@@ -21,13 +21,12 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
-using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
@@ -781,6 +780,9 @@ namespace Microsoft.Build.Execution
 
         private void CancelAllSubmissions(bool async)
         {
+            ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
+            loggingService.LogBuildCanceled();
+
             var parentThreadCulture = _buildParameters != null
                 ? _buildParameters.Culture
                 : CultureInfo.CurrentCulture;
@@ -2952,6 +2954,16 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Sets <see cref="BuildParameters.IsBuildCheckEnabled"/> to true. Used for BuildCheck Replay Mode.
+        /// </summary>
+        internal void EnableBuildCheck()
+        {
+            _buildParameters ??= new BuildParameters();
+
+            _buildParameters.IsBuildCheckEnabled = true;
+        }
+
+        /// <summary>
         /// Creates a logging service around the specified set of loggers.
         /// </summary>
         private ILoggingService CreateLoggingService(
@@ -2999,7 +3011,7 @@ namespace Microsoft.Build.Execution
                     verbosity: LoggerVerbosity.Quiet);
 
                 ILogger buildCheckLogger =
-                    new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService),
+                    new BuildCheckConnectorLogger(new AnalysisLoggingContextFactory(loggingService),
                         buildCheckManagerProvider.Instance);
 
                 ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(buildCheckLogger, forwardingLoggerDescription) };

@@ -101,6 +101,44 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public void SampleAnalyzerIntegrationTest_AnalyzeOnBinaryLogReplay(bool buildInOutOfProcessNode, bool analysisRequested)
+    {
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
+
+        var projectDirectory = Path.GetDirectoryName(projectFile.Path);
+        string logFile = _env.ExpectFile(".binlog").Path;
+
+        RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -bl:{logFile}",
+            out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+
+        success.ShouldBeTrue();
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+         $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(analysisRequested ? "-analyze" : string.Empty)}",
+         out success, false, _env.Output, timeoutMilliseconds: 120_000);
+
+        _env.Output.WriteLine(output);
+
+        success.ShouldBeTrue();
+
+        // The conflicting outputs warning appears - but only if analysis was requested
+        if (analysisRequested)
+        {
+            output.ShouldContain("BC0101");
+            output.ShouldContain("BC0102");
+        }
+        else
+        {
+            output.ShouldNotContain("BC0101");
+            output.ShouldNotContain("BC0102");
+        }
+    }
+
     private void PrepareSampleProjectsAndConfig(
         bool buildInOutOfProcessNode,
         out TransientTestFile projectFile,
@@ -187,7 +225,7 @@ public class EndToEndTests : IDisposable
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10277")]
+    [Theory]
     [InlineData("AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomAnalyzerTest(string analysisCandidate, string[] expectedRegisteredRules, bool expectedRejectedAnalyzers = false)
