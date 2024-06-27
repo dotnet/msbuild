@@ -9,6 +9,8 @@
   <PropertyGroup>
     <BootstrapDestination>$(ArtifactsBinDir)bootstrap\</BootstrapDestination>
     <BootstrapDestination Condition="'$(Platform)' == 'x64' or '$(Platform)' == 'arm64'">$(BootstrapDestination)$(Platform)\</BootstrapDestination>
+
+    <!-- This path is used for Windows Full test run and it points to net472 during execution-->
     <BootstrapDestination>$(BootstrapDestination)$(TargetFramework.ToLowerInvariant())\MSBuild\</BootstrapDestination>
   </PropertyGroup>
 
