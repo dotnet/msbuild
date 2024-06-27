@@ -31,10 +31,10 @@ public class EndToEndTests : IDisposable
 
     public void Dispose() => _env.Dispose();
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
+    [Theory]
     [InlineData(true, true)]
-    [InlineData(false, true)]
-    [InlineData(false, false)]
+    //[InlineData(false, true)]
+    //[InlineData(false, false)]
     public void SampleAnalyzerIntegrationTest_AnalyzeOnBuild(bool buildInOutOfProcessNode, bool analysisRequested)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
@@ -59,7 +59,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
+    [Theory]
     [InlineData(true, true, "warning")]
     [InlineData(true, true, "error")]
     [InlineData(true, true, "info")]
@@ -74,7 +74,7 @@ public class EndToEndTests : IDisposable
         var projectDirectory = Path.GetDirectoryName(projectFile.Path);
         string logFile = _env.ExpectFile(".binlog").Path;
 
-        RunnerUtilities.ExecBootstrapedMSBuild(
+        _ = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(analysisRequested ? "-analyze" : string.Empty)} -bl:{logFile}",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
@@ -109,10 +109,10 @@ public class EndToEndTests : IDisposable
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
 
-        var projectDirectory = Path.GetDirectoryName(projectFile.Path);
+        string? projectDirectory = Path.GetDirectoryName(projectFile.Path);
         string logFile = _env.ExpectFile(".binlog").Path;
 
-        RunnerUtilities.ExecBootstrapedMSBuild(
+        _ = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -bl:{logFile}",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
@@ -144,77 +144,20 @@ public class EndToEndTests : IDisposable
         out TransientTestFile projectFile,
         string BC0101Severity = "warning")
     {
+        string testAssetsFolderName = "SampleAnalyzerIntegrationTest";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
         TransientTestFile testFile = _env.CreateFile(workFolder, "somefile");
 
-        string contents = $"""
-            <Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Hello">
-                
-                <PropertyGroup>
-                    <OutputType>Exe</OutputType>
-                    <TargetFramework>net8.0</TargetFramework>
-                    <ImplicitUsings>enable</ImplicitUsings>
-                    <Nullable>enable</Nullable>
-                </PropertyGroup>
-                  
-                <PropertyGroup Condition="$(Test) == true">
-                    <TestProperty>Test</TestProperty>
-                </PropertyGroup>
-                 
-                <Target Name="Hello">
-                    <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
-                    <Copy SourceFiles="{testFile.Path}" DestinationFolder="{workFolder.Path}" />
-                    <MSBuild Projects=".\FooBar-Copy.csproj" Targets="Hello" />
-                </Target>
-                
-            </Project>
-            """;
+        string contents = File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, "Project1"));
+        string contents2 = File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, "Project2"));
 
-        string contents2 = $"""
-            <Project Sdk="Microsoft.NET.Sdk">
-                <PropertyGroup>
-                    <OutputType>Exe</OutputType>
-                    <TargetFramework>net8.0</TargetFramework>
-                    <ImplicitUsings>enable</ImplicitUsings>
-                    <Nullable>enable</Nullable>
-                </PropertyGroup>
-                                 
-                <PropertyGroup Condition="$(Test) == true">
-                    <TestProperty>Test</TestProperty>
-                </PropertyGroup>
-                                
-                <ItemGroup>
-                    <Reference Include="bin/foo.dll" />
-                </ItemGroup>
-                                
-                <Target Name="Hello">
-                    <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
-                    <Copy SourceFiles="{testFile.Path}" DestinationFolder="{workFolder.Path}" />
-                </Target>
-                               
-            </Project>
-            """;
         projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
         TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
 
-        TransientTestFile config = _env.CreateFile(workFolder, ".editorconfig",
-            $"""
-            root=true
-
-            [*.csproj]
-            build_check.BC0101.IsEnabled=true
-            build_check.BC0101.Severity={BC0101Severity}
-
-            build_check.BC0102.IsEnabled=true
-            build_check.BC0102.Severity=warning
-
-            build_check.COND0543.IsEnabled=false
-            build_check.COND0543.Severity=Error
-            build_check.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
-            build_check.COND0543.CustomSwitch=QWERTY
-
-            build_check.BLA.IsEnabled=false
-            """);
+        TransientTestFile config = _env.CreateFile(
+                      workFolder,
+                      ".editorconfig",
+                      File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, ".editorconfig")));
 
         // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
         // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.

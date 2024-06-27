@@ -135,6 +135,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             [
                 ([SharedOutputPathAnalyzer.SupportedRule.Id], SharedOutputPathAnalyzer.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<SharedOutputPathAnalyzer>),
                 ([DoubleWritesAnalyzer.SupportedRule.Id], DoubleWritesAnalyzer.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<DoubleWritesAnalyzer>),
+                ([NoEnvironmentVariablePropertyAnalyzer.SupportedRule.Id], NoEnvironmentVariablePropertyAnalyzer.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<NoEnvironmentVariablePropertyAnalyzer>)
             ],
             // BuildCheckDataSource.Execution
             []
@@ -326,6 +327,18 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
             => _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(analysisContext, evaluationFinishedEventArgs);
+
+        public void ProcessEvaluationEventArgs(IAnalysisContext analysisContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
+        {
+            if (projectEvaluationEventArgs is EnvironmentVariableReadEventArgs evr)
+            {
+                _buildEventsProcessor.ProcessEnvironmentVariableReadEventArgs(
+                    evr.EnvironmentVariableName,
+                    evr.File,
+                    evr.LineNumber,
+                    evr.ColumnNumber);
+            }
+        }
 
         public void ProcessTaskStartedEventArgs(
             IAnalysisContext analysisContext,

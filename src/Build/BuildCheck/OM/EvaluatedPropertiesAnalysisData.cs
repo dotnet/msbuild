@@ -12,9 +12,16 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 public class EvaluatedPropertiesAnalysisData : AnalysisData
 {
     internal EvaluatedPropertiesAnalysisData(
-        string projectFilePath,
-        IReadOnlyDictionary<string, string> evaluatedProperties) :
-        base(projectFilePath) => EvaluatedProperties = evaluatedProperties;
+            string projectFilePath,
+            IReadOnlyDictionary<string, string> evaluatedProperties,
+            IReadOnlyDictionary<string, (string File, int Line, int Column)> evaluatedEnvironmentVariables)
+            : base(projectFilePath)
+    {
+        EvaluatedProperties = evaluatedProperties;
+        EvaluatedEnvironmentVariables = evaluatedEnvironmentVariables;
+    }
 
     public IReadOnlyDictionary<string, string> EvaluatedProperties { get; }
+
+    public IReadOnlyDictionary<string, (string File, int Line, int Column)> EvaluatedEnvironmentVariables { get; }
 }

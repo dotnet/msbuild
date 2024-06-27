@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Hello">
+                
+   <PropertyGroup>
+       <OutputType>Exe</OutputType>
+       <TargetFramework>net8.0</TargetFramework>
+       <ImplicitUsings>enable</ImplicitUsings>
+       <Nullable>enable</Nullable>
+   </PropertyGroup>
+     
+   <PropertyGroup Condition="$(Test) == true">
+       <TestProperty>Test</TestProperty>
+   </PropertyGroup>
+    
+   <Target Name="Hello">
+       <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
+       <Copy SourceFiles="{testFile.Path}" DestinationFolder="{workFolder.Path}" />
+       <MSBuild Projects=".\FooBar-Copy.csproj" Targets="Hello" />
+   </Target>
+                
+</Project>
