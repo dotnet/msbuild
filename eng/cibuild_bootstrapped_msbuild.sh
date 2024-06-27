@@ -55,13 +55,13 @@ then
 fi
 
 bootstrapRoot="$Stage1Dir/bin/bootstrap"
-# Must be consistent with the version in BootStrapMsBuild.props
-netVersion="8.0.302"
 
 if [ $host_type = "core" ]
 then
   _InitializeBuildTool="$bootstrapRoot/net8.0/dotnet"
-  _InitializeBuildToolCommand="$bootstrapRoot/net8.0/sdk/$netVersion/MSBuild.dll"
+
+  # Must be consistent with the version in BootStrapMsBuild.props
+  _InitializeBuildToolCommand="$bootstrapRoot/net8.0/sdk/8.0.302/MSBuild.dll"
   _InitializeBuildToolFramework="net8.0"
 else
   echo "Unsupported hostType ($host_type)"
