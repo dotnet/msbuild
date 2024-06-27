@@ -234,8 +234,10 @@ namespace Microsoft.Build.UnitTests
 
         #region Build summary tests
 
-        private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, string projectFile, Action additionalCallbacks)
+        private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, Action additionalCallbacks, string projectFile = null)
         {
+            projectFile ??= _projectFile;
+
             BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
             ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(projectFile));
 
@@ -299,7 +301,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintsBuildSummary_Succeeded()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, _projectFile, () => { });
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () => { });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -307,7 +309,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintBuildSummary_SucceededWithWarnings()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, _projectFile, () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("A\nMulti\r\nLine\nWarning!"));
             });
@@ -318,7 +320,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintImmediateWarningMessage_Succeeded()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, _projectFile, () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("[CredentialProvider]DeviceFlow: https://testfeed/index.json"));
                 WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs(
@@ -334,7 +336,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintCopyTaskRetryWarningAsImmediateMessage_Failed()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
             {
                 WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(1));
                 WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(2));
@@ -347,7 +349,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintImmediateMessage_Success()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, _projectFile, () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs(_immediateMessageString, MessageImportance.High));
             });
@@ -358,7 +360,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintImmediateMessage_Skipped()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, _projectFile, () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("--anycustomarg", MessageImportance.High));
             });
@@ -397,14 +399,14 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintBuildSummary_Failed()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, () => { });
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () => { });
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
         [Fact]
         public Task PrintBuildSummary_FailedWithErrors()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
             {
                 ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
             });
@@ -415,7 +417,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintBuildSummary_FailedWithErrorsAndWarnings()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
             {
                 WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning1!"));
                 WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning2!"));
@@ -459,10 +461,10 @@ namespace Microsoft.Build.UnitTests
                     MessageImportance.High);
             e.ProjectFile = _projectFileWithForeignSymbols;
 
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, _projectFileWithForeignSymbols, () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 MessageRaised?.Invoke(_eventSender, e);
-            });
+            }, _projectFileWithForeignSymbols);
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -503,7 +505,7 @@ namespace Microsoft.Build.UnitTests
         public Task PrintBuildSummaryQuietVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Quiet;
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, CallAllTypesOfMessagesWarningAndError);
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -513,7 +515,7 @@ namespace Microsoft.Build.UnitTests
         public Task PrintBuildSummaryMinimalVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Minimal;
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, CallAllTypesOfMessagesWarningAndError);
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -522,7 +524,7 @@ namespace Microsoft.Build.UnitTests
         public Task PrintBuildSummaryNormalVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Normal;
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, CallAllTypesOfMessagesWarningAndError);
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -531,7 +533,7 @@ namespace Microsoft.Build.UnitTests
         public Task PrintBuildSummaryDetailedVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Detailed;
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, CallAllTypesOfMessagesWarningAndError);
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -541,7 +543,7 @@ namespace Microsoft.Build.UnitTests
         public Task PrintBuildSummaryDiagnosticVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Diagnostic;
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, CallAllTypesOfMessagesWarningAndError);
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -571,7 +573,7 @@ namespace Microsoft.Build.UnitTests
             _terminallogger.Parameters = "v=diag";
             _terminallogger.ParseParameters();
 
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, CallAllTypesOfMessagesWarningAndError);
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -583,7 +585,7 @@ namespace Microsoft.Build.UnitTests
             _terminallogger.Parameters = "SHOWCOMMANDLINE=on";
             _terminallogger.ParseParameters();
 
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, _projectFile, () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 MessageRaised?.Invoke(_eventSender, MakeTaskCommandLineEventArgs("Task Command Line.", MessageImportance.High));
             });
@@ -598,7 +600,7 @@ namespace Microsoft.Build.UnitTests
             _terminallogger.Parameters = "SHOWCOMMANDLINE=off";
             _terminallogger.ParseParameters();
 
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, _projectFile, () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 MessageRaised?.Invoke(_eventSender, MakeTaskCommandLineEventArgs("Task Command Line.", MessageImportance.High));
             });
@@ -609,7 +611,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DisplayNodesShowsCurrent()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, async () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, async () =>
             {
                 _terminallogger.DisplayNodes();
 
@@ -633,7 +635,7 @@ namespace Microsoft.Build.UnitTests
                     return stopwatch;
                 };
 
-                InvokeLoggerCallbacksForSimpleProject(succeeded: false, _projectFile, async () =>
+                InvokeLoggerCallbacksForSimpleProject(succeeded: false, async () =>
                 {
                     foreach (var stopwatch in stopwatches)
                     {
