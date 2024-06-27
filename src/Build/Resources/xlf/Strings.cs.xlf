@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AbortingBuild">
         <source>Attempting to cancel the build...</source>
-        <target state="new">Attempting to cancel the build...</target>
+        <target state="translated">Pokus o zrušení sestavování...</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
