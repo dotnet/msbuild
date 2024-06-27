@@ -234,7 +234,7 @@ namespace Microsoft.Build.UnitTests
 
         #region Build summary tests
 
-        private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, Action additionalCallbacks, string projectFile = null)
+        private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, Action additionalCallbacks, string? projectFile = null)
         {
             projectFile ??= _projectFile;
 
