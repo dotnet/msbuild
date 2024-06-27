@@ -645,6 +645,8 @@ internal sealed partial class TerminalLogger : INodeLogger
                             string urlString = url.ToString();
                             if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
                             {
+                                // url.ToString() un-escapes the URL which is needed for our case file://
+                                // but not valid for http://
                                 urlString = uri.ToString();
                             }
 
