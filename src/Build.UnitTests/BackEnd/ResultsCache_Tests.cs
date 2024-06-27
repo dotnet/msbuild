@@ -383,6 +383,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        // Serialize latest version and deserialize latest version of the cache
         [Theory]
         [MemberData(nameof(CacheSerializationTestData))]
         public void TestResultsCacheTranslation(object obj)
@@ -393,12 +394,49 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var copy = new ResultsCache(TranslationHelpers.GetReadTranslator());
 
-            copy.ResultsDictionary.Keys.ToHashSet().SetEquals(resultsCache.ResultsDictionary.Keys.ToHashSet()).ShouldBeTrue();
+            CompareResultsCache(resultsCache, copy);
+        }
 
-            foreach (var configId in copy.ResultsDictionary.Keys)
+        [Theory]
+        [InlineData(1, 1)] // Serialize version 0 and deserialize version 0 
+        [InlineData(1, 0)] // Serialize version 0 and deserialize latest version
+        public void TestResultsCacheTranslationAcrossVersions(int envValue1, int envValue2)
+        {
+            using (var env = TestEnvironment.Create())
             {
-                var copiedBuildResult = copy.ResultsDictionary[configId];
-                var initialBuildResult = resultsCache.ResultsDictionary[configId];
+                env.SetEnvironmentVariable("MSBUILDDONOTVERSIONBUILDRESULT", $"{envValue1}");
+
+                // Create a ResultsCache
+                var request1 = new BuildRequest(1, 2, 3, new[] { "target1" }, null, BuildEventContext.Invalid, null);
+                var request2 = new BuildRequest(4, 5, 6, new[] { "target2" }, null, BuildEventContext.Invalid, null);
+
+                var br1 = new BuildResult(request1);
+                var br2 = new BuildResult(request2);
+                br2.AddResultsForTarget("target2", BuildResultUtilities.GetEmptyFailingTargetResult());
+
+                var resultsCache = new ResultsCache();
+                resultsCache.AddResult(br1.Clone());
+                resultsCache.AddResult(br2.Clone());
+
+                resultsCache.Translate(TranslationHelpers.GetWriteTranslator());
+
+                env.SetEnvironmentVariable("MSBUILDDONOTVERSIONBUILDRESULT", $"{envValue2}");
+                Traits.UpdateFromEnvironment();
+
+                var copy = new ResultsCache(TranslationHelpers.GetReadTranslator());
+
+                CompareResultsCache(resultsCache, copy);
+            }
+        }
+
+        private void CompareResultsCache(ResultsCache resultsCache1, ResultsCache resultsCache2)
+        {
+            resultsCache2.ResultsDictionary.Keys.ToHashSet().SetEquals(resultsCache1.ResultsDictionary.Keys.ToHashSet()).ShouldBeTrue();
+
+            foreach (var configId in resultsCache2.ResultsDictionary.Keys)
+            {
+                var copiedBuildResult = resultsCache2.ResultsDictionary[configId];
+                var initialBuildResult = resultsCache1.ResultsDictionary[configId];
 
                 copiedBuildResult.SubmissionId.ShouldBe(initialBuildResult.SubmissionId);
                 copiedBuildResult.ConfigurationId.ShouldBe(initialBuildResult.ConfigurationId);
