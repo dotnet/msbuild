@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
         <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
-        <target state="new">The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</target>
+        <target state="translated">清单文件不存在或无法读取。请确保它存在并具有相关内容。</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
         <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
-        <target state="new">The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</target>
+        <target state="translated">清单文件打开失败，出现异常:“{0}”。请确保它存在并具有相关内容。</target>
         <note />
       </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
@@ -143,22 +143,22 @@
       </trans-unit>
       <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
         <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
-        <target state="new">MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</target>
+        <target state="translated">MSB9903: PreferNativeArm64 需要 Win32 应用程序清单，并且与 NoWin32Manifest 互斥。</target>
         <note>{StrBegin="MSB9903: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
         <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
-        <target state="new">MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</target>
+        <target state="translated">MSB9904: 启用 PreferNativeArm64 时，请确保平台设置为 AnyCPU。当前平台: {0}。</target>
         <note>{StrBegin="MSB9904: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
         <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
-        <target state="new">MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</target>
+        <target state="translated">MSB9902: Prefer32Bit 和 PreferNativeArm64 选项互斥。请仅启用一个。</target>
         <note>{StrBegin="MSB9902: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
         <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
-        <target state="new">MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</target>
+        <target state="translated">MSB9901: 指定的严重性不相关: 消息“{1}”的“{0}”。</target>
         <note>{StrBegin="MSB9901: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
@@ -358,7 +358,7 @@
       </trans-unit>
       <trans-unit id="Delete.Error">
         <source>MSB3061: Unable to delete file "{0}". {1} {2}</source>
-        <target state="new">MSB3061: Unable to delete file "{0}". {1} {2}</target>
+        <target state="translated">MSB3061: 无法删除文件“{0}”。{1} {2}</target>
         <note>{StrBegin="MSB3061: "}</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
@@ -373,7 +373,7 @@
       </trans-unit>
       <trans-unit id="Delete.Retrying">
         <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</source>
-        <target state="new">MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</target>
+        <target state="translated">MSB3062: 无法删除文件“{0}”。{2} 毫秒后开始重试 {1} 次。{3} {4}</target>
         <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message, {4} is message from LockCheck.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
@@ -1520,7 +1520,7 @@
       </trans-unit>
       <trans-unit id="Move.Error">
         <source>MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</source>
-        <target state="new">MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</target>
+        <target state="translated">MSB3677: 无法将文件“{0}”移动到“{1}”。{2} {3}</target>
         <note>{StrBegin="MSB3677: "}</note>
       </trans-unit>
       <trans-unit id="Move.ExactlyOneTypeOfDestination">
@@ -1596,17 +1596,17 @@
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
         <source>The assembly element is missing from the application manifest.</source>
-        <target state="new">The assembly element is missing from the application manifest.</target>
+        <target state="translated">应用程序清单中缺少程序集元素。</target>
         <note />
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
         <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</source>
-        <target state="new">MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</target>
+        <target state="translated">MSB4300: supportedArchitectures 元素的指定值“{0}”无效。将其从清单中移除或设置为 "amd64 arm64"。</target>
         <note>{StrBegin="MSB4300: "}</note>
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
         <source>The application manifest file cannot be found. Please make sure it exists.</source>
-        <target state="new">The application manifest file cannot be found. Please make sure it exists.</target>
+        <target state="translated">找不到应用程序清单文件。请确保它存在。</target>
         <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
@@ -2586,7 +2586,7 @@
       </trans-unit>
       <trans-unit id="Touch.CannotMakeFileWritable">
         <source>MSB3372: The file "{0}" cannot be made writable. {1} {2}</source>
-        <target state="new">MSB3372: The file "{0}" cannot be made writable. {1} {2}</target>
+        <target state="translated">MSB3372: 无法将文件“{0}”设为可写。{1} {2}</target>
         <note>{StrBegin="MSB3372: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotRestoreAttributes">
@@ -2596,7 +2596,7 @@
       </trans-unit>
       <trans-unit id="Touch.CannotTouch">
         <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</source>
-        <target state="new">MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</target>
+        <target state="translated">MSB3374: 无法设置文件“{0}”的上次访问/写入时间。{1} {2}</target>
         <note>{StrBegin="MSB3374: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CreatingFile">
@@ -2691,7 +2691,7 @@
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
         <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
-        <target state="new">MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</target>
+        <target state="translated">MSB3935: 未能解压缩文件“{0}”，因为目标文件“{1}”是只读文件，无法设为可写。{2} {3}</target>
         <note>{StrBegin="MSB3935: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotOpenFile">
@@ -2776,7 +2776,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
-        <target state="new">MSB3491: Could not write lines to file "{0}". {1} {2}</target>
+        <target state="translated">MSB3491: 未能向文件“{0}”写入行。{1} {2}</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
@@ -3046,7 +3046,7 @@
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotWriteOutput">
         <source>MSB3713: The file "{0}" could not be created. {1} {2}</source>
-        <target state="new">MSB3713: The file "{0}" could not be created. {1} {2}</target>
+        <target state="translated">MSB3713: 无法创建文件“{0}”。{1} {2}</target>
         <note>{StrBegin="MSB3713: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.SkippedNumberedParameter">
@@ -3496,7 +3496,7 @@
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFailed">
         <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</source>
-        <target state="new">MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</target>
+        <target state="translated">MSB3943: 未能将目录“{0}”压缩为文件“{1}”。{2} {3}</target>
         <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFileExists">
