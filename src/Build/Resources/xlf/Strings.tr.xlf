@@ -209,27 +209,27 @@
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
         <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
-        <target state="new">Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</target>
+        <target state="translated">Belirtilen {0} özel çözümleyici derlemesi bulunamadı. Lütfen var olup olmadığını kontrol edin.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
         <source>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="new">Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">Özel çözümleyici türü yüklenemedi: {0} derlemeden: {1}. Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer temel sınıf devralınmış olduğundan emin olun. Özel bir çözümleyici olması amaçlanmadıysa açığa çıkarılmaması gerekir. Daha fazla bilgi: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: {0}.</source>
-        <target state="new">Failed to register the custom analyzer: {0}.</target>
+        <target state="translated">Özel çözümleyici kaydedilemedi: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
         <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="new">Failed to instantiate the custom analyzer rule with the following exception: {0}.</target>
+        <target state="translated">Özel çözümleyici kuralı şu özel durumla başlatılamadı: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
         <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="new">Custom analyzer rule: {0} has been registered successfully.</target>
+        <target state="translated">{0} özel çözümleyici kuralı başarıyla kaydedildi.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -400,7 +400,7 @@
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
-        <target state="new">Output Property: </target>
+        <target state="translated">Çıkış Özelliği: </target>
         <note />
       </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
@@ -516,7 +516,7 @@
       </trans-unit>
       <trans-unit id="ProjectImportsCollectorFileIOFail">
         <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
-        <target state="new">An exception occurred when adding the file '{0}', Exception: '{1}'</target>
+        <target state="translated">Exception: '{1}': '{0}' dosyası eklenirken özel durum oluştu</target>
         <note />
       </trans-unit>
       <trans-unit id="PropertyAssignment">
@@ -562,7 +562,7 @@ Hatalar: {3}</target>
       </trans-unit>
       <trans-unit id="SDKResolverNullMessage">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
-        <target state="new">The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</target>
+        <target state="translated">"{0}" çözümleyicisi "{1}" SDK'sını çözümlemeye çalıştı ve uyarılar veya hatalar listesinde bir dize olarak null döndürdü.</target>
         <note>
       LOCALIZATION: Do not localize the word SDK.
     </note>
@@ -640,7 +640,7 @@ Hatalar: {3}</target>
       </trans-unit>
       <trans-unit id="TaskAssemblyLocationMismatch">
         <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
-        <target state="new">Task assembly was loaded from '{0}' while the desired location was '{1}'.</target>
+        <target state="translated">İstenilen konum '{1}' iken görev derlemesi '{0}'dan yüklendi.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

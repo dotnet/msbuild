@@ -162,22 +162,22 @@
       </trans-unit>
       <trans-unit id="LongPaths">
         <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
-        <target state="new">Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</target>
+        <target state="translated">In base alla chiave del Registro di sistema di Windows LongPathsEnabled, la funzionalità LongPaths è {0}.</target>
         <note>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</note>
       </trans-unit>
       <trans-unit id="LongPaths_Disabled">
         <source>disabled</source>
-        <target state="new">disabled</target>
+        <target state="translated">disabilitata</target>
         <note />
       </trans-unit>
       <trans-unit id="LongPaths_Enabled">
         <source>enabled</source>
-        <target state="new">enabled</target>
+        <target state="translated">abilitata</target>
         <note />
       </trans-unit>
       <trans-unit id="LongPaths_Missing">
         <source>not set</source>
-        <target state="new">not set</target>
+        <target state="translated">non impostata</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
@@ -1721,27 +1721,27 @@ Nota: livello di dettaglio dei logger di file
       </trans-unit>
       <trans-unit id="TestSummary_BannerAndTotal">
         <source>Test summary: total: {0}</source>
-        <target state="new">Test summary: total: {0}</target>
+        <target state="translated">Riepilogo test: totale: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="new">duration: {0}s</target>
+        <target state="translated">durata: {0}s</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Failed">
         <source>failed: {0}</source>
-        <target state="new">failed: {0}</target>
+        <target state="translated">non riuscito: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Skipped">
         <source>skipped: {0}</source>
-        <target state="new">skipped: {0}</target>
+        <target state="translated">ignorato: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="TestSummary_Succeeded">
         <source>succeeded: {0}</source>
-        <target state="new">succeeded: {0}</target>
+        <target state="translated">riuscito: {0}</target>
         <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
