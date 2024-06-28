@@ -1595,7 +1595,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (buildEventArgs is BuildCheckResultError checkResultError)
             {
-                // If BuildCheckResultError was issued then an empty ISet<string> indicates to treat all warnings as errors
+                // If the specified BuildCheckResultError was issued, an empty ISet<string> signifies that the specified build check warnings should be treated as errors.
                 AddWarningsAsErrors(checkResultError.BuildEventContext, new HashSet<string>());
             }
 
