@@ -1595,8 +1595,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (buildEventArgs is BuildCheckResultError checkResultError)
             {
-                // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
-                _buildSubmissionIdsThatHaveLoggedErrors.Add(checkResultError.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
+                // If BuildCheckResultError was issued then an empty ISet<string> indicates to treat all warnings as errors
+                AddWarningsAsErrors(checkResultError.BuildEventContext, new HashSet<string>());
             }
 
             if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
