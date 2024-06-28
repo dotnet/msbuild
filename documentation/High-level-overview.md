@@ -25,7 +25,8 @@ These attributes are defined within `.csproj` files, which are considered *proje
 Since the project file defines the data used for the build, the actual build instructions are imported through imports of libraries, that contains their own tasks and targets. One example that is vastly used is the SDK with `dotnet build`. These librearies also extend what can be done with a build, and overal functionality.
 
 ## MSBuild API
-**TODO**
+**to add mote information**
+
 It is a library of common build logic that defined basic things, like the convept of output folder, intermediate folder, so other tools can utilize these resources. 
 It is also a way to manipulate the MSBuild Language without directly changing the language on a project itself.
 It is an API focused on building .NET programs so there are some specific things.
@@ -34,35 +35,28 @@ Core idea behind those targets is you're either manipulating MSBuild data or fig
     - like command line aplications (exe). We also offer base class toolTask to provide an interface for that.
 
 ### ToolTask
-**TODO**
-We offer an interface called ToolTask where you can implement custom tasks to be processed during the build. This is more perfomant (on windows) than writing a script to do the same thing.
-
-The engine will construct the task, call the execute method and then you can do whatever you want (was written in the task) during the execution
+ToolTask is an interface offered by MSBuild to implement custom tasks. During the build, the MSBuild Engine will construct the task, call the execute method and let it run during execution. This process has performance advantages on windows when compared to writing a script to do the same work.
 
 ## Engine
-**TODO**
-When we commonly say "Build a project" we actually mean in MSBuild, evaluate and then build what you found.
+The MSBuild Engine's main responsibility is to execute the build intructions and process the results of builds. Which includes managing the extensibilities modules that MSBuild offers, integrating them to this process even if they're authored by third parties.
 
-### Processes
-**TODO**
-When you start executing MSBuild from the command line / exe. You start a process, which runs some code, starts to build stuff in that process, and then that process becomes the scheduler node and one of the worker nodes. So it is both the entry point and the scheduler.
-The problem is that when that process ends, it exits and the OS tears it down. No more meory cache, we have kittering (what is this?), and for the next build you have to redo everything.
+Building a project can easily become a huge and time consuming project. To simplify things the MSBuild's engine logic is divided in two main stages: the evalution stage and the execution stage.
 
 ### Entry points
-**TODO**
-We have a few entrypoints to the MSBuild engine / where MSBuild is executed, but it is manily VS, SDK and CLI. All of those go through the API to access the engine.
+There a few officially supported entrypoints for the engine: Visual Studio, .NET SDK and the CLI executable (`MSBuild.exe`). All these methods are an implementation or extension of the MSBuild API. The inputs necessary to start a build include some specific build logic for the projects, generally given by the entry points, User defined imports, and the `.g.props` from NuGet restore. 
 
-As input to  everything we have:
- - Built in logic and imports (SDK / VS).
- - User defined imports.
- - .g.props from NuGet restore imports.
+An example of that is the `<Project Sdk="Microsoft.NET.Sdk">` that can be seen in some of the built-in .NET templates. This indicates that the project will use build logic that comes with the .NET SDK.
 
 ### Evaluate operation
-**TODO**
-*this is not a build*
-"Tell me about this project" , where the project is the entry point, data, etc....
- - For IDE purposes, it also tells which C# files are checked in, project name etc...
+For more detailed information on evaluation visit [Microsoft Learn](https://learn.microsoft.com/en-us/visualstudio/msbuild/build-process-overview#evaluation-phase).
 
+**TODO**
+The evaluation phase of a build is where the engine gathers information on the projects. This includes entry points, imports, items, and tasks. For VS IDE purposes, it also gathers information about which C# files are checked in, solution files, etc...
+
+The first step of evaluation is to load the project and the XML data that it contains. To gather all the data there are multiple passes through the project file, some of them to specifically define project properties and imports. 
+At this stage of evaluation all imports are files on disk, which are processed as paths by the engine. From those imports the build logic is attached to the current processed project, and this allows
+
+The build and processing logic from imports is also brough to the current project, this way MSBuild avoids
 
 Loads the project, read from XML. Has multiple passes through the project file, and it will specifically define properties and imports.
 Import finds the file on disk, take the build logic from there and bring it to the current executing project like it was there in the first place, so we avoid every c# project having details about the c# compiler invokation. Define it in one place and import to the rest.
@@ -74,16 +68,17 @@ Evaluation should have no side effects on disk, just an in memory representation
  So running sequence is: imports (which can honestly be anything, even environmental variables), item definitions, items, tasks and targets. But nothing really executed. We do have a white list of used things that prevent side effects.
 
 #### imports
-**TODO**
-More in depth explanation of all the imports we handle.
-Imports can be anything. Can be a path, property expansions, properties fallback on environmental variables, known folder that you can access.
-There are globbed imports, like the VS directory and sdk that have import folders with wild card imports.
-From the MSBuild perspective, when we get to imports, for example NuGet imports. Things are not different than any other import, which lokks like a property plus path expansion.
-Core MSBuild does not do tool resolution via registry, just use the copy of the tools that is in a folder next to us. However, there are functions that read the registry and the some SDKs use those.
+
+Complex projects generally include imports of many different types. In MSBuild an import can be a lot of things, a disk path, a property expansion, a known folder, or even environmental variables. There are also some main imports that come with the execution in other platforms, like the Visual Studio or SDK can have import directories that contain wild card imports. However, when it comes to the evaluation phase in MSBuild, imports are all treated like a property plus path expansion, this include imported NuGet packages.
+
+In the case of tool imports, MSBuild does not process tool resolution via registry. Instead it is resolved by looking on adjacent folder to the current running version of MSBuild. The folders will be different depending is MSBuild is running from Visual Studio or the .NET SDK.
 
 ### Execution operation
-**TODO**
-Requires evaluation operation. When we commonly say "Build a project" we actually mean in MSBuild, evaluate and then build what you found.
+
+For more detailed information on execution phase visit [Microsoft Learn](https://learn.microsoft.com/en-us/visualstudio/msbuild/build-process-overview#execution-phase).
+
+The execution phase is simply executing the targets defined in the XML by the user or implicitly defined by the SDK or VS. The order of executed targets is defined by the use of a few attributes: `BeforeTargets`, `DependsOnTargets`, and `AfterTargets`. But the final order might change if an earlier target modifies a property of a later target. The full executing order can be [found here](https://learn.microsoft.com/en-us/visualstudio/msbuild/target-build-order#determine-the-target-build-order).
+
 
 #### Executing a task
 **TODO**
@@ -105,9 +100,8 @@ Where you might want to do this:
  - When a task misbehaves and breaks the whole process
  - You have a task that is built in the same repo you're building your code and might change between runs. In this case we make sure that the DLLs are not locked at the end of the building. (Sandbox execution)
 
-### SDK interaction
-**TODO**
-There are a few XML attributes or elements that will trigger SDK resolution, for example Project SDK=" " tag. When that happens we will go and ask the resolver who ca tell us where the SDK. There is also the top level element that has this effect. We can also add the import element so it specifies which file you're looking for.
+### Processes and nodes
+When a new build is started MSBuild starts a process, which runs some setup code and prepares itself to start a build. This first node becomes the scheduler node and one of the worker nodes, becoming both the entry point for the project build and the scheduler. The main problem that arises from that, is when the whole build, the OS tears down the process, loosing the memory cache and having to restart the whole build process from the start. This is offset by having longer lived processes, that can be reused when building projects successionally.
 
 ### Cache
 **TODO**
@@ -221,7 +215,7 @@ With this second mode you need to specify input and output results cache so diff
 
 ### MSbuid Server
 **TODO**
-*Watch the Roman knowledge hand off to get more information about MSBuil server*
+*Watch the knowledge hand off to get more information about MSBuild server*
 
 The MSBuild server is the idea of separating some processes. Splitting the entry point executable that lives for one build invocation, and the scheduler and the 1st in-proc node. This way you don't need to JIT and you can preserve your in-memory cache.
 
@@ -236,7 +230,7 @@ MSBuild includes some extensibilities to it's main process. There were added to 
 We have some extensibilities within MSBuild:
 This includes some built-in tasks: Exec, and Factories.
 Resolvers are just devdiv / dotnet kinda thing
-    Discover resolvers on a folder next to MSBuild. Mitigation to threats is installing MSBuild to an admin only location. No way to specify a custom resolver.
+    Discover resolvers on a folder next to MSBuild. Mitigation to threats is installing MSBuild to an admin only 
 
 ### Packaging system
 MSBuild interacts with external packages in almost every build. However the MSBuild engine does not recognize external packages as third parties, and it also does not handle external dependencies. This is done by a packaging system. The supported one being NuGet. As such, it is NuGet that is responsible for finding the packages, downloading them, and providing the MSBuild engine with a package path for the build.
@@ -256,7 +250,14 @@ Implemetation is based around the communication and serialization protocal that 
 This is not officially supported by us, but it is one of the most used tools for debugging. It is considered a pluggable logger.
 
 ### Resolvers
-**TODO**
+There are a few elements within the MSBuild SML that indicate that a call to the .NET SDK is necessary. Some exaples include:
+ - `<Project Sdk="Microsoft.NET.Sdk">`, where you can also define the SDK version
+ - `<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />`, for explicit imports.
+
+When such interaction is necesasary for a project build, the first thing that needs to be done is to figure out where the SDK is installed so MSBuild can access the content. This is solved by resolvers, which look for the SDK version that was specified, or gets the latest version.
+
+To read more abou SDK resolver you can check the [Microsoft Learn page](https://learn.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk#how-project-sdks-are-resolved), or see the [spec documentation](https://github.com/dotnet/msbuild/blob/main/documentation/specs/sdk-resolvers-algorithm.md).
+    
 
 ### Restore
 **TODO**
