@@ -334,7 +334,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 _buildEventsProcessor.ProcessEnvironmentVariableReadEventArgs(
                     evr.EnvironmentVariableName,
-                    evr.Message,
+                    evr.Message ?? string.Empty,
                     evr.File,
                     evr.LineNumber,
                     evr.ColumnNumber);

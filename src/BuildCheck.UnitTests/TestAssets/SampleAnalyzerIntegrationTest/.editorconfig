@@ -2,7 +2,7 @@ root=true
 
 [*.csproj]
 build_check.BC0101.IsEnabled=true
-build_check.BC0101.Severity={BC0101Severity}
+build_check.BC0101.Severity=BC0101Severity
 
 build_check.BC0102.IsEnabled=true
 build_check.BC0102.Severity=warning

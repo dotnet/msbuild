@@ -33,8 +33,8 @@ public class EndToEndTests : IDisposable
 
     [Theory]
     [InlineData(true, true)]
-    //[InlineData(false, true)]
-    //[InlineData(false, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
     public void SampleAnalyzerIntegrationTest_AnalyzeOnBuild(bool buildInOutOfProcessNode, bool analysisRequested)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
@@ -51,11 +51,13 @@ public class EndToEndTests : IDisposable
         {
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
+            output.ShouldContain("BC0103");
         }
         else
         {
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
+            output.ShouldNotContain("BC0103");
         }
     }
 
@@ -93,11 +95,13 @@ public class EndToEndTests : IDisposable
         {
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
+            output.ShouldContain("BC0103");
         }
         else
         {
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
+            output.ShouldNotContain("BC0103");
         }
     }
 
@@ -131,11 +135,13 @@ public class EndToEndTests : IDisposable
         {
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
+            output.ShouldContain("BC0103");
         }
         else
         {
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
+            output.ShouldNotContain("BC0103");
         }
     }
 
@@ -148,8 +154,8 @@ public class EndToEndTests : IDisposable
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
         TransientTestFile testFile = _env.CreateFile(workFolder, "somefile");
 
-        string contents = File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, "Project1"));
-        string contents2 = File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, "Project2"));
+        string contents = ReadAndAdjustProjectContent("Project1");
+        string contents2 = ReadAndAdjustProjectContent("Project2");
 
         projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
         TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
@@ -168,6 +174,11 @@ public class EndToEndTests : IDisposable
 
         _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
+
+        string ReadAndAdjustProjectContent(string fileName) =>
+            File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, fileName))
+                .Replace("TestFilePath", testFile.Path)
+                .Replace("WorkFolderPath", workFolder.Path);
     }
 
     [Theory]

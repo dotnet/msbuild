@@ -16,7 +16,7 @@
                     
     <Target Name="Hello">
         <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
-        <Copy SourceFiles="{testFile.Path}" DestinationFolder="{workFolder.Path}" />
+        <Copy SourceFiles="TestFilePath" DestinationFolder="WorkFolderPath" />
     </Target>
                    
 </Project>
