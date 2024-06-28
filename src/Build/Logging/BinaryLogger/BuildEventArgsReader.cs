@@ -2,13 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -1094,7 +1091,6 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadEnvironmentVariableReadEventArgs()
         {
-            Debugger.Launch();
             var fields = ReadBuildEventArgsFields(readImportance: true);
             var environmentVariableName = ReadDeduplicatedString();
 

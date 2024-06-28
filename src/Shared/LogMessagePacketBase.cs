@@ -240,6 +240,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="BuildCheckAcquisitionEventArgs"/>
         /// </summary>
         BuildCheckAcquisitionEvent = 39,
+
+        /// <summary>
+        /// Event is <see cref="ExtendedEnvironmentVariableReadEventArgs"/>.
+        /// </summary>
+        ExtendedEnvironmentVariableReadEventArgs = 40
     }
     #endregion
 
@@ -641,6 +646,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.ExtendedCriticalBuildMessageEvent => new ExtendedCriticalBuildMessageEventArgs(),
                 LoggingEventType.ExternalProjectStartedEvent => new ExternalProjectStartedEventArgs(null, null, null, null, null),
                 LoggingEventType.ExternalProjectFinishedEvent => new ExternalProjectFinishedEventArgs(null, null, null, null, false),
+                LoggingEventType.ExtendedEnvironmentVariableReadEventArgs => new ExtendedEnvironmentVariableReadEventArgs(),
                 LoggingEventType.CriticalBuildMessage => new CriticalBuildMessageEventArgs(null, null, null, -1, -1, -1, -1, null, null, null),
                 LoggingEventType.MetaprojectGenerated => new MetaprojectGeneratedEventArgs(null, null, null),
                 LoggingEventType.PropertyInitialValueSet => new PropertyInitialValueSetEventArgs(),
