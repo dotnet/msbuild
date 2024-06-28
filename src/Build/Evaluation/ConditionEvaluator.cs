@@ -189,7 +189,7 @@ namespace Microsoft.Build.Evaluation
             IFileSystem fileSystem,
             LoggingContext? loggingContext,
             ProjectRootElementCacheBase? projectRootElementCache = null)
-            where P : class, IProperty
+            where P : class, IProperty2
             where I : class, IItem
         {
             return EvaluateConditionCollectingConditionedProperties(
@@ -223,7 +223,7 @@ namespace Microsoft.Build.Evaluation
             IFileSystem fileSystem,
             LoggingContext? loggingContext,
             ProjectRootElementCacheBase? projectRootElementCache = null)
-            where P : class, IProperty
+            where P : class, IProperty2
             where I : class, IItem
         {
             ErrorUtilities.VerifyThrowArgumentNull(condition, nameof(condition));
@@ -384,7 +384,7 @@ namespace Microsoft.Build.Evaluation
         /// is stateless and reusable
         /// </summary>
         internal class ConditionEvaluationState<P, I> : IConditionEvaluationState
-            where P : class, IProperty
+            where P : class, IProperty2
             where I : class, IItem
         {
             private readonly Expander<P, I> _expander;

@@ -154,10 +154,12 @@ public class EndToEndTests : IDisposable
         projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
         TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
 
+        string configContent = File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, ".editorconfig")).Replace("BC0101Severity", BC0101Severity);
+
         TransientTestFile config = _env.CreateFile(
                       workFolder,
                       ".editorconfig",
-                      File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, ".editorconfig")));
+                      configContent);
 
         // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
         // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.

@@ -37,7 +37,7 @@ internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
                     SupportedRule,
                     ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
                     envVariableData.Key,
-                    "LOCATION?"));
+                    envVariableData.Value.EnvVarValue));
             }
         }
     }

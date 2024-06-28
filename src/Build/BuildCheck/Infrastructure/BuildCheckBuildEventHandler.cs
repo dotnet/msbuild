@@ -31,7 +31,7 @@ internal class BuildCheckBuildEventHandler
         {
             { typeof(ProjectEvaluationFinishedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationFinishedEvent((ProjectEvaluationFinishedEventArgs)e) },
             { typeof(ProjectEvaluationStartedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs)e) },
-            { typeof(EnvironmentVariableReadEventArgs), (BuildEventArgs e) => HandleEnvironmentVariableReadEvent((EnvironmentVariableReadEventArgs)e) },
+            { typeof(ExtendedEnvironmentVariableReadEventArgs), (BuildEventArgs e) => HandleEnvironmentVariableReadEvent((ExtendedEnvironmentVariableReadEventArgs)e) },
             { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => _buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
             { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
             { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => HandleBuildCheckTracingEvent((BuildCheckTracingEventArgs)e) },
@@ -102,7 +102,7 @@ internal class BuildCheckBuildEventHandler
                 eventArgs.ToAnalyzerAcquisitionData(),
                 _analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)));
 
-    private void HandleEnvironmentVariableReadEvent(EnvironmentVariableReadEventArgs eventArgs)
+    private void HandleEnvironmentVariableReadEvent(ExtendedEnvironmentVariableReadEventArgs eventArgs)
         => _buildCheckManager.ProcessEvaluationEventArgs(
                 _analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)),
                 eventArgs);

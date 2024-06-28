@@ -328,12 +328,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             => _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(analysisContext, evaluationFinishedEventArgs);
 
-        public void ProcessEvaluationEventArgs(IAnalysisContext analysisContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
+        public void ProcessEvaluationEventArgs(IAnalysisContext analysisContext, ExtendedEnvironmentVariableReadEventArgs projectEvaluationEventArgs)
         {
-            if (projectEvaluationEventArgs is EnvironmentVariableReadEventArgs evr)
+            if (projectEvaluationEventArgs is ExtendedEnvironmentVariableReadEventArgs evr)
             {
                 _buildEventsProcessor.ProcessEnvironmentVariableReadEventArgs(
                     evr.EnvironmentVariableName,
+                    evr.Message,
                     evr.File,
                     evr.LineNumber,
                     evr.ColumnNumber);
