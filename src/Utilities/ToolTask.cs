@@ -1053,9 +1053,16 @@ namespace Microsoft.Build.Utilities
         /// <param name="proc"></param>
         private static void WaitForProcessExit(Process proc)
         {
-            // Using overload with timeout prevents hanging in case that grandchild process is still running
-            // See https://github.com/dotnet/runtime/issues/51277 and https://github.com/dotnet/msbuild/issues/2981#issuecomment-818581362
-            proc.WaitForExit(int.MaxValue);
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+            {
+                // Using overload with timeout prevents hanging in case that grandchild process is still running
+                // See https://github.com/dotnet/runtime/issues/51277 and https://github.com/dotnet/msbuild/issues/2981#issuecomment-818581362
+                proc.WaitForExit(int.MaxValue);
+            }
+            else
+            {
+                proc.WaitForExit();
+            }
 
             // Process.WaitForExit() may return prematurely. We need to check to be sure.
             while (!proc.HasExited)
