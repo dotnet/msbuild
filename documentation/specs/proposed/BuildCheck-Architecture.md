@@ -57,6 +57,9 @@ When replaying a binary log we can apply BuildCheck with help of `-analyze` swit
 ```
 
 If BuildCheck is enabled, then the events from `BinaryLogReplayEventSource` and new events from BuildCheck are merged into an `IEventSource`, from witch the loggers get events.
+
+<img src="https://github.com/surayya-MS/msbuild/assets/114938397/7f24f5ee-f254-41a1-bf92-0c476ca8b90e" width="40%" height="40%">
+
 1. The events from `BinaryLogReplayEventSource replayEventSource` are passed to the `IEventSource mergedEventSource` unchanged
 2. The events from `BinaryLogReplayEventSource replayEventSource` are passed to `BuildCheckBuildEventHandler` in order to produce new events from BuildCheck
 3. The `BuildCheckBuildEventHandler` uses the `IEventSource mergedEventSource` to invoke new events
