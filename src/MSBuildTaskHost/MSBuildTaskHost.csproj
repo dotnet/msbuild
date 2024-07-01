@@ -66,6 +66,7 @@
       <Link>IExtendedBuildEventArgs.cs</Link>
     </Compile>
     <Compile Include="..\Framework\AssemblyUtilities.cs" />
+    <Compile Include="..\Framework\NullableAttributes.cs" />
     <Compile Include="..\Framework\ResponseFileUsedEventArgs.cs" />
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CollectionHelpers.cs" />

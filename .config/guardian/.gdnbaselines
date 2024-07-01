@@ -52,6 +52,45 @@
       "createdDate": "2024-03-14 12:01:14Z",
       "expirationDate": "2024-08-31 12:48:32Z",
       "justification": "This error is baselined with an expiration date of 180 days from 2024-03-14 12:48:32Z"
+    },
+    "24491acb7bf0f8b072d9fbd2f6efcf1bdf6e9506ff3f7a9f9c803445c55b7bd9": {
+      "signature": "24491acb7bf0f8b072d9fbd2f6efcf1bdf6e9506ff3f7a9f9c803445c55b7bd9",
+      "alternativeSignatures": [
+        "2dc3f5f5423a151deb6a74413f2798ade061c1f50519daeed42acfd2caebed03"
+      ],
+      "target": ".packages/drop.app/18.165.29912-buildid11693003/lib/net45/ContentStoreApp.Full/x64/BuildXLAria.dll",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2024-06-19 17:22:41Z"
+    },
+    "1dc1a6797e20d1319df1cb8d4df5c6f6194ce4e87151bf801fb9bf2d038ccfaf": {
+      "signature": "1dc1a6797e20d1319df1cb8d4df5c6f6194ce4e87151bf801fb9bf2d038ccfaf",
+      "alternativeSignatures": [
+        "f52bc24a2feebdcb7b1192ac2debea8da9ca5d012a6719e905b16f979711ceca"
+      ],
+      "target": ".packages/drop.app/18.165.29912-buildid11693003/lib/net45/ContentStoreApp.Full/x64/BuildXLNatives.dll",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2008",
+      "createdDate": "2024-06-19 17:22:41Z"
+    },
+    "5bf3f552d54adcae12d7f1e79d47b5a9392c774f03943793cd1a0f7bb2eef28b": {
+      "signature": "5bf3f552d54adcae12d7f1e79d47b5a9392c774f03943793cd1a0f7bb2eef28b",
+      "alternativeSignatures": [
+        "ea4d59d18cbff7ffab4bb678927fc6fee763539a51cfbf5aae60ae1b8123a6ba"
+      ],
+      "target": ".packages/drop.app/18.165.29912-buildid11693003/lib/net45/ContentStoreApp.Full/x64/ClientTelemetry.dll",
+      "memberOf": [
+        "default"
+      ],
+      "tool": "binskim",
+      "ruleId": "BA2007",
+      "createdDate": "2024-06-19 17:22:41Z"
     }
   }
 }

@@ -417,7 +417,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(2, regularILoggerB.BuildStartedCount);
             Assert.Equal(2, regularILoggerC.BuildStartedCount);
 
-            // Make sure if we call build started again we only get one other build started event.
+            // Make sure if we call build finished again we only get one other build finished event.
             _initializedService.LogBuildFinished(true);
             Assert.Equal(2, regularILoggerA.BuildFinishedCount);
             Assert.Equal(2, regularILoggerB.BuildFinishedCount);
