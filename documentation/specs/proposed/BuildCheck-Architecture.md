@@ -47,6 +47,24 @@ The BuildCheck infrastructure will be prepared to be available concurrently with
 * BuildCheck will need to recognize custom analyzers packages during the evaluation time - so some basic code related to BuildCheck will need to be present in the worker node.
 * Presence in worker node (as part of the `RequestBuilder`), will allow inbox analyzers to agile leverage data not available within `BuildEventArgs` (while data proven to be useful should over time be exposed to `BuildEventArgs`)
 
+## Replay Mode
+
+Prerequisites: [MSBuild Replaying a Binary Log](../../wiki/Binary-Log.md#replaying-a-binary-log)
+
+When replaying a binary log we can apply BuildCheck with help of `-analyze` switch:
+```
+> msbuild.exe msbuild.binlog -analyze
+```
+
+### The architecture
+
+If `BuildCheck` is enabled, then the events from `BinaryLogReplayEventSource` and new events from `BuildCheck` are merged into an `IEventSource`, from witch the loggers get events.
+    1. The events from `BinaryLogReplayEventSource replayEventSource` are passed to the `IEventSource mergedEventSource` unchanged
+    2. The events from `BinaryLogReplayEventSource replayEventSource` are passed to `BuildCheckBuildEventHandler` in order to produce new events from `BuildCheck`
+    3. The `BuildCheckBuildEventHandler` uses the `mergedEventSource` to invoke new events
+
+`BuildCheckBuildEventHandler` is an internal infrastructural class, an entry point for producing new events from `BuildCheck`.
+
 ## Handling the Distributed Model
 
 We want to get some benefits (mostly inbox analyzers agility) from hosting BuildCheck infrastructure in worker nodes, but foremost we should prevent leaking the details of this model into public API and OM, until we are sure we cannot achieve all goals from just scheduler node from `BuildEventArgs` (which will likely never happen - as the build should be fully reconstructable from the `BuildEventArgs`).
