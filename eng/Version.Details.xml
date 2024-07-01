@@ -87,9 +87,9 @@
       <Sha>73f0850939d96131c28cf6ea6ee5aacb4da0083a</Sha>
       <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.11.0-rc.105">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.11.0-rc.122">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>66161fc472b2801a807529ff42105bb0fd45c741</Sha>
+      <Sha>c0d441fc5e99e6765c9e0b2f77de162b9866b305</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.11.0-3.24329.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
