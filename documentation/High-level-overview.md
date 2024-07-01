@@ -39,7 +39,6 @@ There are a few officially supported entry points for the engine: Visual Studio,
 An example of that is the `<Project Sdk="Microsoft.NET.Sdk">` that can be seen in some of the built-in .NET templates. This indicates that the project will use build logic that comes with the .NET SDK.
 
 ## Evaluate operation
-**TODO**
 For more detailed information on evaluation visit [Microsoft Learn](https://learn.microsoft.com/en-us/visualstudio/msbuild/build-process-overview#evaluation-phase).
 
 Evaluation of the build is the first step of the process. Its main objective is to collect information on the project being built. This includes checking entry point, imports, items, and tasks. Additionally, for Visual Studio it also gathers information about which C# files, solution files and project files are checked in the IDE.
