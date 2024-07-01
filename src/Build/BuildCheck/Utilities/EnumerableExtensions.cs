@@ -22,7 +22,7 @@ internal static class EnumerableExtensions
     }
 
     /// <summary>
-    /// Returns the item as and enumerable with single item.
+    /// Returns the item as an enumerable with single item.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="item"></param>
