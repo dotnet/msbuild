@@ -57,9 +57,9 @@ When replaying a binary log we can apply BuildCheck with help of `-analyze` swit
 ```
 
 If BuildCheck is enabled, then the events from `BinaryLogReplayEventSource` and new events from BuildCheck are merged into an `IEventSource`, from witch the loggers get events.
-    1. The events from `BinaryLogReplayEventSource replayEventSource` are passed to the `IEventSource mergedEventSource` unchanged
-    2. The events from `BinaryLogReplayEventSource replayEventSource` are passed to `BuildCheckBuildEventHandler` in order to produce new events from BuildCheck
-    3. The `BuildCheckBuildEventHandler` uses the `IEventSource mergedEventSource` to invoke new events
+1. The events from `BinaryLogReplayEventSource replayEventSource` are passed to the `IEventSource mergedEventSource` unchanged
+2. The events from `BinaryLogReplayEventSource replayEventSource` are passed to `BuildCheckBuildEventHandler` in order to produce new events from BuildCheck
+3. The `BuildCheckBuildEventHandler` uses the `IEventSource mergedEventSource` to invoke new events
 
 `BuildCheckBuildEventHandler` is an internal infrastructural class, an entry point for producing new events from BuildCheck.
 
