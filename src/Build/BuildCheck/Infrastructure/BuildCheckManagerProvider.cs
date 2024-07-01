@@ -336,8 +336,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     evr.EnvironmentVariableName,
                     evr.Message ?? string.Empty,
                     evr.File,
-                    evr.LineNumber,
-                    evr.ColumnNumber);
+                    evr.Line,
+                    evr.Column);
             }
         }
 

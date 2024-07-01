@@ -2,13 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
+using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// Arguments for the environment variable read event.
     /// </summary>
-    public class ExtendedEnvironmentVariableReadEventArgs : BuildMessageEventArgs, IExtendedBuildEventArgs
+    public sealed class ExtendedEnvironmentVariableReadEventArgs : CustomBuildEventArgs, IExtendedBuildEventArgs
     {
         /// <summary>
         /// Default constructor. Used for deserialization.
@@ -34,7 +36,6 @@ namespace Microsoft.Build.Framework
         /// <param name="column">column number (0 if not applicable)</param>
         /// <param name="helpKeyword">Help keyword.</param>
         /// <param name="senderName">The name of the sender of the event.</param>
-        /// <param name="importance">The importance of the message.</param>
         public ExtendedEnvironmentVariableReadEventArgs(
             string environmentVarName,
             string environmentVarValue,
@@ -42,13 +43,51 @@ namespace Microsoft.Build.Framework
             int line,
             int column,
             string? helpKeyword = null,
-            string? senderName = null,
-            MessageImportance importance = MessageImportance.Low)
-            : base("", "", file, line, column, 0, 0, environmentVarValue, helpKeyword, senderName, importance) => EnvironmentVariableName = environmentVarName;
+            string? senderName = null)
+            : base(environmentVarValue, helpKeyword, senderName)
+        {
+            EnvironmentVariableName = environmentVarName;
+            File = file;
+            Line = line;
+            Column = column;
+        }
 
         /// <summary>
         /// The name of the environment variable that was read.
         /// </summary>
         public string EnvironmentVariableName { get; set; } = string.Empty;
+
+        /// <summary>
+        /// The line number where environment variable is used.
+        /// </summary>
+        public int Line { get; set; }
+
+        /// <summary>
+        /// The column where environment variable is used.
+        /// </summary>
+        public int Column { get; set; }
+
+        /// <summary>
+        /// The file name where environment variable is used.
+        /// </summary>
+        public string File { get; set; } = string.Empty;
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.Write(EnvironmentVariableName);
+            writer.Write7BitEncodedInt(Line);
+            writer.Write7BitEncodedInt(Column);
+            writer.WriteOptionalString(File);
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            base.CreateFromStream(reader, version);
+            EnvironmentVariableName = reader.ReadString();
+            Line = reader.Read7BitEncodedInt();
+            Column = reader.Read7BitEncodedInt();
+            File = reader.ReadOptionalString() ?? string.Empty;
+        }
     }
 }

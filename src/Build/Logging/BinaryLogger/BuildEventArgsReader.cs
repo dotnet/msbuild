@@ -1113,8 +1113,7 @@ namespace Microsoft.Build.Logging
                     fields.LineNumber,
                     fields.ColumnNumber,
                     fields.HelpKeyword,
-                    fields.SenderName,
-                    fields.Importance);
+                    fields.SenderName);
             }
 
             return e;
