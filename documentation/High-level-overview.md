@@ -23,12 +23,7 @@ These attributes are defined within `.csproj` files, which are considered *proje
 Since the project file defines the data used for the build, the actual build instructions are imported through imports of libraries, that contains their own tasks and targets. One example that is vastly used is the SDK with `dotnet build`. These libraries also extend what can be done with a build, and overall functionality.
 
 # MSBuild API
-**TODO**
-It is a library of common build logic that defines basic things, like the concept of output folder, intermediate folder, so other tools can utilize these resources. 
-It is also a way to manipulate the MSBuild Language without directly changing the language on a project itself.
-It is an API focused on building .NET programs so there are some specific things.
- - Common targets: 
-Core idea behind those targets is you're either manipulating MSBuild data or figuring out the intermediate. What things should be passed to the compiler, or you are invoking tools like command line applications(exe). We also offer base class toolTask to provide an interface for that.
+The MSBuild API is a library with a focus on building .NET programs, as such it is used by Visual Studio and .NET SDK to integrate MSBuild as their project build system. The library includes common build logic and targets, like creation and management of output folder, intermidiary folders, custom task creation, etc... It also enables the change of the MSBuild Language without directly changing the project file itself.
 
 ## ToolTask
 ToolTask is an interface offered by MSBuild to implement custom tasks. During the build, the MSBuild Engine will construct the task, call the execute method and let it run during execution. This process has performance advantages on windows when compared to writing a script to do the same work.
@@ -44,24 +39,16 @@ There are a few officially supported entry points for the engine: Visual Studio,
 An example of that is the `<Project Sdk="Microsoft.NET.Sdk">` that can be seen in some of the built-in .NET templates. This indicates that the project will use build logic that comes with the .NET SDK.
 
 ## Evaluate operation
+**TODO**
 For more detailed information on evaluation visit [Microsoft Learn](https://learn.microsoft.com/en-us/visualstudio/msbuild/build-process-overview#evaluation-phase).
 
-**TODO**
-The evaluation phase of a build is where the engine gathers information on the projects. This includes entry points, imports, items, and tasks. For VS IDE purposes, it also gathers information about which C# files are checked in, solution files, etc...
+Evaluation of the build is the first step of the process. Its main objective is to collect information on the project being built. This includes checking entry point, imports, items, and tasks. Additionally, for Visual Studio it also gathers information about which C# files, solution files and project files are checked in the IDE.
 
-The first step of evaluation is to load the project and the XML data that it contains. To gather all the data there are multiple passes through the project file, some of them to specifically define project properties and imports. 
-At this stage of evaluation all imports are files on disk, which are processed as paths by the engine. From those imports the build logic is attached to the current processed project, and this allows
+The first step of evaluation is to load the project file and the XML data it contains. There are multiple passes within the same file to collect data, some of those to specifically define project properties and imports that are necessary for other tasks. At this time, the restore target has run already, so all imports are files on disk and are processed as paths by the engine. Another characteristic of imports is that they are brough within the project logic, so other projects can refence the same import logic instead of having a copy of the same data. Data loaded within the evaluation are not used until execution stage. This means that data can be added and modified during evaluation. 
 
-The build and processing logic from imports is also brough to the current project, this way MSBuild avoids
-
-Loads the project, read from XML. Has multiple passes through the project file, and it will specifically define properties and imports.
-Import finds the file on disk, take the build logic from there and bring it to the current executing project like it was there in the first place, so we avoid every c# project having details about the c# compiler invokation. Define it in one place and import to the rest.
-Evaluation should have no side effects on disk, just an in memory representation of that project. The exception is the SDK resolution, in which new files might appear on disk.
- - One example is the Nuget SDK, that is commonly involved in builds. Will have side effects during evaluation, like NuGet packages appearing on your disk.
-
- All the data present does not mean anything until exedcution point. Which means that during evaluation you can modify or add data to properties and items. This is a critical part of how projects are built. For example, it is common to generate a C# file based on a part of your build. This also includes intermediate data or output.
-
- So running sequence is: imports (which can honestly be anything, even environmental variables), item definitions, items, tasks and targets. But nothing really executed. We do have a white list of used things that prevent side effects.
+The evaluation stage should not have any side effect on disk, no new or deleted files. Two exceptions for this are:
+ - SDK resolution
+ - NuGet SDK, which might add packages to the disk
 
 ### imports
 Complex projects generally include imports of many different types. In MSBuild an import can be a lot of things, a disk path, a property expansion, a known folder, or even environmental variables. There are also some main imports that come with the execution on other platforms, like the Visual Studio or SDK can have import directories that contain wild card imports. However, when it comes to the evaluation phase in MSBuild, imports are all treated like a property plus path expansion, this includes imported NuGet packages.
