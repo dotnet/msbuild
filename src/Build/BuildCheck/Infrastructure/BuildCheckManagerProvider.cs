@@ -167,13 +167,17 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             BuildCheckDataSource buildCheckDataSource,
             IEnumerable<BuildAnalyzerFactory> factories,
             string[] ruleIds,
-            bool defaultEnablement)
+            bool defaultEnablement,
+            IAnalysisContext analysisContext)
         {
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
                 foreach (BuildAnalyzerFactory factory in factories)
                 {
                     _analyzersRegistry.Add(new BuildAnalyzerFactoryContext(factory, ruleIds, defaultEnablement));
+
+                    var instance = factory();
+                    analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.FriendlyName);
                 }
             }
         }
@@ -207,10 +211,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private void SetupSingleAnalyzer(BuildAnalyzerFactoryContext analyzerFactoryContext, string projectFullPath)
         {
             // For custom analyzers - it should run only on projects where referenced
-            //  (otherwise error out - https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57849480)
-            //  on others it should work similarly as disabling them.
+            // (otherwise error out - https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57849480)
+            // on others it should work similarly as disabling them.
             // Disabled analyzer should not only post-filter results - it shouldn't even see the data 
-
             BuildAnalyzerWrapper wrapper;
             BuildAnalyzerConfigurationInternal[] configurations;
             if (analyzerFactoryContext.MaterializedAnalyzer == null)
@@ -298,7 +301,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
                 catch (BuildCheckConfigurationException e)
                 {
-                    analysisContext.DispatchAsErrorFromText(null, null, null,
+                    analysisContext.DispatchAsErrorFromText(
+                        null,
+                        null,
+                        null,
                         new BuildEventFileInfo(projectFullPath),
                         e.Message);
                     analyzersToRemove.Add(analyzerFactoryContext);
@@ -351,8 +357,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 if (analyzerFactoryContext.MaterializedAnalyzer != null)
                 {
-                    _tracingReporter.AddAnalyzerStats(analyzerFactoryContext.FriendlyName,
-                        analyzerFactoryContext.MaterializedAnalyzer.Elapsed);
+                    _tracingReporter.AddAnalyzerStats(analyzerFactoryContext.FriendlyName, analyzerFactoryContext.MaterializedAnalyzer.Elapsed);
                     analyzerFactoryContext.MaterializedAnalyzer.ClearStats();
                 }
             }
