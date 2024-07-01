@@ -12,12 +12,11 @@ using System.Runtime.ConstrainedExecution;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Experimental.BuildCheck.Analyzers;
-using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Analyzers;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -58,7 +57,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
     // This requires MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION set to 1
     internal void ProcessEvaluationFinishedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        IAnalysisContext analysisContext,
         ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
     {
         Dictionary<string, string> propertiesLookup = new Dictionary<string, string>();
@@ -68,7 +67,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         EvaluatedPropertiesAnalysisData analysisData =
             new(evaluationFinishedEventArgs.ProjectFile!, propertiesLookup);
 
-        _buildCheckCentralContext.RunEvaluatedPropertiesActions(analysisData, buildAnalysisContext, ReportResult);
+        _buildCheckCentralContext.RunEvaluatedPropertiesActions(analysisData, analysisContext, ReportResult);
 
         if (_buildCheckCentralContext.HasParsedItemsActions)
         {
@@ -79,12 +78,12 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             ParsedItemsAnalysisData itemsAnalysisData = new(evaluationFinishedEventArgs.ProjectFile!,
                 new ItemsHolder(xml.Items, xml.ItemGroups));
 
-            _buildCheckCentralContext.RunParsedItemsActions(itemsAnalysisData, buildAnalysisContext, ReportResult);
+            _buildCheckCentralContext.RunParsedItemsActions(itemsAnalysisData, analysisContext, ReportResult);
         }
     }
 
     internal void ProcessTaskStartedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        IAnalysisContext analysisContext,
         TaskStartedEventArgs taskStartedEventArgs)
     {
         if (!_buildCheckCentralContext.HasTaskInvocationActions)
@@ -120,7 +119,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     }
 
     internal void ProcessTaskFinishedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        IAnalysisContext analysisContext,
         TaskFinishedEventArgs taskFinishedEventArgs)
     {
         if (!_buildCheckCentralContext.HasTaskInvocationActions)
@@ -136,13 +135,13 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             {
                 // All task parameters have been recorded by now so remove the task from the dictionary and fire the registered build check actions.
                 _tasksBeingExecuted.Remove(taskKey);
-                _buildCheckCentralContext.RunTaskInvocationActions(taskData.AnalysisData, buildAnalysisContext, ReportResult);
+                _buildCheckCentralContext.RunTaskInvocationActions(taskData.AnalysisData, analysisContext, ReportResult);
             }
         }
     }
 
     internal void ProcessTaskParameterEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        IAnalysisContext analysisContext,
         TaskParameterEventArgs taskParameterEventArgs)
     {
         if (!_buildCheckCentralContext.HasTaskInvocationActions)
@@ -177,13 +176,13 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
     private static void ReportResult(
         BuildAnalyzerWrapper analyzerWrapper,
-        LoggingContext loggingContext,
+        IAnalysisContext analysisContext,
         BuildAnalyzerConfigurationInternal[] configPerRule,
         BuildCheckResult result)
     {
         if (!analyzerWrapper.BuildAnalyzer.SupportedRules.Contains(result.BuildAnalyzerRule))
         {
-            loggingContext.LogErrorFromText(null, null, null,
+            analysisContext.DispatchAsErrorFromText(null, null, null,
                 BuildEventFileInfo.Empty,
                 $"The analyzer '{analyzerWrapper.BuildAnalyzer.FriendlyName}' reported a result for a rule '{result.BuildAnalyzerRule.Id}' that it does not support.");
             return;
@@ -205,6 +204,6 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         // eventArgs.BuildEventContext = loggingContext.BuildEventContext;
         eventArgs.BuildEventContext = BuildEventContext.Invalid;
 
-        loggingContext.LogBuildEvent(eventArgs);
+        analysisContext.DispatchBuildEvent(eventArgs);
     }
 }

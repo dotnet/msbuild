@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
-using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
@@ -37,24 +36,24 @@ internal enum BuildCheckDataSource
 internal interface IBuildCheckManager
 {
     void ProcessEvaluationFinishedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        IAnalysisContext analysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs);
 
     void ProcessTaskStartedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        IAnalysisContext analysisContext,
         TaskStartedEventArgs taskStartedEventArgs);
 
     void ProcessTaskFinishedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        IAnalysisContext analysisContext,
         TaskFinishedEventArgs taskFinishedEventArgs);
 
     void ProcessTaskParameterEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        IAnalysisContext analysisContext,
         TaskParameterEventArgs taskParameterEventArgs);
 
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
-    void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext);
+    void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, IAnalysisContext analysisContext);
 
     Dictionary<string, TimeSpan> CreateAnalyzerTracingStats();
 
@@ -64,7 +63,7 @@ internal interface IBuildCheckManager
     //  but as well from the ConnectorLogger - as even if interleaved, it gives the info
     //  to manager about what analyzers need to be materialized and configuration fetched.
     // No unloading of analyzers is yet considered - once loaded it stays for whole build.
-    void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string fullPath);
+    void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string fullPath);
 
     void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
 

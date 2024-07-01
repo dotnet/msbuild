@@ -186,6 +186,16 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
+        private BuildWarningEventArgs MakeCopyRetryWarning(int retryCount)
+        {
+            return new BuildWarningEventArgs("", "MSB3026", "directory/file", 1, 2, 3, 4,
+                $"MSB3026: Could not copy \"sourcePath\" to \"destinationPath\". Beginning retry {retryCount} in x ms.",
+                null, null)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+        }
+
         private BuildMessageEventArgs MakeMessageEventArgs(string message, MessageImportance importance)
         {
             return new BuildMessageEventArgs(message, "keyword", null, importance)
@@ -315,6 +325,19 @@ namespace Microsoft.Build.UnitTests
                     "**********************************************************************" +
                     "To sign in, use a web browser to open the page https://devicelogin and enter the code XXXXXX to authenticate." +
                     "**********************************************************************"));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintCopyTaskRetryWarningAsImmediateMessage_Failed()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
+            {
+                WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(1));
+                WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(2));
+                WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(3));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();

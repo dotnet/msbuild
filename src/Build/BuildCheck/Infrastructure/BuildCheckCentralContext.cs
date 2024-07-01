@@ -18,9 +18,7 @@ internal sealed class BuildCheckCentralContext
     private readonly ConfigurationProvider _configurationProvider;
 
     internal BuildCheckCentralContext(ConfigurationProvider configurationProvider)
-    {
-        _configurationProvider = configurationProvider;
-    }
+        => _configurationProvider = configurationProvider;
 
     private record CallbackRegistry(
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<EvaluatedPropertiesAnalysisData>>)> EvaluatedPropertiesActions,
@@ -77,33 +75,33 @@ internal sealed class BuildCheckCentralContext
 
     internal void RunEvaluatedPropertiesActions(
         EvaluatedPropertiesAnalysisData evaluatedPropertiesAnalysisData,
-        LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        IAnalysisContext analysisContext,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.EvaluatedPropertiesActions, evaluatedPropertiesAnalysisData,
-            loggingContext, resultHandler);
+            analysisContext, resultHandler);
 
     internal void RunParsedItemsActions(
         ParsedItemsAnalysisData parsedItemsAnalysisData,
-        LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        IAnalysisContext analysisContext,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ParsedItemsActions, parsedItemsAnalysisData,
-            loggingContext, resultHandler);
+            analysisContext, resultHandler);
 
     internal void RunTaskInvocationActions(
         TaskInvocationAnalysisData taskInvocationAnalysisData,
-        LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        IAnalysisContext analysisContext,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.TaskInvocationActions, taskInvocationAnalysisData,
-            loggingContext, resultHandler);
+            analysisContext, resultHandler);
 
     private void RunRegisteredActions<T>(
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks,
         T analysisData,
-        LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> resultHandler)
+        IAnalysisContext analysisContext,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> resultHandler)
     where T : AnalysisData
     {
         string projectFullPath = analysisData.ProjectFilePath;
@@ -147,7 +145,7 @@ internal sealed class BuildCheckCentralContext
 
                 BuildCheckDataContext<T> context = new BuildCheckDataContext<T>(
                     analyzerCallback.Item1,
-                    loggingContext,
+                    analysisContext,
                     configPerRule,
                     resultHandler,
                     analysisData);
