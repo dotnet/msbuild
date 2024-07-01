@@ -1,4 +1,4 @@
-# Wasm/WASI tasks in MSBuild (WasmBuild)
+# Wasm/WASI tasks in MSBuild
 We want to make it easier to work with the WebAssembly ecosystem in MSBuild.
 MSBuild Tasks are the point where this makes sense. 
 Also it brings sandboxing possibilities.
@@ -7,7 +7,7 @@ Also it brings sandboxing possibilities.
 ## Stories for requirements
 Currently tasks have unrestricted access to resources, Wasm/WASI runtimes provide a way to sandbox tasks (by default executables don't have access to any resources). This can be acheived by specifying Inputs and Outputs of these tasks and other resources they can access.
 
- We want to be able to run tasks written in other languages than C# in MSBuild. Those tasks will need a definition for how to write them. Invoking a Wasm runtime can easily run pre-compiled tasks. 
+ We want to be able to run tasks written in other languages than C# in MSBuild. These tasks will get information about the host (the host exports functions which tasks can call) and expose information about themselves (task exports functions which the host can call). Invoking a Wasm runtime can easily run pre-compiled tasks. There has to be a clear API for this communication.
  (Advanced) Integrating compiling other languages to WASI would enable an easy workflow. 
 
 ## Terminology and context
@@ -75,9 +75,9 @@ We can make this more user friendly.
 ### Prototype features
 - [ ] WasmExec class extending ToolTask taking a .wasm file as a parameter - just runs the file with wasmtime
     -  [ ] parametrizing access to resources (will apply to all subsequent parts)
-- [ ] WasmTaskFactory - creating tasks from .wasm files
+- [ ] WasmTask - creating tasks from .wasm files
     - [ ] Specification for what should this .wasm file export and how it will be ran
-    - [ ] Taskhost
+    - [ ] Taskhost version that can get custom parameters from the xml
     - example usage:
 ```xml
 <UsingTask TaskName="FancyWasiTask"
@@ -109,10 +109,12 @@ We can make this more user friendly.
 ### diagram
 
 ![diagram](wasi-diagram.svg)
-### Wasm/WASI interface
-The .wasm task file has to export a function execute(), import extern function getMetadata from host, **TBD more details** 
+### Wasm/WASI communication with MSBuild
+The .wasm task file has to export a function execute()
 
-### Task parameters
+[API description in WIT format](./wasmtask.wit)
+
+### Task parameters 
 every resource has to be explicit, wasmtime is a sandbox by default
 - *implicitly: Executable="path/to/executable.wasm" created by the factory*
 - Inputs="list_of_input_files"
@@ -123,8 +125,9 @@ every resource has to be explicit, wasmtime is a sandbox by default
 - Directories="directories on host that can be accessed"
 - Args="for the wasm program" 
 - TmpDir="somethign like temporary working directory"
-- HostFunctions="list of functions exported to wasm code"
+- **TBD**
 
+Other parameters are handled when instantiating the task with the `TaskHostFactory` which parses them from XML and gives them to the task.
 
 ### Testing
 - **TBD**
@@ -199,19 +202,22 @@ fn.Invoke();
     - file extensions are called .wasm 👍
     - WASI is a standard building on Wasm 👍
     - the compilation target is called wasm-wasi 👍👎
-    - *-> mostly use Wasm-tasks unless Wasm/WASI is more appropriate for that situation*
+    - *-> mostly use Wasm unless WASI is more appropriate for that specific situation, the repo is called [MSBuildWasm](https://github.com/JanProvaznik/MSBuildWasm)*
 
+- **passing things other than numbers**
+    - shared memory, both host and wasm can access it
+    - return values and parameters are pointers to this memory
+     
 ### Open questions
-- **Is the strategy of defining an entrypoint function and invoking it correct?**
-    - would using component model help us a lot? [WebAssembly interface type](https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md), does that require work on wasmtime-dotnet to get the bindings first?
+**Passing data/serialization/typing/WIT** 
+    - component model would help us a lot with passing data it has support for complex types [WebAssembly interface type](https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md), does that require work on wasmtime-dotnet to get the bindings first?
+    - but wasmtime-dotnet does not support it rn, TBD if it's worth focusing on
+    - Solution without it is using a memory shared between the host and the wasm program
 
 - **What changes are needed in MSBuild repo?**
-    - TaskHost is `internal` 
     - How does sandboxing in MSBuild work and how to interact with it?
 
 - **Wasm/WASI Technical details**
-    - how to pass strings/nontrivial objects C# -> Wasm, Wasm -> C#
-    - how to use functions with return values?
     - calling imported functions (from C# host) in Wasm?
     - what happens when a host exports a function and the wasm does not expect it?
     - preventing users shooting themselves in the foot with Wasm errors

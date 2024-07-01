@@ -1,0 +1,62 @@
+﻿package msbuildtask:v0
+
+record str-kv-pair {
+    key: string
+    value: string
+}
+
+type str-dictionary = list<str-kv-pair>
+
+record TaskItem {
+    ItemSpec: string
+    Metadata: str-dictionary
+}
+
+type TaskItems = list<TaskItem>
+type Bools = list<bool>
+type Strings = list<string>
+
+interface host-data {
+    GetHostData: func() -> str-dictionary
+}
+
+
+interface host-logger {
+    enum MessageImportance {
+        High, 
+        Normal,
+        Low
+    }
+
+    LogMessage: func(message: string, importance: MessageImportance)
+    LogError: func(message: string);
+    LogWarning: func(message: string);
+}
+
+
+interface task-info {
+    GetTaskInfo: func() -> str-dictionary
+    LoadParameters: func()
+}
+
+interface host-task-parameter {
+    GetParameter: func(name: string) -> Variant<bool, string, TaskItem, Bools, Strings, TaskItems>;
+    GetBoolParameter: func(name: string) -> bool;
+    GetStringParameter: func(name: string) -> string;
+    GetTaskItemParameter: func(name: string) -> TaskItem;
+    GetBoolsParameter: func(name: string) -> Bools;
+    GetStringsParameter: func(name: string) -> Strings;
+    GetTaskItemsParameter: func(name: string) -> TaskItems;
+}
+
+interface execute {
+    Execute: func() -> bool;
+}
+
+world MSBuildTask {
+    import host-data;
+    import host-logger;
+    import host-task-parameter;
+    export task-info;
+    export execute;
+}
