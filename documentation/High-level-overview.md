@@ -23,8 +23,6 @@ These attributes are defined within `.csproj` files, which are considered *proje
 Since the project file defines the data used for the build, the actual build instructions are imported through imports of libraries, that contains their own tasks and targets. One example that is vastly used is the SDK with `dotnet build`. These librearies also extend what can be done with a build, and overal functionality.
 
 # MSBuild API
-**to add mote information**
-
 It is a library of common build logic that defined basic things, like the convept of output folder, intermediate folder, so other tools can utilize these resources. 
 It is also a way to manipulate the MSBuild Language without directly changing the language on a project itself.
 It is an API focused on building .NET programs so there are some specific things.
@@ -86,17 +84,11 @@ The execute method can do whatever it wants, including reportin back through an 
 And then we return.
 
 ### Task Host
-**TODO**
-When a task needs to run in a different .NET invironment than the one currently in, we handle that through the Task Host.
+MSBuild has a tool called Task Host, that allows tasks to run in a different .NET environment that the one used for build execution.
 
-MSBuild starts a new process of the correct environment, uses an IPC mechanism to feed information for that task, run it in another process, and get information back.
-
-Tasks can ask the host engine for task relevant objects and use it. This is a way to communicate between nodes and tasks across the build.
-
-You can opt-in to this behaviour.
-Where you might want to do this:
- - When a task misbehaves and breaks the whole process
- - You have a task that is built in the same repo you're building your code and might change between runs. In this case we make sure that the DLLs are not locked at the end of the building. (Sandbox execution)
+This is an opt-in behaviour that can be used for various cases:
+- If a task breaks the build process it can be relegated to the Task Host so it does not influence the main build.
+- If a task is built in the same repo that is currently being built by MSBuild and the code might change. So Task Host makes sure the DLLs are not lockd at the end of the build.
 
 ## Processes and nodes
 When a new build is started MSBuild starts a process, which runs some setup code and prepares itself to start a build. This first node becomes the scheduler node and one of the worker nodes, becoming both the entry point for the project build and the scheduler. The main problem that arises from that, is when the whole build, the OS tears down the process, loosing the memory cache and having to restart the whole build process from the start. This is offset by having longer lived processes, that can be reused when building projects successionally.
@@ -114,84 +106,35 @@ This Project Cache differs from the previous because it is separate, and used ma
 For more in depth information visit [the spec](https://github.com/dotnet/msbuild/blob/main/documentation/specs/project-cache.md).
 
 ## Scheduler
-**TODO**
-The schedule is one of the main pieces of the MSBuild engine. It is responsible for scheduling the execution of projects to different working nodes. For a single process build, the scheduling node is also the only work node that is available for builds, so it will schedule work only with itself. In multiprocess builds the schduler node is the first running process, which will then assign work to others. 
-When the build is running, and another project is found that needs to also be executed, the scheduler sends information to the first available node. Once a node
+The scheduler is the part of the MSBuild engine responsible for scheduling work to different nodes, as well as maintaining and managing the result of already executed projects. When a build starts, the scheduler assigns the entry point project to a working node (generally the in-proc node). The  project's execution starts and proceeds until the whole operation ends or is blocked. Once a node is not proceeding with the current project, either finished or blocked, the scheduler than access if it has more work to be given to that node, and assigns it.
 
+On a project's operation end and returned result, it sends that information to the scheduler. The scheduler maintains results of all of the build's executed targets, so when a project or target depends on another to proceed execution, the scheduler can just retrieve that information from the Project Result Cache. Since the scheduler and project are generally in different processes, this communication happens within the engine using built-in loggers.
 
-Scheduler maintains results of executed targets., as well as remembering which projects were already built and have their results. When a result is asked from a task / project that was built previously it gets it from the cache.
-When communicating within the process. A task talks to the engine, which then communicates with the scheduler, to either get results or be blocked.
-
-Build starts with an entry point. Scheduler assigns the entry point to a node (generally the in-proc node). Execution starts and targets start builds in some order. When an operation ends, they provide the results to the scheduler. The scheduler does not care about what the targets do, just what they return once executed.
-
-It can also see pending requests. For example, when one task depends on another, in the middle of task execution, the node will tell the scheduler that it cannot complete, and it needs a list of requests of what it needs. The scheduler can either satisfy those requests from cache, or it puts it on the list for execution.
-
-When a node is finished or blocked, the scheduler consider if they can assign more work to a specific node. And that is how out multiprocess stuff become parallelism.
+If a the node's operation is blocked by a dependency, it asks the scheduler for the results of the dependency's execution. If the dependency has been executed, the result is retrieved from the Project Result Cache. If the process has not been executed, the scheduler suspends the current execution, making the target / project a pending request. When a request is pending, the scheduler adds to the list of requests to execute, and assigns the dependency to be executed to either the current node or another one that is free.
 
 ### Incremental build
-Incremental builds are extremely useful for local development, as it speeds successive builds on local machines. For this the output from each project build are saved in memory, which becomes one big cache for MSBuild.
+Incremental builds are extremely useful for local development, as it speeds consecutive builds on local machines. For this, the output from each project build are saved in memory, which becomes one big cache for MSBuild.
 
 ## Parallelism
-**TODO**
-Tasks run sequentially.
+Parallelism for MSBuild is implemented at project level. Each project is assigned to different working nodes, which will execute the tasks at the same time, with the Scheduler organizing sequence and work division. Within project, targets run sequentially, however they can have parallelism implemented independently from projects.
 
-Parallelism is at the project level. Each project is single threaded until the process yields o MSBuild passes a task call.
-MSBuild keeps control of the level of parallelism. Tasks however can implement parallelism indepedendt of projects.
-
-For multi targeted builds, parallelism can be achieved but there are some extra steps. The outer build produces a list where the include of the list is the same project file each time, but different metadata for the target frameworks, and that is passed to the single MSBuild task so that it can build it in parallel.
-
-Batching can be done in the targets and task levels.
+For multi-targeted builds parallelism works slightly differnt. The outer build produces a list of projects to build. This list contains the same project file with a different metadata for the target framework. This list is then passed to the MSBuild execute target so it can be built in parallel.
 
 
 ## IPC (interprocess communication)
-**TODO**
-During execution we have different OS processes that need to talk with each other.
- - Command line inout
- - Console output
- - Connection between scheduler and worker node
-    - Go build this project
-    - locked bc we need the result from another build
-
-If a node is blocked on a specific project, it is considered freed to be used in other projects as the scheduler allows.
-
-Nature of messages:
- - Deal with blocked tasks on processes (the whole engine communication, freeing a process / nod, etc..)
- - Communication on task execution for a task host
-    - Task definition
-    - inputs
-    - give me the outputs
-
-Transport layer:
-They are based on biderectional BCL .net pipe implementation. In windows they are named pipes, and it has a unix implementation that wraps around sockets.
-
-Since in unix the namespace for pipes and custom code is the same, we create an intermidiate layer with a temporary folder based on the temp environmental variable.
-
-Message Layer:
-Is a custom serialization protocol that is MSBuild specific. Dsigned to be easy to implement new types (ITranslatable). All the types are known internal MSBuild types, with extra dictionary fields to support user custom strings.
+In multiprocess MSBuild execution, many OS processes exist that need to communicate with each other. There are two main reasons:
+ - Dealing with blocked tasks on processes: Communicating with the engine, scheduler, cache, etc...
+ - Communication on task execution for a task host: Task definition, task inputs, task outputs.
 
 ## Graph build
-**TODO**
-Try to evaluate all projects upfront and form relationships between them. So, projects get evaluated, but instead of going and building it, we look at the evaluated project and try to figure out the other projects it references.
-Looks at specific items like Project Refence in order to construct a dependency graph.
+A graph build changes the sequence in which MSBuild processes projects. Normally a project starts execution, and when it has a dependency on another project, then that project starts to build. A graph build evaluates all projects and their relationship before starting execution of any project. This is achieved by looking at specific items in the XML (like Project Reference) to contruct the dependency graph.
 
-The graph itself is not serialized today.
-This whole thing is similar to NuGet graph restore.
-
-There is a special scheduler for graph builds, it does not replace the existing scheduler but auguments it. It basically sends build requests to the scheduler when all the project dependencies are satisfied.
-
-In case of different evaluation time graph and execution time behaviour of the project not matching:
-- Standard mode: It tries to work from the leaves and makes sure that all the results are within the cache. If it hits an unexpected reference, it just tried to schedule that reference for build.
-- Strict / isolate mode: If there is a cache miss, meaning a dependency has not been built already. Just fail the whole build.
-
-With this second mode you need to specify input and output results cache so different projects are able to access the results of dependencies. This is used in distributed builds (CloudBuild for example).
-
-
+There are a couple of different modes to run graph mode in:
+- Stardard mode: Tried to work from the leaves of the dependency graph and makes sure all results are within the cache. If there is a cache miss / unexpected reference, it just schedules the missing reference for execution.
+- Strict / isolate mode: If there is a cache miss when building, the whole built is failed. This is used mostly for distributed system builds.
 
 ## MSbuid Server
-**TODO**
-*Watch the knowledge hand off to get more information about MSBuild server*
-
-The MSBuild server is the idea of separating some processes. Splitting the entry point executable that lives for one build invocation, and the scheduler and the 1st in-proc node. This way you don't need to JIT and you can preserve your in-memory cache.
+In normal MSBuild execution the main process is cleared after the build ends, or after a set time limit. The MSBuild Server project aims to change that, making the entry point process and the schduler process node separate entities. This allows processed to preserve in-memory cache and make consecutive builds faster.
 
 # Extensibilities
 MSBuild includes some extra features that are related to the build process but does not fit on the previous categories. These extensibility features are critical for the build process, but they can also be customized by third parties for their own use.
