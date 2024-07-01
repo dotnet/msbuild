@@ -8,7 +8,6 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Arguments for the environment variable read event.
     /// </summary>
-    [Serializable]
     public class ExtendedEnvironmentVariableReadEventArgs : BuildMessageEventArgs, IExtendedBuildEventArgs
     {
         /// <summary>
