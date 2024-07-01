@@ -48,6 +48,8 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             foreach (Type analyzerCandidate in analyzerTypes)
             {
                 analyzersFactories.Add(() => (BuildAnalyzer)Activator.CreateInstance(analyzerCandidate)!);
+
+                _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerRegistered", analyzerCandidate.Name, analyzerCandidate.Assembly);
             }
 
             if (availableTypes.Count != analyzerTypes.Count)

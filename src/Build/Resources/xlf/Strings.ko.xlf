@@ -233,8 +233,8 @@
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerRegistered">
-        <source>The custom analyzer is registered for the build: '{0}' from the location: '{1}'.</source>
-        <target state="new">The custom analyzer is registered for the build: '{0}' from the location: '{1}'.</target>
+        <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
+        <target state="new">The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">

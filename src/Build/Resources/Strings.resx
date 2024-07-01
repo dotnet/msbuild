@@ -2134,7 +2134,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>The BuildCheck is enabled for this build.</value>
   </data>
   <data name="CustomAnalyzerRegistered" xml:space="preserve">
-    <value>The custom analyzer is registered for the build: '{0}' from the location: '{1}'.</value>
+    <value>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
