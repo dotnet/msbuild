@@ -51,20 +51,20 @@ The BuildCheck infrastructure will be prepared to be available concurrently with
 
 Prerequisites: [MSBuild Replaying a Binary Log](../../wiki/Binary-Log.md#replaying-a-binary-log)
 
-When replaying a binary log we can apply BuildCheck with help of `-analyze` switch:
+When replaying a binary log, we can apply BuildCheck with help of `-analyze` switch:
 ```
 > msbuild.exe msbuild.binlog -analyze
 ```
 
-If BuildCheck is enabled, then the events from `BinaryLogReplayEventSource` and new events from BuildCheck are merged into an `IEventSource`, from witch the loggers get events.
+If BuildCheck is enabled, then the events from `BinaryLogReplayEventSource` and new events from BuildCheck are merged into the `IEventSource`, from which the loggers get events.
 
 <img src="https://github.com/surayya-MS/msbuild/assets/114938397/7f24f5ee-f254-41a1-bf92-0c476ca8b90e" width="40%" height="40%">
 
-1. The events from `BinaryLogReplayEventSource replayEventSource` are passed to the `IEventSource mergedEventSource` unchanged
-2. The events from `BinaryLogReplayEventSource replayEventSource` are passed to `BuildCheckBuildEventHandler` in order to produce new events from BuildCheck
-3. The `BuildCheckBuildEventHandler` uses the `IEventSource mergedEventSource` to invoke new events
+1. The events from `BinaryLogReplayEventSource replayEventSource` are passed to the `IEventSource mergedEventSource` unchanged.
+2. The events from `BinaryLogReplayEventSource replayEventSource` are passed to `BuildCheckBuildEventHandler` in order to produce new events from BuildCheck.
+3. The `BuildCheckBuildEventHandler` uses the `IEventSource mergedEventSource` to invoke new events.
 
-`BuildCheckBuildEventHandler` is an internal infrastructural class, an entry point for producing new events from BuildCheck.
+`BuildCheckBuildEventHandler` is an internal infrastructural class and serves as an entry point for producing new events from BuildCheck.
 
 ## Handling the Distributed Model
 
