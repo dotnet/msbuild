@@ -12,6 +12,14 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
+/// <summary>
+/// Central logger for the build check infrastructure.
+/// Receives events from the <see cref="BuildCheckForwardingLogger"/>.
+/// Processes the events and forwards them to the <see cref="IBuildCheckManager"/> and registered analyzers.
+/// </summary>
+/// <remarks>
+/// Ensure that the consuming events are in sync with <see cref="BuildCheckForwardingLogger"/>.
+/// </remarks>
 internal sealed class BuildCheckConnectorLogger : ILogger
 {
     private readonly BuildCheckBuildEventHandler _eventHandler;
