@@ -49,6 +49,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
     private readonly SimpleProjectRootElementCache _cache = new SimpleProjectRootElementCache();
     private readonly BuildCheckCentralContext _buildCheckCentralContext = buildCheckCentralContext;
+    private Dictionary<string, (string EnvVarValue, string File, int Line, int Column)> _evaluatedEnvironmentVariables = new Dictionary<string, (string EnvVarValue, string File, int Line, int Column)>();
 
     /// <summary>
     /// Keeps track of in-flight tasks. Keyed by task ID as passed in <see cref="BuildEventContext.TaskId"/>.
@@ -65,7 +66,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
 
         EvaluatedPropertiesAnalysisData analysisData =
-            new(evaluationFinishedEventArgs.ProjectFile!, propertiesLookup);
+            new(evaluationFinishedEventArgs.ProjectFile!, propertiesLookup, _evaluatedEnvironmentVariables);
 
         _buildCheckCentralContext.RunEvaluatedPropertiesActions(analysisData, analysisContext, ReportResult);
 
@@ -79,6 +80,17 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 new ItemsHolder(xml.Items, xml.ItemGroups));
 
             _buildCheckCentralContext.RunParsedItemsActions(itemsAnalysisData, analysisContext, ReportResult);
+        }
+    }
+
+    /// <summary>
+    /// The method collects events associated with the used environment variables in projects.
+    /// </summary>
+    internal void ProcessEnvironmentVariableReadEventArgs(string envVarName, string envVarValue, string file, int line, int column)
+    {
+        if (!_evaluatedEnvironmentVariables.ContainsKey(envVarName))
+        {
+            _evaluatedEnvironmentVariables.Add(envVarName, (envVarValue, file, line, column));
         }
     }
 

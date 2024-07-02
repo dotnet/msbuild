@@ -158,6 +158,7 @@
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="BuildCheck\**\*.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
+    <Compile Include="Evaluation\IProperty2.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />

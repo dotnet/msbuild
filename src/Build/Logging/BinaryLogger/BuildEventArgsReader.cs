@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -313,6 +311,7 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.ProjectImported => ReadProjectImportedEventArgs(),
                 BinaryLogRecordKind.TargetSkipped => ReadTargetSkippedEventArgs(),
                 BinaryLogRecordKind.EnvironmentVariableRead => ReadEnvironmentVariableReadEventArgs(),
+                BinaryLogRecordKind.ExtendedEnvironmentVariableRead => ReadEnvironmentVariableReadEventArgs(),
                 BinaryLogRecordKind.ResponseFileUsed => ReadResponseFileUsedEventArgs(),
                 BinaryLogRecordKind.PropertyReassignment => ReadPropertyReassignmentEventArgs(),
                 BinaryLogRecordKind.UninitializedPropertyRead => ReadUninitializedPropertyReadEventArgs(),
@@ -1094,16 +1093,29 @@ namespace Microsoft.Build.Logging
         private BuildEventArgs ReadEnvironmentVariableReadEventArgs()
         {
             var fields = ReadBuildEventArgsFields(readImportance: true);
-
             var environmentVariableName = ReadDeduplicatedString();
 
-            var e = new EnvironmentVariableReadEventArgs(
-                environmentVariableName,
-                fields.Message,
-                fields.HelpKeyword,
-                fields.SenderName,
-                fields.Importance);
-            SetCommonFields(e, fields);
+            BuildEventArgs e;
+            if (fields.Extended == null)
+            {
+                e = new EnvironmentVariableReadEventArgs(
+                    environmentVariableName,
+                    fields.Message,
+                    fields.HelpKeyword,
+                    fields.SenderName,
+                    fields.Importance);
+            }
+            else
+            {
+                e = new ExtendedEnvironmentVariableReadEventArgs(
+                    environmentVariableName ?? string.Empty,
+                    fields.Message,
+                    fields.File ?? string.Empty,
+                    fields.LineNumber,
+                    fields.ColumnNumber,
+                    fields.HelpKeyword,
+                    fields.SenderName);
+            }
 
             return e;
         }

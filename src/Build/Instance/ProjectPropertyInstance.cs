@@ -21,7 +21,7 @@ namespace Microsoft.Build.Execution
     /// Added and removed via methods on the ProjectInstance object.
     /// </summary>
     [DebuggerDisplay("{_name}={_escapedValue}")]
-    public class ProjectPropertyInstance : IKeyed, IValued, IProperty, IEquatable<ProjectPropertyInstance>, ITranslatable
+    public class ProjectPropertyInstance : IKeyed, IValued, IProperty2, IEquatable<ProjectPropertyInstance>, ITranslatable
     {
         /// <summary>
         /// Name of the property
@@ -100,8 +100,22 @@ namespace Microsoft.Build.Execution
                 return _escapedValue;
             }
         }
+
+        string IProperty2.GetEvaluatedValueEscaped(IElementLocation location)
+        {
+            if (this is EnvironmentDerivedProjectPropertyInstance envProperty && envProperty.loggingContext?.IsValid == true && !envProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
+            {
+                ExtendedEnvironmentVariableReadEventArgs args = new(Name, _escapedValue, location.File, location.Line, location.Column);
+                args.BuildEventContext = envProperty.loggingContext.BuildEventContext;
+                envProperty.loggingContext.LogBuildEvent(args);
+                envProperty._loggedEnvProperty = true;
+            }
+
+            return _escapedValue;
+        }
+
         /// <summary>
-        /// Implementation of IKeyed exposing the property name
+        /// Implementation of IKeyed exposing the property name.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         string IKeyed.Key => Name;

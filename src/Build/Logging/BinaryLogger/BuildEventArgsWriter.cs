@@ -17,6 +17,7 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
+using static Microsoft.Build.Shared.FileSystem.WindowsNative;
 
 #nullable disable
 
@@ -549,8 +550,10 @@ namespace Microsoft.Build.Logging
         {
             WriteMessageFields(e, writeImportance: true);
             WriteDeduplicatedString(e.EnvironmentVariableName);
+
             return BinaryLogRecordKind.EnvironmentVariableRead;
         }
+
         private BinaryLogRecordKind Write(ResponseFileUsedEventArgs e)
         {
             WriteMessageFields(e);

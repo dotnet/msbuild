@@ -19,7 +19,7 @@ namespace Microsoft.Build.Evaluation
     /// An evaluated design-time property
     /// </summary>
     [DebuggerDisplay("{Name}={EvaluatedValue} [{UnevaluatedValue}]")]
-    public abstract class ProjectProperty : IKeyed, IValued, IProperty, IEquatable<ProjectProperty>
+    public abstract class ProjectProperty : IKeyed, IValued, IProperty2, IEquatable<ProjectProperty>
     {
         /// <summary>
         /// Project that this property lives in.
@@ -108,6 +108,19 @@ namespace Microsoft.Build.Evaluation
 
                 return EvaluatedValueEscapedInternal;
             }
+        }
+
+        string IProperty2.GetEvaluatedValueEscaped(IElementLocation location)
+        {
+            if (this is EnvironmentDerivedProjectProperty environmentProperty && environmentProperty.loggingContext is { IsValid: true } loggingContext && !environmentProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
+            {
+                ExtendedEnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal, location.File, location.Line, location.Column);
+                args.BuildEventContext = loggingContext.BuildEventContext;
+                loggingContext.LogBuildEvent(args);
+                environmentProperty._loggedEnvProperty = true;
+            }
+
+            return EvaluatedValueEscapedInternal;
         }
 
         /// <summary>

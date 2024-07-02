@@ -130,7 +130,7 @@ namespace Microsoft.Build.Evaluation
     /// <typeparam name="P">Type of the properties used.</typeparam>
     /// <typeparam name="I">Type of the items used.</typeparam>
     internal class Expander<P, I>
-        where P : class, IProperty
+        where P : class, IProperty2
         where I : class, IItem
     {
         /// <summary>
@@ -1126,7 +1126,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         /// <typeparam name="T">Type of the properties used to expand the expression.</typeparam>
         private static class PropertyExpander<T>
-            where T : class, IProperty
+            where T : class, IProperty2
         {
             /// <summary>
             /// This method takes a string which may contain any number of
@@ -1583,7 +1583,7 @@ namespace Microsoft.Build.Evaluation
                         environmentDerivedProperty.loggingContext = propertiesUseTracker.LoggingContext;
                     }
 
-                    propertyValue = property.EvaluatedValueEscaped;
+                    propertyValue = property.GetEvaluatedValueEscaped(elementLocation);
                 }
 
                 return propertyValue;
@@ -3153,7 +3153,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         private struct FunctionBuilder<T>
-            where T : class, IProperty
+            where T : class, IProperty2
         {
             /// <summary>
             /// The type of this function's receiver.
@@ -3221,7 +3221,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <typeparam name="T">Type of the properties used to expand the expression.</typeparam>
         internal class Function<T>
-            where T : class, IProperty
+            where T : class, IProperty2
         {
             /// <summary>
             /// The type of this function's receiver.

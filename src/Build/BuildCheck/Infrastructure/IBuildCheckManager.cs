@@ -39,6 +39,10 @@ internal interface IBuildCheckManager
         IAnalysisContext analysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs);
 
+    void ProcessEvaluationEventArgs(
+        IAnalysisContext analysisContext,
+        ExtendedEnvironmentVariableReadEventArgs envVariableReadEventArgs);
+
     void ProcessTaskStartedEventArgs(
         IAnalysisContext analysisContext,
         TaskStartedEventArgs taskStartedEventArgs);

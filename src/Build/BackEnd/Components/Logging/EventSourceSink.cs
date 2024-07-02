@@ -315,6 +315,7 @@ namespace Microsoft.Build.BackEnd.Logging
             AnyEventRaised = null;
             TelemetryLogged = null;
             BuildCheckEventRaised = null;
+            //ExtendedEnvironmentVariableReadEventRaised = null;
         }
 
         #endregion
@@ -896,7 +897,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             RaiseAnyEvent(sender, buildEvent);
         }
-
+      
         /// <summary>
         /// Raises a catch-all build event to all registered loggers.
         /// </summary>
