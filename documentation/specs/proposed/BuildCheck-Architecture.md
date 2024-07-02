@@ -60,10 +60,10 @@ If BuildCheck is enabled, then the events from `BinaryLogReplayEventSource` and 
 
 ```mermaid
 flowchart TD
-    BinaryLogReplayEventSource[BinaryLogReplayEventSource\nreplayEventSource] --> IEventSource[mergedEventSource]
-    BinaryLogReplayEventSource[BinaryLogReplayEventSource\nreplayEventSource] --> BuildCheckBuildEventHandler[BuildCheckBuildEventHandler]
-    BuildCheckBuildEventHandler[BuildCheckBuildEventHandler] --> IEventSource
-    IEventSource --> loggers
+    replayEventSource[BinaryLogReplayEventSource\nreplayEventSource] --> mergedEventSource[IEventSource\nmergedEventSource]
+    replayEventSource[BinaryLogReplayEventSource\nreplayEventSource] --> BuildCheckBuildEventHandler[BuildCheckBuildEventHandler]
+    BuildCheckBuildEventHandler[BuildCheckBuildEventHandler] --> mergedEventSource[IEventSource\nmergedEventSource]
+    mergedEventSource[IEventSource\nmergedEventSource] --> loggers
 ```
 1. The events from `BinaryLogReplayEventSource replayEventSource` are passed to the `IEventSource mergedEventSource` unchanged.
 2. The events from `BinaryLogReplayEventSource replayEventSource` are passed to `BuildCheckBuildEventHandler` in order to produce new events from BuildCheck.
