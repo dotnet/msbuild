@@ -902,7 +902,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <BuildDependsOn>
       BeforeBuild;
       CoreBuild;
-      AfterBuild
+      AfterBuild;
+	  $(BuildDependsOn)
     </BuildDependsOn>
   </PropertyGroup>
 
@@ -1129,9 +1130,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Run the final build output if it is a .EXE
     ============================================================
     -->
-  <PropertyGroup>
-    <RunDependsOn></RunDependsOn>
-  </PropertyGroup>
 
   <Target
       Name="Run"
@@ -1185,7 +1183,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <PrepareForBuildDependsOn>$(PrepareForBuildDependsOn);GetFrameworkPaths;GetReferenceAssemblyPaths;AssignLinkMetadata</PrepareForBuildDependsOn>
+    <PrepareForBuildDependsOn>GetFrameworkPaths;GetReferenceAssemblyPaths;AssignLinkMetadata;$(PrepareForBuildDependsOn)</PrepareForBuildDependsOn>
   </PropertyGroup>
 
   <Target
@@ -1229,7 +1227,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <FrameworkDir Condition="'$(FrameworkDir)' == ''">@(_TargetFramework40DirectoryItem)</FrameworkDir>
     <TargetedFrameworkDir Condition="'$(TargetedFrameworkDir)' == ''">@(_TargetedFrameworkDirectoryItem)</TargetedFrameworkDir>
     <FrameworkSDKDir Condition="'$(FrameworkSDKDir)' == ''">@(_TargetFrameworkSDKDirectoryItem)</FrameworkSDKDir>
-    <GetFrameworkPathsDependsOn></GetFrameworkPathsDependsOn>
   </PropertyGroup>
 
   <!-- This is a generally overriden target, for example it is overriden in the Microsoft.NETFramework.targets file -->
@@ -1414,10 +1411,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Run the pre-build event if there is one.
     ============================================================
     -->
-  <PropertyGroup>
-    <PreBuildEventDependsOn></PreBuildEventDependsOn>
-  </PropertyGroup>
-
   <Target
       Name="PreBuildEvent"
       Condition="'$(PreBuildEvent)'!=''"
@@ -1443,10 +1436,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     We will re-register the new version after it has been built.
     ============================================================
     -->
-  <PropertyGroup>
-    <UnmanagedUnregistrationDependsOn></UnmanagedUnregistrationDependsOn>
-  </PropertyGroup>
-
   <Target
       Name="UnmanagedUnregistration"
       Condition="(('$(_AssemblyTimestampBeforeCompile)' != '$(_AssemblyTimestampAfterCompile)' or '$(RegisterForComInterop)' != 'true' or '$(OutputType)' != 'library') or
@@ -1515,7 +1504,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       GenerateBindingRedirects;
       GenerateBindingRedirectsUpdateAppConfig;
       ResolveComReferences;
-      AfterResolveReferences
+      AfterResolveReferences;
+	  $(ResolveReferencesDependsOn)
     </ResolveReferencesDependsOn>
   </PropertyGroup>
 
@@ -2069,7 +2059,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AssignProjectConfiguration;
       _SplitProjectReferencesByFileExistence;
       _GetProjectReferenceTargetFrameworkProperties;
-      _GetProjectReferencePlatformProperties
+      _GetProjectReferencePlatformProperties;
+	  $(PrepareProjectReferencesDependsOn)
     </PrepareProjectReferencesDependsOn>
   </PropertyGroup>
 
@@ -2207,10 +2198,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     metadata.
     ============================================================
     -->
-  <PropertyGroup>
-    <GetTargetPathDependsOn>$(GetTargetPathDependsOn)</GetTargetPathDependsOn>
-  </PropertyGroup>
-
   <Target
       Name="GetTargetPath"
       DependsOnTargets="$(GetTargetPathDependsOn)"
@@ -2228,7 +2215,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <GetTargetPathWithTargetPlatformMonikerDependsOn>$(GetTargetPathDependsOn)</GetTargetPathWithTargetPlatformMonikerDependsOn>
+    <GetTargetPathWithTargetPlatformMonikerDependsOn>$(GetTargetPathDependsOn);$(GetTargetPathWithTargetPlatformMonikerDependsOn)</GetTargetPathWithTargetPlatformMonikerDependsOn>
   </PropertyGroup>
 
   <!--NOTE: since an overridden GetTargetPath might not include a DependsOn
@@ -2351,6 +2338,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       PrepareForBuild;
       ResolveSDKReferences;
       ExpandSDKReferences;
+	  $(ResolveAssemblyReferencesDependsOn)
     </ResolveAssemblyReferencesDependsOn>
   </PropertyGroup>
 
@@ -2653,7 +2641,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
   <PropertyGroup>
     <ResolveSDKReferencesDependsOn>
-      GetInstalledSDKLocations
+      GetInstalledSDKLocations;
+	  $(ResolveSDKReferencesDependsOn)
     </ResolveSDKReferencesDependsOn>
   </PropertyGroup>
 
@@ -2724,7 +2713,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup>
     <FindInvalidProjectReferencesDependsOn>
-      GetReferenceTargetPlatformMonikers
+      GetReferenceTargetPlatformMonikers;
+	  $(FindInvalidProjectReferencesDependsOn)
     </FindInvalidProjectReferencesDependsOn>
   </PropertyGroup>
 
@@ -2774,7 +2764,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <ExpandSDKReferencesDependsOn>
-      ResolveSDKReferences
+      ResolveSDKReferences;
+	  $(ExpandSDKReferencesDependsOn)
     </ExpandSDKReferencesDependsOn>
 
     <ExpandSDKAllowedReferenceExtensions Condition="'$(ExpandSDKAllowedReferenceExtensions)' == ''">
@@ -2909,7 +2900,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <DesignTimeResolveAssemblyReferencesDependsOn>
       GetFrameworkPaths;
       GetReferenceAssemblyPaths;
-      ResolveReferences
+      ResolveReferences;
+	  $(DesignTimeResolveAssemblyReferencesDependsOn)
     </DesignTimeResolveAssemblyReferencesDependsOn>
   </PropertyGroup>
 
@@ -3138,10 +3130,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <PrepareResourcesDependsOn>
-      $(PrepareResourcesDependsOn);
       PrepareResourceNames;
       ResGen;
-      CompileLicxFiles
+      CompileLicxFiles;
+	  $(PrepareResourcesDependsOn)
     </PrepareResourcesDependsOn>
   </PropertyGroup>
 
@@ -3161,7 +3153,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AssignTargetPaths;
       SplitResourcesByCulture;
       CreateManifestResourceNames;
-      CreateCustomManifestResourceNames
+      CreateCustomManifestResourceNames;
+	  $(PrepareResourceNamesDependsOn)
     </PrepareResourceNamesDependsOn>
   </PropertyGroup>
 
@@ -3177,10 +3170,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     for the destination of this item.
     ============================================================
     -->
-  <PropertyGroup>
-    <AssignTargetPathsDependsOn></AssignTargetPathsDependsOn>
-  </PropertyGroup>
-
   <Target
       Name="AssignTargetPaths"
       DependsOnTargets="$(AssignTargetPathsDependsOn)">
@@ -3325,10 +3314,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     into the build process
     =======================================================================
     -->
-  <PropertyGroup>
-    <CreateCustomManifestResourceNamesDependsOn></CreateCustomManifestResourceNamesDependsOn>
-  </PropertyGroup>
-
   <Target
       Name="CreateCustomManifestResourceNames"
       DependsOnTargets="$(CreateCustomManifestResourceNamesDependsOn)"/>
@@ -3342,8 +3327,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <ResGenDependsOn>ResolveAssemblyReferences;SplitResourcesByCulture;BeforeResGen;CoreResGen;AfterResGen</ResGenDependsOn>
-    <CoreResGenDependsOn>FindReferenceAssembliesForReferences</CoreResGenDependsOn>
+    <ResGenDependsOn>ResolveAssemblyReferences;SplitResourcesByCulture;BeforeResGen;CoreResGen;AfterResGen;$(ResGenDependsOn)</ResGenDependsOn>
+    <CoreResGenDependsOn>FindReferenceAssembliesForReferences;$(CoreResGenDependsOn)</CoreResGenDependsOn>
     <UseSourcePath Condition="'$(UseSourcePath)'==''">true</UseSourcePath>
     <ResGenExecuteAsTool Condition="'$(ResGenExecuteAsTool)'==''">false</ResGenExecuteAsTool>
   </PropertyGroup>
@@ -3509,10 +3494,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         @(CompiledLicenseFile) - The list of compiled .licenses files (there will be just one)
     ============================================================
     -->
-  <PropertyGroup>
-    <CompileLicxFilesDependsOn></CompileLicxFilesDependsOn>
-  </PropertyGroup>
-
   <Target
       Name="CompileLicxFiles"
       Condition="'@(_LicxFile)'!=''"
@@ -3620,6 +3601,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       CoreCompile;
       _TimeStampAfterCompile;
       AfterCompile;
+	  $(CompileDependsOn)
     </CompileDependsOn>
   </PropertyGroup>
 
@@ -3967,10 +3949,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <CreateSatelliteAssembliesDependsOn>
-      $(CreateSatelliteAssembliesDependsOn);
       _GenerateSatelliteAssemblyInputs;
       ComputeIntermediateSatelliteAssemblies;
-      GenerateSatelliteAssemblies
+      GenerateSatelliteAssemblies;
+	  $(CreateSatelliteAssembliesDependsOn)
     </CreateSatelliteAssembliesDependsOn>
   </PropertyGroup>
 
@@ -4078,7 +4060,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <ComputeIntermediateSatelliteAssembliesDependsOn>
-      CreateManifestResourceNames
+      CreateManifestResourceNames;
+	  $(ComputeIntermediateSatelliteAssembliesDependsOn)
     </ComputeIntermediateSatelliteAssembliesDependsOn>
   </PropertyGroup>
 
@@ -4208,7 +4191,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <GenerateManifestsDependsOn>
       SetWin32ManifestProperties;
       GenerateApplicationManifest;
-      GenerateDeploymentManifest
+      GenerateDeploymentManifest;
+	  $(GenerateManifestsDependsOn)
     </GenerateManifestsDependsOn>
   </PropertyGroup>
 
@@ -4808,7 +4792,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <PrepareForRunDependsOn>
-      CopyFilesToOutputDirectory
+      CopyFilesToOutputDirectory;
+	  $(PrepareForRunDependsOn)
     </PrepareForRunDependsOn>
   </PropertyGroup>
 
@@ -5105,7 +5090,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AssignTargetPaths;
       $(_TargetsThatPrepareProjectReferences);
       _GetProjectReferenceTargetFrameworkProperties;
-      _PopulateCommonStateForGetCopyToOutputDirectoryItems
+      _PopulateCommonStateForGetCopyToOutputDirectoryItems;
+	  $(GetCopyToOutputDirectoryItemsDependsOn)
     </GetCopyToOutputDirectoryItemsDependsOn>
 
     <!--
@@ -5525,10 +5511,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Registers the main assembly for COM interop.
     ============================================================
     -->
-  <PropertyGroup>
-    <UnmanagedRegistrationDependsOn></UnmanagedRegistrationDependsOn>
-  </PropertyGroup>
-
   <Target
       Name="UnmanagedRegistration"
       Condition="'$(RegisterForComInterop)'=='true' and '$(OutputType)'=='library'"
@@ -5731,7 +5713,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       CoreClean;
       CleanReferencedProjects;
       CleanPublishFolder;
-      AfterClean
+      AfterClean;
+	  $(CleanDependsOn)
     </CleanDependsOn>
   </PropertyGroup>
 
@@ -5790,10 +5773,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                         CoreClean
     ============================================================
     -->
-  <PropertyGroup>
-    <CoreCleanDependsOn></CoreCleanDependsOn>
-  </PropertyGroup>
-
   <Target
       Name="CoreClean"
       DependsOnTargets="$(CoreCleanDependsOn)">
@@ -5920,10 +5899,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         rebuilt during this build, then the two values will be different.
     ============================================================
     -->
-  <PropertyGroup>
-    <PostBuildEventDependsOn></PostBuildEventDependsOn>
-  </PropertyGroup>
-
   <Target
       Name="PostBuildEvent"
       Condition="'$(PostBuildEvent)' != '' and ('$(RunPostBuildEvent)' != 'OnOutputUpdated' or '$(_AssemblyTimestampBeforeCompile)' != '$(_AssemblyTimestampAfterCompile)')"
@@ -5945,7 +5920,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <DeploymentComputeClickOnceManifestInfoDependsOn>
       CleanPublishFolder;
       $(_RecursiveTargetForContentCopying);
-      _DeploymentGenerateTrustInfo
+      _DeploymentGenerateTrustInfo;
       $(DeploymentComputeClickOnceManifestInfoDependsOn)
     </DeploymentComputeClickOnceManifestInfoDependsOn>
   </PropertyGroup>
@@ -5961,10 +5936,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PublishDependsOn Condition="'$(PublishableProject)'=='true'">
       SetGenerateManifests;
       Build;
-      PublishOnly
+      PublishOnly;
+	  $(PublishDependsOn)
     </PublishDependsOn>
     <PublishDependsOn Condition="'$(PublishableProject)'!='true'">
-      _DeploymentUnpublishable
+      _DeploymentUnpublishable;
+	  $(PublishDependsOn)
     </PublishDependsOn>
   </PropertyGroup>
 
@@ -6024,7 +6001,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       _DeploymentGenerateBootstrapper;
       ResolveKeySource;
       _DeploymentSignClickOnceDeployment;
-      AfterPublish
+      AfterPublish;
+	  $(PublishOnlyDependsOn)
     </PublishOnlyDependsOn>
   </PropertyGroup>
 
@@ -6066,6 +6044,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       ResolveKeySource;
       GenerateSerializationAssemblies;
       CreateSatelliteAssemblies;
+	  $(PublishBuildDependsOn)
     </PublishBuildDependsOn>
   </PropertyGroup>
 
@@ -6315,7 +6294,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <BuiltProjectOutputGroupDependsOn>PrepareForBuild</BuiltProjectOutputGroupDependsOn>
+    <BuiltProjectOutputGroupDependsOn>PrepareForBuild;$(BuiltProjectOutputGroupDependsOn)</BuiltProjectOutputGroupDependsOn>
     <AddAppConfigToBuildOutputs Condition="('$(AddAppConfigToBuildOutputs)'=='') and ('$(OutputType)'!='library' and '$(OutputType)'!='winmdobj')">true</AddAppConfigToBuildOutputs>
   </PropertyGroup>
 
@@ -6369,10 +6348,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     This target performs population of the Debug Symbols project output group.
     ============================================================
     -->
-  <PropertyGroup>
-    <DebugSymbolsProjectOutputGroupDependsOn></DebugSymbolsProjectOutputGroupDependsOn>
-  </PropertyGroup>
-
   <ItemGroup Condition="'$(_DebugSymbolsProduced)' != 'false' and '$(OutputType)' != 'winmdobj'">
     <DebugSymbolsProjectOutputGroupOutput Include="@(_DebugSymbolsIntermediatePath->'%(FullPath)')">
       <FinalOutputPath>@(_DebugSymbolsOutputPath->'%(FullPath)')</FinalOutputPath>
@@ -6401,10 +6376,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     This target performs population of the Documentation project output group.
     ============================================================
     -->
-  <PropertyGroup>
-    <DocumentationProjectOutputGroupDependsOn></DocumentationProjectOutputGroupDependsOn>
-  </PropertyGroup>
-
   <ItemGroup Condition="'$(DocumentationFile)'!='' and '$(OutputType)' != 'winmdobj'">
     <DocumentationProjectOutputGroupOutput Include="@(DocFileItem->'%(FullPath)')">
       <FinalOutputPath>@(FinalDocFile->'%(FullPath)')</FinalOutputPath>
@@ -6435,7 +6406,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <SatelliteDllsProjectOutputGroupDependsOn>$(SatelliteDllsProjectOutputGroupDependsOn);PrepareForBuild;PrepareResourceNames</SatelliteDllsProjectOutputGroupDependsOn>
+    <SatelliteDllsProjectOutputGroupDependsOn>PrepareForBuild;PrepareResourceNames;$(SatelliteDllsProjectOutputGroupDependsOn)</SatelliteDllsProjectOutputGroupDependsOn>
   </PropertyGroup>
 
   <Target
@@ -6471,7 +6442,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <SourceFilesProjectOutputGroupDependsOn>PrepareForBuild;AssignTargetPaths</SourceFilesProjectOutputGroupDependsOn>
+    <SourceFilesProjectOutputGroupDependsOn>PrepareForBuild;AssignTargetPaths;$(SourceFilesProjectOutputGroupDependsOn)</SourceFilesProjectOutputGroupDependsOn>
   </PropertyGroup>
 
   <Target
@@ -6509,7 +6480,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <PropertyGroup>
-    <ContentFilesProjectOutputGroupDependsOn>PrepareForBuild;AssignTargetPaths</ContentFilesProjectOutputGroupDependsOn>
+    <ContentFilesProjectOutputGroupDependsOn>PrepareForBuild;AssignTargetPaths;$(ContentFilesProjectOutputGroupDependsOn)</ContentFilesProjectOutputGroupDependsOn>
   </PropertyGroup>
 
   <Target
@@ -6532,10 +6503,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     GenerateSerializationAssemblies files are those generated by the GenerateSerializationAssemblies target and task.
     ============================================================
     -->
-  <PropertyGroup>
-    <SGenFilesOutputGroupDependsOn></SGenFilesOutputGroupDependsOn>
-  </PropertyGroup>
-
   <ItemGroup
       Condition="'$(_SGenGenerateSerializationAssembliesConfig)' == 'On' or ('@(WebReferenceUrl)'!='' and '$(_SGenGenerateSerializationAssembliesConfig)' == 'Auto')">
     <SGenFilesOutputGroupOutput Include="@(_OutputPathItem->'%(FullPath)$(_SGenDllName)')">
@@ -6587,7 +6554,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </Target>
 
   <PropertyGroup>
-    <SDKRedistOutputGroupDependsOn>ResolveSDKReferences;ExpandSDKReferences</SDKRedistOutputGroupDependsOn>
+    <SDKRedistOutputGroupDependsOn>ResolveSDKReferences;ExpandSDKReferences;$(SDKRedistOutputGroupDependsOn)</SDKRedistOutputGroupDependsOn>
   </PropertyGroup>
 
   <!--
@@ -6625,11 +6592,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <CommonOutputGroupsDependsOn>
-      $(CommonOutputGroupsDependsOn);
       BuildOnlySettings;
       PrepareForBuild;
       AssignTargetPaths;
-      ResolveReferences
+      ResolveReferences;
+	  $(CommonOutputGroupsDependsOn)
     </CommonOutputGroupsDependsOn>
   </PropertyGroup>
 
@@ -6656,8 +6623,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <BuiltProjectOutputGroupDependenciesDependsOn>
-      $(BuiltProjectOutputGroupDependenciesDependsOn);
-      $(CommonOutputGroupsDependsOn)
+      $(CommonOutputGroupsDependsOn);
+	  $(BuiltProjectOutputGroupDependenciesDependsOn)
     </BuiltProjectOutputGroupDependenciesDependsOn>
   </PropertyGroup>
 
@@ -6685,8 +6652,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <DebugSymbolsProjectOutputGroupDependenciesDependsOn>
-      $(DebugSymbolsProjectOutputGroupDependenciesDependsOn);
-      $(CommonOutputGroupsDependsOn)
+      $(CommonOutputGroupsDependsOn);
+	  $(DebugSymbolsProjectOutputGroupDependenciesDependsOn)
     </DebugSymbolsProjectOutputGroupDependenciesDependsOn>
   </PropertyGroup>
 
@@ -6712,8 +6679,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <SatelliteDllsProjectOutputGroupDependenciesDependsOn>
-      $(SatelliteDllsProjectOutputGroupDependenciesDependsOn);
-      $(CommonOutputGroupsDependsOn)
+      $(CommonOutputGroupsDependsOn);
+	  $(SatelliteDllsProjectOutputGroupDependenciesDependsOn)
     </SatelliteDllsProjectOutputGroupDependenciesDependsOn>
   </PropertyGroup>
 
@@ -6738,8 +6705,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <DocumentationProjectOutputGroupDependenciesDependsOn>
-      $(DocumentationProjectOutputGroupDependenciesDependsOn);
-      $(CommonOutputGroupsDependsOn)
+      $(CommonOutputGroupsDependsOn);
+	  $(DocumentationProjectOutputGroupDependenciesDependsOn)
     </DocumentationProjectOutputGroupDependenciesDependsOn>
   </PropertyGroup>
 
@@ -6765,8 +6732,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <SGenFilesOutputGroupDependenciesDependsOn>
-      $(SGenFilesOutputGroupDependenciesDependsOn);
-      $(CommonOutputGroupsDependsOn)
+      $(CommonOutputGroupsDependsOn);
+	  $(SGenFilesOutputGroupDependenciesDependsOn)
     </SGenFilesOutputGroupDependenciesDependsOn>
   </PropertyGroup>
 
@@ -6791,8 +6758,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <ReferenceCopyLocalPathsOutputGroupDependsOn>
-      $(ReferenceCopyLocalPathsOutputGroupDependsOn);
-      $(CommonOutputGroupsDependsOn)
+      $(CommonOutputGroupsDependsOn);
+	  $(ReferenceCopyLocalPathsOutputGroupDependsOn)
     </ReferenceCopyLocalPathsOutputGroupDependsOn>
   </PropertyGroup>
 
@@ -6821,8 +6788,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
   <PropertyGroup>
     <DesignerRuntimeImplementationProjectOutputGroupDependsOn>
-      $(DesignerRuntimeImplementationProjectOutputGroupDependsOn);
-      $(CommonOutputGroupsDependsOn)
+      $(CommonOutputGroupsDependsOn);
+	  $(DesignerRuntimeImplementationProjectOutputGroupDependsOn)
     </DesignerRuntimeImplementationProjectOutputGroupDependsOn>
   </PropertyGroup>
 
