@@ -3369,6 +3369,8 @@ namespace Microsoft.Build.CommandLine
                 CommandLineSwitchException.VerifyThrow(nodeModeNumber >= 0, "InvalidNodeNumberValueIsNegative", input[0]);
             }
 
+            DateTime startTime = DateTime.UtcNow;
+
             bool restart = true;
             while (restart)
             {
@@ -3381,7 +3383,7 @@ namespace Microsoft.Build.CommandLine
                     // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                     bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
                     OutOfProcNode node = new OutOfProcNode();
-                    shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
+                    shutdownReason = node.Run(startTime, nodeReuse, lowpriority, out nodeException);
 
                     FileUtilities.ClearCacheDirectory();
                 }

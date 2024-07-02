@@ -392,7 +392,7 @@ namespace Microsoft.Build.BackEnd
 
             _inProcNodeEndpoint.Connect(this);
 
-            int connectionTimeout = CommunicationsUtilities.NodeConnectionTimeout;
+            int connectionTimeout = CommunicationsUtilities.MaximumNodeConnectionTimeout;
             bool connected = _endpointConnectedEvent.WaitOne(connectionTimeout);
             ErrorUtilities.VerifyThrow(connected, "In-proc node failed to start up within {0}ms", connectionTimeout);
             return true;
