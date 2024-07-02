@@ -13,6 +13,7 @@ This version of MSBuild shipped with Visual Studio 2022 version 17.0.0 and .NET 
 * `MSBuildCopyContentTransitively` is now on by default, ensuring consistency in output folders on incremental builds.
 * The method `GetType()` can no longer be called in property functions.
 
+
 ### Detailed release notes
 
 #### Added
