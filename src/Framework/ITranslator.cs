@@ -319,6 +319,19 @@ namespace Microsoft.Build.BackEnd
         /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
         void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer);
 
+        /// <summary>
+        /// Translates a dictionary of { string, string } adding additional entries.
+        /// </summary>
+        /// <param name="dictionary">The dictionary to be translated.</param>
+        /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
+        /// <param name="additionalEntries">Additional entries to be translated</param>
+        /// <param name="additionalEntriesKeys">Additional entries keys</param>
+        /// <remarks>
+        /// This overload is needed for a workaround concerning serializing BuildResult with a version.
+        /// It serializes/deserializes additional entries together with the main dictionary.
+        /// </remarks>
+        void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys);
+
         void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> collectionCreator);
 
         void TranslateDictionary(ref Dictionary<string, DateTime> dictionary, StringComparer comparer);

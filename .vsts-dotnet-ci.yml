@@ -15,11 +15,11 @@ jobs:
       $isVersionBumped = $false
       if ($changedVersionsFile -ne $null) {
         $difference = git diff HEAD~1 $versionsFile
-        $changedContent = $difference -join " "
+        $changedContent = $difference -join "%"
         # 'DotNetFinalVersionKind' is expected to be added only during the initial setup of the release branch
-        $initialCommitPattern = '-\s*<VersionPrefix>\d+\.\d+\.\d+<\/VersionPrefix> \+\s*<VersionPrefix>\d+\.\d+\.\d+<\/VersionPrefix>.*<DotNetFinalVersionKind>release<\/DotNetFinalVersionKind>'
+        $initialCommitPattern = '-\s*<VersionPrefix>\d+\.\d+\.\d+<\/VersionPrefix>%.*\+\s*<VersionPrefix>\d+\.\d+\.\d+<\/VersionPrefix><DotNetFinalVersionKind>release<\/DotNetFinalVersionKind>'
         $isInitialCommit = $changedContent -match $initialCommitPattern
-        $pattern = '-\s*<VersionPrefix>\d+\.\d+\.(?<previous>\d+)<\/VersionPrefix>.* \+\s*<VersionPrefix>\d+\.\d+\.(?<current>\d+)<\/VersionPrefix>'
+        $pattern = '-\s*<VersionPrefix>\d+\.\d+\.(?<previous>\d+)<\/VersionPrefix>.*%\+\s*<VersionPrefix>\d+\.\d+\.(?<current>\d+)<\/VersionPrefix>'
         if (!($isInitialCommit) -and ($changedContent -match $pattern)) {
           try {
             $previousPatch = [Convert]::ToInt32($Matches.previous)
