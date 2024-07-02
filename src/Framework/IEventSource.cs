@@ -177,7 +177,7 @@ namespace Microsoft.Build.Framework
     public static class EventSourceExtensions
     {
         /// <summary>
-        /// Helper method ensuring single deduplicated subscription to the <see cref="TEventHandler"/> event.
+        /// Helper method ensuring single deduplicated subscription to the event.
         /// </summary>
         /// <param name="removeHandler"></param>
         /// <param name="addHandler"></param>
