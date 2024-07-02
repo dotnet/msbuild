@@ -1247,9 +1247,9 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             string nonNullMessage = null;
 
-            if (e is EnvironmentVariableReadEventArgs environmentPropertyReadEventArgs)
+            if (e is ExtendedEnvironmentVariableReadEventArgs extendedEnvironmentPropertyReadEventArgs)
             {
-                nonNullMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentPropertyReadEventArgs.EnvironmentVariableName, e.Message);
+                nonNullMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", extendedEnvironmentPropertyReadEventArgs.EnvironmentVariableName, e.Message);
             }
 
             // Include file information if present.

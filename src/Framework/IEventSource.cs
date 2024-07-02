@@ -89,11 +89,6 @@ namespace Microsoft.Build.Framework
     internal delegate void BuildCheckEventHandler(object sender, BuildCheckEventArgs e);
 
     /// <summary>
-    /// Type of handler for ExtendedEnvironmentVariableReadEvent events.
-    /// </summary>
-    internal delegate void ExtendedEnvironmentVariableReadEventHandler(object sender, ExtendedEnvironmentVariableReadEventArgs e);
-
-    /// <summary>
     /// This interface defines the events raised by the build engine.
     /// Loggers use this interface to subscribe to the events they
     /// are interested in receiving.

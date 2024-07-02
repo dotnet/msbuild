@@ -242,9 +242,9 @@ namespace Microsoft.Build.Shared
         BuildCheckAcquisitionEvent = 39,
 
         /// <summary>
-        /// Event is <see cref="ExtendedEnvironmentVariableReadEventArgs"/>.
+        /// Event is <see cref="ExtendedEnvironmentVariableReadEvent"/>.
         /// </summary>
-        ExtendedEnvironmentVariableReadEventArgs = 40
+        ExtendedEnvironmentVariableReadEvent = 40
     }
     #endregion
 
@@ -294,7 +294,7 @@ namespace Microsoft.Build.Shared
              { typeof(ExtendedBuildMessageEventArgs), LoggingEventType.ExtendedBuildMessageEvent },
              { typeof(CriticalBuildMessageEventArgs), LoggingEventType.CriticalBuildMessage },
              { typeof(ExtendedCriticalBuildMessageEventArgs), LoggingEventType.ExtendedCriticalBuildMessageEvent },
-             { typeof(ExtendedEnvironmentVariableReadEventArgs), LoggingEventType.ExtendedEnvironmentVariableReadEventArgs },
+             { typeof(ExtendedEnvironmentVariableReadEventArgs), LoggingEventType.ExtendedEnvironmentVariableReadEvent },
              { typeof(MetaprojectGeneratedEventArgs), LoggingEventType.MetaprojectGenerated },
              { typeof(PropertyInitialValueSetEventArgs), LoggingEventType.PropertyInitialValueSet },
              { typeof(PropertyReassignmentEventArgs), LoggingEventType.PropertyReassignment },
@@ -690,7 +690,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.ExtendedBuildWarningEvent => new ExtendedBuildWarningEventArgs(),
                 LoggingEventType.ExtendedBuildMessageEvent => new ExtendedBuildMessageEventArgs(),
                 LoggingEventType.ExtendedCriticalBuildMessageEvent => new ExtendedCriticalBuildMessageEventArgs(),
-                LoggingEventType.ExtendedEnvironmentVariableReadEventArgs => new ExtendedEnvironmentVariableReadEventArgs(),
+                LoggingEventType.ExtendedEnvironmentVariableReadEvent => new ExtendedEnvironmentVariableReadEventArgs(),
                 LoggingEventType.ExternalProjectStartedEvent => new ExternalProjectStartedEventArgs(null, null, null, null, null),
                 LoggingEventType.ExternalProjectFinishedEvent => new ExternalProjectFinishedEventArgs(null, null, null, null, false),
                 LoggingEventType.CriticalBuildMessage => new CriticalBuildMessageEventArgs(null, null, null, -1, -1, -1, -1, null, null, null),

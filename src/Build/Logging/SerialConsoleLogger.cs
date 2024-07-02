@@ -517,8 +517,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     setColor(ConsoleColor.DarkGray);
                 }
 
-                string nonNullMessage = e is EnvironmentVariableReadEventArgs environmentDerivedProperty ?
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentDerivedProperty.EnvironmentVariableName, e.Message)
+                string nonNullMessage = e is ExtendedEnvironmentVariableReadEventArgs extendedEnvironmentDerivedProperty
+                    ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", extendedEnvironmentDerivedProperty.EnvironmentVariableName, e.Message)
                     : e.Message ?? String.Empty;
 
                 // Include file information if present.

@@ -210,11 +210,19 @@ namespace Microsoft.Build.UnitTests
         public void RoundtripEnvironmentVariableReadEventArgs()
         {
             EnvironmentVariableReadEventArgs args = new("VarName", "VarValue");
-            args.BuildEventContext = new BuildEventContext(4, 5, 6, 7);
             Roundtrip(args,
                 e => e.Message,
-                e => e.EnvironmentVariableName,
-                e => e.BuildEventContext.ToString());
+                e => e.EnvironmentVariableName);
+        }
+
+        [Fact]
+        public void RoundtripExtendedEnvironmentVariableReadEventArgs()
+        {
+            ExtendedEnvironmentVariableReadEventArgs args = new("VarName", "VarValue", "file", 0, 0);
+            Roundtrip(
+                args,
+                e => e.Message,
+                e => e.EnvironmentVariableName);
         }
 
         [Fact]

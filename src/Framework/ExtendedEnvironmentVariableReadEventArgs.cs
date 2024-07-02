@@ -9,14 +9,13 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Arguments for the environment variable read event.
     /// </summary>
-    public sealed class ExtendedEnvironmentVariableReadEventArgs : BuildEventArgs, IExtendedBuildEventArgs
+    public sealed class ExtendedEnvironmentVariableReadEventArgs : EnvironmentVariableReadEventArgs, IExtendedBuildEventArgs
     {
         /// <summary>
         /// Default constructor. Used for deserialization.
         /// </summary>
-        internal ExtendedEnvironmentVariableReadEventArgs()
-            : this("undefined")
-        { }
+        public ExtendedEnvironmentVariableReadEventArgs()
+            : this("undefined") { }
 
         /// <summary>
         /// This constructor specifies only type of extended data.
@@ -51,18 +50,12 @@ namespace Microsoft.Build.Framework
             int column,
             string? helpKeyword = null,
             string? senderName = null)
-            : base(environmentVarValue, helpKeyword, senderName)
+            : base(environmentVarName, environmentVarValue, helpKeyword, senderName)
         {
-            EnvironmentVariableName = environmentVarName;
-            File = file;
-            Line = line;
-            Column = column;
+            FileName = file;
+            LineNumber = line;
+            ColumnNumber = column;
         }
-
-        /// <summary>
-        /// The name of the environment variable that was read.
-        /// </summary>
-        public string EnvironmentVariableName { get; set; } = string.Empty;
 
         /// <summary>
         /// The line number where environment variable is used.
@@ -77,7 +70,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The file name where environment variable is used.
         /// </summary>
-        public string File { get; set; } = string.Empty;
+        public string FileName { get; set; } = string.Empty;
 
         internal override void WriteToStream(BinaryWriter writer)
         {
@@ -85,7 +78,7 @@ namespace Microsoft.Build.Framework
             writer.Write(EnvironmentVariableName);
             writer.Write7BitEncodedInt(Line);
             writer.Write7BitEncodedInt(Column);
-            writer.WriteOptionalString(File);
+            writer.WriteOptionalString(FileName);
 
             writer.WriteExtendedBuildEventData(this);
         }
@@ -94,9 +87,9 @@ namespace Microsoft.Build.Framework
         {
             base.CreateFromStream(reader, version);
             EnvironmentVariableName = reader.ReadString();
-            Line = reader.Read7BitEncodedInt();
-            Column = reader.Read7BitEncodedInt();
-            File = reader.ReadOptionalString() ?? string.Empty;
+            LineNumber = reader.Read7BitEncodedInt();
+            ColumnNumber = reader.Read7BitEncodedInt();
+            FileName = reader.ReadOptionalString() ?? string.Empty;
 
             reader.ReadExtendedBuildEventData(this);
         }
