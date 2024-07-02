@@ -32,7 +32,7 @@ public sealed class BuildCheckResult : IBuildCheckResult
         => severity switch
         {
             BuildAnalyzerResultSeverity.Info => new BuildCheckResultMessage(this),
-            BuildAnalyzerResultSeverity.Warning => new BuildCheckResultWarning(this),
+            BuildAnalyzerResultSeverity.Warning => new BuildCheckResultWarning(this, BuildAnalyzerRule.Id),
             BuildAnalyzerResultSeverity.Error => new BuildCheckResultError(this),
             _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null),
         };
