@@ -34,7 +34,7 @@ variables:
     - name: SourceBranch
       value: ''
   - name: EnableReleaseOneLocBuild
-    value: true
+    value: true # Enable loc for vs17.12
   - name: Codeql.Enabled
     value: true
   - group: DotNet-MSBuild-SDLValidation-Params
@@ -57,6 +57,9 @@ extends:
       # We generate SBOM ourselves, so don't need steps injected by 1ES.
       sbom:
         enabled: false
+      codeSignValidation:
+        enabled: true
+        break: true
 
     stages:
     - stage: build
@@ -176,9 +179,14 @@ extends:
             channelName: $(VisualStudio.ChannelName)
             manifests: $(VisualStudio.SetupManifestList)
             outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
-            bootstrapperCoreVersion:
           displayName: 'OptProf - Build VS bootstrapper'
           condition: succeeded()
+
+        - task: PowerShell@2
+          displayName: Delete the file
+          inputs:
+            targetType: 'inline'
+            script: Get-ChildItem -Path "$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion\bootstrapper" -Recurse -Filter "vs_enterprise.exe" | Remove-Item -Verbose
 
         # Publish run settings
         - task: PowerShell@2
@@ -206,13 +214,6 @@ extends:
           inputs:
             PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
             ArtifactName: logs
-          condition: succeededOrFailed()
-
-        - task: 1ES.PublishPipelineArtifact@1
-          displayName: 'Publish Artifact: bin'
-          inputs:
-            path: 'artifacts\bin'
-            artifactName: bin
           condition: succeededOrFailed()
 
         # Publishes setup VSIXes to a drop.
