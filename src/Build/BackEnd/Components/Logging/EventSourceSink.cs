@@ -105,6 +105,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// This event is raised to log BuildCheck events.
         /// </summary>
         internal event BuildCheckEventHandler BuildCheckEventRaised;
+
+        /// <summary>
+        /// This event is raised to log environment variable read events.
+        /// </summary>
+        internal event ExtendedEnvironmentVariableReadEventHandler ExtendedEnvironmentVariableReadEventRaised;
         #endregion
 
         #region Properties
@@ -276,6 +281,9 @@ namespace Microsoft.Build.BackEnd.Logging
                 case BuildCheckEventArgs buildCheckEvent:
                     RaiseBuildCheckEvent(null, buildCheckEvent);
                     break;
+                case ExtendedEnvironmentVariableReadEventArgs extendedEnvVariableReadEvent:
+                    RaiseExtendedEnvironmentVariableReadEvent(null, extendedEnvVariableReadEvent);
+                    break;
 
                 default:
                     ErrorUtilities.ThrowInternalError("Unknown event args type.");
@@ -315,6 +323,7 @@ namespace Microsoft.Build.BackEnd.Logging
             AnyEventRaised = null;
             TelemetryLogged = null;
             BuildCheckEventRaised = null;
+            ExtendedEnvironmentVariableReadEventRaised = null;
         }
 
         #endregion
@@ -870,6 +879,43 @@ namespace Microsoft.Build.BackEnd.Logging
                 try
                 {
                     BuildCheckEventRaised(sender, buildEvent);
+                }
+                catch (LoggerException)
+                {
+                    // if a logger has failed politely, abort immediately
+                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                    // if a fellow logger is throwing in an event handler.
+                    this.UnregisterAllEventHandlers();
+                    throw;
+                }
+                catch (Exception exception)
+                {
+                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                    // if a fellow logger is throwing in an event handler.
+                    this.UnregisterAllEventHandlers();
+
+                    if (ExceptionHandling.IsCriticalException(exception))
+                    {
+                        throw;
+                    }
+
+                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
+                }
+            }
+
+            RaiseAnyEvent(sender, buildEvent);
+        }
+
+        /// <summary>
+        /// Raises ExtendedEnvironmentVariableRead event to all registered loggers.
+        /// </summary>
+        private void RaiseExtendedEnvironmentVariableReadEvent(object sender, ExtendedEnvironmentVariableReadEventArgs buildEvent)
+        {
+            if (ExtendedEnvironmentVariableReadEventRaised != null)
+            {
+                try
+                {
+                    ExtendedEnvironmentVariableReadEventRaised(sender, buildEvent);
                 }
                 catch (LoggerException)
                 {

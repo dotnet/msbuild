@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Shared;
@@ -10,12 +9,20 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Arguments for the environment variable read event.
     /// </summary>
-    public sealed class ExtendedEnvironmentVariableReadEventArgs : CustomBuildEventArgs, IExtendedBuildEventArgs
+    public sealed class ExtendedEnvironmentVariableReadEventArgs : BuildEventArgs, IExtendedBuildEventArgs
     {
         /// <summary>
         /// Default constructor. Used for deserialization.
         /// </summary>
-        internal ExtendedEnvironmentVariableReadEventArgs() { }
+        internal ExtendedEnvironmentVariableReadEventArgs()
+            : this("undefined")
+        { }
+
+        /// <summary>
+        /// This constructor specifies only type of extended data.
+        /// </summary>
+        /// <param name="type">Type of <see cref="IExtendedBuildEventArgs.ExtendedType"/>.</param>
+        public ExtendedEnvironmentVariableReadEventArgs(string type) => ExtendedType = type;
 
         /// <inheritdoc />
         public string ExtendedType { get; set; } = string.Empty;
@@ -79,6 +86,8 @@ namespace Microsoft.Build.Framework
             writer.Write7BitEncodedInt(Line);
             writer.Write7BitEncodedInt(Column);
             writer.WriteOptionalString(File);
+
+            writer.WriteExtendedBuildEventData(this);
         }
 
         internal override void CreateFromStream(BinaryReader reader, int version)
@@ -88,6 +97,8 @@ namespace Microsoft.Build.Framework
             Line = reader.Read7BitEncodedInt();
             Column = reader.Read7BitEncodedInt();
             File = reader.ReadOptionalString() ?? string.Empty;
+
+            reader.ReadExtendedBuildEventData(this);
         }
     }
 }
