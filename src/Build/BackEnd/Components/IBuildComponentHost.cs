@@ -195,6 +195,15 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The component</returns>
         IBuildComponent GetComponent(BuildComponentType type);
 
+        /// <summary>
+        /// Gets an instance of the specified component type from the host.
+        /// </summary>
+        /// <typeparam name="TComponent"></typeparam>
+        /// <param name="type">The component type to be retrieved</param>
+        /// <returns>The component</returns>
+        TComponent GetComponent<TComponent>(BuildComponentType type)
+            where TComponent : IBuildComponent;
+
         #endregion
     }
 }

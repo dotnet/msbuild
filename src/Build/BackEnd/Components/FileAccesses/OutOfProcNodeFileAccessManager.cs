@@ -13,7 +13,7 @@ namespace Microsoft.Build.FileAccesses
     /// <summary>
     /// Reports file accesses and process data to the in-proc node.
     /// </summary>
-    internal sealed class OutOfProcNodeFileAccessManager : IFileAccessManager, IBuildComponent
+    internal sealed class OutOfProcNodeFileAccessManager : IFileAccessManager
     {
         /// <summary>
         /// The <see cref="Action"/> to report file accesses and process

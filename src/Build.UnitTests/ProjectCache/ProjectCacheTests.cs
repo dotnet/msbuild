@@ -843,7 +843,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             // If it's not a cache result by proxy targets then the cache constructed the target results by hand and only the real target result
             // exists in the BuildResult.
 
-            var targetResult = buildResult.ResultsByTarget["Build"];
+            var targetResult = buildResult.ResultsByTarget!["Build"];
 
             targetResult.Items.ShouldHaveSingleItem();
             var itemResult = targetResult.Items.First();

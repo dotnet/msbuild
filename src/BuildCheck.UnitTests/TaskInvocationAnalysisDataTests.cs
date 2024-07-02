@@ -81,7 +81,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 
                 using (var buildManager = new BuildManager())
                 {
-                    var request = new BuildRequestData(testProject.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, [], null, BuildRequestDataFlags.None);
+                    var request = new BuildRequestData(testProject.ProjectFile, new Dictionary<string, string?>(), MSBuildConstants.CurrentToolsVersion, [], null, BuildRequestDataFlags.None);
                     var parameters = new BuildParameters
                     {
                         LogTaskInputs = true,

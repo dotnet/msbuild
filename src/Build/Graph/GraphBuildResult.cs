@@ -3,14 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 
-#nullable disable
-
 namespace Microsoft.Build.Graph
 {
-    public sealed class GraphBuildResult
+    public sealed class GraphBuildResult : BuildResultBase
     {
         /// <summary>
         /// Constructor creates a build result with results for each graph node.
@@ -32,27 +31,28 @@ namespace Microsoft.Build.Graph
         {
             SubmissionId = submissionId;
             Exception = exception;
+            ResultsByNode = ImmutableDictionary<ProjectGraphNode, BuildResult>.Empty;
         }
 
         /// <summary>
         /// Returns the submission id.
         /// </summary>
-        public int SubmissionId { get; }
+        public override int SubmissionId { get; }
 
         /// <summary>
         /// Returns a flag indicating if a circular dependency was detected.
         /// </summary>
-        public bool CircularDependency => Exception is CircularDependencyException;
+        public override bool CircularDependency => Exception is CircularDependencyException;
 
         /// <summary>
         /// Returns the exception generated while this result was run, if any.
         /// </summary>
-        public Exception Exception { get; internal set; }
+        public override Exception? Exception { get; internal set; }
 
         /// <summary>
         /// Returns the overall result for this result set.
         /// </summary>
-        public BuildResultCode OverallResult
+        public override BuildResultCode OverallResult
         {
             get
             {

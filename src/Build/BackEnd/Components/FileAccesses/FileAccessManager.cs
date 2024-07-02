@@ -14,7 +14,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.FileAccesses
 {
-    internal sealed class FileAccessManager : IFileAccessManager, IBuildComponent
+    internal sealed class FileAccessManager : IFileAccessManager
     {
         private record Handlers(Action<BuildRequest, FileAccessData> FileAccessHander, Action<BuildRequest, ProcessData> ProcessHandler);
 

@@ -303,6 +303,9 @@ namespace Microsoft.Build.Execution
             return _componentFactories.GetComponent(type);
         }
 
+        TComponent IBuildComponentHost.GetComponent<TComponent>(BuildComponentType type)
+            => (TComponent)((IBuildComponentHost)this).GetComponent(type);
+
         #endregion
 
         #region INodePacketFactory Members
