@@ -10,8 +10,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
-#nullable disable
-
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -33,7 +31,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// Contains the current results for all of the targets which have produced results for a particular configuration.
     /// </summary>
-    public class BuildResult : INodePacket, IBuildResults
+    public class BuildResult : BuildResultBase, INodePacket, IBuildResults
     {
         /// <summary>
         /// The submission with which this result is associated.
@@ -64,18 +62,18 @@ namespace Microsoft.Build.Execution
         /// The first build request to generate results for a configuration will set this so that future
         /// requests may be properly satisfied from the cache.
         /// </summary>
-        private List<string> _initialTargets;
+        private List<string>? _initialTargets;
 
         /// <summary>
         /// The first build request to generate results for a configuration will set this so that future
         /// requests may be properly satisfied from the cache.
         /// </summary>
-        private List<string> _defaultTargets;
+        private List<string>? _defaultTargets;
 
         /// <summary>
         /// The set of results for each target.
         /// </summary>
-        private ConcurrentDictionary<string, TargetResult> _resultsByTarget;
+        private ConcurrentDictionary<string, TargetResult>? _resultsByTarget;
 
         /// <summary>
         /// The request caused a circular dependency in scheduling.
@@ -87,7 +85,7 @@ namespace Microsoft.Build.Execution
         /// Note that this can be set if the request itself fails, or if it receives
         /// an exception from a target or task.
         /// </summary>
-        private Exception _requestException;
+        private Exception? _requestException;
 
         /// <summary>
         /// The overall result calculated in the constructor.
@@ -98,13 +96,13 @@ namespace Microsoft.Build.Execution
         /// Snapshot of the environment from the configuration this results comes from.
         /// This should only be populated when the configuration for this result is moved between nodes.
         /// </summary>
-        private Dictionary<string, string> _savedEnvironmentVariables;
+        private Dictionary<string, string>? _savedEnvironmentVariables;
 
         /// <summary>
         /// Snapshot of the current directory from the configuration this result comes from.
         /// This should only be populated when the configuration for this result is moved between nodes.
         /// </summary>
-        private string _savedCurrentDirectory;
+        private string? _savedCurrentDirectory;
 
         /// <summary>
         /// <see cref="ProjectInstance"/> state after the build. This is only provided if <see cref="BuildRequest.BuildRequestDataFlags"/>
@@ -114,16 +112,16 @@ namespace Microsoft.Build.Execution
         /// be used to retrieve <see cref="ProjectInstance.Properties"/>, <see cref="ProjectInstance.GlobalProperties"/> and
         /// <see cref="ProjectInstance.Items"/> from it. No other operation is guaranteed to be supported.
         /// </summary>
-        private ProjectInstance _projectStateAfterBuild;
+        private ProjectInstance? _projectStateAfterBuild;
 
         /// <summary>
         /// The flags provide additional control over the build results and may affect the cached value.
         /// </summary>
         private BuildRequestDataFlags _buildRequestDataFlags;
 
-        private string _schedulerInducedError;
+        private string? _schedulerInducedError;
 
-        private HashSet<string> _projectTargets;
+        private HashSet<string>? _projectTargets;
 
         /// <summary>
         /// Constructor for serialization.
@@ -146,7 +144,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="request">The build request to which these results should be associated.</param>
         /// <param name="exception">The exception, if any.</param>
-        internal BuildResult(BuildRequest request, Exception exception)
+        internal BuildResult(BuildRequest request, Exception? exception)
             : this(request, null, exception)
         {
         }
@@ -189,7 +187,7 @@ namespace Microsoft.Build.Execution
         /// <param name="request">The build request with which these results should be associated.</param>
         /// <param name="existingResults">The existing results, if any.</param>
         /// <param name="exception">The exception, if any</param>
-        internal BuildResult(BuildRequest request, BuildResult existingResults, Exception exception)
+        internal BuildResult(BuildRequest request, BuildResult? existingResults, Exception? exception)
             : this(request, existingResults, null, exception)
         {
         }
@@ -201,9 +199,8 @@ namespace Microsoft.Build.Execution
         /// <param name="existingResults">The existing results, if any.</param>
         /// <param name="targetNames">The list of target names that are the subset of results that should be returned.</param>
         /// <param name="exception">The exception, if any</param>
-        internal BuildResult(BuildRequest request, BuildResult existingResults, string[] targetNames, Exception exception)
+        internal BuildResult(BuildRequest request, BuildResult? existingResults, string[]? targetNames, Exception? exception)
         {
-            ErrorUtilities.VerifyThrow(request != null, "Must specify a request.");
             _submissionId = request.SubmissionId;
             _configurationId = request.ConfigurationId;
             _globalRequestId = request.GlobalRequestId;
@@ -275,7 +272,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Returns the submission id.
         /// </summary>
-        public int SubmissionId
+        public override int SubmissionId
         {
             [DebuggerStepThrough]
             get
@@ -325,7 +322,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Returns the exception generated while this result was run, if any.
         /// </summary>
-        public Exception Exception
+        public override Exception? Exception
         {
             [DebuggerStepThrough]
             get
@@ -339,7 +336,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Returns a flag indicating if a circular dependency was detected.
         /// </summary>
-        public bool CircularDependency
+        public override bool CircularDependency
         {
             [DebuggerStepThrough]
             get
@@ -349,7 +346,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Returns the overall result for this result set.
         /// </summary>
-        public BuildResultCode OverallResult
+        public override BuildResultCode OverallResult
         {
             get
             {
@@ -358,7 +355,7 @@ namespace Microsoft.Build.Execution
                     return BuildResultCode.Failure;
                 }
 
-                foreach (KeyValuePair<string, TargetResult> result in _resultsByTarget)
+                foreach (KeyValuePair<string, TargetResult> result in _resultsByTarget ?? Enumerable.Empty<KeyValuePair<string, TargetResult>>())
                 {
                     if ((result.Value.ResultCode == TargetResultCode.Failure && !result.Value.TargetFailureDoesntCauseBuildFailure)
                         || result.Value.AfterTargetsHaveFailed)
@@ -374,7 +371,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Returns an enumerator for all target results in this build result
         /// </summary>
-        public IDictionary<string, TargetResult> ResultsByTarget
+        public IDictionary<string, TargetResult>? ResultsByTarget
         {
             [DebuggerStepThrough]
             get
@@ -386,7 +383,7 @@ namespace Microsoft.Build.Execution
         /// be used to retrieve <see cref="ProjectInstance.Properties"/>, <see cref="ProjectInstance.GlobalProperties"/> and
         /// <see cref="ProjectInstance.Items"/> from it. Any other operation is not guaranteed to be supported.
         /// </summary>
-        public ProjectInstance ProjectStateAfterBuild
+        public ProjectInstance? ProjectStateAfterBuild
         {
             get => _projectStateAfterBuild;
             set => _projectStateAfterBuild = value;
@@ -411,7 +408,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
-        Dictionary<string, string> IBuildResults.SavedEnvironmentVariables
+        Dictionary<string, string>? IBuildResults.SavedEnvironmentVariables
         {
             get => _savedEnvironmentVariables;
 
@@ -421,7 +418,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Holds a snapshot of the current working directory at the time we blocked.
         /// </summary>
-        string IBuildResults.SavedCurrentDirectory
+        string? IBuildResults.SavedCurrentDirectory
         {
             get => _savedCurrentDirectory;
 
@@ -431,7 +428,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Returns the initial targets for the configuration which requested these results.
         /// </summary>
-        internal List<string> InitialTargets
+        internal List<string>? InitialTargets
         {
             [DebuggerStepThrough]
             get
@@ -445,7 +442,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Returns the default targets for the configuration which requested these results.
         /// </summary>
-        internal List<string> DefaultTargets
+        internal List<string>? DefaultTargets
         {
             [DebuggerStepThrough]
             get
@@ -459,7 +456,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The defined targets for the project associated with this build result.
         /// </summary>
-        internal HashSet<string> ProjectTargets
+        internal HashSet<string>? ProjectTargets
         {
             [DebuggerStepThrough]
             get => _projectTargets;
@@ -471,7 +468,7 @@ namespace Microsoft.Build.Execution
         /// Container used to transport errors from the scheduler (issued while computing a build result)
         /// to the TaskHost that has the proper logging context (project id, target id, task id, file location)
         /// </summary>
-        internal string SchedulerInducedError
+        internal string? SchedulerInducedError
         {
             get => _schedulerInducedError;
             set => _schedulerInducedError = value;
@@ -488,7 +485,7 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get
-            { return _resultsByTarget[target]; }
+            { return _resultsByTarget![target]; }
         }
 
         /// <summary>
@@ -506,7 +503,7 @@ namespace Microsoft.Build.Execution
                 _resultsByTarget ??= CreateTargetResultDictionary(1);
             }
 
-            if (_resultsByTarget.TryGetValue(target, out TargetResult targetResult))
+            if (_resultsByTarget.TryGetValue(target, out TargetResult? targetResult))
             {
                 ErrorUtilities.VerifyThrow(targetResult.ResultCode == TargetResultCode.Skipped, "Items already exist for target {0}.", target);
             }
@@ -524,11 +521,11 @@ namespace Microsoft.Build.Execution
                 targetsToKeep.Count > 0,
                 $"{nameof(targetsToKeep)} should contain at least one target.");
 
-            foreach (string target in _resultsByTarget.Keys)
+            foreach (string target in _resultsByTarget?.Keys ?? Enumerable.Empty<string>())
             {
                 if (!targetsToKeep.Contains(target))
                 {
-                    _ = _resultsByTarget.TryRemove(target, out _);
+                    _ = _resultsByTarget!.TryRemove(target, out _);
                 }
             }
         }
@@ -549,7 +546,7 @@ namespace Microsoft.Build.Execution
             }
 
             // Merge in the results
-            foreach (KeyValuePair<string, TargetResult> targetResult in results._resultsByTarget)
+            foreach (KeyValuePair<string, TargetResult> targetResult in results._resultsByTarget ?? Enumerable.Empty<KeyValuePair<string, TargetResult>>())
             {
                 // NOTE: I believe that because we only allow results for a given target to be produced and cached once for a given configuration,
                 // we can never receive conflicting results for that target, since the cache and build request manager would always return the
@@ -559,7 +556,7 @@ namespace Microsoft.Build.Execution
                 // ErrorUtilities.VerifyThrow(!HasResultsForTarget(targetResult.Key), "Results already exist");
 
                 // Copy the new results in.
-                _resultsByTarget[targetResult.Key] = targetResult.Value;
+                _resultsByTarget![targetResult.Key] = targetResult.Value;
             }
 
             // If there is an exception and we did not previously have one, add it in.
@@ -573,7 +570,7 @@ namespace Microsoft.Build.Execution
         /// <returns>True if results exist, false otherwise.</returns>
         public bool HasResultsForTarget(string target)
         {
-            return _resultsByTarget.ContainsKey(target);
+            return _resultsByTarget?.ContainsKey(target) ?? false;
         }
 
         #region INodePacket Members
@@ -617,7 +614,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void CacheIfPossible()
         {
-            foreach (KeyValuePair<string, TargetResult> targetResultPair in _resultsByTarget)
+            foreach (KeyValuePair<string, TargetResult> targetResultPair in _resultsByTarget ?? Enumerable.Empty<KeyValuePair<string, TargetResult>>())
             {
                 targetResultPair.Value.CacheItems(ConfigurationId, targetResultPair.Key);
             }
@@ -648,7 +645,7 @@ namespace Microsoft.Build.Execution
                 _parentGlobalRequestId = _parentGlobalRequestId,
                 _nodeRequestId = _nodeRequestId,
                 _requestException = _requestException,
-                _resultsByTarget = new ConcurrentDictionary<string, TargetResult>(
+                _resultsByTarget = _resultsByTarget == null ? null : new ConcurrentDictionary<string, TargetResult>(
                     _resultsByTarget,
                     StringComparer.OrdinalIgnoreCase),
                 _baseOverallResult = OverallResult == BuildResultCode.Success,
@@ -685,7 +682,7 @@ namespace Microsoft.Build.Execution
 
             foreach (string target in targetNames)
             {
-                if (existingResults.ResultsByTarget.TryGetValue(target, out TargetResult targetResult))
+                if (existingResults.ResultsByTarget?.TryGetValue(target, out TargetResult? targetResult) ?? false)
                 {
                     resultsByTarget[target] = targetResult;
                 }

@@ -205,6 +205,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             };
         }
 
+        public TComponent GetComponent<TComponent>(BuildComponentType type) where TComponent : IBuildComponent
+            => (TComponent) GetComponent(type);
+
         /// <summary>
         /// Register a new build component factory with the host.
         /// </summary>
@@ -219,26 +222,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Deserialize a packet
         /// </summary>
         public INodePacket DeserializePacket(NodePacketType type, byte[] serializedPacket)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
-        #region IBuildComponent Members
-
-        /// <summary>
-        /// Initialize this component using the provided host
-        /// </summary>
-        public void InitializeComponent(IBuildComponentHost host)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Clean up any state
-        /// </summary>
-        public void ShutdownComponent()
         {
             throw new NotImplementedException();
         }

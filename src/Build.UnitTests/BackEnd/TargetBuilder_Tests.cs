@@ -1857,32 +1857,14 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
                 };
             }
 
+            public TComponent GetComponent<TComponent>(BuildComponentType type) where TComponent : IBuildComponent
+                => (TComponent)GetComponent(type);
+
             /// <summary>
             /// Registers a component factory
             /// </summary>
             public void RegisterFactory(BuildComponentType type, BuildComponentFactoryDelegate factory)
             {
-            }
-
-            #endregion
-
-            #region IBuildComponent Members
-
-            /// <summary>
-            /// Sets the component host
-            /// </summary>
-            /// <param name="host">The component host</param>
-            public void InitializeComponent(IBuildComponentHost host)
-            {
-                throw new NotImplementedException();
-            }
-
-            /// <summary>
-            /// Shuts down the component
-            /// </summary>
-            public void ShutdownComponent()
-            {
-                throw new NotImplementedException();
             }
 
             #endregion
