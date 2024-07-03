@@ -47,6 +47,7 @@ public class BuildAnalyzerConfiguration
     public bool? IsEnabled {
         get
         {
+            // Do not consider Default as enabled, because the default severity of the rule coule be set to None
             if (Severity.HasValue && Severity.Value != BuildAnalyzerResultSeverity.Default)
             {
                 return !Severity.Value.Equals(BuildAnalyzerResultSeverity.None);
