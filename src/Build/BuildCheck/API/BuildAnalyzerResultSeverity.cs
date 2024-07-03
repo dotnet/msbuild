@@ -9,11 +9,6 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 public enum BuildAnalyzerResultSeverity
 {
     /// <summary>
-    /// When set to None the rule will not run.
-    /// </summary>
-    None,
-
-    /// <summary>
     /// Information level message.
     /// </summary>
     Info,
@@ -27,6 +22,11 @@ public enum BuildAnalyzerResultSeverity
     /// Results an error in build if the BuildCheck rule applied.
     /// </summary>
     Error,
+
+    /// <summary>
+    /// When set to None the rule will not run.
+    /// </summary>
+    None,
 
     /// <summary>
     /// When set, the default value of the BuildCheck rule will be used.
