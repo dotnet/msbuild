@@ -219,7 +219,8 @@ public class ConfigurationProvider_Tests
     [InlineData(BuildAnalyzerResultSeverity.Default, BuildAnalyzerResultSeverity.Warning, true)]
     [InlineData(BuildAnalyzerResultSeverity.Info, BuildAnalyzerResultSeverity.Info, true)]
     [InlineData(BuildAnalyzerResultSeverity.None, BuildAnalyzerResultSeverity.None, false)]
-    public void GetConfigurationProvider_MergesSeverity_Correctly(BuildAnalyzerResultSeverity buildAnalyzerResultSeverity, BuildAnalyzerResultSeverity expectedSeverity, bool expectedEnablment)
+    [InlineData(null, BuildAnalyzerResultSeverity.Warning, true)]
+    public void GetConfigurationProvider_MergesSeverity_Correctly(BuildAnalyzerResultSeverity? buildAnalyzerResultSeverity, BuildAnalyzerResultSeverity expectedSeverity, bool expectedEnablment)
     {
         var configurationProvider = new ConfigurationProvider();
         BuildAnalyzerConfiguration buildAnalyzerConfiguration = new BuildAnalyzerConfiguration()
