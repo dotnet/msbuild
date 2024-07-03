@@ -60,12 +60,12 @@ namespace Microsoft.Build.Execution
         public int SubmissionId { get; }
 
         /// <summary>
-        /// The asynchronous context provided to <see cref="BuildSubmission{TRequestData,TResultData}.ExecuteAsync(BuildSubmissionCompleteCallback&lt;TRequestData, TResultData&gt;, object)"/>, if any.
+        /// The asynchronous context provided to <see cref="BuildSubmission.ExecuteAsync(BuildSubmissionCompleteCallback, object)"/>, if any.
         /// </summary>
         public object? AsyncContext { get; protected set; }
 
         /// <summary>
-        /// A <see cref="System.Threading.WaitHandle"/> which will be signalled when the build is complete.  Valid after <see cref="BuildSubmission{TRequestData,TResultData}.Execute()"/> or <see cref="BuildSubmission{TRequestData,TResultData}.ExecuteAsync(BuildSubmissionCompleteCallback&lt;TRequestData, TResultData&gt;, object)"/> returns, otherwise null.
+        /// A <see cref="System.Threading.WaitHandle"/> which will be signalled when the build is complete.  Valid after <see cref="BuildSubmissionBase{TRequestData,TResultData}.Execute()"/> or <see cref="BuildSubmission.ExecuteAsync(BuildSubmissionCompleteCallback, object)"/> returns, otherwise null.
         /// </summary>
         public WaitHandle WaitHandle => CompletionEvent;
 

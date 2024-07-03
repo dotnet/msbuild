@@ -185,7 +185,7 @@ namespace Microsoft.Build.Graph
         /// <value>The project graph entry points.</value>
         public IEnumerable<ProjectGraphEntryPoint>? ProjectGraphEntryPoints { get; }
 
-        internal override BuildSubmission<GraphBuildRequestData, GraphBuildResult> CreateSubmission(BuildManager buildManager, int submissionId, GraphBuildRequestData requestData,
+        internal override BuildSubmissionBase<GraphBuildRequestData, GraphBuildResult> CreateSubmission(BuildManager buildManager, int submissionId, GraphBuildRequestData requestData,
             bool legacyThreadingSemantics) =>
             new GraphBuildSubmission(buildManager, submissionId, requestData);
 

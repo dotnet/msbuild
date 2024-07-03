@@ -252,7 +252,7 @@ namespace Microsoft.Build.Execution
         /// <value>The project file to be built.</value>
         public string ProjectFullPath { get; internal set; }
 
-        internal override BuildSubmission<BuildRequestData, BuildResult> CreateSubmission(BuildManager buildManager,
+        internal override BuildSubmissionBase<BuildRequestData, BuildResult> CreateSubmission(BuildManager buildManager,
             int submissionId, BuildRequestData requestData,
             bool legacyThreadingSemantics) =>
             new BuildSubmission(buildManager, submissionId, requestData, legacyThreadingSemantics);
