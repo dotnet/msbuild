@@ -18,9 +18,9 @@ The MSBuilkd XML is built around representing a project's data. It uses various 
 - [Items](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-items) are inputs to the build system, mostly to tasks or targets. They can represent project files, code files, libraries and most things that a project can depend on.
 - [Properties](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-properties) are name value pairs, they're used to store data that is used throughout the build.
 
-These attributes are defined within `.csproj` files, which are considered *projects*. `.sln` solution files can be normally found in .NET projects, are not written with MSBuild XML, but it is interpreted during project build so all projects can be identified.
+These attributes are defined within project files (`.csproj`, `.vbproj` etc.). `.sln` solution files are not written with MSBuild XML, but those are interpreted during build process so all projects can be identified.
 
-Since the project file defines the data used for the build, the actual build instructions are imported through imports of libraries, that contains their own tasks and targets. One example that is vastly used is the SDK with `dotnet build`. These libraries also extend what can be done with a build, and overall functionality.
+Since the project file defines the data used for the build, the actual build instructions are imported through imports or/and SDKs, that contains their own tasks and targets. One example that is vastly used is the [.NET SDK](https://learn.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk).
 
 # MSBuild API
 The MSBuild API is a library with a focus on building .NET programs, as such it is used by Visual Studio and .NET SDK to integrate MSBuild as their project build system. The library includes common build logic and targets, like creation and management of output folder, intermidiary folders, custom task creation, etc... It also enables the change of the MSBuild Language without directly changing the project file itself.
@@ -50,7 +50,7 @@ The evaluation stage should not have any side effect on disk, no new or deleted 
  - NuGet SDK, which might add packages to the disk
 
 ### imports
-Complex projects generally include imports of many different types. In MSBuild an import can be a lot of things, a disk path, a property expansion, a known folder, or even environmental variables. There are also some main imports that come with the execution on other platforms, like the Visual Studio or SDK can have import directories that contain wild card imports. However, when it comes to the evaluation phase in MSBuild, imports are all treated like a property plus path expansion, this includes imported NuGet packages.
+Complex projects generally include imports of many different types. In MSBuild an import definition can have various forms - a disk path, a property expansion, a known folder, or even environmental variables. There are also some main imports that come with the execution on other platforms, like the Visual Studio or SDK can have import directories that contain wild card imports. However, when it comes to the evaluation phase in MSBuild, imports are all treated like a property plus path expansion, this includes imported NuGet packages.
 
 In the case of tool imports, MSBuild does not process tool resolution via registry. Instead, it is resolved by looking on adjacent folder to the current running version of MSBuild. The folders will be different depending is MSBuild is running from Visual Studio or the .NET SDK.
 
@@ -60,7 +60,7 @@ For more detailed information on execution phase visit [Microsoft Learn](https:/
 The execution phase is simply executing the targets defined in the XML by the user or implicitly defined by the SDK or VS. The order of executed targets is defined using a few attributes: `BeforeTargets`, `DependsOnTargets`, and `AfterTargets`. But the final order might change if an earlier target modifies a property of a later target. The full executing order can be [found here](https://learn.microsoft.com/en-us/visualstudio/msbuild/target-build-order#determine-the-target-build-order).
 
 ### Task Host
-MSBuild has a tool called Task Host, that allows tasks to run in a different .NET environment than the one used for build execution.
+MSBuild has an ability to run tasks out of process via the called Task Host. That allows tasks to run in a different .NET runtime or bintess than the one used by the build engine for the build execution.
 
 This is an opt-in behavior that can be used for various cases:
 - If a task breaks the build process it can be relegated to the Task Host, so it does not influence the main build.
@@ -136,7 +136,7 @@ The Binary Logger, also called BinLog, is a structured log that contains all the
 It is one of the best tools for debugging MSBuild. 
 
 ## Resolvers
-There are a few elements within the MSBuild SML that indicate that a call to the .NET SDK is necessary. Some examples include:
+There are a few elements within the MSBuild XML that indicate that a call to the .NET SDK is necessary. Some examples include:
  - `<Project Sdk="Microsoft.NET.Sdk">`, where you can also define the SDK version
  - `<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />`, for explicit imports.
 
