@@ -81,7 +81,7 @@ build_check.BC0101.Severity=warning
 ```ini
 # I expect this to apply only to a scope of the imported file. Or possibly I expect this to apply to all projects importing this project.
 [ContosoCommonImport.proj]
-buildcheck.BC0101.Severity=warning
+build_check.BC0101.Severity=warning
 ```
 * Respecting `.editorconfig` file in msbuild import locations (unless they are in the parent folders hierarchy of particular project file).
 * CodeFixes are not supported in V1
