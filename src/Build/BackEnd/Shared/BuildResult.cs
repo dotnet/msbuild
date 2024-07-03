@@ -73,7 +73,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The set of results for each target.
         /// </summary>
-        private ConcurrentDictionary<string, TargetResult>? _resultsByTarget;
+        private ConcurrentDictionary<string, TargetResult> _resultsByTarget;
 
         /// <summary>
         /// The request caused a circular dependency in scheduling.
@@ -128,6 +128,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public BuildResult()
         {
+            _resultsByTarget = CreateTargetResultDictionary(1);
         }
 
         /// <summary>
@@ -267,6 +268,7 @@ namespace Microsoft.Build.Execution
         private BuildResult(ITranslator translator)
         {
             ((ITranslatable)this).Translate(translator);
+            _resultsByTarget ??= CreateTargetResultDictionary(1);
         }
 
         /// <summary>
@@ -371,7 +373,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Returns an enumerator for all target results in this build result
         /// </summary>
-        public IDictionary<string, TargetResult>? ResultsByTarget
+        public IDictionary<string, TargetResult> ResultsByTarget
         {
             [DebuggerStepThrough]
             get
@@ -645,9 +647,7 @@ namespace Microsoft.Build.Execution
                 _parentGlobalRequestId = _parentGlobalRequestId,
                 _nodeRequestId = _nodeRequestId,
                 _requestException = _requestException,
-                _resultsByTarget = _resultsByTarget == null ? null : new ConcurrentDictionary<string, TargetResult>(
-                    _resultsByTarget,
-                    StringComparer.OrdinalIgnoreCase),
+                _resultsByTarget = new ConcurrentDictionary<string, TargetResult>(_resultsByTarget, StringComparer.OrdinalIgnoreCase),
                 _baseOverallResult = OverallResult == BuildResultCode.Success,
                 _circularDependency = _circularDependency
             };

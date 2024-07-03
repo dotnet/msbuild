@@ -15,24 +15,24 @@ namespace Microsoft.Build.Execution
     /// <remarks>
     /// When this delegate is invoked, the WaitHandle on the BuildSubmission will have been be signalled and the OverallBuildResult will be valid.
     /// </remarks>
-    public delegate void BuildSubmissionCompleteCallback<TRequestData, TResultData>(
-        BuildSubmission<TRequestData, TResultData> submission)
+    internal delegate void BuildSubmissionCompleteCallbackInternal<TRequestData, TResultData>(
+        BuildSubmissionBase<TRequestData, TResultData> submission)
         where TRequestData : BuildRequestDataBase
         where TResultData : BuildResultBase;
 
-    public abstract class BuildSubmission<TRequestData, TResultData> : BuildSubmissionBase
+    public abstract class BuildSubmissionBase<TRequestData, TResultData> : BuildSubmissionBase
         where TRequestData : BuildRequestDataBase
         where TResultData : BuildResultBase
     {
         /// <summary>
         /// The callback to invoke when the submission is complete.
         /// </summary>
-        private BuildSubmissionCompleteCallback<TRequestData, TResultData>? _completionCallback;
+        private BuildSubmissionCompleteCallbackInternal<TRequestData, TResultData>? _completionCallback;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        protected internal BuildSubmission(BuildManager buildManager, int submissionId, TRequestData requestData)
+        protected internal BuildSubmissionBase(BuildManager buildManager, int submissionId, TRequestData requestData)
             : base(buildManager, submissionId)
         {
             ErrorUtilities.VerifyThrowArgumentNull(requestData, nameof(requestData));
@@ -61,17 +61,8 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
         public abstract TResultData Execute();
 
-        /// <summary>
-        /// Starts the request asynchronously and immediately returns control to the caller.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
-        public void ExecuteAsync(BuildSubmissionCompleteCallback<TRequestData, TResultData>? callback, object? context)
-        {
-            ExecuteAsync(callback, context, allowMainThreadBuild: false);
-        }
-
-        protected void ExecuteAsync(
-            BuildSubmissionCompleteCallback<TRequestData, TResultData>? callback,
+        private protected void ExecuteAsync(
+            BuildSubmissionCompleteCallbackInternal<TRequestData, TResultData>? callback,
             object? context,
             bool allowMainThreadBuild)
         {
@@ -151,7 +142,7 @@ namespace Microsoft.Build.Execution
     /// <remarks>
     /// This class is thread-safe.
     /// </remarks>
-    public class BuildSubmission : BuildSubmission<BuildRequestData, BuildResult>
+    public class BuildSubmission : BuildSubmissionBase<BuildRequestData, BuildResult>
     {
         /// <summary>
         /// Flag indicating whether synchronous wait should support legacy threading semantics.
@@ -167,6 +158,20 @@ namespace Microsoft.Build.Execution
             : base(buildManager, submissionId, requestData)
         {
             _legacyThreadingSemantics = legacyThreadingSemantics;
+        }
+
+        /// <summary>
+        /// Starts the request asynchronously and immediately returns control to the caller.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
+        public void ExecuteAsync(BuildSubmissionCompleteCallback? callback, object? context)
+        {
+            void Clb(BuildSubmissionBase<BuildRequestData, BuildResult> submission)
+            {
+                callback?.Invoke((BuildSubmission)submission);
+            }
+
+            ExecuteAsync(Clb, context, allowMainThreadBuild: false);
         }
 
         /// <summary>

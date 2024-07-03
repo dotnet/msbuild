@@ -61,7 +61,7 @@ namespace Microsoft.Build.Execution
             : base(targetNames, flags, hostServices)
         { }
 
-        internal abstract BuildSubmission<TRequestData, TResultData> CreateSubmission(
+        internal abstract BuildSubmissionBase<TRequestData, TResultData> CreateSubmission(
             BuildManager buildManager, int submissionId, TRequestData requestData, bool legacyThreadingSemantics);
     }
 }

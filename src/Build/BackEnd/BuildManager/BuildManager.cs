@@ -886,7 +886,7 @@ namespace Microsoft.Build.Execution
         /// perform asynchronous execution or access the submission ID prior to executing the request.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
-        private BuildSubmission<TRequestData, TResultData> PendBuildRequest<TRequestData, TResultData>(
+        private BuildSubmissionBase<TRequestData, TResultData> PendBuildRequest<TRequestData, TResultData>(
             TRequestData requestData)
             where TRequestData : BuildRequestData<TRequestData, TResultData>
             where TResultData : BuildResultBase
@@ -1371,7 +1371,7 @@ namespace Microsoft.Build.Execution
         }
 
         internal void ExecuteSubmission<TRequestData, TResultData>(
-            BuildSubmission<TRequestData, TResultData> submission, bool allowMainThreadBuild)
+            BuildSubmissionBase<TRequestData, TResultData> submission, bool allowMainThreadBuild)
             where TRequestData : BuildRequestDataBase
             where TResultData : BuildResultBase
         {
@@ -2667,7 +2667,7 @@ namespace Microsoft.Build.Execution
             {
                 // The build submission has not already been completed.
                 if (_buildSubmissions.TryGetValue(result.SubmissionId, out BuildSubmissionBase? submissionBase) &&
-                    submissionBase is BuildSubmission<TRequestData, TResultData> submission)
+                    submissionBase is BuildSubmissionBase<TRequestData, TResultData> submission)
                 {
                     /* If the request failed because we caught an exception from the loggers, we can assume we will receive no more logging messages for
                      * this submission, therefore set the logging as complete. InternalLoggerExceptions are unhandled exceptions from the logger. If the logger author does

@@ -25,12 +25,26 @@ namespace Microsoft.Build.Graph
     /// <remarks>
     /// This class is thread-safe.
     /// </remarks>
-    public class GraphBuildSubmission : BuildSubmission<GraphBuildRequestData, GraphBuildResult>
+    public class GraphBuildSubmission : BuildSubmissionBase<GraphBuildRequestData, GraphBuildResult>
     {
         internal GraphBuildSubmission(BuildManager buildManager, int submissionId, GraphBuildRequestData requestData) :
             base(buildManager, submissionId, requestData)
         {
             CompleteLogging();
+        }
+
+        /// <summary>
+        /// Starts the request asynchronously and immediately returns control to the caller.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
+        public void ExecuteAsync(GraphBuildSubmissionCompleteCallback? callback, object? context)
+        {
+            void Clb(BuildSubmissionBase<GraphBuildRequestData, GraphBuildResult> submission)
+            {
+                callback?.Invoke((GraphBuildSubmission)submission);
+            }
+
+            ExecuteAsync(Clb, context, allowMainThreadBuild: false);
         }
 
         /// <summary>
