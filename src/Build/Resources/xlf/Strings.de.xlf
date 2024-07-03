@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AbortingBuild">
         <source>Attempting to cancel the build...</source>
-        <target state="new">Attempting to cancel the build...</target>
+        <target state="translated">Es wird versucht, den Buildvorgang abzubrechen...</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
@@ -219,22 +219,22 @@
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
         <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
-        <target state="needs-review-translation">Fehler beim Suchen der angegebenen benutzerdefinierten Analysetoolassembly: {0}. Überprüfen Sie, ob sie vorhanden ist.</target>
+        <target state="new">Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
         <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="needs-review-translation">Fehler beim Laden des benutzerdefinierten Analysetooltyps „{0}“ aus der Assembly „{1}“. Stellen Sie sicher, dass es die Basisklasse „Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer“ erbt. Wenn es sich nicht um ein benutzerdefiniertes Analysetool handelt, sollte es nicht verfügbar gemacht werden. Weitere Informationen: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="new">Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: '{0}'.</source>
-        <target state="needs-review-translation">Fehler beim Registrieren des benutzerdefinierten Analysetools: {0}.</target>
+        <target state="new">Failed to register the custom analyzer: '{0}'.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
         <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
-        <target state="needs-review-translation">Fehler beim Instanziieren der benutzerdefinierten Analysetoolregel mit der folgenden Ausnahme: {0}.</target>
+        <target state="new">Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerRegistered">
@@ -244,7 +244,7 @@
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
         <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
-        <target state="needs-review-translation">Benutzerdefinierte Analysetoolregel {0} wurde erfolgreich registriert.</target>
+        <target state="new">Custom analyzer rule: '{0}' has been registered successfully.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
