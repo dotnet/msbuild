@@ -19,8 +19,11 @@ internal sealed class BuildAnalyzerConfigurationInternal
     }
 
     public string RuleId { get; }
+
     public EvaluationAnalysisScope EvaluationAnalysisScope { get; }
+
     public BuildAnalyzerResultSeverity Severity { get; }
+
     public bool IsEnabled { get; }
 
     // Intentionally not checking the RuleId
@@ -29,6 +32,5 @@ internal sealed class BuildAnalyzerConfigurationInternal
     public bool IsSameConfigurationAs(BuildAnalyzerConfigurationInternal? other) =>
         other != null &&
         Severity == other.Severity &&
-        IsEnabled == other.IsEnabled &&
         EvaluationAnalysisScope == other.EvaluationAnalysisScope;
 }

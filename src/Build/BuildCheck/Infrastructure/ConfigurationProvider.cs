@@ -33,7 +33,6 @@ internal sealed class ConfigurationProvider
 
     private readonly string[] _infrastructureConfigurationKeys = new string[] {
         nameof(BuildAnalyzerConfiguration.EvaluationAnalysisScope).ToLower(),
-        nameof(BuildAnalyzerConfiguration.IsEnabled).ToLower(),
         nameof(BuildAnalyzerConfiguration.Severity).ToLower()
     };
 
@@ -264,7 +263,7 @@ internal sealed class ConfigurationProvider
             ruleId: ruleId,
             evaluationAnalysisScope: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.EvaluationAnalysisScope),
             isEnabled: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.IsEnabled),
-            severity: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.Severity));
+            severity: GetSeverityValue(editorConfig, defaultConfig));
 
     private BuildAnalyzerConfigurationInternal GetMergedConfiguration(
         string projectFullPath,
@@ -279,6 +278,20 @@ internal sealed class ConfigurationProvider
         => propertyGetter(editorConfigValue) ??
            propertyGetter(defaultValue) ??
            EnsureNonNull(propertyGetter(BuildAnalyzerConfiguration.Default));
+
+    private BuildAnalyzerResultSeverity GetSeverityValue(BuildAnalyzerConfiguration editorConfigValue, BuildAnalyzerConfiguration defaultValue)
+    {
+        BuildAnalyzerResultSeverity? resultSeverity = null;
+
+        if (editorConfigValue.Severity != null && editorConfigValue.Severity != BuildAnalyzerResultSeverity.Default)
+        {
+            resultSeverity = editorConfigValue.Severity;
+        }
+
+        resultSeverity ??= defaultValue.Severity ?? EnsureNonNull(BuildAnalyzerConfiguration.Default.Severity);
+
+        return resultSeverity.Value;
+    }
 
     private static T EnsureNonNull<T>(T? value) where T : struct
     {

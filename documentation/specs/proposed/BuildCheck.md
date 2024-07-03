@@ -75,14 +75,12 @@ Majority of following cases are included in appropriate context within the scena
 ```ini
 # I expect this to apply to all projects within my solution, but not to projects which are not part of the solution
 [ContosoFrontEnd.sln]
-build_check.BC0101.IsEnabled=true
 build_check.BC0101.Severity=warning
 ```
 * Attributing `.editorconfig` configurations to lower granularity than whole projects. E.g.:
 ```ini
 # I expect this to apply only to a scope of the imported file. Or possibly I expect this to apply to all projects importing this project.
 [ContosoCommonImport.proj]
-buildcheck.BC0101.IsEnabled=true
 buildcheck.BC0101.Severity=warning
 ```
 * Respecting `.editorconfig` file in msbuild import locations (unless they are in the parent folders hierarchy of particular project file).
@@ -184,7 +182,6 @@ Option `Severity` with following values will be available:
 
 * `Default`
 * `None`
-* `Suggestion`
 * `Warning`
 * `Error`
 
