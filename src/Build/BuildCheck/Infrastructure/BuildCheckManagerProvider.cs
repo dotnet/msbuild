@@ -211,7 +211,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             // Disabled analyzer should not only post-filter results - it shouldn't even see the data 
 
             BuildAnalyzerWrapper wrapper;
-            BuildAnalyzerConfigurationInternal[] configurations;
+            BuildAnalyzerConfigurationEffective[] configurations;
             if (analyzerFactoryContext.MaterializedAnalyzer == null)
             {
                 BuildAnalyzerConfiguration[] userConfigs =

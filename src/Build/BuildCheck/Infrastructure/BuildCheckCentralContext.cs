@@ -78,7 +78,7 @@ internal sealed class BuildCheckCentralContext
     internal void RunEvaluatedPropertiesActions(
         EvaluatedPropertiesAnalysisData evaluatedPropertiesAnalysisData,
         LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.EvaluatedPropertiesActions, evaluatedPropertiesAnalysisData,
             loggingContext, resultHandler);
@@ -86,7 +86,7 @@ internal sealed class BuildCheckCentralContext
     internal void RunParsedItemsActions(
         ParsedItemsAnalysisData parsedItemsAnalysisData,
         LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ParsedItemsActions, parsedItemsAnalysisData,
             loggingContext, resultHandler);
@@ -94,7 +94,7 @@ internal sealed class BuildCheckCentralContext
     internal void RunTaskInvocationActions(
         TaskInvocationAnalysisData taskInvocationAnalysisData,
         LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.TaskInvocationActions, taskInvocationAnalysisData,
             loggingContext, resultHandler);
@@ -103,7 +103,7 @@ internal sealed class BuildCheckCentralContext
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks,
         T analysisData,
         LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> resultHandler)
+        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> resultHandler)
     where T : AnalysisData
     {
         string projectFullPath = analysisData.ProjectFilePath;
@@ -118,8 +118,8 @@ internal sealed class BuildCheckCentralContext
                 // Tracing - https://github.com/dotnet/msbuild/issues/9629 - we might want to account this entire block
                 //  to the relevant analyzer (with only the currently accounted part as being the 'core-execution' subspan)
 
-                BuildAnalyzerConfigurationInternal? commonConfig = analyzerCallback.Item1.CommonConfig;
-                BuildAnalyzerConfigurationInternal[] configPerRule;
+                BuildAnalyzerConfigurationEffective? commonConfig = analyzerCallback.Item1.CommonConfig;
+                BuildAnalyzerConfigurationEffective[] configPerRule;
 
                 if (commonConfig != null)
                 {

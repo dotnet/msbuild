@@ -8,9 +8,9 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// <summary>
 /// Counterpart type for BuildAnalyzerConfiguration - with all properties non-nullable
 /// </summary>
-internal sealed class BuildAnalyzerConfigurationInternal
+internal sealed class BuildAnalyzerConfigurationEffective
 {
-    public BuildAnalyzerConfigurationInternal(string ruleId, EvaluationAnalysisScope evaluationAnalysisScope, BuildAnalyzerResultSeverity severity, bool isEnabled)
+    public BuildAnalyzerConfigurationEffective(string ruleId, EvaluationAnalysisScope evaluationAnalysisScope, BuildAnalyzerResultSeverity severity, bool isEnabled)
     {
         RuleId = ruleId;
         EvaluationAnalysisScope = evaluationAnalysisScope;
@@ -26,7 +26,7 @@ internal sealed class BuildAnalyzerConfigurationInternal
     // Intentionally not checking the RuleId
     //  as for analyzers with multiple rules, we can squash config to a single one,
     //  if the ruleId is the only thing differing.
-    public bool IsSameConfigurationAs(BuildAnalyzerConfigurationInternal? other) =>
+    public bool IsSameConfigurationAs(BuildAnalyzerConfigurationEffective? other) =>
         other != null &&
         Severity == other.Severity &&
         IsEnabled == other.IsEnabled &&

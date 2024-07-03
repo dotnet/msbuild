@@ -101,7 +101,7 @@ internal sealed class ConfigurationProvider
         }
     }
 
-    internal BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
+    internal BuildAnalyzerConfigurationEffective[] GetMergedConfigurations(
         string projectFullPath,
         BuildAnalyzer analyzer)
         => FillConfiguration(projectFullPath, analyzer.SupportedRules, GetMergedConfiguration);
@@ -122,11 +122,11 @@ internal sealed class ConfigurationProvider
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetCustomConfiguration);
 
-    internal BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
+    internal BuildAnalyzerConfigurationEffective[] GetMergedConfigurations(
         BuildAnalyzerConfiguration[] userConfigs,
         BuildAnalyzer analyzer)
     {
-        var configurations = new BuildAnalyzerConfigurationInternal[userConfigs.Length];
+        var configurations = new BuildAnalyzerConfigurationEffective[userConfigs.Length];
 
         for (int idx = 0; idx < userConfigs.Length; idx++)
         {
@@ -254,20 +254,20 @@ internal sealed class ConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="analyzerRule"></param>
     /// <returns></returns>
-    internal BuildAnalyzerConfigurationInternal GetMergedConfiguration(string projectFullPath, BuildAnalyzerRule analyzerRule)
+    internal BuildAnalyzerConfigurationEffective GetMergedConfiguration(string projectFullPath, BuildAnalyzerRule analyzerRule)
         => GetMergedConfiguration(projectFullPath, analyzerRule.Id, analyzerRule.DefaultConfiguration);
 
-    internal BuildAnalyzerConfigurationInternal MergeConfiguration(
+    internal BuildAnalyzerConfigurationEffective MergeConfiguration(
         string ruleId,
         BuildAnalyzerConfiguration defaultConfig,
         BuildAnalyzerConfiguration editorConfig)
-        => new BuildAnalyzerConfigurationInternal(
+        => new BuildAnalyzerConfigurationEffective(
             ruleId: ruleId,
             evaluationAnalysisScope: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.EvaluationAnalysisScope),
             isEnabled: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.IsEnabled),
             severity: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.Severity));
 
-    private BuildAnalyzerConfigurationInternal GetMergedConfiguration(
+    private BuildAnalyzerConfigurationEffective GetMergedConfiguration(
         string projectFullPath,
         string ruleId,
         BuildAnalyzerConfiguration defaultConfig)

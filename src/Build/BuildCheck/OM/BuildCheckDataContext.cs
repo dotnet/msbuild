@@ -33,14 +33,14 @@ public class BuildCheckDataContext<T> where T : AnalysisData
 {
     private readonly BuildAnalyzerWrapper _analyzerWrapper;
     private readonly LoggingContext _loggingContext;
-    private readonly BuildAnalyzerConfigurationInternal[] _configPerRule;
-    private readonly Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> _resultHandler;
+    private readonly BuildAnalyzerConfigurationEffective[] _configPerRule;
+    private readonly Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> _resultHandler;
 
     internal BuildCheckDataContext(
         BuildAnalyzerWrapper analyzerWrapper,
         LoggingContext loggingContext,
-        BuildAnalyzerConfigurationInternal[] configPerRule,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> resultHandler,
+        BuildAnalyzerConfigurationEffective[] configPerRule,
+        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> resultHandler,
         T data)
     {
         _analyzerWrapper = analyzerWrapper;

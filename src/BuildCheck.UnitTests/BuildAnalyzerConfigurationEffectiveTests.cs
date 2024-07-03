@@ -8,7 +8,7 @@ using Shouldly;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
-public class BuildAnalyzerConfigurationInternalTests
+public class BuildAnalyzerConfigurationEffectiveTests
 {
     [Theory]
     [InlineData("ruleId", EvaluationAnalysisScope.ProjectOnly, BuildAnalyzerResultSeverity.Warning, true, true)]
@@ -21,13 +21,13 @@ public class BuildAnalyzerConfigurationInternalTests
         bool secondEnabled,
         bool isExpectedToBeSame)
     {
-        BuildAnalyzerConfigurationInternal configuration1 = new BuildAnalyzerConfigurationInternal(
+        BuildAnalyzerConfigurationEffective configuration1 = new BuildAnalyzerConfigurationEffective(
                        ruleId: "ruleId",
                        evaluationAnalysisScope: EvaluationAnalysisScope.ProjectOnly,
                        severity: BuildAnalyzerResultSeverity.Warning,
                        isEnabled: true);
 
-        BuildAnalyzerConfigurationInternal configuration2 = new BuildAnalyzerConfigurationInternal(
+        BuildAnalyzerConfigurationEffective configuration2 = new BuildAnalyzerConfigurationEffective(
             ruleId: secondRuleId,
             evaluationAnalysisScope: secondScope,
             severity: secondSeverity,

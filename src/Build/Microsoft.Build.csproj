@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -178,7 +178,7 @@
     <Compile Include="BuildCheck\API\BuildAnalyzerRule.cs" />
     <Compile Include="BuildCheck\API\ConfigurationContext.cs" />
     <Compile Include="BuildCheck\API\EvaluationAnalysisScope.cs" />
-    <Compile Include="BuildCheck\Infrastructure\BuildAnalyzerConfigurationInternal.cs" />
+    <Compile Include="BuildCheck\Infrastructure\BuildAnalyzerConfigurationEffective.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildAnalyzerWrapper.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckCentralContext.cs" />
     <Compile Include="BuildCheck\Infrastructure\BuildCheckConnectorLogger.cs" />

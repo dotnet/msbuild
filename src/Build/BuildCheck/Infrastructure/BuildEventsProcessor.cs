@@ -165,7 +165,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     private static void ReportResult(
         BuildAnalyzerWrapper analyzerWrapper,
         LoggingContext loggingContext,
-        BuildAnalyzerConfigurationInternal[] configPerRule,
+        BuildAnalyzerConfigurationEffective[] configPerRule,
         BuildCheckResult result)
     {
         if (!analyzerWrapper.BuildAnalyzer.SupportedRules.Contains(result.BuildAnalyzerRule))
@@ -176,7 +176,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             return;
         }
 
-        BuildAnalyzerConfigurationInternal config = configPerRule.Length == 1
+        BuildAnalyzerConfigurationEffective config = configPerRule.Length == 1
             ? configPerRule[0]
             : configPerRule.First(r =>
                 r.RuleId.Equals(result.BuildAnalyzerRule.Id, StringComparison.CurrentCultureIgnoreCase));
