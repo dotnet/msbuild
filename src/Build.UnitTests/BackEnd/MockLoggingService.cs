@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
@@ -649,6 +650,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             throw new NotImplementedException();
         }
+
+        public void InitializeComponent(IBuildComponentHost host) => throw new NotImplementedException();
+        public void ShutdownComponent() => throw new NotImplementedException();
 
         #endregion
 

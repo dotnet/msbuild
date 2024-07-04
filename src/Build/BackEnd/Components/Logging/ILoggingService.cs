@@ -28,7 +28,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// Interface representing logging services in the build system.
     /// Implementations should be thread-safe.
     /// </summary>
-    internal interface ILoggingService : IBuildEngineDataRouter
+    internal interface ILoggingService : IBuildComponent, IBuildEngineDataRouter
     {
         #region Events
         /// <summary>
