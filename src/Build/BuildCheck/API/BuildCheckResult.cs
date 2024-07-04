@@ -31,7 +31,7 @@ public sealed class BuildCheckResult : IBuildCheckResult
     internal BuildEventArgs ToEventArgs(BuildAnalyzerResultSeverity severity)
         => severity switch
         {
-            BuildAnalyzerResultSeverity.Info => new BuildCheckResultMessage(this),
+            BuildAnalyzerResultSeverity.Suggestion => new BuildCheckResultMessage(this),
             BuildAnalyzerResultSeverity.Warning => new BuildCheckResultWarning(this),
             BuildAnalyzerResultSeverity.Error => new BuildCheckResultError(this),
             _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null),
