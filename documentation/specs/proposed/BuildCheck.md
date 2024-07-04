@@ -182,6 +182,7 @@ Option `Severity` with following values will be available:
 
 * `Default`
 * `None`
+* `Suggestion`
 * `Warning`
 * `Error`
 
