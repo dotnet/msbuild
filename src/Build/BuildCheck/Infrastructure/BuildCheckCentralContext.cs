@@ -120,27 +120,27 @@ internal sealed class BuildCheckCentralContext
 
     internal void RunPropertyReadActions(
         PropertyReadData propertyReadDataData,
-        IAnalysisContext analysisContext,
-        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        LoggingContext loggingContext,
+        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.PropertyReadActions, propertyReadDataData,
-            analysisContext, resultHandler);
+            loggingContext, resultHandler);
 
     internal void RunPropertyWriteActions(
         PropertyWriteData propertyWriteData,
-        IAnalysisContext analysisContext,
-        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        LoggingContext loggingContext,
+        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.PropertyWriteActions, propertyWriteData,
-            analysisContext, resultHandler);
+            loggingContext, resultHandler);
 
     internal void RunProjectProcessingDoneActions(
         ProjectProcessingDoneData projectProcessingDoneData,
-        IAnalysisContext analysisContext,
-        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        LoggingContext loggingContext,
+        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ProjectProcessingDoneActions, projectProcessingDoneData,
-            analysisContext, resultHandler);
+            loggingContext, resultHandler);
 
     private void RunRegisteredActions<T>(
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks,
