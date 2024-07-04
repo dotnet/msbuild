@@ -133,7 +133,7 @@
       </trans-unit>
       <trans-unit id="BuildCheckEnabled">
         <source>The BuildCheck is enabled for this build.</source>
-        <target state="new">The BuildCheck is enabled for this build.</target>
+        <target state="translated">BuildCheck は、このビルドに対して有効になっています。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
@@ -219,32 +219,32 @@
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
         <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
-        <target state="new">Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</target>
+        <target state="translated">指定されたカスタム アナライザー アセンブリが見つかりませんでした: '{0}'。存在するかどうか確認してください。</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
         <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="new">Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">カスタム アナライザーの種類を読み込めませんでした: アセンブリ '{1}' の '{0}'。Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer 基底クラスを継承していることを確認してください。カスタム アナライザーを意図していない場合は、公開しないでください。詳細情報: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: '{0}'.</source>
-        <target state="new">Failed to register the custom analyzer: '{0}'.</target>
+        <target state="translated">カスタム アナライザーを登録できませんでした: '{0}'。</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
         <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
-        <target state="new">Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</target>
+        <target state="translated">次の例外により、カスタム アナライザー ルールのインスタンスを作成できませんでした: '{0}'。</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerRegistered">
         <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="new">The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</target>
+        <target state="translated">カスタム アナライザー'{0}' は、場所 '{1}' からビルドに登録されています。</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
         <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
-        <target state="new">Custom analyzer rule: '{0}' has been registered successfully.</target>
+        <target state="translated">カスタム アナライザー ルール: '{0}' が正常に登録されました。</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
