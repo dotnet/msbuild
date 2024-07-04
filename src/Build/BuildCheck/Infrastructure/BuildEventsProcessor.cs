@@ -174,23 +174,23 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         }
     }
 
-    public void ProcessPropertyRead(PropertyReadData propertyReadData, AnalyzerLoggingContext buildAnalysisContext)
-    {
-        _buildCheckCentralContext.RunPropertyReadActions(propertyReadData, buildAnalysisContext,
-            ReportResult);
-    }
+    public void ProcessPropertyRead(PropertyReadData propertyReadData, AnalysisLoggingContext analysisContext)
+        => _buildCheckCentralContext.RunPropertyReadActions(
+                propertyReadData,
+                analysisContext,
+                ReportResult);
 
-    public void ProcessPropertyWrite(PropertyWriteData propertyWriteData, AnalyzerLoggingContext buildAnalysisContext)
-    {
-        _buildCheckCentralContext.RunPropertyWriteActions(propertyWriteData, buildAnalysisContext,
-            ReportResult);
-    }
+    public void ProcessPropertyWrite(PropertyWriteData propertyWriteData, AnalysisLoggingContext analysisContext)
+        => _buildCheckCentralContext.RunPropertyWriteActions(
+                propertyWriteData,
+                analysisContext,
+                ReportResult);
 
-    public void ProcessProjectDone(AnalyzerLoggingContext buildAnalysisContext, string projectFullPath)
-    {
-        _buildCheckCentralContext.RunProjectProcessingDoneActions(new ProjectProcessingDoneData(projectFullPath),
-            buildAnalysisContext, ReportResult);
-    }
+    public void ProcessProjectDone(IAnalysisContext analysisContext, string projectFullPath)
+        => _buildCheckCentralContext.RunProjectProcessingDoneActions(
+                new ProjectProcessingDoneData(projectFullPath),
+                analysisContext,
+                ReportResult);
 
     private static void ReportResult(
         BuildAnalyzerWrapper analyzerWrapper,

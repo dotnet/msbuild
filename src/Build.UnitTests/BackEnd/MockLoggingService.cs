@@ -5,7 +5,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
@@ -651,10 +652,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
-        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, BuildEventContext buildEventContext)
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext analysisContext)
         { /* Ignore the data */ }
 
-        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, BuildEventContext buildEventContext)
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext analysisContext)
         { /* Ignore the data */ }
     }
 }
