@@ -35,7 +35,7 @@ One example of rich data that might be helpful for internal analyses is [`Projec
 
 ## Execution Modes
 
-**Replay Mode** - so that users can choose to perform analyses post build, without impacting the performance of the build. And so that some level of analysis can be run on artifacts from builds produced by older versions of MSBuild.
+**Replay Mode** - so that users can choose to perform analyses post build, without impacting the performance of the build.
 
 **Live mode** - this is what users are used to from compilation analyses. Integrating into build execution will as well help driving adoption by opting-in users by default to some level of checking and hence exposing them to the feature.
 
