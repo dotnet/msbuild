@@ -262,7 +262,6 @@ internal sealed class ConfigurationProvider
         => new BuildAnalyzerConfigurationInternal(
             ruleId: ruleId,
             evaluationAnalysisScope: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.EvaluationAnalysisScope),
-            isEnabled: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.IsEnabled),
             severity: GetSeverityValue(editorConfig, defaultConfig));
 
     private BuildAnalyzerConfigurationInternal GetMergedConfiguration(
@@ -283,6 +282,8 @@ internal sealed class ConfigurationProvider
     {
         BuildAnalyzerResultSeverity? resultSeverity = null;
 
+        // Consider Default as null, so the severity from the default value could be selected.
+        // Default severity is not recognized by the infrastructure and serves for configuration purpuses only. 
         if (editorConfigValue.Severity != null && editorConfigValue.Severity != BuildAnalyzerResultSeverity.Default)
         {
             resultSeverity = editorConfigValue.Severity;
