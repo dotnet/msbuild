@@ -3,8 +3,9 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -312,8 +313,14 @@ namespace Microsoft.Build.BackEnd.Logging
             _loggingService.LogIncludeFile(BuildEventContext, filePath);
         }
 
-        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo) => _loggingService.BuildEngineDataRouter.ProcessPropertyRead(propertyReadInfo, BuildEventContext);
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo)
+            => _loggingService.BuildEngineDataRouter.ProcessPropertyRead(
+                    propertyReadInfo,
+                    new AnalysisLoggingContext(_loggingService, BuildEventContext));
 
-        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo) => _loggingService.BuildEngineDataRouter.ProcessPropertyWrite(propertyWriteInfo, BuildEventContext);
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo)
+            => _loggingService.BuildEngineDataRouter.ProcessPropertyWrite(
+                    propertyWriteInfo,
+                    new AnalysisLoggingContext(_loggingService, BuildEventContext));
     }
 }

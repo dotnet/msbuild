@@ -14,7 +14,6 @@ using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Analyzers;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
@@ -387,10 +386,30 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             loggingContext.LogBuildEvent(analyzerEventArg);
         }
 
+        private readonly ConcurrentDictionary<int, string> _projectsByContextId = new();
+        private string GetProjectFullPath(BuildEventContext buildEventContext)
+        {
+            const string defaultProjectFullPath = "Unknown_Project";
+
+            if (_projectsByContextId.TryGetValue(buildEventContext.ProjectContextId, out string? projectFullPath))
+            {
+                return projectFullPath;
+            }
+            else if (buildEventContext.ProjectContextId == BuildEventContext.InvalidProjectContextId &&
+                     _projectsByContextId.Count == 1)
+            {
+                // The coalescing is for a rare possibility of a race where other thread removed the item.
+                // We currently do not support multiple projects in parallel in a single node anyway.
+                return _projectsByContextId.FirstOrDefault().Value ?? defaultProjectFullPath;
+            }
+
+            return defaultProjectFullPath;
+        }
+
         public void StartProjectEvaluation(
             BuildCheckDataSource buildCheckDataSource,
             IAnalysisContext analysisContext,
-            string fullPath)
+            string projectFullPath)
         {
             if (buildCheckDataSource == BuildCheckDataSource.EventArgs && IsInProcNode)
             {
@@ -400,7 +419,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            SetupAnalyzersForNewProject(fullPath, analysisContext);
+            SetupAnalyzersForNewProject(projectFullPath, analysisContext);
+            _projectsByContextId[analysisContext.BuildEventContext.ProjectContextId] = projectFullPath;
         }
 
         /*
@@ -420,36 +440,33 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         public void EndProjectRequest(
             BuildCheckDataSource buildCheckDataSource,
-            BuildEventContext buildEventContext,
+            IAnalysisContext analysisContext,
             string projectFullPath)
         {
-            AnalyzerLoggingContext loggingContext = new(_loggingService, buildEventContext);
-            _buildEventsProcessor.ProcessProjectDone(loggingContext, projectFullPath);
-            _projectsByContextId.TryRemove(buildEventContext.ProjectContextId, out _);
+            _buildEventsProcessor.ProcessProjectDone(analysisContext, projectFullPath);
+            _projectsByContextId.TryRemove(analysisContext.BuildEventContext.ProjectContextId, out _);
         }
 
-        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, BuildEventContext buildEventContext)
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext analysisContext)
         {
             if (!_buildCheckCentralContext.HasPropertyReadActions)
             {
                 return;
             }
 
-            AnalyzerLoggingContext loggingContext = new(_loggingService, buildEventContext);
-            PropertyReadData propertyReadData = new(GetProjectFullPath(buildEventContext), propertyReadInfo);
-            _buildEventsProcessor.ProcessPropertyRead(propertyReadData, loggingContext);
+            PropertyReadData propertyReadData = new(GetProjectFullPath(analysisContext.BuildEventContext), propertyReadInfo);
+            _buildEventsProcessor.ProcessPropertyRead(propertyReadData, analysisContext);
         }
 
-        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, BuildEventContext buildEventContext)
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext analysisContext)
         {
             if (!_buildCheckCentralContext.HasPropertyWriteActions)
             {
                 return;
             }
 
-            AnalyzerLoggingContext loggingContext = new(_loggingService, buildEventContext);
-            PropertyWriteData propertyWriteData = new(GetProjectFullPath(buildEventContext), propertyWriteInfo);
-            _buildEventsProcessor.ProcessPropertyWrite(propertyWriteData, loggingContext);
+            PropertyWriteData propertyWriteData = new(GetProjectFullPath(analysisContext.BuildEventContext), propertyWriteInfo);
+            _buildEventsProcessor.ProcessPropertyWrite(propertyWriteData, analysisContext);
         }
 
         public void Shutdown()

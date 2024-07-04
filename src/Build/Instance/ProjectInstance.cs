@@ -3227,8 +3227,6 @@ namespace Microsoft.Build.Execution
         {
             public GenericLoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
                 : base(loggingService, eventContext) => IsValid = true;
-
-            public GenericLoggingContext(LoggingContext baseContext) : base(baseContext) => IsValid = true;
         }
     }
 }

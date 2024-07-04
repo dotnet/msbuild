@@ -69,7 +69,7 @@ internal interface IBuildCheckManager
 
     void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
 
-    void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath);
+    void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string projectFullPath);
 
     void Shutdown();
 }

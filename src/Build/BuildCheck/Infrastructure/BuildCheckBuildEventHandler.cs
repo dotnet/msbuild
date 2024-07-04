@@ -32,7 +32,7 @@ internal class BuildCheckBuildEventHandler
             { typeof(ProjectEvaluationFinishedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationFinishedEvent((ProjectEvaluationFinishedEventArgs)e) },
             { typeof(ProjectEvaluationStartedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs)e) },
             { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => _buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
-            { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => _buildCheckManager.EndProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
+            { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => HandleEndProjectRequest((ProjectFinishedEventArgs)e) },
             { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => HandleBuildCheckTracingEvent((BuildCheckTracingEventArgs)e) },
             { typeof(BuildCheckAcquisitionEventArgs), (BuildEventArgs e) => HandleBuildCheckAcquisitionEvent((BuildCheckAcquisitionEventArgs)e) },
             { typeof(TaskStartedEventArgs), (BuildEventArgs e) => HandleTaskStartedEvent((TaskStartedEventArgs)e) },
@@ -72,6 +72,12 @@ internal class BuildCheckBuildEventHandler
                 eventArgs.ProjectFile!);
         }
     }
+
+    private void HandleEndProjectRequest(ProjectFinishedEventArgs eventArgs)
+        => _buildCheckManager.EndProjectRequest(
+                BuildCheckDataSource.EventArgs,
+                _analyzerContextFactory.CreateAnalysisContext(eventArgs.BuildEventContext!),
+                eventArgs!.ProjectFile!);
 
     private void HandleBuildCheckTracingEvent(BuildCheckTracingEventArgs eventArgs)
     {

@@ -120,27 +120,27 @@ internal sealed class BuildCheckCentralContext
 
     internal void RunPropertyReadActions(
         PropertyReadData propertyReadDataData,
-        LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        AnalysisLoggingContext analysisContext,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.PropertyReadActions, propertyReadDataData,
-            loggingContext, resultHandler);
+            analysisContext, resultHandler);
 
     internal void RunPropertyWriteActions(
         PropertyWriteData propertyWriteData,
-        LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        AnalysisLoggingContext analysisContext,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.PropertyWriteActions, propertyWriteData,
-            loggingContext, resultHandler);
+            analysisContext, resultHandler);
 
     internal void RunProjectProcessingDoneActions(
         ProjectProcessingDoneData projectProcessingDoneData,
-        LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        IAnalysisContext analysisContext,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ProjectProcessingDoneActions, projectProcessingDoneData,
-            loggingContext, resultHandler);
+            analysisContext, resultHandler);
 
     private void RunRegisteredActions<T>(
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks,

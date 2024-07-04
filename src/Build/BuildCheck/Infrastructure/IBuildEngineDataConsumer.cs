@@ -4,7 +4,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal readonly record struct PropertyReadInfo(
     string PropertyName,
@@ -53,12 +53,12 @@ internal interface IBuildEngineDataRouter
 {
     void ProcessPropertyRead(
         PropertyReadInfo propertyReadInfo,
-        BuildEventContext buildEventContext);
+        AnalysisLoggingContext analysisContext);
 
     /// <summary>
     /// Signals that a property was written to.
     /// </summary>
     void ProcessPropertyWrite(
         PropertyWriteInfo propertyWriteInfo,
-        BuildEventContext buildEventContext);
+        AnalysisLoggingContext analysisContext);
 }

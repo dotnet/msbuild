@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Shared;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
@@ -797,10 +798,10 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #endregion
 
-        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, BuildEventContext buildEventContext)
-            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.ProcessPropertyRead(propertyReadInfo, buildEventContext);
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext analysisContext)
+            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.ProcessPropertyRead(propertyReadInfo, analysisContext);
 
-        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, BuildEventContext buildEventContext)
-            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.ProcessPropertyWrite(propertyWriteInfo, buildEventContext);
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext analysisContext)
+            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.ProcessPropertyWrite(propertyWriteInfo, analysisContext);
     }
 }
