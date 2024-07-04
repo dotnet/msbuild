@@ -15,7 +15,7 @@ internal sealed class BuildAnalyzerConfigurationInternal
     {
         if (severity == BuildAnalyzerResultSeverity.Default)
         {
-            throw new ArgumentOutOfRangeException(nameof(severity), severity, "Severity 'Default' is not recognized by the BuilcCheck reports infrastructure");
+            throw new ArgumentOutOfRangeException(nameof(severity), severity, "Severity 'Default' is not recognized by the BuildCheck reports infrastructure");
         }
 
         RuleId = ruleId;
