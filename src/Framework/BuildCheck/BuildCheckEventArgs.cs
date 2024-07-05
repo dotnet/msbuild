@@ -134,7 +134,8 @@ internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
 
 internal sealed class BuildCheckResultError : BuildErrorEventArgs
 {
-    public BuildCheckResultError(IBuildCheckResult result)
+    public BuildCheckResultError(IBuildCheckResult result, string code)
+        : base(subcategory: null, code: code, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: result.FormatMessage(), helpKeyword: null, senderName: null)
     {
         this.Message = result.FormatMessage();
     }

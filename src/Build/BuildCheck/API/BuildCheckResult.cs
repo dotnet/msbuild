@@ -33,7 +33,7 @@ public sealed class BuildCheckResult : IBuildCheckResult
         {
             BuildAnalyzerResultSeverity.Info => new BuildCheckResultMessage(this),
             BuildAnalyzerResultSeverity.Warning => new BuildCheckResultWarning(this, BuildAnalyzerRule.Id),
-            BuildAnalyzerResultSeverity.Error => new BuildCheckResultError(this),
+            BuildAnalyzerResultSeverity.Error => new BuildCheckResultError(this, BuildAnalyzerRule.Id),
             _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null),
         };
 
@@ -50,7 +50,7 @@ public sealed class BuildCheckResult : IBuildCheckResult
     public string MessageFormat => BuildAnalyzerRule.MessageFormat;
 
     public string FormatMessage() =>
-        _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))}{BuildAnalyzerRule.Id}: {string.Format(BuildAnalyzerRule.MessageFormat, MessageArgs)}";
+        _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))}{string.Format(BuildAnalyzerRule.MessageFormat, MessageArgs)}";
 
     private string? _message;
 }
