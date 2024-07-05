@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="pt-BR" original="../Strings.resx">
     <body>
+      <trans-unit id="AbortingBuild">
+        <source>Attempting to cancel the build...</source>
+        <target state="new">Attempting to cancel the build...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: A tarefa "{0}" tem mais de um parâmetro denominado "{1}".</target>
@@ -126,6 +131,11 @@
         <target state="translated">Não há suporte para gravação.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckEnabled">
+        <source>The BuildCheck is enabled for this build.</source>
+        <target state="new">The BuildCheck is enabled for this build.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">FALHA na compilação da pergunta. A compilação foi encerrada antecipadamente ao se deparar com um alvo ou tarefa que não estava atualizado.</target>
@@ -208,28 +218,33 @@
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
-        <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
-        <target state="translated">Falha ao localizar o assembly do analisador personalizado especificado: {0}. Verifique se existe.</target>
+        <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
+        <target state="needs-review-translation">Falha ao localizar o assembly do analisador personalizado especificado: {0}. Verifique se existe.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
-        <source>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Falha ao carregar o tipo de analisador personalizado: {0} do assembly: {1}. Certifique-se de que ele herde a classe base Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. Se não se destina a ser um analisador personalizado, ele não deve ser exposto. Mais informações: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="needs-review-translation">Falha ao carregar o tipo de analisador personalizado: {0} do assembly: {1}. Certifique-se de que ele herde a classe base Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. Se não se destina a ser um analisador personalizado, ele não deve ser exposto. Mais informações: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
-        <source>Failed to register the custom analyzer: {0}.</source>
-        <target state="translated">Falha ao registrar o analisador personalizado: {0}.</target>
+        <source>Failed to register the custom analyzer: '{0}'.</source>
+        <target state="needs-review-translation">Falha ao registrar o analisador personalizado: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
-        <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="translated">Falha ao criar uma instância da regra do analisador personalizado com a seguinte exceção: {0}.</target>
+        <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
+        <target state="needs-review-translation">Falha ao criar uma instância da regra do analisador personalizado com a seguinte exceção: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomAnalyzerRegistered">
+        <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
+        <target state="new">The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
-        <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="translated">Regra do analisador personalizado: {0} foi registrado com sucesso.</target>
+        <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
+        <target state="needs-review-translation">Regra do analisador personalizado: {0} foi registrado com sucesso.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -514,6 +529,11 @@
         <target state="translated">O projeto "{0}" não foi importado por "{1}" em ({2},{3}), porque a expressão foi avaliada como uma cadeia de caracteres vazia.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="translated">Ocorreu uma exceção ao adicionar o arquivo '{0}', Exceção: '{1}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Valor inicial da propriedade: $({0})="{1}" Origem: {2}</target>
@@ -554,6 +574,13 @@ Erros: {3}</target>
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">O resolvedor do SDK "{0}" falhou ao tentar resolver o SDK "{1}". Exceção: "{2}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverNullMessage">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
+        <target state="translated">O resolvedor "{0}" tentou resolver o SDK "{1}" e retornou nulo como uma cadeia de caracteres na lista de avisos ou erros.</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>

@@ -35,7 +35,114 @@ public class EndToEndTests : IDisposable
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
-    public void SampleAnalyzerIntegrationTest(bool buildInOutOfProcessNode, bool analysisRequested)
+    public void SampleAnalyzerIntegrationTest_AnalyzeOnBuild(bool buildInOutOfProcessNode, bool analysisRequested)
+    {
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
+            (analysisRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+        _env.Output.WriteLine(output);
+
+        success.ShouldBeTrue();
+
+        // The analyzer warnings should appear - but only if analysis was requested.
+        if (analysisRequested)
+        {
+            output.ShouldContain("BC0101");
+            output.ShouldContain("BC0102");
+        }
+        else
+        {
+            output.ShouldNotContain("BC0101");
+            output.ShouldNotContain("BC0102");
+        }
+    }
+
+    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
+    [InlineData(true, true, "warning")]
+    [InlineData(true, true, "error")]
+    [InlineData(true, true, "info")]
+    [InlineData(false, true, "warning")]
+    [InlineData(false, true, "error")]
+    [InlineData(false, true, "info")]
+    [InlineData(false, false, "warning")]
+    public void SampleAnalyzerIntegrationTest_ReplayBinaryLogOfAnalyzedBuild(bool buildInOutOfProcessNode, bool analysisRequested, string BC0101Severity)
+    {
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, BC0101Severity);
+
+        var projectDirectory = Path.GetDirectoryName(projectFile.Path);
+        string logFile = _env.ExpectFile(".binlog").Path;
+
+        RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(analysisRequested ? "-analyze" : string.Empty)} -bl:{logFile}",
+            out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+
+        success.ShouldBeTrue();
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+         $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic",
+         out success, false, _env.Output, timeoutMilliseconds: 120_000);
+
+        _env.Output.WriteLine(output);
+
+        success.ShouldBeTrue();
+
+        // The conflicting outputs warning appears - but only if analysis was requested
+        if (analysisRequested)
+        {
+            output.ShouldContain("BC0101");
+            output.ShouldContain("BC0102");
+        }
+        else
+        {
+            output.ShouldNotContain("BC0101");
+            output.ShouldNotContain("BC0102");
+        }
+    }
+
+    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
+    [InlineData(true, true)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public void SampleAnalyzerIntegrationTest_AnalyzeOnBinaryLogReplay(bool buildInOutOfProcessNode, bool analysisRequested)
+    {
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
+
+        var projectDirectory = Path.GetDirectoryName(projectFile.Path);
+        string logFile = _env.ExpectFile(".binlog").Path;
+
+        RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -bl:{logFile}",
+            out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+
+        success.ShouldBeTrue();
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+         $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(analysisRequested ? "-analyze" : string.Empty)}",
+         out success, false, _env.Output, timeoutMilliseconds: 120_000);
+
+        _env.Output.WriteLine(output);
+
+        success.ShouldBeTrue();
+
+        // The conflicting outputs warning appears - but only if analysis was requested
+        if (analysisRequested)
+        {
+            output.ShouldContain("BC0101");
+            output.ShouldContain("BC0102");
+        }
+        else
+        {
+            output.ShouldNotContain("BC0101");
+            output.ShouldNotContain("BC0102");
+        }
+    }
+
+    private void PrepareSampleProjectsAndConfig(
+        bool buildInOutOfProcessNode,
+        out TransientTestFile projectFile,
+        string BC0101Severity = "warning")
     {
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
         TransientTestFile testFile = _env.CreateFile(workFolder, "somefile");
@@ -87,26 +194,22 @@ public class EndToEndTests : IDisposable
                                
             </Project>
             """;
-        TransientTestFile projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
+        projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
         TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
 
         TransientTestFile config = _env.CreateFile(workFolder, ".editorconfig",
-            """
+            $"""
             root=true
 
             [*.csproj]
-            build_check.BC0101.IsEnabled=true
-            build_check.BC0101.Severity=warning
+            build_check.BC0101.Severity={BC0101Severity}
 
-            build_check.BC0102.IsEnabled=true
             build_check.BC0102.Severity=warning
 
-            build_check.COND0543.IsEnabled=false
             build_check.COND0543.Severity=Error
             build_check.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
             build_check.COND0543.CustomSwitch=QWERTY
 
-            build_check.BLA.IsEnabled=false
             """);
 
         // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
@@ -116,22 +219,6 @@ public class EndToEndTests : IDisposable
 
         _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
-        string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
-            (analysisRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
-        _env.Output.WriteLine(output);
-        success.ShouldBeTrue();
-        // The analyzer warnings should appear - but only if analysis was requested.
-        if (analysisRequested)
-        {
-            output.ShouldContain("BC0101");
-            output.ShouldContain("BC0102");
-        }
-        else
-        {
-            output.ShouldNotContain("BC0101");
-            output.ShouldNotContain("BC0102");
-        }
     }
 
     [Theory]

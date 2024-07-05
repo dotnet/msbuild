@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
+      <trans-unit id="AbortingBuild">
+        <source>Attempting to cancel the build...</source>
+        <target state="new">Attempting to cancel the build...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: "{0}" 작업에 이름이 "{1}"인 매개 변수가 두 개 이상 있습니다.</target>
@@ -126,6 +131,11 @@
         <target state="translated">쓰기는 지원되지 않습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckEnabled">
+        <source>The BuildCheck is enabled for this build.</source>
+        <target state="new">The BuildCheck is enabled for this build.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">질문 빌드에 실패했습니다. 빌드가 최신이 아닌 대상 또는 작업을 발견하여 일찍 종료되었습니다.</target>
@@ -208,28 +218,33 @@
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
-        <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
-        <target state="translated">지정한 사용자 지정 분석기 어셈블리를 찾지 못했습니다. {0}. 존재하는지 확인하세요.</target>
+        <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
+        <target state="needs-review-translation">지정한 사용자 지정 분석기 어셈블리를 찾지 못했습니다. {0}. 존재하는지 확인하세요.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
-        <source>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">사용자 지정 분석기 형식을 로드하지 못했습니다. 어셈블리에서 {0} : {1}. Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer 기본 클래스를 상속해야 합니다. 사용자 지정 분석기가 아닌 경우 노출되지 않아야 합니다. 추가 정보: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="needs-review-translation">사용자 지정 분석기 형식을 로드하지 못했습니다. 어셈블리에서 {0} : {1}. Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer 기본 클래스를 상속해야 합니다. 사용자 지정 분석기가 아닌 경우 노출되지 않아야 합니다. 추가 정보: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
-        <source>Failed to register the custom analyzer: {0}.</source>
-        <target state="translated">사용자 지정 분석기를 등록하지 못했습니다. {0}.</target>
+        <source>Failed to register the custom analyzer: '{0}'.</source>
+        <target state="needs-review-translation">사용자 지정 분석기를 등록하지 못했습니다. {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
-        <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="translated">다음 예외로 인해 사용자 지정 분석기 규칙을 인스턴스화하지 못했습니다. {0}.</target>
+        <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
+        <target state="needs-review-translation">다음 예외로 인해 사용자 지정 분석기 규칙을 인스턴스화하지 못했습니다. {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomAnalyzerRegistered">
+        <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
+        <target state="new">The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
-        <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="translated">사용자 지정 분석기 규칙: {0}이(가) 등록되었습니다.</target>
+        <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
+        <target state="needs-review-translation">사용자 지정 분석기 규칙: {0}이(가) 등록되었습니다.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -514,6 +529,11 @@
         <target state="translated">빈 문자열로 평가되는 식 때문에 ({2},{3})의 "{1}"이(가) 프로젝트 "{0}"을(를) 가져오지 않았습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="translated">'{0}' 파일을 추가하는 동안 예외가 발생했습니다. 예외: '{1}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">속성 초기 값: $({0})="{1}" 소스: {2}</target>
@@ -554,6 +574,13 @@ Errors: {3}</source>
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">SDK "{1}"을(를) 확인하는 동안 SDK 확인자 "{0}"이(가) 실패했습니다. 예외: "{2}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverNullMessage">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
+        <target state="translated">"{0}" 확인자가 SDK "{1}" 해결을 시도했으며 경고 또는 오류 목록에서 null을 문자열로 반환했습니다.</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>

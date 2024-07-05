@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ja" original="../Strings.resx">
     <body>
+      <trans-unit id="AbortingBuild">
+        <source>Attempting to cancel the build...</source>
+        <target state="new">Attempting to cancel the build...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: "{0}" タスクには "{1}" という名前のパラメーターが 2 つ以上あります。</target>
@@ -126,6 +131,11 @@
         <target state="translated">書き込みはサポートされていません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckEnabled">
+        <source>The BuildCheck is enabled for this build.</source>
+        <target state="new">The BuildCheck is enabled for this build.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">質問のビルドに失敗しました。ビルドは、最新ではないターゲットまたはタスクが検出されたため、早期に終了しました。</target>
@@ -208,28 +218,33 @@
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
-        <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
-        <target state="translated">指定されたカスタム アナライザー アセンブリが見つかりませんでした: {0}。存在するかどうか確認してください。</target>
+        <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
+        <target state="needs-review-translation">指定されたカスタム アナライザー アセンブリが見つかりませんでした: {0}。存在するかどうか確認してください。</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
-        <source>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">カスタム アナライザーの種類を読み込めませんでした: アセンブリ {1} の {0}。Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer 基底クラスを継承していることを確認してください。カスタム アナライザーを意図していない場合は、公開しないでください。詳細情報: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="needs-review-translation">カスタム アナライザーの種類を読み込めませんでした: アセンブリ {1} の {0}。Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer 基底クラスを継承していることを確認してください。カスタム アナライザーを意図していない場合は、公開しないでください。詳細情報: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
-        <source>Failed to register the custom analyzer: {0}.</source>
-        <target state="translated">カスタム アナライザーを登録できませんでした: {0}</target>
+        <source>Failed to register the custom analyzer: '{0}'.</source>
+        <target state="needs-review-translation">カスタム アナライザーを登録できませんでした: {0}</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
-        <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="translated">次の例外により、カスタム アナライザー ルールのインスタンスを作成できませんでした: {0}。</target>
+        <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
+        <target state="needs-review-translation">次の例外により、カスタム アナライザー ルールのインスタンスを作成できませんでした: {0}。</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomAnalyzerRegistered">
+        <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
+        <target state="new">The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
-        <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="translated">カスタム アナライザー ルール: {0} が正常に登録されました。</target>
+        <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
+        <target state="needs-review-translation">カスタム アナライザー ルール: {0} が正常に登録されました。</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -514,6 +529,11 @@
         <target state="translated">式の評価結果が空の文字列になったため、プロジェクト "{0}" は "{1}" によって ({2},{3}) でインポートされませんでした。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="translated">ファイル '{0}' を追加中に例外が発生しました、例外: '{1}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">プロパティの初期値: $({0})="{1}" ソース: {2}</target>
@@ -554,6 +574,13 @@ Errors: {3}</source>
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">SDK "{1}" を解決しようとしているときに、SDK リゾルバー "{0}" に失敗しました。例外: "{2}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverNullMessage">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
+        <target state="translated">"{0}" リゾルバーは SDK "{1}" を解決しようとしましたが、警告またはエラーのリストで文字列として null を返しました。</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>

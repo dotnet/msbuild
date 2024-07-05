@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
     <body>
+      <trans-unit id="AbortingBuild">
+        <source>Attempting to cancel the build...</source>
+        <target state="new">Attempting to cancel the build...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: "{0}" 工作有多個名稱為 "{1}" 的參數。</target>
@@ -126,6 +131,11 @@
         <target state="translated">不支援寫入。</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckEnabled">
+        <source>The BuildCheck is enabled for this build.</source>
+        <target state="new">The BuildCheck is enabled for this build.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">問題建立失敗。建置提早結束，因為它遇到不是最新的目標或工作。</target>
@@ -208,28 +218,33 @@
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
-        <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
-        <target state="translated">找不到指定的自訂分析器組件: {0}。請檢查它是否存在。</target>
+        <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
+        <target state="needs-review-translation">找不到指定的自訂分析器組件: {0}。請檢查它是否存在。</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
-        <source>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">無法從組件 {1} 載入自訂分析器類型 {0}。請確定它繼承 Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer 基類。如果不是要作為自訂分析器，則不應公開。更多資訊: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="needs-review-translation">無法從組件 {1} 載入自訂分析器類型 {0}。請確定它繼承 Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer 基類。如果不是要作為自訂分析器，則不應公開。更多資訊: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
-        <source>Failed to register the custom analyzer: {0}.</source>
-        <target state="translated">無法登錄自訂分析器: {0}。</target>
+        <source>Failed to register the custom analyzer: '{0}'.</source>
+        <target state="needs-review-translation">無法登錄自訂分析器: {0}。</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
-        <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="translated">無法具現化自訂分析器規則，發生下列例外狀況: {0}。</target>
+        <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
+        <target state="needs-review-translation">無法具現化自訂分析器規則，發生下列例外狀況: {0}。</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomAnalyzerRegistered">
+        <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
+        <target state="new">The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
-        <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="translated">自訂分析器規則: 已成功登錄 {0}。</target>
+        <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
+        <target state="needs-review-translation">自訂分析器規則: 已成功登錄 {0}。</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -514,6 +529,11 @@
         <target state="translated">因為運算式評估為空字串，所以專案 "{0}" 未在 ({2},{3}) 由 "{1}" 匯入。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="translated">新增檔案 '{0}' 時發生例外狀況，例外狀況： '{1}'</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">屬性初始值: $({0})="{1}" 來源: {2}</target>
@@ -554,6 +574,13 @@ Errors: {3}</source>
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">SDK 解析程式 "{0}" 在嘗試解析 SDK "{1}" 時失敗。例外狀況: "{2}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverNullMessage">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
+        <target state="translated">"{0}" 解析程式嘗試解析 SDK "{1}"，並以警告或錯誤清單中的字串傳回 null。</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>

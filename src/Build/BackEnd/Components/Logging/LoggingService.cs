@@ -70,7 +70,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// Logging services is used as a helper class to assist logging messages in getting to the correct loggers.
     /// </summary>
-    internal partial class LoggingService : ILoggingService, INodePacketHandler, IBuildComponent
+    internal partial class LoggingService : ILoggingService, INodePacketHandler
     {
         /// <summary>
         /// The default maximum size for the logging event queue.

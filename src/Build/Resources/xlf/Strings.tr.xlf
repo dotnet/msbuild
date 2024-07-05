@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="tr" original="../Strings.resx">
     <body>
+      <trans-unit id="AbortingBuild">
+        <source>Attempting to cancel the build...</source>
+        <target state="new">Attempting to cancel the build...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: "{0}" görevinin "{1}" adında birden fazla parametresi var.</target>
@@ -126,6 +131,11 @@
         <target state="translated">Yazma işlemi desteklenmiyor.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckEnabled">
+        <source>The BuildCheck is enabled for this build.</source>
+        <target state="new">The BuildCheck is enabled for this build.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">Soru derleme BAŞARISIZ oldu. Güncel olmayan bir hedef veya görev ile karşılaştığından derleme işleminden erken çıkıldı.</target>
@@ -208,28 +218,33 @@
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
-        <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
-        <target state="translated">Belirtilen {0} özel çözümleyici derlemesi bulunamadı. Lütfen var olup olmadığını kontrol edin.</target>
+        <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
+        <target state="needs-review-translation">Belirtilen {0} özel çözümleyici derlemesi bulunamadı. Lütfen var olup olmadığını kontrol edin.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
-        <source>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Özel çözümleyici türü yüklenemedi: {0} derlemeden: {1}. Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer temel sınıf devralınmış olduğundan emin olun. Özel bir çözümleyici olması amaçlanmadıysa açığa çıkarılmaması gerekir. Daha fazla bilgi: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="needs-review-translation">Özel çözümleyici türü yüklenemedi: {0} derlemeden: {1}. Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer temel sınıf devralınmış olduğundan emin olun. Özel bir çözümleyici olması amaçlanmadıysa açığa çıkarılmaması gerekir. Daha fazla bilgi: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
-        <source>Failed to register the custom analyzer: {0}.</source>
-        <target state="translated">Özel çözümleyici kaydedilemedi: {0}.</target>
+        <source>Failed to register the custom analyzer: '{0}'.</source>
+        <target state="needs-review-translation">Özel çözümleyici kaydedilemedi: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
-        <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="translated">Özel çözümleyici kuralı şu özel durumla başlatılamadı: {0}.</target>
+        <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
+        <target state="needs-review-translation">Özel çözümleyici kuralı şu özel durumla başlatılamadı: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomAnalyzerRegistered">
+        <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
+        <target state="new">The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
-        <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="translated">{0} özel çözümleyici kuralı başarıyla kaydedildi.</target>
+        <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
+        <target state="needs-review-translation">{0} özel çözümleyici kuralı başarıyla kaydedildi.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -514,6 +529,11 @@
         <target state="translated">"{0}" adlı proje, ifadenin boş dize olarak değerlendirilmesi nedeniyle ({2},{3}) konumundaki "{1}" tarafından içeri aktarılmadı.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="translated">Exception: '{1}': '{0}' dosyası eklenirken özel durum oluştu</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Özellik başlangıç değeri: $({0})="{1}" Kaynak: {2}</target>
@@ -554,6 +574,13 @@ Hatalar: {3}</target>
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">"{0}" SDK çözümleyicisi, "{1}" SDK'sını çözümlemeye çalışırken başarısız oldu. İstisna: "{2}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverNullMessage">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
+        <target state="translated">"{0}" çözümleyicisi "{1}" SDK'sını çözümlemeye çalıştı ve uyarılar veya hatalar listesinde bir dize olarak null döndürdü.</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>

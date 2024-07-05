@@ -41,19 +41,19 @@ public abstract class AnalysisData(string projectFilePath)
 public class BuildCheckDataContext<T> where T : AnalysisData
 {
     private readonly BuildAnalyzerWrapper _analyzerWrapper;
-    private readonly LoggingContext _loggingContext;
+    private readonly IAnalysisContext _analysisContext;
     private readonly BuildAnalyzerConfigurationInternal[] _configPerRule;
-    private readonly Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> _resultHandler;
+    private readonly Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> _resultHandler;
 
     internal BuildCheckDataContext(
         BuildAnalyzerWrapper analyzerWrapper,
-        LoggingContext loggingContext,
+        IAnalysisContext loggingContext,
         BuildAnalyzerConfigurationInternal[] configPerRule,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> resultHandler,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> resultHandler,
         T data)
     {
         _analyzerWrapper = analyzerWrapper;
-        _loggingContext = loggingContext;
+        _analysisContext = loggingContext;
         _configPerRule = configPerRule;
         _resultHandler = resultHandler;
         Data = data;
@@ -64,7 +64,7 @@ public class BuildCheckDataContext<T> where T : AnalysisData
     /// </summary>
     /// <param name="result"></param>
     public void ReportResult(BuildCheckResult result)
-        => _resultHandler(_analyzerWrapper, _loggingContext, _configPerRule, result);
+        => _resultHandler(_analyzerWrapper, _analysisContext, _configPerRule, result);
 
     /// <summary>
     /// Data to be analyzed.

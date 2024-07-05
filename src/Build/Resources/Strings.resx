@@ -139,6 +139,9 @@
   <data name="NoBuildInProgress" xml:space="preserve">
     <value>The operation cannot be completed because BeginBuild has not yet been called.</value>
   </data>
+  <data name="AbortingBuild" xml:space="preserve">
+    <value>Attempting to cancel the build...</value>
+  </data>
   <data name="WaitingForEndOfBuild" xml:space="preserve">
     <value>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</value>
   </data>
@@ -1349,6 +1352,12 @@ Errors: {3}</value>
       LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
     </comment>
   </data>
+  <data name="SDKResolverNullMessage" xml:space="preserve">
+    <value>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</value>
+    <comment>
+      LOCALIZATION: Do not localize the word SDK.
+    </comment>
+  </data>  
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
     <value>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
   </data>
@@ -2099,27 +2108,36 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </comment>
   </data>
   <data name="CustomAnalyzerSuccessfulAcquisition" xml:space="preserve">
-    <value>Custom analyzer rule: {0} has been registered successfully.</value>
+    <value>Custom analyzer rule: '{0}' has been registered successfully.</value>
     <comment>The message is emitted on successful loading of the custom analyzer rule in process.</comment>
   </data>
   <data name="CustomAnalyzerFailedAcquisition" xml:space="preserve">
-    <value>Failed to register the custom analyzer: {0}.</value>
+    <value>Failed to register the custom analyzer: '{0}'.</value>
     <comment>The message is emitted on failed loading of the custom analyzer in process.</comment>
   </data>
   <data name="CustomAnalyzerFailedRuleLoading" xml:space="preserve">
-    <value>Failed to instantiate the custom analyzer rule with the following exception: {0}.</value>
+    <value>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</value>
     <comment>The message is emitted on failed loading of the custom analyzer rule in process.</comment>
   </data>
   <data name="CustomAnalyzerAssemblyNotExist" xml:space="preserve">
-    <value>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</value>
+    <value>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</value>
     <comment>The message is emitted when the custom analyzer assembly can not be found.</comment>
   </data>
   <data name="CustomAnalyzerBaseTypeNotAssignable" xml:space="preserve">
-    <value>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</value>
+    <value>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</value>
     <comment>The message is emitted when the custom analyzer assembly can not be successfully registered.</comment>
   </data>
   <data name="TaskAssemblyLocationMismatch" xml:space="preserve">
     <value>Task assembly was loaded from '{0}' while the desired location was '{1}'.</value>
+  </data>
+  <data name="ProjectImportsCollectorFileIOFail" xml:space="preserve">
+    <value>An exception occurred when adding the file '{0}', Exception: '{1}'</value>
+  </data>
+  <data name="BuildCheckEnabled" xml:space="preserve">
+    <value>The BuildCheck is enabled for this build.</value>
+  </data>
+  <data name="CustomAnalyzerRegistered" xml:space="preserve">
+    <value>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
