@@ -51,7 +51,7 @@ public sealed class BuildCheckResult : IBuildCheckResult
 
     // Here we will provide different link for built-in rules and custom rules - once we have the base classes differentiated.
     public string FormatMessage() =>
-        _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))} https://aka.ms/buildcheck/codes#{BuildAnalyzerRule.Id} - {string.Format(BuildAnalyzerRule.MessageFormat, MessageArgs)}";
+        _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))}https://aka.ms/buildcheck/codes#{BuildAnalyzerRule.Id} - {string.Format(BuildAnalyzerRule.MessageFormat, MessageArgs)}";
 
     private string? _message;
 }
