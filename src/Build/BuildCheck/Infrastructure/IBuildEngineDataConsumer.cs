@@ -53,6 +53,8 @@ internal interface IBuildEngineDataRouter
 {
     void ProcessPropertyRead(
         PropertyReadInfo propertyReadInfo,
+        // This is intentionally AnalysisLoggingContext instead of IAnalysisContext - to avoid boxing allocations
+        //  on a hot path of properties reading (same for writing)
         AnalysisLoggingContext analysisContext);
 
     /// <summary>

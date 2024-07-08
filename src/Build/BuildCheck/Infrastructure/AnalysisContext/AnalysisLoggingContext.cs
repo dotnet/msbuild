@@ -15,7 +15,11 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// <see cref="IAnalysisContext"/> that uses <see cref="ILoggingService"/> to dispatch.
 /// </summary>
-internal class AnalysisLoggingContext : IAnalysisContext
+/// <remarks>
+/// Making this a record struct to avoid allocations (unless called through interface - which leads to boxing).
+/// This is wanted since this can be used in a hot path (of property reads and writes)
+/// </remarks>
+internal readonly record struct AnalysisLoggingContext : IAnalysisContext
 {
     private readonly ILoggingService _loggingService;
     private readonly BuildEventContext _eventContext;
