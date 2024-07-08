@@ -32,7 +32,7 @@ The actual OM exposed to users will be translating/mapping/proxying the underlyi
 
 For agility we'll be able to source internal data during the evaluation and/or execution directly from the build engine, without the `BuildEventArgs` exposure.
 
-To simplify the switch between 'in-node direct data' and 'properly remoted data that can be exposed via public OM' we will internaly expose execution data consuming interface - that will be implemented by `LoggingService` as well as BuildCheck infrastructure. This way we can have a simple toggle logic in `LoggingService` that will either forward data to BuildCheck infrastructure (in-proc) or trnaslate them to appropriate `BuildEventArgs` and send them via logging infrastructure.
+To simplify the switch between 'in-node direct data' and 'properly remoted data that can be exposed via public OM' we will internaly expose execution data consuming interface - that will be implemented by `LoggingService` as well as BuildCheck infrastructure. This way we can have a simple toggle logic in `LoggingService` that will either forward data to BuildCheck infrastructure (in-proc) or translate them to appropriate `BuildEventArgs` and send them via logging infrastructure.
 
 The following diagram ilustrates the case where data are being consumed directly in node - minimizing the performance and resources impact:
 
