@@ -5,6 +5,7 @@ using System;
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -469,6 +470,7 @@ namespace Microsoft.Build.Logging
                 case TaskCommandLineEventArgs taskCommandLine: return Write(taskCommandLine);
                 case UninitializedPropertyReadEventArgs uninitializedPropertyRead: return Write(uninitializedPropertyRead);
                 case EnvironmentVariableReadEventArgs environmentVariableRead: return Write(environmentVariableRead);
+                case ExtendedEnvironmentVariableReadEventArgs extendedEnvironmentVariableRead: return Write(extendedEnvironmentVariableRead);
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: return Write(propertyInitialValueSet);
                 case CriticalBuildMessageEventArgs criticalBuildMessage: return Write(criticalBuildMessage);
                 case AssemblyLoadBuildEventArgs assemblyLoad: return Write(assemblyLoad);
@@ -552,6 +554,17 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.EnvironmentVariableName);
 
             return BinaryLogRecordKind.EnvironmentVariableRead;
+        }
+
+        private BinaryLogRecordKind Write(ExtendedEnvironmentVariableReadEventArgs e)
+        {
+            WriteMessageFields(e, writeImportance: false);
+            WriteDeduplicatedString(e.EnvironmentVariableName);
+            Write(e.Line);
+            Write(e.Column);
+            WriteDeduplicatedString(e.FileName);
+
+            return BinaryLogRecordKind.ExtendedEnvironmentVariableRead;
         }
 
         private BinaryLogRecordKind Write(ResponseFileUsedEventArgs e)

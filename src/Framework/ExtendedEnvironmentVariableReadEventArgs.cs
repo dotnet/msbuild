@@ -9,28 +9,9 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Arguments for the environment variable read event.
     /// </summary>
-    public sealed class ExtendedEnvironmentVariableReadEventArgs : EnvironmentVariableReadEventArgs, IExtendedBuildEventArgs
+    public sealed class ExtendedEnvironmentVariableReadEventArgs : BuildMessageEventArgs
     {
-        /// <summary>
-        /// Default constructor. Used for deserialization.
-        /// </summary>
-        public ExtendedEnvironmentVariableReadEventArgs()
-            : this("undefined") { }
-
-        /// <summary>
-        /// This constructor specifies only type of extended data.
-        /// </summary>
-        /// <param name="type">Type of <see cref="IExtendedBuildEventArgs.ExtendedType"/>.</param>
-        public ExtendedEnvironmentVariableReadEventArgs(string type) => ExtendedType = type;
-
-        /// <inheritdoc />
-        public string ExtendedType { get; set; } = string.Empty;
-
-        /// <inheritdoc />
-        public Dictionary<string, string?>? ExtendedMetadata { get; set; }
-
-        /// <inheritdoc />
-        public string? ExtendedData { get; set; }
+        public ExtendedEnvironmentVariableReadEventArgs() { }
 
         /// <summary>
         /// Initializes an instance of the ExtendedEnvironmentVariableReadEventArgs class.
@@ -50,8 +31,9 @@ namespace Microsoft.Build.Framework
             int column,
             string? helpKeyword = null,
             string? senderName = null)
-            : base(environmentVarName, environmentVarValue, helpKeyword, senderName)
+            : base(environmentVarValue, helpKeyword, senderName, MessageImportance.Normal)
         {
+            EnvironmentVariableName = environmentVarName;
             FileName = file;
             LineNumber = line;
             ColumnNumber = column;
@@ -72,6 +54,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public string FileName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// The environment variable name.
+        /// </summary>
+        public string EnvironmentVariableName { get; set; } = string.Empty;
+
         internal override void WriteToStream(BinaryWriter writer)
         {
             base.WriteToStream(writer);
@@ -79,8 +66,6 @@ namespace Microsoft.Build.Framework
             writer.Write7BitEncodedInt(Line);
             writer.Write7BitEncodedInt(Column);
             writer.WriteOptionalString(FileName);
-
-            writer.WriteExtendedBuildEventData(this);
         }
 
         internal override void CreateFromStream(BinaryReader reader, int version)
@@ -90,8 +75,6 @@ namespace Microsoft.Build.Framework
             LineNumber = reader.Read7BitEncodedInt();
             ColumnNumber = reader.Read7BitEncodedInt();
             FileName = reader.ReadOptionalString() ?? string.Empty;
-
-            reader.ReadExtendedBuildEventData(this);
         }
     }
 }

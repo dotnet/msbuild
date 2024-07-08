@@ -311,7 +311,7 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.ProjectImported => ReadProjectImportedEventArgs(),
                 BinaryLogRecordKind.TargetSkipped => ReadTargetSkippedEventArgs(),
                 BinaryLogRecordKind.EnvironmentVariableRead => ReadEnvironmentVariableReadEventArgs(),
-                BinaryLogRecordKind.ExtendedEnvironmentVariableRead => ReadEnvironmentVariableReadEventArgs(),
+                BinaryLogRecordKind.ExtendedEnvironmentVariableRead => ReadExtendedEnvironmentVariableReadEventArgs(),
                 BinaryLogRecordKind.ResponseFileUsed => ReadResponseFileUsedEventArgs(),
                 BinaryLogRecordKind.PropertyReassignment => ReadPropertyReassignmentEventArgs(),
                 BinaryLogRecordKind.UninitializedPropertyRead => ReadUninitializedPropertyReadEventArgs(),
@@ -1095,19 +1095,26 @@ namespace Microsoft.Build.Logging
             var fields = ReadBuildEventArgsFields(readImportance: true);
             var environmentVariableName = ReadDeduplicatedString();
 
-            BuildEventArgs e;
-            if (fields.Extended == null)
-            {
-                e = new EnvironmentVariableReadEventArgs(
+            BuildEventArgs e = new EnvironmentVariableReadEventArgs(
                     environmentVariableName,
                     fields.Message,
                     fields.HelpKeyword,
                     fields.SenderName,
                     fields.Importance);
-            }
-            else
-            {
-                e = new ExtendedEnvironmentVariableReadEventArgs(
+
+            return e;
+        }
+
+        private BuildEventArgs ReadExtendedEnvironmentVariableReadEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+
+            string? environmentVariableName = ReadDeduplicatedString();
+            int line = ReadInt32();
+            int column = ReadInt32();
+            string? fileName = ReadDeduplicatedString();
+
+            BuildEventArgs e = new ExtendedEnvironmentVariableReadEventArgs(
                     environmentVariableName ?? string.Empty,
                     fields.Message,
                     fields.File ?? string.Empty,
@@ -1115,7 +1122,6 @@ namespace Microsoft.Build.Logging
                     fields.ColumnNumber,
                     fields.HelpKeyword,
                     fields.SenderName);
-            }
 
             return e;
         }

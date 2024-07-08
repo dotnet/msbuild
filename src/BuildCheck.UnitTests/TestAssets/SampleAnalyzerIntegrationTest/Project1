@@ -10,6 +10,10 @@
    <PropertyGroup Condition="$(Test) == true">
        <TestProperty>Test</TestProperty>
    </PropertyGroup>
+
+    <PropertyGroup Condition="$(Test) == true">
+        <ReadFromEnvVariable>$(DOTNET_ROOT)</ReadFromEnvVariable>
+    </PropertyGroup>
     
    <Target Name="Hello">
        <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />

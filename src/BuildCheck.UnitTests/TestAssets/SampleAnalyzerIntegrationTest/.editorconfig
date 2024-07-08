@@ -1,5 +1,5 @@
 [*.csproj]
-build_check.BC0101.Severity={BC0101Severity}
+build_check.BC0101.Severity=BC0101Severity
 
 build_check.BC0102.Severity=warning
 build_check.BC0103.Severity=warning
