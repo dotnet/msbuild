@@ -38,6 +38,7 @@ namespace Microsoft.Build.UnitTests
 
         private readonly string _projectFile = NativeMethods.IsUnixLike ? "/src/project.proj" : @"C:\src\project.proj";
         private readonly string _projectFile2 = NativeMethods.IsUnixLike ? "/src/project2.proj" : @"C:\src\project2.proj";
+        private readonly string _projectFileWithNonAnsiSymbols = NativeMethods.IsUnixLike ? "/src/проектТерминал/㐇𠁠𪨰𫠊𫦠𮚮⿕.proj" : @"C:\src\проектТерминал\㐇𠁠𪨰𫠊𫦠𮚮⿕.proj";
 
         private StringWriter _outputWriter = new();
 
@@ -233,20 +234,22 @@ namespace Microsoft.Build.UnitTests
 
         #region Build summary tests
 
-        private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, Action additionalCallbacks)
+        private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, Action additionalCallbacks, string? projectFile = null)
         {
-            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
-            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile));
+            projectFile ??= _projectFile;
 
-            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build"));
-            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task"));
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(projectFile));
+
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(projectFile, "Build"));
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(projectFile, "Task"));
 
             additionalCallbacks();
 
-            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task", succeeded));
-            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "Build", succeeded));
+            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(projectFile, "Task", succeeded));
+            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(projectFile, "Build", succeeded));
 
-            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(projectFile, succeeded));
             BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
         }
 
@@ -449,6 +452,22 @@ namespace Microsoft.Build.UnitTests
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
+        [Fact]
+        public Task PrintProjectOutputDirectoryLink()
+        {
+            // Send message in order to set project output path
+            BuildMessageEventArgs e = MakeMessageEventArgs(
+                    $"㐇𠁠𪨰𫠊𫦠𮚮⿕ -> {_projectFileWithNonAnsiSymbols.Replace("proj", "dll")}",
+                    MessageImportance.High);
+            e.ProjectFile = _projectFileWithNonAnsiSymbols;
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                MessageRaised?.Invoke(_eventSender, e);
+            }, _projectFileWithNonAnsiSymbols);
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
 
         #endregion
 

@@ -315,7 +315,6 @@ namespace Microsoft.Build.BackEnd.Logging
             AnyEventRaised = null;
             TelemetryLogged = null;
             BuildCheckEventRaised = null;
-            //ExtendedEnvironmentVariableReadEventRaised = null;
         }
 
         #endregion

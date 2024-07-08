@@ -46,11 +46,13 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             foreach (Type analyzerCandidate in analyzerTypes)
             {
                 analyzersFactories.Add(() => (BuildAnalyzer)Activator.CreateInstance(analyzerCandidate)!);
+                analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerRegistered", analyzerCandidate.Name, analyzerCandidate.Assembly);
             }
 
             if (availableTypes.Count != analyzerTypes.Count)
             {
-                availableTypes.Except(analyzerTypes).ToList().ForEach(t => analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
+                availableTypes.Except(analyzerTypes).ToList()
+                    .ForEach(t => analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
             }
         }
         catch (ReflectionTypeLoadException ex)

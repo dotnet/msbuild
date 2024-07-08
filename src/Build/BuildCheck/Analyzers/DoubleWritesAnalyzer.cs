@@ -25,7 +25,7 @@ internal sealed class DoubleWritesAnalyzer : BuildAnalyzer
         "DoubleWrites",
         "Two tasks should not write the same file",
         "Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.",
-        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Warning, IsEnabled = true });
+        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Warning });
 
     public override string FriendlyName => "MSBuild.DoubleWritesAnalyzer";
 
