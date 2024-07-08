@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AbortingBuild">
         <source>Attempting to cancel the build...</source>
-        <target state="new">Attempting to cancel the build...</target>
+        <target state="translated">Попытка отменить сборку...</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
@@ -133,7 +133,7 @@
       </trans-unit>
       <trans-unit id="BuildCheckEnabled">
         <source>The BuildCheck is enabled for this build.</source>
-        <target state="new">The BuildCheck is enabled for this build.</target>
+        <target state="translated">Для этой сборки включен параметр BuildCheck.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
@@ -219,32 +219,32 @@
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
         <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
-        <target state="needs-review-translation">Не удалось найти указанную сборку настраиваемого анализатора: {0}. Убедитесь, что она существует.</target>
+        <target state="translated">Не удалось найти указанную сборку настраиваемого анализатора "{0}". Убедитесь, что она существует.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
         <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="needs-review-translation">Не удалось загрузить настраиваемый тип анализатора {0} из сборки {1}. Убедитесь, что он наследует базовый класс Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. Если он не предназначен для настраиваемого анализатора, его не следует предоставлять. Дополнительные сведения: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">Не удалось загрузить тип настраиваемого анализатора "{0}" из сборки "{1}". Убедитесь, что он наследует базовый класс Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. Если он не предназначен для настраиваемого анализатора, его не следует предоставлять. Подробнее: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: '{0}'.</source>
-        <target state="needs-review-translation">Не удалось зарегистрировать настраиваемый анализатор: {0}.</target>
+        <target state="translated">Не удалось зарегистрировать настраиваемый анализатор "{0}".</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
         <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
-        <target state="needs-review-translation">Не удалось создать экземпляр правила настраиваемого анализатора со следующим исключением: {0}.</target>
+        <target state="translated">Не удалось создать экземпляр правила настраиваемого анализатора со следующим исключением: "{0}".</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerRegistered">
         <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="new">The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</target>
+        <target state="translated">Настраиваемый анализатор "{0}" включен для сборки из расположения "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
         <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
-        <target state="needs-review-translation">Зарегистрировано правило настраиваемого анализатора: {0}.</target>
+        <target state="translated">Правило настраиваемого анализатора "{0}" успешно зарегистрировано.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
