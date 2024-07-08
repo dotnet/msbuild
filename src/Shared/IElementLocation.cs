@@ -16,7 +16,11 @@ namespace Microsoft.Build.Shared
     /// All implementations should be IMMUTABLE.
     /// Any editing of the project XML through the MSBuild API's will invalidate locations in that XML until the XML is reloaded.
     /// </summary>
-    public interface IMsBuildElementLocation
+    /// <remarks>
+    /// This is currently internal - but it is prepared to be made public once it will be needed by other public BuildCheck OM
+    /// (e.g. by property read/write OM)
+    /// </remarks>
+    internal interface IMsBuildElementLocation
     {
         /// <summary>
         /// The file from which this particular element originated.  It may
