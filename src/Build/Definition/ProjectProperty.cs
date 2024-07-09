@@ -110,6 +110,11 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
+        /// <summary>
+        /// Gets or sets object's location in xml file.
+        /// </summary>
+        public (string File, int Line, int Column) Location { get; set; }
+
         string IProperty2.GetEvaluatedValueEscaped(IElementLocation location)
         {
             if (this is EnvironmentDerivedProjectProperty environmentProperty && environmentProperty.loggingContext is { IsValid: true } loggingContext && !environmentProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
@@ -119,6 +124,9 @@ namespace Microsoft.Build.Evaluation
                 loggingContext.LogBuildEvent(args);
                 environmentProperty._loggedEnvProperty = true;
             }
+
+            // the location is handy in BuildCheck messages.
+            Location = (location.File, location.Line, location.Column);
 
             return EvaluatedValueEscapedInternal;
         }

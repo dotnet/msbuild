@@ -81,6 +81,11 @@ namespace Microsoft.Build.Execution
         public virtual bool IsImmutable => false;
 
         /// <summary>
+        /// Gets or sets object's location in xml file.
+        /// </summary>
+        public (string File, int Line, int Column) Location { get; set; }
+
+        /// <summary>
         /// Evaluated value of the property, escaped as necessary.
         /// Setter assumes caller has protected global properties, if necessary.
         /// </summary>
@@ -110,6 +115,9 @@ namespace Microsoft.Build.Execution
                 envProperty.loggingContext.LogBuildEvent(args);
                 envProperty._loggedEnvProperty = true;
             }
+
+            // the location is handy in BuildCheck messages.
+            Location = (location.File, location.Line, location.Column);
 
             return _escapedValue;
         }

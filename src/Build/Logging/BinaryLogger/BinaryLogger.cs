@@ -73,14 +73,16 @@ namespace Microsoft.Build.Logging
         //   - TaskStartedEventArgs: Added TaskAssemblyLocation property
         // version 21:
         //   - TaskParameterEventArgs: Added ParameterName and PropertyName properties
-
+        // version 22:
+        //    - new record kinds: ExtendedEnvironmentVariableRead that reports file and exact location where environment variable was used.
+        //      It substitutes the existing EnvironmentVariableRead.
         // This should be never changed.
         // The minimum version of the binary log reader that can read log of above version.
         internal const int ForwardCompatibilityMinimalVersion = 18;
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 21;
+        internal const int FileFormatVersion = 22;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being
