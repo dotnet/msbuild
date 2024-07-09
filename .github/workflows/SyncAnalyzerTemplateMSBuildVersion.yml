@@ -1,8 +1,6 @@
 name: Sync Microsoft.Build version in analyzer template with Version.props
 on:
   push:
-    branches:
-      - main
     paths:
       - 'eng/Versions.props'
 
