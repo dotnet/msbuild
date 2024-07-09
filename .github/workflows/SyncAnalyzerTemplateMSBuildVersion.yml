@@ -1,6 +1,8 @@
 name: Sync Microsoft.Build version in analyzer template with Version.props
 on:
   push:
+    branches:
+      - main
     paths:
       - 'eng/Versions.props'
 
@@ -43,4 +45,4 @@ jobs:
         commit-message: 'Update MicrosoftBuildVersion in analyzer template'
         branch: 'update-msbuild-version-for-analyzer-template'
         title: 'Update MicrosoftBuildVersion in analyzer template'
-        body: 'This PR updates the MicrosoftBuildVersion dynamically.'
+        body: 'This PR updates the MicrosoftBuildVersion defaultValue in the template.json dynamically.'
