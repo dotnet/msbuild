@@ -1,0 +1,48 @@
+name: Sync Microsoft.Build version in analyzer template with Version.props
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'eng/Versions.props'
+
+jobs:
+  Sync-version:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Update analyzer template version with version from Versions.props
+      shell: pwsh
+      run: |
+        # Define the paths to your XML and JSON files
+        $xmlFilePath = "eng/Versions.props"
+        $jsonFilePath = "template_feed/content/Microsoft.AnalyzerTemplate/.template.config\template.json"
+
+        # Load and parse the XML content
+        [xml]$xmlContent = Get-Content -Path $xmlFilePath
+        $versionPrefix = [string]$xmlContent.Project.PropertyGroup.VersionPrefix
+
+        # Load the JSON template
+        $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
+
+        # Update the defaultValue of MicrosoftBuildVersion in the JSON template
+        $jsonContent.symbols.MicrosoftBuildVersion.defaultValue = $versionPrefix.Trim()
+
+        # Convert the JSON content back to a string
+        $jsonString = $jsonContent | ConvertTo-Json -Depth 10
+
+        # Write the updated JSON back to the file
+        Set-Content -Path $jsonFilePath -Value $jsonString
+        Write-Output "Updated MicrosoftBuildVersion to $versionPrefix"
+
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v6
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'Update MicrosoftBuildVersion in analyzer template'
+        branch: 'update-msbuild-version-for-analyzer-template'
+        title: 'Update MicrosoftBuildVersion in analyzer template'
+        body: 'This PR updates the MicrosoftBuildVersion dynamically.'
