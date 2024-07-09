@@ -1101,6 +1101,7 @@ namespace Microsoft.Build.Logging
                     fields.HelpKeyword,
                     fields.SenderName,
                     fields.Importance);
+            SetCommonFields(e, fields);
 
             return e;
         }
@@ -1122,6 +1123,7 @@ namespace Microsoft.Build.Logging
                     column,
                     fields.HelpKeyword,
                     fields.SenderName);
+            SetCommonFields(e, fields);
 
             return e;
         }
