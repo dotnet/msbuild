@@ -40,16 +40,6 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// The line number where environment variable is used.
-        /// </summary>
-        public int Line { get; set; }
-
-        /// <summary>
-        /// The column where environment variable is used.
-        /// </summary>
-        public int Column { get; set; }
-
-        /// <summary>
         /// The file name where environment variable is used.
         /// </summary>
         public string FileName { get; set; } = string.Empty;
@@ -63,8 +53,8 @@ namespace Microsoft.Build.Framework
         {
             base.WriteToStream(writer);
             writer.Write(EnvironmentVariableName);
-            writer.Write7BitEncodedInt(Line);
-            writer.Write7BitEncodedInt(Column);
+            writer.Write7BitEncodedInt(LineNumber);
+            writer.Write7BitEncodedInt(ColumnNumber);
             writer.WriteOptionalString(FileName);
         }
 

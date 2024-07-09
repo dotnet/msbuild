@@ -1117,9 +1117,9 @@ namespace Microsoft.Build.Logging
             BuildEventArgs e = new ExtendedEnvironmentVariableReadEventArgs(
                     environmentVariableName ?? string.Empty,
                     fields.Message,
-                    fields.File ?? string.Empty,
-                    fields.LineNumber,
-                    fields.ColumnNumber,
+                    fileName ?? string.Empty,
+                    line,
+                    column,
                     fields.HelpKeyword,
                     fields.SenderName);
 

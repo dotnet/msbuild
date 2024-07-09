@@ -6,6 +6,7 @@ using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -560,8 +561,8 @@ namespace Microsoft.Build.Logging
         {
             WriteMessageFields(e, writeImportance: false);
             WriteDeduplicatedString(e.EnvironmentVariableName);
-            Write(e.Line);
-            Write(e.Column);
+            Write(e.LineNumber);
+            Write(e.ColumnNumber);
             WriteDeduplicatedString(e.FileName);
 
             return BinaryLogRecordKind.ExtendedEnvironmentVariableRead;
