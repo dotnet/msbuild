@@ -36,9 +36,9 @@ namespace Microsoft.Build.BuildEngine
 
     /// <summary>
     /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-    /// <xref:Microsoft.Build.Construction>
-    /// <xref:Microsoft.Build.Evaluation>
-    /// <xref:Microsoft.Build.Execution>
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
     /// 
     /// This class implements the default logger that outputs event data
     /// to the console (stdout).
@@ -72,10 +72,10 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
         /// 
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Default constructor.
         /// </summary>
         /// <remarks>
@@ -96,9 +96,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Create a logger instance with a specific verbosity.  This logs to
         /// the default console.
@@ -129,9 +129,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Initializes the logger, with alternate output handlers.
         /// </summary>
@@ -222,10 +222,10 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
         /// 
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Gets or sets the level of detail to show in the event log.
         /// </summary>
         /// <value>Verbosity level.</value>
@@ -261,10 +261,10 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
         /// 
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// The console logger takes a single parameter to suppress the output of the errors
         /// and warnings summary at the end of a build.
         /// </summary>
@@ -301,9 +301,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Suppresses the display of project headers. Project headers are
         /// displayed by default unless this property is set.
@@ -340,10 +340,10 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
         /// 
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Suppresses the display of error and warnings summary.
         /// </summary>
         /// <remarks>
@@ -406,10 +406,10 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
         /// 
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Apply a parameter.
         /// NOTE: This method was public by accident in Whidbey, so it cannot be made internal now. It has
         /// no good reason for being public.
@@ -432,9 +432,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Signs up the console logger for all build events.
         /// </summary>
@@ -457,9 +457,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// </summary>
         /// <remarks>
         /// <format type="text/markdown"><![CDATA[
@@ -480,9 +480,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// The console logger does not need to release any resources.
         /// This method does nothing.
@@ -504,9 +504,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Handler for build started events
         /// </summary>
@@ -531,9 +531,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Handler for build finished events
         /// </summary>
@@ -558,9 +558,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Handler for project started events
         /// </summary>
@@ -585,9 +585,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Handler for project finished events
         /// </summary>
@@ -612,9 +612,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Handler for target started events
         /// </summary>
@@ -639,9 +639,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Handler for target finished events
         /// </summary>
@@ -666,9 +666,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Handler for task started events
         /// </summary>
@@ -693,9 +693,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Handler for task finished events
         /// </summary>
@@ -720,9 +720,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Prints an error event
         /// </summary>
@@ -745,9 +745,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Prints a warning event
         /// </summary>
@@ -770,9 +770,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Prints a message event
         /// </summary>
@@ -795,10 +795,10 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
         /// 
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Prints a custom event
         /// </summary>
         /// <remarks>

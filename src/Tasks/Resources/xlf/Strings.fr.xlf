@@ -143,22 +143,22 @@
       </trans-unit>
       <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
         <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
-        <target state="new">MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</target>
+        <target state="translated">MSB9903: PreferNativeArm64 nécessite un manifeste d’application Win32 et s’exclue mutuellement de NoWin32Manifest.</target>
         <note>{StrBegin="MSB9903: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
         <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
-        <target state="new">MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</target>
+        <target state="translated">MSB9904: lorsque PreferNativeArm64 est activé, vérifiez que la plateforme est définie sur AnyCPU. Plateforme actuelle : {0}.</target>
         <note>{StrBegin="MSB9904: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
         <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
-        <target state="new">MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</target>
+        <target state="translated">MSB9902: les options Prefer32Bit et PreferNativeArm64 s’excluent mutuellement. N’activez qu’un seul.</target>
         <note>{StrBegin="MSB9902: "}</note>
       </trans-unit>
       <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
         <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
-        <target state="new">MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</target>
+        <target state="translated">MSB9901: la gravité spécifiée n’est pas pertinente : «{0}» pour le message : «{1}».</target>
         <note>{StrBegin="MSB9901: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
@@ -274,12 +274,12 @@
       <trans-unit id="Copy.Retrying">
         <source>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4} {5}</source>
         <target state="translated">MSB3026: Impossible de copier "{0}" vers "{1}". Nouvelle tentative de l'opération {2} dans {3} ms. {4} {5}</target>
-        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
+        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.ExceededRetries">
         <source>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed. {3}</source>
         <target state="translated">MSB3027: Impossible de copier "{0}" vers "{1}". Dépassement du nombre maximal de nouvelles tentatives de {2}. Échec. {3}</target>
-        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
+        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.InvalidRetryCount">
         <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
@@ -357,8 +357,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Delete.Error">
-        <source>MSB3061: Unable to delete file "{0}". {1}</source>
-        <target state="translated">MSB3061: Impossible de supprimer le fichier "{0}". {1}</target>
+        <source>MSB3061: Unable to delete file "{0}". {1} {2}</source>
+        <target state="translated">MSB3061: Impossible de supprimer le fichier « {0} ». {1} {2}</target>
         <note>{StrBegin="MSB3061: "}</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
@@ -372,9 +372,9 @@
         <note>{StrBegin="MSB3029: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="Delete.Retrying">
-        <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</source>
-        <target state="translated">MSB3062: Impossible de supprimer le fichier "{0}« . Début du {1} de nouvelles tentatives en {2}ms. {3}</target>
-        <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</note>
+        <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</source>
+        <target state="translated">MSB3062: Impossible de supprimer le fichier « {0} ». Début du {1} de nouvelles tentatives en {2} ms. {3} {4}</target>
+        <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message, {4} is message from LockCheck.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
         <source>File "{0}" doesn't exist. Skipping.</source>
@@ -1519,8 +1519,8 @@
         <note>{StrBegin="MSB3676: "}</note>
       </trans-unit>
       <trans-unit id="Move.Error">
-        <source>MSB3677: Unable to move file "{0}" to "{1}". {2}</source>
-        <target state="translated">MSB3677: Impossible de déplacer le fichier "{0}" vers "{1}". {2}</target>
+        <source>MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</source>
+        <target state="translated">MSB3677: Impossible de déplacer le fichier « {0} » vers « {1} ». {2} {3}</target>
         <note>{StrBegin="MSB3677: "}</note>
       </trans-unit>
       <trans-unit id="Move.ExactlyOneTypeOfDestination">
@@ -1601,7 +1601,7 @@
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
         <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</source>
-        <target state="new">MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</target>
+        <target state="translated">MSB4300: la valeur spécifiée «{0}» pour l’élément supportedArchitectures n’est pas valide. Supprimez-le du manifeste ou définissez-le sur « amd64 arm64 ».</target>
         <note>{StrBegin="MSB4300: "}</note>
       </trans-unit>
       <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
@@ -2564,11 +2564,6 @@
         <target state="translated">MSB3353: La clé publique nécessaire à la signature différée n'a pas été spécifiée.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
-      <trans-unit id="Task.FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="translated">Le fichier est verrouillé par : "{0}"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: La tâche "{0}" n'est pas prise en charge dans la version .NET Core de MSBuild. Utilisez la version du .NET Framework de MSBuild. Pour plus d'informations, consultez https://aka.ms/msbuild/MSB4803.</target>
@@ -2590,8 +2585,8 @@
         <note>{StrBegin="MSB3371: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotMakeFileWritable">
-        <source>MSB3372: The file "{0}" cannot be made writable. {1}</source>
-        <target state="translated">MSB3372: Impossible de rendre le fichier "{0}" accessible en écriture. {1}</target>
+        <source>MSB3372: The file "{0}" cannot be made writable. {1} {2}</source>
+        <target state="translated">MSB3372: Impossible de rendre le fichier « {0} » accessible en écriture. {1} {2}</target>
         <note>{StrBegin="MSB3372: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotRestoreAttributes">
@@ -2600,8 +2595,8 @@
         <note>{StrBegin="MSB3373: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotTouch">
-        <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1}</source>
-        <target state="translated">MSB3374: Impossible de définir l'heure du dernier accès/de la dernière écriture pour le fichier "{0}". {1}</target>
+        <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</source>
+        <target state="translated">MSB3374: Impossible de définir l’heure du dernier accès/de la dernière écriture pour le fichier « {0} ». {1} {2}</target>
         <note>{StrBegin="MSB3374: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CreatingFile">
@@ -2695,8 +2690,8 @@
         <note>{StrBegin="MSB3936: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
-        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
-        <target state="translated">MSB3935: Échec de la décompression du fichier "{0}", car le fichier de destination "{1}" est en lecture seule et n'a pas pu être rendu accessible en écriture. {2}</target>
+        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
+        <target state="translated">MSB3935: Échec de la décompression du fichier « {0} », car le fichier de destination « {1} » est en lecture seule et n’a pas pu être rendu accessible en écriture. {2} {3}</target>
         <note>{StrBegin="MSB3935: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotOpenFile">
@@ -2780,8 +2775,8 @@
         <note>{StrBegin="MSB3715: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
-        <source>MSB3491: Could not write lines to file "{0}". {1}</source>
-        <target state="translated">MSB3491: Impossible d'écrire des lignes dans le fichier "{0}". {1}</target>
+        <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
+        <target state="translated">MSB3491: Impossible d’écrire des lignes dans le fichier « {0} ». {1} {2}</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
@@ -3050,8 +3045,8 @@
         <note>{StrBegin="MSB3712: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotWriteOutput">
-        <source>MSB3713: The file "{0}" could not be created. {1}</source>
-        <target state="translated">MSB3713: Impossible de créer le fichier "{0}". {1}</target>
+        <source>MSB3713: The file "{0}" could not be created. {1} {2}</source>
+        <target state="translated">MSB3713: Impossible de créer le fichier « {0} ». {1} {2}</target>
         <note>{StrBegin="MSB3713: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.SkippedNumberedParameter">
@@ -3500,8 +3495,8 @@
         <note>{StrBegin="MSB3941: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFailed">
-        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
-        <target state="translated">MSB3943: Échec de la compression du répertoire "{0}" dans le fichier "{1}". {2}</target>
+        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</source>
+        <target state="translated">MSB3943: Échec de la compression du répertoire « {0} » dans le fichier « {1} ». {2} {3}</target>
         <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFileExists">

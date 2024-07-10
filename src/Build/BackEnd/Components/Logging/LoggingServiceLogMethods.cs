@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd.Shared;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
@@ -69,17 +70,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (!OnlyLogCriticalEvents)
             {
-                ErrorUtilities.VerifyThrow(buildEventContext != null, "buildEventContext was null");
-                ErrorUtilities.VerifyThrow(message != null, "message was null");
+                BuildMessageEventArgs buildEvent = EventsCreatorHelper.CreateMessageEventFromText(buildEventContext, importance, message, messageArgs);
 
-                BuildMessageEventArgs buildEvent = new BuildMessageEventArgs(
-                        message,
-                        helpKeyword: null,
-                        senderName: "MSBuild",
-                        importance,
-                        DateTime.UtcNow,
-                        messageArgs);
-                buildEvent.BuildEventContext = buildEventContext;
                 ProcessLoggingEvent(buildEvent);
             }
         }
@@ -136,31 +128,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">Message is null</exception>
         public void LogErrorFromText(BuildEventContext buildEventContext, string subcategoryResourceName, string errorCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
-            ErrorUtilities.VerifyThrow(buildEventContext != null, "Must specify the buildEventContext");
-            ErrorUtilities.VerifyThrow(file != null, "Must specify the associated file.");
-            ErrorUtilities.VerifyThrow(message != null, "Need error message.");
+            BuildErrorEventArgs buildEvent = EventsCreatorHelper.CreateErrorEventFromText(buildEventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
 
-            string subcategory = null;
-
-            if (subcategoryResourceName != null)
-            {
-                subcategory = AssemblyResources.GetString(subcategoryResourceName);
-            }
-
-            BuildErrorEventArgs buildEvent =
-            new BuildErrorEventArgs(
-                subcategory,
-                errorCode,
-                file.File,
-                file.Line,
-                file.Column,
-                file.EndLine,
-                file.EndColumn,
-                message,
-                helpKeyword,
-                "MSBuild");
-
-            buildEvent.BuildEventContext = buildEventContext;
             if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
                 _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
@@ -418,6 +387,15 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Make sure we process this event before going any further
             WaitForLoggingToProcessEvents();
+        }
+
+        /// <inheritdoc />
+        public void LogBuildCanceled()
+        {
+            string message = ResourceUtilities.GetResourceString("AbortingBuild"); 
+            BuildCanceledEventArgs buildEvent = new BuildCanceledEventArgs(message);
+
+            ProcessLoggingEvent(buildEvent);
         }
 
         /// <inheritdoc />

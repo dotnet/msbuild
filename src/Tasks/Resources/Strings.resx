@@ -275,11 +275,11 @@
   </data>
   <data name="Copy.Retrying">
     <value>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4} {5}</value>
-    <comment>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</comment>
+    <comment>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</comment>
   </data>
   <data name="Copy.ExceededRetries">
     <value>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed. {3}</value>
-    <comment>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</comment>
+    <comment>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</comment>
   </data>
   <data name="Copy.InvalidRetryCount">
     <value>MSB3028: {0} is an invalid retry count. Value must not be negative.</value>
@@ -292,9 +292,6 @@
   <data name="Copy.SourceFileNotFound">
     <value>MSB3030: Could not copy the file "{0}" because it was not found.</value>
     <comment>{StrBegin="MSB3030: "} LOCALIZATION: {0} is a number.</comment>
-  </data>
-  <data name="Task.FileLocked">
-    <value>The file is locked by: "{0}"</value>
   </data>
 
   <!--
@@ -366,15 +363,15 @@
     <value>Deleting file "{0}".</value>
   </data>
   <data name="Delete.Error">
-    <value>MSB3061: Unable to delete file "{0}". {1}</value>
+    <value>MSB3061: Unable to delete file "{0}". {1} {2}</value>
     <comment>{StrBegin="MSB3061: "}</comment>
   </data>
   <data name="Delete.SkippingNonexistentFile">
     <value>File "{0}" doesn't exist. Skipping.</value>
   </data>
   <data name="Delete.Retrying">
-    <value>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</value>
-    <comment>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</comment>
+    <value>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</value>
+    <comment>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message, {4} is message from LockCheck.</comment>
   </data>
   <data name="Delete.InvalidRetryCount">
     <value>MSB3028: {0} is an invalid retry count. Value must not be negative.</value>
@@ -1239,7 +1236,7 @@
     <comment>{StrBegin="MSB3676: "}</comment>
   </data>
   <data name="Move.Error">
-    <value>MSB3677: Unable to move file "{0}" to "{1}". {2}</value>
+    <value>MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</value>
     <comment>{StrBegin="MSB3677: "}</comment>
   </data>
   <data name="Move.ExactlyOneTypeOfDestination">
@@ -2094,7 +2091,7 @@
     <comment>{StrBegin="MSB3371: "}</comment>
   </data>
   <data name="Touch.CannotMakeFileWritable">
-    <value>MSB3372: The file "{0}" cannot be made writable. {1}</value>
+    <value>MSB3372: The file "{0}" cannot be made writable. {1} {2}</value>
     <comment>{StrBegin="MSB3372: "}</comment>
   </data>
   <data name="Touch.CannotRestoreAttributes">
@@ -2102,7 +2099,7 @@
     <comment>{StrBegin="MSB3373: "}</comment>
   </data>
   <data name="Touch.CannotTouch">
-    <value>MSB3374: The last access/last write time on file "{0}" cannot be set. {1}</value>
+    <value>MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</value>
     <comment>{StrBegin="MSB3374: "}</comment>
   </data>
   <data name="Touch.CreatingFile">
@@ -2188,7 +2185,7 @@
         If this bucket overflows, pls. contact 'vsppbdev'.
   -->
   <data name="WriteLinesToFile.ErrorOrWarning">
-    <value>MSB3491: Could not write lines to file "{0}". {1}</value>
+    <value>MSB3491: Could not write lines to file "{0}". {1} {2}</value>
     <comment>{StrBegin="MSB3491: "}</comment>
   </data>
   <data name="WriteLinesToFile.ErrorReadingFile">
@@ -2430,7 +2427,7 @@
       <comment>{StrBegin="MSB3712: "}</comment>
     </data>
     <data name="WriteCodeFragment.CouldNotWriteOutput" xml:space="preserve">
-      <value>MSB3713: The file "{0}" could not be created. {1}</value>
+      <value>MSB3713: The file "{0}" could not be created. {1} {2}</value>
       <comment>{StrBegin="MSB3713: "}</comment>
     </data>
     <data name="WriteCodeFragment.SkippedNumberedParameter" xml:space="preserve">
@@ -2871,7 +2868,7 @@
     <comment>{StrBegin="MSB3934: "}</comment>
   </data>
   <data name="Unzip.ErrorCouldNotMakeFileWriteable">
-    <value>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</value>
+    <value>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</value>
     <comment>{StrBegin="MSB3935: "}</comment>
   </data>
   <data name="Unzip.ErrorCouldNotExtractFile">
@@ -2912,7 +2909,7 @@
     <comment>{StrBegin="MSB3942: "}</comment>
   </data>
   <data name="ZipDirectory.ErrorFailed">
-    <value>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</value>
+    <value>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</value>
     <comment>{StrBegin="MSB3943: "}</comment>
   </data>
   <data name="ZipDirectory.Comment">

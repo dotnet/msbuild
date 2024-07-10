@@ -35,6 +35,22 @@ Detecting unsecure packages is not MSBuild responsibility and is currently out o
 Custom analyzers are delivered as regular nuget packages by MSBuild `<PackageReference />` element.
 Users is expected to implement process to detect and warn about known malicious custom analyzers.
 
+#### Important Notice:
+Users should not add untrusted build analyzers to their projects. The use of untrusted or unverified 3rd party analyzers can introduce security risks and vulnerabilities into the build process. Always ensure that any build analyzers integrated into your projects come from reputable sources and have been thoroughly vetted.
+
+To ensure a secure and reliable build environment, the following steps should be taken:
+
+#### Use Dedicated Security Tools:
+Utilize specialized security tools and services to scan and monitor 3rd party analyzer packages and their dependencies. 
+#### Regular Updates:
+Ensure that all 3rd party packages and dependencies are regularly updated to the latest versions, which often include security patches and vulnerability fixes.
+
+#### Vendor Documentation and Support:
+Refer to the official documentation and support channels provided by the developers of the 3rd party analyzer packages. They may offer guidance and tools for managing security and addressing vulnerabilities.
+
+#### Internal Security Policies:
+Implement internal policies and processes for the assessment and mitigation of security risks associated with using 3rd party packages. This can include regular security audits, dependency management protocols, and automated vulnerability scanning during the build process.
+
 ## Execution
 
 ### Threat: Supply chain attack by custom analyzer

@@ -14,9 +14,9 @@ namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
     /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-    /// <xref:Microsoft.Build.Construction>
-    /// <xref:Microsoft.Build.Evaluation>
-    /// <xref:Microsoft.Build.Execution>
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
     /// 
     /// This class represents a single UsingTask element in a project file
     /// </summary>
@@ -39,9 +39,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// Returns true if this UsingTask was imported from another project
         /// </summary>
@@ -65,9 +65,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// The task name
         /// </summary>
@@ -99,9 +99,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// The name of the assembly containing the task
         /// </summary>
@@ -133,9 +133,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// The assembly file containing the task
         /// </summary>
@@ -167,9 +167,9 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
-        /// <xref:Microsoft.Build.Construction>
-        /// <xref:Microsoft.Build.Evaluation>
-        /// <xref:Microsoft.Build.Execution>
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// 
         /// The condition string for this UsingTask
         /// </summary>

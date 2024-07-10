@@ -15,10 +15,6 @@ namespace Microsoft.Build.Experimental.BuildCheck.Acquisition;
 
 internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
 {
-    private readonly ILoggingService _loggingService;
-
-    internal BuildCheckAcquisitionModule(ILoggingService loggingService) => _loggingService = loggingService;
-
 #if FEATURE_ASSEMBLYLOADCONTEXT
     /// <summary>
     /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory.
@@ -29,7 +25,9 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
     /// <summary>
     /// Creates a list of factory delegates for building analyzer rules instances from a given assembly path.
     /// </summary>
-    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext)
+    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(
+        AnalyzerAcquisitionData analyzerAcquisitionData,
+        IAnalysisContext analysisContext)
     {
         var analyzersFactories = new List<BuildAnalyzerFactory>();
 
@@ -48,11 +46,13 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             foreach (Type analyzerCandidate in analyzerTypes)
             {
                 analyzersFactories.Add(() => (BuildAnalyzer)Activator.CreateInstance(analyzerCandidate)!);
+                analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerRegistered", analyzerCandidate.Name, analyzerCandidate.Assembly);
             }
 
             if (availableTypes.Count != analyzerTypes.Count)
             {
-                availableTypes.Except(analyzerTypes).ToList().ForEach(t => _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
+                availableTypes.Except(analyzerTypes).ToList()
+                    .ForEach(t => analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
             }
         }
         catch (ReflectionTypeLoadException ex)
@@ -61,13 +61,13 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             {
                 foreach (Exception? loaderException in ex.LoaderExceptions)
                 {
-                    _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", loaderException?.Message);
+                    analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", loaderException?.Message);
                 }
             }
         }
         catch (Exception ex)
         {
-            _loggingService.LogComment(buildEventContext, MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", ex?.Message);
+            analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", ex?.Message);
         }
 
         return analyzersFactories;
