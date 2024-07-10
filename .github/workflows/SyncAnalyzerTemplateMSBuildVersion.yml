@@ -17,26 +17,46 @@ jobs:
     - name: Update analyzer template version with version from Versions.props
       shell: pwsh
       run: |
-        # Define the paths to your XML and JSON files
-        $xmlFilePath = "eng/Versions.props"
-        $jsonFilePath = "template_feed/content/Microsoft.AnalyzerTemplate/.template.config\template.json"
+        try {
+            # Define the paths to your XML and JSON files
+            $xmlFilePath = "eng/Versions.props"
+            $jsonFilePath = "template_feed/content/Microsoft.AnalyzerTemplate/.template.config/template.json"
 
-        # Load and parse the XML content
-        [xml]$xmlContent = Get-Content -Path $xmlFilePath
-        $versionPrefix = [string]$xmlContent.Project.PropertyGroup.VersionPrefix
+            # Check if the XML file exists
+            if (-Not (Test-Path -Path $xmlFilePath)) {
+                throw "Versons.props file not found: $xmlFilePath"
+            }
 
-        # Load the JSON template
-        $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
+            # Load and parse the XML content
+            [xml]$xmlContent = Get-Content -Path $xmlFilePath
+            $versionPrefix = [string]$xmlContent.Project.PropertyGroup.VersionPrefix
 
-        # Update the defaultValue of MicrosoftBuildVersion in the JSON template
-        $jsonContent.symbols.MicrosoftBuildVersion.defaultValue = $versionPrefix.Trim()
+            # Validate the versionPrefix
+            if ([string]::IsNullOrWhiteSpace($versionPrefix)) {
+                throw "VersionPrefix is empty or null in the XML file: $xmlFilePath"
+            }
 
-        # Convert the JSON content back to a string
-        $jsonString = $jsonContent | ConvertTo-Json -Depth 10
+            # Check if the JSON file exists
+            if (-Not (Test-Path -Path $jsonFilePath)) {
+                throw "Analyzer template file not found: $jsonFilePath"
+            }
 
-        # Write the updated JSON back to the file
-        Set-Content -Path $jsonFilePath -Value $jsonString
-        Write-Output "Updated MicrosoftBuildVersion to $versionPrefix"
+            # Load the JSON template
+            $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
+
+            # Update the defaultValue of MicrosoftBuildVersion in the JSON template
+            $jsonContent.symbols.MicrosoftBuildVersion.defaultValue = $versionPrefix.Trim()
+
+            # Convert the JSON content back to a string
+            $jsonString = $jsonContent | ConvertTo-Json -Depth 10
+
+            # Write the updated JSON back to the file
+            Set-Content -Path $jsonFilePath -Value $jsonString
+            Write-Output "Updated MicrosoftBuildVersion to $versionPrefix"
+        }
+        catch {
+            Write-Error "An error occurred: $_"
+        }
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v6
@@ -45,4 +65,4 @@ jobs:
         commit-message: 'Update MicrosoftBuildVersion in analyzer template'
         branch: 'update-msbuild-version-for-analyzer-template'
         title: 'Update MicrosoftBuildVersion in analyzer template'
-        body: 'This PR updates the MicrosoftBuildVersion defaultValue in the template.json dynamically.'
+        body: '[Automated] Update the MicrosoftBuildVersion defaultValue in the template.json.'
