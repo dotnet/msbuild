@@ -334,7 +334,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             => _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(analysisContext, evaluationFinishedEventArgs);
 
-        public void ProcessEvaluationEventArgs(IAnalysisContext analysisContext, ExtendedEnvironmentVariableReadEventArgs projectEvaluationEventArgs)
+        public void ProcessEnvironmentVariableReadEventArgs(IAnalysisContext analysisContext, ExtendedEnvironmentVariableReadEventArgs projectEvaluationEventArgs)
         {
             if (projectEvaluationEventArgs is ExtendedEnvironmentVariableReadEventArgs evr)
             {

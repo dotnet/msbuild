@@ -108,51 +108,46 @@ internal sealed class BuildCheckCentralContext
     {
         string projectFullPath = analysisData.ProjectFilePath;
 
-        // Alternatively we might want to actually do this all in serial, but asynchronously (blocking queue)
-        Parallel.ForEach(
-            registeredCallbacks,
-            new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
-            /* (BuildAnalyzerWrapper2, Action<BuildAnalysisContext<T>>) */
-            analyzerCallback =>
+        foreach (var analyzerCallback in registeredCallbacks)
+        {
+            // Tracing - https://github.com/dotnet/msbuild/issues/9629 - we might want to account this entire block
+            //  to the relevant analyzer (with only the currently accounted part as being the 'core-execution' subspan)
+
+            BuildAnalyzerConfigurationInternal? commonConfig = analyzerCallback.Item1.CommonConfig;
+            BuildAnalyzerConfigurationInternal[] configPerRule;
+
+            if (commonConfig != null)
             {
-                // Tracing - https://github.com/dotnet/msbuild/issues/9629 - we might want to account this entire block
-                //  to the relevant analyzer (with only the currently accounted part as being the 'core-execution' subspan)
-
-                BuildAnalyzerConfigurationInternal? commonConfig = analyzerCallback.Item1.CommonConfig;
-                BuildAnalyzerConfigurationInternal[] configPerRule;
-
-                if (commonConfig != null)
+                if (!commonConfig.IsEnabled)
                 {
-                    if (!commonConfig.IsEnabled)
-                    {
-                        return;
-                    }
-
-                    configPerRule = new[] { commonConfig };
-                }
-                else
-                {
-                    configPerRule =
-                        _configurationProvider.GetMergedConfigurations(projectFullPath,
-                            analyzerCallback.Item1.BuildAnalyzer);
-                    if (configPerRule.All(c => !c.IsEnabled))
-                    {
-                        return;
-                    }
+                    return;
                 }
 
-                // Here we might want to check the configPerRule[0].EvaluationAnalysisScope - if the input data supports that
-                // The decision and implementation depends on the outcome of the investigation tracked in:
-                // https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57851137
+                configPerRule = new[] { commonConfig };
+            }
+            else
+            {
+                configPerRule =
+                    _configurationProvider.GetMergedConfigurations(projectFullPath,
+                        analyzerCallback.Item1.BuildAnalyzer);
+                if (configPerRule.All(c => !c.IsEnabled))
+                {
+                    return;
+                }
+            }
 
-                BuildCheckDataContext<T> context = new BuildCheckDataContext<T>(
-                    analyzerCallback.Item1,
-                    analysisContext,
-                    configPerRule,
-                    resultHandler,
-                    analysisData);
+            // Here we might want to check the configPerRule[0].EvaluationAnalysisScope - if the input data supports that
+            // The decision and implementation depends on the outcome of the investigation tracked in:
+            // https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57851137
 
-                analyzerCallback.Item2(context);
-            });
+            BuildCheckDataContext<T> context = new BuildCheckDataContext<T>(
+                analyzerCallback.Item1,
+                analysisContext,
+                configPerRule,
+                resultHandler,
+                analysisData);
+
+            analyzerCallback.Item2(context);
+        }
     }
 }

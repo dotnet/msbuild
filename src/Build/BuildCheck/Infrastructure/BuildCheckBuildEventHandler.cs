@@ -103,7 +103,7 @@ internal class BuildCheckBuildEventHandler
                 _analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)));
 
     private void HandleEnvironmentVariableReadEvent(ExtendedEnvironmentVariableReadEventArgs eventArgs)
-        => _buildCheckManager.ProcessEvaluationEventArgs(
+        => _buildCheckManager.ProcessEnvironmentVariableReadEventArgs(
                 _analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)),
                 eventArgs);
 

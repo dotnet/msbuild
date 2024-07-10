@@ -25,9 +25,9 @@ internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
         // No custom configuration
     }
 
-    public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEvaluatedPropertiesAction(EvaluatedPropertiesAction);
+    public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEvaluatedPropertiesAction(ProcessEnvironmentVariableReadAction);
 
-    private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesAnalysisData> context)
+    private void ProcessEnvironmentVariableReadAction(BuildCheckDataContext<EvaluatedPropertiesAnalysisData> context)
     {
         if (context.Data.EvaluatedEnvironmentVariables.Count != 0)
         {
