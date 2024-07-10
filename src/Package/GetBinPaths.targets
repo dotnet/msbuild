@@ -19,11 +19,6 @@
                       ReferenceOutputAssembly="false"
                       OutputItemType="MSBuildTaskHostResolvedProjectReferencePath" />
 
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Deprecated\Conversion\Microsoft.Build.Conversion.csproj"
-                      Private="false"
-                      ReferenceOutputAssembly="false"
-                      OutputItemType="MSBuildConversionResolvedProjectReferencePath" />
-
     <!-- Set up items to build projects where the Platform is set to x64, when we need the x64 versions of the files.
          We have to treat these separately from normal project references, as the AssignProjectConfiguration task would overwrite
          the SetPlatform item metadata if they were ProjectReferences.
