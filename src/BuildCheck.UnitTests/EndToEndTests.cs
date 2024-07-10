@@ -181,7 +181,7 @@ public class EndToEndTests : IDisposable
                 .Replace("WorkFolderPath", workFolder.Path);
     }
 
-    [Theory]
+    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10277")]
     [InlineData("AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomAnalyzerTest(string analysisCandidate, string[] expectedRegisteredRules, bool expectedRejectedAnalyzers = false)
