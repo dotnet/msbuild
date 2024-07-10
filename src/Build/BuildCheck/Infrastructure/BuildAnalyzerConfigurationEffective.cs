@@ -8,7 +8,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// <summary>
 /// Counterpart type for BuildAnalyzerConfiguration - with all properties non-nullable
 /// </summary>
-internal sealed class BuildAnalyzerConfigurationEffective
+public sealed class BuildAnalyzerConfigurationEffective
 {
     public BuildAnalyzerConfigurationEffective(string ruleId, EvaluationAnalysisScope evaluationAnalysisScope, BuildAnalyzerResultSeverity severity, bool isEnabled)
     {

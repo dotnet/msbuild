@@ -226,7 +226,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 CustomConfigurationData[] customConfigData =
                     _configurationProvider.GetCustomConfigurations(projectFullPath, analyzerFactoryContext.RuleIds);
 
-                ConfigurationContext configurationContext = ConfigurationContext.FromDataEnumeration(customConfigData, userConfigs);
+                ConfigurationContext configurationContext = ConfigurationContext.FromDataEnumeration(customConfigData, configurations);
 
                 wrapper = analyzerFactoryContext.Factory(configurationContext);
                 analyzerFactoryContext.MaterializedAnalyzer = wrapper;
