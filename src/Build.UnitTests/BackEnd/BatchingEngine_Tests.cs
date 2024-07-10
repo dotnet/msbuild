@@ -484,11 +484,47 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(content))));
+            using ProjectFromString projectFromString = new(ObjectModelHelpers.CleanupFileContents(content));
+            Project project = projectFromString.Project;
             MockLogger logger = new MockLogger();
             project.Build(logger);
 
             logger.AssertLogContains("[i1;i2 ]", "[i3 m1]");
+        }
+
+        /// <summary>
+        /// This is a regression test for https://github.com/dotnet/msbuild/issues/10180.
+        /// </summary>
+        [Fact]
+        public void HandlesEarlyExitFromTargetBatching()
+        {
+            string content = @"
+                <Project>
+                    <ItemGroup>
+                        <Example Include='Item1'>
+                            <Color>Blue</Color>
+                        </Example>
+                        <Example Include='Item2'>
+                            <Color>Red</Color>
+                        </Example>
+                    </ItemGroup>
+
+                    <Target Name='Build'
+                        Inputs='@(Example)'
+                        Outputs='%(Color)\MyFile.txt'>
+                        <NonExistentTask
+                            Text = '@(Example)'
+                            Output = '%(Color)\MyFile.txt'/>
+                    </Target>
+                </Project>
+                ";
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
+            MockLogger logger = new MockLogger();
+            project.Build(logger);
+
+            // Build should fail with error MSB4036: The "NonExistentTask" task was not found.
+            logger.AssertLogContains("MSB4036");
         }
 
         private static Lookup CreateLookup(ItemDictionary<ProjectItemInstance> itemsByType, PropertyDictionary<ProjectPropertyInstance> properties)

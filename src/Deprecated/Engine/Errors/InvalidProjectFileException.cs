@@ -15,9 +15,24 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+    /// 
     /// This exception is thrown whenever there is a problem with the user's XML project file. The problem might be semantic or
     /// syntactical. The latter would be of a type typically caught by XSD validation (if it was performed by the project writer).
     /// </summary>
+    /// <remarks>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
+    /// </remarks>
     /// <owner>RGoel</owner>
     // WARNING: marking a type [Serializable] without implementing ISerializable imposes a serialization contract -- it is a
     // promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
@@ -29,12 +44,27 @@ namespace Microsoft.Build.BuildEngine
         #region Basic constructors
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Default constructor.
         /// </summary>
         /// <remarks>
         /// This constructor only exists to satisfy .NET coding guidelines. Use a rich constructor whenever possible.
         /// </remarks>
         /// <owner>RGoel</owner>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public InvalidProjectFileException()
             : base()
         {
@@ -42,6 +72,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// 
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Creates an instance of this exception using the specified error message.
         /// </summary>
         /// <remarks>
@@ -49,6 +84,16 @@ namespace Microsoft.Build.BuildEngine
         /// </remarks>
         /// <owner>SumedhK</owner>
         /// <param name="message"></param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public InvalidProjectFileException(string message)
             : base(message)
         {
@@ -56,6 +101,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// 
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Creates an instance of this exception using the specified error message and inner exception.
         /// </summary>
         /// <owner>SumedhK</owner>
@@ -64,6 +114,16 @@ namespace Microsoft.Build.BuildEngine
         /// </remarks>
         /// <param name="message"></param>
         /// <param name="innerException"></param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public InvalidProjectFileException(string message, Exception innerException)
             : base(message, innerException)
         {
@@ -95,11 +155,26 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// ISerializable method which we must override since Exception implements this interface
         /// If we ever add new members to this class, we'll need to update this.
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -121,6 +196,11 @@ namespace Microsoft.Build.BuildEngine
         #region Rich constructors
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Creates an instance of this exception using rich error information.
         /// </summary>
         /// <remarks>This constructor is preferred over the basic constructors.</remarks>
@@ -130,6 +210,16 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="errorSubcategory">Error sub-category that describes the error (can be null).</param>
         /// <param name="errorCode">The error code (can be null).</param>
         /// <param name="helpKeyword">The F1-help keyword for the host IDE (can be null).</param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public InvalidProjectFileException
         (
             XmlNode xmlNode,
@@ -154,6 +244,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Creates an instance of this exception using rich error information.
         /// </summary>
         /// <remarks>This constructor is preferred over the basic constructors.</remarks>
@@ -167,6 +262,16 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="errorSubcategory">Error sub-category that describes the error (can be null).</param>
         /// <param name="errorCode">The error code (can be null).</param>
         /// <param name="helpKeyword">The F1-help keyword for the host IDE (can be null).</param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public InvalidProjectFileException
         (
             string projectFile,
@@ -199,10 +304,25 @@ namespace Microsoft.Build.BuildEngine
         #region Properties
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Gets the exception message including the affected project file (if any).
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The complete message string.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public override string Message
         {
             get
@@ -214,10 +334,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Gets the exception message not including the project file.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The error message string only.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string BaseMessage
         {
             get
@@ -227,10 +362,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Gets the project file (if any) associated with this exception.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>Project filename/path string, or null.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string ProjectFile
         {
             get
@@ -240,10 +390,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// 
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Gets the invalid line number (if any) in the project.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The invalid line number, or zero.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public int LineNumber
         {
             get
@@ -253,10 +418,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Gets the invalid column number (if any) in the project.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The invalid column number, or zero.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public int ColumnNumber
         {
             get
@@ -266,10 +446,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Gets the last line number (if any) of a range of invalid lines in the project.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The last invalid line number, or zero.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public int EndLineNumber
         {
             get
@@ -279,10 +474,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// 
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Gets the last column number (if any) of a range of invalid columns in the project.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The last invalid column number, or zero.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public int EndColumnNumber
         {
             get
@@ -292,10 +502,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Gets the error sub-category (if any) that describes the type of this error.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The sub-category string, or null.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string ErrorSubcategory
         {
             get
@@ -305,10 +530,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// 
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Gets the error code (if any) associated with the exception message.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>Error code string, or null.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string ErrorCode
         {
             get
@@ -318,10 +558,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// 
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Gets the F1-help keyword (if any) associated with this error, for the host IDE.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <value>The keyword string, or null.</value>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public string HelpKeyword
         {
             get

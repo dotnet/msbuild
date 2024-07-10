@@ -188,6 +188,7 @@ namespace Microsoft.Build.Logging
                 if (CollectProjectImports != ProjectImportsCollectionMode.None && replayEventSource == null)
                 {
                     projectImportsCollector = new ProjectImportsCollector(FilePath, CollectProjectImports == ProjectImportsCollectionMode.ZipFile);
+                    projectImportsCollector.FileIOExceptionEvent += EventSource_AnyEventRaised;
                 }
 
                 if (eventSource is IEventSource3 eventSource3)
@@ -320,6 +321,7 @@ namespace Microsoft.Build.Logging
                     projectImportsCollector.DeleteArchive();
                 }
 
+                projectImportsCollector.FileIOExceptionEvent -= EventSource_AnyEventRaised;
                 projectImportsCollector = null;
             }
 

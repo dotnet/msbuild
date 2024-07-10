@@ -14,7 +14,6 @@ using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
@@ -3046,7 +3045,7 @@ namespace Microsoft.Build.Execution
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
             _hostServices = buildParameters.HostServices;
             this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
-            _loggingContext = new AnalyzerLoggingContext(loggingService, buildEventContext);
+            _loggingContext = new GenericLoggingContext(loggingService, buildEventContext);
             this.EvaluatedItemElements = new List<ProjectItemElement>();
 
             _explicitToolsVersionSpecified = (explicitToolsVersion != null);
@@ -3397,6 +3396,14 @@ namespace Microsoft.Build.Execution
                 ProjectPropertyInstance instance = InstantiateProjectPropertyInstance(property, isImmutable);
                 _properties.Set(instance);
             }
+        }
+
+        internal class GenericLoggingContext : LoggingContext
+        {
+            public GenericLoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
+                : base(loggingService, eventContext) => IsValid = true;
+
+            public GenericLoggingContext(LoggingContext baseContext) : base(baseContext) => IsValid = true;
         }
     }
 }

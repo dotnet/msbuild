@@ -29,7 +29,6 @@
       <SwrProperty Include="Version=$(VsixVersion)" />
       <SwrProperty Include="FrameworkBinPath=$(FrameworkBinPath)" />
       <SwrProperty Include="Arm64BinPath=$(Arm64BinPath)" />
-      <SwrProperty Include="TaskHostArm64BinPath=$(MSBuildTaskHostArm64BinPath)" />
     </ItemGroup>
   </Target>
 

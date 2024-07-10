@@ -15,6 +15,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
+using Microsoft.Build.Experimental.BuildCheck;
 
 #nullable disable
 
@@ -69,7 +70,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// Logging services is used as a helper class to assist logging messages in getting to the correct loggers.
     /// </summary>
-    internal partial class LoggingService : ILoggingService, INodePacketHandler, IBuildComponent
+    internal partial class LoggingService : ILoggingService, INodePacketHandler
     {
         /// <summary>
         /// The default maximum size for the logging event queue.
@@ -1233,7 +1234,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs to process</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
-        internal virtual void ProcessLoggingEvent(object buildEvent)
+        protected internal virtual void ProcessLoggingEvent(object buildEvent)
         {
             ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
@@ -1592,6 +1593,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
             }
 
+            if (buildEventArgs is BuildCheckResultError checkResultError)
+            {
+                // If the specified BuildCheckResultError was issued, an empty ISet<string> signifies that the specified build check warnings should be treated as errors.
+                AddWarningsAsErrors(checkResultError.BuildEventContext, new HashSet<string>());
+            }
+
             if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
             {
                 WarningsConfigKey key = GetWarningsConfigKey(projectFinishedEvent);
@@ -1763,8 +1770,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 BuildCheckForwardingLogger => MessageImportance.High,
                 BuildCheckConnectorLogger => MessageImportance.High,
 
-                // Central forwarding loggers are used in worker nodes if logging verbosity could not be optimized, i.e. in cases
-                // where we must log everything. They can be ignored in inproc nodes.
+                // If this is not an OutOfProc node, we can ignore the central forwarding logger, because we'll be
+                // setting the message importance to accurate level based on the exact needs of the central logger.
+                // That will happen in separate call to this method, with the central logger itself. This is because in the
+                // inproc case, we register the central loggers (that are the destination for the logging),
+                // wherease in the out-of-proc case, we register the forwarding loggers only - and those need to make sure
+                // to forward at minimum what is required by the central logger.
                 CentralForwardingLogger => (_nodeId > 1 ? MessageImportance.Low : null),
 
                 // The null logger has no effect on minimum verbosity.

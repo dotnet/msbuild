@@ -43,7 +43,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -64,7 +65,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -85,7 +87,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -106,7 +109,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -134,7 +138,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -155,7 +160,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -176,7 +182,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -197,7 +204,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -225,7 +233,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -246,7 +255,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -267,7 +277,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -288,7 +299,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -316,7 +328,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -337,7 +350,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -358,7 +372,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -379,7 +394,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -407,7 +423,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -428,7 +445,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -449,7 +467,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -470,7 +489,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
