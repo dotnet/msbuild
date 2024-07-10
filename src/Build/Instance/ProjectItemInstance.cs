@@ -1432,9 +1432,9 @@ namespace Microsoft.Build.Execution
                     }
                     else if (_itemDefinitions != null)
                     {
-                        foreach (var itemDefinition in _itemDefinitions)
+                        for (int i = 0; i < _itemDefinitions.Count; i++)
                         {
-                            destinationAsTaskItem._itemDefinitions.Add(itemDefinition);
+                            destinationAsTaskItem._itemDefinitions.Add(_itemDefinitions[i]);
                         }
                     }
                 }
@@ -1625,9 +1625,9 @@ namespace Microsoft.Build.Execution
 
                 if (_itemDefinitions is not null)
                 {
-                    foreach (ProjectItemDefinitionInstance itemDefinition in _itemDefinitions)
+                    for (int i = 0; i < _itemDefinitions.Count; i++)
                     {
-                        thisNames.UnionWith(itemDefinition.MetadataNames);
+                        thisNames.UnionWith(_itemDefinitions[i].MetadataNames);
                     }
                 }
 
@@ -1936,14 +1936,13 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private ProjectMetadataInstance GetItemDefinitionMetadata(string metadataName)
             {
-
                 // Check any inherited item definition metadata first. It's more like
                 // direct metadata, but we didn't want to copy the tables.
                 if (_itemDefinitions != null)
                 {
-                    foreach (ProjectItemDefinitionInstance itemDefinition in _itemDefinitions)
+                    for (int i = 0; i < _itemDefinitions.Count; i++)
                     {
-                        ProjectMetadataInstance metadataFromDefinition = itemDefinition.GetMetadata(metadataName);
+                        ProjectMetadataInstance metadataFromDefinition = _itemDefinitions[i].GetMetadata(metadataName);
 
                         if (metadataFromDefinition != null)
                         {
