@@ -12,7 +12,7 @@ Project files are read during the first pass of the evaluation of the project. G
 
 There two issues that arises from such a design:
 1. The configuration of the logging system should be ideally dependent on the set of the applied build analyzers. Verbosity of the build hugely affects the set of logging events that are logged by default. Moreover, some events are not forwarded with forwarding loggers, depending on forwarding loggers configuration. This is done for performance reasons to allow to drop the events that are not consumed by the central loggers. We need to ensure that the events required for the analyzers to work pass through. There might be different detailing: either set up the set of consumed events for the analyzer, or for analyzer rule. In the first case only the declaration is needed for forwarding logger configuration, in the second - information about active rules from the `.editorconfig` file.
-2. There is no syncronization between build manager and logging service. When the build check acquisition events get to the main node, most of the build might have been already finished on worker nodes.
+2. There is no synchronization between build manager and logging service. When the build check acquisition events get to the main node, most of the build might have been already finished on worker nodes.
 
 # Solution ideas
 
