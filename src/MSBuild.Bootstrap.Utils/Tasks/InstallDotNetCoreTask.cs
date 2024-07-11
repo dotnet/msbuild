@@ -16,7 +16,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
     /// This task is designed to automate the installation of .NET Core SDK.
     /// It downloads the appropriate installation script and executes it to install the specified version of .NET Core SDK.
     /// </summary>
-    public sealed class InstallDotNetCoreTask : ToolTask
+    public sealed class InstallDotNetCoreTask : Task
     {
         private const string ScriptName = "dotnet-install";
 
@@ -55,8 +55,6 @@ namespace MSBuild.Bootstrap.Utils.Tasks
 
         private bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-        protected override string ToolName => IsWindows ? "powershell.exe" : "/bin/bash";
-
         /// <summary>
         /// Executes the task, downloading and running the .NET Core installation script.
         /// </summary>
@@ -79,8 +77,6 @@ namespace MSBuild.Bootstrap.Utils.Tasks
 
             return RunScript(executionSettings);
         }
-
-        protected override string GenerateFullPathToTool() => ToolName;
 
         /// <summary>
         /// Downloads the .NET Core installation script asynchronously from the specified URL.
@@ -193,7 +189,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = ToolName,
+                FileName = IsWindows ? "powershell.exe" : "/bin/bash",
                 Arguments = scriptArgs,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
