@@ -33,13 +33,13 @@ namespace Microsoft.Build.Logging
         TargetSkipped,
         PropertyReassignment,
         UninitializedPropertyRead,
+        EnvironmentVariableRead,
         PropertyInitialValueSet,
         NameValueList,
         String,
         TaskParameter,
         ResponseFileUsed,
         AssemblyLoad,
-        EnvironmentVariableRead,
         ExtendedEnvironmentVariableRead,
     }
 }
