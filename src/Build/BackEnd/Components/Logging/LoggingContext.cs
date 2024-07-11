@@ -124,7 +124,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="messageArgs">string resource arguments</param>
         internal void LogComment(MessageImportance importance, string messageResourceName, params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            CheckValidity();
             _loggingService.LogComment(_eventContext, importance, messageResourceName, messageArgs);
         }
 
@@ -137,7 +137,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="messageArgs">string resource arguments</param>
         internal void LogComment(MessageImportance importance, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            CheckValidity();
 
             _loggingService.LogBuildEvent(new BuildMessageEventArgs(
                 null,
@@ -165,7 +165,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="message">message to log</param>
         internal void LogCommentFromText(MessageImportance importance, string message)
         {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            CheckValidity();
             _loggingService.LogCommentFromText(_eventContext, importance, message);
         }
 
@@ -177,7 +177,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="messageArgs">Format string arguments</param>
         internal void LogCommentFromText(MessageImportance importance, string message, params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            CheckValidity();
             _loggingService.LogCommentFromText(_eventContext, importance, message, messageArgs);
         }
 
@@ -189,7 +189,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="messageArgs">Parameters for the resource string</param>
         internal void LogError(BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            CheckValidity();
             _loggingService.LogError(_eventContext, file, messageResourceName, messageArgs);
             _hasLoggedErrors = true;
         }
@@ -203,7 +203,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="messageArgs">Parameters for the resource string</param>
         internal void LogErrorWithSubcategory(string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            CheckValidity();
             _loggingService.LogError(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
             _hasLoggedErrors = true;
         }
@@ -218,7 +218,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="message">Error message</param>
         internal void LogErrorFromText(string subcategoryResourceName, string errorCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            CheckValidity();
             _loggingService.LogErrorFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
             _hasLoggedErrors = true;
         }
@@ -229,7 +229,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="invalidProjectFileException">The invalid Project File Exception which is to be logged</param>
         internal void LogInvalidProjectFileError(InvalidProjectFileException invalidProjectFileException)
         {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            CheckValidity();
             _loggingService.LogInvalidProjectFileError(_eventContext, invalidProjectFileException);
             _hasLoggedErrors = true;
         }
@@ -243,14 +243,14 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="messageArgs">The arguments for the error message</param>
         internal void LogFatalError(Exception exception, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            CheckValidity();
             _loggingService.LogFatalError(_eventContext, exception, file, messageResourceName, messageArgs);
             _hasLoggedErrors = true;
         }
 
         internal void LogWarning(string messageResourceName, params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            CheckValidity();
             _loggingService.LogWarning(_eventContext, null, BuildEventFileInfo.Empty, messageResourceName, messageArgs);
         }
 
@@ -263,7 +263,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="messageArgs">parameters for the string resource</param>
         internal void LogWarning(string subcategoryResourceName, BuildEventFileInfo file, string messageResourceName, params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            CheckValidity();
             _loggingService.LogWarning(_eventContext, subcategoryResourceName, file, messageResourceName, messageArgs);
         }
 
@@ -277,7 +277,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="message">The message to be logged as a warning</param>
         internal void LogWarningFromText(string subcategoryResourceName, string warningCode, string helpKeyword, BuildEventFileInfo file, string message)
         {
-            ErrorUtilities.VerifyThrow(_isValid, "must be valid");
+            CheckValidity();
             _loggingService.LogWarningFromText(_eventContext, subcategoryResourceName, warningCode, helpKeyword, file, message);
         }
 
@@ -287,7 +287,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="buildEvent">The event to log</param>
         internal void LogBuildEvent(BuildEventArgs buildEvent)
         {
-            ErrorUtilities.VerifyThrow(IsValid, "must be valid");
+            CheckValidity();
             LoggingService.LogBuildEvent(buildEvent);
         }
 
@@ -298,7 +298,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="file">The file in which the error occurred</param>
         internal void LogFatalBuildError(Exception exception, BuildEventFileInfo file)
         {
-            ErrorUtilities.VerifyThrow(IsValid, "must be valid");
+            CheckValidity();
             LoggingService.LogFatalBuildError(BuildEventContext, exception, file);
             _hasLoggedErrors = true;
         }
@@ -309,8 +309,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="filePath">Path to response file</param>
         internal void LogIncludeFile(string filePath)
         {
-            ErrorUtilities.VerifyThrow(IsValid, "must be valid");
+            CheckValidity();
             _loggingService.LogIncludeFile(BuildEventContext, filePath);
+        }
+
+        private protected void CheckValidity()
+        {
+            if (!_isValid)
+            {
+                ErrorUtilities.ThrowInternalError("LoggingContext (type: {0}) was not valid during logging attempt.",
+                    this.GetType());
+            }
         }
     }
 }
