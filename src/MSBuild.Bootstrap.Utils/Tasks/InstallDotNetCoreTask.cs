@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
@@ -16,7 +15,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
     /// This task is designed to automate the installation of .NET Core SDK.
     /// It downloads the appropriate installation script and executes it to install the specified version of .NET Core SDK.
     /// </summary>
-    public sealed class InstallDotNetCoreTask : Task
+    public sealed class InstallDotNetCoreTask : ToolTask
     {
         private const string ScriptName = "dotnet-install";
 
@@ -55,6 +54,8 @@ namespace MSBuild.Bootstrap.Utils.Tasks
 
         private bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
+        protected override string ToolName => IsWindows ? "powershell.exe" : "/bin/bash";
+
         /// <summary>
         /// Executes the task, downloading and running the .NET Core installation script.
         /// </summary>
@@ -77,6 +78,8 @@ namespace MSBuild.Bootstrap.Utils.Tasks
 
             return RunScript(executionSettings);
         }
+
+        protected override string GenerateFullPathToTool() => ToolName;
 
         /// <summary>
         /// Downloads the .NET Core installation script asynchronously from the specified URL.
@@ -109,31 +112,12 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         /// <param name="scriptPath">The path of the script to make executable.</param>
         private void MakeScriptExecutable(string scriptPath)
         {
-            if (IsWindows)
+            if (!IsWindows)
             {
-                return;
-            }
-
-            using (var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
+                int exitCode = ExecuteTool("/bin/chmod", string.Empty, $"+x {scriptPath}");
+                if (exitCode != 0)
                 {
-                    FileName = "/bin/chmod",
-                    Arguments = $"+x {scriptPath}",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                },
-            })
-            {
-                _ = process.Start();
-                process.WaitForExit();
-
-                if (process.ExitCode != 0)
-                {
-                    string errors = process.StandardError.ReadToEnd() ?? string.Empty;
-                    Log.LogError($"Install-scripts can not be made executable due to the errors: {errors}.");
+                    Log.LogError($"Install-scripts can not be made executable due to the errors reported above.");
                 }
             }
         }
@@ -145,30 +129,13 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         /// <returns>True if the script executed successfully; otherwise, false.</returns>
         private bool RunScript(ScriptExecutionSettings executionSettings)
         {
-            if (Log.HasLoggedErrors)
+            if (!Log.HasLoggedErrors)
             {
-                return false;
-            }
+                int exitCode = ExecuteTool(ToolName, string.Empty, executionSettings.ExecutableArgs);
 
-            using (Process process = new Process { StartInfo = executionSettings.StartInfo })
-            {
-                bool started = process.Start();
-                if (started)
+                if (exitCode != 0)
                 {
-                    string output = process.StandardOutput.ReadToEnd() ?? string.Empty;
-                    Log.LogMessage($"Install-scripts output logs: {output}");
-
-                    process.WaitForExit();
-
-                    if (process.ExitCode != 0)
-                    {
-                        string errors = process.StandardError.ReadToEnd() ?? string.Empty;
-                        Log.LogError($"Install-scripts execution errors: {errors}");
-                    }
-                }
-                else
-                {
-                    Log.LogError("Process for install-scripts execution has not started.");
+                    Log.LogError($"Install-scripts was not executed successfully.");
                 }
             }
 
@@ -187,29 +154,19 @@ namespace MSBuild.Bootstrap.Utils.Tasks
                 ? $"-NoProfile -ExecutionPolicy Bypass -File {scriptPath} -Version {Version} -InstallDir {InstallDir}"
                 : $"{scriptPath} --version {Version} --install-dir {InstallDir}";
 
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = IsWindows ? "powershell.exe" : "/bin/bash",
-                Arguments = scriptArgs,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            };
-
-            return new ScriptExecutionSettings(startInfo, $"{ScriptName}.{scriptExtension}", scriptPath);
+            return new ScriptExecutionSettings($"{ScriptName}.{scriptExtension}", scriptPath, scriptArgs);
         }
 
         /// <summary>
         /// A private struct to hold settings for script execution.
         /// </summary>
-        private struct ScriptExecutionSettings(ProcessStartInfo startInfo, string scriptName, string scriptsFullPath)
+        private readonly struct ScriptExecutionSettings(string scriptName, string scriptsFullPath, string executableArgs)
         {
-            public ProcessStartInfo StartInfo { get; } = startInfo;
-
             public string ScriptName { get; } = scriptName;
 
             public string ScriptsFullPath { get; } = scriptsFullPath;
+
+            public string ExecutableArgs { get; } = executableArgs;
         }
     }
 }
