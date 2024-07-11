@@ -251,7 +251,6 @@
     <Compile Include="LC.cs" />
     <Compile Include="ListOperators\FindUnderPath.cs" />
     <Compile Include="ListOperators\RemoveDuplicates.cs" />
-    <Compile Include="LockCheck.cs" />
     <Compile Include="MakeDir.cs" />
     <Compile Include="ManifestUtil\*.cs" Exclude="ManifestUtil\CngLightup.cs" />
     <Compile Include="Message.cs" />

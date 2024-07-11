@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Experimental.BuildCheck.Acquisition;
-using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Acquisition;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -29,18 +29,18 @@ public class BuildCheckManagerTests
         _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
         _logger = new MockLogger();
         _loggingService.RegisterLogger(_logger);
-        _testedInstance = new BuildCheckManager(_loggingService);
+        _testedInstance = new BuildCheckManager();
     }
 
     [Theory]
-    [InlineData(true, new[] { "Custom analyzer rule: Rule1 has been registered successfully.", "Custom analyzer rule: Rule2 has been registered successfully." })]
-    [InlineData(false, new[] { "Failed to register the custom analyzer: DummyPath." })]
+    [InlineData(true, new[] { "Custom analyzer rule: 'Rule1' has been registered successfully.", "Custom analyzer rule: 'Rule2' has been registered successfully." })]
+    [InlineData(false, new[] { "Failed to register the custom analyzer: 'DummyPath'." })]
     public void ProcessAnalyzerAcquisitionTest(bool isAnalyzerRuleExist, string[] expectedMessages)
     {
         MockBuildCheckAcquisition(isAnalyzerRuleExist);
         MockEnabledDataSourcesDefinition();
 
-        _testedInstance.ProcessAnalyzerAcquisition(new AnalyzerAcquisitionData("DummyPath"), new BuildEventContext(1, 2, 3, 4, 5, 6, 7));
+        _testedInstance.ProcessAnalyzerAcquisition(new AnalyzerAcquisitionData("DummyPath"), new AnalysisLoggingContext(_loggingService, new BuildEventContext(1, 2, 3, 4, 5, 6, 7)));
 
         _logger.AllBuildEvents.Where(be => be.GetType() == typeof(BuildMessageEventArgs)).Select(be => be.Message).ToArray()
             .ShouldBeEquivalentTo(expectedMessages);
@@ -66,7 +66,7 @@ internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionMo
 
     internal BuildCheckAcquisitionModuleMock(bool isAnalyzerRuleExistForTest) => _isAnalyzerRuleExistForTest = isAnalyzerRuleExistForTest;
 
-    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, BuildEventContext buildEventContext)
+    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, IAnalysisContext analysisContext)
         => _isAnalyzerRuleExistForTest
         ? new List<BuildAnalyzerFactory>() { () => new BuildAnalyzerRuleMock("Rule1"), () => new BuildAnalyzerRuleMock("Rule2") }
         : new List<BuildAnalyzerFactory>();

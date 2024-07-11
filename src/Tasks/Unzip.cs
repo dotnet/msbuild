@@ -221,7 +221,8 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e)
                     {
-                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotMakeFileWriteable", zipArchiveEntry.FullName, destinationPath.FullName, e.Message);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(destinationPath.FullName);
+                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotMakeFileWriteable", zipArchiveEntry.FullName, destinationPath.FullName, e.Message, lockedFileMessage);
                         continue;
                     }
                 }

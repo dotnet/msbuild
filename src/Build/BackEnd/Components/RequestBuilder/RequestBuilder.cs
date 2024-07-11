@@ -10,13 +10,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -1123,7 +1123,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     buildCheckManager.StartProjectEvaluation(
                         BuildCheckDataSource.BuildExecution,
-                        _requestEntry.Request.ParentBuildEventContext,
+                        new AnalysisLoggingContext(_nodeLoggingContext.LoggingService, _requestEntry.Request.ParentBuildEventContext),
                         _requestEntry.RequestConfiguration.ProjectFullPath);
 
                     _requestEntry.RequestConfiguration.LoadProjectIntoConfiguration(
@@ -1177,7 +1177,7 @@ namespace Microsoft.Build.BackEnd
                 _requestEntry.Request.BuildEventContext = _projectLoggingContext.BuildEventContext;
 
                 // Determine the set of targets we need to build
-                string[] allTargets = _requestEntry.RequestConfiguration
+                (string name, TargetBuiltReason reason)[] allTargets = _requestEntry.RequestConfiguration
                     .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
 
                 ProjectErrorUtilities.VerifyThrowInvalidProject(allTargets.Length > 0,
