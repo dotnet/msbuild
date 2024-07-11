@@ -18,7 +18,7 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
-    <ProjectReference Include="..\MSBuild.Bootstrap.Utils\MSBuild.Bootstrap.Utils.csproj" />
+    <ProjectReference Include="..\MSBuild.Bootstrap.Utils\MSBuild.Bootstrap.Utils.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <ItemGroup>
     <!-- This file is needed so the dotnet CLI knows how to map preview SDK versions to tfms (because tfms do not have preview information on them) -->
