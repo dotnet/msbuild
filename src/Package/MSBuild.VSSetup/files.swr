@@ -335,5 +335,3 @@ folder InstallDir:\Common7\IDE\CommonExtensions\MSBuild
   file source=$(SourceDir)Tasks\Microsoft.Build.Tasks.Core.pkgdef
   file source=$(SourceDir)Tasks\System.Resources.Extensions.pkgdef
   file source=$(SourceDir)Utilities\Microsoft.Build.Utilities.Core.pkgdef
-  file source=$(SourceDir)Deprecated\Conversion\Microsoft.Build.Conversion.Core.pkgdef
-  file source=$(SourceDir)Deprecated\Engine\Microsoft.Build.Engine.pkgdef
