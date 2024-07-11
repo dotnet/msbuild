@@ -26,9 +26,7 @@ folder InstallDir:\MSBuild\Current
   file source=$(ThirdPartyNotice)
 
 folder InstallDir:\MSBuild\Current\Bin
-  file source=$(MSBuildConversionBinPath)Microsoft.Build.Conversion.Core.dll vs.file.ngenApplications="[installDir]\Common7\IDE\vsn.exe" vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngenApplications="[installDir]\Common7\IDE\vsn.exe" vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
-  file source=$(MSBuildConversionBinPath)Microsoft.Build.Engine.dll vs.file.ngenApplications="[installDir]\Common7\IDE\vsn.exe" vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenApplications="[installDir]\Common7\IDE\vsn.exe" vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Framework.tlb
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenApplications="[installDir]\Common7\IDE\vsn.exe" vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
@@ -184,9 +182,7 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X64BinPath)MSBuild.exe.config
   file source=$(TaskHostX64BinPath)MSBuildTaskHost.exe.config
 
-  file source=$(MSBuildConversionBinPath)Microsoft.Build.Conversion.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngenArchitecture=all
-  file source=$(MSBuildConversionBinPath)Microsoft.Build.Engine.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenArchitecture=all
   file source=$(FrameworkBinPath)x64\Microsoft.Build.Framework.tlb
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
