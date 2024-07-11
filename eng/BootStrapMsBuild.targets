@@ -204,13 +204,13 @@
 
   <!-- The task allow to download sdk bits for the specified version. It will be used later to bootstrap the runnable MSBuild. -->
   <UsingTask TaskName="MSBuild.Bootstrap.Utils.Tasks.InstallDotNetCoreTask" AssemblyFile="$(ArtifactsBinDir)MSBuild.Bootstrap.Utils\$(Configuration)\netstandard2.0\MSBuild.Bootstrap.Utils.dll" TaskFactory="TaskHostFactory" />
-  <Target Name="BootstrapNetCore" DependsOnTargets="CleanBootstrapFolder">
+  <Target Name="BootstrapNetCore">
 
     <PropertyGroup>
-      <InstallDir>$(ArtifactsBinDir)bootstrap\$(TargetFramework)\</InstallDir>
+      <InstallDir>$(ArtifactsBinDir)bootstrap\core\</InstallDir>
     </PropertyGroup>
 
-    <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(InstallDir)" Version="$(NetVersion)" DotNetInstallBaseUrl="https://raw.githubusercontent.com/dotnet/install-scripts/main/src/"/>
+    <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(InstallDir)" Version="$(NetVersion)"/>
   </Target>
 
   <Target Name="BootstrapNetCorePatch" AfterTargets="BootstrapNetCore">

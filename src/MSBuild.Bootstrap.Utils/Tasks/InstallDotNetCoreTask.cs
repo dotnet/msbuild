@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if RUNTIME_TYPE_NETCORE
-
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -18,7 +16,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
     /// This task is designed to automate the installation of .NET Core SDK.
     /// It downloads the appropriate installation script and executes it to install the specified version of .NET Core SDK.
     /// </summary>
-    public sealed class InstallDotNetCoreTask : Task
+    public sealed class InstallDotNetCoreTask : ToolTask
     {
         private const string ScriptName = "dotnet-install";
 
@@ -57,12 +55,20 @@ namespace MSBuild.Bootstrap.Utils.Tasks
 
         private bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
+        protected override string ToolName => IsWindows ? "powershell.exe" : "/bin/bash";
+
         /// <summary>
         /// Executes the task, downloading and running the .NET Core installation script.
         /// </summary>
         /// <returns>True if the task succeeded; otherwise, false.</returns>
         public override bool Execute()
         {
+            if (Directory.Exists(InstallDir) || Directory.Exists(Path.Combine(InstallDir, "sdk", Version)))
+            {
+                // no need to download sdk again, it exists locally
+                return true;
+            }
+
             ScriptExecutionSettings executionSettings = SetupScriptsExecutionSettings();
             if (!File.Exists(executionSettings.ScriptsFullPath))
             {
@@ -73,6 +79,8 @@ namespace MSBuild.Bootstrap.Utils.Tasks
 
             return RunScript(executionSettings);
         }
+
+        protected override string GenerateFullPathToTool() => ToolName;
 
         /// <summary>
         /// Downloads the .NET Core installation script asynchronously from the specified URL.
@@ -178,7 +186,6 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         private ScriptExecutionSettings SetupScriptsExecutionSettings()
         {
             string scriptExtension = IsWindows ? "ps1" : "sh";
-            string executableName = IsWindows ? "powershell.exe" : "/bin/bash";
             string scriptPath = Path.Combine(DotNetInstallScriptRootPath, $"{ScriptName}.{scriptExtension}");
             string scriptArgs = IsWindows
                 ? $"-NoProfile -ExecutionPolicy Bypass -File {scriptPath} -Version {Version} -InstallDir {InstallDir}"
@@ -186,7 +193,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
 
             var startInfo = new ProcessStartInfo
             {
-                FileName = executableName,
+                FileName = ToolName,
                 Arguments = scriptArgs,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -194,20 +201,19 @@ namespace MSBuild.Bootstrap.Utils.Tasks
                 CreateNoWindow = true,
             };
 
-            return new ScriptExecutionSettings(executableName, startInfo, $"{ScriptName}.{scriptExtension}", scriptPath);
+            return new ScriptExecutionSettings(startInfo, $"{ScriptName}.{scriptExtension}", scriptPath);
         }
 
         /// <summary>
         /// A private struct to hold settings for script execution.
         /// </summary>
-        private struct ScriptExecutionSettings(string executableName, ProcessStartInfo startInfo, string scriptName, string scriptsFullPath)
+        private struct ScriptExecutionSettings(ProcessStartInfo startInfo, string scriptName, string scriptsFullPath)
         {
-            public string ExecutableName { get; } = executableName;
             public ProcessStartInfo StartInfo { get; } = startInfo;
+
             public string ScriptName { get; } = scriptName;
+
             public string ScriptsFullPath { get; } = scriptsFullPath;
         }
     }
 }
-
-#endif

@@ -16,7 +16,7 @@ Fresh MSBuild bits are then copied to this folder.
 The constructed SDK is used for both local end-to-end tests and CI runs.
 
 ## Potential Cons
-The reliance on downloading the SDK from a remote source requires an internet connection. For the initial build of the repository, this doesn't change as the SDK is always downloaded to the .dotnet folder first. However, for subsequent runs, the SDK will need to be downloaded again, which could be problematic in environments with limited or no internet connectivity.
+The reliance on downloading the SDK from a remote source requires an internet connection. For the initial build of the repository, this doesn't change as the SDK is always downloaded to the .dotnet folder first. For subsequent runs, the SDK in bootstrap will be downloaded again only **if the requested version was changed**.
 
 ## Pros
 This approach simplifies testing MSBuild as part of dotnet by providing a ready and reliable environment without needing to patch anything into a globally installed SDK, as was previously required.
