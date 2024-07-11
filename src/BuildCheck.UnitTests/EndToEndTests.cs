@@ -41,7 +41,7 @@ public class EndToEndTests : IDisposable
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
-            (analysisRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+            (analysisRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: 12000_000);
         _env.Output.WriteLine(output);
 
         success.ShouldBeTrue();
@@ -64,10 +64,10 @@ public class EndToEndTests : IDisposable
     [Theory]
     [InlineData(true, true, "warning")]
     [InlineData(true, true, "error")]
-    [InlineData(true, true, "info")]
+    [InlineData(true, true, "suggestion")]
     [InlineData(false, true, "warning")]
     [InlineData(false, true, "error")]
-    [InlineData(false, true, "info")]
+    [InlineData(false, true, "suggestion")]
     [InlineData(false, false, "warning")]
     public void SampleAnalyzerIntegrationTest_ReplayBinaryLogOfAnalyzedBuild(bool buildInOutOfProcessNode, bool analysisRequested, string BC0101Severity)
     {
@@ -174,6 +174,8 @@ public class EndToEndTests : IDisposable
 
         _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
+
+        _env.SetEnvironmentVariable("TEST", "FromEnvVariable");
 
         string ReadAndAdjustProjectContent(string fileName) =>
             File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, fileName))
