@@ -6,7 +6,7 @@ This is an internal engineering document. For general overview and user-oriented
 
 Let's recall some details of build check analyzers acquisition. There might be two types of the build analyzer: build-in and custom. 
 The build-in analyzers are configured in the `.editorconfig` file. The custom analyzers are declared in the project files and also configured in the `.editorconfig` file. 
-Project files are read during the first pass of the evaluation of the project. Given the multy-processing nature of msbuild, this might happen either on main node or on the msbuild worker node. When the analyzer is found, the event `BuildCheckAcquisitionEventArgs` is logged with information concerning the analyzer that is needed to be loaded. This event is forwarded by `BuildCheckForwardingLogger` through logging system via the named pipes to the main msbuild node, where it is processed by `BuildCheckConnectorLogger`. This requires the logging system to be configured on main and worker msbuild nodes. 
+Project files are read during the first pass of the evaluation of the project. Given the multi-processing nature of msbuild, this might happen either on main node or on the msbuild worker node. When the analyzer is encountered, the event `BuildCheckAcquisitionEventArgs` is logged with information concerning the analyzer that is needed to be loaded. This event is forwarded by `BuildCheckForwardingLogger` through logging system via the named pipes to the main msbuild node, where it is processed by `BuildCheckConnectorLogger`. This requires the logging system to be configured on main and worker msbuild nodes. 
 
 ![analyzers-acquisition](analyzers-acquisition.png)
 
