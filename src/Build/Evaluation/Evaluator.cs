@@ -54,7 +54,7 @@ namespace Microsoft.Build.Evaluation
     /// This class could be improved to do partial (minimal) reevaluation: at present we wipe all state and start over.
     /// </remarks>
     internal class Evaluator<P, I, M, D>
-        where P : class, IProperty2, IEquatable<P>, IValued
+        where P : class, IProperty, IEquatable<P>, IValued
         where I : class, IItem<M>, IMetadataTable
         where M : class, IMetadatum
         where D : class, IItemDefinition<M>

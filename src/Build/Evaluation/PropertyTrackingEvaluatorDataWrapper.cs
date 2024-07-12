@@ -24,7 +24,7 @@ namespace Microsoft.Build.Evaluation
     /// <typeparam name="M">The type of metadata on those items.</typeparam>
     /// <typeparam name="D">The type of item definitions to be produced.</typeparam>
     internal class PropertyTrackingEvaluatorDataWrapper<P, I, M, D> : IEvaluatorData<P, I, M, D>
-        where P : class, IProperty2, IEquatable<P>, IValued
+        where P : class, IProperty, IEquatable<P>, IValued
         where I : class, IItem
         where M : class, IMetadatum
         where D : class, IItemDefinition<M>

@@ -18,7 +18,7 @@ namespace Microsoft.Build.Evaluation
     ///     provides some operations over them (like matching items against a given ItemSpec)
     /// </summary>
     internal class ItemSpec<P, I>
-        where P : class, IProperty2
+        where P : class, IProperty
         where I : class, IItem, IMetadataTable
     {
         internal readonly struct ReferencedItem
@@ -570,7 +570,7 @@ namespace Microsoft.Build.Evaluation
     /// <typeparam name="P">Property type</typeparam>
     /// <typeparam name="I">Item type</typeparam>
     internal sealed class MetadataTrie<P, I>
-        where P : class, IProperty2
+        where P : class, IProperty
         where I : class, IItem, IMetadataTable
     {
         private readonly Dictionary<string, MetadataTrie<P, I>> _children;

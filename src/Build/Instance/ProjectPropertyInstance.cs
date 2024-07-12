@@ -21,7 +21,7 @@ namespace Microsoft.Build.Execution
     /// Added and removed via methods on the ProjectInstance object.
     /// </summary>
     [DebuggerDisplay("{_name}={_escapedValue}")]
-    public class ProjectPropertyInstance : IKeyed, IValued, IProperty2, IEquatable<ProjectPropertyInstance>, ITranslatable
+    public class ProjectPropertyInstance : IKeyed, IValued, IProperty, IEquatable<ProjectPropertyInstance>, ITranslatable
     {
         /// <summary>
         /// Name of the property
@@ -106,7 +106,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        string IProperty2.GetEvaluatedValueEscaped(IElementLocation location)
+        string IProperty.GetEvaluatedValueEscaped(IElementLocation location)
         {
             if (this is EnvironmentDerivedProjectPropertyInstance envProperty && envProperty.loggingContext?.IsValid == true && !envProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
             {

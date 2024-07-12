@@ -247,7 +247,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Evaluate the usingtask and add the result into the data passed in
         /// </summary>
-        /// <typeparam name="P">A type derived from IProperty2</typeparam>
+        /// <typeparam name="P">A type derived from IProperty</typeparam>
         /// <typeparam name="I">A type derived from IItem</typeparam>
         internal static void InitializeTaskRegistryFromUsingTaskElements<P, I>(
             LoggingContext loggingContext,
@@ -256,7 +256,7 @@ namespace Microsoft.Build.Execution
             Expander<P, I> expander,
             ExpanderOptions expanderOptions,
             IFileSystem fileSystem)
-            where P : class, IProperty2
+            where P : class, IProperty
             where I : class, IItem
         {
             foreach ((ProjectUsingTaskElement projectUsingTaskXml, string directoryOfImportingFile) registration in registrations)
@@ -279,7 +279,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Evaluate the usingtask and add the result into the data passed in
         /// </summary>
-        /// <typeparam name="P">A type derived from IProperty2</typeparam>
+        /// <typeparam name="P">A type derived from IProperty</typeparam>
         /// <typeparam name="I">A type derived from IItem</typeparam>
         private static void RegisterTasksFromUsingTaskElement
             <P, I>(
@@ -290,7 +290,7 @@ namespace Microsoft.Build.Execution
             Expander<P, I> expander,
             ExpanderOptions expanderOptions,
             IFileSystem fileSystem)
-            where P : class, IProperty2
+            where P : class, IProperty
             where I : class, IItem
         {
             ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile, nameof(directoryOfImportingFile));
@@ -1610,7 +1610,7 @@ namespace Microsoft.Build.Execution
                 /// <typeparam name="P">Property type</typeparam>
                 /// <typeparam name="I">Item Type</typeparam>
                 internal void ExpandUsingTask<P, I>(ProjectUsingTaskElement projectUsingTaskXml, Expander<P, I> expander, ExpanderOptions expanderOptions)
-                    where P : class, IProperty2
+                    where P : class, IProperty
                     where I : class, IItem
                 {
                     ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml, nameof(projectUsingTaskXml));
@@ -1636,7 +1636,7 @@ namespace Microsoft.Build.Execution
                 /// <typeparam name="P">IProperttyTypes</typeparam>
                 /// <typeparam name="I">IItems</typeparam>
                 private void EvaluateTaskBody<P, I>(Expander<P, I> expander, ProjectUsingTaskBodyElement taskElement, ExpanderOptions expanderOptions)
-                    where P : class, IProperty2
+                    where P : class, IProperty
                     where I : class, IItem
                 {
                     bool evaluate;
@@ -1672,7 +1672,7 @@ namespace Microsoft.Build.Execution
                 /// <typeparam name="P">Property type</typeparam>
                 /// <typeparam name="I">Item types</typeparam>
                 private void ParseUsingTaskParameterGroupElement<P, I>(UsingTaskParameterGroupElement usingTaskParameterGroup, Expander<P, I> expander, ExpanderOptions expanderOptions)
-                    where P : class, IProperty2
+                    where P : class, IProperty
                     where I : class, IItem
                 {
                     _usingTaskParameters ??= new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
