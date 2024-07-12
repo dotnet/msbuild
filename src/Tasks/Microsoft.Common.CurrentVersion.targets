@@ -2172,10 +2172,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_ResolvedProjectReferencePaths>
     </ItemGroup>
 
-    <!-- Issue a warning for each non-existent project. -->
+    <!-- Issue a warning or error for each non-existent project. -->
     <Warning
         Text="The referenced project '%(_MSBuildProjectReferenceNonexistent.Identity)' does not exist."
-        Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != ''"/>
+        Condition="'$(ErrorOnMissingProjectReference)' != 'True' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != ''"/>
+
+    <Error
+        Text="The referenced project '%(_MSBuildProjectReferenceNonexistent.Identity)' does not exist."
+        Condition="'$(ErrorOnMissingProjectReference)' == 'True' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != ''"/>
 
   </Target>
 
