@@ -289,7 +289,6 @@ namespace Microsoft.Build.Shared
              { typeof(ExtendedBuildMessageEventArgs), LoggingEventType.ExtendedBuildMessageEvent },
              { typeof(CriticalBuildMessageEventArgs), LoggingEventType.CriticalBuildMessage },
              { typeof(ExtendedCriticalBuildMessageEventArgs), LoggingEventType.ExtendedCriticalBuildMessageEvent },
-             { typeof(EnvironmentVariableReadEventArgs), LoggingEventType.EnvironmentVariableReadEvent },
              { typeof(MetaprojectGeneratedEventArgs), LoggingEventType.MetaprojectGenerated },
              { typeof(PropertyInitialValueSetEventArgs), LoggingEventType.PropertyInitialValueSet },
              { typeof(PropertyReassignmentEventArgs), LoggingEventType.PropertyReassignment },
@@ -313,6 +312,7 @@ namespace Microsoft.Build.Shared
              { typeof(BuildStartedEventArgs), LoggingEventType.BuildStartedEvent },
              { typeof(BuildWarningEventArgs), LoggingEventType.BuildWarningEvent },
              { typeof(BuildErrorEventArgs), LoggingEventType.BuildErrorEvent },
+             { typeof(EnvironmentVariableReadEventArgs), LoggingEventType.EnvironmentVariableReadEvent },
              { typeof(ResponseFileUsedEventArgs), LoggingEventType.ResponseFileUsedEvent },
         };
 
