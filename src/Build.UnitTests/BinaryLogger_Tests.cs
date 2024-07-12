@@ -329,7 +329,7 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
         }
 
-        [Fact(Skip = "TODO: reenable after applying changes in BinLog related to changing EnvironmentVariableRead -> ExtendedEnvironmentVariableRead")]
+        [Fact]
         public void UnusedEnvironmentVariablesDoNotAppearInBinaryLog()
         {
             using (TestEnvironment env = TestEnvironment.Create())
