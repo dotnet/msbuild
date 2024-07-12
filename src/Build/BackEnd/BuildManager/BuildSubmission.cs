@@ -215,8 +215,6 @@ namespace Microsoft.Build.Execution
             // rather flexible in how users are allowed to submit multiple requests for the same configuration.  In this case, the
             // request id of the result will match the first request, even though it will contain results for all requests (including
             // this one.)
-            ErrorUtilities.VerifyThrow(result.ConfigurationId == BuildRequest?.ConfigurationId, "BuildResult doesn't match BuildRequest configuration");
-
             if (result.ConfigurationId != BuildRequest?.ConfigurationId)
             {
                 ErrorUtilities.ThrowInternalError("BuildResult configuration ({0}) doesn't match BuildRequest configuration ({1})",
