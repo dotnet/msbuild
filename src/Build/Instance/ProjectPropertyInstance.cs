@@ -34,6 +34,11 @@ namespace Microsoft.Build.Execution
         private string _escapedValue;
 
         /// <summary>
+        /// Property location in xml file. Can be empty.
+        /// </summary>
+        private (string File, int Line, int Column) _location;
+
+        /// <summary>
         /// Private constructor
         /// </summary>
         private ProjectPropertyInstance(string name, string escapedValue)
@@ -83,7 +88,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets or sets object's location in xml file.
         /// </summary>
-        public (string File, int Line, int Column) Location { get; set; }
+        public (string File, int Line, int Column) Location { get => _location; }
 
         /// <summary>
         /// Evaluated value of the property, escaped as necessary.
@@ -117,7 +122,7 @@ namespace Microsoft.Build.Execution
             }
 
             // the location is handy in BuildCheck messages.
-            Location = (location.File, location.Line, location.Column);
+            _location = (location.File, location.Line, location.Column);
 
             return _escapedValue;
         }

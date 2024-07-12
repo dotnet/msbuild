@@ -33,6 +33,8 @@ public class EndToEndTests : IDisposable
 
     [Theory]
     [InlineData(true, true)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
     public void SampleAnalyzerIntegrationTest_AnalyzeOnBuild(bool buildInOutOfProcessNode, bool analysisRequested)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);

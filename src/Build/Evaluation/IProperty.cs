@@ -43,8 +43,11 @@ namespace Microsoft.Build.Evaluation
         string GetEvaluatedValueEscaped(IElementLocation location);
 
         /// <summary>
-        /// Property location in xml file. Can be empty.
+        /// Returns property location in xml file. Can be empty.
         /// </summary>
-        (string File, int Line, int Column) Location { get; set; }
+        (string File, int Line, int Column) Location
+        {
+            get;
+        }
     }
 }

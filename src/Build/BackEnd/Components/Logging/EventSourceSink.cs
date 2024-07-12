@@ -896,7 +896,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             RaiseAnyEvent(sender, buildEvent);
         }
-      
+
         /// <summary>
         /// Raises a catch-all build event to all registered loggers.
         /// </summary>

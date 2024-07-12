@@ -33,6 +33,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private string _evaluatedValueEscaped;
 
+        /// <summary>
+        /// Property location in xml file. Can be empty.
+        /// </summary>
+        private (string File, int Line, int Column) _location;
+
         internal ProjectProperty(Project project)
         {
             ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
@@ -111,9 +116,9 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Gets or sets object's location in xml file.
+        /// Gets object's location in xml file.
         /// </summary>
-        public (string File, int Line, int Column) Location { get; set; }
+        public (string File, int Line, int Column) Location { get => _location; }
 
         string IProperty.GetEvaluatedValueEscaped(IElementLocation location)
         {
@@ -126,7 +131,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // the location is handy in BuildCheck messages.
-            Location = (location.File, location.Line, location.Column);
+            _location = (location.File, location.Line, location.Column);
 
             return EvaluatedValueEscapedInternal;
         }

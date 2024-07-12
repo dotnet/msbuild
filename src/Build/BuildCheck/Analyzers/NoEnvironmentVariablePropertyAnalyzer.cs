@@ -12,7 +12,7 @@ internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
     /// <summary>
     /// Contains the list of reported environment variables.
     /// </summary>
-    private readonly IList<EnvironmentVariableIdentityKey> _environmentVariablesReported = new List<EnvironmentVariableIdentityKey>();
+    private readonly HashSet<EnvironmentVariableIdentityKey> _environmentVariablesReported = new HashSet<EnvironmentVariableIdentityKey>();
 
     public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
         "BC0103",
