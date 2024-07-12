@@ -768,7 +768,6 @@ namespace Microsoft.Build.Shared
             }
         }
 
-#if !TASKHOST
         /// <summary>
         /// Serializes EnvironmentVariableRead Event argument to the stream.
         /// </summary>
@@ -788,7 +787,7 @@ namespace Microsoft.Build.Shared
             translator.Translate(ref context);
 #endif
         }
-#endif
+
         #region Writes to Stream
 
         /// <summary>
@@ -1126,7 +1125,6 @@ namespace Microsoft.Build.Shared
             };
         }
 
-#if !TASKHOST
         /// <summary>
         /// Read and reconstruct an EnvironmentVariableReadEventArgs from the stream. This message should never be called from a TaskHost, so although the context translation does not work, that's ok.
         /// </summary>
@@ -1150,7 +1148,6 @@ namespace Microsoft.Build.Shared
 #endif
             return args;
         }
-#endif
 
         /// <summary>
         /// Read and reconstruct a BuildWarningEventArgs from the stream
