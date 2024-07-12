@@ -333,7 +333,26 @@ namespace Microsoft.Build.Evaluation
                 loggingService,
                 buildEventContext);
 
-            evaluator.Evaluate();
+            try
+            {
+                evaluator.Evaluate();
+            }
+            finally
+            {
+                IEnumerable globalProperties = null;
+                IEnumerable properties = null;
+                IEnumerable items = null;
+
+                if (evaluator._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItems)
+                {
+                    globalProperties = evaluator._data.GlobalPropertiesDictionary;
+                    properties = Traits.LogAllEnvironmentVariables ? evaluator._data.Properties : evaluator.FilterOutEnvironmentDerivedProperties(evaluator._data.Properties);
+                    items = evaluator._data.Items;
+                }
+
+                evaluator._evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, evaluator._evaluationProfiler.ProfiledResult);
+            }
+
             MSBuildEventSource.Log.EvaluateStop(root.ProjectFileLocation.File);
         }
 
@@ -798,19 +817,6 @@ namespace Microsoft.Build.Evaluation
             }
 
             ErrorUtilities.VerifyThrow(_evaluationProfiler.IsEmpty(), "Evaluation profiler stack is not empty.");
-
-            IEnumerable globalProperties = null;
-            IEnumerable properties = null;
-            IEnumerable items = null;
-
-            if (this._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItems)
-            {
-                globalProperties = _data.GlobalPropertiesDictionary;
-                properties = Traits.LogAllEnvironmentVariables ? _data.Properties : FilterOutEnvironmentDerivedProperties(_data.Properties);
-                items = _data.Items;
-            }
-
-            _evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, _evaluationProfiler.ProfiledResult);
         }
 
         private IEnumerable FilterOutEnvironmentDerivedProperties(PropertyDictionary<P> dictionary)
