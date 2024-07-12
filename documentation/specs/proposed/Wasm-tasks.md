@@ -1,14 +1,10 @@
 # Wasm/WASI tasks in MSBuild
-We want to make it easier to work with the WebAssembly ecosystem in MSBuild.
-MSBuild Tasks are the point where this makes sense. 
-Also it brings sandboxing possibilities.
+Exploration of using Wasm/WASI to create sandboxed [Tasks in MSBuild](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-tasks) using non-dotnet Wasm/WASI compatible language.
 
+## Stories 
+Currently MSBuild tasks have unrestricted access to resources (filesystem, network, environment variables), Wasm/WASI runtimes provide a way to sandbox tasks (all access to resources has to be specified). Sandboxing is useful from a security perspective if someone wanted to run a task from an untrusted source without decompiling and analyzing it.
 
-## Stories for requirements
-Currently tasks have unrestricted access to resources, Wasm/WASI runtimes provide a way to sandbox tasks (by default executables don't have access to any resources). This can be acheived by specifying Inputs and Outputs of these tasks and other resources they can access.
-
- We want to be able to run tasks written in other languages than C# in MSBuild. These tasks will get information about the host (the host exports functions which tasks can call) and expose information about themselves (task exports functions which the host can call). Invoking a Wasm runtime can easily run pre-compiled tasks. There has to be a clear API for this communication.
- (Advanced) Integrating compiling other languages to WASI would enable an easy workflow. 
+Today a MSBuild task = .NET class. We want to enable users to write a task in another language. This feature includes designing how tasks will communicate with MSBuild if they're running out of the .NET runtime.
 
 ## Terminology and context
 -  **WebAssembly (abbreviated Wasm)**
@@ -16,15 +12,45 @@ Currently tasks have unrestricted access to resources, Wasm/WASI runtimes provid
 
 - [**WASI**](https://wasi.dev/) : WebAssembly System Interface is a standard for APIs for software compiled to Wasm to use system resouces outside of browsers.
 - [**Wasmtime**](https://wasmtime.dev) : Wasm runtime implementation for desktops supporting WASI
+- **Wasm Module** a compiled Wasm program that exposes functions to the host and expects imports functions from the host
 
-The WebAssembly standard defines an language for a Wasm runtime that can be implemented in a browser or as a standalone program. 
-We can compile programs to this language and run them on any platform with virtual machine. 
-- Note that .NET programs usually still run as the runtime bundled with CIL of the program.
+### Diagram of a Wasm execution from a host
+```mermaid 
+flowchart TD
+    a[guest language] -->|compile with wasi-sdk| K[Wasm Module]
+
+    A[Engine]  --> E[Linker]
+    
+    E -->|Define host functions & WASI| H[Instance]
+
+    H <---> Mem[Shared Memory]
+    
+    K[Module] -->|Piece of functionality| H
+    
+    L[Store] -->|Config for runtime| H
+    
+    H -->|Invoke module functions| M[Execution]
+
+    subgraph " "
+    A
+    K
+    L
+    end
+
+    subgraph "Single execution"
+    H
+    E
+    M
+    Mem
+    end
+
+```
 
 ### Current state
-We can use the Exec task in this manner to run an executable .wasm file (.NET example):
-- note that this execution does not get any resources so it can't manipulate files
+We can use the Exec task an executable .wasm file (.NET example):
+- note that this execution does not get any resources so it can't e.g. manipulate files
 
+#### .NET example
 1. install [wasi-sdk](https://github.com/WebAssembly/wasi-sdk), [wasmtime](https://wasmtime.dev)
 1. `dotnet add workflow wasi-experimental`
 2. `dotnet new wasiconsole`
@@ -40,56 +66,58 @@ We can use the Exec task in this manner to run an executable .wasm file (.NET ex
   </PropertyGroup>
 
   <Target Name="RunWasmtime" AfterTargets="Build">
-    <Exec Command="wasmtime run bin/$(Configuration)/$(TargetFramework)/wasi-wasm/AppBundle/$(AssemblyName).wasm" />
+    <Exec Command="wasmtime run bin/$(Configuration)/$(TargetFramework)/wasi-wasm/AppBundle/$(AssemblyName).wasm --additional-parameters-for-wasmtime" />
 </Target>
 </Project>
 ```
-5. dotnet build
+5. `dotnet build`
 
 
-Rust example:
-1. install wasmtime
-2. compile Rust to .wasm (won't elaborate here, GPT can explain without problems)
+#### Rust example:
+1. install [wasi-sdk](https://github.com/WebAssembly/wasi-sdk), [wasmtime](https://wasmtime.dev), [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 3. .proj
 ```xml
-  <Target Name="RunWasmtime" AfterTargets="Build">
+  <Target Name="CompileAndRun" BeforeTargets="Build">
+    <Exec Command="cargo build --target wasm32-wasi --release">
     <Exec Command="wasmtime run path_to_compiled_rust_program.wasm" />
 </Target>
 ```
 4. dotnet build
-- In principle it's possible to compile to .wasm with a few Exec tasks too.
 
-We can make this more user friendly.
-
-### Utility for MSBuild
-- resources for Wasm tasks have to be managed explicitly which provides sandboxing if desired
-- Easier interoperability outside of .NET
-    - Task authoring in non-.NET languages
-- Wasm tasks can be packaged with no outside dependencies 
+This is quite cumbersome and does not provide a way to pass parameters to the "task" or get outputs from it.
 
 ## Goals for the Wasm task feature
-1. specify Wasm/WASI interface for writing tasks in other languages and returning MSBuild information
-2. Write an `ITaskFactory` that takes a `.wasm` file implementing that interface and runs it as an MSBuild task  
+1. specify how a Wasm/WASI task should communicate with MSBuild, and what it should contain to be recognized as a task
+2. Write an `ITaskFactory` and a supporting `ITask` that given a `.wasm` file implementing that interface and runs it as an MSBuild task
 3. Rust demo task
 
 ### Prototype features
-- [ ] WasmExec class extending ToolTask taking a .wasm file as a parameter - just runs the file with wasmtime
-    -  [ ] parametrizing access to resources (will apply to all subsequent parts)
+Prototypes are implemented in [https://github.com/JanProvaznik/MSBuildWasm](https://github.com/JanProvaznik/MSBuildWasm)
+- [ ] WasmExec class taking a .wasm file as a parameter - just runs the file with Wasmtime 
+    - nudges the user to parametrize access to resources, but does not do anything interesting
 - [ ] WasmTask - creating tasks from .wasm files
-    - [ ] Specification for what should this .wasm file export and how it will be ran
-    - [ ] Taskhost version that can get custom parameters from the xml
-    - example usage:
-```xml
-<UsingTask TaskName="FancyWasiTask"
-           AssemblyFile="path/to/your/thing.dll"
-           TaskFactory="WasiTaskFactory">
-  <Task>
-    <WasiModule>compiled_task_implementation.wasm</WasiModule>
-  </Task>
-</UsingTask>
-```
+    - [x] Specification for what should this .wasm file export and how it will be ran
+    - [ ] ITaskFactory that gets custom parameters from the xml
 - [ ] Rust example
 - [ ] .NET example
+#### User Experience
+1. The user Writes a task in Rust based on the template.
+2. The user adds the task to their .proj file and it runs and logs as if it were a C# task. 
+```xml
+<UsingTask TaskName="FancyWasmTask"
+           AssemblyFile="path/MSBuildWasm.dll"
+           TaskFactory="WasmTaskFactory">
+  <Task>
+    <WasmModule>compiled_task_implementation.wasm</WasmModule>
+  </Task>
+</UsingTask>
+
+<Target Name="name">
+<FancyWasmTask Param="..." Param2="asdf">
+<Output>...</Output>
+</FancyWasiTask>
+</Target>
+```
 
 ### Advanced features
 - [ ] integrating pipeline for creating Wasm/WASI tasks from code in other languages
@@ -97,50 +125,70 @@ We can make this more user friendly.
     - On task level
         - [ ] RustTaskFactory
         - exploring other languages (Go, C/C++, Zig)
-    - On code in XML level (maybe out of scope)
-        - [ ] RustCodeTaskFactory
-        - exploring other languages
-- [ ] Wasm code inside XML 
-    - [ ] WasmCodeFactory 
 - investigate running an arbitrary .NET task distributed as a dll in the WASI sandbox (👀 Mono runtime)
 
 
 ## Design
 ### diagram
 
-![diagram](wasi-diagram.svg)
-### Wasm/WASI communication with MSBuild
-The .wasm task file has to export a function execute()
+```mermaid
+flowchart TD
+    A[MSBuild] -->|Evaluation| B[WasmTaskFactory]
+    A -->|Target execution| C[TaskExecutionHost]
+    C -->|instantiate and\n set parameters from XML| D[WasmTask]
+    H[Rust/C#/Go] -->|"compile using wasi-sdk"| G
+    D -->|gather output \nfor use in other tasks| C 
+    D -->|execute| E[wasmtime-dotnet]
+    E <--> F[Wasmtime]
 
-[API description in WIT format](./wasmtask.wit)
+    B -->|Create Type for a specific WasmTask| D
+    B -->|read what the task expects as parameters| E
+    B -->|save path to task parameters| G[.wasm module]
+    E -->|read output from task stdout| D
+    %%B, C, D%%
+    style B fill:#ffff00
+    style C fill:#ffff00
+    style D fill:#ffff00
+```
+C# classes are yellow.
+
+
+### Wasm/WASI communication with MSBuild
+Without WIT (not implemented in wasmtime-dotnet), the only data type that an be a Wasm function parameter and output is a number. Tasks have parameters which are of the following types: string, bool, [ITaskItem](https://github.com/dotnet/msbuild/blob/main/src/Framework/ITaskItem.cs) (basically a string dict), and arrays of these types.
+
+The .wasm module has to import functions from "module" msbuild-log: LogError(int,int), LogWarning(int,int), LogMessage(int,int,int), where 1. is the pointer to passed string in shared memory and 2. is the length of the string. 3. in LogMessage is the message importance integer (0=high, 1=medium, 2=low).
+
+The .wasm task file has to export functions GetTaskInfo(), Execute()->int. Where the return type is 0 for success and 1 for failure.
+
+
 
 ### Task parameters 
-every resource has to be explicit, wasmtime is a sandbox by default
-- *implicitly: Executable="path/to/executable.wasm" created by the factory*
-- Inputs="list_of_input_files"
-- Outputs="list_of_output_files"
+What parameters the task has is read from GetTaskInfo in the Task module. When initializing the task with the `WasmTaskFactory` we use reflection to create a corresponding C# type with those properties.
+Task parameters are passed into the wasm module as a JSON string in stdin.
+
+We describe the proposed [API description in WIT format](./wasmtask.wit) once it is supported in wasmtime-dotnet as a model for refactoring. This would remove the need to use JSON strings for passing parameters and logs could be passed using strings rather than pointers.
+
+Every resource has to be explicit, Wasmtime is a sandbox by default.
+Additional parameters that specify execution environment for the task can be specified in the XML: 
 - InheritEnv=default to false, 
 - Environment="list_of_variables"
-- StdIOE=default to true
 - Directories="directories on host that can be accessed"
-- Args="for the wasm program" 
-- TmpDir="somethign like temporary working directory"
-- **TBD**
+After the task is run, Output parameters as a JSON are read from stdout of the Wasm execution, and parsed back into C# class properties so the rest of MSBuild can use them.
 
-Other parameters are handled when instantiating the task with the `TaskHostFactory` which parses them from XML and gives them to the task.
 
 ### Testing
-- **TBD**
-- E2E tests - building projects in different languages most important
+#### Unit tests
+- [ ] setting parameters in the task
+- [ ] parsing outputs
+- [ ] examples contain expected functions
+#### E2E tests
+- Using Wasm/WASI Tasks in a build
+- [ ] Rust tasks
+    - [ ] logging
+    - [ ] accessing environment variables
+    - [ ] passing parameters
+    - [ ] accessing files
 
-<!-- Integration tests for logging -->
-<!-- mirror MSBuild\src\Build.UnitTests\BackEnd\TaskHost_Tests.cs --> 
-### Other
-The sandboxing of files will require changes to msbuild proper but the rest would preferrably be a NuGet package where community is more responsible for maintaining that the tools for using other languages are integrated well.
-
-## User Experience
-API should be clear and the Rust task provide an example of how to implement it.
-Then the user adds the task to their .proj file and it runs and logs as if it were a C# task.
 
 ## Implementation details
 ### wasmtime-dotnet bindings and basic usage
@@ -148,11 +196,10 @@ Then the user adds the task to their .proj file and it runs and logs as if it we
 using var engine = new Engine();
 using var module = Module.FromFile(engine, WasmFilePath);
 using var linker = new Linker(engine);
-linker.DefineWasi(); 
-// add delegates to linker that the wasm file can use
+linker.DefineWasi(); // linking WASI
+linker.Define("namespace", "function", (Action)delegate { /* do something */ }); // Host function that can be called from Wasm
 using var store = new Store(engine);
-var wasiConfigBuilder = new WasiConfiguration(); 
-// enable resources: Environment, InheritEnvironment, PreopenedDirectory(ies), Standard(I/O/E), 
+var wasiConfigBuilder = new WasiConfiguration(); // enable resources: Environment Variables, InheritEnvironment, PreopenedDirectory, StdIO 
 store.SetWasiConfiguration(wasiConfigBuilder);
 Instance instance = linker.Instantiate(store, module);
 Action fn = instance.GetAction("execute");
@@ -162,16 +209,12 @@ fn.Invoke();
 
 ## Development remarks (in-progress)
 
-### TODO for this doc
-- create in depth explanations for Wasm/WASI and how its concepts map to MSBuild concepts
-- discuss with people who understand MSBuild internals, WASI and dotnet interaction, users of MSBuild
-- elaborate how to give resources using wasmtime-dotnet
 
-
-### Tentatively resolved considerations 
-- **Inside MSBuild or as a NuGet package?
+### Architectural decision record
+- **Inside MSBuild or as an external package?**
     - the feature seems largely independent
     - *-> separate repo https://github.com/JanProvaznik/MSBuild-Wasm, some features might need coordination - feature branch `dev/wasi-tasks`*
+    - *-> actually the TaskExecutionHost is a very deep MSBuild thing and would need refactoring*
 
 - **implementing WASI api on our own like [wasm in vscode](https://github.com/microsoft/vscode-wasm)?**
     - customizable👍
@@ -202,25 +245,20 @@ fn.Invoke();
     - file extensions are called .wasm 👍
     - WASI is a standard building on Wasm 👍
     - the compilation target is called wasm-wasi 👍👎
-    - *-> mostly use Wasm unless WASI is more appropriate for that specific situation, the repo is called [MSBuildWasm](https://github.com/JanProvaznik/MSBuildWasm)*
+    - *-> use Wasm/WASI, the repo is called [MSBuildWasm](https://github.com/JanProvaznik/MSBuildWasm) for brevity*
 
-- **passing things other than numbers**
-    - shared memory, both host and wasm can access it
-    - return values and parameters are pointers to this memory
+- **communication between host and a wasm module**
+    - shared memory, both host and wasm can access it; callbacks where to read from it, environment vars, stdIO 
+    - eventually with Wasm/WASI component model better data-structures  
+    - component model would help us a lot with passing data it has support for complex types [WebAssembly interface type](https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md) 
+        - but wasmtime-dotnet does not support it now and the implementation is nontrivial: https://github.com/bytecodealliance/wasmtime-dotnet/issues/324#issuecomment-2218889279
+    - *-> use JSON strings with callbacks and stdIO for now, with parsing on both sides, WIT is not implemented in wasmtime-dotnet*
      
-### Open questions
-**Passing data/serialization/typing/WIT** 
-    - component model would help us a lot with passing data it has support for complex types [WebAssembly interface type](https://github.com/WebAssembly/component-model/blob/main/design/mvp/WIT.md), does that require work on wasmtime-dotnet to get the bindings first?
-    - but wasmtime-dotnet does not support it rn, TBD if it's worth focusing on
-    - Solution without it is using a memory shared between the host and the wasm program
-
-- **What changes are needed in MSBuild repo?**
-    - How does sandboxing in MSBuild work and how to interact with it?
-
-- **Wasm/WASI Technical details**
-    - calling imported functions (from C# host) in Wasm?
-    - what happens when a host exports a function and the wasm does not expect it?
-    - preventing users shooting themselves in the foot with Wasm errors
+- **TaskExecutionHost?**
+    - TaskExecutionHost is the class that usually runs instantiated tasks and uses reflection to give them property values, 
+    - if we want this layer to handle setting up the environment for the task it has to be abstracted and the interface implemented by custom WasmTaskExecutionHost
+    - Blocked by having to bring the feature to MSBuild repo and refactoring TaskBuilder and including wasmtime-dotnet
+    - *-> keep it separate from MSBuild for now, it's OK that the base WasmTask class will handle setting up the Wasm/WASI environment*
 
 ### Related projects
 
@@ -228,7 +266,7 @@ fn.Invoke();
 
 [wasmtime-dotnet](https://github.com/bytecodealliance/wasmtime-dotnet) - Bindings for wasmtime API in C#
 
-[componentize-dotnet](https://github.com/bytecodealliance/componentize-dotnet) NuGet package to easily make Wasi bundle from a C#.NET project, released short time ago, created by Microsoft people
+[componentize-dotnet](https://github.com/bytecodealliance/componentize-dotnet) NuGet package to easily make a Wasm/WASI component from a C#.NET project, released short time ago, created by people from Microsoft, right now we can't use it because components are a different system than modules and we can't switch because wasmtime-dotnet does not support it yet.
 
 [dotnet-wasi-sdk](https://github.com/dotnet/dotnet-wasi-sdk) 
 - compile dotnet to Wasm
@@ -243,6 +281,4 @@ MSBuild issues for making other environments for running tasks: [711](https://gi
 <!-- https://learn.microsoft.com/en-us/visualstudio/msbuild/configure-tasks?view=vs-2022 -->
 <!-- - configuring tasks to run outside the env of the rest of the project, probably not relevant because wasi is too specific-->
 
-- [documentation/wiki/Nodes-Orchestration.md](documentation/wiki/Nodes-Orchestration.md)
-
-- wasmtime-dotnet needs to be signed to have a StrongName and put in a private feed if we'd like to integrate it to MSBuild proper eventually.
+- wasmtime-dotnet needs to be signed to have a StrongName and put in a private feed if we'd like to integrate it to MSBuild proper eventually https://github.com/bytecodealliance/wasmtime-dotnet/pull/320
