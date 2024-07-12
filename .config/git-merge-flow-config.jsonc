@@ -10,12 +10,8 @@
         "vs17.0": {
             "MergeToBranch": "vs17.3"
         },
-        // Automate opening PRs to merge msbuild's vs17.3 (SDK 6.0.4xx) into vs17.4 (SDK 7.0.1xx until 5/2024, VS until 7/2024)
+        // Automate opening PRs to merge msbuild's vs17.3 (SDK 6.0.4xx) into vs17.6 (VS until 1/2025)
         "vs17.3": {
-            "MergeToBranch": "vs17.4"
-        },
-        // Automate opening PRs to merge msbuild's vs17.4 into vs17.6 (VS until 1/2025)
-        "vs17.4": {
             "MergeToBranch": "vs17.6"
         },
         // Automate opening PRs to merge msbuild's vs17.6 into vs17.8 (VS until 7/2025)
