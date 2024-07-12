@@ -89,6 +89,6 @@ internal class NullBuildCheckManager : IBuildCheckManager
     public void ProcessTaskParameter(BuildCheckDataSource buildCheckDataSource, TaskParameterEventArgs eventArg)
     { }
 
-    public void ProcessEnvironmentVariableReadEventArgs(IAnalysisContext analysisContext, ExtendedEnvironmentVariableReadEventArgs projectEvaluationEventArgs)
+    public void ProcessEnvironmentVariableReadEventArgs(IAnalysisContext analysisContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
     { }
 }

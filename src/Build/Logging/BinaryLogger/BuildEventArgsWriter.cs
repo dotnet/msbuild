@@ -466,7 +466,6 @@ namespace Microsoft.Build.Logging
                 case TaskCommandLineEventArgs taskCommandLine: return Write(taskCommandLine);
                 case UninitializedPropertyReadEventArgs uninitializedPropertyRead: return Write(uninitializedPropertyRead);
                 case EnvironmentVariableReadEventArgs environmentVariableRead: return Write(environmentVariableRead);
-                case ExtendedEnvironmentVariableReadEventArgs extendedEnvironmentVariableRead: return Write(extendedEnvironmentVariableRead);
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: return Write(propertyInitialValueSet);
                 case CriticalBuildMessageEventArgs criticalBuildMessage: return Write(criticalBuildMessage);
                 case AssemblyLoadBuildEventArgs assemblyLoad: return Write(assemblyLoad);
@@ -546,21 +545,13 @@ namespace Microsoft.Build.Logging
 
         private BinaryLogRecordKind Write(EnvironmentVariableReadEventArgs e)
         {
-            WriteMessageFields(e, writeImportance: true);
-            WriteDeduplicatedString(e.EnvironmentVariableName);
-
-            return BinaryLogRecordKind.EnvironmentVariableRead;
-        }
-
-        private BinaryLogRecordKind Write(ExtendedEnvironmentVariableReadEventArgs e)
-        {
             WriteMessageFields(e, writeImportance: false);
             WriteDeduplicatedString(e.EnvironmentVariableName);
             Write(e.LineNumber);
             Write(e.ColumnNumber);
-            WriteDeduplicatedString(e.FileName);
+            WriteDeduplicatedString(e.File);
 
-            return BinaryLogRecordKind.ExtendedEnvironmentVariableRead;
+            return BinaryLogRecordKind.EnvironmentVariableRead;
         }
 
         private BinaryLogRecordKind Write(ResponseFileUsedEventArgs e)

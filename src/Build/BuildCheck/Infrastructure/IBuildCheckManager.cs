@@ -41,7 +41,7 @@ internal interface IBuildCheckManager
 
     void ProcessEnvironmentVariableReadEventArgs(
         IAnalysisContext analysisContext,
-        ExtendedEnvironmentVariableReadEventArgs envVariableReadEventArgs);
+        EnvironmentVariableReadEventArgs envVariableReadEventArgs);
 
     void ProcessTaskStartedEventArgs(
         IAnalysisContext analysisContext,

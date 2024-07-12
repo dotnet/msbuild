@@ -21,7 +21,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -4701,7 +4700,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     logger
                         .AllBuildEvents
-                        .OfType<ExtendedEnvironmentVariableReadEventArgs>()
+                        .OfType<EnvironmentVariableReadEventArgs>()
                         .ShouldHaveSingleItem()
                         .EnvironmentVariableName
                         .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
@@ -4733,7 +4732,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     logger
                         .AllBuildEvents
-                        .OfType<ExtendedEnvironmentVariableReadEventArgs>()
+                        .OfType<EnvironmentVariableReadEventArgs>()
                         .ShouldHaveSingleItem()
                         .EnvironmentVariableName
                         .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
@@ -4764,7 +4763,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     logger
                         .AllBuildEvents
-                        .OfType<ExtendedEnvironmentVariableReadEventArgs>()
+                        .OfType<EnvironmentVariableReadEventArgs>()
                         .ShouldHaveSingleItem()
                         .EnvironmentVariableName
                         .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
@@ -4796,7 +4795,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     logger
                         .AllBuildEvents
-                        .OfType<ExtendedEnvironmentVariableReadEventArgs>()
+                        .OfType<EnvironmentVariableReadEventArgs>()
                         .ShouldHaveSingleItem()
                         .EnvironmentVariableName
                         .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
@@ -4848,12 +4847,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     logger
                         .AllBuildEvents
-                        .OfType<ExtendedEnvironmentVariableReadEventArgs>()
+                        .OfType<EnvironmentVariableReadEventArgs>()
                         .ShouldContain(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
-                        .OfType<ExtendedEnvironmentVariableReadEventArgs>()
+                        .OfType<EnvironmentVariableReadEventArgs>()
                         .ShouldNotContain(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE");
 
                     logger
@@ -4882,7 +4881,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     logger
                         .AllBuildEvents
-                        .OfType<ExtendedEnvironmentVariableReadEventArgs>()
+                        .OfType<EnvironmentVariableReadEventArgs>()
                         .ShouldHaveSingleItem()
                         .EnvironmentVariableName
                         .ShouldBe("DEFINED_ENVIRONMENT_VARIABLE2");
@@ -4913,12 +4912,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     logger
                         .AllBuildEvents
-                        .OfType<ExtendedEnvironmentVariableReadEventArgs>()
+                        .OfType<EnvironmentVariableReadEventArgs>()
                         .ShouldContain(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE2");
 
                     logger
                         .AllBuildEvents
-                        .OfType<ExtendedEnvironmentVariableReadEventArgs>()
+                        .OfType<EnvironmentVariableReadEventArgs>()
                         .ShouldNotContain(ev => ev.EnvironmentVariableName == "DEFINED_ENVIRONMENT_VARIABLE");
 
                     logger

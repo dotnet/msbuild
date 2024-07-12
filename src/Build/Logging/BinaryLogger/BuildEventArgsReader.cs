@@ -311,7 +311,6 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.ProjectImported => ReadProjectImportedEventArgs(),
                 BinaryLogRecordKind.TargetSkipped => ReadTargetSkippedEventArgs(),
                 BinaryLogRecordKind.EnvironmentVariableRead => ReadEnvironmentVariableReadEventArgs(),
-                BinaryLogRecordKind.ExtendedEnvironmentVariableRead => ReadExtendedEnvironmentVariableReadEventArgs(),
                 BinaryLogRecordKind.ResponseFileUsed => ReadResponseFileUsedEventArgs(),
                 BinaryLogRecordKind.PropertyReassignment => ReadPropertyReassignmentEventArgs(),
                 BinaryLogRecordKind.UninitializedPropertyRead => ReadUninitializedPropertyReadEventArgs(),
@@ -1092,22 +1091,6 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadEnvironmentVariableReadEventArgs()
         {
-            var fields = ReadBuildEventArgsFields(readImportance: true);
-            var environmentVariableName = ReadDeduplicatedString();
-
-            BuildEventArgs e = new EnvironmentVariableReadEventArgs(
-                    environmentVariableName,
-                    fields.Message,
-                    fields.HelpKeyword,
-                    fields.SenderName,
-                    fields.Importance);
-            SetCommonFields(e, fields);
-
-            return e;
-        }
-
-        private BuildEventArgs ReadExtendedEnvironmentVariableReadEventArgs()
-        {
             var fields = ReadBuildEventArgsFields();
 
             string? environmentVariableName = ReadDeduplicatedString();
@@ -1115,14 +1098,12 @@ namespace Microsoft.Build.Logging
             int column = ReadInt32();
             string? fileName = ReadDeduplicatedString();
 
-            BuildEventArgs e = new ExtendedEnvironmentVariableReadEventArgs(
+            BuildEventArgs e = new EnvironmentVariableReadEventArgs(
                     environmentVariableName ?? string.Empty,
                     fields.Message,
                     fileName ?? string.Empty,
                     line,
-                    column,
-                    fields.HelpKeyword,
-                    fields.SenderName);
+                    column);
             SetCommonFields(e, fields);
 
             return e;

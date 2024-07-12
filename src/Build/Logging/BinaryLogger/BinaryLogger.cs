@@ -74,8 +74,7 @@ namespace Microsoft.Build.Logging
         // version 21:
         //   - TaskParameterEventArgs: Added ParameterName and PropertyName properties
         // version 22:
-        //    - new record kinds: ExtendedEnvironmentVariableRead that reports file and exact location where environment variable was used.
-        //      It substitutes the existing EnvironmentVariableRead.
+        //    - extend EnvironmentVariableRead with location where environment variable was used.
         // This should be never changed.
         // The minimum version of the binary log reader that can read log of above version.
         internal const int ForwardCompatibilityMinimalVersion = 18;

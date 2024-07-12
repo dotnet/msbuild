@@ -334,14 +334,14 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             => _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(analysisContext, evaluationFinishedEventArgs);
 
-        public void ProcessEnvironmentVariableReadEventArgs(IAnalysisContext analysisContext, ExtendedEnvironmentVariableReadEventArgs projectEvaluationEventArgs)
+        public void ProcessEnvironmentVariableReadEventArgs(IAnalysisContext analysisContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
         {
-            if (projectEvaluationEventArgs is ExtendedEnvironmentVariableReadEventArgs evr)
+            if (projectEvaluationEventArgs is EnvironmentVariableReadEventArgs evr)
             {
                 _buildEventsProcessor.ProcessEnvironmentVariableReadEventArgs(
                     evr.EnvironmentVariableName,
                     evr.Message ?? string.Empty,
-                    evr.FileName,
+                    evr.File,
                     evr.LineNumber,
                     evr.ColumnNumber);
             }

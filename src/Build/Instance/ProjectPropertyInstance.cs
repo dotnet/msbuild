@@ -96,7 +96,7 @@ namespace Microsoft.Build.Execution
             {
                 if (this is EnvironmentDerivedProjectPropertyInstance envProperty && envProperty.loggingContext?.IsValid == true && !envProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
                 {
-                    EnvironmentVariableReadEventArgs args = new(Name, _escapedValue);
+                    EnvironmentVariableReadEventArgs args = new(Name, _escapedValue, string.Empty, 0, 0);
                     args.BuildEventContext = envProperty.loggingContext.BuildEventContext;
                     envProperty.loggingContext.LogBuildEvent(args);
                     envProperty._loggedEnvProperty = true;
@@ -110,7 +110,7 @@ namespace Microsoft.Build.Execution
         {
             if (this is EnvironmentDerivedProjectPropertyInstance envProperty && envProperty.loggingContext?.IsValid == true && !envProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
             {
-                ExtendedEnvironmentVariableReadEventArgs args = new(Name, _escapedValue, location.File, location.Line, location.Column);
+                EnvironmentVariableReadEventArgs args = new(Name, _escapedValue, location.File, location.Line, location.Column);
                 args.BuildEventContext = envProperty.loggingContext.BuildEventContext;
                 envProperty.loggingContext.LogBuildEvent(args);
                 envProperty._loggedEnvProperty = true;
