@@ -56,7 +56,7 @@ https://ceapex.visualstudio.com/CEINTL/_workitems/edit/957875 (DONE)
 - [ ] Get M2 or QB approval as necessary per the VS schedule
 - [ ]  Merge to VS (babysit the automatically generated VS insertion PR https://devdiv.visualstudio.com/DevDiv/_git/VS/pullrequests for the MSBuild commit noted in above step): {{URL_OF_VS_INSERTION}}
 - [ ] Update the PackageValidationBaselineVersion to the latest released version ({{THIS_RELEASE_VERSION}}.0) - this might require temporary addition of the [build artifacts feed](https://github.com/dotnet/msbuild/blob/29397b577e3ec0fe0c7650c3ab0400909655dc88/NuGet.config#L9) as the new version is not yet added to the official feeds (this is post release). This can trigger a high severity CG error (https://eng.ms/docs/cloud-ai-platform/devdiv/one-engineering-system-1es/1es-docs/secure-supply-chain/how-to-securely-configure-package-source-files) - however it should be fine to keep this temporary feed untill the release.
-- [ ] Update the requested SDK version for bootstrap folder if a fresh sdk was released in [NetVersion](https://github.com/dotnet/msbuild/blob/main/eng/BootStrapMsBuild.props).
+- [ ] Update the requested SDK version for bootstrap folder (the `NetVersion` property in [BootStrapMsBuild.props](https://github.com/dotnet/msbuild/blob/main/eng/BootStrapMsBuild.props)) and buildToolCommand/_InitializeBuildToolCommand values in cibuild_bootstrapped_msbuild scripts if a fresh sdk was released (released runtimes and associated sdk versions can be checked here - https://dotnet.microsoft.com/en-us/download/visual-studio-sdks - make sure to allways check the details of the appropriate targetted version of .NET for the matchin latest version of SDK).
 
 ## ASAP On/After GA:
 

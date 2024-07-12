@@ -62,7 +62,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         /// <returns>True if the task succeeded; otherwise, false.</returns>
         public override bool Execute()
         {
-            if (Directory.Exists(InstallDir) || Directory.Exists(Path.Combine(InstallDir, "sdk", Version)))
+            if (Directory.Exists(Path.Combine(InstallDir, "sdk", Version)))
             {
                 // no need to download sdk again, it exists locally
                 return true;
