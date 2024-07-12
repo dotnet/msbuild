@@ -801,22 +801,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void RoundTripEnvironmentVariableReadEventArgs()
-        {
-            var args = new EnvironmentVariableReadEventArgs(
-                environmentVariableName: Guid.NewGuid().ToString(),
-                message: Guid.NewGuid().ToString(),
-                helpKeyword: Guid.NewGuid().ToString(),
-                senderName: Guid.NewGuid().ToString());
-
-            Roundtrip(args,
-                e => e.EnvironmentVariableName,
-                e => e.Message,
-                e => e.HelpKeyword,
-                e => e.SenderName);
-        }
-
-        [Fact]
         public void RoundTripPropertyReassignmentEventArgs()
         {
             var args = new PropertyReassignmentEventArgs(
