@@ -4,7 +4,8 @@ trigger:
 - vs*
 
 variables:
-- group: AzureDevOps-Artifact-Feeds-Pats
+- ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+  - group: AzureDevOps-Artifact-Feeds-Pats
 - name: cfsNugetWarnLevel
   value: warn
 - name: nugetMultiFeedWarnLevel
