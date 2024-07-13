@@ -163,11 +163,11 @@ For the `.editorconfig` file configuration, following will apply:
 
 ```ini
 [*.csproj]
-build_check.BC0101.Severity=warning
+build_check.BC0101.severity=warning
 
-build_check.COND0543.Severity=none
-build_check.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
-build_check.COND0543.CustomSwitch=QWERTY
+build_check.COND0543.severity=none
+build_check.COND0543.scope=project
+build_check.COND0543.custom_switch=QWERTY
 ```
 
 ### User Configurable Options
@@ -176,15 +176,17 @@ Initial version of BuildCheck plans a limited set of options configurable by use
 
 **NOTE:** The actual naming of the configuration options is yet to be determined.
 
-#### Severity
+#### Severity levels
 
 Option `Severity` with following values will be available:
 
-* `Default`
-* `None`
-* `Suggestion`
-* `Warning`
-* `Error`
+| Severity      | EditorConfig option      |
+| ------------- | ------------- |
+| Default | `default` |
+| None | `none` |
+| Suggestion | `suggestion` |
+| Warning | `warning` |
+| Error | `error` |
 
 Severity levels are in line with [roslyn analyzers severity levels](https://learn.microsoft.com/en-us/visualstudio/code-quality/use-roslyn-analyzers). `Default` severity in `.editorconfig` will lead to using build-in severity from the analyzer (so this can be used for clearing custom severity setting from higher level `.editorconfig` file). `Default` severity in the build-in code has same effect as if the code doesn't specify severity at all - an infrastruture default of `None` is considered.
 
@@ -194,13 +196,23 @@ Each rule has a severity, even if multiple rules are defined in a single analyze
 
 If all the rules from a single analyzer have severity `None` - analyzer won't be given any data for such configured part of the build (specific project or a whole build). If analyzer have some rules enabled and some disabled - it will be still fed with data, but the reports will be post-filtered.
 
+#### Configuring severity level
+
+```ini
+[*.csproj]
+build_check.BC0101.severity=warning
+```
+
 #### Scope of Analysis
 
 Option `EvaluationAnalysisScope` with following possible options will be available:
-* `ProjectOnly` - Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded.
-* `ProjectWithImportsFromCurrentWorkTree` - Only the data from currently analyzed project and imports from files under the entry project or solution will be sent to the analyzer. Other imports will be discarded.
-* `ProjectWithImportsWithoutSdks` - Imports from SDKs will not be sent to the analyzer. Other imports will be sent.
-* `ProjectWithAllImports` - All data will be sent to the analyzer.
+
+| EvaluationAnalysisScope (Solution Explorer)   | EditorConfig option      |  Behaviour  | 
+| ------------- | ------------- |   ------------- |
+| ProjectOnly | `project` | Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded. | 
+| ProjectWithImportsFromCurrentWorkTree | `current_imports` |  Only the data from currently analyzed project and imports from files under the entry project or solution will be sent to the analyzer. Other imports will be discarded. | 
+| ProjectWithImportsWithoutSdks | `without_sdks` | Imports from SDKs will not be sent to the analyzer. Other imports will be sent. | 
+| ProjectWithAllImports | `all` | All data will be sent to the analyzer. | 
 
 All rules of a single analyzer must have the `EvaluationAnalysisScope` configured to a same value. If any rule from the analyzer have the value configured differently - a warning will be issued during the build and analyzer will be deregistered.
 
@@ -208,6 +220,12 @@ Same rule can have `EvaluationAnalysisScope` configured to different values for 
 
 BuildCheck might not be able to guarantee to properly filter the data with this distinction for all [registration types](#RegisterActions) - in case an explicit value is attempted to be configured (either [from the analyzer code](#BuildAnalyzerConfiguration) or from `.editorconfig` file) for an analyzer that has a subscription to unfilterable data - a warning will be issued during the build and analyzer will be deregistered.
 
+#### Configuring evalution scope
+
+```ini
+[*.csproj]
+build_check.BC0101.scope=all
+```
 
 ## Analyzers and Rules Identification
 
