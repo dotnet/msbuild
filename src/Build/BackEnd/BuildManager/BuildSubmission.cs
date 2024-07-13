@@ -78,13 +78,14 @@ namespace Microsoft.Build.Execution
         internal void CompleteResults(TResultData result)
         {
             ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
-            ErrorUtilities.VerifyThrow(result.SubmissionId == SubmissionId,
-                "GraphBuildResult's submission id doesn't match GraphBuildSubmission's");
+            CheckResultValidForCompletion(result);
 
             BuildResult ??= result;
 
             CheckForCompletion();
         }
+
+        protected internal abstract void CheckResultValidForCompletion(TResultData result);
 
         protected internal abstract TResultData CreateFailedResult(Exception exception);
 
@@ -207,7 +208,19 @@ namespace Microsoft.Build.Execution
                 "BuildRequest is not populated while reporting failed result.");
             return new(BuildRequest!, exception);
         }
-        
+
+        protected internal override void CheckResultValidForCompletion(BuildResult result)
+        {
+            // We verify that we got results from the same configuration, but not necessarily the same request, because we are
+            // rather flexible in how users are allowed to submit multiple requests for the same configuration.  In this case, the
+            // request id of the result will match the first request, even though it will contain results for all requests (including
+            // this one.)
+            if (result.ConfigurationId != BuildRequest?.ConfigurationId)
+            {
+                ErrorUtilities.ThrowInternalError("BuildResult configuration ({0}) doesn't match BuildRequest configuration ({1})",
+                    result.ConfigurationId, BuildRequest?.ConfigurationId);
+            }
+        }
 
         protected internal override void OnCompletition()
         {

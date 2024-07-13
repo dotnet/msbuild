@@ -62,6 +62,12 @@ namespace Microsoft.Build.Graph
             return BuildResult!;
         }
 
+        protected internal override void CheckResultValidForCompletion(GraphBuildResult result)
+        {
+            ErrorUtilities.VerifyThrow(result.SubmissionId == SubmissionId,
+                "GraphBuildResult's submission id doesn't match GraphBuildSubmission's");
+        }
+
         protected internal override GraphBuildResult CreateFailedResult(Exception exception)
             => new(SubmissionId, exception);
     }
