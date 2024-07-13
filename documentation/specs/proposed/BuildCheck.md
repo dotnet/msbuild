@@ -207,7 +207,7 @@ build_check.BC0101.severity=warning
 
 Option `EvaluationAnalysisScope` with following possible options will be available:
 
-| EvaluationAnalysisScope (Solution Explorer)   | EditorConfig option      |  Behaviour  | 
+| EvaluationAnalysisScope (Solution Explorer)   | EditorConfig option      |  Behavior  | 
 | ------------- | ------------- |   ------------- |
 | ProjectOnly | `project` | Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded. | 
 | ProjectWithImportsFromCurrentWorkTree | `current_imports` |  Only the data from currently analyzed project and imports from files under the entry project or solution will be sent to the analyzer. Other imports will be discarded. | 
