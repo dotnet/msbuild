@@ -167,7 +167,7 @@ jobs:
       inlineScript: |
         # '499b84ac-1321-427f-aa17-267ca6975798' for Azure DevOps
         $token = az account get-access-token --query accessToken --resource 499b84ac-1321-427f-aa17-267ca6975798 -o tsv
-        Write-Host "Setting AzDO.DotnetPerfStarToken: ${token}"
+        Write-Host "Setting AzDO.DotnetPerfStarToken"
         Write-Host "##vso[task.setvariable variable=AzDO.DotnetPerfStarToken]${token}"
 
   - powershell: |
