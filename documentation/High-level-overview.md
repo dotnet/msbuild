@@ -10,7 +10,7 @@ This document covers all parts of MSBuild in a general manner. So, there will be
 
 
 # MSBuild XML Language
-The MSBuild programming language is a programming language that uses XML semantics with a focus on describing a project. You can see an [exmaple here](..src/Build/Microsoft.Build.csproj).
+The MSBuild programming language is a programming language that uses XML semantics with a focus on describing a project. You can see an [exmaple here](../src/Build/Microsoft.Build.csproj).
 
 The MSBuilkd XML is built around representing a project's data. It uses various attributes to do so:
 - [Tasks](https://learn.microsoft.com/visualstudio/msbuild/msbuild-targets) are how actions are defined in MSBuild, they're a unit of executable code to perform build operations. Most used tasks are defined within MSBuild itself but can also be externally authored by implementing the `ITask` interface.
@@ -146,7 +146,7 @@ It is one of the best tools for debugging MSBuild.
 ## Project result cache plugin
 This Project Cache differs from the previous one because it is separate from the main MSBuild code and used mainly for distributed builds. It functions as a middle layer between the scheduler and the Project Result Cache. So, when the scheduler requests a result for a target or project, the plugin responds first to check all the different distributed nodes for the result. To accomplish this, it adds profiles on disk based on hashes of the project or task ID / name. When the plugin cache gets a hit on an input, it downloads and copies the file results to the right place, deserializes the resulting payload and provides it to the local engine to continue execution.
 
-For more in depth information visit [the spec](..documentation/specs/project-cache.md).
+For more in depth information visit [the spec](../documentation/specs/project-cache.md).
 
 ## BuildCheck
 
@@ -158,7 +158,7 @@ There are a few elements within the MSBuild XML that indicate that a call to the
 
 When such interaction is necessary for a project build, the first thing that needs to be done is to figure out where the SDK is installed so MSBuild can access the content. This is solved by resolvers, which look for the SDK version that was specified, or gets the latest version.
 
-To read more about SDK resolver you can check the [Microsoft Learn page](https://learn.microsoft.com/visualstudio/msbuild/how-to-use-project-sdk#how-project-sdks-are-resolved), or see the [spec documentation](..documentation/specs/sdk-resolvers-algorithm.md).
+To read more about SDK resolver you can check the [Microsoft Learn page](https://learn.microsoft.com/visualstudio/msbuild/how-to-use-project-sdk#how-project-sdks-are-resolved), or see the [spec documentation](../documentation/specs/sdk-resolvers-algorithm.md).
 
 ## Telemetry
 MSBuild has a few telemetry points, mostly through the .NET SDK. It is implemented as a logger that keeps track of telemetry events in the SDK, this allows to have a single opt-out mechanism that also works for MSBuild.
