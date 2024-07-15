@@ -4,23 +4,23 @@ MSBuild is a build platform used mainly for C# projects within .NET and Visual S
 - API and command line program that interprets and manipulates the programming language.
 - Build engine that executes a build based on the programming language inputs.
 
-MSBuild also contains some extensibility aspects that mostly interact with the API and engine. These are built to increase customization and interaction capability. 
+MSBuild also contains some extensibility aspects that mostly interact with the API and engine. These are built to increase customization and interaction capability.
 
-This document covers all parts of MSBuild in a general manner. So, there will be no in depth technical details, or how-to's. If you'd like to learn how to use MSBuild to improve your builds please visit [Learn Microsoft](https://learn.microsoft.com/en-us/visualstudio/msbuild).
+This document covers all parts of MSBuild in a general manner. So, there will be no in depth technical details, or how-to's. If you'd like to learn how to use MSBuild to improve your builds please visit [Learn Microsoft](https://learn.microsoft.com/visualstudio/msbuild).
 
 
 # MSBuild XML Language
-The MSBuild programming language is a programming language that uses XML semantics with a focus on describing a project. You can see an [exmaple here](https://github.com/dotnet/msbuild/blob/main/src/Build/Microsoft.Build.csproj). 
+The MSBuild programming language is a programming language that uses XML semantics with a focus on describing a project. You can see an [exmaple here](https://github.com/dotnet/msbuild/blob/main/src/Build/Microsoft.Build.csproj).
 
 The MSBuilkd XML is built around representing a project's data. It uses various attributes to do so:
-- [Tasks](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-targets) are how actions are defined in MSBuild, they're a unit of executable code to perform build operations. Most used tasks are defined within MSBuild itself but can also be externally authored by implementing the `ITask` interface.
-- [Targets](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-targets) represents a group of tasks, in which their order matters. It is a set of instructions for the MSBuild engine to build from.
-- [Items](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-items) are inputs to the build system, mostly to tasks or targets. They can represent project files, code files, libraries and most things that a project can depend on.
-- [Properties](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-properties) are name value pairs, they're used to store data that is used throughout the build.
+- [Tasks](https://learn.microsoft.com/visualstudio/msbuild/msbuild-targets) are how actions are defined in MSBuild, they're a unit of executable code to perform build operations. Most used tasks are defined within MSBuild itself but can also be externally authored by implementing the `ITask` interface.
+- [Targets](https://learn.microsoft.com/visualstudio/msbuild/msbuild-targets) represents a group of tasks, in which their order matters. It is a set of instructions for the MSBuild engine to build from.
+- [Items](https://learn.microsoft.com/visualstudio/msbuild/msbuild-items) are inputs to the build system, mostly to tasks or targets. They can represent project files, code files, libraries and most things that a project can depend on.
+- [Properties](https://learn.microsoft.com/visualstudio/msbuild/msbuild-properties) are name value pairs, they're used to store data that is used throughout the build.
 
 These attributes are defined within project files (`.csproj`, `.vbproj` etc.). `.sln` solution files are not written with MSBuild XML, but those are interpreted during build process so all projects can be identified.
 
-Since the project file defines the data used for the build, the actual build instructions are imported through imports or/and SDKs, that contains their own tasks and targets. One example that is vastly used is the [.NET SDK](https://learn.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk).
+Since the project file defines the data used for the build, the actual build instructions are imported through imports or/and SDKs, that contains their own tasks and targets. One example that is vastly used is the [.NET SDK](https://learn.microsoft.com/visualstudio/msbuild/how-to-use-project-sdk).
 
 # MSBuild API
 The MSBuild API is a library with a focus on building .NET programs, as such it is used by Visual Studio and .NET SDK to integrate MSBuild as their project build system. The library includes common build logic and targets, like creation and management of output folder, intermidiary folders, custom task creation, etc... This also allows programs (like Visual Studio) to change the behaviour of MSBuild through UI and checkboxes, making sure that the user has access to those options and there is not a need to modify the project file XML directly.
@@ -43,11 +43,11 @@ There are a few officially supported entry points for the engine: Visual Studio,
 An example of the imported build logic is the `<Project Sdk="Microsoft.NET.Sdk">` that can be seen in some of the built-in .NET templates. This indicates that the project will use build logic that comes with the .NET SDK.
 
 ## Evaluate operation
-For more detailed information on evaluation visit [Microsoft Learn](https://learn.microsoft.com/en-us/visualstudio/msbuild/build-process-overview#evaluation-phase).
+For more detailed information on evaluation visit [Microsoft Learn](https://learn.microsoft.com/visualstudio/msbuild/build-process-overview#evaluation-phase).
 
 Evaluation of the build is the first step of the process. Its main objective is to collect information on the project being built. This includes checking entry point, imports, items, and tasks. Additionally, for Visual Studio it also gathers information about which C# files, solution files and project files are checked in the IDE.
 
-The first step of evaluation is to load the project file and the XML data it contains. There are multiple passes within the same file to collect data, some of those to specifically define project properties and imports that are necessary for other tasks. At this time, the restore target has run already, so all imports are files on disk and are processed as paths by the engine. Another characteristic of imports is that they are brough within the project logic, so other projects can refence the same import logic instead of having a copy of the same data. Data loaded within the evaluation are not used until execution stage. This means that data can be added and modified during evaluation. 
+The first step of evaluation is to load the project file and the XML data it contains. There are multiple passes within the same file to collect data, some of those to specifically define project properties and imports that are necessary for other tasks. At this time, the restore target has run already, so all imports are files on disk and are processed as paths by the engine. Another characteristic of imports is that they are brough within the project logic, so other projects can refence the same import logic instead of having a copy of the same data. Data loaded within the evaluation are not used until execution stage. This means that data can be added and modified during evaluation.
 
 The evaluation stage should not have any side effect on disk, no new or deleted files. Two exceptions for this are:
  - SDK resolution
@@ -59,9 +59,9 @@ Complex projects generally include imports of many different types. In MSBuild a
 In the case of tool imports, MSBuild does not process tool resolution via registry. Instead, it is resolved by looking on adjacent folder to the current running version of MSBuild. The folders will be different depending is MSBuild is running from Visual Studio or the .NET SDK.
 
 ## Execution operation
-For more detailed information on execution phase visit [Microsoft Learn](https://learn.microsoft.com/en-us/visualstudio/msbuild/build-process-overview#execution-phase).
+For more detailed information on execution phase visit [Microsoft Learn](https://learn.microsoft.com/visualstudio/msbuild/build-process-overview#execution-phase).
 
-The execution phase is simply executing the targets defined in the XML by the user or implicitly defined by the SDK or VS. The order of executed targets is defined using a few attributes: `BeforeTargets`, `DependsOnTargets`, and `AfterTargets`. However, the order in which targets are executed during a build will not strictly follow the one defined by those attributes. During execution, if a target that is being executed changes attributes or properties from another target, the final execution order might change due to the dependency chain changing. The full executing order can be [found here](https://learn.microsoft.com/en-us/visualstudio/msbuild/target-build-order#determine-the-target-build-order).
+The execution phase is simply executing the targets defined in the XML by the user or implicitly defined by the SDK or VS. The order of executed targets is defined using a few attributes: `BeforeTargets`, `DependsOnTargets`, and `AfterTargets`. However, the order in which targets are executed during a build will not strictly follow the one defined by those attributes. During execution, if a target that is being executed changes attributes or properties from another target, the final execution order might change due to the dependency chain changing. The full executing order can be [found here](https://learn.microsoft.com/visualstudio/msbuild/target-build-order#determine-the-target-build-order).
 
 ### Task Host
 MSBuild has an ability to run tasks out of process via the called Task Host. That allows tasks to run in a different .NET runtime or bintess than the one used by the build engine for the build execution.
@@ -140,7 +140,7 @@ Pluggable loggers are added through DLLs, and MSBuild engine identifies them at 
 
 ### Binary logger
 The Binary Logger, also called BinLog, is a structured log that contains all the events within a build. It achieves that through its implementation focused on reading events from the build and serializing those in an structured form. To read a BinLog the BinLog reader can be used, but it is not officially supported by the MSBuild team.
-It is one of the best tools for debugging MSBuild. 
+It is one of the best tools for debugging MSBuild.
 
 
 ## Project result cache plugin
@@ -158,7 +158,7 @@ There are a few elements within the MSBuild XML that indicate that a call to the
 
 When such interaction is necessary for a project build, the first thing that needs to be done is to figure out where the SDK is installed so MSBuild can access the content. This is solved by resolvers, which look for the SDK version that was specified, or gets the latest version.
 
-To read more about SDK resolver you can check the [Microsoft Learn page](https://learn.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk#how-project-sdks-are-resolved), or see the [spec documentation](https://github.com/dotnet/msbuild/blob/main/documentation/specs/sdk-resolvers-algorithm.md).
+To read more about SDK resolver you can check the [Microsoft Learn page](https://learn.microsoft.com/visualstudio/msbuild/how-to-use-project-sdk#how-project-sdks-are-resolved), or see the [spec documentation](https://github.com/dotnet/msbuild/blob/main/documentation/specs/sdk-resolvers-algorithm.md).
 
 ## Telemetry
 MSBuild has a few telemetry points, mostly through the .NET SDK. It is implemented as a logger that keeps track of telemetry events in the SDK, this allows to have a single opt-out mechanism that also works for MSBuild.
