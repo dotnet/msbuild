@@ -480,6 +480,7 @@ namespace Microsoft.Build.Shared
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
                 if (_buildEvent is ProjectEvaluationStartedEventArgs
                     or ProjectEvaluationFinishedEventArgs
+                    or EnvironmentVariableReadEventArgs
                     or ResponseFileUsedEventArgs)
                 {
                     // switch to serialization methods that we provide in this file
