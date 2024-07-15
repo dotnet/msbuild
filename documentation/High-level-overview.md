@@ -23,7 +23,7 @@ These attributes are defined within project files (`.csproj`, `.vbproj` etc.). `
 Since the project file defines the data used for the build, the actual build instructions are imported through imports or/and SDKs, that contains their own tasks and targets. One example that is vastly used is the [.NET SDK](https://learn.microsoft.com/en-us/visualstudio/msbuild/how-to-use-project-sdk).
 
 # MSBuild API
-The MSBuild API is a library with a focus on building .NET programs, as such it is used by Visual Studio and .NET SDK to integrate MSBuild as their project build system. The library includes common build logic and targets, like creation and management of output folder, intermidiary folders, custom task creation, etc... It also enables the change of the MSBuild Language without directly changing the project file itself.
+The MSBuild API is a library with a focus on building .NET programs, as such it is used by Visual Studio and .NET SDK to integrate MSBuild as their project build system. The library includes common build logic and targets, like creation and management of output folder, intermidiary folders, custom task creation, etc... This also allows programs (like Visual Studio) to change the behaviour of MSBuild through UI and checkboxes, making sure that the user has access to those options and there is not a need to modify the project file XML directly.
 
 ## ToolTask
 ToolTask is an interface offered by MSBuild to implement custom tasks. During the build, the MSBuild Engine will construct the task, call the execute method and let it run during execution. This process has performance advantages on windows when compared to writing a script to do the same work.
@@ -34,9 +34,13 @@ The MSBuild Engine's main responsibility is to execute the build instructions an
 Building a project can easily become a huge and time-consuming project. To simplify things the MSBuild's engine logic is divided into two main stages: the evalution stage and the execution stage.
 
 ## Entry points
-There are a few officially supported entry points for the engine: Visual Studio, .NET SDK and the CLI executable (`MSBuild.exe`). All these methods are an implementation or extension of the MSBuild API. The inputs necessary to start a build include some specific build logic for the projects, generally given by the entry points, User defined imports, and the `.g.props` from NuGet restore. 
+There are a few officially supported entry points for the engine: Visual Studio, .NET SDK and the CLI executable (`MSBuild.exe`). All these methods are an implementation or extension of the MSBuild API. The inputs necessary to start a build include:
+ - Build logic for the projects, either from user generated on the project's XML, or from implicit imports by the entry point programs.
+ - User defined imports
+ - `.g.props` from NuGet restore.
 
-An example of that is the `<Project Sdk="Microsoft.NET.Sdk">` that can be seen in some of the built-in .NET templates. This indicates that the project will use build logic that comes with the .NET SDK.
+
+An example of the imported build logic is the `<Project Sdk="Microsoft.NET.Sdk">` that can be seen in some of the built-in .NET templates. This indicates that the project will use build logic that comes with the .NET SDK.
 
 ## Evaluate operation
 For more detailed information on evaluation visit [Microsoft Learn](https://learn.microsoft.com/en-us/visualstudio/msbuild/build-process-overview#evaluation-phase).
@@ -57,7 +61,7 @@ In the case of tool imports, MSBuild does not process tool resolution via regist
 ## Execution operation
 For more detailed information on execution phase visit [Microsoft Learn](https://learn.microsoft.com/en-us/visualstudio/msbuild/build-process-overview#execution-phase).
 
-The execution phase is simply executing the targets defined in the XML by the user or implicitly defined by the SDK or VS. The order of executed targets is defined using a few attributes: `BeforeTargets`, `DependsOnTargets`, and `AfterTargets`. But the final order might change if an earlier target modifies a property of a later target. The full executing order can be [found here](https://learn.microsoft.com/en-us/visualstudio/msbuild/target-build-order#determine-the-target-build-order).
+The execution phase is simply executing the targets defined in the XML by the user or implicitly defined by the SDK or VS. The order of executed targets is defined using a few attributes: `BeforeTargets`, `DependsOnTargets`, and `AfterTargets`. However, the order in which targets are executed during a build will not strictly follow the one defined by those attributes. During execution, if a target that is being executed changes attributes or properties from another target, the final execution order might change due to the dependency chain changing. The full executing order can be [found here](https://learn.microsoft.com/en-us/visualstudio/msbuild/target-build-order#determine-the-target-build-order).
 
 ### Task Host
 MSBuild has an ability to run tasks out of process via the called Task Host. That allows tasks to run in a different .NET runtime or bintess than the one used by the build engine for the build execution.
@@ -67,7 +71,7 @@ This is an opt-in behavior that can be used for various cases:
 - If a task is built in the same repo that is currently being built by MSBuild and the code might change. So, Task Host makes sure the DLLs are not locked at the end of the build.
 
 ## Processes and nodes
-When a new build is started MSBuild starts a process, which runs some setup code and prepares itself to start a build. This first node becomes the scheduler node and one of the worker nodes, becoming both the entry point for the project build and the scheduler. The main problem that arises from that is when the whole build, the OS tears down the process, losing the memory cache and having to restart the whole build process from the start. This is offset by having longer lived processes, that can be reused when building projects successionally.
+When a new build is started, MSBuild starts a process that runs some setup code and prepares itself to start a build. This first node becomes the scheduler node and one of the worker nodes, becoming both the entry point for the project build and the scheduler. The main problem that arises from that is when the whole build finishes execution, the OS tears down the process, losing the memory cache and having to restart the whole build process from the start. This is offset by having longer lived processes, that can be reused when building projects successionally.
 
 ## Caches
 ### Register Task Objects
@@ -76,13 +80,10 @@ During execution tasks might need to share state meaningfully between invocation
 ### Project result cache
 The project Result Cache refers to the cache used by the scheduler that keeps the build results of already executed project. The result of a target is success, failure, and a list of items that succeeded. Beyond that the `return` and `output` attributes from targets are also serialized with the build result, as to be used by other targets for their execution.
 
-### Project result cache plugin
-This Project Cache differs from the previous one because it is separate from the main MSBuild code and used mainly for distributed builds. It functions as a middle layer between the scheduler and the Project Result Cache. So, when the scheduler requests a result for a target or project, the plugin responds first to check all the different distributed nodes for the result. To accomplish this, it adds profiles on disk based on hashes of the project or task ID / name. When the plugin cache gets a hit on an input, it downloads and copies the file results to the right place, deserializes the resulting payload and provides it to the local engine to continue execution.
-
-For more in depth information visit [the spec](https://github.com/dotnet/msbuild/blob/main/documentation/specs/project-cache.md).
+There is also another Project Cache Plugin, which focuses on result cache in distributed builds. More information about it is in the Extensibility section.
 
 ## Scheduler
-The scheduler is the part of the MSBuild engine responsible for scheduling work to different nodes, as well as maintaining and managing the result of already executed projects. When a build starts, the scheduler assigns the entry point project to a working node (generally the in-proc node). The project's execution starts and proceeds until the whole operation ends or is blocked. Once a node is not proceeding with the current project, either finished or blocked, the scheduler then access if it has more work to be given to that node and assigns it.
+The scheduler is the part of the MSBuild engine responsible for scheduling work to different nodes, as well as maintaining and managing the result of already executed projects. When a build starts, the scheduler assigns the entry point project to a working node (generally the in-proc node). The project's execution starts and proceeds until the whole operation ends or is blocked. A node is considered blocked, when the project that it is currently building depends on another project that has not yet finished executing. Once a node is not proceeding with the current project, the scheduler then asseses if it has more work to be given to that node and assigns it.
 
 On a project's operation end and returned result, it sends that information to the scheduler. The scheduler maintains results of all of the build's executed targets, so when a project or target depends on another to proceed execution, the scheduler can just retrieve that information from the Project Result Cache. Since the scheduler and project are generally in different processes, this communication happens within the engine using built-in loggers.
 
@@ -97,10 +98,14 @@ Parallelism for MSBuild is implemented at project level. Each project is assigne
 For multi-targeted builds parallelism works slightly different. The outer build produces a list of projects to build. This list contains the same project file with a different metadata for the target framework. This list is then passed to the MSBuild execute target so it can be built in parallel.
 
 
-## IPC (inter-process communication)
+## IPC (Inter-Process Communication)
 In multi-process MSBuild execution, many OS processes exist that need to communicate with each other. There are two main reasons:
  - Dealing with blocked tasks on processes: Communicating with the engine, scheduler, cache, etc...
  - Communication on task execution for a task host: Task definition, task inputs, task outputs.
+
+The transportation layer for messages are based on a .NET pipe implementattion. These pipes are specifically for windows, while the unix system implmentation has a wrap around sockets for the same functionality.
+
+The message layer has a custom serialization protocal that is specific to MSBuild.It is designed so implementing new types for new messages is easy, oinly needs to implement the `ITranslatable` interface. All message types used are known internal MSBuild types, that also have an extra field with a `string, string` disctionary to support extra user messages.
 
 ## Graph build
 A graph build changes the sequence in which MSBuild processes projects. Normally a project starts execution, and when it has a dependency on another project, then that project starts to build. A graph build evaluates all projects and their relationship before starting execution of any project. This is achieved by looking at specific items in the XML (like Project Reference) to construct the dependency graph.
@@ -121,6 +126,8 @@ MSBuild interacts with external packages in almost every build. However, the MSB
 ## Restore
 The restore operation is a built-in target within MSBuild. The main function is to walk through the project references and `packages.config` file about all the packages that need to be restored. This process is executed by NuGet, as MSBuild does not have a packaging system within the code.
 
+## Tasks
+
 ## Diagnosability / Loggers
 Diagnosability within MSBuild went through some changes. Before we had a debugger, where you could step through the XML during the build and debug. This was discarded in favor of a log focused approach, where MSBuild has a more robust logging system that contains more data to identify what is happening during a build.
 
@@ -135,10 +142,19 @@ Pluggable loggers are added through DLLs, and MSBuild engine identifies them at 
 The Binary Logger, also called BinLog, is a structured log that contains all the events within a build. It achieves that through its implementation focused on reading events from the build and serializing those in an structured form. To read a BinLog the BinLog reader can be used, but it is not officially supported by the MSBuild team.
 It is one of the best tools for debugging MSBuild. 
 
+
+## Project result cache plugin
+This Project Cache differs from the previous one because it is separate from the main MSBuild code and used mainly for distributed builds. It functions as a middle layer between the scheduler and the Project Result Cache. So, when the scheduler requests a result for a target or project, the plugin responds first to check all the different distributed nodes for the result. To accomplish this, it adds profiles on disk based on hashes of the project or task ID / name. When the plugin cache gets a hit on an input, it downloads and copies the file results to the right place, deserializes the resulting payload and provides it to the local engine to continue execution.
+
+For more in depth information visit [the spec](https://github.com/dotnet/msbuild/blob/main/documentation/specs/project-cache.md).
+
+## BuildCheck
+
 ## Resolvers
 There are a few elements within the MSBuild XML that indicate that a call to the .NET SDK is necessary. Some examples include:
  - `<Project Sdk="Microsoft.NET.Sdk">`, where you can also define the SDK version
  - `<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />`, for explicit imports.
+ - `<Sdk Name="My.Build.Sdk" Version="1.0.0" />`, another explicit import of the SDK.
 
 When such interaction is necessary for a project build, the first thing that needs to be done is to figure out where the SDK is installed so MSBuild can access the content. This is solved by resolvers, which look for the SDK version that was specified, or gets the latest version.
 
