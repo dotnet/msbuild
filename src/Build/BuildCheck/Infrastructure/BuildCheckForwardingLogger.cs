@@ -48,31 +48,17 @@ internal class BuildCheckForwardingLogger : IForwardingLogger
         typeof(TaskParameterEventArgs)
     };
 
-    private bool _customAnalyzerDetected;
-
     public void Initialize(IEventSource eventSource, int nodeCount) => Initialize(eventSource);
 
     public void Initialize(IEventSource eventSource)
     {
-        _customAnalyzerDetected = false;
         eventSource.AnyEventRaised += EventSource_AnyEventRaised;
     }
 
     public void EventSource_AnyEventRaised(object sender, BuildEventArgs buildEvent)
     {
-        if (_customAnalyzerDetected)
-        {
-            BuildEventRedirector?.ForwardEvent(buildEvent);
-            return;
-        }
-
         if (_eventsToForward.Contains(buildEvent.GetType()))
         {
-            if (buildEvent is BuildCheckAcquisitionEventArgs)
-            {
-                _customAnalyzerDetected = true;
-            }
-
             BuildEventRedirector?.ForwardEvent(buildEvent);
         }
     }
