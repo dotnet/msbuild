@@ -105,7 +105,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
+    [Theory]
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
@@ -145,45 +145,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    private void PrepareSampleProjectsAndConfig(
-        bool buildInOutOfProcessNode,
-        out TransientTestFile projectFile,
-        string BC0101Severity = "warning")
-    {
-        string testAssetsFolderName = "SampleAnalyzerIntegrationTest";
-        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
-        TransientTestFile testFile = _env.CreateFile(workFolder, "somefile");
-
-        string contents = ReadAndAdjustProjectContent("Project1");
-        string contents2 = ReadAndAdjustProjectContent("Project2");
-
-        projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
-        TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
-
-        string configContent = File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, ".editorconfig")).Replace("BC0101Severity", BC0101Severity);
-
-        TransientTestFile config = _env.CreateFile(
-                      workFolder,
-                      ".editorconfig",
-                      configContent);
-
-        // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
-        // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
-        // See if there is a way of fixing it in the engine - tracked: https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=55702688.
-        _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
-
-        _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
-        _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
-
-        _env.SetEnvironmentVariable("TEST", "FromEnvVariable");
-
-        string ReadAndAdjustProjectContent(string fileName) =>
-            File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, fileName))
-                .Replace("TestFilePath", testFile.Path)
-                .Replace("WorkFolderPath", workFolder.Path);
-    }
-
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10277")]
+    [Theory]
     [InlineData("AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomAnalyzerTest(string analysisCandidate, string[] expectedRegisteredRules, bool expectedRejectedAnalyzers = false)
@@ -247,5 +209,47 @@ public class EndToEndTests : IDisposable
         var attribute = doc.CreateAttribute(attributeName);
         attribute.Value = attributeValue;
         node.Attributes!.Append(attribute);
+    }
+
+    private void PrepareSampleProjectsAndConfig(
+    bool buildInOutOfProcessNode,
+    out TransientTestFile projectFile,
+    string? BC0101Severity = null)
+    {
+        string testAssetsFolderName = "SampleAnalyzerIntegrationTest";
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+        TransientTestFile testFile = _env.CreateFile(workFolder, "somefile");
+
+        string contents = ReadAndAdjustProjectContent("Project1");
+        string contents2 = ReadAndAdjustProjectContent("Project2");
+
+        projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
+        TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
+
+        CreateEditorConfig(BC0101Severity, testAssetsFolderName, workFolder);
+
+        // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
+        // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
+        // See if there is a way of fixing it in the engine - tracked: https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=55702688.
+        _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
+
+        _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
+        _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
+
+        _env.SetEnvironmentVariable("TEST", "FromEnvVariable");
+
+        string ReadAndAdjustProjectContent(string fileName) =>
+            File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, fileName))
+                .Replace("TestFilePath", testFile.Path)
+                .Replace("WorkFolderPath", workFolder.Path);
+    }
+
+    private void CreateEditorConfig(string? BC0101Severity, string testAssetsFolderName, TransientTestFolder workFolder)
+    {
+        string configContent = string.IsNullOrEmpty(BC0101Severity)
+            ? File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, ".editorconfigbasic"))
+            : File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, ".editorconfigcustomised")).Replace("BC0101Severity", BC0101Severity);
+
+        _ = _env.CreateFile(workFolder, ".editorconfig", configContent);
     }
 }
