@@ -1376,9 +1376,10 @@ namespace Microsoft.Build.Execution
             where TResultData : BuildResultBase
         {
             // TODO: here we should add BuildRequestStarted https://github.com/dotnet/msbuild/issues/10145
+            BuildSubmissionStartedEventArgs submissionStartedEvent = new(submission.BuildRequestData);
+
             // BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
             // ((IBuildComponentHost)this).LoggingService.LogBuildEvent()
-
 
             if (submission is BuildSubmission buildSubmission)
             {
