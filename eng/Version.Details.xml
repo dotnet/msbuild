@@ -2,9 +2,9 @@
 <Dependencies>
   <ProductDependencies>
     <!-- Intermediate is necessary for source build. -->
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.24257.2">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.24365.2">
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>6ed73280a6d70f7e7ac39c86f2abe8c10983f0bb</Sha>
+      <Sha>8258018588e4435f92c8355b51c84c7084f36eae</Sha>
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
