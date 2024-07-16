@@ -5,13 +5,13 @@ This is an internal engineering document. For general overview and user-oriented
 # Challenge
 
 Let's recall some details of build check analyzers acquisition. There might be two types of the build analyzer: build-in and custom. 
-The build-in analyzers are configured in the `.editorconfig` file. The custom analyzers are declared in the project files and also configured in the `.editorconfig` file. 
+The build-in analyzers are configured in the `.editorconfig` file. The custom analyzers are declared in the project files via PackageReference and also configured in the `.editorconfig` file.
 Project files are read during the first pass of the evaluation of the project. Given the multi-processing nature of msbuild, this might happen either on main node or on the msbuild worker node. When the analyzer is encountered, the event `BuildCheckAcquisitionEventArgs` is logged with information concerning the analyzer that is needed to be loaded. This event is forwarded by `BuildCheckForwardingLogger` through logging system via the named pipes to the main msbuild node, where it is processed by `BuildCheckConnectorLogger`. This requires the logging system to be configured on main and worker msbuild nodes. 
 
 ![analyzers-acquisition](analyzers-acquisition.png)
 
 There two issues that arises from such a design:
-1. The configuration of the logging system should be ideally dependent on the set of the applied build analyzers. Verbosity of the build hugely affects the set of logging events that are logged by default. Moreover, some events are not forwarded with forwarding loggers, depending on forwarding loggers configuration. This is done for performance reasons to allow to drop the events that are not consumed by the central loggers. We need to ensure that the events required for the analyzers to work pass through. There might be different detailing: either set up the set of consumed events for the analyzer, or for analyzer rule. In the first case only the declaration is needed for forwarding logger configuration, in the second - information about active rules from the `.editorconfig` file.
+1. The configuration of the logging system should be ideally dependent on the set of the applied build analyzers. Verbosity of the build hugely affects the set of logging events that are logged by default. Moreover, some events are not forwarded with forwarding loggers, depending on forwarding loggers configuration. This is done for performance reasons to allow to drop the events that are not consumed by any of the central loggers. We need to ensure that the events required for the analyzers to work pass through. For that we need to have information about active rules from the `.editorconfig` file and the declarations in the project files via PackageReference when setting up the logging system.
 2. There is no synchronization between build manager and logging service. When the build check acquisition events get to the main node, most of the build might have been already finished on worker nodes.
 
 # Solution ideas
