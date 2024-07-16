@@ -215,6 +215,18 @@ namespace Microsoft.Build.Framework
             this.endColumnNumber = endColumnNumber;
         }
 
+        protected BuildMessageEventArgs(
+           string message,
+           string file,
+           int lineNumber,
+           int columnNumber)
+            : base(message, helpKeyword: null, senderName: null)
+        {
+            this.file = file;
+            this.lineNumber = lineNumber;
+            this.columnNumber = columnNumber;
+        }
+
         private MessageImportance importance;
 
         [OptionalField(VersionAdded = 2)]
@@ -311,7 +323,11 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// File associated with event.
         /// </summary>
-        public string File => file;
+        public string File
+        {
+            get => file;
+            internal set => file = value;
+        }
 
         /// <summary>
         /// Line number of interest in associated file.

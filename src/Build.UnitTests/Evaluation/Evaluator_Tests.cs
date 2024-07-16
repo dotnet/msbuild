@@ -21,7 +21,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
