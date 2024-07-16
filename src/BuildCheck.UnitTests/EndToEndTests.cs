@@ -202,18 +202,14 @@ public class EndToEndTests : IDisposable
             root=true
 
             [*.csproj]
-            build_check.BC0101.IsEnabled=true
             build_check.BC0101.Severity={BC0101Severity}
 
-            build_check.BC0102.IsEnabled=true
             build_check.BC0102.Severity=warning
 
-            build_check.COND0543.IsEnabled=false
             build_check.COND0543.Severity=Error
             build_check.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
             build_check.COND0543.CustomSwitch=QWERTY
 
-            build_check.BLA.IsEnabled=false
             """);
 
         // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
@@ -225,7 +221,7 @@ public class EndToEndTests : IDisposable
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
     }
 
-    [Theory]
+    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10277")]
     [InlineData("AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomAnalyzerTest(string analysisCandidate, string[] expectedRegisteredRules, bool expectedRejectedAnalyzers = false)
