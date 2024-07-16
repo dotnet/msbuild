@@ -64,11 +64,13 @@ For more detailed information on execution phase visit [Microsoft Learn](https:/
 The execution phase is simply executing the targets defined in the XML by the user or implicitly defined by the SDK or VS. The order of executed targets is defined using a few attributes: `BeforeTargets`, `DependsOnTargets`, and `AfterTargets`. However, the order in which targets are executed during a build will not strictly follow the one defined by those attributes. During execution, if a target that is being executed changes attributes or properties from another target, the final execution order might change due to the dependency chain changing. The full executing order can be [found here](https://learn.microsoft.com/visualstudio/msbuild/target-build-order#determine-the-target-build-order).
 
 ### Task Host
-MSBuild has an ability to run tasks out of process via the called Task Host. That allows tasks to run in a different .NET runtime or bintess than the one used by the build engine for the build execution.
+MSBuild has an ability to run tasks out of process via the so called Task Host. That allows tasks to run in a different .NET runtime or bintess than the one used by the build engine for the build execution.
 
-This is an opt-in behavior that can be used for various cases:
-- If a task breaks the build process it can be relegated to the Task Host, so it does not influence the main build.
-- If a task is built in the same repo that is currently being built by MSBuild and the code might change. So, Task Host makes sure the DLLs are not locked at the end of the build.
+Task host is automatically when the task explicitly declares need for a specific runtime or architecture and such is not used by the executing MSBuild engine. The runtime and architecture can be requested via `Runtime` and `Architecture` attributes in [`UsingTask`](https://learn.microsoft.com/en-us/visualstudio/msbuild/usingtask-element-msbuild) element defining the task or in the [`Task`](https://learn.microsoft.com/en-us/visualstudio/msbuild/task-element-msbuild) element used for task invocation.
+
+TaskHost can be opted-in via `TaskFactory="TaskHostFactory"` in the [`UsingTask`](https://learn.microsoft.com/en-us/visualstudio/msbuild/usingtask-element-msbuild) element defining the task. This opt-in behavior can be used for various cases:
+- If a task is built in the same repo that is currently being built by MSBuild and the code might change. So, Task Host makes sure the DLLs are not locked at the end of the build (as MSBuild uses long living worker nodes that survives single build execution)
+- As an isolation mechanism - separating the execution from the engine execution process.
 
 ## Processes and nodes
 When a new build is started, MSBuild starts a process that runs some setup code and prepares itself to start a build. This first node becomes the scheduler node and one of the worker nodes, becoming both the entry point for the project build and the scheduler. The main problem that arises from that is when the whole build finishes execution, the OS tears down the process, losing the memory cache and having to restart the whole build process from the start. This is offset by having longer lived processes, that can be reused when building projects successionally.
