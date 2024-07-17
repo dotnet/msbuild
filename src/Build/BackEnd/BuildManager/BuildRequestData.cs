@@ -15,6 +15,7 @@ namespace Microsoft.Build.Execution
 {
     /// <summary>
     /// Flags providing additional control over the build request
+    /// This enum has a copt on Microsoft.Build.Framework. Any modifications must be mirrored on the copy.
     /// </summary>
     [Flags]
     public enum BuildRequestDataFlags
