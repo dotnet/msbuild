@@ -1551,8 +1551,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <Target Name="IgnoreJavaScriptOutputAssembly"
-    BeforeTargets="AssignProjectConfiguration"
-    Condition="$([MSBuild]::AreFeaturesEnabled('17.8'))">
+    BeforeTargets="AssignProjectConfiguration">
       <ItemGroup>
         <ProjectReference Condition="'%(ProjectReference.Extension)' == '.esproj' and '%(ProjectReference.ReferenceOutputAssembly)' == ''">
           <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -4551,7 +4550,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_ClickOnceTransitiveContentItemsTemp>
       <_ClickOnceTransitiveContentItems Include="@(_ClickOnceTransitiveContentItemsTemp->'%(SavedIdentity)')" Condition="'%(Identity)'=='@(PublishFile)' Or '%(Extension)'=='.exe' Or '%(Extension)'=='.dll'" />
 
-      <!-- 
+      <!--
         ClickOnce content items is union of transitive content items and content items from this project.
         We also exclude content items from this project that have set CopyToPublishDirectory to Never.
       -->

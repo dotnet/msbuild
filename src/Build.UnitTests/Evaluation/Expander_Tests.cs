@@ -40,8 +40,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         private string _dateToParse = new DateTime(2010, 12, 25).ToString(CultureInfo.CurrentCulture);
         private static readonly string s_rootPathPrefix = NativeMethodsShared.IsWindows ? "C:\\" : Path.VolumeSeparatorChar.ToString();
 
-        private static bool IsIntrinsicFunctionOverloadsEnabled => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8);
-
         [Fact]
         public void ExpandAllIntoTaskItems0()
         {
@@ -4577,7 +4575,7 @@ $(
         public void PropertyFunctionMSBuildAddIntegerOverflow()
         {
             // Overflow wrapping - result exceeds size of long
-            string expected = IsIntrinsicFunctionOverloadsEnabled ? "-9223372036854775808" : (long.MaxValue + 1.0).ToString();
+            string expected = "-9223372036854775808";
             TestPropertyFunction("$([MSBuild]::Add($(X), 1))", "X", long.MaxValue.ToString(), expected);
         }
 
@@ -4612,7 +4610,7 @@ $(
         public void PropertyFunctionMSBuildSubtractIntegerMaxValue()
         {
             // If the double overload is used, there will be a rounding error.
-            string expected = IsIntrinsicFunctionOverloadsEnabled ? "1" : "0";
+            string expected = "1";
             TestPropertyFunction("$([MSBuild]::Subtract($(X), 9223372036854775806))", "X", long.MaxValue.ToString(), expected);
         }
 
@@ -4632,7 +4630,7 @@ $(
         public void PropertyFunctionMSBuildMultiplyIntegerOverflow()
         {
             // Overflow - result exceeds size of long
-            string expected = IsIntrinsicFunctionOverloadsEnabled ? "-2" : (long.MaxValue * 2.0).ToString();
+            string expected = "-2";
             TestPropertyFunction("$([MSBuild]::Multiply($(X), 2))", "X", long.MaxValue.ToString(), expected);
         }
 
@@ -4645,7 +4643,7 @@ $(
         [Fact]
         public void PropertyFunctionMSBuildDivideIntegerLiteral()
         {
-            string expected = IsIntrinsicFunctionOverloadsEnabled ? "6" : "6.5536";
+            string expected = "6";
             TestPropertyFunction("$([MSBuild]::Divide($(X), 10000))", "X", "65536", expected);
         }
 

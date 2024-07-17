@@ -43,12 +43,6 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Introduce [MSBuild]::StableStringHash overloads](https://github.com/dotnet/msbuild/issues/9519)
 - [Keep the encoding of standard output & error consistent with the console code page for ToolTask](https://github.com/dotnet/msbuild/pull/9539)
 
-### 17.8
-- [[RAR] Don't do I/O on SDK-provided references](https://github.com/dotnet/msbuild/pull/8688)
-- [Delete destination file before copy](https://github.com/dotnet/msbuild/pull/8685)
-- [Moving from SHA1 to SHA256 for Hash task](https://github.com/dotnet/msbuild/pull/8812)
-- [Deprecating custom derived BuildEventArgs](https://github.com/dotnet/msbuild/pull/8917) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`
-
 ## Change Waves No Longer In Rotation
 ### 16.8
 - [Enable NoWarn](https://github.com/dotnet/msbuild/pull/5671)
@@ -91,3 +85,10 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Log assembly loads](https://github.com/dotnet/msbuild/pull/8316)
 - [AnyHaveMetadataValue returns false when passed an empty list](https://github.com/dotnet/msbuild/pull/8603)
 - [Log item self-expansion](https://github.com/dotnet/msbuild/pull/8581)
+
+### 17.8
+
+- [[RAR] Don't do I/O on SDK-provided references](https://github.com/dotnet/msbuild/pull/8688)
+- [Delete destination file before copy](https://github.com/dotnet/msbuild/pull/8685)
+- [Moving from SHA1 to SHA256 for Hash task](https://github.com/dotnet/msbuild/pull/8812)
+- [Deprecating custom derived BuildEventArgs](https://github.com/dotnet/msbuild/pull/8917) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`

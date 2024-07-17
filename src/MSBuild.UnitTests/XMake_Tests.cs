@@ -899,10 +899,8 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void ConsoleUIRespectsSDKLanguage(bool enableFeature)
+        [Fact]
+        public void ConsoleUIRespectsSDKLanguage()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
             {
@@ -923,18 +921,10 @@ namespace Microsoft.Build.UnitTests
             {
                 // Set the UI language based on the SDK environment var.
                 testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, "ja"); // Japanese chose arbitrarily.
-                ChangeWaves.ResetStateForTests();
-                if (!enableFeature)
-                {
-                    testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_8.ToString());
-                }
                 MSBuildApp.SetConsoleUI();
 
-                Assert.Equal(enableFeature ? new CultureInfo("ja") : CultureInfo.CurrentUICulture.GetConsoleFallbackUICulture(), thisThread.CurrentUICulture);
-                if (enableFeature)
-                {
-                    Assert.Equal(65001, Console.OutputEncoding.CodePage); // UTF-8 enabled for correct rendering.
-                }
+                Assert.Equal(new CultureInfo("ja"), thisThread.CurrentUICulture);
+                Assert.Equal(65001, Console.OutputEncoding.CodePage); // UTF-8 enabled for correct rendering.
             }
             finally
             {
@@ -956,7 +946,6 @@ namespace Microsoft.Build.UnitTests
         /// We shouldn't change the UI culture if the current UI culture is invariant.
         /// In other cases, we can get an exception on CultureInfo creation when System.Globalization.Invariant enabled.
         /// </summary>
-
         [Fact]
         public void SetConsoleUICultureInInvariantCulture()
         {

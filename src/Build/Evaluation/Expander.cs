@@ -4870,13 +4870,10 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (IntrinsicFunctionOverload.IsIntrinsicFunctionOverloadsEnabled())
+                if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
                 {
-                    if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
-                    {
-                        resultValue = integerOperation(argLong0, argLong1);
-                        return true;
-                    }
+                    resultValue = integerOperation(argLong0, argLong1);
+                    return true;
                 }
 
                 if (TryConvertToDouble(args[0], out double argDouble0) && TryConvertToDouble(args[1], out double argDouble1))
@@ -5508,16 +5505,10 @@ namespace Microsoft.Build.Evaluation
         // For reuse, the comparer is cached in a non-generic type.
         // Both comparer instances can be cached to support change wave testing.
         private static IComparer<MemberInfo>? s_comparerLongBeforeDouble;
-        private static IComparer<MemberInfo>? s_comparerDoubleBeforeLong;
 
-        internal static IComparer<MemberInfo> IntrinsicFunctionOverloadMethodComparer => IsIntrinsicFunctionOverloadsEnabled() ? LongBeforeDoubleComparer : DoubleBeforeLongComparer;
+        internal static IComparer<MemberInfo> IntrinsicFunctionOverloadMethodComparer => LongBeforeDoubleComparer;
 
         private static IComparer<MemberInfo> LongBeforeDoubleComparer => s_comparerLongBeforeDouble ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key0).CompareTo(SelectTypeOfFirstParameter(key1)));
-
-        private static IComparer<MemberInfo> DoubleBeforeLongComparer => s_comparerDoubleBeforeLong ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key1).CompareTo(SelectTypeOfFirstParameter(key0)));
-
-        // The arithmetic overload feature uses this method to test for the change wave.
-        internal static bool IsIntrinsicFunctionOverloadsEnabled() => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8);
 
         internal static bool IsKnownOverloadMethodName(string methodName) => s_knownOverloadName.Any(name => string.Equals(name, methodName, StringComparison.OrdinalIgnoreCase));
 
