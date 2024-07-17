@@ -3,30 +3,37 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
-    // QUESTIONS: I have a base, but the imports are a bit problematic, bc the types are in Microsoft.BuildExecution
-    // which I don't think is a great import to make in this case.
     [Serializable]
-    public class BuildSubmissionStartedEventArgs : EventArgs
+    public class BuildSubmissionStartedEventArgs : BuildStatusEventArgs
     {
-        public IDictionary<string, string> GlobalProperties { get; protected set; }
+        public IReadOnlyDictionary<string, string?> GlobalProperties { get; protected set; }
 
-        public string EntryProjectFullPath { get; protected set; }
+        public IEnumerable<string> EntryProjectsFullPath { get; protected set; }
 
         public ICollection<string> TargetNames { get; protected set; }
 
         public BuildRequestDataFlags Flags { get; protected set; }
 
-        private string? SubmissionId;
+        public int SubmissionId { get; protected set; }
 
-        public BuildSubmissionStartedEventArgs(BuildRequestDataBase requestData)
+        public BuildSubmissionStartedEventArgs(
+            IReadOnlyDictionary<string, string?> globalProperties,
+            IEnumerable<string> entryProjectsFullPath,
+            ICollection<string> targetNames,
+            BuildRequestDataFlags flags,
+            int submissionId)
+            : base()
         {
-            requestData.EntryProjectFullPath = EntryProjectFullPath;
-            requestData.TargetNames = TargetNames;
-            requestData.Flags = Flags;
-            requestData.SubmissionId = SubmissionId;
+            GlobalProperties = globalProperties;
+            EntryProjectsFullPath = entryProjectsFullPath;
+            TargetNames = targetNames;
+            Flags = flags;
+            SubmissionId = submissionId;
         }
     }
 }
