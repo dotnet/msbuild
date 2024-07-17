@@ -84,8 +84,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.BuildCheck.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Build.Templates", "template_feed\Microsoft.Build.Templates.csproj", "{A86EE74A-AEF0-42ED-A5A7-7A54BC0773D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSBuild.Bootstrap.Utils", "src\MSBuild.Bootstrap.Utils\MSBuild.Bootstrap.Utils.csproj", "{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -918,30 +916,6 @@ Global
 		{A86EE74A-AEF0-42ED-A5A7-7A54BC0773D8}.Release|x64.Build.0 = Release|Any CPU
 		{A86EE74A-AEF0-42ED-A5A7-7A54BC0773D8}.Release|x86.ActiveCfg = Release|Any CPU
 		{A86EE74A-AEF0-42ED-A5A7-7A54BC0773D8}.Release|x86.Build.0 = Release|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Debug|ARM64.ActiveCfg = Debug|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Debug|ARM64.Build.0 = Debug|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Debug|x64.Build.0 = Debug|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Debug|x86.Build.0 = Debug|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.MachineIndependent|Any CPU.ActiveCfg = MachineIndependent|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.MachineIndependent|Any CPU.Build.0 = MachineIndependent|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.MachineIndependent|ARM64.ActiveCfg = MachineIndependent|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.MachineIndependent|ARM64.Build.0 = MachineIndependent|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.MachineIndependent|x64.ActiveCfg = MachineIndependent|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.MachineIndependent|x64.Build.0 = MachineIndependent|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.MachineIndependent|x86.ActiveCfg = MachineIndependent|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.MachineIndependent|x86.Build.0 = MachineIndependent|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Release|ARM64.ActiveCfg = Release|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Release|ARM64.Build.0 = Release|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Release|x64.ActiveCfg = Release|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Release|x64.Build.0 = Release|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Release|x86.ActiveCfg = Release|Any CPU
-		{E12F619A-80F1-4643-9AEC-D3D5C2FB8443}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
