@@ -1,6 +1,7 @@
 # What is MSBuild
-MSBuild is a build platform used mainly for .NET and Visual Studio. But when referencing MSBuild technically we can divide what MSBuild is in 3 main parts:
+MSBuild is a build platform used mainly for .NET and Visual Studio. But when referencing MSBuild technically we can divide what MSBuild is in a few main parts:
 - Programming language that uses XML semantics to define build actions and data.
+- A set of common targets that define what a build means.
 - API and command line program that interprets and manipulates the programming language.
 - Build engine that executes a build based on the programming language inputs.
 
@@ -22,11 +23,18 @@ These attributes are defined within project files (`.csproj`, `.vbproj` etc.). `
 
 While the project file defines the data used for the build, the actual build instructions are generally imported from a common location through the `Import` element or MSBuild SDKs that contain their own tasks and targets. One example that is widely used is the [.NET SDK](https://learn.microsoft.com/visualstudio/msbuild/how-to-use-project-sdk).
 
-# MSBuild API
-The MSBuild API is a library with a focus on building .NET programs, as such it is used by Visual Studio and .NET SDK to integrate MSBuild as their project build system. The library includes common build logic and targets, like creation and management of output folder, intermidiary folders, custom task creation, etc... This also allows programs (like Visual Studio) to change the behaviour of MSBuild through UI and checkboxes, making sure that the user has access to those options and there is not a need to modify the project file XML directly.
 
-## ToolTask
-ToolTask is an interface offered by MSBuild to implement custom tasks. During the build, the MSBuild Engine will construct the task, call the execute method and let it run during execution. This process has performance advantages on windows when compared to writing a script to do the same work.
+# Common Targets
+MSBuild has some Common Targets that adds functionalites to the build and interactictions with the XML projects. This functionality includes build management, like the creation and management of output folders and intermidiary folders, and custom task creation, etc...
+
+Visual Studio also uses common targets to change the behaviour of MSBuild through UI and checkboxes, making sure that the user has access to those options and there is not a need to modify the project file XML directly. Some use cases for Visual Studio also include:
+- Population of the Solution Explorer window. Which projects and files need to be added to the view of the complete solution.
+- Executing design-time builds to populate language services.
+
+
+# MSBuild API
+The MSBuild API is .NET library with a focus on building and extracting data from MSBuild projects. It is used by Visual Studio and .NET SDK to integrate MSBuild as their project build system. This API is also available for any third parties to use.
+
 
 # Engine
 The MSBuild Engine's main responsibility is to execute the build instructions and process the results of builds. This includes managing the extensibility that MSBuild offers, integrating customizations into the build process even if they're authored by third parties.
@@ -34,34 +42,41 @@ The MSBuild Engine's main responsibility is to execute the build instructions an
 The MSBuild engine's logic is divided into two main stages: the evalution stage and the execution stage.
 
 ## Entry points
-There are a few officially supported entry points for the engine: Visual Studio, .NET SDK and the CLI executable (`MSBuild.exe`). All these methods are an implementation or extension of the MSBuild API. The inputs necessary to start a build include:
+There are a few entry points for the MSBuild engine: Visual Studio, .NET SDK and the CLI executable (`MSBuild.exe`). These partner products are implementations or extensions of the MSBuild API, and we do care about their smooth integration with MSBuild, but do not support them directly. We only officially support the MSBuild API.
+
+The inputs necessary to start a build include:
  - Build logic for the projects, either from the project's XML, or from imports referenced the entry point project.
  - User defined imports
  - `.g.props` from NuGet restore.
-
 
 An example of the imported build logic is the `<Project Sdk="Microsoft.NET.Sdk">` that can be seen in some of the built-in .NET templates. This indicates that the project will use build logic that comes with the .NET SDK.
 
 ## Evaluate operation
 For more detailed information on evaluation visit [Microsoft Learn](https://learn.microsoft.com/visualstudio/msbuild/build-process-overview#evaluation-phase).
 
-Evaluation of the build is the first step of the process. Its main objective is to collect information on the project being built. This includes checking entry point, imports, items, and tasks. Some API consumers, like Visual Studio project systems, extract information about which C# files, solution files and project files are relevant to a project after evaluation.
+Evaluation of the build is the first step of the process. Its main objective is to collect information on the project being built. This includes checking the entry point project for imports, items, and tasks. Some API consumers, like Visual Studio project systems, extract information about which C# files, solution files and project files are relevant to a project after evaluation.
 
-The first step of evaluation is to load the project file and the XML data it contains. There are multiple passes within the same project, each of which has a defined role and is required for subsequent passes. At this time, the restore target has run already, so all imports are files on disk and are processed as paths by the engine. Another characteristic of imports is that they are brough within the project logic, so other projects can refence the same import logic instead of having a copy of the same build logic. Data loaded within the evaluation are not used until execution stage. This means that data can be added and modified during evaluation.
+The first step of evaluation is to load the project file and the XML data it contains. There are multiple evaluation passes within the same project, each is responsible for evaluating a different type of data is required for subsequent passes. Data within the evaluation can be modified depending on the pass the build is currently executing. For example, during the pass that evaluated imports and properties, properties can be modified, but after the pass is done the properties are read-only until the execution phase.
+
+// TODO: add diagram with the evaluation phase passes
+
+At this time, the restore target has run already, so all imports are files on disk and are processed as paths by the engine. Another characteristic of imports is that they are brough within the project logic, so other projects can refence the same import logic instead of having a copy of it.
 
 The evaluation stage should not have any side effect on disk, no new or deleted files. Two exceptions for this are:
- - SDK resolution
- - NuGet SDK, which might add packages to the disk
+ - SDK resolution.
+ - NuGet SDK, which might add packages to the disk.
 
 ### Imports
-Complex projects generally include imports of many different types. In MSBuild an import definition can have various forms - a disk path, a property expansion, a known folder, or even environmental variables. There are also some main imports that come with the execution on other platforms, like the Visual Studio or SDK can have import directories that contain wild card imports. However, when it comes to the evaluation phase in MSBuild, imports are all treated like a property plus path expansion, this includes imported NuGet packages.
+In MSBuild an import definition can have various forms - a disk path, a property expansion, a known folder, or even environmental variables. There are also some main imports that come with the execution on other platforms, like the Visual Studio or SDK can have import directories that contain wild card imports. However, when it comes to the evaluation phase in MSBuild, imports are all treated like a property plus path expansion, this includes imported NuGet packages.
 
-In the case of tool imports, MSBuild does not process tool resolution via registry. Instead, it is resolved by looking on adjacent folder to the current running version of MSBuild. The folders will be different depending is MSBuild is running from Visual Studio or the .NET SDK.
+Historically a single version of MSBuild supported multiple `ToolsVersions` that could result in differing imports for the same expression, but today an MSBuild distribution provides only one `ToolsVersion` and selection between versions is expected to be done outside of MSBuild.
 
 ## Execution operation
 For more detailed information on execution phase visit [Microsoft Learn](https://learn.microsoft.com/visualstudio/msbuild/build-process-overview#execution-phase).
 
-The execution phase is simply executing the targets defined in the XML by the user or implicitly defined by the SDK or VS. The order of executed targets is defined using a few attributes: `BeforeTargets`, `DependsOnTargets`, and `AfterTargets`. However, the order in which targets are executed during a build will not strictly follow the one defined by those attributes. During execution, if a target that is being executed changes attributes or properties from another target, the final execution order might change due to the dependency chain changing. The full executing order can be [found here](https://learn.microsoft.com/visualstudio/msbuild/target-build-order#determine-the-target-build-order).
+The execution phase is simply executing a request that contains a list of targets defined in the XML by the user or implicitly defined by the SDK or VS. The order of executed targets is defined using a few attributes: `BeforeTargets`, `DependsOnTargets`, and `AfterTargets`. However, the order in which targets are executed during a build will not strictly follow the one defined by those attributes. During execution, if a target that is being executed changes attributes or properties from another target, the final execution order might change due to the dependency chain changing. The full executing order can be [found here](https://learn.microsoft.com/visualstudio/msbuild/target-build-order#determine-the-target-build-order).
+
+Another target order issue arises when there is a project dependency. Project dependencies are dicovered during target execution, so targets can start executing in a certain order, hit a project dependency that has not been completed yet. In this case, the node that is processing the targets will be considered blocked, and will pause the current execution to start another project. Once the dependencies have been fullfilled, the original build resumes and the target execution will continue in the original order.
 
 ### Task Host
 MSBuild has an ability to run tasks out of process via the so called Task Host. That allows tasks to run in a different .NET runtime or bitness than the one used by the build engine for the build execution.
@@ -72,17 +87,17 @@ TaskHost can be opted-in via `TaskFactory="TaskHostFactory"` in the [`UsingTask`
 - If a task is built in the same repo that is currently being built by MSBuild and the code might change. So, Task Host makes sure the DLLs are not locked at the end of the build (as MSBuild uses long living worker nodes that survives single build execution)
 - As an isolation mechanism - separating the execution from the engine execution process.
 
-## Processes and nodes
-When a new build is started, MSBuild starts a process that runs some setup code and prepares itself to start a build. This first node becomes the scheduler node and one of the worker nodes, becoming both the entry point for the project build and the scheduler. The main problem that arises from that is when the whole build finishes execution, the OS tears down the process, losing the memory cache and having to restart the whole build process from the start. This is offset by having longer lived processes, that can be reused when building projects successionally.
-
 ## Caches
-### Register Task Objects
-During execution tasks might need to share state meaningfully between invocations in a single build or across builds. The MSBuild engine provides a mechanism to manage the lifetime of .NET objects to fill this gap. This lifetime can be defined by the user but has specific scopes: it can live per build or indefinitely. However, this mechanism is only available for communication within the same execution node, and it is not serializable.
-
 ### Project result cache
 The project Result Cache refers to the cache used by the scheduler that keeps the build results of already executed project. The result of a target is success, failure, and a list of items that succeeded. Beyond that the `return` and `output` attributes from targets are also serialized with the build result, as to be used by other targets for their execution.
 
 There is also another Project Cache Plugin, which focuses on result cache in distributed builds. More information about it is in the Extensibility section.
+
+### Register Task Objects
+During execution tasks might need to share state meaningfully between invocations in a single build or across builds. The MSBuild engine provides a mechanism to manage the lifetime of .NET objects to fill this gap. This lifetime can be defined by the user but has specific scopes: it can live per build or indefinitely. However, this mechanism is only available for communication within the same execution node, and it is not serializable.
+
+### Incremental Build Cache
+//TODO
 
 ## Scheduler
 The scheduler is the part of the MSBuild engine responsible for scheduling work to different nodes, as well as maintaining and managing the result of already executed projects. When a build starts, the scheduler assigns the entry point project to a working node (generally the in-proc node). The project's execution starts and proceeds until the whole operation ends or is blocked. A node is considered blocked, when the project that it is currently building depends on another project that has not yet finished executing. Once a node is not proceeding with the current project, the scheduler then asseses if it has more work to be given to that node and assigns it.
@@ -98,6 +113,13 @@ Incremental builds are extremely useful for local development, as it speeds cons
 Parallelism for MSBuild is implemented at project level. Each project is assigned to different working nodes, which will execute the tasks at the same time, with the Scheduler organizing sequence and work division. Within project targets run sequentially, however they can have parallelism implemented independently from projects.
 
 For multi-targeted builds parallelism works slightly different. The outer build produces a list of projects to build. This list contains the same project file with a different metadata for the target framework. This list is then passed to the MSBuild execute target so it can be built in parallel.
+
+### Processes and nodes
+When a new build is started, MSBuild starts a process that runs some setup code and prepares itself to start a build. The process of defining the scheduler differs slightly depending on the environment the build is being executed. 
+
+In the case of a CLI build the first node becomes the scheduler node and one of the worker nodes, becoming both the entry point for the project build and the scheduler. The main problem that arises from that is when the whole build finishes execution, the OS tears down the process, losing the memory cache and having to restart the whole build process from the start. 
+
+In the case of a Visual Studio build, that uses the API to manage the builds, this problem has been solved by having the schduler process be separate (the `devenv.exe` process) and very long lived.
 
 
 ## IPC (Inter-Process Communication)
@@ -129,6 +151,10 @@ MSBuild interacts with external packages in almost every build. However, the MSB
 The restore operation is a built-in target within MSBuild. The main function is to walk through the project references and `packages.config` file about all the packages that need to be restored. This process is executed by NuGet, as MSBuild does not have a packaging system within the code.
 
 ## Tasks
+//TODO
+
+### ToolTask
+Users can implement custom tasks via arbitrary .NET code, and MSBuild provides helper classes for common use cases like "build a command line for and then run a command-line tool".
 
 ## Diagnosability / Loggers
 Diagnosability within MSBuild went through some changes. Before we had a debugger in additional to basic logs, where you could step through the XML during the build and debug. This was discarded in favor of a log focused approach, where MSBuild has a more robust logging system that contains more data to identify what is happening during a build.
@@ -148,6 +174,7 @@ This Project Cache differs from the previous one because it is separate from the
 For more in depth information visit [the spec](../documentation/specs/project-cache.md).
 
 ## BuildCheck
+//TODO
 
 ## Resolvers
 There are a few elements within the MSBuild XML that indicate that a call to the .NET SDK is necessary. Some examples include:
@@ -165,3 +192,4 @@ MSBuild has a few telemetry points, mostly through the .NET SDK. It is implement
 Visual Studio telemetry was removed once MSBuild went open source, and it was never added again.
 
 ## FileTracker
+// TODO
