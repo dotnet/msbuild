@@ -46,9 +46,8 @@ flowchart TD
 
 ```
 
-### Current state
-We can use the Exec task an executable .wasm file (.NET example):
-- note that this execution does not get any resources so it can't e.g. manipulate files
+### Interacting with Wasm/WASI in MSBuild without Wasm/WASI Tasks
+In a build, we can use the [`Exec` task](https://learn.microsoft.com/en-us/visualstudio/msbuild/exec-task) with Wasmtime and an executable .wasm file, but this execution would not have any MSBuild capabilities such as logging and passing of file parameters.
 
 #### .NET example
 1. install [wasi-sdk](https://github.com/WebAssembly/wasi-sdk), [wasmtime](https://wasmtime.dev)
@@ -75,31 +74,31 @@ We can use the Exec task an executable .wasm file (.NET example):
 
 #### Rust example:
 1. install [wasi-sdk](https://github.com/WebAssembly/wasi-sdk), [wasmtime](https://wasmtime.dev), [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
-3. .proj
+3. write your Rust program
+3. `project.csproj`
 ```xml
   <Target Name="CompileAndRun" BeforeTargets="Build">
     <Exec Command="cargo build --target wasm32-wasi --release">
     <Exec Command="wasmtime run path_to_compiled_rust_program.wasm" />
 </Target>
 ```
-4. dotnet build
+4. `dotnet build`
 
 This is quite cumbersome and does not provide a way to pass parameters to the "task" or get outputs from it.
 
-## Goals for the Wasm task feature
+## Goals for the Wasm tasks feature
 1. specify how a Wasm/WASI task should communicate with MSBuild, and what it should contain to be recognized as a task
-2. Write an `ITaskFactory` and a supporting `ITask` that given a `.wasm` file implementing that interface and runs it as an MSBuild task
-3. Rust demo task
+2. Write an `ITaskFactory` and a supporting `ITask` classes that when passed a `.wasm` file implementing required functions runs it as an MSBuild task
+3. Demos/examples
 
 ### Prototype features
 Prototypes are implemented in [https://github.com/JanProvaznik/MSBuildWasm](https://github.com/JanProvaznik/MSBuildWasm)
 - [ ] WasmExec class taking a .wasm file as a parameter - just runs the file with Wasmtime 
-    - nudges the user to parametrize access to resources, but does not do anything interesting
+    - nudges the user to parametrize access to resources
 - [ ] WasmTask - creating tasks from .wasm files
     - [x] Specification for what should this .wasm file export and how it will be ran
-    - [ ] ITaskFactory that gets custom parameters from the xml
+    - [ ] ITaskFactory that let's msbuild use task parameters defined inside the .wasm module
 - [ ] Rust example
-- [ ] .NET example
 #### User Experience
 1. The user Writes a task in Rust based on the template.
 2. The user adds the task to their .proj file and it runs and logs as if it were a C# task. 
@@ -114,12 +113,13 @@ Prototypes are implemented in [https://github.com/JanProvaznik/MSBuildWasm](http
 
 <Target Name="name">
 <FancyWasmTask Param="..." Param2="asdf">
-<Output>...</Output>
+<Output .../>
 </FancyWasiTask>
 </Target>
 ```
 
 ### Advanced features
+- [ ] .NET example
 - [ ] integrating pipeline for creating Wasm/WASI tasks from code in other languages
     - [ ] investigate integrating tools compiling languages to Wasm/WASI
     - On task level
@@ -181,6 +181,7 @@ After the task is run, Output parameters as a JSON are read from stdout of the W
 - [ ] setting parameters in the task
 - [ ] parsing outputs
 - [ ] examples contain expected functions
+
 #### E2E tests
 - Using Wasm/WASI Tasks in a build
 - [ ] Rust tasks
@@ -236,7 +237,7 @@ fn.Invoke();
 
 - **Interacting with the tooling for creating .wasi files from other languages?**
     - hard, unstable
-    - *-> in scope but ambitious, nuget package can have some install scripts doing that*
+    - *-> in scope but ambitious, the package can check/download and install tooling (wasi-sdk, rust) in simple cases*
 
 - **start with windows or UNIX?**
     - *-> most different is the investigation about how to bundle tooling for other languages*
