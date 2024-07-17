@@ -484,7 +484,6 @@
     <Compile Include="Evaluation\ProjectRootElementCacheBase.cs" />
     <Compile Include="Evaluation\ProjectRootElementCache.cs" />
     <Compile Include="Evaluation\SimpleProjectRootElementCache.cs" />
-    <Compile Include="Evaluation\ProjectStringCache.cs" />
     <Compile Include="Evaluation\SemiColonTokenizer.cs" />
     <Compile Include="Evaluation\StringMetadataTable.cs" />
     <Compile Include="Evaluation\ExpressionShredder.cs" />
