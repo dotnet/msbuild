@@ -210,7 +210,9 @@
       <Code Source="$(MSBuildThisFileDirectory)..\src\MSBuild.Bootstrap.Utils\Tasks\InstallDotNetCoreTask.cs" Language="cs" />
     </Task>
   </UsingTask>
-  <Target Name="BootstrapNetCore">
+  <Target Name="AcquireSdk"
+          BeforeTargets="PrepareForBuild"
+          Condition="!$(TargetFramework.StartsWith('net4'))">
 
     <PropertyGroup>
       <InstallDir>$(ArtifactsBinDir)bootstrap\core\</InstallDir>
@@ -219,7 +221,7 @@
     <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(InstallDir)" Version="$(NetVersion)"/>
   </Target>
 
-  <Target Name="BootstrapNetCorePatch" AfterTargets="BootstrapNetCore">
+  <Target Name="BootstrapNetCore" DependsOnTargets="AcquireSdk">
 
     <ItemGroup>
      <!-- *.deps.json are excluded because they will cause the conflicts on an attempt to build solution with the bootstraped bits. -->
