@@ -1588,7 +1588,7 @@ namespace Microsoft.Build.Evaluation
                 if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
                 {
                     // Set to log an error only if the change wave is enabled.
-                    missingDirectoryDespiteTrueCondition = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && !containsWildcards;
+                    missingDirectoryDespiteTrueCondition = !containsWildcards;
                     continue;
                 }
 

@@ -182,8 +182,7 @@ namespace Microsoft.Build.BackEnd
                 if (condition)
                 {
                     ExpanderOptions expanderOptions = ExpanderOptions.ExpandAll;
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) &&
-                        // If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
+                    if (// If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
                         bucket.BucketSequenceNumber == 0 &&
                         // Referring to unqualified metadata of other item (transform) is fine.
                         child.Include.IndexOf("@(", StringComparison.Ordinal) == -1)

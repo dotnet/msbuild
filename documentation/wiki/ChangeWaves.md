@@ -49,14 +49,6 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Moving from SHA1 to SHA256 for Hash task](https://github.com/dotnet/msbuild/pull/8812)
 - [Deprecating custom derived BuildEventArgs](https://github.com/dotnet/msbuild/pull/8917) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`
 
-### 17.6
-- [Parse invalid property under target](https://github.com/dotnet/msbuild/pull/8190)
-- [Eliminate project string cache](https://github.com/dotnet/msbuild/pull/7965)
-- [Log an error when no provided search path for an import exists](https://github.com/dotnet/msbuild/pull/8095)
-- [Log assembly loads](https://github.com/dotnet/msbuild/pull/8316)
-- [AnyHaveMetadataValue returns false when passed an empty list](https://github.com/dotnet/msbuild/pull/8603)
-- [Log item self-expansion](https://github.com/dotnet/msbuild/pull/8581)
-
 ## Change Waves No Longer In Rotation
 ### 16.8
 - [Enable NoWarn](https://github.com/dotnet/msbuild/pull/5671)
@@ -90,3 +82,12 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Adding accepted SDK name match pattern to SDK manifests](https://github.com/dotnet/msbuild/pull/7597)
 - [Throw warning indicating invalid project types](https://github.com/dotnet/msbuild/pull/7708)
 - [MSBuild server](https://github.com/dotnet/msbuild/pull/7634)
+
+### 17.6
+
+- [Parse invalid property under target](https://github.com/dotnet/msbuild/pull/8190)
+- [Eliminate project string cache](https://github.com/dotnet/msbuild/pull/7965)
+- [Log an error when no provided search path for an import exists](https://github.com/dotnet/msbuild/pull/8095)
+- [Log assembly loads](https://github.com/dotnet/msbuild/pull/8316)
+- [AnyHaveMetadataValue returns false when passed an empty list](https://github.com/dotnet/msbuild/pull/8603)
+- [Log item self-expansion](https://github.com/dotnet/msbuild/pull/8581)

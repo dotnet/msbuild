@@ -396,7 +396,7 @@ namespace Microsoft.Build.Evaluation
         /// This is for the purpose of evaluations through API calls, that might not be able to pass the logging context
         ///  - BuildCheck analysis won't be executed for those.
         /// (for one of the calls we can actually pass IDataConsumingContext - as we have logging service and project)
-        /// 
+        ///
         /// </summary>
         internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata, IFileSystem fileSystem)
             : this(properties, items, fileSystem, null)
@@ -1558,7 +1558,7 @@ namespace Microsoft.Build.Evaluation
                                    MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7);
 
                 propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, elementLocation, property == null, isArtifical);
-                
+
                 if (isArtifical)
                 {
                     // It could be one of the MSBuildThisFileXXXX properties,
@@ -2016,8 +2016,7 @@ namespace Microsoft.Build.Evaluation
                     if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)) != true)
                     {
                         // ...or a function "AnyHaveMetadataValue", since that will want to return false for an empty list.
-                        if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) ||
-                            expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
+                        if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
                         {
                             itemsFromCapture = new List<KeyValuePair<string, S>>();
                             return false;

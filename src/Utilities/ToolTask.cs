@@ -380,7 +380,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>true, if successful</returns>
         protected internal virtual bool ValidateParameters()
         {
-            if (TaskProcessTerminationTimeout < -1 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
+            if (TaskProcessTerminationTimeout < -1)
             {
                 Log.LogWarningWithCodeFromResources("ToolTask.InvalidTerminationTimeout", TaskProcessTerminationTimeout);
                 return false;
@@ -694,7 +694,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// We expect tasks to override this method if they need information about the tool process or its process events during task execution.
         /// Implementation should make sure that the task is started in this method.
-        /// Starts the process during task execution. 
+        /// Starts the process during task execution.
         /// </summary>
         /// <param name="proc">Fully populated <see cref="Process"/> instance representing the tool process to be started.</param>
         /// <returns>A started process. This could be <paramref name="proc"/> or another <see cref="Process"/> instance.</returns>
@@ -1000,7 +1000,7 @@ namespace Microsoft.Build.Utilities
                     LogShared.LogWarningWithCodeFromResources("Shared.KillingProcessByCancellation", processName);
                 }
 
-                int timeout = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && TaskProcessTerminationTimeout >= -1 ? TaskProcessTerminationTimeout : 5000;
+                int timeout = TaskProcessTerminationTimeout >= -1 ? TaskProcessTerminationTimeout : 5000;
                 string timeoutFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTOOLTASKCANCELPROCESSWAITTIMEOUT");
                 if (timeoutFromEnvironment != null)
                 {
