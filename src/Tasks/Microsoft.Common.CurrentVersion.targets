@@ -2175,11 +2175,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Issue a warning or error for each non-existent project. -->
     <Warning
         Text="The referenced project '%(_MSBuildProjectReferenceNonexistent.Identity)' does not exist."
-        Condition="'$(ErrorOnMissingProjectReference)' != 'True' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != ''"/>
+        Code="MSB9008"
+        Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' != 'True'"/>
 
     <Error
         Text="The referenced project '%(_MSBuildProjectReferenceNonexistent.Identity)' does not exist."
-        Condition="'$(ErrorOnMissingProjectReference)' == 'True' and '@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != ''"/>
+        Code="MSB9008"
+        Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' == 'True'"/>
 
   </Target>
 
