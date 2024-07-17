@@ -1583,7 +1583,7 @@ namespace Microsoft.Build.Evaluation
                         environmentDerivedProperty.loggingContext = propertiesUseTracker.LoggingContext;
                     }
 
-                    propertyValue = property.EvaluatedValueEscaped;
+                    propertyValue = property.GetEvaluatedValueEscaped(elementLocation);
                 }
 
                 return propertyValue;
