@@ -156,7 +156,7 @@ C# classes are yellow.
 ### Wasm/WASI communication with MSBuild
 Without WIT (not implemented in wasmtime-dotnet), the only data type that an be a Wasm function parameter and output is a number. Tasks have parameters which are of the following types: string, bool, [ITaskItem](https://github.com/dotnet/msbuild/blob/main/src/Framework/ITaskItem.cs) (basically a string dict), and arrays of these types.
 
-The .wasm module has to import functions from "module" msbuild-log: LogError(int,int), LogWarning(int,int), LogMessage(int,int,int), where 1. is the pointer to passed string in shared memory and 2. is the length of the string. 3. in LogMessage is the message importance integer (0=high, 1=medium, 2=low).
+The .wasm module has to import functions from "module" msbuild-log: LogError(int,int), LogWarning(int,int), LogMessage(int,int,int), where 1st in LogMessage is important and subsequent pair is a pointer to the shared memory and the length of the string.
 
 The .wasm task file has to export functions GetTaskInfo(), Execute()->int. Where the return type is 0 for success and 1 for failure.
 
