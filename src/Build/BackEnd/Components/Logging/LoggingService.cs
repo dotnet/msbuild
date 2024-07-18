@@ -202,12 +202,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool? _includeEvaluationProfile;
 
         /// <summary>
-        /// Whether properties and items should be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>.
-        /// </summary>
-        private bool? _includeEvaluationPropertiesAndItems;
-
-        /// <summary>
         /// Whether to include task inputs in task events.
         /// </summary>
         private bool? _includeTaskInputs;
@@ -541,36 +535,76 @@ namespace Microsoft.Build.BackEnd.Logging
             set => _includeTaskInputs = value;
         }
 
-        /// <summary>
-        /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>?
-        /// </summary>
-        public bool IncludeEvaluationPropertiesAndItems
+        /// <inheritdoc cref="ILoggingService.SetIncludeEvaluationPropertiesAndItemsInEvents"/>
+        public void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent, bool inEvaluationFinishedEvent)
+        {
+            _evalDataBehaviorSet = true;
+            IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = inEvaluationFinishedEvent;
+            IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = inProjectStartedEvent;
+        }
+
+        private bool _evalDataBehaviorSet;
+        private bool _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
+        private bool _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
+        private void InferEvalDataBehavior()
+        {
+            if (_evalDataBehaviorSet)
+            {
+                return;
+            }
+
+            bool? escapeHatch = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation;
+            if (escapeHatch.HasValue)
+            {
+                IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = escapeHatch.Value;
+                IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !escapeHatch.Value;
+            }
+            else
+            {
+                var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>().ToList();
+
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                {
+                    // If any logger requested the data - we need to emit them
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
+                        sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
+                    // If any logger didn't request the data - hence it's likely legacy logger
+                    //  - we need to populate the data in legacy way
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
+                        sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
+                }
+                else
+                {
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
+                        sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
+                        !IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
+                }
+            }
+
+            _evalDataBehaviorSet = true;
+        }
+
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
         {
             get
             {
-                if (_includeEvaluationPropertiesAndItems == null)
-                {
-                    var escapeHatch = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation;
-                    if (escapeHatch.HasValue)
-                    {
-                        _includeEvaluationPropertiesAndItems = escapeHatch.Value;
-                    }
-                    else
-                    {
-                        var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>();
-                        // If any sink requested the data - we need to emit them
-                        _includeEvaluationPropertiesAndItems =
-                            ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
-                                ? sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems)
-                                : sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
-                    }
-                }
-
-                return _includeEvaluationPropertiesAndItems ?? false;
+                InferEvalDataBehavior();
+                return _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
             }
+            private set => _includeEvaluationPropertiesAndItemsInProjectStartedEvent = value;
+        }
 
-            set => _includeEvaluationPropertiesAndItems = value;
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
+        {
+            get
+            {
+                InferEvalDataBehavior();
+                return _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
+            }
+            private set => _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = value;
         }
 
         /// <summary>
@@ -611,6 +645,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             return GetWarningsForProject(context, _warningsNotAsErrorsByProject, WarningsNotAsErrors);
         }
+
 
         /// <summary>
         /// Returns a collection of warnings to be demoted to messages for the specified build context.
