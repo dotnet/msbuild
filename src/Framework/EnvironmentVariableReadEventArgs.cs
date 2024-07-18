@@ -52,7 +52,7 @@ namespace Microsoft.Build.Framework
             string file,
             int line,
             int column)
-            : base(environmentVarValue, file, line, column) => EnvironmentVariableName = environmentVarName;
+            : base(environmentVarValue, file, line, column, MessageImportance.Low) => EnvironmentVariableName = environmentVarName;
 
         /// <summary>
         /// The name of the environment variable that was read.

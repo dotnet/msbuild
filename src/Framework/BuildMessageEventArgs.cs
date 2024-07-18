@@ -219,9 +219,11 @@ namespace Microsoft.Build.Framework
            string message,
            string file,
            int lineNumber,
-           int columnNumber)
+           int columnNumber,
+           MessageImportance importance)
             : base(message, helpKeyword: null, senderName: null)
         {
+            this.importance = importance;
             this.file = file;
             this.lineNumber = lineNumber;
             this.columnNumber = columnNumber;
