@@ -41,6 +41,7 @@
     <SystemTextJsonVersion>8.0.3</SystemTextJsonVersion>
     <SystemThreadingChannelsVersion>8.0.0</SystemThreadingChannelsVersion>
     <SystemThreadingTasksDataflowVersion>8.0.0</SystemThreadingTasksDataflowVersion>
+    <SystemFormatsAsn1Version>8.0.1</SystemFormatsAsn1Version>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
