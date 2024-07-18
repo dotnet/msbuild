@@ -2,6 +2,8 @@
   <ItemGroup>
     <ItemsToSign Include="$(VisualStudioSetupInsertionPath)Microsoft.Build.UnGAC.exe" />
 
+    <ItemsToSign Include="$(ArtifactsDir)\xsd\Update-MSBuildXsds.ps1" />
+
     <FileSignInfo Include="RuntimeContracts.dll" CertificateName="3PartySHA2" />
   </ItemGroup>
 

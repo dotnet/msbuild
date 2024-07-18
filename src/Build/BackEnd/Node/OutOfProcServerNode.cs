@@ -409,8 +409,8 @@ namespace Microsoft.Build.Experimental
             (int exitCode, string exitType) buildResult;
 
             // Dispose must be called before the server sends ServerNodeBuildResult packet
-            using (var outWriter = RedirectConsoleWriter.Create(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
-            using (var errWriter = RedirectConsoleWriter.Create(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
+            using (RedirectConsoleWriter outWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
+            using (RedirectConsoleWriter errWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
             {
                 Console.SetOut(outWriter);
                 Console.SetError(errWriter);
@@ -438,112 +438,316 @@ namespace Microsoft.Build.Experimental
         {
             private readonly Action<string> _writeCallback;
             private readonly Timer _timer;
-            private readonly TextWriter _syncWriter;
-
+            private readonly object _lock = new();
             private readonly StringWriter _internalWriter;
 
-            private RedirectConsoleWriter(Action<string> writeCallback)
+            public RedirectConsoleWriter(Action<string> writeCallback)
             {
                 _writeCallback = writeCallback;
                 _internalWriter = new StringWriter();
-                _syncWriter = Synchronized(_internalWriter);
                 _timer = new Timer(TimerCallback, null, 0, 40);
             }
 
             public override Encoding Encoding => _internalWriter.Encoding;
 
-            public static TextWriter Create(Action<string> writeCallback)
-            {
-                RedirectConsoleWriter writer = new RedirectConsoleWriter(writeCallback);
-
-                return writer;
-            }
-
             public override void Flush()
             {
-                var sb = _internalWriter.GetStringBuilder();
-                string captured = sb.ToString();
-                sb.Clear();
+                lock (_lock)
+                {
+                    var sb = _internalWriter.GetStringBuilder();
+                    string captured = sb.ToString();
+                    sb.Clear();
 
-                _writeCallback(captured);
-                _internalWriter.Flush();
+                    _writeCallback(captured);
+                    _internalWriter.Flush();
+                }
             }
 
-            public override void Write(char value) => _syncWriter.Write(value);
+            public override void Write(char value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(value);
+                }
+            }
 
-            public override void Write(char[]? buffer) => _syncWriter.Write(buffer);
+            public override void Write(char[]? buffer)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(buffer);
+                }
+            }
 
-            public override void Write(char[] buffer, int index, int count) => _syncWriter.Write(buffer, index, count);
+            public override void Write(char[] buffer, int index, int count)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(buffer, index, count);
+                }
+            }
 
-            public override void Write(bool value) => _syncWriter.Write(value);
+            public override void Write(bool value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(value);
+                }
+            }
 
-            public override void Write(int value) => _syncWriter.Write(value);
+            public override void Write(int value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(value);
+                }
+            }
 
-            public override void Write(uint value) => _syncWriter.Write(value);
+            public override void Write(uint value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(value);
+                }
+            }
 
-            public override void Write(long value) => _syncWriter.Write(value);
+            public override void Write(long value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(value);
+                }
+            }
 
-            public override void Write(ulong value) => _syncWriter.Write(value);
- 
-            public override void Write(float value) => _syncWriter.Write(value);
+            public override void Write(ulong value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(value);
+                }
+            }
 
-            public override void Write(double value) => _syncWriter.Write(value);
+            public override void Write(float value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(value);
+                }
+            }
 
-            public override void Write(decimal value) => _syncWriter.Write(value);
+            public override void Write(double value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(value);
+                }
+            }
 
-            public override void Write(string? value) => _syncWriter.Write(value);
+            public override void Write(decimal value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(value);
+                }
+            }
 
-            public override void Write(object? value) => _syncWriter.Write(value);
+            public override void Write(string? value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(value);
+                }
+            }
 
-            public override void Write(string format, object? arg0) => _syncWriter.Write(format, arg0);
+            public override void Write(object? value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(value);
+                }
+            }
 
-            public override void Write(string format, object? arg0, object? arg1) => _syncWriter.Write(format, arg0, arg1);
+            public override void Write(string format, object? arg0)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(format, arg0);
+                }
+            }
 
-            public override void Write(string format, object? arg0, object? arg1, object? arg2) => _syncWriter.Write(format, arg0, arg1, arg2);
+            public override void Write(string format, object? arg0, object? arg1)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(format, arg0, arg1);
+                }
+            }
 
-            public override void Write(string format, params object?[] arg) => _syncWriter.WriteLine(format, arg);
+            public override void Write(string format, object? arg0, object? arg1, object? arg2)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.Write(format, arg0, arg1, arg2);
+                }
+            }
 
-            public override void WriteLine() => _syncWriter.WriteLine();
+            public override void Write(string format, params object?[] arg)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(format, arg);
+                }
+            }
 
-            public override void WriteLine(char value) => _syncWriter.WriteLine(value);
+            public override void WriteLine()
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine();
+                }
+            }
 
-            public override void WriteLine(decimal value) => _syncWriter.WriteLine(value);
+            public override void WriteLine(char value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(value);
+                }
+            }
 
-            public override void WriteLine(char[]? buffer) => _syncWriter.WriteLine(buffer);
+            public override void WriteLine(decimal value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(value);
+                }
+            }
 
-            public override void WriteLine(char[] buffer, int index, int count) => _syncWriter.WriteLine(buffer, index, count);
+            public override void WriteLine(char[]? buffer)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(buffer);
+                }
+            }
 
-            public override void WriteLine(bool value) => _syncWriter.WriteLine(value);
+            public override void WriteLine(char[] buffer, int index, int count)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(buffer, index, count);
+                }
+            }
 
-            public override void WriteLine(int value) => _syncWriter.WriteLine(value);
+            public override void WriteLine(bool value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(value);
+                }
+            }
 
-            public override void WriteLine(uint value) => _syncWriter.WriteLine(value);
+            public override void WriteLine(int value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(value);
+                }
+            }
 
-            public override void WriteLine(long value) => _syncWriter.WriteLine(value);
+            public override void WriteLine(uint value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(value);
+                }
+            }
 
-            public override void WriteLine(ulong value) => _syncWriter.WriteLine(value);
+            public override void WriteLine(long value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(value);
+                }
+            }
 
-            public override void WriteLine(float value) => _syncWriter.WriteLine(value);
+            public override void WriteLine(ulong value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(value);
+                }
+            }
 
-            public override void WriteLine(double value) => _syncWriter.WriteLine(value);
+            public override void WriteLine(float value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(value);
+                }
+            }
 
-            public override void WriteLine(string? value) => _syncWriter.WriteLine(value);
+            public override void WriteLine(double value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(value);
+                }
+            }
 
-            public override void WriteLine(object? value) => _syncWriter.WriteLine(value);
+            public override void WriteLine(string? value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(value);
+                }
+            }
 
-            public override void WriteLine(string format, object? arg0) => _syncWriter.WriteLine(format, arg0);
+            public override void WriteLine(object? value)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(value);
+                }
+            }
 
-            public override void WriteLine(string format, object? arg0, object? arg1) => _syncWriter.WriteLine(format, arg0, arg1);
+            public override void WriteLine(string format, object? arg0)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(format, arg0);
+                }
+            }
 
-            public override void WriteLine(string format, object? arg0, object? arg1, object? arg2) => _syncWriter.WriteLine(format, arg0, arg1, arg2);
+            public override void WriteLine(string format, object? arg0, object? arg1)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(format, arg0, arg1);
+                }
+            }
 
-            public override void WriteLine(string format, params object?[] arg) => _syncWriter.WriteLine(format, arg);
+            public override void WriteLine(string format, object? arg0, object? arg1, object? arg2)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(format, arg0, arg1, arg2);
+                }
+            }
+
+            public override void WriteLine(string format, params object?[] arg)
+            {
+                lock (_lock)
+                {
+                    _internalWriter.WriteLine(format, arg);
+                }
+            }
 
             private void TimerCallback(object? state)
             {
                 if (_internalWriter.GetStringBuilder().Length > 0)
                 {
-                    _syncWriter.Flush();
+                    Flush();
                 }
             }
 

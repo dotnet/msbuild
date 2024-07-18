@@ -2,12 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
-
-#nullable disable
 
 namespace Microsoft.Build.Execution
 {
@@ -87,9 +89,9 @@ namespace Microsoft.Build.Execution
     }
 
     /// <summary>
-    /// BuildRequestData encapsulates all of the data needed to submit a build request.
+    /// BuildRequestData encapsulates all the data needed to submit a build request.
     /// </summary>
-    public class BuildRequestData
+    public class BuildRequestData : BuildRequestData<BuildRequestData, BuildResult>
     {
         /// <summary>
         /// Constructs a BuildRequestData for build requests based on project instances.
@@ -119,7 +121,7 @@ namespace Microsoft.Build.Execution
         /// <param name="targetsToBuild">The targets to build.</param>
         /// <param name="hostServices">The host services to use, if any.  May be null.</param>
         /// <param name="flags">Flags controlling this build request.</param>
-        public BuildRequestData(ProjectInstance projectInstance, string[] targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags)
+        public BuildRequestData(ProjectInstance projectInstance, string[] targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags)
             : this(projectInstance, targetsToBuild, hostServices, flags, null)
         {
         }
@@ -132,8 +134,8 @@ namespace Microsoft.Build.Execution
         /// <param name="hostServices">The host services to use, if any.  May be null.</param>
         /// <param name="flags">Flags controlling this build request.</param>
         /// <param name="propertiesToTransfer">The list of properties whose values should be transferred from the project to any out-of-proc node.</param>
-        public BuildRequestData(ProjectInstance projectInstance, string[] targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags, IEnumerable<string> propertiesToTransfer)
-            : this(targetsToBuild, hostServices, flags)
+        public BuildRequestData(ProjectInstance projectInstance, string[] targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags, IEnumerable<string>? propertiesToTransfer)
+            : this(targetsToBuild, hostServices, flags, projectInstance.FullPath)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectInstance, nameof(projectInstance));
 
@@ -144,7 +146,6 @@ namespace Microsoft.Build.Execution
 
             ProjectInstance = projectInstance;
 
-            ProjectFullPath = projectInstance.FullPath;
             GlobalPropertiesDictionary = projectInstance.GlobalPropertiesDictionary;
             ExplicitlySpecifiedToolsVersion = projectInstance.ExplicitToolsVersion;
             if (propertiesToTransfer != null)
@@ -162,7 +163,7 @@ namespace Microsoft.Build.Execution
         /// <param name="flags">Flags controlling this build request.</param>
         /// <param name="propertiesToTransfer">The list of properties whose values should be transferred from the project to any out-of-proc node.</param>
         /// <param name="requestedProjectState">A <see cref="Execution.RequestedProjectState"/> describing properties, items, and metadata that should be returned. Requires setting <see cref="BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild"/>.</param>
-        public BuildRequestData(ProjectInstance projectInstance, string[] targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags, IEnumerable<string> propertiesToTransfer, RequestedProjectState requestedProjectState)
+        public BuildRequestData(ProjectInstance projectInstance, string[] targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags, IEnumerable<string>? propertiesToTransfer, RequestedProjectState requestedProjectState)
             : this(projectInstance, targetsToBuild, hostServices, flags, propertiesToTransfer)
         {
             ErrorUtilities.VerifyThrowArgumentNull(requestedProjectState, nameof(requestedProjectState));
@@ -179,7 +180,7 @@ namespace Microsoft.Build.Execution
         /// <param name="toolsVersion">The tools version to use for the build.  May be null.</param>
         /// <param name="targetsToBuild">The targets to build.</param>
         /// <param name="hostServices">The host services to use.  May be null.</param>
-        public BuildRequestData(string projectFullPath, IDictionary<string, string> globalProperties, string toolsVersion, string[] targetsToBuild, HostServices hostServices)
+        public BuildRequestData(string projectFullPath, IDictionary<string, string?> globalProperties, string? toolsVersion, string[] targetsToBuild, HostServices? hostServices)
             : this(projectFullPath, globalProperties, toolsVersion, targetsToBuild, hostServices, BuildRequestDataFlags.None)
         {
         }
@@ -194,8 +195,8 @@ namespace Microsoft.Build.Execution
         /// <param name="hostServices">The host services to use.  May be null.</param>
         /// <param name="flags">The <see cref="BuildRequestDataFlags"/> to use.</param>
         /// <param name="requestedProjectState">A <see cref="Execution.RequestedProjectState"/> describing properties, items, and metadata that should be returned. Requires setting <see cref="BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild"/>.</param>
-        public BuildRequestData(string projectFullPath, IDictionary<string, string> globalProperties,
-            string toolsVersion, string[] targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags,
+        public BuildRequestData(string projectFullPath, IDictionary<string, string?> globalProperties,
+            string? toolsVersion, string[] targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags,
             RequestedProjectState requestedProjectState)
             : this(projectFullPath, globalProperties, toolsVersion, targetsToBuild, hostServices, flags)
         {
@@ -213,15 +214,14 @@ namespace Microsoft.Build.Execution
         /// <param name="targetsToBuild">The targets to build.</param>
         /// <param name="hostServices">The host services to use.  May be null.</param>
         /// <param name="flags">The <see cref="BuildRequestDataFlags"/> to use.</param>
-        public BuildRequestData(string projectFullPath, IDictionary<string, string> globalProperties, string toolsVersion, string[] targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags)
-            : this(targetsToBuild, hostServices, flags)
+        public BuildRequestData(string projectFullPath, IDictionary<string, string?> globalProperties, string? toolsVersion, string[] targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags)
+            : this(targetsToBuild, hostServices, flags, FileUtilities.NormalizePath(projectFullPath)!)
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFullPath, nameof(projectFullPath));
             ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
 
-            ProjectFullPath = FileUtilities.NormalizePath(projectFullPath);
             GlobalPropertiesDictionary = new PropertyDictionary<ProjectPropertyInstance>(globalProperties.Count);
-            foreach (KeyValuePair<string, string> propertyPair in globalProperties)
+            foreach (KeyValuePair<string, string?> propertyPair in globalProperties)
             {
                 GlobalPropertiesDictionary.Set(ProjectPropertyInstance.Create(propertyPair.Key, propertyPair.Value));
             }
@@ -232,13 +232,10 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Common constructor.
         /// </summary>
-        private BuildRequestData(string[] targetsToBuild, HostServices hostServices, BuildRequestDataFlags flags)
+        private BuildRequestData(string[] targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags, string projectFullPath)
+            : base(targetsToBuild, flags, hostServices)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetsToBuild, nameof(targetsToBuild));
-
-            HostServices = hostServices;
-            TargetNames = new List<string>(targetsToBuild);
-            Flags = flags;
+            ProjectFullPath = projectFullPath;
         }
 
         /// <summary>
@@ -246,7 +243,7 @@ namespace Microsoft.Build.Execution
         /// May be null.
         /// </summary>
         /// <value>The project instance.</value>
-        public ProjectInstance ProjectInstance
+        public ProjectInstance? ProjectInstance
         {
             get;
         }
@@ -255,16 +252,12 @@ namespace Microsoft.Build.Execution
         /// <value>The project file to be built.</value>
         public string ProjectFullPath { get; internal set; }
 
-        /// <summary>
-        /// The name of the targets to build.
-        /// </summary>
-        /// <value>An array of targets in the project to be built.</value>
-        public ICollection<string> TargetNames { get; }
+        internal override BuildSubmissionBase<BuildRequestData, BuildResult> CreateSubmission(BuildManager buildManager,
+            int submissionId, BuildRequestData requestData,
+            bool legacyThreadingSemantics) =>
+            new BuildSubmission(buildManager, submissionId, requestData, legacyThreadingSemantics);
 
-        /// <summary>
-        /// Extra flags for this BuildRequest.
-        /// </summary>
-        public BuildRequestDataFlags Flags { get; }
+        public override IEnumerable<string> EntryProjectsFullPath => ProjectFullPath.AsSingleItemEnumerable();
 
         /// <summary>
         /// The global properties to use.
@@ -274,26 +267,23 @@ namespace Microsoft.Build.Execution
             (ICollection<ProjectPropertyInstance>)ReadOnlyEmptyCollection<ProjectPropertyInstance>.Instance :
             new ReadOnlyCollection<ProjectPropertyInstance>(GlobalPropertiesDictionary);
 
+        public override bool IsGraphRequest => false;
+
         /// <summary>
         /// The explicitly requested tools version to use.
         /// </summary>
-        public string ExplicitlySpecifiedToolsVersion { get; }
-
-        /// <summary>
-        /// Gets the HostServices object for this request.
-        /// </summary>
-        public HostServices HostServices { get; }
+        public string? ExplicitlySpecifiedToolsVersion { get; }
 
         /// <summary>
         /// Returns a list of properties to transfer out of proc for the build.
         /// </summary>
-        public IEnumerable<string> PropertiesToTransfer { get; }
+        public IEnumerable<string>? PropertiesToTransfer { get; }
 
         /// <summary>
         /// Returns the properties, items, and metadata that will be returned
         /// by this build.
         /// </summary>
-        public RequestedProjectState RequestedProjectState { get; }
+        public RequestedProjectState? RequestedProjectState { get; }
 
         /// <summary>
         /// Whether the tools version used originated from an explicit specification,
@@ -304,6 +294,25 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Returns the global properties as a dictionary.
         /// </summary>
-        internal PropertyDictionary<ProjectPropertyInstance> GlobalPropertiesDictionary { get; }
+        internal PropertyDictionary<ProjectPropertyInstance>? GlobalPropertiesDictionary { get; }
+
+        private IReadOnlyDictionary<string, string?>? _globalPropertiesLookup;
+
+        /// <inheritdoc cref="BuildRequestDataBase"/>
+        public override IReadOnlyDictionary<string, string?> GlobalPropertiesLookup => _globalPropertiesLookup ??=
+            Execution.GlobalPropertiesLookup.ToGlobalPropertiesLookup(GlobalPropertiesDictionary);
+
+        // WARNING!: Do not remove the below proxy properties.
+        //  They are required to make the OM forward compatible
+        //  (code built against this OM should run against binaries with previous version of OM).
+
+        /// <inheritdoc cref="BuildRequestDataBase.TargetNames"/>
+        public new ICollection<string> TargetNames => base.TargetNames;
+
+        /// <inheritdoc cref="BuildRequestDataBase.Flags"/>
+        public new BuildRequestDataFlags Flags => base.Flags;
+
+        /// <inheritdoc cref="BuildRequestDataBase.HostServices"/>
+        public new HostServices? HostServices => base.HostServices;
     }
 }

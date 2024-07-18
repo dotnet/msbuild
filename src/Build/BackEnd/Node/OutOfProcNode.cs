@@ -303,6 +303,9 @@ namespace Microsoft.Build.Execution
             return _componentFactories.GetComponent(type);
         }
 
+        TComponent IBuildComponentHost.GetComponent<TComponent>(BuildComponentType type)
+            => (TComponent)((IBuildComponentHost)this).GetComponent(type);
+
         #endregion
 
         #region INodePacketFactory Members
@@ -778,9 +781,12 @@ namespace Microsoft.Build.Execution
                 _loggingService.IncludeTaskInputs = true;
             }
 
-            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItems)
+            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent)
             {
-                _loggingService.IncludeEvaluationPropertiesAndItems = true;
+                _loggingService.SetIncludeEvaluationPropertiesAndItemsInEvents(
+                    configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
+                    configuration.LoggingNodeConfiguration
+                        .IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent);
             }
 
             try

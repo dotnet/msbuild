@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -18,9 +18,7 @@ internal sealed class BuildCheckCentralContext
     private readonly ConfigurationProvider _configurationProvider;
 
     internal BuildCheckCentralContext(ConfigurationProvider configurationProvider)
-    {
-        _configurationProvider = configurationProvider;
-    }
+        => _configurationProvider = configurationProvider;
 
     private record CallbackRegistry(
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<EvaluatedPropertiesAnalysisData>>)> EvaluatedPropertiesActions,
@@ -36,7 +34,9 @@ internal sealed class BuildCheckCentralContext
     // This we can potentially use to subscribe for receiving evaluated props in the
     //  build event args. However - this needs to be done early on, when analyzers might not be known yet
     internal bool HasEvaluatedPropertiesActions => _globalCallbacks.EvaluatedPropertiesActions.Count > 0;
+
     internal bool HasParsedItemsActions => _globalCallbacks.ParsedItemsActions.Count > 0;
+
     internal bool HasTaskInvocationActions => _globalCallbacks.TaskInvocationActions.Count > 0;
 
     internal void RegisterEvaluatedPropertiesAction(BuildAnalyzerWrapper analyzer, Action<BuildCheckDataContext<EvaluatedPropertiesAnalysisData>> evaluatedPropertiesAction)
@@ -77,82 +77,77 @@ internal sealed class BuildCheckCentralContext
 
     internal void RunEvaluatedPropertiesActions(
         EvaluatedPropertiesAnalysisData evaluatedPropertiesAnalysisData,
-        LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        IAnalysisContext analysisContext,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.EvaluatedPropertiesActions, evaluatedPropertiesAnalysisData,
-            loggingContext, resultHandler);
+            analysisContext, resultHandler);
 
     internal void RunParsedItemsActions(
         ParsedItemsAnalysisData parsedItemsAnalysisData,
-        LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        IAnalysisContext analysisContext,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ParsedItemsActions, parsedItemsAnalysisData,
-            loggingContext, resultHandler);
+            analysisContext, resultHandler);
 
     internal void RunTaskInvocationActions(
         TaskInvocationAnalysisData taskInvocationAnalysisData,
-        LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
+        IAnalysisContext analysisContext,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.TaskInvocationActions, taskInvocationAnalysisData,
-            loggingContext, resultHandler);
+            analysisContext, resultHandler);
 
     private void RunRegisteredActions<T>(
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks,
         T analysisData,
-        LoggingContext loggingContext,
-        Action<BuildAnalyzerWrapper, LoggingContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> resultHandler)
+        IAnalysisContext analysisContext,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> resultHandler)
     where T : AnalysisData
     {
         string projectFullPath = analysisData.ProjectFilePath;
 
-        // Alternatively we might want to actually do this all in serial, but asynchronously (blocking queue)
-        Parallel.ForEach(
-            registeredCallbacks,
-            new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount },
-            /* (BuildAnalyzerWrapper2, Action<BuildAnalysisContext<T>>) */
-            analyzerCallback =>
+        foreach (var analyzerCallback in registeredCallbacks)
+        {
+            // Tracing - https://github.com/dotnet/msbuild/issues/9629 - we might want to account this entire block
+            //  to the relevant analyzer (with only the currently accounted part as being the 'core-execution' subspan)
+
+            BuildAnalyzerConfigurationInternal? commonConfig = analyzerCallback.Item1.CommonConfig;
+            BuildAnalyzerConfigurationInternal[] configPerRule;
+
+            if (commonConfig != null)
             {
-                // Tracing - https://github.com/dotnet/msbuild/issues/9629 - we might want to account this entire block
-                //  to the relevant analyzer (with only the currently accounted part as being the 'core-execution' subspan)
-
-                BuildAnalyzerConfigurationInternal? commonConfig = analyzerCallback.Item1.CommonConfig;
-                BuildAnalyzerConfigurationInternal[] configPerRule;
-
-                if (commonConfig != null)
+                if (!commonConfig.IsEnabled)
                 {
-                    if (!commonConfig.IsEnabled)
-                    {
-                        return;
-                    }
-
-                    configPerRule = new[] { commonConfig };
-                }
-                else
-                {
-                    configPerRule =
-                        _configurationProvider.GetMergedConfigurations(projectFullPath,
-                            analyzerCallback.Item1.BuildAnalyzer);
-                    if (configPerRule.All(c => !c.IsEnabled))
-                    {
-                        return;
-                    }
+                    return;
                 }
 
-                // Here we might want to check the configPerRule[0].EvaluationAnalysisScope - if the input data supports that
-                // The decision and implementation depends on the outcome of the investigation tracked in:
-                // https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57851137
+                configPerRule = new[] { commonConfig };
+            }
+            else
+            {
+                configPerRule =
+                    _configurationProvider.GetMergedConfigurations(projectFullPath,
+                        analyzerCallback.Item1.BuildAnalyzer);
+                if (configPerRule.All(c => !c.IsEnabled))
+                {
+                    return;
+                }
+            }
 
-                BuildCheckDataContext<T> context = new BuildCheckDataContext<T>(
-                    analyzerCallback.Item1,
-                    loggingContext,
-                    configPerRule,
-                    resultHandler,
-                    analysisData);
+            // Here we might want to check the configPerRule[0].EvaluationAnalysisScope - if the input data supports that
+            // The decision and implementation depends on the outcome of the investigation tracked in:
+            // https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57851137
 
-                analyzerCallback.Item2(context);
-            });
+            BuildCheckDataContext<T> context = new BuildCheckDataContext<T>(
+                analyzerCallback.Item1,
+                analysisContext,
+                configPerRule,
+                resultHandler,
+                analysisData);
+
+            analyzerCallback.Item2(context);
+        }
     }
 }

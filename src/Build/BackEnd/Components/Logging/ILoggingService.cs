@@ -27,7 +27,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// Interface representing logging services in the build system.
     /// Implementations should be thread-safe.
     /// </summary>
-    internal interface ILoggingService
+    internal interface ILoggingService : IBuildComponent
     {
         #region Events
         /// <summary>
@@ -200,12 +200,24 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>?
+        /// or/and <see cref="ProjectStartedEventArgs"/>?
         /// </summary>
-        bool IncludeEvaluationPropertiesAndItems
+        void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent, bool inEvaluationFinishedEvent);
+
+        /// <summary>
+        /// Indicates whether properties and items should be logged on <see cref="ProjectStartedEventArgs"/>.
+        /// </summary>
+        bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
         {
             get;
-            set;
+        }
+
+        /// <summary>
+        /// Indicates whether properties and items should be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>.
+        /// </summary>
+        bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
+        {
+            get;
         }
 
         /// <summary>
@@ -463,6 +475,11 @@ namespace Microsoft.Build.BackEnd.Logging
         void LogBuildFinished(bool success);
 
         /// <summary>
+        /// Logs that the build has canceled
+        /// </summary>
+        void LogBuildCanceled();
+
+        /// <summary>
         /// Create an evaluation context, by generating a new evaluation id.
         /// </summary>
         /// <param name="nodeId">The node id</param>
@@ -650,6 +667,7 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             set;
         }
+
         #endregion
         /// <summary>
         /// Entry point for a sink to consume an event.
