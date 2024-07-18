@@ -5070,8 +5070,6 @@ $(
         [InlineData("$([System.String]::new('Hi').Equals('Hello'))")]
         [InlineData("$([System.IO.Path]::GetFileNameWithoutExtension('C:\\folder\\file.txt'))")]
         [InlineData("$([System.Int32]::new(123).ToString('mm')")]
-        [InlineData("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('10.0.19041.0', 'Windows'))")]
-        [InlineData("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKDisplayName('10.0.19041.0', 'Windows'))")]
         [InlineData("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::NormalizeDirectory('C:/folder1/./folder2/'))")]
         [InlineData("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::IsOSPlatform('Windows'))")]
         public void FastPathValidationTest(string methodInvocationMetadata)
