@@ -134,12 +134,14 @@ The message layer has a custom serialization protocal that is specific to MSBuil
 ## Graph build
 A graph build changes the sequence in which MSBuild processes projects. Normally a project starts execution, and when it has a dependency on another project, then that project starts to build. A graph build evaluates all projects and their relationship before starting execution of any project. This is achieved by looking at specific items (like `ProjectReference`) after evaluation to construct the dependency graph.
 
-There are a couple of different modes to run graph mode in:
-- Standard mode: Tried to work from the leaves of the dependency graph and makes sure all results are within the cache. If there is a cache miss / unexpected reference, it just schedules the missing reference for execution.
-- Strict / isolate mode: If there is a cache miss when building, the whole built is failed. This is used mostly for unused.
+There are a couple of different modes to run graph mode in (see [the spec](../documentation/specs/static-graph.md#what-is-static-graph) for more details):
+- Standard mode (`-graph`): Tried to work from the leaves of the dependency graph and makes sure all results are within the cache. If there is a cache miss / unexpected reference, it just schedules the missing reference for execution.
+- Strict / isolate mode (`-graph -isolate`): If there is a cache miss when building, the whole built is failed. This can be used when the graph of the build is fully known upfront and is not expected to change. Avoiding the need for dynamic resolution of dependencies can lead to improved scheduling and caching. Usually a first run with `-graph` is needed on initial run or on dependencies changes in order to construct/refresh the graph and to be able to consequently run in a strict mode.
+- Single project isolated mode: This is not directly invokable by users, instead it is used from higher order build systems to achive distributed / cached builds (in which the individual projects need to run in isolation from their dependencies - as those can be pulled from distributed cache or scheduled to run on different computation nodes).
 
 ## MSBuid Server
 In normal MSBuild command-line build execution the main process exists after the build ends. The MSBuild Server project aims to change that, making the entry point process and the scheduler process node separate entities. This allows processes to preserve in-memory cache and make consecutive builds faster, like they are in Visual Studio and other API consumers.
+For more information please see [the spec](../documentation/MSBuild-Server.md).
 
 # Extensibilities
 MSBuild includes some extra features that are related to the build process but does not fit on the previous categories. These extensibility features are critical for the build process, but they can also be customized by third parties for their own use.
@@ -174,7 +176,8 @@ This Project Cache differs from the previous one because it is separate from the
 For more in depth information visit [the spec](../documentation/specs/project-cache.md).
 
 ## BuildCheck
-//TODO
+BuildCheck is new MSBuild extensible and configurable linting/diagnostic feature, that enables users to enable/configure and author checks flagging discouraged and anti-pattern practices.
+For more information please see [the spec](../documentation/specs/BuildCheck/BuildCheck.md).
 
 ## Resolvers
 There are a few elements within the MSBuild XML that indicate that a call to the .NET SDK is necessary. Some examples include:
@@ -192,4 +195,4 @@ MSBuild has a few telemetry points, mostly through the .NET SDK. It is implement
 Visual Studio telemetry was removed once MSBuild went open source, and it was never added again.
 
 ## FileTracker
-// TODO
+In order to automatically detect task inputs and outputs, MSBuild can intercept Windows I/O API calls to track the dependencies. A [FileTracker](https://github.com/dotnet/msbuild/blob/main/src/Utilities/TrackedDependencies/FileTracker.cs) utility is used to accomplish this. For more information please see [the spec](../documentation/specs/static-graph.md#detours).
