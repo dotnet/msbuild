@@ -171,7 +171,8 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
             if (_loggingContext?.BuildEventContext != null)
             {
                 buildArgs.BuildEventContext = _loggingContext.BuildEventContext;
-                // bypass the logging context validity check
+                // bypass the logging context validity check: it's possible that the load happened
+                // on a thread unrelated to the context we're tracking loads in
                 _loggingContext.LoggingService.LogBuildEvent(buildArgs);
             }
             _loggingService?.LogBuildEvent(buildArgs);
