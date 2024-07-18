@@ -106,6 +106,36 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
+    [InlineData("warning", "warning BC0101")]
+    [InlineData("error", "error BC0101")]
+    [InlineData("suggestion", "BC0101")]
+    [InlineData("default", "warning BC0101")]
+    public void EditorConfig_SeverityAppliedCorrectly(string BC0101Severity, string expectedOutputValues)
+    {
+        PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, BC0101Severity);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze",
+            out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+
+        success.ShouldBeTrue();
+        output.ShouldContain(expectedOutputValues);
+    }
+
+    [Fact]
+    public void EditorConfig_SeverityNoneAppliedCorrectly()
+    {
+        PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, "none");
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze",
+            out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+
+        success.ShouldBeTrue();
+        output.ShouldNotContain("BC0101");
+    }
+
+    [Theory]
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
