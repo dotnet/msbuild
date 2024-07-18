@@ -7,7 +7,7 @@ MSBuild is a build platform used mainly for .NET and Visual Studio. But when ref
 
 MSBuild also contains some extensibility aspects that mostly interact with the API and engine. These are built to increase customization and interaction capability.
 
-This document covers all parts of MSBuild in a general manner from the perspective of an MSBuild codebase maintainer. There will be no in depth technical details, or how-to's. If you'd like to learn how to use MSBuild to improve your builds please visit [Microsoft Learn's MSBuild documentation](https://learn.microsoft.com/visualstudio/msbuild).
+This document covers all parts of MSBuild in a general manner from the perspective of an MSBuild codebase maintainer. There will be no in depth technical details, or how-to's. If you'd like to learn how to use MSBuild to improve your builds please visit Microsoft Learn's [MSBuild documentation](https://learn.microsoft.com/visualstudio/msbuild).
 
 
 # MSBuild XML Language
@@ -21,7 +21,7 @@ The MSBuild XML is built around representing a project's data. It uses various e
 
 These attributes are defined within project files (`.csproj`, `.vbproj` etc.). The solution files (`.sln`) are not written with MSBuild XML. They are originally exclusive to Visual Studio and yet the MSBuild command-line application can parse them to find projects to build. It does so by converting the solution file to a MSBuild project file in-memory and acts upon it instead. More on this in the `Building Solutions` section.
 
-While the project file defines the data used for the build, the actual build instructions are generally imported from a common location through the `Import` element or MSBuild SDKs that contain their own tasks and targets. One example that is widely used is the [.NET SDK](https://learn.microsoft.com/visualstudio/msbuild/how-to-use-project-sdk).
+While the project file defines the data used for the build, the actual build instructions are generally imported from a common location through the `Import` element or [MSBuild SDKs](https://learn.microsoft.com/visualstudio/msbuild/how-to-use-project-sdk) that contain their own tasks and targets. One example that is widely used is the [`Microsoft.NET.Sdk`](https://learn.microsoft.com/dotnet/core/project-sdk/overview) from the .NET SDK.
 
 
 # Common Targets
@@ -33,23 +33,25 @@ Visual Studio also uses common targets to change the behaviour of MSBuild throug
 
 
 # MSBuild API
-The MSBuild API is .NET library with a focus on building and extracting data from MSBuild projects. It is used by Visual Studio and .NET SDK to integrate MSBuild as their project build system. This API is also available for any third parties to use.
+The MSBuild API is .NET library with a focus on building and fetching data from MSBuild projects. It is used by Visual Studio and .NET SDK to integrate MSBuild as their project build system. This API is also available for any third parties to use.
 
 
 # Engine
 The MSBuild Engine's main responsibility is to execute the build instructions and process the results of builds. This includes managing the extensibility that MSBuild offers, integrating customizations into the build process even if they're authored by third parties.
 
-The MSBuild engine's logic is divided into two main stages: the evalution stage and the execution stage.
+The MSBuild engine's logic is divided into two main stages: 
+- evalution stage
+- execution stage.
 
 ## Entry points
 There are a few entry points for the MSBuild engine: Visual Studio, .NET SDK and the CLI executable (`MSBuild.exe` on Windows). These partner products are implementations or extensions of the MSBuild API, and we do care about their smooth integration with MSBuild, but do not support them directly. We only officially support the MSBuild API.
 
 The inputs necessary to start a build include:
- - Build logic for the projects, either from the project's XML, or from imports referenced the entry point project.
+ - Build logic for the projects, typically the entry point project's XML or from the imports within.
  - User defined imports
  - The generated build imports (`.g.props` and `.g.targets`) from NuGet restore.
 
-An example of the imported build logic is the `<Project Sdk="Microsoft.NET.Sdk">` that can be seen in some of the built-in .NET templates. This indicates that the project will use build logic that comes with the .NET SDK.
+An example of the imported build logic is the `<Project Sdk="Microsoft.NET.Sdk">` that can be seen in some of the built-in .NET templates. This indicates that the project will use build logic logic from the `Microsoft.NET.Sdk` component comes with the .NET SDK.
 
 More on this in the [Restore](#restore) section below.
 
@@ -70,7 +72,7 @@ One such resolver that comes with the .NET SDK and Visual Studio is the NuGet's 
 ### Imports
 In MSBuild an import definition can have various forms - a disk path, a property expansion, a known folder, or even environmental variables. There are also some main imports that come with the execution on other platforms, like the Visual Studio or SDK can have import directories that contain wild card imports. However, when it comes to the evaluation phase in MSBuild, imports are all treated like a property plus path expansion, this includes imported NuGet packages.
 
-Historically a single version of MSBuild supported multiple `ToolsVersions` that could result in differing imports for the same expression, but today an MSBuild distribution provides only one `ToolsVersion` and selection between versions is expected to be done outside of MSBuild.
+Historically a single version of MSBuild supported multiple `ToolsVersions` that could result in differing imports for the same expression, but today an MSBuild distribution provides only the current version of `ToolsVersion` and selection between versions is expected to be done outside of MSBuild.
 
 ## Execution operation
 For more detailed information on execution phase visit [Microsoft Learn](https://learn.microsoft.com/visualstudio/msbuild/build-process-overview#execution-phase).
@@ -82,9 +84,9 @@ Another target order issue arises when there is a project dependency. Project de
 ### Task Host
 MSBuild has an ability to run tasks out of process via the so called Task Host. That allows tasks to run in a different .NET runtime or bitness than the one used by the build engine for the build execution.
 
-Task host is automatically when the task explicitly declares need for a specific runtime or architecture and such is not used by the executing MSBuild engine. The runtime and architecture can be requested via `Runtime` and `Architecture` attributes in [`UsingTask`](https://learn.microsoft.com/en-us/visualstudio/msbuild/usingtask-element-msbuild) element defining the task or in the [`Task`](https://learn.microsoft.com/en-us/visualstudio/msbuild/task-element-msbuild) element used for task invocation.
+Task host is automatically when the task explicitly declares need for a specific runtime or architecture and such is not used by the executing MSBuild engine. The runtime and architecture can be requested via `Runtime` and `Architecture` attributes in [`UsingTask`](https://learn.microsoft.com/visualstudio/msbuild/usingtask-element-msbuild) element defining the task or in the [`Task`](https://learn.microsoft.com/visualstudio/msbuild/task-element-msbuild) element used for task invocation.
 
-TaskHost can be opted-in via `TaskFactory="TaskHostFactory"` in the [`UsingTask`](https://learn.microsoft.com/en-us/visualstudio/msbuild/usingtask-element-msbuild) element defining the task. This opt-in behavior can be used for various cases:
+TaskHost can be opted-in via `TaskFactory="TaskHostFactory"` in the [`UsingTask`](https://learn.microsoft.com/visualstudio/msbuild/usingtask-element-msbuild) element defining the task. This opt-in behavior can be used for various cases:
 - If a task is built in the same repo that is currently being built by MSBuild and the code might change. So, Task Host makes sure the DLLs are not locked at the end of the build (as MSBuild uses long living worker nodes that survives single build execution)
 - As an isolation mechanism - separating the execution from the engine execution process.
 
@@ -92,7 +94,7 @@ TaskHost can be opted-in via `TaskFactory="TaskHostFactory"` in the [`UsingTask`
 ### Project result cache
 The project Result Cache refers to the cache used by the scheduler that keeps the build results of already executed project. The result of a target is success, failure, and a list of items that succeeded. Beyond that the `return` and `output` attributes from targets are also serialized with the build result, as to be used by other targets for their execution.
 
-There is also another Project Cache Plugin, which focuses on result cache in distributed builds. More information about it is in the Extensibility section.
+There is also another Project Cache Plugin, which focuses on result cache in distributed builds. More information about it is in the [Extensibility](#extensibility) section.
 
 ### Register Task Objects
 During execution tasks might need to share state meaningfully between invocations in a single build or across builds. The MSBuild engine provides a mechanism to manage the lifetime of .NET objects to fill this gap. This lifetime can be defined by the user but has specific scopes: it can live per build or indefinitely. However, this mechanism is only available for communication within the same execution node, and it is not serializable.
@@ -120,7 +122,7 @@ When a new build is started, MSBuild starts a process that runs some setup code 
 
 In the case of a CLI build the first node becomes the scheduler node and one of the worker nodes, becoming both the entry point for the project build and the scheduler. The main problem that arises from that is when the whole build finishes execution, the OS tears down the process, losing the memory cache and having to restart the whole build process from the start. 
 
-In the case of a Visual Studio build, that uses the API to manage the builds, this problem has been solved by having the schduler process be separate (the `devenv.exe` process) and very long lived.
+In the case of a Visual Studio build, that uses the MSBuild API to manage the builds, this problem has been solved by having the scheduler process be separate from the Main Visual Studio (`devenv.exe`) process and keeping it very long lived.
 
 
 ## IPC (Inter-Process Communication)
@@ -128,9 +130,9 @@ In multi-process MSBuild execution, many OS processes exist that need to communi
  - Dealing with blocked tasks on processes: Communicating with the engine, scheduler, cache, etc...
  - Communication on task execution for a task host: Task definition, task inputs, task outputs.
 
-The transport layer for messages is a .NET named pipe.
+The transport layer for messages is a [.NET named pipe](https://learn.microsoft.com/dotnet/standard/io/how-to-use-named-pipes-for-network-interprocess-communication).
 
-The message layer has a custom serialization protocal that is specific to MSBuild. As of {{ TODO insert version here}}, all message types used are known internal MSBuild types. Earlier MSBuild versions allowed `BinaryFormatter` serialization of plugin-controlled types.
+The message layer has a custom serialization protocol that is specific to MSBuild. As of version 17.4, all message types used are known internal MSBuild types. Earlier MSBuild versions allowed `BinaryFormatter` serialization of plugin-controlled types.
 
 ## Graph build
 A graph build changes the sequence in which MSBuild processes projects. Normally a project starts execution, and when it has a dependency on another project, then that project starts to build. A graph build evaluates all projects and their relationship before starting execution of any project. This is achieved by looking at specific items (like `ProjectReference`) after evaluation to construct the dependency graph.
@@ -144,7 +146,7 @@ There are a couple of different modes to run graph mode in (see [the spec](../do
 In normal MSBuild command-line build execution the main process exists after the build ends. The MSBuild Server project aims to change that, making the entry point process and the scheduler process node separate entities. This allows processes to preserve in-memory cache and make consecutive builds faster, like they are in Visual Studio and other API consumers.
 For more information please see [the spec](../documentation/MSBuild-Server.md).
 
-# Extensibilities
+# Extensibility
 MSBuild includes some extra features that are related to the build process but does not fit on the previous categories. These extensibility features are critical for the build process, but they can also be customized by third parties for their own use.
 
 ## Packaging system
