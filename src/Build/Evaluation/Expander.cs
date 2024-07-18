@@ -4463,9 +4463,10 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+                    // Length check needed due to existing overloads. 
                     else if (_receiverType == typeof(ToolLocationHelper))
                     {
-                        if (string.Equals(_methodMethodName, nameof(ToolLocationHelper.GetPlatformSDKLocation), StringComparison.OrdinalIgnoreCase))
+                        if (string.Equals(_methodMethodName, nameof(ToolLocationHelper.GetPlatformSDKLocation), StringComparison.OrdinalIgnoreCase) && args.Length == 2)
                         {
                             if (TryGetArg([args[0]], out string arg0) && TryGetArg([args[1]], out string arg1))
                             {
@@ -4473,7 +4474,7 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
-                        else if (string.Equals(_methodMethodName, nameof(ToolLocationHelper.GetPlatformSDKDisplayName), StringComparison.OrdinalIgnoreCase))
+                        else if (string.Equals(_methodMethodName, nameof(ToolLocationHelper.GetPlatformSDKDisplayName), StringComparison.OrdinalIgnoreCase) && args.Length == 2)
                         {
                             if (TryGetArg([args[0]], out string arg0) && TryGetArg([args[1]], out string arg1))
                             {
