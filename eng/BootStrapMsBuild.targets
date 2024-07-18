@@ -218,7 +218,7 @@
       <InstallDir>$(ArtifactsBinDir)bootstrap\core\</InstallDir>
     </PropertyGroup>
 
-    <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(InstallDir)" Version="$(NetVersion)"/>
+    <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(InstallDir)" Version="$(BootstrapSdkVersion)"/>
   </Target>
 
   <Target Name="BootstrapNetCore" DependsOnTargets="AcquireSdk">
@@ -230,11 +230,11 @@
 
     <!-- The copying of these dependencies is required by bootstrap\**\sdk\**\NuGet.RestoreEx.targets. Otherwise NuGet.Build.Tasks.dll can not be found. -->
     <Copy SourceFiles="@(_NuGetRuntimeDependencies)"
-          DestinationFolder="$(InstallDir)sdk\$(NetVersion)\"
+          DestinationFolder="$(InstallDir)sdk\$(BootstrapSdkVersion)\"
           SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(FreshlyBuiltNetBinaries)"
-          DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(NetVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
   </Target>
 

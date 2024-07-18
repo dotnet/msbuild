@@ -2,10 +2,6 @@
 
   <!-- Construct a location of MSBuild bootstrap folder - to be used for deployment and for tests relying on bootstrapped MSBuild -->
 
-  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
-    <NetVersion>8.0.302</NetVersion>
-  </PropertyGroup>
-
   <PropertyGroup>
     <BootstrapDestination>$(ArtifactsBinDir)bootstrap\</BootstrapDestination>
     <BootstrapDestination Condition="'$(Platform)' == 'x64' or '$(Platform)' == 'arm64'">$(BootstrapDestination)$(Platform)\</BootstrapDestination>

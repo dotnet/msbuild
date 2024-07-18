@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests.Shared
             string binaryFolder = attribute.BootstrapMsBuildBinaryLocation;
 #if NET
             string pathToExecutable = EnvironmentProvider.GetDotnetExePathFromFolder(binaryFolder);
-            msbuildParameters = Path.Combine(binaryFolder, "sdk", attribute.NetVersion, "MSBuild.dll") + " " + msbuildParameters;
+            msbuildParameters = Path.Combine(binaryFolder, "sdk", attribute.BootstrapSdkVersion, "MSBuild.dll") + " " + msbuildParameters;
 #else
             string pathToExecutable = Path.Combine(binaryFolder, "MSBuild.exe");
 #endif

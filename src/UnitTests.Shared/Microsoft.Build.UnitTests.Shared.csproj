@@ -41,7 +41,7 @@
   <ItemGroup>
     <AssemblyAttribute Include="Microsoft.Build.UnitTests.Shared.BootstrapLocationAttribute">
       <_Parameter1>$(TestBootstrapBinaryDestination)</_Parameter1>
-      <_Parameter2>$(NetVersion)</_Parameter2>
+      <_Parameter2>$(BootstrapSdkVersion)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
 </Project>

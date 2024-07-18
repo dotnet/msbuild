@@ -6,9 +6,9 @@ global using NativeMethodsShared = Microsoft.Build.Framework.NativeMethods;
 namespace Microsoft.Build.UnitTests.Shared;
 
 [System.AttributeUsage(System.AttributeTargets.Assembly)]
-internal sealed class BootstrapLocationAttribute(string bootstrapMsBuildBinaryLocation, string netVersion) : System.Attribute
+internal sealed class BootstrapLocationAttribute(string bootstrapMsBuildBinaryLocation, string bootstrapSdkVersion) : System.Attribute
 {
     public string BootstrapMsBuildBinaryLocation { get; } = bootstrapMsBuildBinaryLocation;
 
-    public string NetVersion { get; } = netVersion;
+    public string BootstrapSdkVersion { get; } = bootstrapSdkVersion;
 }
