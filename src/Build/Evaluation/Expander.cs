@@ -3568,7 +3568,6 @@ namespace Microsoft.Build.Evaluation
                     }
                     else
                     {
-                        Debugger.Launch();
                         bool wellKnownFunctionSuccess = false;
 
                         try
@@ -3867,7 +3866,7 @@ namespace Microsoft.Build.Evaluation
                             return true;
                         }
                     }
-                    else if (string.Equals(_methodMethodName, nameof(String.Equals), StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(_methodMethodName, nameof(string.Equals), StringComparison.OrdinalIgnoreCase))
                     {
                         if (TryGetArg(args, out string arg0))
                         {
@@ -4484,20 +4483,20 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+                    else if (string.Equals(_methodMethodName, nameof(Regex.Replace), StringComparison.OrdinalIgnoreCase) && args.Length == 3)
+                    {
+                        if (TryGetArg([args[0]], out string arg1) && TryGetArg([args[1]], out string arg2) && TryGetArg([args[2]], out string arg3))
+                        {
+                            returnVal = Regex.Replace(arg1, arg2, arg3);
+                            return true;
+                        }
+                    }
                 }
                 else if (string.Equals(_methodMethodName, nameof(Version.ToString), StringComparison.OrdinalIgnoreCase) && objectInstance is Version v)
                 {
                     if (TryGetArg(args, out int arg0))
                     {
                         returnVal = v.ToString(arg0);
-                        return true;
-                    }
-                }
-                else if (string.Equals(_methodMethodName, nameof(Regex.Replace), StringComparison.OrdinalIgnoreCase) && args.Length == 3)
-                {
-                    if (TryGetArg([args[0]], out string arg1) && TryGetArg([args[1]], out string arg2) && TryGetArg([args[2]], out string arg3))
-                    {
-                        returnVal = Regex.Replace(arg1, arg2, arg3);
                         return true;
                     }
                 }

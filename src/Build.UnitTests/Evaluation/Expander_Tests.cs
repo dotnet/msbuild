@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
@@ -5061,6 +5062,43 @@ $(
                 {
                     new ProjectInstance(projectFile.Path);
                 });
+            }
+        }
+
+        [Theory]
+        [InlineData("$([System.Version]::Parse('17.12.11.10').ToString(2))")]
+        [InlineData("$([System.Text.RegularExpressions.Regex]::Replace('abc123def', 'abc', ''))")]
+        [InlineData("$([System.String]::new('Hi').Equals('Hello'))")]
+        [InlineData("$([System.IO.Path]::GetFileNameWithoutExtension('C:\\folder\\file.txt'))")]
+        [InlineData("$([System.Int32]::new(123).ToString('mm')")]
+        [InlineData("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('10.0.19041.0', 'Windows'))")]
+        [InlineData("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKDisplayName('10.0.19041.0', 'Windows'))")]
+        [InlineData("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::NormalizeDirectory('C:/folder1/./folder2/'))")]
+        [InlineData("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::IsOSPlatform('Windows'))")]
+        public void FastPathValidationTest(string methodInvocationMetadata)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                // Setting this env variable allows to track if expander was using reflection for a function invocation. 
+                env.SetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection", "1");
+
+                var logger = new MockLogger();
+                ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+                loggingService.RegisterLogger(logger);
+                var loggingContext = new MockLoggingContext(
+                    loggingService,
+                    new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
+
+                _ = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                    new PropertyDictionary<ProjectPropertyInstance>(),
+                    FileSystems.Default,
+                    loggingContext)
+                    .ExpandIntoStringLeaveEscaped(methodInvocationMetadata, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+                string reflectionInfoPath = Path.Combine(Directory.GetCurrentDirectory(), "PropertyFunctionsRequiringReflection");
+
+                // the fast path was successfully resolved without reflection.
+                File.Exists(reflectionInfoPath).ShouldBeFalse();
             }
         }
 
