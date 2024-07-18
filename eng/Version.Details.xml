@@ -67,7 +67,7 @@
     </Dependency>
     <Dependency Name="System.Formats.Asn1" Version="8.0.1">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
-      <Sha />
+      <Sha>bf5e279d9239bfef5bb1b8d6212f1b971c434606</Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
