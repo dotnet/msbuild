@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Microsoft.Build.Shared;
 
@@ -88,7 +89,7 @@ public sealed class ExtendedBuildWarningEventArgs : BuildWarningEventArgs, IExte
     /// <param name="eventTimestamp">Timestamp when event was created</param>
     /// <param name="messageArgs">message arguments</param>
     public ExtendedBuildWarningEventArgs(string type, string? subcategory, string? code, string? file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber,
-        string? message, string? helpKeyword, string? senderName, DateTime eventTimestamp, params object[]? messageArgs)
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string? message, string? helpKeyword, string? senderName, DateTime eventTimestamp, params object[]? messageArgs)
         : base(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, eventTimestamp, messageArgs) => ExtendedType = type;
 
     /// <summary>
@@ -109,7 +110,7 @@ public sealed class ExtendedBuildWarningEventArgs : BuildWarningEventArgs, IExte
     /// <param name="eventTimestamp">Timestamp when event was created</param>
     /// <param name="messageArgs">message arguments</param>
     public ExtendedBuildWarningEventArgs(string type, string? subcategory, string? code, string? file, int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber,
-        string? message, string? helpKeyword, string? senderName, string? helpLink, DateTime eventTimestamp, params object[]? messageArgs)
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string? message, string? helpKeyword, string? senderName, string? helpLink, DateTime eventTimestamp, params object[]? messageArgs)
         : base(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, helpLink, eventTimestamp, messageArgs) => ExtendedType = type;
 
     internal override void WriteToStream(BinaryWriter writer)
