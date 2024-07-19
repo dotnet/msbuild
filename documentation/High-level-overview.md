@@ -164,7 +164,7 @@ MSBuild interacts with external packages in almost every build. However, the MSB
 The restore operation is a built-in target within MSBuild. The main function is to walk through the project references and `packages.config` file about all the packages that need to be restored. This process is executed by NuGet, as MSBuild does not have a packaging system within the code.
 
 ## Tasks
-//TODO
+An [msbuild task](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-tasks) is a unit of executable code used by MSBuild to perform atomic build operations. There are many build-in tasks living in [`Microsoft.Build.Tasks`](../src/Tasks/README.md) package. Tasks can also be authored by third parties by implementing the `ITask` interface, please see documentation on [Task Writing](https://learn.microsoft.com/visualstudio/msbuild/task-writing).
 
 ### ToolTask
 Users can implement custom tasks via arbitrary .NET code, and MSBuild provides helper classes for common use cases like "build a command line for and then run a command-line tool".
