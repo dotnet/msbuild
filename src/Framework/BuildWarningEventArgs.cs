@@ -149,7 +149,7 @@ namespace Microsoft.Build.Framework
             [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             string helpKeyword,
             string senderName,
-            string helpLink,
+            [StringSyntax(StringSyntaxAttribute.Uri)] string helpLink,
             DateTime eventTimestamp,
             params object[] messageArgs)
             : base(message, helpKeyword, senderName, eventTimestamp, messageArgs)
