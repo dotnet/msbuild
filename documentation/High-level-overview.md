@@ -16,7 +16,7 @@ The MSBuild markup language is a subset of XML with a focus on describing a proj
 The MSBuild XML is built around representing a project's data. It uses various elements to do so:
 - [Items](https://learn.microsoft.com/visualstudio/msbuild/msbuild-items) are inputs to the build system, mostly to tasks or targets. They can represent project files, code files, libraries and most things that a project can depend on.
 - [Properties](https://learn.microsoft.com/visualstudio/msbuild/msbuild-properties) are name value pairs, they're used to store data that is used throughout the build.
-- [Tasks](https://learn.microsoft.com/visualstudio/msbuild/msbuild-targets) are how actions are defined in MSBuild, they're a unit of executable code to perform build operations. Many tasks are defined within MSBuild itself, but tasks can also be authored by third parties by implementing the `ITask` interface.
+- [Tasks](https://learn.microsoft.com/visualstudio/msbuild/msbuild-tasks) are how actions are defined in MSBuild, they're a unit of executable code to perform build operations. Many tasks are defined within MSBuild itself, but tasks can also be authored by third parties by implementing the `ITask` interface.
 - [Targets](https://learn.microsoft.com/visualstudio/msbuild/msbuild-targets) represents a group of tasks, in which their order matters. It is a set of instructions for the MSBuild engine to build from.
 
 These attributes are defined within project files (`.csproj`, `.vbproj` etc.). The solution files (`.sln`) are not written with MSBuild XML. They are originally exclusive to Visual Studio and yet the MSBuild command-line application can parse them to find projects to build. It does so by converting the solution file to a MSBuild project file in-memory and acts upon it instead. More on this in the `Building Solutions` section.
@@ -44,7 +44,7 @@ The MSBuild engine's logic is divided into two main stages:
 - execution stage.
 
 ## Entry points
-There are a few entry points for the MSBuild engine: Visual Studio, .NET SDK and the CLI executable (`MSBuild.exe` on Windows). These partner products are implementations or extensions of the MSBuild API, and we do care about their smooth integration with MSBuild, but do not support them directly. We only officially support the MSBuild API.
+There are a few entry points for the MSBuild engine: Visual Studio, .NET SDK and the CLI executable (`MSBuild.exe` on Windows, and `msbuild` in unix). These partner products are implementations or extensions of the MSBuild API, and we do care about their smooth integration with MSBuild, but do not support them directly. We only officially support the MSBuild API.
 
 The inputs necessary to start a build include:
  - Build logic for the projects, typically the entry point project's XML or from the imports within.
@@ -84,15 +84,15 @@ Another target order issue arises when there is a project dependency. Project de
 ### Task Host
 MSBuild has an ability to run tasks out of process via the so called Task Host. That allows tasks to run in a different .NET runtime or bitness than the one used by the build engine for the build execution.
 
-Task host is automatically when the task explicitly declares need for a specific runtime or architecture and such is not used by the executing MSBuild engine. The runtime and architecture can be requested via `Runtime` and `Architecture` attributes in [`UsingTask`](https://learn.microsoft.com/visualstudio/msbuild/usingtask-element-msbuild) element defining the task or in the [`Task`](https://learn.microsoft.com/visualstudio/msbuild/task-element-msbuild) element used for task invocation.
+A specific task host is automatically selected when a task explicitly declares the need for a specific runtime or architecture that is different from the one used by the executing MSBuild engine. The runtime and architecture can be requested via `Runtime` and `Architecture` attributes in [`UsingTask`](https://learn.microsoft.com/visualstudio/msbuild/usingtask-element-msbuild) element defining the task or in the [`Task`](https://learn.microsoft.com/visualstudio/msbuild/task-element-msbuild) element used for task invocation.
 
 TaskHost can be opted-in via `TaskFactory="TaskHostFactory"` in the [`UsingTask`](https://learn.microsoft.com/visualstudio/msbuild/usingtask-element-msbuild) element defining the task. This opt-in behavior can be used for various cases:
-- If a task is built in the same repo that is currently being built by MSBuild and the code might change. So, Task Host makes sure the DLLs are not locked at the end of the build (as MSBuild uses long living worker nodes that survives single build execution)
+- If a task's source code is in the same repository that is being built, and the repository's build needs to use that task during the build process. Using a Task Host makes sure the DLLs are not locked at the end of the build (as MSBuild uses long living worker nodes that survives single build execution)
 - As an isolation mechanism - separating the execution from the engine execution process.
 
 ## Caches
 ### Project result cache
-The project Result Cache refers to the cache used by the scheduler that keeps the build results of already executed project. The result of a target is success, failure, and a list of items that succeeded. Beyond that the `return` and `output` attributes from targets are also serialized with the build result, as to be used by other targets for their execution.
+The project Result Cache refers to the cache used by the scheduler that keeps the build results of already executed project. The result of a target is success, failure, and a list of items that succeeded. Beyond that, the `Returns` and `Outputs` attributes from targets are also serialized with the build result, as to be used by other targets for their execution.
 
 There is also another Project Cache Plugin, which focuses on result cache in distributed builds. More information about it is in the [Extensibility](#extensibility) section.
 
@@ -121,7 +121,7 @@ Incremental builds are extremely useful for local development, as it speeds cons
 ## Parallelism
 Parallelism for MSBuild is implemented at project level. Each project is assigned to different working nodes, which will execute the tasks at the same time, with the Scheduler organizing sequence and work division. Within project targets run sequentially, however they can have parallelism implemented independently within tasks.
 
-For multi-targeted builds parallelism works slightly different. The outer build produces a list of projects to build. This list contains the same project file with a different metadata for the target framework. This list is then passed to the MSBuild execute target so it can be built in parallel.
+For multi-targeted builds parallelism is a specific case with some extra work before the build. The outer build produces a list of projects to build. This list contains the same project file with a different metadata for the target framework. This list is then passed to the MSBuild execute target so it can be built in parallel.
 
 ### Processes and nodes
 When a new build is started, MSBuild starts a process that runs some setup code and prepares itself to start a build. The process of defining the scheduler differs slightly depending on the environment the build is being executed. 
@@ -138,7 +138,7 @@ In multi-process MSBuild execution, many OS processes exist that need to communi
 
 The transport layer for messages is a [.NET named pipe](https://learn.microsoft.com/dotnet/standard/io/how-to-use-named-pipes-for-network-interprocess-communication).
 
-The message layer has a custom serialization protocol that is specific to MSBuild. As of version 17.4, all message types used are known internal MSBuild types. Earlier MSBuild versions allowed `BinaryFormatter` serialization of plugin-controlled types.
+The message layer has a custom serialization protocol that is specific to MSBuild. As of DotNet 8, all message types used are known internal MSBuild types. Earlier MSBuild versions allowed `BinaryFormatter` serialization of plugin-controlled types.
 
 ## Graph build
 A graph build changes the sequence in which MSBuild processes projects. Normally a project starts execution, and when it has a dependency on another project, then that project starts to build. A graph build evaluates all projects and their relationship before starting execution of any project. This is achieved by looking at specific items (like `ProjectReference`) after evaluation to construct the dependency graph.
@@ -159,12 +159,15 @@ MSBuild includes some extra features that are related to the build process but d
 MSBuild interacts with external packages in almost every build. However, the MSBuild engine does not recognize external packages as third parties, and it also does not handle external dependencies. This is done by a packaging system. The supported one being NuGet. As such, it is NuGet that is responsible for finding the packages, downloading them, and providing the MSBuild engine with a package path for the build.
 
 ## Building Solutions
+// TODO - how MSBuild handles solution files (maybe a bit about the slnx support).
 
 ## Restore
-The restore operation is a built-in target within MSBuild. The main function is to walk through the project references and `packages.config` file about all the packages that need to be restored. This process is executed by NuGet, as MSBuild does not have a packaging system within the code.
+The restore operation is a built-in target, and it executed as any other target within MSBuild. The main function is to walk through the project references and `packages.config` file about all the packages that need to be restored. This process might result in new or updated files in disk, as well as new imports to the build process. The packaging system is handled by NuGet, it includes finding project references, downloading and adding packages to the right place in memory for MSBuild access.
 
 ## Tasks
 An [msbuild task](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-tasks) is a unit of executable code used by MSBuild to perform atomic build operations. There are many build-in tasks living in [`Microsoft.Build.Tasks`](../src/Tasks/README.md) package. Tasks can also be authored by third parties by implementing the `ITask` interface, please see documentation on [Task Writing](https://learn.microsoft.com/visualstudio/msbuild/task-writing).
+
+Implemented tasks also have additional fields that can have access to .NET functions to be executed during the task. So it is possible to do anything that is publicly available in .NET during task execution.
 
 ### ToolTask
 Users can implement custom tasks via arbitrary .NET code, and MSBuild provides helper classes for common use cases like "build a command line for and then run a command-line tool".
@@ -178,11 +181,11 @@ Logging within MSBuild consists of various integrated and pluggable loggers. Int
 Pluggable loggers must be specified before the build begins. Because of this, build logic (and NuGet) is not able to manipulate loggers.
 
 ### Binary logger
-The Binary Logger, also called binlog, is a structured log that captures all the events within a build as well as files that are critical to the build. To read a binlog, the MSBuild executable (*`MSBuild.exe` in Windows*) can replay the events through arbitrary loggers, and third-party tooling like the [Structured Log Viewer](https://msbuildlog.com) can also read binlogs, but it is not officially supported by the MSBuild team.
+The Binary Logger, also called binlog, is a structured log that captures all the events within a build as well as files that are critical to the build. To read a binlog, the MSBuild executable (`MSBuild.exe` in Windows, and `msbuild` in unix) can replay the events through arbitrary loggers, and third-party tooling like the [Structured Log Viewer](https://msbuildlog.com) can also read binlogs, but it is not officially supported by the MSBuild team.
 
 
 ## Project result cache plugin
-This Project Cache differs from the previous one because it is separate from the main MSBuild code and used mainly for distributed builds. It functions as a middle layer between the scheduler and the Project Result Cache. So, when the scheduler requests a result for a target or project, the plugin responds first to check all the different distributed nodes for the result. To accomplish this, it adds profiles on disk based on hashes of the project or task ID / name. When the plugin cache gets a hit on an input, it downloads and copies the file results to the right place, deserializes the resulting payload and provides it to the local engine to continue execution.
+This system allows plugins to extend the per-build result cache to apply across builds and across machines. It functions as a middle layer between the scheduler and the Project Result Cache. So, when the scheduler requests a result for a target or project, the plugin responds first to check all the different distributed nodes for the result. When the plugin cache gets a hit on an input, it downloads and copies the file results to the right place, deserializes the resulting payload and provides it to the local engine to continue execution.
 
 For more in depth information visit [the spec](specs/project-cache.md).
 
