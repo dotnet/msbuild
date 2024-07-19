@@ -106,11 +106,12 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("warning", "warning BC0101")]
-    [InlineData("error", "error BC0101")]
-    [InlineData("suggestion", "BC0101")]
-    [InlineData("default", "warning BC0101")]
-    public void EditorConfig_SeverityAppliedCorrectly(string BC0101Severity, string expectedOutputValues)
+    [InlineData("warning", "warning BC0101", new string[] { "error BC0101" })]
+    [InlineData("error", "error BC0101", new string[] { "warning BC0101" })]
+    [InlineData("suggestion", "BC0101", new string[] { "error BC0101", "warning BC0101" })]
+    [InlineData("default", "warning BC0101", new string[] { "error BC0101" })]
+    [InlineData("none", null, new string[] { "BC0101"})]
+    public void EditorConfig_SeverityAppliedCorrectly(string BC0101Severity, string expectedOutputValues, string[] unexpectedOutputValues)
     {
         PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, BC0101Severity);
 
@@ -119,20 +120,16 @@ public class EndToEndTests : IDisposable
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
         success.ShouldBeTrue();
-        output.ShouldContain(expectedOutputValues);
-    }
 
-    [Fact]
-    public void EditorConfig_SeverityNoneAppliedCorrectly()
-    {
-        PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, "none");
+        if (!string.IsNullOrEmpty(expectedOutputValues))
+        {
+            output.ShouldContain(expectedOutputValues);
+        }
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze",
-            out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
-
-        success.ShouldBeTrue();
-        output.ShouldNotContain("BC0101");
+        foreach (string unexpectedOutputValue in unexpectedOutputValues)
+        {
+            output.ShouldNotContain(unexpectedOutputValue);
+        }
     }
 
     [Theory]
