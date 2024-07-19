@@ -289,31 +289,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     CreateTargetSkipped(),
                     new ExtendedBuildErrorEventArgs("extError", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedBuildWarningEventArgs("extWarn", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedBuildMessageEventArgs("extWarn", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", MessageImportance.Normal, DateTime.UtcNow, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedCustomBuildEventArgs("extCustom", "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedCriticalBuildMessageEventArgs("extCritMsg", "Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
@@ -104,18 +105,19 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                     EndGlobal
                 ");
                 TransientTestFile filterFile = testEnvironment.CreateFile(folder, "solutionFilter.slnf",
-                    @"
-                {
-                  ""solution"": {
-                    // I'm a comment
-                    ""path"": "".\\SimpleProject\\SimpleProject.sln"",
-                    ""projects"": [
-                    /* ""..\\ClassLibrary\\ClassLibrary\\ClassLibrary.csproj"", */
-                      ""SimpleProject\\SimpleProject.csproj"",
-                    ]
-                    }
-                }
-                ");
+                    /*lang=json*/
+                                  """
+                                  {
+                                    "solution": {
+                                      // I'm a comment
+                                      "path": ".\\SimpleProject\\SimpleProject.sln",
+                                      "projects": [
+                                      /* "..\\ClassLibrary\\ClassLibrary\\ClassLibrary.csproj", */
+                                        "SimpleProject\\SimpleProject.csproj",
+                                      ]
+                                      }
+                                  }
+                                  """);
                 Directory.GetCurrentDirectory().ShouldNotBe(Path.GetDirectoryName(filterFile.Path));
                 if (graphBuild)
                 {
@@ -147,59 +149,59 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
         }
 
         [Theory]
-        [InlineData(@"
-                {
-                  ""solution"": {
-                    ""path"": ""C:\\notAPath\\MSBuild.Dev.sln"",
-                    ""projects2"": [
-                      ""src\\Build\\Microsoft.Build.csproj"",
-                      ""src\\Framework\\Microsoft.Build.Framework.csproj"",
-                      ""src\\MSBuild\\MSBuild.csproj"",
-                      ""src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj""
-                    ]
-                    }
+        [InlineData(/*lang=json,strict*/ """
+            {
+              "solution": {
+                "path": "C:\\notAPath\\MSBuild.Dev.sln",
+                "projects2": [
+                  "src\\Build\\Microsoft.Build.csproj",
+                  "src\\Framework\\Microsoft.Build.Framework.csproj",
+                  "src\\MSBuild\\MSBuild.csproj",
+                  "src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj"
+                ]
                 }
-                ", "MSBuild.SolutionFilterJsonParsingError")]
-        [InlineData(@"
-                [{
-                  ""solution"": {
-                    ""path"": ""C:\\notAPath\\MSBuild.Dev.sln"",
-                    ""projects"": [
-                      ""src\\Build\\Microsoft.Build.csproj"",
-                      ""src\\Framework\\Microsoft.Build.Framework.csproj"",
-                      ""src\\MSBuild\\MSBuild.csproj"",
-                      ""src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj""
-                    ]
-                    }
-                }]
-                ", "MSBuild.SolutionFilterJsonParsingError")]
-        [InlineData(@"
-                {
-                  ""solution"": {
-                    ""path"": ""C:\\notAPath\\MSBuild.Dev.sln"",
-                    ""projects"": [
-                      {""path"": ""src\\Build\\Microsoft.Build.csproj""},
-                      {""path"": ""src\\Framework\\Microsoft.Build.Framework.csproj""},
-                      {""path"": ""src\\MSBuild\\MSBuild.csproj""},
-                      {""path"": ""src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj""}
-                    ]
-                    }
+            }
+            """, "MSBuild.SolutionFilterJsonParsingError")]
+        [InlineData(/*lang=json,strict*/ """
+            [{
+              "solution": {
+                "path": "C:\\notAPath\\MSBuild.Dev.sln",
+                "projects": [
+                  "src\\Build\\Microsoft.Build.csproj",
+                  "src\\Framework\\Microsoft.Build.Framework.csproj",
+                  "src\\MSBuild\\MSBuild.csproj",
+                  "src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj"
+                ]
                 }
-                ", "MSBuild.SolutionFilterJsonParsingError")]
-        [InlineData(@"
-                {
-                  ""solution"": {
-                    ""path"": ""C:\\notAPath2\\MSBuild.Dev.sln"",
-                    ""projects"": [
-                      {""path"": ""src\\Build\\Microsoft.Build.csproj""},
-                      {""path"": ""src\\Framework\\Microsoft.Build.Framework.csproj""},
-                      {""path"": ""src\\MSBuild\\MSBuild.csproj""},
-                      {""path"": ""src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj""}
-                    ]
-                    }
+            }]
+            """, "MSBuild.SolutionFilterJsonParsingError")]
+        [InlineData(/*lang=json,strict*/ """
+            {
+              "solution": {
+                "path": "C:\\notAPath\\MSBuild.Dev.sln",
+                "projects": [
+                  {"path": "src\\Build\\Microsoft.Build.csproj"},
+                  {"path": "src\\Framework\\Microsoft.Build.Framework.csproj"},
+                  {"path": "src\\MSBuild\\MSBuild.csproj"},
+                  {"path": "src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj"}
+                ]
                 }
-                ", "MSBuild.SolutionFilterMissingSolutionError")]
-        public void InvalidSolutionFilters(string slnfValue, string exceptionReason)
+            }
+            """, "MSBuild.SolutionFilterJsonParsingError")]
+        [InlineData(/*lang=json,strict*/ """
+            {
+              "solution": {
+                "path": "C:\\notAPath2\\MSBuild.Dev.sln",
+                "projects": [
+                  {"path": "src\\Build\\Microsoft.Build.csproj"},
+                  {"path": "src\\Framework\\Microsoft.Build.Framework.csproj"},
+                  {"path": "src\\MSBuild\\MSBuild.csproj"},
+                  {"path": "src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj"}
+                ]
+                }
+            }
+            """, "MSBuild.SolutionFilterMissingSolutionError")]
+        public void InvalidSolutionFilters([StringSyntax(StringSyntaxAttribute.Json)] string slnfValue, string exceptionReason)
         {
             Assert.False(File.Exists("C:\\notAPath2\\MSBuild.Dev.sln"));
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
