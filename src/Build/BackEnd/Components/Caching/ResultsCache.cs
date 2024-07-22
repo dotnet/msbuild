@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using BuildRequestDataFlags = Microsoft.Build.Execution.BuildRequestDataFlags;
 
 #nullable disable
 

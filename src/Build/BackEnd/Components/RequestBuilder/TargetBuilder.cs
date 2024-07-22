@@ -16,6 +16,7 @@ using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+using BuildRequestDataFlags = Microsoft.Build.Execution.BuildRequestDataFlags;
 
 #nullable disable
 

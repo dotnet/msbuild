@@ -39,6 +39,7 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.NET.StringTools;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
+using BuildRequestDataFlags = Microsoft.Build.Execution.BuildRequestDataFlags;
 
 namespace Microsoft.Build.Execution
 {
