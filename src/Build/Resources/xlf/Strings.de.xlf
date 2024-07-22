@@ -217,6 +217,11 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
+        <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
+        <target state="translated">Es wurden mehrere Überladungen für die Methode „{0}“ mit {1} Parametern gefunden. Dies wird derzeit nicht unterstützt.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
         <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
         <target state="translated">Fehler beim Suchen der angegebenen benutzerdefinierten Analysetoolassembly: {0}. Überprüfen Sie, ob sie vorhanden ist.</target>

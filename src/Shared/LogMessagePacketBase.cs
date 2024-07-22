@@ -11,7 +11,6 @@ using Microsoft.Build.Framework;
 
 #if !TASKHOST
 using Microsoft.Build.Experimental.BuildCheck;
-using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 #endif
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
@@ -215,7 +214,7 @@ namespace Microsoft.Build.Shared
         /// Event is a <see cref="GeneratedFileUsedEventArgs"/>
         /// </summary>
         GeneratedFileUsedEvent = 34,
-        
+
         /// <summary>
         /// Event is <see cref="BuildCheckResultMessage"/>
         /// </summary>
@@ -440,7 +439,6 @@ namespace Microsoft.Build.Shared
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
                 if (_buildEvent is ProjectEvaluationStartedEventArgs
                     or ProjectEvaluationFinishedEventArgs
-                    or EnvironmentVariableReadEventArgs
                     or ResponseFileUsedEventArgs)
                 {
                     // switch to serialization methods that we provide in this file
@@ -628,7 +626,6 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskStartedEvent => new TaskStartedEventArgs(null, null, null, null, null),
                 LoggingEventType.TaskFinishedEvent => new TaskFinishedEventArgs(null, null, null, null, null, false),
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
-                LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
                 LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),
                 LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(null, null, null, null, null),
 
@@ -658,6 +655,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildCheckErrorEvent => new BuildCheckResultError(),
                 LoggingEventType.BuildCheckAcquisitionEvent => new BuildCheckAcquisitionEventArgs(),
                 LoggingEventType.BuildCheckTracingEvent => new BuildCheckTracingEventArgs(),
+                LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -793,6 +791,10 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.BuildCheckTracingEvent;
             }
+            else if (eventType == typeof(EnvironmentVariableReadEventArgs))
+            {
+                return LoggingEventType.EnvironmentVariableReadEvent;
+            }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))
             {
@@ -829,10 +831,6 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(BuildErrorEventArgs))
             {
                 return LoggingEventType.BuildErrorEvent;
-            }
-            else if (eventType == typeof(EnvironmentVariableReadEventArgs))
-            {
-                return LoggingEventType.EnvironmentVariableReadEvent;
             }
             else if (eventType == typeof(ResponseFileUsedEventArgs))
             {
@@ -889,34 +887,10 @@ namespace Microsoft.Build.Shared
                 case LoggingEventType.BuildWarningEvent:
                     WriteBuildWarningEventToStream((BuildWarningEventArgs)buildEvent, translator);
                     break;
-                case LoggingEventType.EnvironmentVariableReadEvent:
-                    WriteEnvironmentVariableReadEventArgs((EnvironmentVariableReadEventArgs)buildEvent, translator);
-                    break;
                 default:
                     ErrorUtilities.ThrowInternalError("Not Supported LoggingEventType {0}", eventType.ToString());
                     break;
             }
-        }
-
-        /// <summary>
-        /// Serializes EnvironmentVariableRead Event argument to the stream. Does not work properly on TaskHosts due to BuildEventContext serialization not being
-        /// enabled on TaskHosts, but that shouldn't matter, as this should never be called from a TaskHost anyway.
-        /// </summary>
-        private void WriteEnvironmentVariableReadEventArgs(EnvironmentVariableReadEventArgs environmentVariableReadEventArgs, ITranslator translator)
-        {
-            string name = environmentVariableReadEventArgs.EnvironmentVariableName;
-            MessageImportance importance = environmentVariableReadEventArgs.Importance;
-
-            translator.Translate(ref name);
-            translator.TranslateEnum(ref importance, (int)importance);
-
-#if !CLR2COMPATIBILITY
-            DateTime timestamp = environmentVariableReadEventArgs.RawTimestamp;
-            BuildEventContext context = environmentVariableReadEventArgs.BuildEventContext;
-
-            translator.Translate(ref timestamp);
-            translator.Translate(ref context);
-#endif
         }
 
         #region Writes to Stream
@@ -1251,33 +1225,8 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildMessageEvent => ReadBuildMessageEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.ResponseFileUsedEvent => ReadResponseFileUsedEventFromStream(translator, message, helpKeyword, senderName),
                 LoggingEventType.BuildWarningEvent => ReadBuildWarningEventFromStream(translator, message, helpKeyword, senderName),
-                LoggingEventType.EnvironmentVariableReadEvent => ReadEnvironmentVariableReadEventFromStream(translator, message, helpKeyword, senderName),
                 _ => null,
             };
-        }
-
-        /// <summary>
-        /// Read and reconstruct an EnvironmentVariableReadEventArgs from the stream. This message should never be called from a TaskHost, so although the context translation does not work, that's ok.
-        /// </summary>
-        private EnvironmentVariableReadEventArgs ReadEnvironmentVariableReadEventFromStream(ITranslator translator, string message, string helpKeyword, string senderName)
-        {
-            string environmentVariableName = null;
-            MessageImportance importance = default;
-
-            translator.Translate(ref environmentVariableName);
-            translator.TranslateEnum(ref importance, (int)importance);
-
-            EnvironmentVariableReadEventArgs args = new(environmentVariableName, message, helpKeyword, senderName, importance);
-
-#if !CLR2COMPATIBILITY
-            DateTime timestamp = default;
-            BuildEventContext context = null;
-            translator.Translate(ref timestamp);
-            translator.Translate(ref context);
-            args.RawTimestamp = timestamp;
-            args.BuildEventContext = context;
-#endif
-            return args;
         }
 
         /// <summary>
