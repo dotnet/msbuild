@@ -3051,6 +3051,58 @@
     <comment>{StrBegin="MSB9904: "}</comment>
   </data>
 
+  <data name="CommonTarget.BaseIntermediateOutputPathMismatchWarning">
+    <value>MSB3539: The value of the property &quot;BaseIntermediateOutputPath&quot; was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the &quot;MSBuildProjectExtensionsPath&quot; instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</value>
+    <comment>{StrBegin="MSB3539: "} </comment>
+  </data>
+
+  <data name="CommonTarget.MSBuildProjectExtensionsPathModifiedAfterUse">
+    <value>MSB3540: The value of the property &quot;MSBuildProjectExtensionsPath&quot; was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</value>
+    <comment>{StrBegin="MSB3540: "}</comment>
+  </data>
+
+  <data name="CommonTarget.InvalidConfigurationTextWithBuildingInsideVisualStudio">
+    <value>The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. This error may also appear if some other project is trying to follow a project-to-project reference to this project, this project has been unloaded or is not included in the solution, and the referencing project does not build using the same or an equivalent Configuration or Platform.</value>
+    <comment>LOCALIZATION:  Do not localize the words "BaseOutputPath/OutputPath", "Configuration" and "Platform"</comment>
+  </data>
+
+  <data name="CommonTarget.InvalidConfigurationTextWithoutBuildingInsideVisualStudio">
+    <value>The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. You may be seeing this message because you are trying to build a project without a solution file, and have specified a non-default Configuration or Platform that doesn't exist for this project.</value>
+    <comment>LOCALIZATION:  Do not localize the words "BaseOutputPath/OutputPath", "Configuration" and "Platform"</comment>
+  </data>
+
+  <data name="CommonTarget.ManifestResourceWithNoCultureWarning">
+    <value>{0}: {1} item type is deprecated. Emit EmbeddedResource items instead, with metadata WithCulture='{2}', Type='{3}', and optional LogicalName.</value>
+  </data>
+
+  <data name="CommonTarget.PropertyWithTrailingSlash">
+    <value>The {0} must end with a trailing slash.</value>
+  </data>
+
+  <data name="CommonTarget.DeploymentUnpublishable">
+    <value>Skipping unpublishable project.</value>
+  </data>
+
+  <data name="CommonTarget.GenerateManifestsOnlyForExe">
+    <value>Publish is only valid for 'Windows Application' or 'Console Application' project types.</value>
+  </data>
+
+  <data name="CommonTarget.SigningKeyRequired">
+    <value>A signing key is required in order to publish this project. Please specify a ManifestKeyFile or ManifestCertificateThumbprint value. Publishing from Visual Studio will automatically configure a signing key for this project.</value>
+  </data>
+
+  <data name="CommonTarget.RunTargetDependsOnMessage">
+    <value>Cannot run '{0}' because project output type is not '.exe'</value>
+  </data>
+
+  <data name="CommonTarget.CrossTargetingGetTargetFrameworks">
+    <value>Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build</value>
+  </data>
+
+  <data name="CommonTarget.SplitResourcesByCultureEmbeddedResourceMessage">
+    <value>{0}: {1} item type is deprecated. Use EmbeddedResource items instead.</value>
+  </data>
+
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 
@@ -3142,7 +3194,7 @@
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)
-            
+
             MSB9901 - MSB9990   MSBuild common targets messages
 
         The following codes are not longer used but have shipped so should not be reused:
