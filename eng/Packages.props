@@ -31,6 +31,6 @@
     <PackageVersion Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
     <PackageVersion Include="System.Threading.Channels" Version="$(SystemThreadingChannelsVersion)" />
     <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="$(SystemThreadingTasksDataflowVersion)" />
-    <PackageVersion Include="xunit.console" Version="$(XUnitVersion)" />	
+    <PackageVersion Include="xunit.console" Version="$(XUnitVersion)" />
   </ItemGroup>
 </Project>
