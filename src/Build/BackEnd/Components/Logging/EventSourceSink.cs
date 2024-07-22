@@ -253,6 +253,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     RaiseProjectFinishedEvent(null, projectFinishedEvent);
                     break;
                 case BuildSubmissionStartedEventArgs buildSubmissionStartedEvent:
+                    RaiseBuildSubmissionStartedEvent(null, buildSubmissionStartedEvent);
                     break;
                 case BuildStartedEventArgs buildStartedEvent:
                     HaveLoggedBuildStartedEvent = true;

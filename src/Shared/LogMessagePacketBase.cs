@@ -240,6 +240,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="BuildCheckAcquisitionEventArgs"/>
         /// </summary>
         BuildCheckAcquisitionEvent = 39,
+
+        /// <summary>
+        /// Event is <see cref="BuildSubmissionStartedEventArgs"/>
+        /// </summary>
+        BuildSubmissionStartedEvent = 40,
     }
     #endregion
 
@@ -624,7 +629,8 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskFinishedEvent => new TaskFinishedEventArgs(null, null, null, null, null, false),
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
-                LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),               
+                LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),
+                LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(null, null, null, null, null),
 
 #if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
                 LoggingEventType.AssemblyLoadEvent => new AssemblyLoadBuildEventArgs(),
@@ -811,6 +817,10 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(BuildStartedEventArgs))
             {
                 return LoggingEventType.BuildStartedEvent;
+            }
+            else if (eventType == typeof(BuildSubmissionStartedEventArgs))
+            {
+                return LoggingEventType.BuildSubmissionStartedEvent;
             }
             else if (eventType == typeof(BuildWarningEventArgs))
             {

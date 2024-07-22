@@ -1382,11 +1382,11 @@ namespace Microsoft.Build.Execution
                 submission.BuildRequestDataBase.EntryProjectsFullPath,
                 submission.BuildRequestDataBase.TargetNames,
                 (Framework.BuildRequestDataFlags)submission.BuildRequestDataBase.Flags,
-                submission.BuildResultBase.SubmissionId);
+                submission.BuildResultBase!.SubmissionId);
 
-            // BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-            // ((IBuildComponentHost)this).LoggingService.LogBuildEvent()
-            
+            BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            ((IBuildComponentHost)this).LoggingService.LogBuildEvent(submissionStartedEvent);
+
             if (submission is BuildSubmission buildSubmission)
             {
                 ExecuteSubmission(buildSubmission, allowMainThreadBuild);
