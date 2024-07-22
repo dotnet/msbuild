@@ -3593,8 +3593,17 @@ namespace Microsoft.Build.Evaluation
                             // otherwise there is the potential of running a function twice!
                             try
                             {
-                                // First use InvokeMember using the standard binder - this will match and coerce as needed
-                                functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                // If there are any out parameters, try to figure out their type and create defaults for them as appropriate before calling the method.
+                                if (args.Any(a => "_".Equals(a)))
+                                {
+                                    IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
+                                    functionResult = GetMethodResult(objectInstance, methods, args, 0);
+                                }
+                                else
+                                {
+                                    // If there are no out parameters, use InvokeMember using the standard binder - this will match and coerce as needed
+                                    functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                }
                             }
                             // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
                             // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coercion is possible, so throw.
@@ -3665,6 +3674,48 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.Message);
                     }
 
+                    return null;
+                }
+            }
+
+            private object GetMethodResult(object objectInstance, IEnumerable<MethodInfo> methods, object[] args, int index)
+            {
+                for (int i = index; i < args.Length; i++)
+                {
+                    if (args[i].Equals("_"))
+                    {
+                        object toReturn = null;
+                        foreach (MethodInfo method in methods)
+                        {
+                            Type t = method.GetParameters()[i].ParameterType;
+                            args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
+                            object currentReturnValue = GetMethodResult(objectInstance, methods, args, i + 1);
+                            if (currentReturnValue is not null)
+                            {
+                                if (toReturn is null)
+                                {
+                                    toReturn = currentReturnValue;
+                                }
+                                else if (!toReturn.Equals(currentReturnValue))
+                                {
+                                    // There were multiple methods that seemed viable and gave different results. We can't differentiate between them so throw.
+                                    ErrorUtilities.ThrowArgument("CouldNotDifferentiateBetweenCompatibleMethods", _methodMethodName, args.Length);
+                                    return null;
+                                }
+                            }
+                        }
+
+                        return toReturn;
+                    }
+                }
+
+                try
+                {
+                    return _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                }
+                catch (Exception)
+                {
+                    // This isn't a viable option, but perhaps another set of parameters will work.
                     return null;
                 }
             }
@@ -3861,6 +3912,14 @@ namespace Microsoft.Build.Evaluation
                         if (TryGetArg(args, out int index))
                         {
                             returnVal = text[index];
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(_methodMethodName, nameof(string.Equals), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.Equals(arg0);
                             return true;
                         }
                     }
@@ -4310,6 +4369,22 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.NormalizeDirectory), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.NormalizeDirectory(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsOSPlatform), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.IsOSPlatform(arg0);
+                                return true;
+                            }
+                        }
                     }
                     else if (_receiverType == typeof(Path))
                     {
@@ -4407,6 +4482,14 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
+                        else if (string.Equals(_methodMethodName, nameof(Path.GetFileNameWithoutExtension), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Path.GetFileNameWithoutExtension(arg0);
+                                return true;
+                            }
+                        }
                     }
                     else if (_receiverType == typeof(Version))
                     {
@@ -4419,7 +4502,7 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
-                    else if (_receiverType == typeof(System.Guid))
+                    else if (_receiverType == typeof(Guid))
                     {
                         if (string.Equals(_methodMethodName, nameof(Guid.NewGuid), StringComparison.OrdinalIgnoreCase))
                         {
@@ -4430,8 +4513,31 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+                    else if (string.Equals(_methodMethodName, nameof(Regex.Replace), StringComparison.OrdinalIgnoreCase) && args.Length == 3)
+                    {
+                        if (TryGetArg([args[0]], out string arg1) && TryGetArg([args[1]], out string arg2) && TryGetArg([args[2]], out string arg3))
+                        {
+                            returnVal = Regex.Replace(arg1, arg2, arg3);
+                            return true;
+                        }
+                    }
                 }
-
+                else if (string.Equals(_methodMethodName, nameof(Version.ToString), StringComparison.OrdinalIgnoreCase) && objectInstance is Version v)
+                {
+                    if (TryGetArg(args, out int arg0))
+                    {
+                        returnVal = v.ToString(arg0);
+                        return true;
+                    }
+                }
+                else if (string.Equals(_methodMethodName, nameof(Int32.ToString), StringComparison.OrdinalIgnoreCase) && objectInstance is int i)
+                {
+                    if (TryGetArg(args, out string arg0))
+                    {
+                        returnVal = i.ToString(arg0);
+                        return true;
+                    }
+                }
                 if (Traits.Instance.LogPropertyFunctionsRequiringReflection)
                 {
                     LogFunctionCall("PropertyFunctionsRequiringReflection", objectInstance, args);
