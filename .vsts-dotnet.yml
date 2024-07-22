@@ -61,6 +61,8 @@ extends:
         enabled: true
         break: true
         additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
+      credscan:
+        suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
 
     stages:
     - stage: build
