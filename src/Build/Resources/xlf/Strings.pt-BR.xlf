@@ -219,7 +219,7 @@
       </trans-unit>
       <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
         <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
-        <target state="new">Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</target>
+        <target state="translated">Foram encontradas várias sobrecargas para o método "{0}" com parâmetros {1}. No momento, não há suporte para isso.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
