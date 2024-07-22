@@ -8,7 +8,6 @@
     <UsagePattern IdentityGlob="System.Collections.Immutable/*8.0.0*" />
     <UsagePattern IdentityGlob="System.Configuration.ConfigurationManager/*8.0.0*" />
     <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Formats.Asn1/*8.0.0*" />
     <UsagePattern IdentityGlob="System.Formats.Asn1/*8.0.1*" />
     <UsagePattern IdentityGlob="System.Reflection.Metadata/*8.0.0*" />
     <UsagePattern IdentityGlob="System.Reflection.MetadataLoadContext/*8.0.0*" />
