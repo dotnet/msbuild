@@ -91,7 +91,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void LogTargetBatchFinished(string projectFullPath, bool success, IEnumerable<TaskItem> targetOutputs)
         {
-            ErrorUtilities.VerifyThrow(IsValid, "Should be valid");
+            this.CheckValidity();
 
             TargetOutputItemsInstanceEnumeratorProxy targetOutputWrapper = null;
 
@@ -110,7 +110,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal TaskLoggingContext LogTaskBatchStarted(string projectFullPath, ProjectTargetInstanceChild task, string taskAssemblyLocation)
         {
-            ErrorUtilities.VerifyThrow(IsValid, "Should be valid");
+            this.CheckValidity();
 
             return new TaskLoggingContext(this, projectFullPath, task, taskAssemblyLocation);
         }
