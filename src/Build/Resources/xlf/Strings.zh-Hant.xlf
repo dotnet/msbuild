@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AbortingBuild">
         <source>Attempting to cancel the build...</source>
-        <target state="translated">正在嘗試取消建置...</target>
+        <target state="new">Attempting to cancel the build...</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
@@ -133,7 +133,7 @@
       </trans-unit>
       <trans-unit id="BuildCheckEnabled">
         <source>The BuildCheck is enabled for this build.</source>
-        <target state="translated">已為此組建啟用 BuildCheck。</target>
+        <target state="new">The BuildCheck is enabled for this build.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
@@ -219,32 +219,32 @@
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
         <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
-        <target state="translated">找不到指定的自訂分析器組件: '{0}'。請確認其是否存在。</target>
+        <target state="new">Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
         <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">無法從組件: '{1}'載入自訂分析器類型: '{0}'。請確認其繼承了 Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer 基底類別。如非作為自訂分析器，則不應公開。更多資訊: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="new">Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: '{0}'.</source>
-        <target state="translated">無法註冊自訂分析器: '{0}'。</target>
+        <target state="new">Failed to register the custom analyzer: '{0}'.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
         <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
-        <target state="translated">無法具現化自訂分析器規則，發生下列例外狀況: '{0}'。</target>
+        <target state="new">Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerRegistered">
         <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">已從 '{1}' 位置為組建註冊自訂分析器 '{0}'。</target>
+        <target state="new">The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
         <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
-        <target state="translated">已成功註冊自訂分析器規則: '{0}'。</target>
+        <target state="new">Custom analyzer rule: '{0}' has been registered successfully.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -292,7 +292,7 @@
       <trans-unit id="FatalErrorWhileLoggingWithInnerException">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</source>
-        <target state="translated">MSB4017: 因為未預期的記錄器失敗，建置未預期停止。
+        <target state="translated">MSB4017: 由於發生未預期的記錄器失敗，因此已中止組建。
    {0}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a

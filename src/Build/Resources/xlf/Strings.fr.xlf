@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AbortingBuild">
         <source>Attempting to cancel the build...</source>
-        <target state="translated">Tentative d'annulation de la génération en cours...</target>
+        <target state="new">Attempting to cancel the build...</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
@@ -133,7 +133,7 @@
       </trans-unit>
       <trans-unit id="BuildCheckEnabled">
         <source>The BuildCheck is enabled for this build.</source>
-        <target state="translated">BuildCheck est activé pour cette build.</target>
+        <target state="new">The BuildCheck is enabled for this build.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
@@ -219,32 +219,32 @@
       </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
         <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
-        <target state="translated">Désolé... Nous n’avons pas pu trouver l’assembly d’analyseur personnalisé : « {0} ». Veuillez vérifier s’il existe.</target>
+        <target state="new">Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
         <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Désolé... Nous n’avons pas pu charger le type d’analyseur personnalisé : « {0} » à partir de l’assembly : « {1} ». Vérifiez qu’il hérite de la classe de base Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. S’il n’est pas destiné à être un analyseur personnalisé, il ne doit pas être exposé. Plus d’informations : https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="new">Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: '{0}'.</source>
-        <target state="translated">Désolé... Nous n’avons pas pu inscrire l’analyseur personnalisé : « {0} ».</target>
+        <target state="new">Failed to register the custom analyzer: '{0}'.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
         <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
-        <target state="translated">Désolé... Nous n’avons pas pu instancier la règle d’analyseur personnalisé avec l’exception suivante : « {0} ».</target>
+        <target state="new">Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerRegistered">
         <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">L’analyseur personnalisé : « {0} » est inscrit pour la build à partir de l’emplacement : « {1} ».</target>
+        <target state="new">The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
         <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
-        <target state="translated">Règle de l’analyseur personnalisé : {0} a été correctement inscrit.</target>
+        <target state="new">Custom analyzer rule: '{0}' has been registered successfully.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -684,7 +684,7 @@ Erreurs : {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Il s’agit d’une exception non gérée dans MSBuild –– VOTEZ POUR UN PROBLÈME EXISTANT OU ENTREZ UN NOUVEAU FICHIER À https://aka.ms/msbuild/unhandled.
+        <target state="translated">Il s’agit d’une exception non prise en charge dans MSBuild –– VOTEZ POUR UN PROBLÈME EXISTANT OU CRÉEZ-EN UN SUR https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>

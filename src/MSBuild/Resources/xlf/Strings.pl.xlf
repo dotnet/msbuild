@@ -120,10 +120,10 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Powoduje, że program MSBuild zgłasza dostępy do wszystkich skonfigurowanych plików
+                     Powoduje, że platforma MSBuild zgłasza dostępy do wszystkich skonfigurowanych
                      wtyczek pamięci podręcznej projektu.
 
-Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
+                     Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -137,11 +137,11 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      the -targets option or the -getTargetResult option is
                      used, write out the values after the build.
     </source>
-        <target state="translated">  -getProperty:propertyName,...
-                     Zapisz wartość co najmniej jednej określonej właściwości
-                     po zakończeniu oceny, bez wykonywania kompilacji lub jeśli
-                     któraś z opcji -targets lub -getTargetResult jest
-                     użyta, zapisz wartości po kompilacji.
+        <target state="new">  -getProperty:propertyName,...
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
+                     the -targets option or the -getTargetResult option is
+                     used, write out the values after the build.
     </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
@@ -156,12 +156,12 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      or the -getTargetResult option is used, write out
                      the values after the build.
     </source>
-        <target state="translated">  -getItem:itemName,...
-                     Zapisz wartość co najmniej jednego określonego elementu i
-                     ich skojarzonych metadanych po ocenie bez
-                     wykonywania kompilacji lub jeśli jest użyta któraś z opcji -targets
-                     lub -getTargetResult, zapisz
-                     wartości po kompilacji.
+        <target state="new">  -getItem:itemName,...
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
+                     the values after the build.
     </target>
         <note>
       LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
@@ -173,9 +173,9 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      Write out the output value of one or more targets and
                      the specified targets will be executed.
     </source>
-        <target state="translated">  -getTargetResult:targetName,...
-                     Zapisz wartość wyjściową co najmniej jednego elementu docelowego, a
-                     określone elementy docelowe zostaną wykonane.
+        <target state="new">  -getTargetResult:targetName,...
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
     </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
@@ -198,20 +198,20 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      - Preview - the feature is in preview (not stable)
                      (Short form: -fa)
     </source>
-        <target state="translated">  -featureAvailability:featureName,...
-                     Sprawdź dostępność funkcji. Wynikiem jest jeden z
-                     ciągów „Undefined”, „Available”, „NotAvailable” i
-                     „Preview”.
-                     — Undefined — dostępność funkcji jest niezdefiniowana
-                     (nazwa funkcji jest nieznana dla dostępności funkcji
-                     kontroler)
-                     — NotAvailable — funkcja jest niedostępna (w przeciwieństwie do
-                     Undefined, nazwa funkcji jest znana kontrolerowi
-                     dostępności funkcji i wie on, że funkcja nie jest
-                     obsługiwana przez bieżący aparat MSBuild)
-                     — Available — funkcja jest dostępna
-                     — Preview — funkcja jest w wersji zapoznawczej (niestabilna)
-                     (Krótka forma: -fa)
+        <target state="new">  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the
+                     strings "Undefined", "Available", "NotAvailable" and
+                     "Preview".
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
+                     (Short form: -fa)
     </target>
         <note>
       LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
@@ -231,17 +231,17 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      later.
                      (Short form: -tl)
     </source>
-        <target state="translated">  -terminalLogger[:auto,on,off]
-                     Włącz lub wyłącz rejestrator terminali. Rejestrator terminali
-                     udostępnia ulepszone dane wyjściowe kompilacji na konsoli w czasie rzeczywistym,
-                     uporządkowane logicznie według projektu i zaprojektowane do wyróżniania
-                     informacji umożliwiających podejmowanie działań. Określ auto (lub użyj opcji
-                     bez argumentów), aby używać rejestratora terminali tylko wtedy, gdy
-                     standardowe dane wyjściowe nie są przekierowywane. Nie analizowanie danych wyjściowych
-                     lub inaczej – poleganie na nich pozostanie niezmienione w przyszłych
-                     wersjach. Ta opcja jest dostępna w wersji MSBuild 17.8 i
-                     późniejszych.
-                     (Krótka forma: -tl)
+        <target state="new">  -terminalLogger[:auto,on,off]
+                     Enable or disable the terminal logger. Terminal logger
+                     provides enhanced build output on the console in real time,
+                     organized logically by project, and designed to highlight
+                     actionable information. Specify auto (or use the option
+                     without arguments) to use the terminal logger only if the
+                     standard output is not redirected. Don't parse the output
+                     or otherwise rely on it remaining unchanged in future
+                     versions. This option is available in MSBuild 17.8 and
+                     later.
+                     (Short form: -tl)
     </target>
         <note>
       LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
@@ -268,23 +268,23 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                       Example:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
-        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                     Parametry rejestratora terminali. (Krótka forma: -tlp)
-                     Dostępne parametry.
-                        default-- określa domyślne zachowanie rejestratora
-                        terminalu. Wymaga jednej z następujących wartości:
-                           — „on”, „true” wymusza użycie elementu TerminalLogger nawet
-                            kiedy zostanie on wyłączony.
-                           — „off”, „false” wymusza nieużywanie elementu TerminalLogger
-                            nawet wtedy, gdy zostanie on włączony.
-                           — „auto” włącza element TerminalLogger, gdy terminal
-                            go obsługuje, a sesja nie została przekierowana
+        <target state="new">  -terminalLoggerParameters: &lt;parameters&gt;
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
                             stdout/stderr
-                        verbosity-- zastąp ustawienie -verbosity dla tego
-                        rejestratora
-                        showCommandLine-- pokaż komunikaty TaskCommandLineEvent
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
 
-                      Przykład:
+                      Example:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
@@ -300,12 +300,12 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      This writes the value of property Bar into Biz.txt.
     </source>
-        <target state="translated">  -getResultOutputFile:file
-                     Przekieruj dane wyjściowe z polecenia get* do pliku.
+        <target state="new">  -getResultOutputFile:file
+                     Redirect output from get* into a file.
 
-                     Przykład:
+                     Example:
                      -getProperty:Bar -getResultOutputFile:Biz.txt
-                     Spowoduje to zapisywanie wartości paska właściwości w pliku Biz.txt.
+                     This writes the value of property Bar into Biz.txt.
     </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
@@ -784,17 +784,14 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania
-                         zdarzeń pochodzących z programu MSBuild. Aby określić
-                     wiele rejestratorów, określ każdy z nich osobno.
+        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania zdarzeń pochodzących
+                     z programu MSBuild. Aby określić wiele rejestratorów, określ każdy z nich osobno.
                      Składnia elementu &lt;rejestrator&gt;:
-                        [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt;
-                        [;&lt;parametry rejestratora&gt;]
+                      [&lt;klasa rejestratora&gt;,]&lt;assembly&gt; [;&lt;parametry rejestratora&gt;]
                      Składnia elementu &lt;klasa rejestratora&gt;:
-                        [&lt;częściowa lub pełna przestrzeń nazw&gt;.]
-                        &lt;nazwa klasy rejestratora&gt;
+                       [&lt;częściowa lub pełna przestrzeń nazw&gt;.] &lt;nazwa klasy rejestratora&gt;
                      Składnia elementu &lt;zestaw rejestratora&gt;:
-                        {&lt;nazwa zestawu&gt;[,&lt;strong name&gt;] | &lt;plik zestawu&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Wartości &lt;parametry rejestratora&gt; są opcjonalne i są
                      przekazywane do rejestratora dokładnie tak, jak zostały
                      wpisane. (Krótka wersja: -l)
@@ -1073,11 +1070,11 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      wiele rejestratorów, określ każdy z nich osobno.
                      (Krótka wersja: -dl)
                      Składnia elementu &lt;rejestrator&gt;:
-                       [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt;[;&lt;parametry rejestratora&gt;]
+                       [&lt;klasa rejestratora&gt;,]&lt;assembly&gt;[;&lt;parametry rejestratora&gt;]
                      Składnia elementu &lt;klasa rejestratora&gt;:
                        [&lt;częściowa lub pełna przestrzeń nazw&gt;.]&lt;nazwa klasy rejestratora&gt;
                      Składnia elementu &lt;zestaw rejestratora&gt;:
-                       {&lt;nazwa zestawu&gt;[,&lt;strong name&gt;] | &lt;plik zestawu&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Wartości &lt;parametry rejestratora&gt; są opcjonalne i są
                      przekazywane do rejestratora dokładnie tak, jak zostały
                      wpisane. (Krótka wersja: -l)
@@ -1189,13 +1186,11 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      create a log file for each node.
     </source>
         <target state="translated">  -distributedFileLogger
-                     Rejestruje dane wyjściowe kompilacji w wielu plikach
-                     dziennika, po jednym pliku na węzeł programu MSBuild.
-                     Początkową lokalizacją tych plików jest bieżący katalog.
-                     Domyślnie pliki mają nazwę
+                     Rejestruje dane wyjściowe kompilacji w wielu plikach dziennika,po jednym pliku
+                     na węzeł programu MSBuild. Początkową lokalizacją tych plików
+                     jest bieżący katalog. Domyślnie pliki mają nazwę
                      „MSBuild&lt;identyfikator węzła&gt;.log”. Lokalizację plików
                      i inne parametry rejestratora plików można określić
-
                      przez dodanie przełącznika „-fileLoggerParameters”.
 
                      Jeśli nazwa pliku zostanie ustawiona za pomocą przełącznika
@@ -1543,7 +1538,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: należy podać nazwę funkcji dla przełącznika dostępności funkcji.</target>
+        <target state="new">MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
       following the switch, as in "msbuild.exe -featureAvailability:blah".

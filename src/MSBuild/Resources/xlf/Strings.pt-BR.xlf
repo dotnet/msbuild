@@ -120,8 +120,9 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Faz com que o MSBuild relate acessos a arquivos para qualquer plug-in
-                     de cache de projeto configurado.
+                     Faz com que o MSBuild relate acessos a arquivos a qualquer
+ configurado
+                     plug-ins de cache do projeto.
 
                      Este sinalizador é experimental e pode não funcionar conforme o esperado.
     </target>
@@ -137,11 +138,11 @@
                      the -targets option or the -getTargetResult option is
                      used, write out the values after the build.
     </source>
-        <target state="translated">  -getProperty:propertyName,...
-                     Grava o valor de uma ou mais propriedades especificadas
-                     após a avaliação, sem executar a compilação, ou se
-                     a opção -targets ou a opção -getTargetResult for
-                     for usada, escreva os valores após a compilação.
+        <target state="new">  -getProperty:propertyName,...
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
+                     the -targets option or the -getTargetResult option is
+                     used, write out the values after the build.
     </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
@@ -156,12 +157,12 @@
                      or the -getTargetResult option is used, write out
                      the values after the build.
     </source>
-        <target state="translated">  -getItem:itemName,...
-                     Escreve o valor de um ou mais itens especificados e
-                     seus metadados associados após a avaliação sem
-                     executar a compilação, ou se a opção -targets
-                     ou a opção -getTargetResult for usada, escreva
-                     os valores após a compilação.
+        <target state="new">  -getItem:itemName,...
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
+                     the values after the build.
     </target>
         <note>
       LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
@@ -173,9 +174,9 @@
                      Write out the output value of one or more targets and
                      the specified targets will be executed.
     </source>
-        <target state="translated">  -getTargetResult:targetName,...
-                     Escreve o valor da saída de um ou mais destinos e
-                     os destinos especificados serão executados.
+        <target state="new">  -getTargetResult:targetName,...
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
     </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
@@ -198,20 +199,20 @@
                      - Preview - the feature is in preview (not stable)
                      (Short form: -fa)
     </source>
-        <target state="translated">  -featureAvailability:featureName,...
-                     Verifica a disponibilidade do recurso. O resultado é uma das 
-                     cadeias de caracteres "Indefinido", "Disponível", "Não Disponível" e
-                     "Visualizar".
-                     - Indefinido - a disponibilidade do recurso é indefinida
-                     (o nome do recurso é desconhecido para o verificador de disponibilidade do recurso
-                     verificador)
-                     - NotAvailable - o recurso não está disponível (ao contrário de
-                     Indefinido, o nome do recurso é conhecido pelo verificador de disponibilidade do recurso
-                     verificador de disponibilidade e ele sabe que o recurso não
-                     tem suporte pelo mecanismo MSBuild atual)
-                     - Disponível - o recurso está disponível
-                     - Visualização - o recurso está em pré-visualização (não é estável)
-                     (Forma abreviada: -fa)
+        <target state="new">  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the
+                     strings "Undefined", "Available", "NotAvailable" and
+                     "Preview".
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
+                     (Short form: -fa)
     </target>
         <note>
       LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
@@ -231,17 +232,17 @@
                      later.
                      (Short form: -tl)
     </source>
-        <target state="translated">  -terminalLogger[:auto,on,off]
-                     Habilitar ou desabilitar o registrador de terminal. O agente do terminal
-                     fornece saída de compilação aprimorada no console em tempo real,
-                     organizada logicamente por projeto e projetada para destacar
-                     informações acionáveis. Especificar automaticamente (ou use a opção
-                     sem argumentos) para usar o registrador de terminal somente se a
-                     a saída padrão não for redirecionada. Não analise a saída
-                     nem confie que ela permanecerá inalterada em futuras
-                     versões. Essa opção está disponível no MSBuild 17.8 e
-                     posterior.
-                     (Forma abreviada: -tl)
+        <target state="new">  -terminalLogger[:auto,on,off]
+                     Enable or disable the terminal logger. Terminal logger
+                     provides enhanced build output on the console in real time,
+                     organized logically by project, and designed to highlight
+                     actionable information. Specify auto (or use the option
+                     without arguments) to use the terminal logger only if the
+                     standard output is not redirected. Don't parse the output
+                     or otherwise rely on it remaining unchanged in future
+                     versions. This option is available in MSBuild 17.8 and
+                     later.
+                     (Short form: -tl)
     </target>
         <note>
       LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
@@ -268,23 +269,23 @@
                       Example:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
-        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                     Parâmetros para o registrador de terminal. (Forma abreviada: -tlp)
-                     Os parâmetros disponíveis.
-                        default--Especifica o comportamento padrão do agente de
-                        terminal. Requer um dos seguintes valores:
-                           - `on`, `true` força o TerminalLogger a ser usado mesmo
-                            quando ele estiver desabilitado.
-                           - `off`, `false` força o TerminalLogger a não ser usado
-                            mesmo quando estiver habilitado.
-                           - `auto` ativa o TerminalLogger quando o terminal
-                            der suporte e a sessão não tiver redirecionado
+        <target state="new">  -terminalLoggerParameters: &lt;parameters&gt;
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
                             stdout/stderr
-                        verbosidade--Substitui a configuração de -verbosidade para esse
-                        agente
-                        showCommandLine--Mostra mensagens de TaskCommandLineEvent
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
 
-                      Exemplo:
+                      Example:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
@@ -300,12 +301,12 @@
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      This writes the value of property Bar into Biz.txt.
     </source>
-        <target state="translated">  -getResultOutputFile:file
-                     Redirecionar a saída de get* para um arquivo.
+        <target state="new">  -getResultOutputFile:file
+                     Redirect output from get* into a file.
 
-                     Exemplo:
+                     Example:
                      -getProperty:Bar -getResultOutputFile:Biz.txt
-                     Isso grava o valor da propriedade Bar em Biz.txt.
+                     This writes the value of property Bar into Biz.txt.
     </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
@@ -1533,7 +1534,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: É necessário fornecer um nome de recurso para a chave featureAvailability.</target>
+        <target state="new">MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
       following the switch, as in "msbuild.exe -featureAvailability:blah".

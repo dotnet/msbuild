@@ -119,12 +119,11 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -reportFileAccesses[:True|Falsch]
-                     Führt dazu, dass MSBuild Dateizugriffe an alle konfigurierten
- meldet
-                     Projektcache-Plug-Ins.
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     Führt dazu, dass MSBuild Dateizugriffe auf ein beliebiges konfiguriertes
+                     Projektcache-Plug-In meldet.
 
-                     Dieses Kennzeichen ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
+                     Dieses Flag ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -138,11 +137,11 @@
                      the -targets option or the -getTargetResult option is
                      used, write out the values after the build.
     </source>
-        <target state="translated">  -getProperty:propertyName,...
-                     Schreiben Sie den Wert einer oder mehrerer angegebener Eigenschaften
-                     nach der Auswertung aus, ohne den Build auszuführen, oder wenn entweder
-                     die Option "-getTargetResult" oder die Option "-getTargetResult" verwendet
-                     wird, schreiben Sie die Werte nach dem Build aus.
+        <target state="new">  -getProperty:propertyName,...
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
+                     the -targets option or the -getTargetResult option is
+                     used, write out the values after the build.
     </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
@@ -157,12 +156,12 @@
                      or the -getTargetResult option is used, write out
                      the values after the build.
     </source>
-        <target state="translated">  -getItem:itemName,...
-                     Schreiben Sie den Wert eines oder mehrerer angegebener Elemente und
-                     die zugehörigen Metadaten nach der Auswertung ohne
-                     Ausführen des Builds aus, oder wenn entweder die Option "-targets"
-                     oder die Option "-getTargetResult" verwendet wird, schreiben Sie
-                     die Werte nach dem Build aus.
+        <target state="new">  -getItem:itemName,...
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
+                     the values after the build.
     </target>
         <note>
       LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
@@ -174,9 +173,9 @@
                      Write out the output value of one or more targets and
                      the specified targets will be executed.
     </source>
-        <target state="translated">  -getTargetResult:targetName,...
-                     Schreiben Sie den Ausgabewert eines oder mehrerer Ziele aus und
-                     die angegebenen Ziele werden ausgeführt.
+        <target state="new">  -getTargetResult:targetName,...
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
     </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
@@ -199,20 +198,20 @@
                      - Preview - the feature is in preview (not stable)
                      (Short form: -fa)
     </source>
-        <target state="translated">  -featureAvailability:featureName,...
-                     Überprüft die Verfügbarkeit von Features. Das Ergebnis ist eine der
-                     Zeichenfolgen "Undefined", "Available", "NotAvailable" und
+        <target state="new">  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the
+                     strings "Undefined", "Available", "NotAvailable" and
                      "Preview".
-                     –Undefinied: Die Verfügbarkeit des Features ist nicht definiert
-                     (der Featurename ist für den Prüfer der Featureverfügbarkeit
-                     unbekannt)
-                     -NotAvailable: Das Feature ist nicht verfügbar (im Gegensatz zu
-                     "Undefined", wo der Featurename für den Prüfer der Featureverfügbarkeit
-                     bekannt ist und er weiß, dass das Feature von der
-                     aktuellen MSBuild-Engine nicht unterstützt wird)
-                     -Available: Das Feature ist verfügbar
-                     -Preview: Das Feature befindet sich in der Vorschau (nicht stabil)
-                     (Kurzform: -fa)
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
+                     (Short form: -fa)
     </target>
         <note>
       LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
@@ -232,17 +231,17 @@
                      later.
                      (Short form: -tl)
     </source>
-        <target state="translated">  -terminalLogger[:auto,on,off]
-                     Aktiviert oder deaktiviert die Terminalprotokollierung. Terminal-Logger
-                     bietet verbesserte Buildausgabe auf der Konsole in Echtzeit,
-                     logisch nach Projekt organisiert und entwickelt, um
-                     verwertbare Informationen hervorzuheben. Geben Sie "auto" an (oder verwenden Sie die Option
-                     ohne Argumente), um den Terminal-Logger nur zu verwenden, wenn die
-                     Standardausgabe nicht umgeleitet wird. Analysieren Sie die Ausgabe nicht
-                     oder vertrauen Sie darauf, dass sie in zukünftigen
-                     Versionen unverändert bleibt. Diese Option ist in MSBuild 17.8 und
-                     später verfügbar.
-                     (Kurzform: -tl)
+        <target state="new">  -terminalLogger[:auto,on,off]
+                     Enable or disable the terminal logger. Terminal logger
+                     provides enhanced build output on the console in real time,
+                     organized logically by project, and designed to highlight
+                     actionable information. Specify auto (or use the option
+                     without arguments) to use the terminal logger only if the
+                     standard output is not redirected. Don't parse the output
+                     or otherwise rely on it remaining unchanged in future
+                     versions. This option is available in MSBuild 17.8 and
+                     later.
+                     (Short form: -tl)
     </target>
         <note>
       LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
@@ -269,23 +268,23 @@
                       Example:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
-        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                     Parameter für Terminal-Logger. (Kurzform: -tlp)
-                     Die verfügbaren Parameter.
-                        default: Gibt das Standardverhalten des Terminal-
-                        Loggers an. Erfordert einen der folgenden Werte:
-                           – "on", "true" erzwingt die Verwendung von TerminalLogger, auch
-                            wenn er deaktiviert werden sollte.
-                           – "off", "true" erzwingt die Nichtverwendung von TerminalLogger, auch
-                            wenn er aktiviert werden sollte.
-                           – "auto" aktiviert TerminalLogger, wenn das Terminal
-                            dies unterstützt, und die Sitzung nicht umgeleitet wurde
+        <target state="new">  -terminalLoggerParameters: &lt;parameters&gt;
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
                             stdout/stderr
-                        verbosity: Überschreiben Sie die Einstellung "-verbosity" für diesen
-                        Logger
-                        showCommandLine: TaskCommandLineEvent-Meldungen anzeigen
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
 
-                      Beispiel: 
+                      Example:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
@@ -301,12 +300,12 @@
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      This writes the value of property Bar into Biz.txt.
     </source>
-        <target state="translated">  -getResultOutputFile:file
-                     Leiten Sie die Ausgabe von get* in eine Datei um.
+        <target state="new">  -getResultOutputFile:file
+                     Redirect output from get* into a file.
 
-                     Beispiel: 
+                     Example:
                      -getProperty:Bar -getResultOutputFile:Biz.txt
-                     Dadurch wird der Wert der Eigenschaftsleiste in Biz.txt geschrieben.
+                     This writes the value of property Bar into Biz.txt.
     </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
@@ -783,11 +782,11 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
         <target state="translated">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben, 
                      wird jede Protokollierung gesondert angegeben.
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
-                       {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
                      Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
@@ -1065,11 +1064,11 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                      gesondert angegeben.
                      (Kurzform -dl)
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
-                       {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
                      Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
@@ -1533,7 +1532,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: Es muss ein Featurename für den featureAvailability-Schalter angegeben werden.</target>
+        <target state="new">MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
       following the switch, as in "msbuild.exe -featureAvailability:blah".
