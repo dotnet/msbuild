@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
@@ -486,6 +487,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
+        /// <inheritdoc />
+        public void LogBuildCanceled()
+        {
+        }
 
         /// <inheritdoc />
         public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
@@ -638,6 +643,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             throw new NotImplementedException();
         }
+
+        public void InitializeComponent(IBuildComponentHost host) => throw new NotImplementedException();
+        public void ShutdownComponent() => throw new NotImplementedException();
 
         #endregion
     }

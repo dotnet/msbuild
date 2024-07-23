@@ -462,11 +462,11 @@ namespace Microsoft.Build.Internal
         /// Retrieves properties derived from the current
         /// environment variables.
         /// </summary>
-        internal static PropertyDictionary<ProjectPropertyInstance> GetEnvironmentProperties(bool makeReadOnly)
+        internal static PropertyDictionary<ProjectPropertyInstance> GetEnvironmentProperties()
         {
             IDictionary<string, string> environmentVariablesBag = CommunicationsUtilities.GetEnvironmentVariables();
 
-            var envPropertiesHashSet = new RetrievableValuedEntryHashSet<ProjectPropertyInstance>(environmentVariablesBag.Count + 2, MSBuildNameIgnoreCaseComparer.Default);
+            PropertyDictionary<ProjectPropertyInstance> environmentProperties = new PropertyDictionary<ProjectPropertyInstance>(environmentVariablesBag.Count + 2);
 
             // We set the MSBuildExtensionsPath variables here because we don't want to make them official
             // reserved properties; we need the ability for people to override our default in their
@@ -483,11 +483,11 @@ namespace Microsoft.Build.Internal
                                           ? Path.Combine(programFiles32, ReservedPropertyNames.extensionsPathSuffix)
                                           : programFiles32;
 #endif
-            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath32, extensionsPath32, true));
+            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath32, extensionsPath32, true));
 
 #if !FEATURE_INSTALLED_MSBUILD
             string extensionsPath64 = extensionsPath;
-            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
+            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
 #else
             // "MSBuildExtensionsPath64". This points to whatever the value of "Program Files" environment variable is on a
             // 64-bit machine, and is empty on a 32-bit machine.
@@ -500,7 +500,7 @@ namespace Microsoft.Build.Internal
                                                   FrameworkLocationHelper.programFiles64,
                                                   ReservedPropertyNames.extensionsPathSuffix)
                                               : FrameworkLocationHelper.programFiles64;
-                envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
+                environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
             }
 #endif
 
@@ -523,13 +523,13 @@ namespace Microsoft.Build.Internal
             }
 #endif
 
-            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath, extensionsPath, true));
+            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath, extensionsPath, true));
 
             // Windows XP and Windows Server 2003 don't define LocalAppData in their environment.
             // We'll set it here if the environment doesn't have it so projects can reliably
             // depend on $(LocalAppData).
             string localAppData = String.Empty;
-            ProjectPropertyInstance localAppDataProp = envPropertiesHashSet.Get(ReservedPropertyNames.localAppData);
+            ProjectPropertyInstance localAppDataProp = environmentProperties.GetProperty(ReservedPropertyNames.localAppData);
             if (localAppDataProp != null)
             {
                 localAppData = localAppDataProp.EvaluatedValue;
@@ -551,11 +551,11 @@ namespace Microsoft.Build.Internal
             }
 
 
-            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.localAppData, localAppData));
+            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.localAppData, localAppData));
 
             // Add MSBuildUserExtensionsPath at $(LocalAppData)\Microsoft\MSBuild
             string userExtensionsPath = Path.Combine(localAppData, ReservedPropertyNames.userExtensionsPathSuffix);
-            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.userExtensionsPath, userExtensionsPath));
+            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.userExtensionsPath, userExtensionsPath));
 
             foreach (KeyValuePair<string, string> environmentVariable in environmentVariablesBag)
             {
@@ -570,7 +570,7 @@ namespace Microsoft.Build.Internal
                 {
                     ProjectPropertyInstance environmentProperty = ProjectPropertyInstance.Create(environmentVariableName, environmentVariable.Value);
 
-                    envPropertiesHashSet.Add(environmentProperty);
+                    environmentProperties.Set(environmentProperty);
                 }
                 else
                 {
@@ -579,12 +579,6 @@ namespace Microsoft.Build.Internal
                 }
             }
 
-            if (makeReadOnly)
-            {
-                envPropertiesHashSet.MakeReadOnly();
-            }
-
-            var environmentProperties = new PropertyDictionary<ProjectPropertyInstance>(envPropertiesHashSet);
             return environmentProperties;
         }
 

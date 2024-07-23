@@ -35,7 +35,7 @@ One example of rich data that might be helpful for internal analyses is [`Projec
 
 ## Execution Modes
 
-**Replay Mode** - so that users can choose to perform analyses post build, without impacting the performance of the build. And so that some level of analysis can be run on artifacts from builds produced by older versions of MSBuild.
+**Replay Mode** - so that users can choose to perform analyses post build, without impacting the performance of the build. And so that some level of analysis can be run on artifacts from builds produced by MSBuild from NET 9.0 / VS 17.12 or newer. The older versions won't be supported.
 
 **Live mode** - this is what users are used to from compilation analyses. Integrating into build execution will as well help driving adoption by opting-in users by default to some level of checking and hence exposing them to the feature.
 
@@ -46,6 +46,30 @@ Prerequisites: [MSBuild Nodes Orchestration](../../wiki/Nodes-Orchestration.md#o
 The BuildCheck infrastructure will be prepared to be available concurrently within the `scheduler node` as well as in the additional `worker nodes`. There are 2 reasons for this:
 * BuildCheck will need to recognize custom analyzers packages during the evaluation time - so some basic code related to BuildCheck will need to be present in the worker node.
 * Presence in worker node (as part of the `RequestBuilder`), will allow inbox analyzers to agile leverage data not available within `BuildEventArgs` (while data proven to be useful should over time be exposed to `BuildEventArgs`)
+
+## Replay Mode
+
+Prerequisites: [MSBuild Replaying a Binary Log](../../wiki/Binary-Log.md#replaying-a-binary-log)
+
+When replaying a binary log, we can apply BuildCheck with help of `-analyze` switch:
+```
+> msbuild.exe msbuild.binlog -analyze
+```
+
+If BuildCheck is enabled, then the events from `BinaryLogReplayEventSource` and new events from BuildCheck are merged into the `IEventSource`, from which the loggers get events.
+
+```mermaid
+flowchart TD
+    replayEventSource[BinaryLogReplayEventSource\nreplayEventSource] --> mergedEventSource[IEventSource\nmergedEventSource]
+    replayEventSource[BinaryLogReplayEventSource\nreplayEventSource] --> BuildCheckBuildEventHandler[BuildCheckBuildEventHandler]
+    BuildCheckBuildEventHandler[BuildCheckBuildEventHandler] --> mergedEventSource[IEventSource\nmergedEventSource]
+    mergedEventSource[IEventSource\nmergedEventSource] --> loggers
+```
+1. The events from `BinaryLogReplayEventSource replayEventSource` are passed to the `IEventSource mergedEventSource` unchanged.
+2. The events from `BinaryLogReplayEventSource replayEventSource` are passed to `BuildCheckBuildEventHandler` in order to produce new events from BuildCheck.
+3. The `BuildCheckBuildEventHandler` uses the `IEventSource mergedEventSource` to invoke new events.
+
+`BuildCheckBuildEventHandler` is an internal infrastructural class and serves as an entry point for producing new events from BuildCheck.
 
 ## Handling the Distributed Model
 

@@ -21,8 +21,7 @@ public class BuildAnalyzerConfiguration
     public static BuildAnalyzerConfiguration Default { get; } = new()
     {
         EvaluationAnalysisScope = BuildCheck.EvaluationAnalysisScope.ProjectOnly,
-        Severity = BuildAnalyzerResultSeverity.Info,
-        IsEnabled = false,
+        Severity = BuildAnalyzerResultSeverity.None
     };
 
     public static BuildAnalyzerConfiguration Null { get; } = new();
@@ -47,7 +46,18 @@ public class BuildAnalyzerConfiguration
     /// If all rules within the analyzer are not enabled, it will not be run.
     /// If some rules are enabled and some are not, the analyzer will be run and reports will be post-filtered.
     /// </summary>
-    public bool? IsEnabled { get; internal init; }
+    public bool? IsEnabled {
+        get
+        {
+            // Do not consider Default as enabled, because the default severity of the rule coule be set to None
+            if (Severity.HasValue && Severity.Value != BuildAnalyzerResultSeverity.Default)
+            {
+                return !Severity.Value.Equals(BuildAnalyzerResultSeverity.None);
+            }
+
+            return null;
+        }
+    }
 
     /// <summary>
     /// Creates a <see cref="BuildAnalyzerConfiguration"/> object based on the provided configuration dictionary.
@@ -61,8 +71,7 @@ public class BuildAnalyzerConfiguration
         return new()
         {
             EvaluationAnalysisScope = TryExtractValue(nameof(EvaluationAnalysisScope), configDictionary, out EvaluationAnalysisScope evaluationAnalysisScope) ? evaluationAnalysisScope : null,
-            Severity = TryExtractValue(nameof(Severity), configDictionary, out BuildAnalyzerResultSeverity severity) ? severity : null,
-            IsEnabled = TryExtractValue(nameof(IsEnabled), configDictionary, out bool isEnabled) ? isEnabled : null,
+            Severity = TryExtractValue(nameof(Severity), configDictionary, out BuildAnalyzerResultSeverity severity) ? severity : null
         };
     }
 
@@ -77,31 +86,6 @@ public class BuildAnalyzerConfiguration
 
         var isParsed = Enum.TryParse(stringValue, true, out value);
 
-        if (!isParsed)
-        {
-            ThrowIncorrectValueException(key, stringValue);
-        }
-
-        return isParsed;
-    }
-
-    private static bool TryExtractValue(string key, Dictionary<string, string>? config, out bool value)
-    {
-        value = default;
-
-        if (config == null || !config.TryGetValue(key.ToLower(), out var stringValue) || stringValue is null)
-        {
-            return false;
-        }
-
-        bool isParsed = false;
-        
-        if (bool.TryParse(stringValue, out bool boolValue))
-        {
-            value = boolValue;
-            isParsed = true;
-        }
-        
         if (!isParsed)
         {
             ThrowIncorrectValueException(key, stringValue);

@@ -38,6 +38,11 @@ namespace Microsoft.Build.Framework
     public delegate void BuildFinishedEventHandler(object sender, BuildFinishedEventArgs e);
 
     /// <summary>
+    /// Type of handler for BuildCanceledEvent events
+    /// </summary>
+    public delegate void BuildCanceledEventHandler(object sender, BuildCanceledEventArgs e);
+
+    /// <summary>
     /// Type of handler for ProjectStarted events
     /// </summary>
     public delegate void ProjectStartedEventHandler(object sender, ProjectStartedEventArgs e);
