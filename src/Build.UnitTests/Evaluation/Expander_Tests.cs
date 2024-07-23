@@ -1301,7 +1301,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
 <Project>
   <PropertyGroup>
-    <MyProperty>Value is $([System.Int32]::TryParse(""3"", _))</MyProperty>
+    <MyProperty>Value is $([System.Int32]::TryParse(""3"", out _))</MyProperty>
   </PropertyGroup>
   <Target Name='Build'>
     <Message Text='$(MyProperty)' />
@@ -1317,7 +1317,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
 <Project>
   <PropertyGroup>
-    <MyProperty>Value is $([System.Int32]::TryParse(""notANumber"", _))</MyProperty>
+    <MyProperty>Value is $([System.Int32]::TryParse(""notANumber"", out _))</MyProperty>
   </PropertyGroup>
   <Target Name='Build'>
     <Message Text='$(MyProperty)' />
@@ -1325,6 +1325,22 @@ namespace Microsoft.Build.UnitTests.Evaluation
 </Project>");
 
             logger.FullLog.ShouldContain("Value is False");
+        }
+
+        [Fact]
+        public void StaticMethodWithUnderscoreNotConfusedWithThrowaway()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+<Project>
+  <PropertyGroup>
+    <MyProperty>Value is $([System.String]::Join('_', 'asdf', 'jkl'))</MyProperty>
+  </PropertyGroup>
+  <Target Name='Build'>
+    <Message Text='$(MyProperty)' />
+  </Target>
+</Project>");
+
+            logger.FullLog.ShouldContain("Value is asdf_jkl");
         }
 
         /// <summary>
