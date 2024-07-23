@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -1093,16 +1091,19 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadEnvironmentVariableReadEventArgs()
         {
-            var fields = ReadBuildEventArgsFields(readImportance: true);
+            var fields = ReadBuildEventArgsFields();
 
-            var environmentVariableName = ReadDeduplicatedString();
+            string? environmentVariableName = ReadDeduplicatedString();
+            int line = ReadInt32();
+            int column = ReadInt32();
+            string? fileName = ReadDeduplicatedString();
 
-            var e = new EnvironmentVariableReadEventArgs(
-                environmentVariableName,
-                fields.Message,
-                fields.HelpKeyword,
-                fields.SenderName,
-                fields.Importance);
+            BuildEventArgs e = new EnvironmentVariableReadEventArgs(
+                    environmentVariableName ?? string.Empty,
+                    fields.Message,
+                    fileName ?? string.Empty,
+                    line,
+                    column);
             SetCommonFields(e, fields);
 
             return e;

@@ -1294,6 +1294,39 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.True(false);
         }
+
+        [Fact]
+        public void StaticMethodWithThrowawayParameterSupported()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+<Project>
+  <PropertyGroup>
+    <MyProperty>Value is $([System.Int32]::TryParse(""3"", _))</MyProperty>
+  </PropertyGroup>
+  <Target Name='Build'>
+    <Message Text='$(MyProperty)' />
+  </Target>
+</Project>");
+
+            logger.FullLog.ShouldContain("Value is True");
+        }
+
+        [Fact]
+        public void StaticMethodWithThrowawayParameterSupported2()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+<Project>
+  <PropertyGroup>
+    <MyProperty>Value is $([System.Int32]::TryParse(""notANumber"", _))</MyProperty>
+  </PropertyGroup>
+  <Target Name='Build'>
+    <Message Text='$(MyProperty)' />
+  </Target>
+</Project>");
+
+            logger.FullLog.ShouldContain("Value is False");
+        }
+
         /// <summary>
         /// Creates a set of complicated item metadata and properties, and items to exercise
         /// the Expander class.  The data here contains escaped characters, metadata that
@@ -5061,6 +5094,41 @@ $(
                 {
                     new ProjectInstance(projectFile.Path);
                 });
+            }
+        }
+
+        [Theory]
+        [InlineData("$([System.Version]::Parse('17.12.11.10').ToString(2))")]
+        [InlineData("$([System.Text.RegularExpressions.Regex]::Replace('abc123def', 'abc', ''))")]
+        [InlineData("$([System.String]::new('Hi').Equals('Hello'))")]
+        [InlineData("$([System.IO.Path]::GetFileNameWithoutExtension('C:\\folder\\file.txt'))")]
+        [InlineData("$([System.Int32]::new(123).ToString('mm')")]
+        [InlineData("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::NormalizeDirectory('C:/folder1/./folder2/'))")]
+        [InlineData("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::IsOSPlatform('Windows'))")]
+        public void FastPathValidationTest(string methodInvocationMetadata)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                // Setting this env variable allows to track if expander was using reflection for a function invocation. 
+                env.SetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection", "1");
+
+                var logger = new MockLogger();
+                ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+                loggingService.RegisterLogger(logger);
+                var loggingContext = new MockLoggingContext(
+                    loggingService,
+                    new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
+
+                _ = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                    new PropertyDictionary<ProjectPropertyInstance>(),
+                    FileSystems.Default,
+                    loggingContext)
+                    .ExpandIntoStringLeaveEscaped(methodInvocationMetadata, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+                string reflectionInfoPath = Path.Combine(Directory.GetCurrentDirectory(), "PropertyFunctionsRequiringReflection");
+
+                // the fast path was successfully resolved without reflection.
+                File.Exists(reflectionInfoPath).ShouldBeFalse();
             }
         }
 
