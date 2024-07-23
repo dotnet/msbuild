@@ -33,43 +33,45 @@ public class BuildAnalyzerConfiguration_Test
 
     [Theory]
     [InlineData("error", BuildAnalyzerResultSeverity.Error)]
-    [InlineData("info", BuildAnalyzerResultSeverity.Info)]
+    [InlineData("ERROR", BuildAnalyzerResultSeverity.Error)]
+    [InlineData("suggestion", BuildAnalyzerResultSeverity.Suggestion)]
+    [InlineData("SUGGESTION", BuildAnalyzerResultSeverity.Suggestion)]
     [InlineData("warning", BuildAnalyzerResultSeverity.Warning)]
     [InlineData("WARNING", BuildAnalyzerResultSeverity.Warning)]
+    [InlineData("NONE", BuildAnalyzerResultSeverity.None)]
+    [InlineData("none", BuildAnalyzerResultSeverity.None)]
+    [InlineData("default", BuildAnalyzerResultSeverity.Default)]
+    [InlineData("DEFAULT", BuildAnalyzerResultSeverity.Default)]
     public void CreateBuildAnalyzerConfiguration_Severity(string parameter, BuildAnalyzerResultSeverity? expected)
     {
         var config = new Dictionary<string, string>()
         {
             { "severity" , parameter },
         };
+
         var buildConfig = BuildAnalyzerConfiguration.Create(config);
 
         buildConfig.ShouldNotBeNull();
         buildConfig.Severity.ShouldBe(expected);
-
-        buildConfig.IsEnabled.ShouldBeNull();
         buildConfig.EvaluationAnalysisScope.ShouldBeNull();
     }
 
     [Theory]
-    [InlineData("true", true)]
-    [InlineData("TRUE", true)]
-    [InlineData("false", false)]
-    [InlineData("FALSE", false)]
-    public void CreateBuildAnalyzerConfiguration_IsEnabled(string parameter, bool? expected)
+    [InlineData("error", true)]
+    [InlineData("warning", true)]
+    [InlineData("suggestion", true)]
+    [InlineData("none", false)]
+    [InlineData("default", null)]
+    public void CreateBuildAnalyzerConfiguration_SeverityAndEnabledOrder(string parameter, bool? expected)
     {
         var config = new Dictionary<string, string>()
         {
-            { "isenabled" , parameter },
+            { "severity", parameter },
         };
-
+        
         var buildConfig = BuildAnalyzerConfiguration.Create(config);
 
-        buildConfig.ShouldNotBeNull();
         buildConfig.IsEnabled.ShouldBe(expected);
-
-        buildConfig.Severity.ShouldBeNull();
-        buildConfig.EvaluationAnalysisScope.ShouldBeNull();
     }
 
     [Theory]
@@ -96,7 +98,6 @@ public class BuildAnalyzerConfiguration_Test
 
     [Theory]
     [InlineData("evaluationanalysisscope", "incorrec-value")]
-    [InlineData("isenabled", "incorrec-value")]
     [InlineData("severity", "incorrec-value")]
     public void CreateBuildAnalyzerConfiguration_ExceptionOnInvalidInputValue(string key, string value)
     {

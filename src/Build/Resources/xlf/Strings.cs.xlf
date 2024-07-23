@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AbortingBuild">
         <source>Attempting to cancel the build...</source>
-        <target state="new">Attempting to cancel the build...</target>
+        <target state="translated">Pokus o zrušení sestavování...</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
@@ -133,7 +133,7 @@
       </trans-unit>
       <trans-unit id="BuildCheckEnabled">
         <source>The BuildCheck is enabled for this build.</source>
-        <target state="new">The BuildCheck is enabled for this build.</target>
+        <target state="translated">Pro tento build je povolena funkce BuildCheck.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
@@ -217,34 +217,39 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
+        <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
+        <target state="translated">Bylo nalezeno více přetížení pro metodu {0} s tímto počtem parametrů: {1}. To v současné době není podporováno.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
         <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
-        <target state="needs-review-translation">Nepodařilo se najít zadané sestavení vlastního analyzátoru: {0}. Zkontrolujte prosím, jestli existuje.</target>
+        <target state="translated">Nepodařilo se najít zadané sestavení vlastního analyzátoru: {0}. Zkontrolujte prosím, jestli existuje.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
         <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="needs-review-translation">Nepodařilo se načíst vlastní typ analyzátoru: {0} ze sestavení: {1}. Ujistěte se, že dědí základní třídu Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. Pokud se nemá jednat o vlastní analyzátor, neměl by být odkrytý. Další informace: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">Nepodařilo se načíst typ vlastního analyzátoru: {0} ze sestavení: {1}. Ujistěte se, že dědí základní třídu Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. Pokud se nemá jednat o vlastní analyzátor, neměl by být exponovaný. Další informace: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
         <source>Failed to register the custom analyzer: '{0}'.</source>
-        <target state="needs-review-translation">Nepodařilo se zaregistrovat vlastní analyzátor: {0}.</target>
+        <target state="translated">Nepodařilo se zaregistrovat vlastní analyzátor: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
         <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
-        <target state="needs-review-translation">Nepovedlo se vytvořit instanci pravidla vlastního analyzátoru s následující výjimkou: {0}.</target>
+        <target state="translated">Nepovedlo se vytvořit instanci pravidla vlastního analyzátoru s následující výjimkou: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerRegistered">
         <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="new">The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</target>
+        <target state="translated">Vlastní analyzátor {0} je pro build zaregistrován z umístění: {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
         <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
-        <target state="needs-review-translation">Pravidlo vlastního analyzátoru: {0} se úspěšně zaregistrovalo.</target>
+        <target state="translated">Pravidlo vlastního analyzátoru: {0} se úspěšně zaregistrovalo.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">

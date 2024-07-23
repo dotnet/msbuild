@@ -216,7 +216,10 @@ namespace Microsoft.Build.Evaluation
 
             var args = new EnvironmentVariableReadEventArgs(
                 name,
-                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentVariableRead", name));
+                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentVariableRead", name),
+                string.Empty,
+                0,
+                0);
             args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
 
             _evaluationLoggingContext.LogBuildEvent(args);

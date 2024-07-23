@@ -147,7 +147,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="taskName">The task in which the warning occurred</param>
         internal void LogTaskWarningFromException(Exception exception, BuildEventFileInfo file, string taskName)
         {
-            ErrorUtilities.VerifyThrow(IsValid, "must be valid");
+            CheckValidity();
             LoggingService.LogTaskWarningFromException(BuildEventContext, exception, file, taskName);
         }
 

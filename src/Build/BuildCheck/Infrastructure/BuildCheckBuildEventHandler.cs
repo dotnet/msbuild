@@ -31,6 +31,7 @@ internal class BuildCheckBuildEventHandler
         {
             { typeof(ProjectEvaluationFinishedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationFinishedEvent((ProjectEvaluationFinishedEventArgs)e) },
             { typeof(ProjectEvaluationStartedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs)e) },
+            { typeof(EnvironmentVariableReadEventArgs), (BuildEventArgs e) => HandleEnvironmentVariableReadEvent((EnvironmentVariableReadEventArgs)e) },
             { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => _buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!) },
             { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => HandleProjectFinishedRequest((ProjectFinishedEventArgs)e) },
             { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => HandleBuildCheckTracingEvent((BuildCheckTracingEventArgs)e) },
@@ -106,6 +107,11 @@ internal class BuildCheckBuildEventHandler
         => _buildCheckManager.ProcessAnalyzerAcquisition(
                 eventArgs.ToAnalyzerAcquisitionData(),
                 _analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)));
+
+    private void HandleEnvironmentVariableReadEvent(EnvironmentVariableReadEventArgs eventArgs)
+        => _buildCheckManager.ProcessEnvironmentVariableReadEventArgs(
+                _analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)),
+                eventArgs);
 
     private bool IsMetaProjFile(string? projectFile) => projectFile?.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase) == true;
 
