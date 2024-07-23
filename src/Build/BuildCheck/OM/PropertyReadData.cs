@@ -13,16 +13,19 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 internal class PropertyReadData(
     string projectFilePath,
+    int? projectInstanceId,
     string propertyName,
     IMsBuildElementLocation elementLocation,
     bool isUninitialized,
     PropertyReadContext propertyReadContext)
-    : AnalysisData(projectFilePath)
+    : AnalysisData(projectFilePath, projectInstanceId)
 {
     public PropertyReadData(
         string projectFilePath,
+        int? projectInstanceId,
         PropertyReadInfo propertyReadInfo)
         : this(projectFilePath,
+            projectInstanceId,
             propertyReadInfo.PropertyName.Substring(propertyReadInfo.StartIndex, propertyReadInfo.EndIndex - propertyReadInfo.StartIndex + 1),
             propertyReadInfo.ElementLocation,
             propertyReadInfo.IsUninitialized,

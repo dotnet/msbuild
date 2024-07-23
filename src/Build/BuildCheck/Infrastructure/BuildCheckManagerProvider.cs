@@ -401,6 +401,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         }
 
         private readonly ConcurrentDictionary<int, string> _projectsByContextId = new();
+        /// <summary>
+        /// This method fetches the project full path from the context id.
+        /// This is needed because the full path is needed for configuration and later for fetching configured checks
+        ///  (future version might optimize by using the ProjectContextId directly for fetching the checks).
+        /// </summary>
+        /// <param name="buildEventContext"></param>
+        /// <returns></returns>
         private string GetProjectFullPath(BuildEventContext buildEventContext)
         {
             const string defaultProjectFullPath = "Unknown_Project";
@@ -412,7 +419,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             else if (buildEventContext.ProjectContextId == BuildEventContext.InvalidProjectContextId &&
                      _projectsByContextId.Count == 1)
             {
-                // The coalescing is for a rare possibility of a race where other thread removed the item.
+                // The coalescing is for a rare possibility of a race where other thread removed the item (between the if check and fetch here).
                 // We currently do not support multiple projects in parallel in a single node anyway.
                 return _projectsByContextId.FirstOrDefault().Value ?? defaultProjectFullPath;
             }
@@ -468,7 +475,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            PropertyReadData propertyReadData = new(GetProjectFullPath(analysisContext.BuildEventContext), propertyReadInfo);
+            PropertyReadData propertyReadData = new(
+                GetProjectFullPath(analysisContext.BuildEventContext),
+                analysisContext.BuildEventContext.ProjectInstanceId,
+                propertyReadInfo);
             _buildEventsProcessor.ProcessPropertyRead(propertyReadData, analysisContext);
         }
 
@@ -479,7 +489,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            PropertyWriteData propertyWriteData = new(GetProjectFullPath(analysisContext.BuildEventContext), propertyWriteInfo);
+            PropertyWriteData propertyWriteData = new(
+                GetProjectFullPath(analysisContext.BuildEventContext),
+                analysisContext.BuildEventContext.ProjectInstanceId,
+                propertyWriteInfo);
             _buildEventsProcessor.ProcessPropertyWrite(propertyWriteData, analysisContext);
         }
 

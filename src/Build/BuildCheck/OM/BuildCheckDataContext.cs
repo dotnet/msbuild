@@ -18,7 +18,8 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// Base for a data passed from infrastructure to build analyzers.
 /// </summary>
 /// <param name="projectFilePath">Currently built project.</param>
-public abstract class AnalysisData(string projectFilePath)
+/// <param name="projectInstanceId">The unique id of a project with unique global properties set.</param>
+public abstract class AnalysisData(string projectFilePath, int? projectInstanceId)
 {
     private string? _projectFileDirectory;
 
@@ -26,6 +27,14 @@ public abstract class AnalysisData(string projectFilePath)
     /// Full path to the project file being built.
     /// </summary>
     public string ProjectFilePath { get; } = projectFilePath;
+
+    /// <summary>
+    /// The unique id of a project with unique global properties set.
+    /// This is helpful to distinguish between different configurations of a single project in case of multitargeting.
+    ///
+    /// In cases where the project instance cannot be determined, it will be set to <see cref="BuildEventContext.InvalidProjectInstanceId"/>.
+    /// </summary>
+    public int ProjectInstanceId { get; } = projectInstanceId ?? BuildEventContext.InvalidProjectInstanceId;
 
     /// <summary>
     /// Directory path of the file being built (the containing directory of <see cref="ProjectFilePath"/>).
