@@ -216,7 +216,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             // on others it should work similarly as disabling them.
             // Disabled analyzer should not only post-filter results - it shouldn't even see the data 
             BuildAnalyzerWrapper wrapper;
-            BuildAnalyzerConfigurationInternal[] configurations;
+            BuildAnalyzerConfigurationEffective[] configurations;
             if (analyzerFactoryContext.MaterializedAnalyzer == null)
             {
                 BuildAnalyzerConfiguration[] userConfigs =
@@ -231,9 +231,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 CustomConfigurationData[] customConfigData =
                     _configurationProvider.GetCustomConfigurations(projectFullPath, analyzerFactoryContext.RuleIds);
 
-                ConfigurationContext configurationContext = ConfigurationContext.FromDataEnumeration(customConfigData);
+                BuildAnalyzer uninitializedAnalyzer = analyzerFactoryContext.Factory();
+                configurations = _configurationProvider.GetMergedConfigurations(userConfigs, uninitializedAnalyzer);
 
-                wrapper = analyzerFactoryContext.Factory(configurationContext);
+                ConfigurationContext configurationContext = ConfigurationContext.FromDataEnumeration(customConfigData, configurations);
+
+                wrapper = analyzerFactoryContext.Initialize(uninitializedAnalyzer, configurationContext);
                 analyzerFactoryContext.MaterializedAnalyzer = wrapper;
                 BuildAnalyzer analyzer = wrapper.BuildAnalyzer;
 
@@ -252,8 +255,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     throw new BuildCheckConfigurationException(
                         $"The analyzer '{analyzer.FriendlyName}' exposes rules '{analyzer.SupportedRules.Select(r => r.Id).ToCsvString()}', but different rules were declared during registration: '{analyzerFactoryContext.RuleIds.ToCsvString()}'");
                 }
-
-                configurations = _configurationProvider.GetMergedConfigurations(userConfigs, analyzer);
 
                 // technically all analyzers rules could be disabled, but that would mean
                 // that the provided 'IsEnabledByDefault' value wasn't correct - the only
@@ -438,12 +439,17 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             string[] ruleIds,
             bool isEnabledByDefault)
         {
-            public BuildAnalyzerWrapperFactory Factory { get; init; } = configContext =>
+            public BuildAnalyzer Factory()
             {
                 BuildAnalyzer ba = factory();
+                return ba;
+            }
+
+            public BuildAnalyzerWrapper Initialize(BuildAnalyzer ba, ConfigurationContext configContext)
+            {
                 ba.Initialize(configContext);
                 return new BuildAnalyzerWrapper(ba);
-            };
+            }
 
             public BuildAnalyzerWrapper? MaterializedAnalyzer { get; set; }
 

@@ -336,7 +336,7 @@ public class BuildAnalyzerConfiguration
 }
 ```
 
-Values for this recognized contract, that are explicitly specified via .editorconfig files are passed only to the BuildCheck infrastructure – they are invisible to the actual analyzers (NOTE: this is a subject to likely revision).
+Values for this recognized contract, that are explicitly specified via .editorconfig files are passed both to the BuildCheck infrastructure as well as individual analyzers.
 
 #### Custom configuration declaration
 
@@ -351,7 +351,12 @@ public class ConfigurationContext
     /// <summary>
     /// Custom configuration data - per each rule that has some specified.
     /// </summary>
-    public CustomConfigurationData[] CustomConfigurationData { get; init; }
+    public IReadOnlyList<CustomConfigurationData> CustomConfigurationData { get; init; }
+
+    /// <summary>
+    /// Configuration data from standard declarations
+    /// </summary>
+    public IReadOnlyList<BuildAnalyzerConfiguration> BuildAnalyzerConfig { get; init; }
 }
 ```
 

@@ -9,7 +9,7 @@ using System;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
-public class BuildAnalyzerConfigurationInternalTests
+public class BuildAnalyzerConfigurationEffectiveTests
 {
     [Theory]
     [InlineData("ruleId", EvaluationAnalysisScope.ProjectOnly, BuildAnalyzerResultSeverity.Warning,  true)]
@@ -21,12 +21,12 @@ public class BuildAnalyzerConfigurationInternalTests
         BuildAnalyzerResultSeverity secondSeverity,
         bool isExpectedToBeSame)
     {
-        BuildAnalyzerConfigurationInternal configuration1 = new BuildAnalyzerConfigurationInternal(
+        BuildAnalyzerConfigurationEffective configuration1 = new BuildAnalyzerConfigurationEffective(
                        ruleId: "ruleId",
                        evaluationAnalysisScope: EvaluationAnalysisScope.ProjectOnly,
                        severity: BuildAnalyzerResultSeverity.Warning);
 
-        BuildAnalyzerConfigurationInternal configuration2 = new BuildAnalyzerConfigurationInternal(
+        BuildAnalyzerConfigurationEffective configuration2 = new BuildAnalyzerConfigurationEffective(
             ruleId: secondRuleId,
             evaluationAnalysisScope: secondScope,
             severity: secondSeverity);
@@ -41,7 +41,7 @@ public class BuildAnalyzerConfigurationInternalTests
     [InlineData(BuildAnalyzerResultSeverity.None, false)]
     public void BuildAnalyzerConfigurationInternal_Constructor_SeverityConfig(BuildAnalyzerResultSeverity severity, bool isEnabledExpected)
     {
-        BuildAnalyzerConfigurationInternal configuration = new BuildAnalyzerConfigurationInternal(
+        BuildAnalyzerConfigurationEffective configuration = new BuildAnalyzerConfigurationEffective(
                        ruleId: "ruleId",
                        evaluationAnalysisScope: EvaluationAnalysisScope.ProjectOnly,
                        severity: severity);
@@ -54,7 +54,7 @@ public class BuildAnalyzerConfigurationInternalTests
     {
         Should.Throw<ArgumentOutOfRangeException>(() =>
         {
-            new BuildAnalyzerConfigurationInternal(
+            new BuildAnalyzerConfigurationEffective(
                         ruleId: "ruleId",
                         evaluationAnalysisScope: EvaluationAnalysisScope.ProjectOnly,
                         severity: BuildAnalyzerResultSeverity.Default);
