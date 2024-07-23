@@ -16,7 +16,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
-using BuildRequestDataFlags = Microsoft.Build.Execution.BuildRequestDataFlags;
 
 #nullable disable
 

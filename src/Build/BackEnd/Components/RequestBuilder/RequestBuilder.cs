@@ -22,7 +22,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
-using BuildRequestDataFlags = Microsoft.Build.Execution.BuildRequestDataFlags;
 
 #nullable disable
 

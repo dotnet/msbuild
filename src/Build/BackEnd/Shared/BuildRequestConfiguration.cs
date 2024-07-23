@@ -15,7 +15,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using BuildRequestDataFlags = Microsoft.Build.Execution.BuildRequestDataFlags;
 
 #nullable disable
 

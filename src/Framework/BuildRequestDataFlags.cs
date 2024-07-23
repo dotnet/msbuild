@@ -7,11 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.Framework
+// Note: Namespace is within Build.Execution for type forwarding to work correctly
+namespace Microsoft.Build.Execution
 {
     /// <summary>
     /// Flags providing additional control over the build request
-    /// This is a copy of same enum on Microsoft.Build.Execution. Any modifications to this enum must be mirrored on the original
     /// </summary>
     [Flags]
     public enum BuildRequestDataFlags

@@ -39,7 +39,6 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.NET.StringTools;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
-using BuildRequestDataFlags = Microsoft.Build.Execution.BuildRequestDataFlags;
 
 namespace Microsoft.Build.Execution
 {
@@ -1381,7 +1380,7 @@ namespace Microsoft.Build.Execution
                 submission.BuildRequestDataBase.GlobalPropertiesLookup,
                 submission.BuildRequestDataBase.EntryProjectsFullPath,
                 submission.BuildRequestDataBase.TargetNames,
-                (Framework.BuildRequestDataFlags)submission.BuildRequestDataBase.Flags,
+                submission.BuildRequestDataBase.Flags,
                 submission.BuildResultBase!.SubmissionId);
 
             BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);

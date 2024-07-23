@@ -18,7 +18,6 @@ using Microsoft.Build.Shared.Debugging;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
-using BuildRequestDataFlags = Microsoft.Build.Execution.BuildRequestDataFlags;
 
 #nullable disable
 
