@@ -1,8 +1,8 @@
 # What is MSBuild
 MSBuild is a build platform used mainly for .NET and Visual Studio. But when referencing MSBuild technically we can divide what MSBuild is in a few main parts:
 - Programming language that uses XML semantics to define build actions and data.
-- A set of common targets that define what a build means.
-- API and command line program that interprets and manipulates the programming language.
+- A standard set of scripts authored in the MSBuild language (so called 'common targets') that are shipped together with the MSBuild binaries and that define what a build process means.
+- API and command line interface that interprets and manipulates the programming language.
 - Build engine that executes a build based on the programming language inputs.
 
 MSBuild also contains some extensibility aspects that mostly interact with the API and engine. These are built to increase customization and interaction capability.
@@ -14,12 +14,12 @@ This document covers all parts of MSBuild in a general manner from the perspecti
 The MSBuild markup language is a subset of XML with a focus on describing a project. An advanced example of this, is our own MSBuild executable's [project here](../src/MSBuild/MSBuild.csproj).
 
 The MSBuild XML is built around representing a project's data. It uses various elements to do so:
-- [Items](https://learn.microsoft.com/visualstudio/msbuild/msbuild-items) are inputs to the build system, mostly to tasks or targets. They can represent project files, code files, libraries and most things that a project can depend on.
+- [Items](https://learn.microsoft.com/visualstudio/msbuild/msbuild-items) are data enumerations, where single element is a string value with optional enumeration of key-value strings - so called `metadata`. `Items` represent project files, code files, libraries and most things that a project can depend on. Together with `Properties`, `Items` are data inputs to the build system - mostly to tasks or targets.
 - [Properties](https://learn.microsoft.com/visualstudio/msbuild/msbuild-properties) are name value pairs, they're used to store data that is used throughout the build.
 - [Tasks](https://learn.microsoft.com/visualstudio/msbuild/msbuild-tasks) are how actions are defined in MSBuild, they're a unit of executable code to perform build operations. Many tasks are defined within MSBuild itself, but tasks can also be authored by third parties by implementing the `ITask` interface.
 - [Targets](https://learn.microsoft.com/visualstudio/msbuild/msbuild-targets) represents a group of tasks, in which their order matters. It is a set of instructions for the MSBuild engine to build from.
 
-These attributes are defined within project files (`.csproj`, `.vbproj` etc.). The solution files (`.sln`) are not written with MSBuild XML. They are originally exclusive to Visual Studio and yet the MSBuild command-line application can parse them to find projects to build. It does so by converting the solution file to a MSBuild project file in-memory and acts upon it instead. More on this in the `Building Solutions` section.
+These attributes are defined within project files (`.csproj`, `.vbproj` etc.). The solution files (`.sln`) are not written with MSBuild XML. They are originally exclusive to Visual Studio and yet the MSBuild command-line application can parse them to find projects to build. It does so by converting the solution file to a MSBuild project file in-memory and acts upon it instead.
 
 While the project file defines the data used for the build, the actual build instructions are generally imported from a common location through the `Import` element or [MSBuild SDKs](https://learn.microsoft.com/visualstudio/msbuild/how-to-use-project-sdk) that contain their own tasks and targets. One example that is widely used is the [`Microsoft.NET.Sdk`](https://learn.microsoft.com/dotnet/core/project-sdk/overview) from the .NET SDK.
 
@@ -44,7 +44,7 @@ The MSBuild engine's logic is divided into two main stages:
 - execution stage.
 
 ## Entry points
-There are a few entry points for the MSBuild engine: Visual Studio, .NET SDK and the CLI executable (`MSBuild.exe` on Windows, and `msbuild` in unix). These partner products are implementations or extensions of the MSBuild API, and we do care about their smooth integration with MSBuild, but do not support them directly. We only officially support the MSBuild API.
+There are a few entry points for the MSBuild engine: Visual Studio, .NET SDK (`dotnet build` command) and the CLI executable (`MSBuild.exe` on Windows, and `msbuild` in unix). These partner products are implementations or extensions of the MSBuild API, and we do care about their smooth integration with MSBuild, but do not support them directly. We only officially support the MSBuild API.
 
 The inputs necessary to start a build include:
  - Build logic for the projects, typically the entry point project's XML or from the imports within.
@@ -128,7 +128,7 @@ When a new build is started, MSBuild starts a process that runs some setup code 
 
 In the case of a CLI build the first node becomes the scheduler node and one of the worker nodes, becoming both the entry point for the project build and the scheduler. The main problem that arises from that is when the whole build finishes execution, the OS tears down the process, losing the memory cache and having to restart the whole build process from the start. 
 
-In the case of a Visual Studio build, that uses the MSBuild API to manage the builds, this problem has been solved by having the scheduler process be separate from the Main Visual Studio (`devenv.exe`) process and keeping it very long lived.
+This has been partially addressed by the long lived worker nodes feature (AKA 'nodes reuse'), where the worker nodes keeps alive and can be reused by multiple build requests. The main node (with scheduler, loggers, etc.) is still being teared down. In the case of a Visual Studio build, that uses the MSBuild API to manage the builds, this problem has been solved by having the scheduler process be separate from the Main Visual Studio (`devenv.exe`) process and keeping it very long lived. In case of CLI and experimental feature - [`MSBuild Server`](#msbuild-server) has been authored to address this gap by keeping the main node alive between build requests as well.
 
 
 ## IPC (Inter-Process Communication)
@@ -157,9 +157,6 @@ MSBuild includes some extra features that are related to the build process but d
 
 ## Packaging system
 MSBuild interacts with external packages in almost every build. However, the MSBuild engine does not recognize external packages as third parties, and it also does not handle external dependencies. This is done by a packaging system. The supported one being NuGet. As such, it is NuGet that is responsible for finding the packages, downloading them, and providing the MSBuild engine with a package path for the build.
-
-## Building Solutions
-// TODO - how MSBuild handles solution files (maybe a bit about the slnx support).
 
 ## Restore
 The restore operation is a built-in target, and it executed as any other target within MSBuild. The main function is to walk through the project references and `packages.config` file about all the packages that need to be restored. This process might result in new or updated files in disk, as well as new imports to the build process. The packaging system is handled by NuGet, it includes finding project references, downloading and adding packages to the right place in memory for MSBuild access.
