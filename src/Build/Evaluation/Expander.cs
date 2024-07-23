@@ -3598,7 +3598,7 @@ namespace Microsoft.Build.Evaluation
                             try
                             {
                                 // If there are any out parameters, try to figure out their type and create defaults for them as appropriate before calling the method.
-                                if (args.Any(a => "_".Equals(a)))
+                                if (args.Any(a => "out _".Equals(a)))
                                 {
                                     IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
                                     functionResult = GetMethodResult(objectInstance, methods, args, 0);
@@ -3707,7 +3707,7 @@ namespace Microsoft.Build.Evaluation
             {
                 for (int i = index; i < args.Length; i++)
                 {
-                    if (args[i].Equals("_"))
+                    if (args[i].Equals("out _"))
                     {
                         object toReturn = null;
                         foreach (MethodInfo method in methods)
