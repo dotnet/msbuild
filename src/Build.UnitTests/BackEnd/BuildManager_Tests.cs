@@ -672,11 +672,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when if the environment variable MsBuildForwardPropertiesFromChild is set to a value and
         /// we launch a child node that we get only that value.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1976")]
-#else
         [Fact]
-#endif
         public void OutOfProcNodeForwardCertainproperties()
         {
             string contents = CleanupFileContents(@"
@@ -704,7 +700,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
                 MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
-            BuildResult result = _buildManager.Build(_parameters, data);
+            // We need to recreate build parameters to ensure proper capturing of newly set environment variables
+            BuildParameters parameters = new BuildParameters
+            {
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = new ILogger[] { _logger },
+                EnableNodeReuse = false
+            };
+
+            BuildResult result = _buildManager.Build(parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
@@ -723,11 +727,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we launch a child node that we get only that value. Also, make sure that when a project is pulled from the results cache
         /// and we have a list of properties to serialize that we do not crash. This is to prevent a regression of 826594
         /// </summary>
-#if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1976")]
-#else
         [Fact]
-#endif
         public void OutOfProcNodeForwardCertainpropertiesAlsoGetResultsFromCache()
         {
             string tempProject = _env.CreateFile(".proj").Path;
@@ -766,7 +766,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
                 MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
-            BuildResult result = _buildManager.Build(_parameters, data);
+            // We need to recreate build parameters to ensure proper capturing of newly set environment variables
+            BuildParameters parameters = new BuildParameters
+            {
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = new ILogger[] { _logger },
+                EnableNodeReuse = false
+            };
+
+            BuildResult result = _buildManager.Build(parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
             Assert.Equal(3, _logger.ProjectStartedEvents.Count);
