@@ -178,7 +178,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     private static void ReportResult(
         BuildAnalyzerWrapper analyzerWrapper,
         IAnalysisContext analysisContext,
-        BuildAnalyzerConfigurationInternal[] configPerRule,
+        BuildAnalyzerConfigurationEffective[] configPerRule,
         BuildCheckResult result)
     {
         if (!analyzerWrapper.BuildAnalyzer.SupportedRules.Contains(result.BuildAnalyzerRule))

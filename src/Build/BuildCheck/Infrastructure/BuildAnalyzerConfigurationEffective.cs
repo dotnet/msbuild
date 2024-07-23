@@ -11,7 +11,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// </summary>
 public sealed class BuildAnalyzerConfigurationEffective
 {
-    public BuildAnalyzerConfigurationEffective(string ruleId, EvaluationAnalysisScope evaluationAnalysisScope, BuildAnalyzerResultSeverity severity, bool isEnabled)
+    public BuildAnalyzerConfigurationEffective(string ruleId, EvaluationAnalysisScope evaluationAnalysisScope, BuildAnalyzerResultSeverity severity)
     {
         if (severity == BuildAnalyzerResultSeverity.Default)
         {

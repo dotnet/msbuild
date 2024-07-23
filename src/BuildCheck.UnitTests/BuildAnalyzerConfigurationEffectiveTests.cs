@@ -41,7 +41,7 @@ public class BuildAnalyzerConfigurationEffectiveTests
     [InlineData(BuildAnalyzerResultSeverity.None, false)]
     public void BuildAnalyzerConfigurationInternal_Constructor_SeverityConfig(BuildAnalyzerResultSeverity severity, bool isEnabledExpected)
     {
-        BuildAnalyzerConfigurationInternal configuration = new BuildAnalyzerConfigurationInternal(
+        BuildAnalyzerConfigurationEffective configuration = new BuildAnalyzerConfigurationEffective(
                        ruleId: "ruleId",
                        evaluationAnalysisScope: EvaluationAnalysisScope.ProjectOnly,
                        severity: severity);
@@ -54,7 +54,7 @@ public class BuildAnalyzerConfigurationEffectiveTests
     {
         Should.Throw<ArgumentOutOfRangeException>(() =>
         {
-            new BuildAnalyzerConfigurationInternal(
+            new BuildAnalyzerConfigurationEffective(
                         ruleId: "ruleId",
                         evaluationAnalysisScope: EvaluationAnalysisScope.ProjectOnly,
                         severity: BuildAnalyzerResultSeverity.Default);
