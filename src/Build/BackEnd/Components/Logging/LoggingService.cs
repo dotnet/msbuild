@@ -552,6 +552,9 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return;
             }
+            // Set this right away - to prevent SO exception in case of any future refactoring
+            //  that would refer to the IncludeEvaluation... properties here
+            _evalDataBehaviorSet = true;
 
             bool? escapeHatch = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation;
             if (escapeHatch.HasValue)
@@ -575,14 +578,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
                 else
                 {
-                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
-                        sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
-                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
-                        !IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
+                    bool allSinksIncludeEvalData = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = allSinksIncludeEvalData;
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !allSinksIncludeEvalData;
                 }
             }
-
-            _evalDataBehaviorSet = true;
         }
 
         /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent"/>
