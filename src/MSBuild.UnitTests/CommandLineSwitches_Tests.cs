@@ -1522,6 +1522,8 @@ namespace Microsoft.Build.UnitTests
                 </Project>
                 """;
             using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("_MSBUILDTLENABLED", "0");
+
             string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
 
 #if FEATURE_GET_COMMANDLINE
