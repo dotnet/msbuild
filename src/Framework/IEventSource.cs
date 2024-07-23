@@ -28,11 +28,6 @@ namespace Microsoft.Build.Framework
     public delegate void CustomBuildEventHandler(object sender, CustomBuildEventArgs e);
 
     /// <summary>
-    /// Type of handler for BuildSubmissionStartedEvent events
-    /// </summary>
-    public delegate void BuildSubmissionStartedEventHandler(object sender, BuildSubmissionStartedEventArgs e);
-
-    /// <summary>
     /// Type of handler for BuildStartedEvent events
     /// </summary>
     public delegate void BuildStartedEventHandler(object sender, BuildStartedEventArgs e);

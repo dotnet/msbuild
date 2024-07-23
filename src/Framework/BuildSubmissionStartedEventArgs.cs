@@ -9,27 +9,17 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
-    [Serializable]
-    public class BuildSubmissionStartedEventArgs : BuildStatusEventArgs
+    public sealed class BuildSubmissionStartedEventArgs : BuildStatusEventArgs
     {
-        public IReadOnlyDictionary<string, string?>? GlobalProperties { get; protected set; }
+        public IReadOnlyDictionary<string, string?>? GlobalProperties { get; set; }
 
-        public IEnumerable<string>? EntryProjectsFullPath { get; protected set; }
+        public IEnumerable<string>? EntryProjectsFullPath { get; set; }
 
-        public ICollection<string>? TargetNames { get; protected set; }
+        public ICollection<string>? TargetNames { get; set; }
 
-        public BuildRequestDataFlags? Flags { get; protected set; }
+        public BuildRequestDataFlags? Flags { get; set; }
 
-        public int? SubmissionId { get; protected set; }
-
-        /// <summary>
-        /// Default constructor
-        /// </summary>
-        protected BuildSubmissionStartedEventArgs()
-            : base()
-        {
-            // do nothing
-        }
+        public int? SubmissionId { get; set; }
 
         public BuildSubmissionStartedEventArgs(
             IReadOnlyDictionary<string, string?>? globalProperties,
@@ -37,13 +27,22 @@ namespace Microsoft.Build.Framework
             ICollection<string>? targetNames,
             BuildRequestDataFlags? flags,
             int? submissionId)
-            : base()
         {
             GlobalProperties = globalProperties;
             EntryProjectsFullPath = entryProjectsFullPath;
             TargetNames = targetNames;
             Flags = flags;
             SubmissionId = submissionId;
+        }
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            // TODO
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            // TODO
         }
     }
 }
