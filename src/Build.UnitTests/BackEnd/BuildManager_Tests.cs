@@ -672,7 +672,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Make sure when if the environment variable MsBuildForwardPropertiesFromChild is set to a value and
         /// we launch a child node that we get only that value.
         /// </summary>
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1976")]
+#else
         [Fact]
+#endif
         public void OutOfProcNodeForwardCertainproperties()
         {
             string contents = CleanupFileContents(@"
@@ -727,7 +731,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// we launch a child node that we get only that value. Also, make sure that when a project is pulled from the results cache
         /// and we have a list of properties to serialize that we do not crash. This is to prevent a regression of 826594
         /// </summary>
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1976")]
+#else
         [Fact]
+#endif
         public void OutOfProcNodeForwardCertainpropertiesAlsoGetResultsFromCache()
         {
             string tempProject = _env.CreateFile(".proj").Path;
