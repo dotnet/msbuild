@@ -12,7 +12,6 @@ using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -166,7 +165,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The logging context to be used and piped down throughout evaluation.
         /// </summary>
-        private EvaluationLoggingContext _evaluationLoggingContext;
+        private readonly EvaluationLoggingContext _evaluationLoggingContext;
 
         private bool _logProjectImportedEvents = true;
 
@@ -185,7 +184,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Keeps track of the FullPaths of ProjectRootElements that may have been modified as a stream.
         /// </summary>
-        private List<string> _streamImports;
+        private readonly List<string> _streamImports;
 
         private readonly bool _interactive;
 
@@ -1848,8 +1847,8 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                if ((sdkResult.PropertiesToAdd?.Any() == true) ||
-                    (sdkResult.ItemsToAdd?.Any() == true))
+                if ((sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any()) ||
+                    (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any()))
                 {
                     projectList ??= new List<ProjectRootElement>();
 
@@ -1918,7 +1917,7 @@ namespace Microsoft.Build.Evaluation
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.FullPath = projectPath;
 
-                if (sdkResult.PropertiesToAdd?.Any() == true)
+                if (sdkResult.PropertiesToAdd != null && sdkResult.PropertiesToAdd.Any())
                 {
                     var propertyGroup = project.AddPropertyGroup();
                     foreach (var propertyNameAndValue in sdkResult.PropertiesToAdd)
@@ -1927,7 +1926,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                if (sdkResult.ItemsToAdd?.Any() == true)
+                if (sdkResult.ItemsToAdd != null && sdkResult.ItemsToAdd.Any())
                 {
                     var itemGroup = project.AddItemGroup();
                     foreach (var item in sdkResult.ItemsToAdd)

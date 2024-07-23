@@ -63,8 +63,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static readonly BuildEventContext s_buildEventContext = new BuildEventContext(0 /* node ID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
 
-        private ProjectLink implementation;
-        private IProjectLinkInternal implementationInternal;
+        private readonly ProjectLink implementation;
+        private readonly IProjectLinkInternal implementationInternal;
 
         internal bool IsLinked => implementationInternal.IsLinked;
         internal ProjectLink Link => implementation;
@@ -3441,7 +3441,7 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if ((metadata?.Any() == true) || candidateExistingItemXml.Count > 0)
+                if ((metadata != null && metadata.Any()) || candidateExistingItemXml.Count > 0)
                 {
                     // Don't try to make sure the metadata are the same.
                     return false;
@@ -3846,7 +3846,7 @@ namespace Microsoft.Build.Evaluation
                     return null;
                 }
 
-                if (metadata?.Any() == true)
+                if (metadata != null && metadata.Any())
                 {
                     // Don't bother trying to match up metadata
                     return null;

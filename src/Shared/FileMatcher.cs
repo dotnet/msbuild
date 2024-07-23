@@ -2552,7 +2552,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            if (searchesToExclude?.Count == 0)
+            if (searchesToExclude != null && searchesToExclude.Count == 0)
             {
                 searchesToExclude = null;
             }

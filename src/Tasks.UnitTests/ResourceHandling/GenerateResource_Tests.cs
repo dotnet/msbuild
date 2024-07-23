@@ -11,12 +11,10 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -2149,7 +2147,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.False(result);
 
                 // Should have not written any files
-                Assert.True(t.FilesWritten?.Length == 0);
+                Assert.True(t.FilesWritten == null || t.FilesWritten.Length == 0);
                 Assert.False(File.Exists(resourcesFile));
             }
             finally

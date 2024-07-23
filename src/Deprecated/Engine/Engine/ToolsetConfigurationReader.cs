@@ -8,15 +8,15 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
 using Microsoft.Build.BuildEngine.Shared;
+using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
 
 namespace Microsoft.Build.BuildEngine
 {
     internal class ToolsetConfigurationReader : ToolsetReader
     {
         private ToolsetConfigurationSection configurationSection = null;
-        private ReadApplicationConfiguration readApplicationConfiguration = null;
+        private readonly ReadApplicationConfiguration readApplicationConfiguration = null;
         private bool configurationReadAttempted = false;
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Microsoft.Build.BuildEngine
                                               toolset.ElementInformation.LineNumber
                                           );
 
-                        if (toolset.toolsVersion?.Length == 0)
+                        if (toolset.toolsVersion == null || toolset.toolsVersion.Length == 0)
                         {
                             InvalidToolsetDefinitionException.Throw("InvalidToolsetValueInConfigFileValue", location);
                         }
@@ -104,7 +104,7 @@ namespace Microsoft.Build.BuildEngine
                                       propertyElement.ElementInformation.LineNumber
                                   );
 
-                if (propertyElement.Name?.Length == 0)
+                if (propertyElement.Name == null || propertyElement.Name.Length == 0)
                 {
                     InvalidToolsetDefinitionException.Throw("InvalidToolsetValueInConfigFileValue", location);
                 }
@@ -248,7 +248,7 @@ namespace Microsoft.Build.BuildEngine
         /// toolset definition before, since the .NET configuration classes
         /// won't perform this check without respect for case.
         /// </summary>
-        private Dictionary<string, string> previouslySeenToolsVersions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, string> previouslySeenToolsVersions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Creates a new element of the collection
@@ -413,7 +413,7 @@ namespace Microsoft.Build.BuildEngine
             /// property definition before, since the .NET configuration classes
             /// won't perform this check without respect for case.
             /// </summary>
-            private Dictionary<string, string> previouslySeenPropertyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            private readonly Dictionary<string, string> previouslySeenPropertyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             /// <summary>
             /// Creates a new element

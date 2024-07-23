@@ -90,7 +90,7 @@ namespace Microsoft.Build.Evaluation
                             toolset.ElementInformation.LineNumber,
                             0);
 
-                        if (toolset.toolsVersion?.Length == 0)
+                        if (toolset.toolsVersion == null || toolset.toolsVersion.Length == 0)
                         {
                             InvalidToolsetDefinitionException.Throw(
                                 "InvalidToolsetValueInConfigFileValue",
@@ -167,7 +167,7 @@ namespace Microsoft.Build.Evaluation
             {
                 ElementLocation location = ElementLocation.Create(propertyElement.ElementInformation.Source, propertyElement.ElementInformation.LineNumber, 0);
 
-                if (propertyElement.Name?.Length == 0)
+                if (propertyElement.Name == null || propertyElement.Name.Length == 0)
                 {
                     InvalidToolsetDefinitionException.Throw("InvalidToolsetValueInConfigFileValue", location.LocationString);
                 }

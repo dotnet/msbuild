@@ -518,7 +518,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void VerifyThrowArgumentLengthIfNotNull<T>([MaybeNull] IReadOnlyCollection<T>? parameter, string parameterName)
         {
-            if (parameter?.Count == 0)
+            if (parameter == null || parameter.Count == 0)
             {
                 ThrowArgumentLength(parameterName);
             }
@@ -551,7 +551,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void VerifyThrowArgumentLengthIfNotNull(string? parameter, string parameterName)
         {
-            if (parameter?.Length == 0)
+            if (parameter == null || parameter.Length == 0)
             {
                 ThrowArgumentLength(parameterName);
             }

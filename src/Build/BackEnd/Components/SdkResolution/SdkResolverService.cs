@@ -423,8 +423,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 }
                 else if (loggingContext.LoggingService.MinimumRequiredMessageImportance >= MessageImportance.Low)
                 {
-                    string resultWarnings = result.Warnings?.Any() == true ? string.Join(Environment.NewLine, result.Warnings) : "null";
-                    string resultErrors = result.Errors?.Any() == true ? string.Join(Environment.NewLine, result.Errors) : "null";
+                    string resultWarnings = result.Warnings != null && result.Warnings.Any() ? string.Join(Environment.NewLine, result.Warnings) : "null";
+                    string resultErrors = result.Errors != null && result.Errors.Any() ? string.Join(Environment.NewLine, result.Errors) : "null";
 
                     loggingContext.LogComment(MessageImportance.Low, "SDKResolverAttempt", sdkResolver.Name, sdk.ToString(), resultWarnings, resultErrors);
                 }

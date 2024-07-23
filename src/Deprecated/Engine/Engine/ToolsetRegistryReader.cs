@@ -33,7 +33,7 @@ namespace Microsoft.Build.BuildEngine
         private const string msbuildRegistryPath = @"SOFTWARE\Microsoft\MSBuild";
 
         // Cached registry wrapper at root of the msbuild entries
-        private RegistryKeyWrapper msbuildRegistryWrapper;
+        private readonly RegistryKeyWrapper msbuildRegistryWrapper;
 
         /// <summary>
         /// Default constructor
@@ -123,7 +123,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 string propertyValue = null;
 
-                if (propertyName?.Length == 0)
+                if (propertyName == null || propertyName.Length == 0)
                 {
                     InvalidToolsetDefinitionException.Throw("PropertyNameInRegistryHasZeroLength", toolsVersionWrapper.Name);
                 }

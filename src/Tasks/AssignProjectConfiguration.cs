@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks
             set
             {
                 _defaultToVcxPlatformMapping = value;
-                if (_defaultToVcxPlatformMapping?.Length == 0)
+                if (_defaultToVcxPlatformMapping != null && _defaultToVcxPlatformMapping.Length == 0)
                 {
                     _defaultToVcxPlatformMapping = null;
                 }
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Tasks
             {
                 _vcxToDefaultPlatformMapping = value;
 
-                if (_vcxToDefaultPlatformMapping?.Length == 0)
+                if (_vcxToDefaultPlatformMapping != null && _vcxToDefaultPlatformMapping.Length == 0)
                 {
                     _vcxToDefaultPlatformMapping = null;
                 }

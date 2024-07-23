@@ -291,7 +291,7 @@ namespace Microsoft.Build.Evaluation
         {
             string propertyValue = null;
 
-            if (propertyName?.Length == 0)
+            if (propertyName == null || propertyName.Length == 0)
             {
                 InvalidToolsetDefinitionException.Throw("PropertyNameInRegistryHasZeroLength", toolsetWrapper.Name);
             }
