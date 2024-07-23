@@ -25,6 +25,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
@@ -808,7 +809,7 @@ namespace Microsoft.Build.CommandLine
                     // as if a build is happening
                     if (FileUtilities.IsBinaryLogFilename(projectFile))
                     {
-                        ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount);
+                        ReplayBinaryLog(projectFile, loggers, distributedLoggerRecords, cpuCount, isBuildCheckEnabled);
                     }
                     else if (outputPropertiesItemsOrTargetResults && FileUtilities.IsSolutionFilename(projectFile))
                     {
@@ -4418,20 +4419,26 @@ namespace Microsoft.Build.CommandLine
             string binaryLogFilePath,
             ILogger[] loggers,
             IEnumerable<DistributedLoggerRecord> distributedLoggerRecords,
-            int cpuCount)
+            int cpuCount,
+            bool isBuildCheckEnabled)
         {
+
             var replayEventSource = new BinaryLogReplayEventSource();
+
+            var eventSource = isBuildCheckEnabled ?
+                BuildCheckReplayModeConnector.GetMergedEventSource(BuildManager.DefaultBuildManager, replayEventSource) :
+                replayEventSource;
 
             foreach (var distributedLoggerRecord in distributedLoggerRecords)
             {
                 ILogger centralLogger = distributedLoggerRecord.CentralLogger;
                 if (centralLogger is INodeLogger nodeLogger)
                 {
-                    nodeLogger.Initialize(replayEventSource, cpuCount);
+                    nodeLogger.Initialize(eventSource, cpuCount);
                 }
                 else
                 {
-                    centralLogger?.Initialize(replayEventSource);
+                    centralLogger?.Initialize(eventSource);
                 }
             }
 
@@ -4439,11 +4446,11 @@ namespace Microsoft.Build.CommandLine
             {
                 if (logger is INodeLogger nodeLogger)
                 {
-                    nodeLogger.Initialize(replayEventSource, cpuCount);
+                    nodeLogger.Initialize(eventSource, cpuCount);
                 }
                 else
                 {
-                    logger.Initialize(replayEventSource);
+                    logger.Initialize(eventSource);
                 }
             }
 

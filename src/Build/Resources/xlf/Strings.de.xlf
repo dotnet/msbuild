@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AbortingBuild">
         <source>Attempting to cancel the build...</source>
-        <target state="new">Attempting to cancel the build...</target>
+        <target state="translated">Es wird versucht, den Buildvorgang abzubrechen...</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
@@ -131,6 +131,11 @@
         <target state="translated">Schreibvorgänge werden nicht unterstützt.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckEnabled">
+        <source>The BuildCheck is enabled for this build.</source>
+        <target state="translated">BuildCheck ist für diesen Build aktiviert.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">Fehler beim Erstellen der Frage. Der Build wurde früh beendet, da ein Ziel oder eine Aufgabe gefunden wurde, die nicht aktuell war.</target>
@@ -212,29 +217,39 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
+        <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
+        <target state="translated">Es wurden mehrere Überladungen für die Methode „{0}“ mit {1} Parametern gefunden. Dies wird derzeit nicht unterstützt.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomAnalyzerAssemblyNotExist">
-        <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
+        <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
         <target state="translated">Fehler beim Suchen der angegebenen benutzerdefinierten Analysetoolassembly: {0}. Überprüfen Sie, ob sie vorhanden ist.</target>
         <note>The message is emitted when the custom analyzer assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
-        <source>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Fehler beim Laden des benutzerdefinierten Analysetooltyps „{0}“ aus der Assembly „{1}“. Stellen Sie sicher, dass es die Basisklasse „Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer“ erbt. Wenn es sich nicht um ein benutzerdefiniertes Analysetool handelt, sollte es nicht verfügbar gemacht werden. Weitere Informationen: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="translated">Fehler beim Laden des benutzerdefinierten Analysetooltyps „{0}“ aus der Assembly: {1}. Stellen Sie sicher, dass es die Basisklasse „Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer“ erbt. Wenn es sich nicht um ein benutzerdefiniertes Analysetool handelt, sollte es nicht verfügbar gemacht werden. Weitere Informationen: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedAcquisition">
-        <source>Failed to register the custom analyzer: {0}.</source>
+        <source>Failed to register the custom analyzer: '{0}'.</source>
         <target state="translated">Fehler beim Registrieren des benutzerdefinierten Analysetools: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer in process.</note>
       </trans-unit>
       <trans-unit id="CustomAnalyzerFailedRuleLoading">
-        <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="translated">Fehler beim Instanziieren der benutzerdefinierten Analysetoolregel mit der folgenden Ausnahme: {0}.</target>
+        <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
+        <target state="translated">Fehler beim Instanziieren der benutzerdefinierten Analyseregel. Ausnahme: {0}.</target>
         <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomAnalyzerRegistered">
+        <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
+        <target state="translated">Das benutzerdefinierte Analysetool „{0}“ ist für den Build vom Folgenden aus registriert: {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
-        <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="translated">Benutzerdefinierte Analysetoolregel {0} wurde erfolgreich registriert.</target>
+        <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
+        <target state="translated">Die benutzerdefinierte Analyseregel „{0}“ wurde erfolgreich registriert.</target>
         <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">

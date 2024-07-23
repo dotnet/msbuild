@@ -15,6 +15,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
+using Microsoft.Build.Experimental.BuildCheck;
 
 #nullable disable
 
@@ -69,7 +70,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// Logging services is used as a helper class to assist logging messages in getting to the correct loggers.
     /// </summary>
-    internal partial class LoggingService : ILoggingService, INodePacketHandler, IBuildComponent
+    internal partial class LoggingService : ILoggingService, INodePacketHandler
     {
         /// <summary>
         /// The default maximum size for the logging event queue.
@@ -1590,6 +1591,12 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
+            }
+
+            if (buildEventArgs is BuildCheckResultError checkResultError)
+            {
+                // If the specified BuildCheckResultError was issued, an empty ISet<string> signifies that the specified build check warnings should be treated as errors.
+                AddWarningsAsErrors(checkResultError.BuildEventContext, new HashSet<string>());
             }
 
             if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
