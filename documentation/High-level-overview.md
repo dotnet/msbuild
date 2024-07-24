@@ -43,6 +43,32 @@ The MSBuild engine's logic is divided into two main stages:
 - evalution stage
 - execution stage.
 
+```mermaid
+---
+title: MSBuild engine parts
+---
+flowchart LR
+    subgraph Build inputs
+    I["`Inputs
+    _.proj_ file`"]
+    API([API])
+    end
+    
+    subgraph API inputs
+    VS[Visual Studio] --> API
+    SDK[.NET SDK] --> API
+    NC[NuGet Client] --> API
+    E[Extensibilities] --> API
+    end
+
+    API & I --> EN[Entry Point Node 
+    and Scheduler]
+    
+    EN --IPC--> WN[Worker Nodes]
+    WN <--IPC--> TH[Task Host]
+    L[Loggers] --> WN & EN
+```
+
 ## Entry points
 There are a few entry points for the MSBuild engine: Visual Studio, .NET SDK (`dotnet build` command) and the CLI executable (`MSBuild.exe` on Windows, and `msbuild` in unix). These partner products are implementations or extensions of the MSBuild API, and we do care about their smooth integration with MSBuild, but do not support them directly. We only officially support the MSBuild API.
 
@@ -50,6 +76,28 @@ The inputs necessary to start a build include:
  - Build logic for the projects, typically the entry point project's XML or from the imports within.
  - User defined imports
  - The generated build imports (`.g.props` and `.g.targets`) from NuGet restore.
+
+ ```mermaid
+flowchart TD
+    UI[User specific imports]
+    
+    UL["`User defined import logic
+    _.props_ and _.targets_`"]
+    
+    PROJ["`_.proj_ file`"
+    eg. Foo.csproj]
+    
+    IL[Common Targets Logic
+    SDK or VS]
+
+    NI["`NuGet imports
+    _.g.props_ and _.g.targets_`"]
+
+    UI --> PROJ
+    UL --> PROJ
+    IL --> PROJ
+    NI --> PROJ
+ ```
 
 An example of the imported build logic is the `<Project Sdk="Microsoft.NET.Sdk">` that can be seen in some of the built-in .NET templates. This indicates that the project will use build logic logic from the `Microsoft.NET.Sdk` component comes with the .NET SDK.
 
@@ -67,7 +115,6 @@ The first step of evaluation is to load the project file and the XML data it con
 title: Evaluation passes 
 ---
 flowchart LR
-    BT(Build started) --> 
     PE[Project evaluation] --> 
     EV[Environmental variables] --> 
     IP[Imports and Properties 
@@ -75,8 +122,7 @@ flowchart LR
     ID[Item definition] -->
     IO[Items outside tagets] -->
     UE[UsingTask elements] -->
-    T[Targets] -->
-    EP(Execution Phase)
+    T[Targets]
 ```
 
 At this time, the restore target has run already, so all imports are files on disk and are processed as paths by the engine. Another characteristic of imports is that they are brough within the project logic, so other projects can refence the same import logic instead of having a copy of it.
