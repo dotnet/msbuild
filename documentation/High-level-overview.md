@@ -62,7 +62,22 @@ Evaluation of the build is the first step of the process. Its main objective is 
 
 The first step of evaluation is to load the project file and the XML data it contains. There are multiple evaluation passes within the same project, each is responsible for evaluating a different type of data is required for subsequent passes. Data within the evaluation can be modified depending on the pass the build is currently executing. For example, during the pass that evaluated imports and properties, properties can be modified, but after the pass is done the properties are read-only until the execution phase.
 
-// TODO: add diagram with the evaluation phase passes
+```mermaid
+---
+title: Evaluation passes 
+---
+flowchart LR
+    BT(Build started) --> 
+    PE[Project evaluation] --> 
+    EV[Environmental variables] --> 
+    IP[Imports and Properties 
+    outisde targets] -->
+    ID[Item definition] -->
+    IO[Items outside tagets] -->
+    UE[UsingTask elements] -->
+    T[Targets] -->
+    EP(Execution Phase)
+```
 
 At this time, the restore target has run already, so all imports are files on disk and are processed as paths by the engine. Another characteristic of imports is that they are brough within the project logic, so other projects can refence the same import logic instead of having a copy of it.
 
@@ -114,6 +129,19 @@ The scheduler is the part of the MSBuild engine responsible for scheduling work,
 On a project's operation end and returned result, it sends that information to the scheduler. The scheduler maintains results of all of the build's executed requests, so when a project or target depends on another to proceed execution, the scheduler can just retrieve that information from the Project Result Cache.
 
 If the node's operation is blocked by a dependency, it asks the scheduler for the results of the dependency's execution. If the dependency has been executed, the result is retrieved from the Project Result Cache. If the process has not been executed, the scheduler suspends the current project, making the target / project a pending request. When a request is pending, the scheduler adds to the list of requests to execute, and will eventually assign the dependency to be executed to either the current node or another one that is free.
+
+```mermaid
+---
+title: Build where project A depends on project B
+---
+flowchart TD
+   A1[Build Request] --Project A--> S1[Scheduler]
+   S1 --> C1{Is cached}
+   C1 ---Yes1[Yes]--> Result1[Return result]
+   C1 ---No1[No]--> Build1[Build Project A]
+   Build1 --Dependency identified--> PB1[Project B]
+   PB1 --Request Build--> S1
+```
 
 ### Incremental build
 Incremental builds are extremely useful for local development, as it speeds consecutive builds on local machines. For this, the output from build targets is persisted to disk, which becomes one big cache for MSBuild.
