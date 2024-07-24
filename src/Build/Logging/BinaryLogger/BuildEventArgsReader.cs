@@ -1094,9 +1094,15 @@ namespace Microsoft.Build.Logging
             var fields = ReadBuildEventArgsFields();
 
             string? environmentVariableName = ReadDeduplicatedString();
-            int line = ReadInt32();
-            int column = ReadInt32();
-            string? fileName = ReadDeduplicatedString();
+            int line = 0;
+            int column = 0;
+            string? fileName = null;
+            if (_fileFormatVersion >= 22)
+            {
+                line = ReadInt32();
+                column = ReadInt32();
+                fileName = ReadDeduplicatedString();
+            }
 
             BuildEventArgs e = new EnvironmentVariableReadEventArgs(
                     environmentVariableName ?? string.Empty,
