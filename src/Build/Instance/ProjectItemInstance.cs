@@ -2063,7 +2063,7 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// The singleton instance.
                 /// </summary>
-                private static readonly TaskItemFactory s_instance = new TaskItemFactory();
+                private static TaskItemFactory s_instance = new TaskItemFactory();
 
                 /// <summary>
                 /// Private constructor for singleton creation.
@@ -2190,12 +2190,12 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// Item type
                 /// </summary>
-                private readonly string _itemType;
+                private string _itemType;
 
                 /// <summary>
                 /// Backing item
                 /// </summary>
-                private readonly TaskItem _item;
+                private TaskItem _item;
 
                 /// <summary>
                 /// Constructor.
