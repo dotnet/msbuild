@@ -1522,7 +1522,6 @@ namespace Microsoft.Build.UnitTests
                 </Project>
                 """;
             using TestEnvironment testEnvironment = TestEnvironment.Create();
-
             string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
 
 #if FEATURE_GET_COMMANDLINE
