@@ -1137,6 +1137,7 @@ namespace Microsoft.Build.UnitTests
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             testEnvironment.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en"); // build machines may have other values.
+            testEnvironment.SetEnvironmentVariable("_MSBUILDTLENABLED", "0");
             CultureInfo.CurrentUICulture = new CultureInfo("en"); // Validate that the thread will produce an english log regardless of the machine OS language
 
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
