@@ -1091,7 +1091,7 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadEnvironmentVariableReadEventArgs()
         {
-            var fields = ReadBuildEventArgsFields();
+            var fields = ReadBuildEventArgsFields(readImportance: true);
 
             string? environmentVariableName = ReadDeduplicatedString();
             int line = 0;
