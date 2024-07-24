@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Experimental.BuildCheck;
 using System.Collections.Concurrent;
+using Microsoft.Build.Experimental.BuildCheck.Utilities;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -31,9 +32,9 @@ internal sealed class ConfigurationProvider
     /// </summary>
     private readonly ConcurrentDictionary<string, CustomConfigurationData> _customConfigurationData = new ConcurrentDictionary<string, CustomConfigurationData>(StringComparer.InvariantCultureIgnoreCase);
 
-    private readonly string[] _infrastructureConfigurationKeys = new string[] {
-        nameof(BuildAnalyzerConfiguration.EvaluationAnalysisScope).ToLower(),
-        nameof(BuildAnalyzerConfiguration.Severity).ToLower()
+    private readonly string[] _infrastructureConfigurationKeys = {
+        BuildCheckConstants.scopeConfigurationKey,
+        BuildCheckConstants.severityConfigurationKey,
     };
 
     /// <summary>

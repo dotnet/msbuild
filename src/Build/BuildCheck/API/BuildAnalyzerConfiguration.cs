@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck.Utilities;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
@@ -66,32 +67,78 @@ public class BuildAnalyzerConfiguration
     /// </summary>
     /// <param name="configDictionary">The configuration dictionary containing the settings for the build analyzer. The configuration's keys are expected to be in lower case or the EqualityComparer to ignore case.</param>
     /// <returns>A new instance of <see cref="BuildAnalyzerConfiguration"/> with the specified settings.</returns>
-    internal static BuildAnalyzerConfiguration Create(Dictionary<string, string>? configDictionary)
+    internal static BuildAnalyzerConfiguration Create(Dictionary<string, string>? configDictionary) => new()
     {
-        return new()
+        EvaluationAnalysisScope = TryExtractEvaluationAnalysisScope(configDictionary),
+        Severity = TryExtractSeverity(configDictionary),
+    };
+
+
+    private static EvaluationAnalysisScope? TryExtractEvaluationAnalysisScope(Dictionary<string, string>? config)
+    {
+
+        if (!TryExtractValue(BuildCheckConstants.scopeConfigurationKey, config, out string? stringValue) || stringValue is null)
         {
-            EvaluationAnalysisScope = TryExtractValue(nameof(EvaluationAnalysisScope), configDictionary, out EvaluationAnalysisScope evaluationAnalysisScope) ? evaluationAnalysisScope : null,
-            Severity = TryExtractValue(nameof(Severity), configDictionary, out BuildAnalyzerResultSeverity severity) ? severity : null
-        };
+            return null;
+        }
+
+        switch (stringValue)
+        {
+            case "project":
+                return BuildCheck.EvaluationAnalysisScope.ProjectOnly;
+            case "current_imports":
+                return BuildCheck.EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree;
+            case "without_sdks":
+                return BuildCheck.EvaluationAnalysisScope.ProjectWithImportsWithoutSdks;
+            case "all":
+                return BuildCheck.EvaluationAnalysisScope.ProjectWithAllImports;
+            default:
+                ThrowIncorrectValueException(BuildCheckConstants.scopeConfigurationKey, stringValue);
+                break;
+        }
+
+        return null;
     }
 
-    private static bool TryExtractValue<T>(string key, Dictionary<string, string>? config, out T value) where T : struct, Enum
+    private static BuildAnalyzerResultSeverity? TryExtractSeverity(Dictionary<string, string>? config)
     {
-        value = default;
+        if (!TryExtractValue(BuildCheckConstants.severityConfigurationKey, config, out string? stringValue) || stringValue is null)
+        {
+            return null;
+        }
 
-        if (config == null || !config.TryGetValue(key.ToLower(), out var stringValue) || stringValue is null)
+        switch (stringValue)
+        {
+            case "none":
+                return BuildAnalyzerResultSeverity.None;
+            case "default":
+                return BuildAnalyzerResultSeverity.Default;
+            case "suggestion":
+                return BuildAnalyzerResultSeverity.Suggestion;
+            case "warning":
+                return BuildAnalyzerResultSeverity.Warning;
+            case "error":
+                return BuildAnalyzerResultSeverity.Error;
+            default:
+                ThrowIncorrectValueException(BuildCheckConstants.severityConfigurationKey, stringValue);
+                break;
+        }
+
+        return null;
+    }
+
+    private static bool TryExtractValue(string key, Dictionary<string, string>? config, out string? stringValue)
+    {
+        stringValue = null;
+
+        if (config == null || !config.TryGetValue(key.ToLower(), out stringValue) || stringValue is null)
         {
             return false;
         }
 
-        var isParsed = Enum.TryParse(stringValue, true, out value);
+        stringValue = stringValue.ToLower();
 
-        if (!isParsed)
-        {
-            ThrowIncorrectValueException(key, stringValue);
-        }
-
-        return isParsed;
+        return true;
     }
 
     private static void ThrowIncorrectValueException(string key, string value)
