@@ -66,7 +66,8 @@ flowchart LR
     
     EN --IPC--> WN[Worker Nodes]
     WN <--IPC--> TH[Task Host]
-    L[Loggers] --> WN & EN
+    L[Loggers] --> EN
+    FW[Forwarding Loggers] --> WN
 ```
 
 ## Entry points
@@ -247,9 +248,9 @@ Users can implement custom tasks via arbitrary .NET code, and MSBuild provides h
 Diagnosability within MSBuild went through some changes. Before we had a debugger in additional to basic logs, where you could step through the XML during the build and debug. This was discarded in favor of a log focused approach, where MSBuild has a more robust logging system that contains more data to identify what is happening during a build.
 
 ### General Loggers
-Logging within MSBuild consists of various integrated and pluggable loggers. Integrated loggers generally processes code structure events, such as communication between nodes during build, or data for BuildCheck analyzers to run properly. Built-in loggers include the Binary Logger, Console / Terminal logger, and a Text Log. Pluggable loggers are third party loggers that can receive events through the MSBuild API, or the .NET event handlers.
+Logging within MSBuild consists of various integrated and third-party loggers. Both use the [`ILogger`](https://learn.microsoft.com/dotnet/api/microsoft.build.framework.ilogger) API. Built-in loggers include the Binary Logger which produces compressed `.binlog` files, the Console and Terminal loggers for interactive output, and a Text Log. Third party loggers  receive events through `ILogger`, and multiple loggers can be connected to a single build.
 
-Pluggable loggers must be specified before the build begins. Because of this, build logic (and NuGet) is not able to manipulate loggers.
+Third-party loggers must be specified before the build begins. Because of this, build logic (and NuGet) is not able to manipulate loggers.
 
 ### Binary logger
 The Binary Logger, also called binlog, is a structured log that captures all the events within a build as well as files that are critical to the build. To read a binlog, the MSBuild executable (`MSBuild.exe` in Windows, and `msbuild` in unix) can replay the events through arbitrary loggers, and third-party tooling like the [Structured Log Viewer](https://msbuildlog.com) can also read binlogs, but it is not officially supported by the MSBuild team.
