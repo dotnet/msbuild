@@ -71,7 +71,7 @@ flowchart LR
 ```
 
 ## Entry points
-There are a few entry points for the MSBuild engine: Visual Studio, .NET SDK (`dotnet build` command) and the CLI executable (`MSBuild.exe` on Windows, and `msbuild` in unix). These partner products are implementations or extensions of the MSBuild API, and we do care about their smooth integration with MSBuild, but do not support them directly. We only officially support the MSBuild API.
+There are a few entry points for the MSBuild engine: Visual Studio, .NET SDK (`dotnet build` command) and the CLI executable (`MSBuild.exe` on Windows, and `msbuild` in unix). These partner products are implementations or extensions of the MSBuild API, and we do care about their smooth integration with MSBuild, but do not support them directly.
 
 The inputs necessary to start a build include:
  - Build logic for the projects, typically the entry point project's XML or from the imports within.
@@ -266,12 +266,7 @@ BuildCheck is new MSBuild extensible and configurable linting/diagnostic feature
 For more information please see [the spec](../documentation/specs/BuildCheck/BuildCheck.md).
 
 ## Resolvers
-There are a few elements within the MSBuild XML that indicate that a call to the .NET SDK is necessary. Some examples include:
- - `<Project Sdk="Microsoft.NET.Sdk">`, where you can also define the SDK version
- - `<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />`, for explicit imports.
- - `<Sdk Name="My.Build.Sdk" Version="1.0.0" />`, another explicit import of the SDK.
-
-When such interaction is necessary for a project build, the first thing that needs to be done is to figure out where the SDK is installed so MSBuild can access the content. This is solved by resolvers, which look for the SDK version that was specified, or gets the latest version.
+There are a few elements within the MSBuild XML that indicate that a call to the .NET SDK is necessary. When such interaction is necessary for a project build, the first thing that needs to be done is to figure out where the SDK is installed so MSBuild can access the content. This is solved by resolvers, which look for the SDK version that was specified, or gets the latest version.
 
 To read more about SDK resolver you can check the [Microsoft Learn page](https://learn.microsoft.com/visualstudio/msbuild/how-to-use-project-sdk#how-project-sdks-are-resolved), or see the [spec documentation](specs/sdk-resolvers-algorithm.md).
 
