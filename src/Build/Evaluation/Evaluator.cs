@@ -165,7 +165,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The logging context to be used and piped down throughout evaluation.
         /// </summary>
-        private readonly EvaluationLoggingContext _evaluationLoggingContext;
+        private EvaluationLoggingContext _evaluationLoggingContext;
 
         private bool _logProjectImportedEvents = true;
 
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Keeps track of the FullPaths of ProjectRootElements that may have been modified as a stream.
         /// </summary>
-        private readonly List<string> _streamImports;
+        private List<string> _streamImports;
 
         private readonly bool _interactive;
 

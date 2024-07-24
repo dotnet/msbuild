@@ -772,7 +772,7 @@ namespace Microsoft.Build.Execution
             /// it is used to calculate built-in metadata. Otherwise,
             /// the current directory is used.
             /// </summary>
-            private readonly string _projectDirectory;
+            private string _projectDirectory;
 
             /// <summary>
             /// Whether the task item is immutable.
@@ -1918,7 +1918,7 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// The project to which item instances created by this factory will belong.
                 /// </summary>
-                private readonly ProjectInstance _project;
+                private ProjectInstance _project;
 
                 /// <summary>
                 /// Constructor not taking an item type.
@@ -2256,7 +2256,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// The singleton comparer.
             /// </summary>
-            private static readonly ProjectItemInstanceEqualityComparer s_comparer = new ProjectItemInstanceEqualityComparer();
+            private static ProjectItemInstanceEqualityComparer s_comparer = new ProjectItemInstanceEqualityComparer();
 
             /// <summary>
             /// Constructor.

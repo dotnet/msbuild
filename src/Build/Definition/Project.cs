@@ -63,8 +63,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static readonly BuildEventContext s_buildEventContext = new BuildEventContext(0 /* node ID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
 
-        private readonly ProjectLink implementation;
-        private readonly IProjectLinkInternal implementationInternal;
+        private ProjectLink implementation;
+        private IProjectLinkInternal implementationInternal;
 
         internal bool IsLinked => implementationInternal.IsLinked;
         internal ProjectLink Link => implementation;

@@ -413,7 +413,7 @@ namespace Microsoft.Build.BuildEngine
             /// property definition before, since the .NET configuration classes
             /// won't perform this check without respect for case.
             /// </summary>
-            private readonly Dictionary<string, string> previouslySeenPropertyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            private Dictionary<string, string> previouslySeenPropertyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             /// <summary>
             /// Creates a new element
