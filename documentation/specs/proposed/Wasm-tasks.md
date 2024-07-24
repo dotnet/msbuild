@@ -4,13 +4,15 @@ Exploration of using Wasm/WASI to create sandboxed [Tasks in MSBuild](https://le
 ## Stories 
 Currently MSBuild tasks have unrestricted access to resources (filesystem, network, environment variables), Wasm/WASI runtimes provide a way to sandbox tasks (all access to resources has to be specified). Sandboxing is useful from a security perspective if someone wanted to run a task from an untrusted source without decompiling and analyzing it.
 
-Today a MSBuild task = .NET class. We want to enable users to write a task in another language. This feature includes designing how tasks will communicate with MSBuild if they're running out of the .NET runtime.
+Today a MSBuild task = .NET class. We want to enable users to write a task in another language. This feature includes designing how tasks will communicate with MSBuild if they're running out of the .NET runtime. Ecosystems that support the Wasm/WASI development features we need are Rust and C/C++.
 
 ## Terminology and context
 -  **WebAssembly (abbreviated Wasm)**
 > is a binary instruction format for a stack-based virtual machine. Wasm is designed as a portable compilation target for programming languages, enabling deployment on the web for client and server applications. - [webassembly.org/](https://webassembly.org/)
 
 - [**WASI**](https://wasi.dev/) : WebAssembly System Interface is a standard for APIs for software compiled to Wasm to use system resouces outside of browsers.
+    - WASIp1 filesystem, environment variables, stdIO, programs are "Modules"
+    - WASIp2 rich interface data types, networking, programs are "Components"
 - [**Wasmtime**](https://wasmtime.dev) : Wasm runtime implementation for desktops supporting WASI
 - **Wasm Module** a compiled Wasm program that exposes functions to the host and expects imports functions from the host
 
@@ -51,7 +53,7 @@ In a build, we can use the [`Exec` task](https://learn.microsoft.com/en-us/visua
 
 #### .NET example
 1. install [wasi-sdk](https://github.com/WebAssembly/wasi-sdk), [wasmtime](https://wasmtime.dev)
-1. `dotnet add workflow wasi-experimental`
+1. `dotnet workload install wasi-experimental`
 2. `dotnet new wasiconsole`
 3. add `<WasmSingleFileBundle>true</WasmSingleFileBundle>` to .csproj,
  this example runs the compiled program after building: 
@@ -119,13 +121,14 @@ Prototypes are implemented in [https://github.com/JanProvaznik/MSBuildWasm](http
 ```
 
 ### Advanced features
-- [ ] .NET example
-- [ ] integrating pipeline for creating Wasm/WASI tasks from code in other languages
+- [ ] ~~.NET example~~ (WASIp1 will not be supported in .NET)
+- [ ] integrating pipeline for creating Wasm/WASI tasks from code in Rust 
     - [ ] investigate integrating tools compiling languages to Wasm/WASI
     - On task level
         - [ ] RustTaskFactory
         - exploring other languages (Go, C/C++, Zig)
-- investigate running an arbitrary .NET task distributed as a dll in the WASI sandbox (👀 Mono runtime)
+- [x] investigate running an arbitrary .NET task distributed as a dll in the WASI sandbox (👀 Mono runtime)
+    - Due to implementing WasmTasks with WASIp1, it will not compatible with .NET runtime effort to support WASIp2
 
 
 ## Design
@@ -154,26 +157,81 @@ C# classes are yellow.
 
 
 ### Wasm/WASI communication with MSBuild
-Without WIT (not implemented in wasmtime-dotnet), the only data type that an be a Wasm function parameter and output is a number. Tasks have parameters which are of the following types: string, bool, [ITaskItem](https://github.com/dotnet/msbuild/blob/main/src/Framework/ITaskItem.cs) (basically a string dict), and arrays of these types.
+Without WASIp2 WIT (not implemented in wasmtime-dotnet), the only data type that an be a Wasm function parameter and output is a number. Tasks have parameters which are of the following types: string, bool, [ITaskItem](https://github.com/dotnet/msbuild/blob/main/src/Framework/ITaskItem.cs) (basically a string dict), and arrays of these types.
 
-The .wasm module has to import functions from "module" msbuild-log: LogError(int,int), LogWarning(int,int), LogMessage(int,int,int), where 1st in LogMessage is important and subsequent pair is a pointer to the shared memory and the length of the string.
-
-The .wasm task file has to export functions GetTaskInfo(), Execute()->int. Where the return type is 0 for success and 1 for failure.
-
-
+The .wasm module has to import functions from "module" msbuild-log: LogError(int str_ptr,int str_len), LogWarning(int str_ptr,int str_len), LogMessage(int MessageImportance,int str_ptr,int str_len). 
+The .wasm task file has to export functions void GetTaskInfo(), int Execute(). Where the return type is 0 for success and 1 for failure.
 
 ### Task parameters 
-What parameters the task has is read from GetTaskInfo in the Task module. When initializing the task with the `WasmTaskFactory` we use reflection to create a corresponding C# type with those properties.
-Task parameters are passed into the wasm module as a JSON string in stdin.
+What parameters the task has is obtained by calling GetTaskInfo() in the Task wasm module. When initializing the task with the `WasmTaskFactory` we use reflection to create a corresponding C# type with corresponding properties.
+Task parameter values are passed into the wasm module as a JSON string in stdin.
 
-We describe the proposed [API description in WIT format](./wasmtask.wit) once it is supported in wasmtime-dotnet as a model for refactoring. This would remove the need to use JSON strings for passing parameters and logs could be passed using strings rather than pointers.
+For future reference we describe the proposed interface [in the WASIp2 WIT format](./wasmtask.wit) once it is supported in wasmtime-dotnet as a model for rewrite to WASIp2. This would remove the need to use JSON strings for passing parameters and logs could be passed using strings rather than pointers.
 
-Every resource has to be explicit, Wasmtime is a sandbox by default.
-Additional parameters that specify execution environment for the task can be specified in the XML: 
+Every resource available to the Wasm/WASI runtime has to be explicit, Wasmtime is a sandbox by default, and WASIp1 via wasmtime-dotnet enables: preopening directories, environment variables, stdIO, args (if ran as a standalone program), 
+Parameters that specify execution environment for the task can be specified in the XML: 
 - InheritEnv=default to false, 
-- Environment="list_of_variables"
 - Directories="directories on host that can be accessed"
 After the task is run, Output parameters as a JSON are read from stdout of the Wasm execution, and parsed back into C# class properties so the rest of MSBuild can use them.
+
+### Json format for parameter spec
+They mirror MSBuild Task parameters as they need to be reflected to a C# class.
+```json
+{
+    "Properties": {
+        "Param1": {
+            "type": "string", 
+            "required": true, // required attribute in C#
+            "output": false // output attribute in C#
+        },
+        "Param2": {
+            "type": "bool",
+            "required": false,
+            "output": false
+        },
+        "Param3": {
+            "type": "ITaskItem", 
+            "required": false,
+            "output": false
+        },
+        "Param4": {
+            "type": "ITaskItem[]",
+            "required": false,
+            "output": true 
+        }
+    }
+}
+
+```
+### Json format for parameter values
+```json
+{
+    "Properties" : {
+        "Param1": "hello",
+        "Param2": true,
+        "Param3": {
+            "ItemSpec": "C:\\real\\path\\file.txt",
+            "WasmPath" : "file.txt", // guest runtime path
+            "More dotnet metadata": "..."
+            } 
+    }
+}
+```
+
+### Json format for task output
+Only parameters with the output attribute set to true are recognized from the output in the MSBuild task.
+```json
+{
+        "Param4": [
+            {
+                "WasmPath" : "also/can/be/dir"
+            },
+            {
+                "WasmPath" : "dir2"
+            }
+        ]
+}
+```
 
 
 ### Testing
@@ -200,10 +258,10 @@ using var linker = new Linker(engine);
 linker.DefineWasi(); // linking WASI
 linker.Define("namespace", "function", (Action)delegate { /* do something */ }); // Host function that can be called from Wasm
 using var store = new Store(engine);
-var wasiConfigBuilder = new WasiConfiguration(); // enable resources: Environment Variables, InheritEnvironment, PreopenedDirectory, StdIO 
+var wasiConfigBuilder = new WasiConfiguration(); // enable resources: InheritEnvironment, PreopenedDirectory, StdIO 
 store.SetWasiConfiguration(wasiConfigBuilder);
 Instance instance = linker.Instantiate(store, module);
-Action fn = instance.GetAction("execute");
+Action fn = instance.GetAction("Execute");
 fn.Invoke();
 ```
 
@@ -273,7 +331,7 @@ fn.Invoke();
 - compile dotnet to Wasm
 - moved to sdk and runtime repos `dotnet workload install wasi-experimental`
     - Discussions: [1](https://github.com/dotnet/runtime/tree/main/src/mono/wasm) [2](https://github.com/dotnet/runtime/discussions/98538#discussioncomment-8499105) [3](https://github.com/dotnet/runtime/issues/65895#issuecomment-1511265657)
-- copy their properties as those would be similar
+- developments that would enable using Wasm/WASI tasks written in .NET were added after the workload release but recently removed as .NET will focus only on WASIp2
 
 MSBuild issues for making other environments for running tasks: [711](https://github.com/dotnet/msbuild/issues/711) [4834](https://github.com/dotnet/msbuild/issues/4834) [7257](https://github.com/dotnet/msbuild/issues/7257)
 
@@ -281,5 +339,6 @@ MSBuild issues for making other environments for running tasks: [711](https://gi
 
 <!-- https://learn.microsoft.com/en-us/visualstudio/msbuild/configure-tasks?view=vs-2022 -->
 <!-- - configuring tasks to run outside the env of the rest of the project, probably not relevant because wasi is too specific-->
-
 - wasmtime-dotnet needs to be signed to have a StrongName and put in a private feed if we'd like to integrate it to MSBuild proper eventually https://github.com/bytecodealliance/wasmtime-dotnet/pull/320
+
+- languages other than Rust are moving slowly and it's unclear if they'll implement WASIp1 at all or just like .NET will focus on WASIp2. Closest to support is Go but it's missing function exports. .NET 9 preview 6 possibly implements everything needed for Wasm/WASI tasks but the code was removed in preview 7 and won't come back.
