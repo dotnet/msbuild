@@ -82,7 +82,6 @@ namespace Microsoft.Build.UnitTests
             TransientTestFile outputFile = env.CreateFile("tempOutput.tmp");
 
             env.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
-            env.SetEnvironmentVariable("_MSBUILDTLENABLED", "0");
 
 #if FEATURE_GET_COMMANDLINE
             MSBuildApp.Execute(@"c:\bin\msbuild.exe """ + inputFile.Path +

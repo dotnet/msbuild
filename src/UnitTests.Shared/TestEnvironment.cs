@@ -429,6 +429,7 @@ namespace Microsoft.Build.UnitTests
         public EnvironmentInvariant()
         {
             _initialEnvironment = Environment.GetEnvironmentVariables();
+            _initialEnvironment.Add("_MSBUILDTLENABLED", "0");
         }
 
         public override void AssertInvariant(ITestOutputHelper output)
