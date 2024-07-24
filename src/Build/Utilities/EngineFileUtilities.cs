@@ -192,7 +192,7 @@ namespace Microsoft.Build.Internal
 
             var filespecHasNoWildCards = !FilespecHasWildcards(filespecEscaped);
             var filespecMatchesLazyWildcard = FilespecMatchesLazyWildcard(filespecEscaped, forceEvaluateWildCards);
-            var excludeSpecsAreEmpty = excludeSpecsEscaped == null || !excludeSpecsEscaped.Any();
+            var excludeSpecsAreEmpty = excludeSpecsEscaped?.Any() != true;
 
             // Return original value if:
             //      FileSpec matches lazyloading regex or

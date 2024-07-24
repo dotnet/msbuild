@@ -8,15 +8,15 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using Microsoft.Build.BuildEngine.Shared;
 using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
+using Microsoft.Build.BuildEngine.Shared;
 
 namespace Microsoft.Build.BuildEngine
 {
     internal class ToolsetConfigurationReader : ToolsetReader
     {
         private ToolsetConfigurationSection configurationSection = null;
-        private readonly ReadApplicationConfiguration readApplicationConfiguration = null;
+        private ReadApplicationConfiguration readApplicationConfiguration = null;
         private bool configurationReadAttempted = false;
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace Microsoft.Build.BuildEngine
         /// toolset definition before, since the .NET configuration classes
         /// won't perform this check without respect for case.
         /// </summary>
-        private readonly Dictionary<string, string> previouslySeenToolsVersions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, string> previouslySeenToolsVersions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Creates a new element of the collection
