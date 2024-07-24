@@ -26,6 +26,8 @@ public class BuildAnalyzerConfiguration
 
     public static BuildAnalyzerConfiguration Null { get; } = new();
 
+    public string? RuleId { get; internal set; }
+
     /// <summary>
     /// This applies only to specific events, that can distinguish whether they are directly inferred from
     ///  the current project, or from some import. If supported it can help tuning the level of detail or noise from analysis.
