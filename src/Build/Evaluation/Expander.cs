@@ -3593,17 +3593,8 @@ namespace Microsoft.Build.Evaluation
                             // otherwise there is the potential of running a function twice!
                             try
                             {
-                                // If there are any out parameters, try to figure out their type and create defaults for them as appropriate before calling the method.
-                                if (args.Any(a => "_".Equals(a)))
-                                {
-                                    IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
-                                    functionResult = GetMethodResult(objectInstance, methods, args, 0);
-                                }
-                                else
-                                {
-                                    // If there are no out parameters, use InvokeMember using the standard binder - this will match and coerce as needed
-                                    functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
-                                }
+                                // First use InvokeMember using the standard binder - this will match and coerce as needed
+                                functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
                             }
                             // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
                             // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coercion is possible, so throw.
@@ -3674,48 +3665,6 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.Message);
                     }
 
-                    return null;
-                }
-            }
-
-            private object GetMethodResult(object objectInstance, IEnumerable<MethodInfo> methods, object[] args, int index)
-            {
-                for (int i = index; i < args.Length; i++)
-                {
-                    if (args[i].Equals("_"))
-                    {
-                        object toReturn = null;
-                        foreach (MethodInfo method in methods)
-                        {
-                            Type t = method.GetParameters()[i].ParameterType;
-                            args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
-                            object currentReturnValue = GetMethodResult(objectInstance, methods, args, i + 1);
-                            if (currentReturnValue is not null)
-                            {
-                                if (toReturn is null)
-                                {
-                                    toReturn = currentReturnValue;
-                                }
-                                else if (!toReturn.Equals(currentReturnValue))
-                                {
-                                    // There were multiple methods that seemed viable and gave different results. We can't differentiate between them so throw.
-                                    ErrorUtilities.ThrowArgument("CouldNotDifferentiateBetweenCompatibleMethods", _methodMethodName, args.Length);
-                                    return null;
-                                }
-                            }
-                        }
-
-                        return toReturn;
-                    }
-                }
-
-                try
-                {
-                    return _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    // This isn't a viable option, but perhaps another set of parameters will work.
                     return null;
                 }
             }
