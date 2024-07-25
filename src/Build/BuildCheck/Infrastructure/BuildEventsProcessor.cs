@@ -55,7 +55,10 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
 
         EvaluatedPropertiesAnalysisData analysisData =
-            new(evaluationFinishedEventArgs.ProjectFile!, propertiesLookup, _evaluatedEnvironmentVariables);
+            new(evaluationFinishedEventArgs.ProjectFile!,
+                evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
+                propertiesLookup,
+                _evaluatedEnvironmentVariables);
 
         _buildCheckCentralContext.RunEvaluatedPropertiesActions(analysisData, analysisContext, ReportResult);
 
@@ -65,7 +68,9 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 evaluationFinishedEventArgs.ProjectFile!, /*unused*/
                 null, /*unused*/null, _cache, false /*Not explicitly loaded - unused*/);
 
-            ParsedItemsAnalysisData itemsAnalysisData = new(evaluationFinishedEventArgs.ProjectFile!,
+            ParsedItemsAnalysisData itemsAnalysisData = new(
+                evaluationFinishedEventArgs.ProjectFile!,
+                evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
                 new ItemsHolder(xml.Items, xml.ItemGroups));
 
             _buildCheckCentralContext.RunParsedItemsActions(itemsAnalysisData, analysisContext, ReportResult);
@@ -109,6 +114,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 TaskParameters = taskParameters,
                 AnalysisData = new(
                     projectFilePath: taskStartedEventArgs.ProjectFile!,
+                    projectConfigurationId: taskStartedEventArgs.BuildEventContext.ProjectInstanceId,
                     taskInvocationLocation: invocationLocation,
                     taskName: taskStartedEventArgs.TaskName,
                     taskAssemblyLocation: taskStartedEventArgs.TaskAssemblyLocation,
@@ -174,6 +180,24 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             taskData.TaskParameters[parameterName] = new TaskInvocationAnalysisData.TaskParameter(parameterValue, isOutput);
         }
     }
+
+    public void ProcessPropertyRead(PropertyReadData propertyReadData, AnalysisLoggingContext analysisContext)
+        => _buildCheckCentralContext.RunPropertyReadActions(
+                propertyReadData,
+                analysisContext,
+                ReportResult);
+
+    public void ProcessPropertyWrite(PropertyWriteData propertyWriteData, AnalysisLoggingContext analysisContext)
+        => _buildCheckCentralContext.RunPropertyWriteActions(
+                propertyWriteData,
+                analysisContext,
+                ReportResult);
+
+    public void ProcessProjectDone(IAnalysisContext analysisContext, string projectFullPath)
+        => _buildCheckCentralContext.RunProjectProcessingDoneActions(
+                new ProjectProcessingDoneData(projectFullPath, analysisContext.BuildEventContext.ProjectInstanceId),
+                analysisContext,
+                ReportResult);
 
     private static void ReportResult(
         BuildAnalyzerWrapper analyzerWrapper,

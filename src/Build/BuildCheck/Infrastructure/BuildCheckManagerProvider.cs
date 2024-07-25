@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -13,6 +14,7 @@ using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Analyzers;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -29,6 +31,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
     internal static IBuildCheckManager GlobalInstance => s_globalInstance ?? throw new InvalidOperationException("BuildCheckManagerProvider not initialized");
 
     public IBuildCheckManager Instance => GlobalInstance;
+
+    public IBuildEngineDataRouter BuildEngineDataRouter => (IBuildEngineDataRouter)GlobalInstance;
+    public static IBuildEngineDataRouter? GlobalBuildEngineDataRouter => (IBuildEngineDataRouter?)s_globalInstance;
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
@@ -60,7 +65,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
     public void ShutdownComponent() => GlobalInstance.Shutdown();
 
-    internal sealed class BuildCheckManager : IBuildCheckManager
+    internal sealed class BuildCheckManager : IBuildCheckManager, IBuildEngineDataRouter
     {
         private readonly TracingReporter _tracingReporter = new TracingReporter();
         private readonly ConfigurationProvider _configurationProvider = new ConfigurationProvider();
@@ -396,10 +401,37 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             loggingContext.LogBuildEvent(analyzerEventArg);
         }
 
+        private readonly ConcurrentDictionary<int, string> _projectsByContextId = new();
+        /// <summary>
+        /// This method fetches the project full path from the context id.
+        /// This is needed because the full path is needed for configuration and later for fetching configured checks
+        ///  (future version might optimize by using the ProjectContextId directly for fetching the checks).
+        /// </summary>
+        /// <param name="buildEventContext"></param>
+        /// <returns></returns>
+        private string GetProjectFullPath(BuildEventContext buildEventContext)
+        {
+            const string defaultProjectFullPath = "Unknown_Project";
+
+            if (_projectsByContextId.TryGetValue(buildEventContext.ProjectContextId, out string? projectFullPath))
+            {
+                return projectFullPath;
+            }
+            else if (buildEventContext.ProjectContextId == BuildEventContext.InvalidProjectContextId &&
+                     _projectsByContextId.Count == 1)
+            {
+                // The coalescing is for a rare possibility of a race where other thread removed the item (between the if check and fetch here).
+                // We currently do not support multiple projects in parallel in a single node anyway.
+                return _projectsByContextId.FirstOrDefault().Value ?? defaultProjectFullPath;
+            }
+
+            return defaultProjectFullPath;
+        }
+
         public void StartProjectEvaluation(
             BuildCheckDataSource buildCheckDataSource,
             IAnalysisContext analysisContext,
-            string fullPath)
+            string projectFullPath)
         {
             if (buildCheckDataSource == BuildCheckDataSource.EventArgs && IsInProcNode)
             {
@@ -409,7 +441,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            SetupAnalyzersForNewProject(fullPath, analysisContext);
+            SetupAnalyzersForNewProject(projectFullPath, analysisContext);
+            _projectsByContextId[analysisContext.BuildEventContext.ProjectContextId] = projectFullPath;
         }
 
         /*
@@ -423,12 +456,47 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
         }
 
-        public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+        public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath)
         {
+            // There can be multiple ProjectStarted-ProjectFinished per single configuration project build (each request for different target)
+            _projectsByContextId[buildEventContext.ProjectContextId] = projectFullPath;
         }
 
-        public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+        public void EndProjectRequest(
+            BuildCheckDataSource buildCheckDataSource,
+            IAnalysisContext analysisContext,
+            string projectFullPath)
         {
+            _buildEventsProcessor.ProcessProjectDone(analysisContext, projectFullPath);
+            _projectsByContextId.TryRemove(analysisContext.BuildEventContext.ProjectContextId, out _);
+        }
+
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext analysisContext)
+        {
+            if (!_buildCheckCentralContext.HasPropertyReadActions)
+            {
+                return;
+            }
+
+            PropertyReadData propertyReadData = new(
+                GetProjectFullPath(analysisContext.BuildEventContext),
+                analysisContext.BuildEventContext.ProjectInstanceId,
+                propertyReadInfo);
+            _buildEventsProcessor.ProcessPropertyRead(propertyReadData, analysisContext);
+        }
+
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext analysisContext)
+        {
+            if (!_buildCheckCentralContext.HasPropertyWriteActions)
+            {
+                return;
+            }
+
+            PropertyWriteData propertyWriteData = new(
+                GetProjectFullPath(analysisContext.BuildEventContext),
+                analysisContext.BuildEventContext.ProjectInstanceId,
+                propertyWriteInfo);
+            _buildEventsProcessor.ProcessPropertyWrite(propertyWriteData, analysisContext);
         }
 
         public void Shutdown()
