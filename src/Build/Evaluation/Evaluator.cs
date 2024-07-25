@@ -343,7 +343,7 @@ namespace Microsoft.Build.Evaluation
                 IEnumerable properties = null;
                 IEnumerable items = null;
 
-                if (evaluator._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItems)
+                if (evaluator._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent)
                 {
                     globalProperties = evaluator._data.GlobalPropertiesDictionary;
                     properties = Traits.LogAllEnvironmentVariables ? evaluator._data.Properties : evaluator.FilterOutEnvironmentDerivedProperties(evaluator._data.Properties);
