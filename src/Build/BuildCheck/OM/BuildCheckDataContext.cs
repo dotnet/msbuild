@@ -28,20 +28,22 @@ public abstract class AnalysisData(string projectFilePath, int? projectConfigura
     /// </summary>
     public string ProjectFilePath { get; } = projectFilePath;
 
-    /// <summary>
-    /// The unique id of a project with unique global properties set.
-    /// This is helpful to distinguish between different configurations of a single project in case of multitargeting.
-    ///
-    /// In cases where the project instance cannot be determined, it will be set to <see cref="BuildEventContext.InvalidProjectInstanceId"/>.
-    /// </summary>
-    /// <remarks>
-    /// The same project with same global properties (aka configuration), can be executed multiple times to obtain results for multiple targets.
-    ///  (this is internally distinguished as 'ProjectContextId' - each context is a different request for different targets results).
-    /// This is not distinguished by the ProjectConfigurationId - as all of those executions share same configuration and results and prevents re-execution of the same targets.
-    ///
-    /// InstanceId (ConfigurationId): https://github.com/dotnet/msbuild/blob/2a8b16dbabd25782554ff0fe77619d58eccfe603/src/Build/BackEnd/BuildManager/BuildManager.cs#L2186-L2244
-    /// </remarks>
-    public int ProjectConfigurationId { get; } = projectConfigurationId ?? BuildEventContext.InvalidProjectInstanceId;
+    // TBD: ProjectConfigurationId is not yet populated - as we need to properly anchor project build events
+    ///// <summary>
+    ///// The unique id of a project with unique global properties set.
+    ///// This is helpful to distinguish between different configurations of a single project in case of multitargeting.
+    /////
+    ///// In cases where the project instance cannot be determined, it will be set to <see cref="BuildEventContext.InvalidProjectInstanceId"/>.
+    ///// This is generally case of all evaluation-time data. To relate evaluation-time and build-execution-time data, use (TBD: ProjectStarted event/data)
+    ///// </summary>
+    ///// <remarks>
+    ///// The same project with same global properties (aka configuration), can be executed multiple times to obtain results for multiple targets.
+    /////  (this is internally distinguished as 'ProjectContextId' - each context is a different request for different targets results).
+    ///// This is not distinguished by the ProjectConfigurationId - as all of those executions share same configuration and results and prevents re-execution of the same targets.
+    /////
+    ///// InstanceId (ConfigurationId): https://github.com/dotnet/msbuild/blob/2a8b16dbabd25782554ff0fe77619d58eccfe603/src/Build/BackEnd/BuildManager/BuildManager.cs#L2186-L2244
+    ///// </remarks>
+    //public int ProjectConfigurationId { get; } = projectConfigurationId ?? BuildEventContext.InvalidProjectInstanceId;
 
     /// <summary>
     /// Directory path of the file being built (the containing directory of <see cref="ProjectFilePath"/>).
