@@ -2213,10 +2213,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     metadata.
     ============================================================
     -->
-  <PropertyGroup>
-    <GetTargetPathDependsOn>$(GetTargetPathDependsOn)</GetTargetPathDependsOn>
-  </PropertyGroup>
-
   <Target
       Name="GetTargetPath"
       DependsOnTargets="$(GetTargetPathDependsOn)"
@@ -5951,7 +5947,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <DeploymentComputeClickOnceManifestInfoDependsOn>
       CleanPublishFolder;
       $(_RecursiveTargetForContentCopying);
-      _DeploymentGenerateTrustInfo
+      _DeploymentGenerateTrustInfo;
       $(DeploymentComputeClickOnceManifestInfoDependsOn)
     </DeploymentComputeClickOnceManifestInfoDependsOn>
   </PropertyGroup>
