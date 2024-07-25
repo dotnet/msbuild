@@ -13,13 +13,24 @@ namespace Microsoft.Build.Framework
 {
     public sealed class BuildSubmissionStartedEventArgs : BuildStatusEventArgs
     {
+        /// <summary>
+        /// Constructor with default values.
+        /// </summary>
+        public BuildSubmissionStartedEventArgs()
+        {
+            GlobalProperties = new Dictionary<string, string>();
+            EntryProjectsFullPath = Enumerable.Empty<string>();
+            TargetNames = Enumerable.Empty<string>();
+            Flags = BuildRequestDataFlags.None;
+            SubmissionId = 0;
+        }
 
         public BuildSubmissionStartedEventArgs(
-            IEnumerable? globalProperties,
-            IEnumerable<string>? entryProjectsFullPath,
-            IEnumerable<string>? targetNames,
-            BuildRequestDataFlags? flags,
-            int? submissionId)
+            IDictionary<string, string> globalProperties,
+            IEnumerable<string> entryProjectsFullPath,
+            IEnumerable<string> targetNames,
+            BuildRequestDataFlags flags,
+            int submissionId)
         {
             GlobalProperties = globalProperties;
             EntryProjectsFullPath = entryProjectsFullPath;
@@ -28,26 +39,22 @@ namespace Microsoft.Build.Framework
             SubmissionId = submissionId;
         }
 
-        // Dictionary<string, string?>
-        public IEnumerable? GlobalProperties { get; set; }
+        public IDictionary<string, string> GlobalProperties { get; set; }
 
-        // IEnumerable<string>
-        public IEnumerable<string>? EntryProjectsFullPath { get; set; }
+        public IEnumerable<string> EntryProjectsFullPath { get; set; }
 
-        // ICollection<string>
-        public IEnumerable<string>? TargetNames { get; set; }
+        public IEnumerable<string> TargetNames { get; set; }
 
-        public BuildRequestDataFlags? Flags { get; set; }
+        public BuildRequestDataFlags Flags { get; set; }
 
-        public int? SubmissionId { get; set; }
+        public int SubmissionId { get; set; }
 
         internal override void WriteToStream(BinaryWriter writer)
         {
             base.WriteToStream(writer);
 
-            var properties = GlobalProperties.Cast<DictionaryEntry>().Where(entry => entry.Key != null && entry.Value != null);
-            writer.Write7BitEncodedInt(properties.Count());
-            foreach (var entry in properties)
+            writer.Write7BitEncodedInt(GlobalProperties.Count);
+            foreach (var entry in GlobalProperties)
             {
                 writer.Write((string)entry.Key);
                 writer.Write((string?)entry.Value ?? "");
@@ -72,6 +79,36 @@ namespace Microsoft.Build.Framework
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);
+
+            int numberOfProperties = reader.ReadInt32();
+            Dictionary<string, string> globalProperties = new Dictionary<string, string>(numberOfProperties);
+            for (int i = 0; i < numberOfProperties; i++)
+            {
+                string key = reader.ReadString();
+                string value = reader.ReadString();
+
+                if (key != null && value != null)
+                {
+                    globalProperties[value] = key;
+                }
+            }
+
+            int numberOfEntries = reader.ReadInt32();
+            var entries = new string[numberOfEntries];
+            for (int i = 0; i < numberOfEntries; i++)
+            {
+                entries[i] = reader.ReadString();
+            }
+
+            int numberOfTargets = reader.ReadInt32();
+            var targets = new string[numberOfTargets];
+            for (int i = 0;i < numberOfTargets; i++)
+            {
+                targets[i] = reader.ReadString();
+            }
+
+            BuildRequestDataFlags flags = (BuildRequestDataFlags)reader.ReadInt32();
+            int submissionId = reader.ReadInt32();
         }
     }
 }

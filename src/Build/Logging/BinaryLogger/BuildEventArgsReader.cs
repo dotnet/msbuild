@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -623,11 +624,6 @@ namespace Microsoft.Build.Logging
         {
             var fields = ReadBuildEventArgsFields();
 
-            var entryProjectsFullPath = ReadPropertyList();
-            var targetNames = ReadStringDictionary();
-            var flags = (BuildRequestDataFlags)ReadInt32();
-            var submissionId = ReadInt32();
-
             IDictionary<string, string>? globalProperties = null;
             // See ReadProjectEvaluationFinishedEventArgs for details on why we always store global properties in newer version.
             if (_fileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion ||
@@ -635,6 +631,12 @@ namespace Microsoft.Build.Logging
             {
                 globalProperties = ReadStringDictionary();
             }
+            globalProperties = globalProperties ?? new Dictionary<string, string>();
+
+            var entryProjectsFullPath = ReadStringIEnumerable() ?? Enumerable.Empty<string>();
+            var targetNames = ReadStringIEnumerable() ?? Enumerable.Empty<string>();
+            var flags = (BuildRequestDataFlags)ReadInt32();
+            var submissionId = ReadInt32();
 
             var e = new BuildSubmissionStartedEventArgs(
                 globalProperties,
@@ -1573,6 +1575,25 @@ namespace Microsoft.Build.Logging
             for (int i = 0; i < count; i++)
             {
                 ITaskItem item = ReadTaskItem();
+                list[i] = item;
+            }
+
+            return list;
+        }
+
+        private IEnumerable<string>? ReadStringIEnumerable()
+        {
+            int count = ReadInt32();
+            if (count == 0)
+            {
+                return null;
+            }
+
+            var list = new string[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                string item = ReadString();
                 list[i] = item;
             }
 

@@ -627,7 +627,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskFinishedEvent => new TaskFinishedEventArgs(null, null, null, null, null, false),
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
                 LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),
-                LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(null, null, null, null, null),
+                LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
 
 #if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
                 LoggingEventType.AssemblyLoadEvent => new AssemblyLoadBuildEventArgs(),
