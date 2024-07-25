@@ -6891,7 +6891,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MsAppxPackageTargets Condition="'$(MsAppxPackageTargets)'==''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\AppxPackage\Microsoft.AppXPackage.Targets</MsAppxPackageTargets>
 
     <!-- Opt-out switch to allow disabling importing the 'AppxPackage' targers for UWP class libraries using modern .NET -->
-    <EnableAppxPackageTargetsForClassLibraries Condition="'$(EnableAppxPackageTargetsForClassLibraries)' == ''">true</EnableAppxPackageTargetsForClassLibraries>
+    <EnableAppxPackageTargetsForUwpClassLibraries Condition="'$(EnableAppxPackageTargetsForClassLibraries)' == ''">true</EnableAppxPackageTargetsForUwpClassLibraries>
   </PropertyGroup>
 
   <!--
@@ -6902,7 +6902,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         We cannot use this for applications, because the rest of that tooling is not capable of handling modern .NET projects.
         In that case, we either leverage the tooling in WinAppSDK, or DesktopBridge (via a .wapproj project for packaging).
   -->
-  <Import Project="$(MsAppxPackageTargets)" Condition="('$(WindowsAppContainer)' == 'true' or ('$(UseUwpTools)' == 'true' and '$(OutputType)' == 'Library' and '$(EnableAppxPackageTargetsForClassLibraries)' != 'false')) and Exists('$(MsAppxPackageTargets)')" />
+  <Import Project="$(MsAppxPackageTargets)" Condition="('$(WindowsAppContainer)' == 'true' or ('$(UseUwpTools)' == 'true' and '$(OutputType)' == 'Library' and '$(EnableAppxPackageTargetsForUwpClassLibraries)' != 'false')) and Exists('$(MsAppxPackageTargets)')" />
 
   <!-- This import is temporary and will be removed once it is moved into the silverlight targets -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.Data.Entity.targets" Condition="'$(TargetFrameworkIdentifier)' == 'Silverlight' and Exists('$(MSBuildToolsPath)\Microsoft.Data.Entity.targets')"/>
