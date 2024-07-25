@@ -1390,6 +1390,7 @@ namespace Microsoft.Build.Execution
                 submission.BuildRequestDataBase.TargetNames,
                 submission.BuildRequestDataBase.Flags,
                 submission.SubmissionId);
+            submissionStartedEvent.BuildEventContext = buildEventContext;
 
             ((IBuildComponentHost)this).LoggingService.LogBuildEvent(submissionStartedEvent);
 

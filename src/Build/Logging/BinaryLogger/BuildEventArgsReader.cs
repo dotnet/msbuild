@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
@@ -294,6 +295,7 @@ namespace Microsoft.Build.Logging
             {
                 BinaryLogRecordKind.BuildStarted => ReadBuildStartedEventArgs(),
                 BinaryLogRecordKind.BuildFinished => ReadBuildFinishedEventArgs(),
+                BinaryLogRecordKind.BuildSubmissionStarted => ReadBuildSubmissionStartedEventArgs(),
                 BinaryLogRecordKind.ProjectStarted => ReadProjectStartedEventArgs(),
                 BinaryLogRecordKind.ProjectFinished => ReadProjectFinishedEventArgs(),
                 BinaryLogRecordKind.TargetStarted => ReadTargetStartedEventArgs(),
@@ -614,6 +616,34 @@ namespace Microsoft.Build.Logging
                 succeeded,
                 fields.Timestamp);
             SetCommonFields(e, fields);
+            return e;
+        }
+
+        private BuildEventArgs ReadBuildSubmissionStartedEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+
+            var entryProjectsFullPath = ReadPropertyList();
+            var targetNames = ReadStringDictionary();
+            var flags = (BuildRequestDataFlags)ReadInt32();
+            var submissionId = ReadInt32();
+
+            IDictionary<string, string>? globalProperties = null;
+            // See ReadProjectEvaluationFinishedEventArgs for details on why we always store global properties in newer version.
+            if (_fileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion ||
+                ReadBoolean())
+            {
+                globalProperties = ReadStringDictionary();
+            }
+
+            var e = new BuildSubmissionStartedEventArgs(
+                globalProperties,
+                entryProjectsFullPath,
+                targetNames,
+                flags,
+                submissionId);
+            SetCommonFields(e, fields);
+
             return e;
         }
 

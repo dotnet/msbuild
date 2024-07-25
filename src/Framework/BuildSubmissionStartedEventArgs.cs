@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
@@ -11,20 +13,11 @@ namespace Microsoft.Build.Framework
 {
     public sealed class BuildSubmissionStartedEventArgs : BuildStatusEventArgs
     {
-        public IReadOnlyDictionary<string, string?>? GlobalProperties { get; set; }
-
-        public IEnumerable<string>? EntryProjectsFullPath { get; set; }
-
-        public ICollection<string>? TargetNames { get; set; }
-
-        public BuildRequestDataFlags? Flags { get; set; }
-
-        public int? SubmissionId { get; set; }
 
         public BuildSubmissionStartedEventArgs(
-            IReadOnlyDictionary<string, string?>? globalProperties,
+            IEnumerable? globalProperties,
             IEnumerable<string>? entryProjectsFullPath,
-            ICollection<string>? targetNames,
+            IEnumerable<string>? targetNames,
             BuildRequestDataFlags? flags,
             int? submissionId)
         {
@@ -35,14 +28,50 @@ namespace Microsoft.Build.Framework
             SubmissionId = submissionId;
         }
 
+        // Dictionary<string, string?>
+        public IEnumerable? GlobalProperties { get; set; }
+
+        // IEnumerable<string>
+        public IEnumerable<string>? EntryProjectsFullPath { get; set; }
+
+        // ICollection<string>
+        public IEnumerable<string>? TargetNames { get; set; }
+
+        public BuildRequestDataFlags? Flags { get; set; }
+
+        public int? SubmissionId { get; set; }
+
         internal override void WriteToStream(BinaryWriter writer)
         {
-            // TODO
+            base.WriteToStream(writer);
+
+            var properties = GlobalProperties.Cast<DictionaryEntry>().Where(entry => entry.Key != null && entry.Value != null);
+            writer.Write7BitEncodedInt(properties.Count());
+            foreach (var entry in properties)
+            {
+                writer.Write((string)entry.Key);
+                writer.Write((string?)entry.Value ?? "");
+            }
+
+            writer.Write7BitEncodedInt(EntryProjectsFullPath.Count());
+            foreach(var entry in EntryProjectsFullPath)
+            {
+                writer.Write((string)entry);
+            }
+
+            writer.Write7BitEncodedInt(TargetNames.Count());
+            foreach (var entry in TargetNames)
+            {
+                writer.Write((string)entry);
+            }
+
+            writer.Write7BitEncodedInt((int)Flags);
+            writer.Write7BitEncodedInt((int)SubmissionId);
         }
 
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
-            // TODO
+            base.CreateFromStream(reader, version);
         }
     }
 }

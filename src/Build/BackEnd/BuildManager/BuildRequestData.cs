@@ -13,7 +13,6 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-[assembly: TypeForwardedTo(typeof(Microsoft.Build.Execution.BuildRequestDataFlags))]
 namespace Microsoft.Build.Execution
 {
     /// <summary>
