@@ -15,4 +15,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Utilities;
 internal static class BuildCheckConstants
 {
     internal const string infraStatPrefix = "infrastructureStat_";
+
+    internal const string severityConfigurationKey = "severity";
+    internal const string scopeConfigurationKey = "scope";
 }

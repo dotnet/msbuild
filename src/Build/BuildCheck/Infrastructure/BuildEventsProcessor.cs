@@ -3,20 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Diagnostics.Tracing;
-using System.IO;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Components.Caching;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Experimental.BuildCheck;
-using Microsoft.Build.Experimental.BuildCheck.Analyzers;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -49,6 +38,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
     private readonly SimpleProjectRootElementCache _cache = new SimpleProjectRootElementCache();
     private readonly BuildCheckCentralContext _buildCheckCentralContext = buildCheckCentralContext;
+    private Dictionary<string, (string EnvVarValue, string File, int Line, int Column)> _evaluatedEnvironmentVariables = new Dictionary<string, (string EnvVarValue, string File, int Line, int Column)>();
 
     /// <summary>
     /// Keeps track of in-flight tasks. Keyed by task ID as passed in <see cref="BuildEventContext.TaskId"/>.
@@ -65,7 +55,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
 
         EvaluatedPropertiesAnalysisData analysisData =
-            new(evaluationFinishedEventArgs.ProjectFile!, propertiesLookup);
+            new(evaluationFinishedEventArgs.ProjectFile!, propertiesLookup, _evaluatedEnvironmentVariables);
 
         _buildCheckCentralContext.RunEvaluatedPropertiesActions(analysisData, analysisContext, ReportResult);
 
@@ -79,6 +69,17 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 new ItemsHolder(xml.Items, xml.ItemGroups));
 
             _buildCheckCentralContext.RunParsedItemsActions(itemsAnalysisData, analysisContext, ReportResult);
+        }
+    }
+
+    /// <summary>
+    /// The method collects events associated with the used environment variables in projects.
+    /// </summary>
+    internal void ProcessEnvironmentVariableReadEventArgs(string envVarName, string envVarValue, string file, int line, int column)
+    {
+        if (!_evaluatedEnvironmentVariables.ContainsKey(envVarName))
+        {
+            _evaluatedEnvironmentVariables.Add(envVarName, (envVarValue, file, line, column));
         }
     }
 
@@ -177,7 +178,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     private static void ReportResult(
         BuildAnalyzerWrapper analyzerWrapper,
         IAnalysisContext analysisContext,
-        BuildAnalyzerConfigurationInternal[] configPerRule,
+        BuildAnalyzerConfigurationEffective[] configPerRule,
         BuildCheckResult result)
     {
         if (!analyzerWrapper.BuildAnalyzer.SupportedRules.Contains(result.BuildAnalyzerRule))
@@ -188,7 +189,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             return;
         }
 
-        BuildAnalyzerConfigurationInternal config = configPerRule.Length == 1
+        BuildAnalyzerConfigurationEffective config = configPerRule.Length == 1
             ? configPerRule[0]
             : configPerRule.First(r =>
                 r.RuleId.Equals(result.BuildAnalyzerRule.Id, StringComparison.CurrentCultureIgnoreCase));

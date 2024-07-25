@@ -200,12 +200,24 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>?
+        /// or/and <see cref="ProjectStartedEventArgs"/>?
         /// </summary>
-        bool IncludeEvaluationPropertiesAndItems
+        void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent, bool inEvaluationFinishedEvent);
+
+        /// <summary>
+        /// Indicates whether properties and items should be logged on <see cref="ProjectStartedEventArgs"/>.
+        /// </summary>
+        bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
         {
             get;
-            set;
+        }
+
+        /// <summary>
+        /// Indicates whether properties and items should be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>.
+        /// </summary>
+        bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
+        {
+            get;
         }
 
         /// <summary>

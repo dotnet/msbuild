@@ -24,7 +24,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             #region BuildAnalyzer initialization
 
             public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule("BC0000", "TestRule", "TestDescription", "TestMessage",
-                new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Warning, IsEnabled = true });
+                new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Warning });
 
             public override string FriendlyName => "MSBuild.TestAnalyzer";
 
