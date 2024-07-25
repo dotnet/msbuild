@@ -1154,7 +1154,8 @@ namespace Microsoft.Build.BackEnd
             _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
             buildCheckManager.StartProjectRequest(
                 BuildCheckDataSource.BuildExecution,
-                _requestEntry.Request.ParentBuildEventContext);
+                _requestEntry.Request.ParentBuildEventContext,
+                _requestEntry.RequestConfiguration.ProjectFullPath);
 
             try
             {

@@ -456,8 +456,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
         }
 
-        public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+        public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath)
         {
+            // There can be multiple ProjectStarted-ProjectFinished per single configuration project build (each request for different target)
+            _projectsByContextId[buildEventContext.ProjectContextId] = projectFullPath;
         }
 
         public void EndProjectRequest(
