@@ -6891,7 +6891,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MsAppxPackageTargets Condition="'$(MsAppxPackageTargets)'==''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\AppxPackage\Microsoft.AppXPackage.Targets</MsAppxPackageTargets>
 
     <!-- Opt-out switch to allow disabling importing the 'AppxPackage' targets for UWP class libraries using modern .NET -->
-    <EnableAppxPackageTargetsForUwpClassLibraries Condition="'$(EnableAppxPackageTargetsForClassLibraries)' == ''">true</EnableAppxPackageTargetsForUwpClassLibraries>
+    <EnableAppxPackageTargetsForUwpClassLibraries Condition="'$(EnableAppxPackageTargetsForUwpClassLibraries)' == ''">true</EnableAppxPackageTargetsForUwpClassLibraries>
   </PropertyGroup>
 
   <!--
