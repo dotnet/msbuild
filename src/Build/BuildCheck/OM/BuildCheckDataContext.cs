@@ -22,6 +22,10 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 public abstract class AnalysisData(string projectFilePath, int? projectConfigurationId)
 {
     private string? _projectFileDirectory;
+    // The id is going to be used in future revision
+#pragma warning disable CA1823
+    private int? _projectConfigurationId = projectConfigurationId;
+#pragma warning restore CA1823
 
     /// <summary>
     /// Full path to the project file being built.
@@ -43,7 +47,7 @@ public abstract class AnalysisData(string projectFilePath, int? projectConfigura
     /////
     ///// InstanceId (ConfigurationId): https://github.com/dotnet/msbuild/blob/2a8b16dbabd25782554ff0fe77619d58eccfe603/src/Build/BackEnd/BuildManager/BuildManager.cs#L2186-L2244
     ///// </remarks>
-    //public int ProjectConfigurationId { get; } = projectConfigurationId ?? BuildEventContext.InvalidProjectInstanceId;
+    ////public int ProjectConfigurationId { get; } = projectConfigurationId ?? BuildEventContext.InvalidProjectInstanceId;
 
     /// <summary>
     /// Directory path of the file being built (the containing directory of <see cref="ProjectFilePath"/>).
