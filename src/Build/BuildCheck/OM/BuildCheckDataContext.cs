@@ -58,14 +58,14 @@ public class BuildCheckDataContext<T> where T : AnalysisData
 {
     private readonly BuildAnalyzerWrapper _analyzerWrapper;
     private readonly IAnalysisContext _analysisContext;
-    private readonly BuildAnalyzerConfigurationInternal[] _configPerRule;
-    private readonly Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> _resultHandler;
+    private readonly BuildAnalyzerConfigurationEffective[] _configPerRule;
+    private readonly Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> _resultHandler;
 
     internal BuildCheckDataContext(
         BuildAnalyzerWrapper analyzerWrapper,
         IAnalysisContext loggingContext,
-        BuildAnalyzerConfigurationInternal[] configPerRule,
-        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationInternal[], BuildCheckResult> resultHandler,
+        BuildAnalyzerConfigurationEffective[] configPerRule,
+        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> resultHandler,
         T data)
     {
         _analyzerWrapper = analyzerWrapper;

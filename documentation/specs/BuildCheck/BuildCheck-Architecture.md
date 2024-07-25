@@ -122,7 +122,7 @@ Planned model:
 
 # Configuration
 
-**TBD** - implementation details to be amended by @f-alizada 
+[Configuration implmentation details](../../../src/Build/BuildCheck/Infrastructure/EditorConfig/README.md).
 
 ## High-level logic
 
