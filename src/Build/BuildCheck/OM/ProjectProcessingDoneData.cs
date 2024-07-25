@@ -5,4 +5,4 @@ using Microsoft.Build.Experimental.BuildCheck;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
-internal class ProjectProcessingDoneData(string projectFilePath, int? projectInstanceId) : AnalysisData(projectFilePath, projectInstanceId);
+internal class ProjectProcessingDoneData(string projectFilePath, int? projectConfigurationId) : AnalysisData(projectFilePath, projectConfigurationId);

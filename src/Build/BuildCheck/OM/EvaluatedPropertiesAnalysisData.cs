@@ -13,10 +13,10 @@ public class EvaluatedPropertiesAnalysisData : AnalysisData
 {
     internal EvaluatedPropertiesAnalysisData(
         string projectFilePath,
-        int? projectInstanceId,
+        int? projectConfigurationId,
         IReadOnlyDictionary<string, string> evaluatedProperties,
         IReadOnlyDictionary<string, (string EnvVarValue, string File, int Line, int Column)> evaluatedEnvironmentVariables)
-        : base(projectFilePath, projectInstanceId)
+        : base(projectFilePath, projectConfigurationId)
     {
         EvaluatedProperties = evaluatedProperties;
         EvaluatedEnvironmentVariables = evaluatedEnvironmentVariables;

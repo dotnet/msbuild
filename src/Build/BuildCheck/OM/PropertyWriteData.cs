@@ -13,15 +13,15 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 internal class PropertyWriteData(
     string projectFilePath,
-    int? projectInstanceId,
+    int? projectConfigurationId,
     string propertyName,
     IMsBuildElementLocation? elementLocation,
     bool isEmpty)
-    : AnalysisData(projectFilePath, projectInstanceId)
+    : AnalysisData(projectFilePath, projectConfigurationId)
 {
-    public PropertyWriteData(string projectFilePath, int? projectInstanceId, PropertyWriteInfo propertyWriteInfo)
+    public PropertyWriteData(string projectFilePath, int? projectConfigurationId, PropertyWriteInfo propertyWriteInfo)
         : this(projectFilePath,
-            projectInstanceId,
+            projectConfigurationId,
             propertyWriteInfo.PropertyName,
             propertyWriteInfo.ElementLocation,
             propertyWriteInfo.IsEmpty)

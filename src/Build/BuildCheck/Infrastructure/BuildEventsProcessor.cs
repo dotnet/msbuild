@@ -114,7 +114,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 TaskParameters = taskParameters,
                 AnalysisData = new(
                     projectFilePath: taskStartedEventArgs.ProjectFile!,
-                    projectInstanceId: taskStartedEventArgs.BuildEventContext.ProjectInstanceId,
+                    projectConfigurationId: taskStartedEventArgs.BuildEventContext.ProjectInstanceId,
                     taskInvocationLocation: invocationLocation,
                     taskName: taskStartedEventArgs.TaskName,
                     taskAssemblyLocation: taskStartedEventArgs.TaskAssemblyLocation,

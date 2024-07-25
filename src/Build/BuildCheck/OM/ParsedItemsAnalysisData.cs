@@ -46,9 +46,9 @@ public class ParsedItemsAnalysisData : AnalysisData
 {
     internal ParsedItemsAnalysisData(
         string projectFilePath,
-        int? projectInstanceId,
+        int? projectConfigurationId,
         ItemsHolder itemsHolder) :
-        base(projectFilePath, projectInstanceId) => ItemsHolder = itemsHolder;
+        base(projectFilePath, projectConfigurationId) => ItemsHolder = itemsHolder;
 
     public ItemsHolder ItemsHolder { get; }
 }
@@ -109,12 +109,12 @@ public sealed class TaskInvocationAnalysisData : AnalysisData
 
     internal TaskInvocationAnalysisData(
         string projectFilePath,
-        int? projectInstanceId,
+        int? projectConfigurationId,
         ElementLocation taskInvocationLocation,
         string taskName,
         string taskAssemblyLocation,
         IReadOnlyDictionary<string, TaskParameter> parameters)
-        : base(projectFilePath, projectInstanceId)
+        : base(projectFilePath, projectConfigurationId)
     {
         TaskInvocationLocation = taskInvocationLocation;
         TaskName = taskName;
