@@ -92,6 +92,21 @@ namespace Microsoft.Build.Evaluation.Context
         ///     Factory for <see cref="EvaluationContext" />
         /// </summary>
         /// <param name="policy">The <see cref="SharingPolicy"/> to use.</param>
+        /// <param name="fileSystem">The <see cref="IFileSystem"/> to use.
+        ///     This parameter is compatible only with <see cref="SharingPolicy.Shared"/>.
+        ///     The method throws if a file system is used with <see cref="SharingPolicy.Isolated"/> or <see cref="SharingPolicy.SharedSDKCache"/>.
+        ///     The reasoning is that these values guarantee not reusing file system caches between evaluations,
+        ///     and the passed in <paramref name="fileSystem"/> might cache state.
+        /// </param>
+        public static EvaluationContext Create(SharingPolicy policy, MSBuildFileSystemBase fileSystem)
+        {
+            return Create(policy, fileSystem, projectLoadSettings: null);
+        }
+
+        /// <summary>
+        ///     Factory for <see cref="EvaluationContext" />
+        /// </summary>
+        /// <param name="policy">The <see cref="SharingPolicy"/> to use.</param>
         /// <param name="projectLoadSettings">The <see cref="ProjectLoadSettings"/> to use.</param>
         public static EvaluationContext Create(SharingPolicy policy, ProjectLoadSettings? projectLoadSettings)
         {
