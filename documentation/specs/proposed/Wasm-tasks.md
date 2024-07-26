@@ -136,24 +136,26 @@ Prototypes are implemented in [https://github.com/JanProvaznik/MSBuildWasm](http
 
 ```mermaid
 flowchart TD
-    A[MSBuild] -->|Evaluation| B[WasmTaskFactory]
-    A -->|Target execution| C[TaskExecutionHost]
-    C -->|instantiate and\n set parameters from XML| D[WasmTask]
-    H[Rust/C#/Go] -->|"compile using wasi-sdk"| G
-    D -->|gather output \nfor use in other tasks| C 
-    D -->|execute| E[wasmtime-dotnet]
+    A[MSBuild] -.->|1. Registering tasks| B[WasmTaskFactory]
+    A -.->|5. Target execution| C[TaskExecutionHost]
+    C -->|6. a. instantiate \n b. set parameters from XML\n c. Execute task| D[WasmTask]
+    H[languages targeting wasi P1] -->|"0. compile using wasi-sdk/cargo"| G
+    D -->|9. properties| C 
+    
+    D -->|7. run module's Execute function| E[wasmtime-dotnet]
+    E -->|8. stdout json \nwith property values| D
     E <--> F[Wasmtime]
 
-    B -->|Create Type for a specific WasmTask| D
-    B -->|read what the task expects as parameters| E
-    B -->|save path to task parameters| G[.wasm module]
-    E -->|read output from task stdout| D
+    B -->|4. Create Type for\n the specific WasmTask| D
+    B <-->|3. GetTaskParameters| E
+    G[.wasm module] -->|2. module path via XML| B
     %%B, C, D%%
-    style B fill:#ffff00
-    style C fill:#ffff00
-    style D fill:#ffff00
+    style A fill:magenta
+    style B fill:#512bd4
+    style C fill:#512bd4
+    style D fill:#512bd4
 ```
-C# classes are yellow.
+MSBuildWasm classes are purple.
 
 
 ### Wasm/WASI communication with MSBuild
@@ -172,7 +174,7 @@ Every resource available to the Wasm/WASI runtime has to be explicit, Wasmtime i
 Parameters that specify execution environment for the task can be specified in the XML: 
 - InheritEnv=default to false, 
 - Directories="directories on host that can be accessed"
-After the task is run, Output parameters as a JSON are read from stdout of the Wasm execution, and parsed back into C# class properties so the rest of MSBuild can use them.
+- After the task is run, Output parameters as a JSON are read from stdout of the Wasm execution, and parsed back into C# class properties so the rest of MSBuild can use them.
 
 ### Json format for parameter spec
 They mirror MSBuild Task parameters as they need to be reflected to a C# class.
