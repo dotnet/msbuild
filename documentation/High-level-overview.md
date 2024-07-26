@@ -1,5 +1,5 @@
 # What is MSBuild
-MSBuild is a build platform used mainly for .NET and Visual Studio. But when referencing MSBuild technically we can divide what MSBuild is in a few main parts:
+MSBuild is a build platform used mainly for .NET and Visual Studio. When referencing MSBuild technically we can divide what MSBuild is in a few main parts:
 - Programming language that uses XML semantics to define build actions and data.
 - A standard set of scripts authored in the MSBuild language (so called 'common targets') that are shipped together with the MSBuild binaries and that define what a build process means.
 - API and command line interface that interprets and manipulates the programming language.
@@ -100,7 +100,7 @@ flowchart TD
     NI --> PROJ
  ```
 
-An example of the imported build logic is the `<Project Sdk="Microsoft.NET.Sdk">` that can be seen in some of the built-in .NET templates. This indicates that the project will use build logic logic from the `Microsoft.NET.Sdk` component comes with the .NET SDK.
+An example of the imported build logic is the `<Project Sdk="Microsoft.NET.Sdk">` that can be seen in some of the built-in .NET templates. This indicates that the project will use build logic from the `Microsoft.NET.Sdk` component comes with the .NET SDK.
 
 More on this in the [Restore](#restore) section below.
 
@@ -126,7 +126,7 @@ flowchart LR
     T[Targets]
 ```
 
-At this time, the restore target has run already, so all imports are files on disk and are processed as paths by the engine. Another characteristic of imports is that they are brough within the project logic, so other projects can refence the same import logic instead of having a copy of it.
+At this time, the restore target has run already, so all imports are files on disk and are processed as paths by the engine. Another characteristic of imports is that they are brought within the project logic, so other projects can refence the same import logic instead of having a copy of it.
 
 The evaluation stage should not have any side effect on disk, no new or deleted files. One exception is the SDK resolution phase. The built-in MSBuild SDK resolver just looks for SDKs already installed or existing on disk. But, MSBuild also has support for custom resolvers that can run arbitrary .NET Code such as referencing SDKs through a Network Share or fetching SDK packages from a remote server.
 One such resolver that comes with the .NET SDK and Visual Studio is the NuGet's MSBuild SDK resolver (`Microsoft.Build.NuGetSdkResolver`) which downloads the SDK packages from NuGet repositories to local storage.
@@ -163,11 +163,11 @@ During execution tasks might need to share state meaningfully between invocation
 
 ### Incremental Build Cache
 The build incrementality is controled by individual `Tasks` and `Targets`. Those can define their `Inputs` and `Outputs` - and if both specified, MSBuild engine will control if `Outputs` are up-to-date via checking presence of specified files and file system update timestamps (and if outputs have newer timestamps - they are considered up to date) and skip execution of such `Tasks` or/and `Targets` that are deemed up to date.
-For this reason many `Targets` in the MSbuild SDK, that perform intermediate operations, specifies explicit `Inputs` and `Outputs` - while flushing the outputs usually into `IntermediateOutputDirectory` (AKA the 'obj' directory). This helps to follow the incrementality of the build. The `IntermediateOutputDirectory` can hence be regarded as the incremental build cache - though it's not any centraly managed cache with a single de/serialization mechanism. Each Target controls the way how it wants to create and read the intermediate files. The Targets within MSBuild SDK store only up front know data types (no type information is being stored into the cache).
+For this reason many `Targets` in the MSBuild SDK, that perform intermediate operations, specifies explicit `Inputs` and `Outputs` - while flushing the outputs usually into `IntermediateOutputDirectory` (AKA the 'obj' directory). This helps to follow the incrementality of the build. The `IntermediateOutputDirectory` can hence be regarded as the incremental build cache - though it's not any centraly managed cache with a single de/serialization mechanism. Each Target controls the way how it wants to create and read the intermediate files. The Targets within MSBuild SDK store only up front know data types (no type information is being stored into the cache).
 
 #### RAR Cache
 Special case of incremental build cache within the `IntermediateOutputDirectory` is a `ResolveAssemblyReference` (RAR) cache.
-[`ResolveAssemblyReference`](../../src/Tasks/AssemblyDependency/ResolveAssemblyReference.cs) (RAR) is one of the most important tasks in the MSBuild toolset. It is responsible for obtain all references needed to build the project and resolve the full paths to the asemblies representing those references (so that the compiler task can operate on a deterministic, fully defined, input). For more information on RAR please see [the RAR documentation](../documentation/wiki/ResolveAssemblyReference.md).
+[`ResolveAssemblyReference`](../../src/Tasks/AssemblyDependency/ResolveAssemblyReference.cs) (RAR) is one of the most important tasks in the MSBuild toolset. It is responsible for obtain all references needed to build the project and resolve the full paths to the assemblies representing those references (so that the compiler task can operate on a deterministic, fully defined, input). For more information on RAR please see [the RAR documentation](../documentation/wiki/ResolveAssemblyReference.md).
 RAR stores the resolved information in the `obj` folder (pointed via `IntermediateOutputDirectory` property) in the files with configurable name with '.cache' extension. The cache content is de/serialized via MSBuild proprietary de/serialization protocol (AKA `ITranslatable`), that requires exact upfront knowledge of the types being de/serialized (means - no type information is being exchanged).
 
 ## Scheduler
@@ -213,14 +213,14 @@ In multi-process MSBuild execution, many OS processes exist that need to communi
 
 The transport layer for messages is a [.NET named pipe](https://learn.microsoft.com/dotnet/standard/io/how-to-use-named-pipes-for-network-interprocess-communication).
 
-The message layer has a custom serialization protocol that is specific to MSBuild. As of DotNet 8, all message types used are known internal MSBuild types. Earlier MSBuild versions allowed `BinaryFormatter` serialization of plugin-controlled types.
+The message layer has a custom serialization protocol that is specific to MSBuild. As of .NET 8, all message types used are known internal MSBuild types. Earlier MSBuild versions allowed `BinaryFormatter` serialization of plugin-controlled types.
 
 ## Graph build
 A graph build changes the sequence in which MSBuild processes projects. Normally a project starts execution, and when it has a dependency on another project, then that project starts to build. A graph build evaluates all projects and their relationship before starting execution of any project. This is achieved by looking at specific items (like `ProjectReference`) after evaluation to construct the dependency graph.
 
 There are a couple of different modes to run graph mode in (see [the spec](../documentation/specs/static-graph.md#what-is-static-graph) for more details):
 - Standard mode (`-graph`): Tried to work from the leaves of the dependency graph and makes sure all results are within the cache. If there is a cache miss / unexpected reference, it just schedules the missing reference for execution.
-- Strict / isolate mode (`-graph -isolate`): If there is a cache miss when building, the whole built is failed. This can be used when the graph of the build is fully known upfront and is not expected to change. Avoiding the need for dynamic resolution of dependencies can lead to improved scheduling and caching. Usually a first run with `-graph` is needed on initial run or on dependencies changes in order to construct/refresh the graph and to be able to consequently run in a strict mode.
+- Strict / isolate mode (`-graph -isolate`): If there is a cache miss when building, the whole build is failed. This can be used when the graph of the build is fully known upfront and is not expected to change. Avoiding the need for dynamic resolution of dependencies can lead to improved scheduling and caching. Usually a first run with `-graph` is needed on initial run or on dependencies changes in order to construct/refresh the graph and to be able to consequently run in a strict mode.
 - Single project isolated mode: This is not directly invokable by users, instead it is used from higher order build systems to achive distributed / cached builds (in which the individual projects need to run in isolation from their dependencies - as those can be pulled from distributed cache or scheduled to run on different computation nodes).
 
 ## MSBuid Server
