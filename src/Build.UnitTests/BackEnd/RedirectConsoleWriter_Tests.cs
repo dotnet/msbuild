@@ -18,7 +18,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             StringBuilder sb = new StringBuilder();
 
-            using (var writer = OutOfProcServerNode.RedirectConsoleWriter.Create(text => sb.Append(text)))
+            using (OutOfProcServerNode.RedirectConsoleWriter writer = new(text => sb.Append(text)))
             {
                 writer.WriteLine("Line 1");
                 await Task.Delay(80); // should be somehow bigger than `RedirectConsoleWriter` flush period - see its constructor

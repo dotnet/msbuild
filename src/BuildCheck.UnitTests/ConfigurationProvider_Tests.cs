@@ -76,8 +76,9 @@ public class ConfigurationProvider_Tests
         [*.csproj]
         build_check.rule_id.property1=value1
         build_check.rule_id.property2=value2
-        build_check.rule_id.isEnabled=true
-        build_check.rule_id.isEnabled2=true
+        build_check.rule_id.is_enabled_2=true
+        build_check.rule_id.scope=project
+        build_check.rule_id.severity=default
         any_other_key1=any_other_value1
         any_other_key2=any_other_value2
         any_other_key3=any_other_value3
@@ -92,7 +93,7 @@ public class ConfigurationProvider_Tests
 
         configs.ContainsKey("property1").ShouldBeTrue();
         configs.ContainsKey("property2").ShouldBeTrue();
-        configs.ContainsKey("isenabled2").ShouldBeTrue();
+        configs.ContainsKey("is_enabled_2").ShouldBeTrue();
     }
 
     [Fact]
@@ -106,9 +107,8 @@ public class ConfigurationProvider_Tests
         root=true
 
         [*.csproj]
-        build_check.rule_id.isEnabled=true
-        build_check.rule_id.Severity=Error
-        build_check.rule_id.EvaluationAnalysisScope=ProjectOnly
+        build_check.rule_id.severity=error
+        build_check.rule_id.scope=project
         """);
 
         var configurationProvider = new ConfigurationProvider();
@@ -116,9 +116,9 @@ public class ConfigurationProvider_Tests
 
         buildConfig.ShouldNotBeNull();
 
-        buildConfig.IsEnabled?.ShouldBeTrue();
-        buildConfig.Severity?.ShouldBe(BuildAnalyzerResultSeverity.Error);
-        buildConfig.EvaluationAnalysisScope?.ShouldBe(EvaluationAnalysisScope.ProjectOnly);
+        buildConfig.IsEnabled.ShouldBe(true);
+        buildConfig.Severity.ShouldBe(BuildAnalyzerResultSeverity.Error);
+        buildConfig.EvaluationAnalysisScope.ShouldBe(EvaluationAnalysisScope.ProjectOnly);
     }
 
     [Fact]
@@ -134,14 +134,12 @@ public class ConfigurationProvider_Tests
         [*.csproj]
         build_check.rule_id.property1=value1
         build_check.rule_id.property2=value2
-        build_check.rule_id.isEnabled=true
-        build_check.rule_id.isEnabled2=true
+        build_check.rule_id.is_enabled_2=true
 
         [test123.csproj]
         build_check.rule_id.property1=value2
         build_check.rule_id.property2=value3
-        build_check.rule_id.isEnabled=true
-        build_check.rule_id.isEnabled2=tru1
+        build_check.rule_id.is_enabled_2=tru1
         """);
 
         var configurationProvider = new ConfigurationProvider();
@@ -167,13 +165,13 @@ public class ConfigurationProvider_Tests
         [*.csproj]
         build_check.rule_id.property1=value1
         build_check.rule_id.property2=value2
-        build_check.rule_id.isEnabled2=true
+        build_check.rule_id.is_enabled_2=true
 
         [test123.csproj]
         build_check.rule_id.property1=value1
         build_check.rule_id.property2=value2
-        build_check.rule_id.isEnabled2=true
-        build_check.rule_id.isEnabled3=true
+        build_check.rule_id.is_enabled_2=true
+        build_check.rule_id.is_enabled_3=true
         """);
 
         var configurationProvider = new ConfigurationProvider();
@@ -199,14 +197,12 @@ public class ConfigurationProvider_Tests
         [*.csproj]
         build_check.rule_id.property1=value1
         build_check.rule_id.property2=value2
-        build_check.rule_id.isEnabled=true
-        build_check.rule_id.isEnabled2=true
+        build_check.rule_id.is_enabled_2=true
 
         [test123.csproj]
         build_check.rule_id.property1=value1
         build_check.rule_id.property2=value2
-        build_check.rule_id.isEnabled=true
-        build_check.rule_id.isEnabled2=true
+        build_check.rule_id.is_enabled_2=true
         """);
 
         var configurationProvider = new ConfigurationProvider();
@@ -217,5 +213,30 @@ public class ConfigurationProvider_Tests
         {
             configurationProvider.CheckCustomConfigurationDataValidity(Path.Combine(workFolder1.Path, "test123.csproj"), "rule_id");
         });
+    }
+
+    [Theory]
+    [InlineData(BuildAnalyzerResultSeverity.Warning, BuildAnalyzerResultSeverity.Warning, true)]
+    [InlineData(BuildAnalyzerResultSeverity.Error, BuildAnalyzerResultSeverity.Error, true)]
+    [InlineData(BuildAnalyzerResultSeverity.Default, BuildAnalyzerResultSeverity.Warning, true)]
+    [InlineData(BuildAnalyzerResultSeverity.Suggestion, BuildAnalyzerResultSeverity.Suggestion, true)]
+    [InlineData(BuildAnalyzerResultSeverity.None, BuildAnalyzerResultSeverity.None, false)]
+    [InlineData(null, BuildAnalyzerResultSeverity.Warning, true)]
+    public void GetConfigurationProvider_MergesSeverity_Correctly(BuildAnalyzerResultSeverity? buildAnalyzerResultSeverity, BuildAnalyzerResultSeverity expectedSeverity, bool expectedEnablment)
+    {
+        var configurationProvider = new ConfigurationProvider();
+        BuildAnalyzerConfiguration buildAnalyzerConfiguration = new BuildAnalyzerConfiguration()
+        {
+            Severity = buildAnalyzerResultSeverity
+        };
+
+        BuildAnalyzerConfiguration defaultValue = new BuildAnalyzerConfiguration()
+        {
+            Severity = BuildAnalyzerResultSeverity.Warning
+        };
+
+        var internalBuildAnalyzer = configurationProvider.MergeConfiguration("ruleId", defaultValue, buildAnalyzerConfiguration);
+        internalBuildAnalyzer.Severity.ShouldBe(expectedSeverity);
+        internalBuildAnalyzer.IsEnabled.ShouldBe(expectedEnablment);
     }
 }

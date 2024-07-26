@@ -463,7 +463,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             TaskParser tp = XamlTestHelpers.LoadAndParse(xmlContents, "CL");
             TaskGenerator tg = new TaskGenerator(tp);
             CodeCompileUnit compileUnit = tg.GenerateCode();
-            CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
+            using CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
 
             using (StringWriter sw = new StringWriter(CultureInfo.CurrentCulture))
             {
@@ -473,7 +473,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
                 codeGenerator.GenerateCodeFromCompileUnit(compileUnit, sw, options);
 
-                CSharpCodeProvider provider = new CSharpCodeProvider();
+                using CSharpCodeProvider provider = new CSharpCodeProvider();
                 // Build the parameters for source compilation.
                 CompilerParameters cp = new CompilerParameters();
 
@@ -516,7 +516,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             TaskParser tp = XamlTestHelpers.LoadAndParse(xml, "CL");
             TaskGenerator tg = new TaskGenerator(tp);
             CodeCompileUnit compileUnit = tg.GenerateCode();
-            CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
+            using CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
 
             try
             {
@@ -529,7 +529,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                     codeGenerator.GenerateCodeFromCompileUnit(compileUnit, sw, options);
                 }
 
-                CSharpCodeProvider provider = new CSharpCodeProvider();
+                using CSharpCodeProvider provider = new CSharpCodeProvider();
                 // Build the parameters for source compilation.
                 CompilerParameters cp = new CompilerParameters();
 

@@ -5,20 +5,19 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
-using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-internal class NullBuildCheckManager : IBuildCheckManager
+internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRouter
 {
     public void Shutdown()
     {
     }
 
     public void ProcessEvaluationFinishedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        IAnalysisContext analysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
     {
     }
@@ -27,22 +26,27 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
-    public void ProcessTaskStartedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+    public void ProcessTaskStartedEventArgs(
+        IAnalysisContext analysisContext,
         TaskStartedEventArgs taskStartedEventArgs)
     {
     }
 
-    public void ProcessTaskFinishedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+    public void ProcessTaskFinishedEventArgs(
+        IAnalysisContext analysisContext,
         TaskFinishedEventArgs taskFinishedEventArgs)
     {
     }
 
-    public void ProcessTaskParameterEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+    public void ProcessTaskParameterEventArgs(
+        IAnalysisContext analysisContext,
         TaskParameterEventArgs taskParameterEventArgs)
     {
     }
 
-    public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext) 
+    public void ProcessAnalyzerAcquisition(
+        AnalyzerAcquisitionData acquisitionData,
+        IAnalysisContext analysisContext)
     {
     }
 
@@ -50,7 +54,7 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
-    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string fullPath)
+    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string fullPath)
     {
     }
 
@@ -58,11 +62,12 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
-    public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath)
     {
     }
 
-    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext,
+        string projectFullPath)
     {
     }
 
@@ -83,5 +88,14 @@ internal class NullBuildCheckManager : IBuildCheckManager
     { }
 
     public void ProcessTaskParameter(BuildCheckDataSource buildCheckDataSource, TaskParameterEventArgs eventArg)
+    { }
+
+    public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext buildEventContext)
+    { }
+
+    public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext buildEventContext)
+    { }
+	
+    public void ProcessEnvironmentVariableReadEventArgs(IAnalysisContext analysisContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
     { }
 }

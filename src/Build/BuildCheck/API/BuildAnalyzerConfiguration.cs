@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck.Utilities;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
@@ -21,11 +22,12 @@ public class BuildAnalyzerConfiguration
     public static BuildAnalyzerConfiguration Default { get; } = new()
     {
         EvaluationAnalysisScope = BuildCheck.EvaluationAnalysisScope.ProjectOnly,
-        Severity = BuildAnalyzerResultSeverity.Info,
-        IsEnabled = false,
+        Severity = BuildAnalyzerResultSeverity.None
     };
 
     public static BuildAnalyzerConfiguration Null { get; } = new();
+
+    public string? RuleId { get; internal set; }
 
     /// <summary>
     /// This applies only to specific events, that can distinguish whether they are directly inferred from
@@ -45,7 +47,18 @@ public class BuildAnalyzerConfiguration
     /// If all rules within the analyzer are not enabled, it will not be run.
     /// If some rules are enabled and some are not, the analyzer will be run and reports will be post-filtered.
     /// </summary>
-    public bool? IsEnabled { get; internal init; }
+    public bool? IsEnabled {
+        get
+        {
+            // Do not consider Default as enabled, because the default severity of the rule coule be set to None
+            if (Severity.HasValue && Severity.Value != BuildAnalyzerResultSeverity.Default)
+            {
+                return !Severity.Value.Equals(BuildAnalyzerResultSeverity.None);
+            }
+
+            return null;
+        }
+    }
 
     /// <summary>
     /// Creates a <see cref="BuildAnalyzerConfiguration"/> object based on the provided configuration dictionary.
@@ -54,58 +67,78 @@ public class BuildAnalyzerConfiguration
     /// </summary>
     /// <param name="configDictionary">The configuration dictionary containing the settings for the build analyzer. The configuration's keys are expected to be in lower case or the EqualityComparer to ignore case.</param>
     /// <returns>A new instance of <see cref="BuildAnalyzerConfiguration"/> with the specified settings.</returns>
-    internal static BuildAnalyzerConfiguration Create(Dictionary<string, string>? configDictionary)
+    internal static BuildAnalyzerConfiguration Create(Dictionary<string, string>? configDictionary) => new()
     {
-        return new()
+        EvaluationAnalysisScope = TryExtractEvaluationAnalysisScope(configDictionary),
+        Severity = TryExtractSeverity(configDictionary),
+    };
+
+
+    private static EvaluationAnalysisScope? TryExtractEvaluationAnalysisScope(Dictionary<string, string>? config)
+    {
+
+        if (!TryExtractValue(BuildCheckConstants.scopeConfigurationKey, config, out string? stringValue) || stringValue is null)
         {
-            EvaluationAnalysisScope = TryExtractValue(nameof(EvaluationAnalysisScope), configDictionary, out EvaluationAnalysisScope evaluationAnalysisScope) ? evaluationAnalysisScope : null,
-            Severity = TryExtractValue(nameof(Severity), configDictionary, out BuildAnalyzerResultSeverity severity) ? severity : null,
-            IsEnabled = TryExtractValue(nameof(IsEnabled), configDictionary, out bool isEnabled) ? isEnabled : null,
-        };
+            return null;
+        }
+
+        switch (stringValue)
+        {
+            case "project":
+                return BuildCheck.EvaluationAnalysisScope.ProjectOnly;
+            case "current_imports":
+                return BuildCheck.EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree;
+            case "without_sdks":
+                return BuildCheck.EvaluationAnalysisScope.ProjectWithImportsWithoutSdks;
+            case "all":
+                return BuildCheck.EvaluationAnalysisScope.ProjectWithAllImports;
+            default:
+                ThrowIncorrectValueException(BuildCheckConstants.scopeConfigurationKey, stringValue);
+                break;
+        }
+
+        return null;
     }
 
-    private static bool TryExtractValue<T>(string key, Dictionary<string, string>? config, out T value) where T : struct, Enum
+    private static BuildAnalyzerResultSeverity? TryExtractSeverity(Dictionary<string, string>? config)
     {
-        value = default;
+        if (!TryExtractValue(BuildCheckConstants.severityConfigurationKey, config, out string? stringValue) || stringValue is null)
+        {
+            return null;
+        }
 
-        if (config == null || !config.TryGetValue(key.ToLower(), out var stringValue) || stringValue is null)
+        switch (stringValue)
+        {
+            case "none":
+                return BuildAnalyzerResultSeverity.None;
+            case "default":
+                return BuildAnalyzerResultSeverity.Default;
+            case "suggestion":
+                return BuildAnalyzerResultSeverity.Suggestion;
+            case "warning":
+                return BuildAnalyzerResultSeverity.Warning;
+            case "error":
+                return BuildAnalyzerResultSeverity.Error;
+            default:
+                ThrowIncorrectValueException(BuildCheckConstants.severityConfigurationKey, stringValue);
+                break;
+        }
+
+        return null;
+    }
+
+    private static bool TryExtractValue(string key, Dictionary<string, string>? config, out string? stringValue)
+    {
+        stringValue = null;
+
+        if (config == null || !config.TryGetValue(key.ToLower(), out stringValue) || stringValue is null)
         {
             return false;
         }
 
-        var isParsed = Enum.TryParse(stringValue, true, out value);
+        stringValue = stringValue.ToLower();
 
-        if (!isParsed)
-        {
-            ThrowIncorrectValueException(key, stringValue);
-        }
-
-        return isParsed;
-    }
-
-    private static bool TryExtractValue(string key, Dictionary<string, string>? config, out bool value)
-    {
-        value = default;
-
-        if (config == null || !config.TryGetValue(key.ToLower(), out var stringValue) || stringValue is null)
-        {
-            return false;
-        }
-
-        bool isParsed = false;
-        
-        if (bool.TryParse(stringValue, out bool boolValue))
-        {
-            value = boolValue;
-            isParsed = true;
-        }
-        
-        if (!isParsed)
-        {
-            ThrowIncorrectValueException(key, stringValue);
-        }
-
-        return isParsed;
+        return true;
     }
 
     private static void ThrowIncorrectValueException(string key, string value)

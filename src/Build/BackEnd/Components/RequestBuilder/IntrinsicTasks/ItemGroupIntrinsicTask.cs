@@ -457,8 +457,7 @@ namespace Microsoft.Build.BackEnd
                             includeSplit /* before wildcard expansion */,
                             null,
                             null,
-                            originalItem.Location.File,
-                            useItemDefinitionsWithoutModification: false));
+                            originalItem.Location.File));
                     }
                 }
             }

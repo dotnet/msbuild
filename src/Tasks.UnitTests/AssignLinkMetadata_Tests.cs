@@ -174,7 +174,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private ITaskItem GetParentedTaskItem(string itemSpec, string linkMetadata = null)
         {
-            Project p = new Project(new ProjectCollection())
+            using var collection = new ProjectCollection();
+            Project p = new Project(collection)
             {
                 FullPath = Path.Combine(Path.GetTempPath(), "a.proj")
             };

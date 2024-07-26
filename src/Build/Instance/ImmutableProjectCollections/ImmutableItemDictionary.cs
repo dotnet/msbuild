@@ -19,28 +19,29 @@ namespace Microsoft.Build.Instance
     /// </summary>
     internal sealed class ImmutableItemDictionary<TCached, T> : IItemDictionary<T>
         where T : class, IKeyed, IItem
-        where TCached : IKeyed, IItem
     {
         private readonly IDictionary<string, ICollection<TCached>> _itemsByType;
-        private readonly ICollection<TCached> _allCachedItems;
-        private readonly Func<TCached, T?> _getInstance;
-        private readonly Func<T, string?> _getItemType;
+        private readonly ICollection<T> _allItems;
 
-        public ImmutableItemDictionary(
-            ICollection<TCached> allItems,
-            IDictionary<string, ICollection<TCached>> itemsByType,
-            Func<TCached, T?> getInstance,
-            Func<T, string?> getItemType)
+        public ImmutableItemDictionary(IDictionary<string, ICollection<TCached>> itemsByType, ICollection<TCached> allItems)
         {
+            _itemsByType = itemsByType ?? throw new ArgumentNullException(nameof(itemsByType));
+
             if (allItems == null)
             {
                 throw new ArgumentNullException(nameof(allItems));
             }
 
-            _allCachedItems = allItems;
-            _itemsByType = itemsByType ?? throw new ArgumentNullException(nameof(itemsByType));
-            _getInstance = getInstance;
-            _getItemType = getItemType;
+            var convertedItems = new HashSet<T>(allItems.Count);
+            foreach (var item in allItems)
+            {
+                T? instance = GetInstance(item);
+                if (instance != null)
+                {
+                    convertedItems.Add(instance);
+                }
+            }
+            _allItems = new ReadOnlyCollection<T>(convertedItems);
         }
 
         /// <inheritdoc />
@@ -53,12 +54,12 @@ namespace Microsoft.Build.Instance
                     return Array.Empty<T>();
                 }
 
-                return new ListConverter(itemType, list, _getInstance);
+                return new ListConverter(itemType, _allItems, list);
             }
         }
 
         /// <inheritdoc />
-        public int Count => _allCachedItems.Count;
+        public int Count => _allItems.Count;
 
         /// <inheritdoc />
         public ICollection<string> ItemTypes => _itemsByType.Keys;
@@ -76,22 +77,7 @@ namespace Microsoft.Build.Instance
         public void Clear() => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public bool Contains(T projectItem)
-        {
-            if (projectItem == null)
-            {
-                return false;
-            }
-
-            string? itemType = _getItemType(projectItem);
-            if (itemType == null)
-            {
-                return false;
-            }
-
-            ICollection<T> items = GetItems(itemType);
-            return items.Contains(projectItem);
-        }
+        public bool Contains(T projectItem) => _allItems.Contains(projectItem);
 
         /// <inheritdoc />
         public void EnumerateItemsPerType(Action<string, IEnumerable<T>> itemTypeCallback)
@@ -104,55 +90,31 @@ namespace Microsoft.Build.Instance
                     continue;
                 }
 
-                itemTypeCallback(kvp.Key, new ListConverter(kvp.Key, kvp.Value, _getInstance));
+                itemTypeCallback(kvp.Key, new ListConverter(kvp.Key, _allItems, kvp.Value));
             }
         }
 
         /// <inheritdoc />
         public IEnumerable<TResult> GetCopyOnReadEnumerable<TResult>(Func<T, TResult> selector)
         {
-            foreach (var cachedItem in _allCachedItems)
+            foreach (var item in _allItems)
             {
-                T? item = _getInstance(cachedItem);
-                if (item is not null)
-                {
-                    yield return selector(item);
-                }
+                yield return selector(item);
             }
         }
 
         /// <inheritdoc />
-        public IEnumerator<T> GetEnumerator()
-        {
-            foreach (var cachedItem in _allCachedItems)
-            {
-                T? item = _getInstance(cachedItem);
-                if (item is not null)
-                {
-                    yield return item;
-                }
-            }
-        }
+        public IEnumerator<T> GetEnumerator() => _allItems.GetEnumerator();
 
         /// <inheritdoc />
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            foreach (var cachedItem in _allCachedItems)
-            {
-                T? item = _getInstance(cachedItem);
-                if (item is not null)
-                {
-                    yield return item;
-                }
-            }
-        }
+        IEnumerator IEnumerable.GetEnumerator() => _allItems.GetEnumerator();
 
         /// <inheritdoc />
         public ICollection<T> GetItems(string itemType)
         {
             if (_itemsByType.TryGetValue(itemType, out ICollection<TCached>? items))
             {
-                return new ListConverter(itemType, items, _getInstance);
+                return new ListConverter(itemType, _allItems, items);
             }
 
             return Array.Empty<T>();
@@ -176,17 +138,27 @@ namespace Microsoft.Build.Instance
         /// <inheritdoc />
         public void Replace(T existingItem, T newItem) => throw new NotSupportedException();
 
+        private static T? GetInstance(TCached item)
+        {
+            if (item is IImmutableInstanceProvider<T> instanceProvider)
+            {
+                return instanceProvider.ImmutableInstance;
+            }
+
+            return null;
+        }
+
         private sealed class ListConverter : ICollection<T>
         {
             private readonly string _itemType;
+            private readonly ICollection<T> _allItems;
             private readonly ICollection<TCached> _list;
-            private readonly Func<TCached, T?> _getInstance;
 
-            public ListConverter(string itemType, ICollection<TCached> list, Func<TCached, T?> getInstance)
+            public ListConverter(string itemType, ICollection<T> allItems, ICollection<TCached> list)
             {
                 _itemType = itemType;
+                _allItems = allItems;
                 _list = list;
-                _getInstance = getInstance;
             }
 
             public int Count => _list.Count;
@@ -201,20 +173,8 @@ namespace Microsoft.Build.Instance
 
             public bool Contains(T item)
             {
-                return _list.Any(
-                    cachedItem =>
-                    {
-                        if (MSBuildNameIgnoreCaseComparer.Default.Equals(cachedItem.EvaluatedIncludeEscaped, item.EvaluatedIncludeEscaped))
-                        {
-                            T? foundItem = _getInstance(cachedItem);
-                            if (foundItem is not null && foundItem.Equals(item))
-                            {
-                                return true;
-                            }
-                        }
-
-                        return false;
-                    });
+                return MSBuildNameIgnoreCaseComparer.Default.Equals(item.Key, _itemType) &&
+                       _allItems.Contains(item);
             }
 
             public void CopyTo(T[] array, int arrayIndex)
@@ -224,7 +184,7 @@ namespace Microsoft.Build.Instance
                 int currentIndex = arrayIndex;
                 foreach (var item in _list)
                 {
-                    T? instance = _getInstance(item);
+                    T? instance = GetInstance(item);
                     if (instance != null)
                     {
                         array[currentIndex] = instance;
@@ -237,7 +197,7 @@ namespace Microsoft.Build.Instance
             {
                 foreach (var item in _list)
                 {
-                    T? instance = _getInstance(item);
+                    T? instance = GetInstance(item);
                     if (instance != null)
                     {
                         yield return instance;
@@ -249,7 +209,7 @@ namespace Microsoft.Build.Instance
             {
                 foreach (var item in _list)
                 {
-                    T? instance = _getInstance(item);
+                    T? instance = GetInstance(item);
                     if (instance != null)
                     {
                         yield return instance;

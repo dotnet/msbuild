@@ -365,6 +365,14 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         public readonly bool UseMinimalResxParsingInCoreScenarios = Environment.GetEnvironmentVariable("MSBUILDUSEMINIMALRESX") == "1";
 
+        /// <summary>
+        /// Escape hatch to ensure msbuild produces the compatible build results cache without versioning.
+        /// </summary>
+        /// <remarks>
+        /// Escape hatch for problems arising from https://github.com/dotnet/msbuild/issues/10208.
+        /// </remarks>
+        public readonly bool DoNotVersionBuildResult = Environment.GetEnvironmentVariable("MSBUILDDONOTVERSIONBUILDRESULT") == "1";
+
         private bool _sdkReferencePropertyExpansionInitialized;
         private SdkReferencePropertyExpansionMode? _sdkReferencePropertyExpansionValue;
 

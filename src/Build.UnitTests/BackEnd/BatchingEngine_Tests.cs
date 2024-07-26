@@ -484,7 +484,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(content))));
+            using ProjectFromString projectFromString = new(ObjectModelHelpers.CleanupFileContents(content));
+            Project project = projectFromString.Project;
             MockLogger logger = new MockLogger();
             project.Build(logger);
 
@@ -517,8 +518,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target>
                 </Project>
                 ";
-
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(content))));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
             MockLogger logger = new MockLogger();
             project.Build(logger);
 
