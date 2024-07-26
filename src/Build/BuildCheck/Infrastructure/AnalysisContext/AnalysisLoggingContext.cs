@@ -15,32 +15,28 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// <see cref="IAnalysisContext"/> that uses <see cref="ILoggingService"/> to dispatch.
 /// </summary>
-internal class AnalysisLoggingContext : IAnalysisContext
+/// <remarks>
+/// Making this a record struct to avoid allocations (unless called through interface - which leads to boxing).
+/// This is wanted since this can be used in a hot path (of property reads and writes)
+/// </remarks>
+internal readonly struct AnalysisLoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
+    : IAnalysisContext
 {
-    private readonly ILoggingService _loggingService;
-    private readonly BuildEventContext _eventContext;
-
-    public AnalysisLoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
-    {
-        _loggingService = loggingService;
-        _eventContext = eventContext;
-    }
-
-    public BuildEventContext BuildEventContext => _eventContext;
+    public BuildEventContext BuildEventContext => eventContext;
 
     public void DispatchBuildEvent(BuildEventArgs buildEvent)
-        => _loggingService
+        => loggingService
             .LogBuildEvent(buildEvent);
 
     public void DispatchAsComment(MessageImportance importance, string messageResourceName, params object?[] messageArgs)
-        => _loggingService
-            .LogComment(_eventContext, importance, messageResourceName, messageArgs);
+        => loggingService
+            .LogComment(eventContext, importance, messageResourceName, messageArgs);
 
     public void DispatchAsCommentFromText(MessageImportance importance, string message)
-        => _loggingService
-            .LogCommentFromText(_eventContext, importance, message);
+        => loggingService
+            .LogCommentFromText(eventContext, importance, message);
 
     public void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
-        => _loggingService
-            .LogErrorFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
+        => loggingService
+            .LogErrorFromText(eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
 }

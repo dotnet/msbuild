@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
@@ -27,7 +28,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// Interface representing logging services in the build system.
     /// Implementations should be thread-safe.
     /// </summary>
-    internal interface ILoggingService : IBuildComponent
+    internal interface ILoggingService : IBuildComponent, IBuildEngineDataRouter
     {
         #region Events
         /// <summary>
@@ -51,6 +52,11 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        IBuildEngineDataRouter BuildEngineDataRouter { get; }
 
         /// <summary>
         /// Provide the current state of the loggingService.
@@ -200,12 +206,24 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>?
+        /// or/and <see cref="ProjectStartedEventArgs"/>?
         /// </summary>
-        bool IncludeEvaluationPropertiesAndItems
+        void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent, bool inEvaluationFinishedEvent);
+
+        /// <summary>
+        /// Indicates whether properties and items should be logged on <see cref="ProjectStartedEventArgs"/>.
+        /// </summary>
+        bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
         {
             get;
-            set;
+        }
+
+        /// <summary>
+        /// Indicates whether properties and items should be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>.
+        /// </summary>
+        bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
+        {
+            get;
         }
 
         /// <summary>
