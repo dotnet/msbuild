@@ -423,3 +423,11 @@ dotnet_diagnostic.IDE0073.severity = error
 
 # Temporarily disable SA1010 "Opening square brackets should not be preceded by a space" until https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3687 is fixed
 dotnet_diagnostic.SA1010.severity = none
+
+
+#TODO:fix all xUnit new warning 
+dotnet_diagnostic.xUnit1031.severity = suggestion
+dotnet_diagnostic.xUnit1048.severity = suggestion
+dotnet_diagnostic.xUnit2020.severity = suggestion
+dotnet_diagnostic.xUnit1012.severity = suggestion
+dotnet_diagnostic.xUnit2029.severity = suggestion
