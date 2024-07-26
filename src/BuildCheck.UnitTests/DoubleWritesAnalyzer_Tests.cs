@@ -41,7 +41,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
                 }
             }
 
-            private void ResultHandler(BuildAnalyzerWrapper wrapper, IAnalysisContext context, BuildAnalyzerConfigurationInternal[] configs, BuildCheckResult result)
+            private void ResultHandler(BuildAnalyzerWrapper wrapper, IAnalysisContext context, BuildAnalyzerConfigurationEffective[] configs, BuildCheckResult result)
                 => Results.Add(result);
         }
 
@@ -61,6 +61,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             string projectFile = NativeMethodsShared.IsWindows ? @"C:\fake\project.proj" : "/fake/project.proj";
             return new TaskInvocationAnalysisData(
                 projectFile,
+                null,
                 Construction.ElementLocation.EmptyLocation,
                 taskName,
                 projectFile,

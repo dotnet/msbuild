@@ -21,7 +21,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -49,6 +48,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             GC.Collect();
+        }
+
+        [Fact]
+        public void EnsureProjectEvaluationFinishedIsLogged()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile projectFile = env.CreateFile("project.proj", $@"
+<Project Sdk=""Microsoft.NETT.Sdk"">
+  <Target Name=""DefaultTarget"">
+  </Target>
+</Project>
+");
+
+            MockLogger logger = new();
+            using ProjectCollection collection = new(new Dictionary<string, string>(), [logger], ToolsetDefinitionLocations.Default);
+            Assert.Throws<InvalidProjectFileException>(() => collection.LoadProject(projectFile.Path));
+            logger.EvaluationFinishedEvents.ShouldNotBeEmpty();
         }
 
         [Theory]

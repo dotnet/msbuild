@@ -301,5 +301,18 @@ namespace Microsoft.Build.Execution
         /// <inheritdoc cref="BuildRequestDataBase"/>
         public override IReadOnlyDictionary<string, string?> GlobalPropertiesLookup => _globalPropertiesLookup ??=
             Execution.GlobalPropertiesLookup.ToGlobalPropertiesLookup(GlobalPropertiesDictionary);
+
+        // WARNING!: Do not remove the below proxy properties.
+        //  They are required to make the OM forward compatible
+        //  (code built against this OM should run against binaries with previous version of OM).
+
+        /// <inheritdoc cref="BuildRequestDataBase.TargetNames"/>
+        public new ICollection<string> TargetNames => base.TargetNames;
+
+        /// <inheritdoc cref="BuildRequestDataBase.Flags"/>
+        public new BuildRequestDataFlags Flags => base.Flags;
+
+        /// <inheritdoc cref="BuildRequestDataBase.HostServices"/>
+        public new HostServices? HostServices => base.HostServices;
     }
 }

@@ -7,6 +7,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | 0 | Success |
 | [BC0101](#BC0101) | Shared output path. |
 | [BC0102](#BC0102) | Double writes. |
+| [BC0103](#BC0103) | Used environment variable. |
 
 
 To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
@@ -33,7 +34,14 @@ This is a similar problem as ['BC0101 - Shared output path'](#BC0101) - however 
 
 If you want multiple tasks to update file in a one-by-one pipeline fashion, it is recommended to give each intermediate output a distinct name - preventing silent mixups if any of the tasks in the chain are skipped or removed.
 
+## <a name="BC0103"></a>BC0103 - Used environment variable.
 
+"Environment variables should not be used as a value source for the properties"
+
+Using environment variables as a data source in MSBuild is problematic and can lead to nondeterministic builds.
+Relying on environment variables introduces variability and unpredictability, as their values can change between builds or environments.
+
+This practice can result in inconsistent build outcomes and makes debugging difficult, since environment variables are external to project files and build scripts. To ensure consistent and reproducible builds, avoid using environment variables. Instead, explicitly pass properties using the /p option, which offers better control and traceability.
 
 <BR/>
 <BR/>

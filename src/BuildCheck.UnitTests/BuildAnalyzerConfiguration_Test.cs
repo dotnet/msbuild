@@ -75,16 +75,19 @@ public class BuildAnalyzerConfiguration_Test
     }
 
     [Theory]
-    [InlineData("ProjectOnly", EvaluationAnalysisScope.ProjectOnly)]
-    [InlineData("ProjectWithImportsFromCurrentWorkTree", EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree)]
-    [InlineData("ProjectWithImportsWithoutSdks", EvaluationAnalysisScope.ProjectWithImportsWithoutSdks)]
-    [InlineData("ProjectWithAllImports", EvaluationAnalysisScope.ProjectWithAllImports)]
-    [InlineData("projectwithallimports", EvaluationAnalysisScope.ProjectWithAllImports)]
+    [InlineData("project", EvaluationAnalysisScope.ProjectOnly)]
+    [InlineData("PROJECT", EvaluationAnalysisScope.ProjectOnly)]
+    [InlineData("current_imports", EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree)]
+    [InlineData("CURRENT_IMPORTS", EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree)]
+    [InlineData("without_sdks", EvaluationAnalysisScope.ProjectWithImportsWithoutSdks)]
+    [InlineData("WITHOUT_SDKS", EvaluationAnalysisScope.ProjectWithImportsWithoutSdks)]
+    [InlineData("all", EvaluationAnalysisScope.ProjectWithAllImports)]
+    [InlineData("ALL", EvaluationAnalysisScope.ProjectWithAllImports)]
     public void CreateBuildAnalyzerConfiguration_EvaluationAnalysisScope(string parameter, EvaluationAnalysisScope? expected)
     {
         var config = new Dictionary<string, string>()
         {
-            { "evaluationanalysisscope" , parameter },
+            { "scope" , parameter },
         };
 
         var buildConfig = BuildAnalyzerConfiguration.Create(config);
@@ -97,7 +100,7 @@ public class BuildAnalyzerConfiguration_Test
     }
 
     [Theory]
-    [InlineData("evaluationanalysisscope", "incorrec-value")]
+    [InlineData("scope", "incorrec-value")]
     [InlineData("severity", "incorrec-value")]
     public void CreateBuildAnalyzerConfiguration_ExceptionOnInvalidInputValue(string key, string value)
     {
@@ -106,7 +109,8 @@ public class BuildAnalyzerConfiguration_Test
             { key , value },
         };
 
-        var exception = Should.Throw<BuildCheckConfigurationException>(() => {
+        var exception = Should.Throw<BuildCheckConfigurationException>(() =>
+        {
             BuildAnalyzerConfiguration.Create(config);
         });
         exception.Message.ShouldContain($"Incorrect value provided in config for key {key}");

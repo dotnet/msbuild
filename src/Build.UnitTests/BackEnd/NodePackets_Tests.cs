@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             PropertyReassignmentEventArgs propReassign = new("prop", "prevValue", "newValue", "loc", "message", "help", "sender", MessageImportance.Normal);
             ResponseFileUsedEventArgs responseFileUsed = new("path");
             UninitializedPropertyReadEventArgs uninitializedPropertyRead = new("prop", "message", "help", "sender", MessageImportance.Normal);
-            EnvironmentVariableReadEventArgs environmentVariableRead = new("env", "message", "help", "sender", MessageImportance.Normal);
+            EnvironmentVariableReadEventArgs environmentVariableRead = new("env", "message", "file", 0, 0);
             GeneratedFileUsedEventArgs generatedFileUsed = new GeneratedFileUsedEventArgs("path", "some content");
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
@@ -251,7 +251,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     new ResponseFileUsedEventArgs("path"),
                     new UninitializedPropertyReadEventArgs("prop", "message", "help", "sender", MessageImportance.Normal),
-                    new EnvironmentVariableReadEventArgs("env", "message", "help", "sender", MessageImportance.Normal) { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6) },
+                    new EnvironmentVariableReadEventArgs("env", "message", "file", 0, 0) { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6) },
                     new PropertyReassignmentEventArgs("prop", "prevValue", "newValue", "loc", "message", "help", "sender", MessageImportance.Normal),
                     new PropertyInitialValueSetEventArgs("prop", "val", "propsource", "message", "help", "sender", MessageImportance.Normal),
                     new MetaprojectGeneratedEventArgs("metaName", "path", "message"),

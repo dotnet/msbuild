@@ -39,6 +39,10 @@ internal interface IBuildCheckManager
         IAnalysisContext analysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs);
 
+    void ProcessEnvironmentVariableReadEventArgs(
+        IAnalysisContext analysisContext,
+        EnvironmentVariableReadEventArgs envVariableReadEventArgs);
+
     void ProcessTaskStartedEventArgs(
         IAnalysisContext analysisContext,
         TaskStartedEventArgs taskStartedEventArgs);
@@ -63,13 +67,13 @@ internal interface IBuildCheckManager
     //  but as well from the ConnectorLogger - as even if interleaved, it gives the info
     //  to manager about what analyzers need to be materialized and configuration fetched.
     // No unloading of analyzers is yet considered - once loaded it stays for whole build.
-    void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string fullPath);
+    void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string projectFullPath);
 
     void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
 
-    void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
+    void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath);
 
-    void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
+    void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string projectFullPath);
 
     void Shutdown();
 }

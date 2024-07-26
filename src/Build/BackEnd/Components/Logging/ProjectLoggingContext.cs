@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
@@ -85,19 +86,54 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildEventContext parentBuildEventContext,
             int evaluationId,
             int projectContextId)
-            : base(nodeLoggingContext)
+            : base(nodeLoggingContext,
+                CreateInitialContext(nodeLoggingContext,
+                    submissionId,
+                     configurationId,
+                    projectFullPath,
+                    targets,
+                    toolsVersion,
+                    projectProperties,
+                    projectItems,
+                    parentBuildEventContext,
+                    evaluationId,
+                    projectContextId))
         {
             _projectFullPath = projectFullPath;
 
+            // No need to log a redundant message in the common case
+            if (toolsVersion != "Current")
+            {
+                LoggingService.LogComment(this.BuildEventContext, MessageImportance.Low, "ToolsVersionInEffectForBuild", toolsVersion);
+            }
+
+            this.IsValid = true;
+        }
+
+        private static BuildEventContext CreateInitialContext(
+            NodeLoggingContext nodeLoggingContext,
+            int submissionId,
+            int configurationId,
+            string projectFullPath,
+            List<string> targets,
+            string toolsVersion,
+            PropertyDictionary<ProjectPropertyInstance> projectProperties,
+            IItemDictionary<ProjectItemInstance> projectItems,
+            BuildEventContext parentBuildEventContext,
+            int evaluationId,
+            int projectContextId)
+        {
             IEnumerable<DictionaryEntry> properties = null;
             IEnumerable<DictionaryEntry> items = null;
 
-            string[] propertiesToSerialize = LoggingService.PropertiesToSerialize;
+            ILoggingService loggingService = nodeLoggingContext.LoggingService;
+
+            string[] propertiesToSerialize = loggingService.PropertiesToSerialize;
 
             // If we are only logging critical events lets not pass back the items or properties
-            if (!LoggingService.OnlyLogCriticalEvents &&
-                !LoggingService.IncludeEvaluationPropertiesAndItems &&
-                (!LoggingService.RunningOnRemoteNode || LoggingService.SerializeAllProperties))
+            if (!loggingService.OnlyLogCriticalEvents &&
+                loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent &&
+                (!loggingService.RunningOnRemoteNode || loggingService.SerializeAllProperties))
             {
                 if (projectProperties is null)
                 {
@@ -116,9 +152,9 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             if (projectProperties != null &&
-                !LoggingService.IncludeEvaluationPropertiesAndItems &&
+                loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent &&
                 propertiesToSerialize?.Length > 0 &&
-                !LoggingService.SerializeAllProperties)
+                !loggingService.SerializeAllProperties)
             {
                 PropertyDictionary<ProjectPropertyInstance> projectPropertiesToSerialize = new PropertyDictionary<ProjectPropertyInstance>();
                 foreach (string propertyToGet in propertiesToSerialize)
@@ -135,7 +171,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 properties = projectPropertiesToSerialize.Select((ProjectPropertyInstance property) => new DictionaryEntry(property.Name, property.EvaluatedValue));
             }
 
-            this.BuildEventContext = LoggingService.LogProjectStarted(
+            return loggingService.LogProjectStarted(
                 nodeLoggingContext.BuildEventContext,
                 submissionId,
                 configurationId,
@@ -146,14 +182,6 @@ namespace Microsoft.Build.BackEnd.Logging
                 items,
                 evaluationId,
                 projectContextId);
-
-            // No need to log a redundant message in the common case
-            if (toolsVersion != "Current")
-            {
-                LoggingService.LogComment(this.BuildEventContext, MessageImportance.Low, "ToolsVersionInEffectForBuild", toolsVersion);
-            }
-
-            this.IsValid = true;
         }
 
         /// <summary>

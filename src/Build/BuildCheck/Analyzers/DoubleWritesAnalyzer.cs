@@ -20,7 +20,9 @@ namespace Microsoft.Build.Experimental.BuildCheck.Analyzers;
 
 internal sealed class DoubleWritesAnalyzer : BuildAnalyzer
 {
-    public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule("BC0102", "DoubleWrites",
+    public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
+        "BC0102",
+        "DoubleWrites",
         "Two tasks should not write the same file",
         "Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.",
         new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Warning });

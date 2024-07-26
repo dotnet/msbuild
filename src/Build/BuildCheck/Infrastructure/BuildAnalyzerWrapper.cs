@@ -27,12 +27,12 @@ internal sealed class BuildAnalyzerWrapper
 
     // Let's optimize for the scenario where users have a single .editorconfig file that applies to the whole solution.
     // In such case - configuration will be same for all projects. So we do not need to store it per project in a collection.
-    internal BuildAnalyzerConfigurationInternal? CommonConfig { get; private set; }
+    internal BuildAnalyzerConfigurationEffective? CommonConfig { get; private set; }
 
     // start new project
     internal void StartNewProject(
         string fullProjectPath,
-        IReadOnlyList<BuildAnalyzerConfigurationInternal> userConfigs)
+        IReadOnlyList<BuildAnalyzerConfigurationEffective> userConfigs)
     {
         if (!_isInitialized)
         {

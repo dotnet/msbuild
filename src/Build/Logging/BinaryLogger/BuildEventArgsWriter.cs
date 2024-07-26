@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -15,7 +14,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 
 #nullable disable
@@ -547,10 +545,15 @@ namespace Microsoft.Build.Logging
 
         private BinaryLogRecordKind Write(EnvironmentVariableReadEventArgs e)
         {
-            WriteMessageFields(e, writeImportance: true);
+            WriteMessageFields(e, writeImportance: false);
             WriteDeduplicatedString(e.EnvironmentVariableName);
+            Write(e.LineNumber);
+            Write(e.ColumnNumber);
+            WriteDeduplicatedString(e.File);
+
             return BinaryLogRecordKind.EnvironmentVariableRead;
         }
+
         private BinaryLogRecordKind Write(ResponseFileUsedEventArgs e)
         {
             WriteMessageFields(e);
