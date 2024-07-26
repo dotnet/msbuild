@@ -1,62 +1,88 @@
-﻿package msbuildtask:v0
+﻿package MSBuildWasm:v0
 
-record str-kv-pair {
-    key: string
-    value: string
+// WIT doesn't have maps/dictionaries
+record StringKVPair {
+    Key: string
+    Value: string
+}
+type StringMap = list<StringKVPair>
+
+// mirroring TaskItem in MSBuild - it's a description of a file or directory
+record TaskItem { 
+    // Path inside the sandbox
+    WasmPath: string;
+    Metadata: StringMap
+}
+// enum for types of properties in Tasks
+enum PropertyType {
+    BoolType,
+    StringType,
+    TaskItemType,
+    BoolArrayType,
+    StringArrayType,
+    TaskItemArrayType
 }
 
-type str-dictionary = list<str-kv-pair>
-
-record TaskItem {
-    ItemSpec: string
-    Metadata: str-dictionary
+// variant contains one of the possible types of properties
+variant PropertyValue {
+    Bool(bool);
+    String(string);
+    TaskItem(TaskItem);
+    BoolArray(BoolList);
+    StringArray(StringList);
+    TaskItemArray(TaskItemList);
 }
 
-type TaskItems = list<TaskItem>
-type Bools = list<bool>
-type Strings = list<string>
+type TaskItemList = list<TaskItem>
+type BoolList = list<bool>
+type StringList = list<string>
 
-interface host-data {
-    GetHostData: func() -> str-dictionary
+// mirrors MSBuild's TaskPropertyInfo
+record TaskPropertyInfo {
+    Name: string;
+    Type: PropertyType;
+    Output: bool;
+    Required: bool;
 }
 
+// information about a task passed from the Task to MSBuild
+record TaskInfo {
+    Name: string; 
+    Parameters: list<TaskPropertyInfo>; 
+    Metadata: StringMap; // e.g. requirements for the host environment
+}
 
-interface host-logger {
+// information about the host environment passed from MSBuild to the Task
+record HostInfo {
+    PreopenedDirectories: TaskItemList;
+}
+
+// input to Execute 
+// (in MSBuild normally the task already magically has set its properties to the values from the project file, but here we need to pass them explicitly)
+record TaskInput {
+    HostInfo: HostInfo;
+    Properties: list<PropertyValue>;
+}
+
+// callbacks with logs from the task to MSBuild logging system
+interface HostLogger {
     enum MessageImportance {
         High, 
         Normal,
         Low
     }
 
-    LogMessage: func(message: string, importance: MessageImportance)
-    LogError: func(message: string);
+    LogMessage: func(importance: MessageImportance, message: string)
     LogWarning: func(message: string);
+    LogError: func(message: string);
 }
 
-
-interface task-info {
-    GetTaskInfo: func() -> str-dictionary
-    LoadParameters: func()
-}
-
-interface host-task-parameter {
-    GetParameter: func(name: string) -> Variant<bool, string, TaskItem, Bools, Strings, TaskItems>;
-    GetBoolParameter: func(name: string) -> bool;
-    GetStringParameter: func(name: string) -> string;
-    GetTaskItemParameter: func(name: string) -> TaskItem;
-    GetBoolsParameter: func(name: string) -> Bools;
-    GetStringsParameter: func(name: string) -> Strings;
-    GetTaskItemsParameter: func(name: string) -> TaskItems;
-}
-
-interface execute {
-    Execute: func() -> bool;
-}
-
-world MSBuildTask {
-    import host-data;
-    import host-logger;
-    import host-task-parameter;
-    export task-info;
-    export execute;
+// world describes the task's interface to MSBuild
+world WasmTask {
+    // host obtains information about the task to know what properties to read from project file and pass in
+    export GetTaskInfo: func() -> TaskInfo;
+    // execute is the entry point for the task, returns success
+    export Execute: func(input: TaskInput) -> bool;
+    // task should call HostLogger functions to log messages
+    import HostLogger;
 }

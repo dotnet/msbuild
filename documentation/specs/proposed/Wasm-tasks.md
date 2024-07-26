@@ -176,7 +176,7 @@ After the task is run, Output parameters as a JSON are read from stdout of the W
 
 ### Json format for parameter spec
 They mirror MSBuild Task parameters as they need to be reflected to a C# class.
-```json
+```jsonc
 {
     "Properties": {
         "Param1": {
@@ -204,7 +204,7 @@ They mirror MSBuild Task parameters as they need to be reflected to a C# class.
 
 ```
 ### Json format for parameter values
-```json
+```jsonc
 {
     "Properties" : {
         "Param1": "hello",
@@ -220,7 +220,7 @@ They mirror MSBuild Task parameters as they need to be reflected to a C# class.
 
 ### Json format for task output
 Only parameters with the output attribute set to true are recognized from the output in the MSBuild task.
-```json
+```jsonc
 {
         "Param4": [
             {
