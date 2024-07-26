@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BuildCheck.Analyzers;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Analyzers;
@@ -143,7 +144,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 ([NoEnvironmentVariablePropertyAnalyzer.SupportedRule.Id], NoEnvironmentVariablePropertyAnalyzer.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<NoEnvironmentVariablePropertyAnalyzer>)
             ],
             // BuildCheckDataSource.Execution
-            []
+            [
+                (PropertiesUsageAnalyzer.SupportedRulesList.Select(r => r.Id).ToArray(),
+                    PropertiesUsageAnalyzer.SupportedRulesList.Any(r => r.DefaultConfiguration.IsEnabled ?? false),
+                    Construct<PropertiesUsageAnalyzer>)
+            ]
         ];
 
         /// <summary>
@@ -515,7 +520,19 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             public BuildAnalyzerWrapper Initialize(BuildAnalyzer ba, ConfigurationContext configContext)
             {
-                ba.Initialize(configContext);
+                try
+                {
+                    ba.Initialize(configContext);
+                }
+                catch (BuildCheckConfigurationException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    throw new BuildCheckConfigurationException(
+                        $"The analyzer '{ba.FriendlyName}' failed to initialize: {e.Message}", e);
+                }
                 return new BuildAnalyzerWrapper(ba);
             }
 

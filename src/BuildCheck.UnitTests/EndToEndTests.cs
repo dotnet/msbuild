@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -30,6 +31,60 @@ public class EndToEndTests : IDisposable
     private static string TestAssetsRootPath { get; } = Path.Combine(AssemblyLocation, "TestAssets");
 
     public void Dispose() => _env.Dispose();
+
+    [Fact]
+    public void PropertiesUsageAnalyzerTest()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        string contents = """
+                              <Project DefaultTargets="PrintEnvVar">
+
+                              <PropertyGroup>
+                              <!--
+                              <MyProp1>value-of-prop1</MyProp1>
+                              <MyProp2>$(MyProp1)</MyProp2>
+                              <MyProp3>blah</MyProp3>
+                              -->
+                              </PropertyGroup>
+
+
+                              <PropertyGroup Condition="'$(MyProp12)' == ''">
+                                <MyProp13>$(MyProp11)</MyProp13>
+                              </PropertyGroup>
+
+
+                              <!--
+                              <ItemGroup>
+                                <a Include="$(nonexistent)" />
+                              </ItemGroup>
+                              -->
+
+                              <Target Name="PrintEnvVar">
+                              <Message Text="MyPropT2 has value $(MyPropT2)" Importance="High" Condition="'$(MyPropT2)' == ''" />
+                              <PropertyGroup>
+                              <MyPropT2>$(MyPropT2);xxx</MyPropT2>
+                              </PropertyGroup>
+                              </Target>
+
+                              </Project>
+                              """;
+        TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
+        TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -analyze", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+
+        output.ShouldMatch(@"BC0201: .* Property: \[MyProp11\]");
+        output.ShouldMatch(@"BC0202: .* Property: \[MyPropT2\]");
+        output.ShouldMatch(@"BC0203: .* Property: \[MyProp13\]");
+
+        // each finding should be found just once - but reported twice, due to summary
+        Regex.Matches(output, "BC0201: .* Property").Count.ShouldBe(2);
+        Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
+        Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(2);
+    }
 
     [Theory]
     [InlineData(true, true)]
