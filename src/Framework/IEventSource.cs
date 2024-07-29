@@ -3,6 +3,8 @@
 
 #nullable disable
 
+using Microsoft.Build.Experimental.BuildCheck;
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -34,6 +36,11 @@ namespace Microsoft.Build.Framework
     /// Type of handler for BuildFinishedEvent events
     /// </summary>
     public delegate void BuildFinishedEventHandler(object sender, BuildFinishedEventArgs e);
+
+    /// <summary>
+    /// Type of handler for BuildCanceledEvent events
+    /// </summary>
+    public delegate void BuildCanceledEventHandler(object sender, BuildCanceledEventArgs e);
 
     /// <summary>
     /// Type of handler for ProjectStarted events
@@ -74,6 +81,11 @@ namespace Microsoft.Build.Framework
     /// Type of handler for AnyEventRaised events
     /// </summary>
     public delegate void AnyEventHandler(object sender, BuildEventArgs e);
+
+    /// <summary>
+    /// Type of handler for BuildCheckEventRaised events
+    /// </summary>
+    internal delegate void BuildCheckEventHandler(object sender, BuildCheckEventArgs e);
 
     /// <summary>
     /// This interface defines the events raised by the build engine.

@@ -661,11 +661,12 @@ namespace Microsoft.Build.UnitTests
         public static ProjectRootElement CreateInMemoryProjectRootElement(string projectContents, ProjectCollection collection = null, bool preserveFormatting = true)
         {
             var cleanedProject = CleanupFileContents(projectContents);
-
+#pragma warning disable CA2000 // The return object depends on the created XML reader and project collection that should not be disposed in this scope.
             return ProjectRootElement.Create(
                 XmlReader.Create(new StringReader(cleanedProject)),
                 collection ?? new ProjectCollection(),
                 preserveFormatting);
+#pragma warning restore CA2000 // The return object depends on the created XML reader and project collection that should not be disposed in this scope.
         }
 
         /// <summary>
@@ -686,7 +687,9 @@ namespace Microsoft.Build.UnitTests
         /// <returns>Returns created <see cref="Project"/>.</returns>
         public static Project CreateInMemoryProject(string xml, params ILogger[] loggers)
         {
+#pragma warning disable CA2000 // The return object depends on the project collection that should not be disposed in this scope.
             return CreateInMemoryProject(new ProjectCollection(), xml, loggers);
+#pragma warning restore CA2000 // The return object depends on the project collection that should not be disposed in this scope.
         }
 
         /// <summary>
@@ -723,12 +726,13 @@ namespace Microsoft.Build.UnitTests
                     projectCollection.RegisterLogger(logger);
                 }
             }
-
+#pragma warning disable CA2000 // The return object depends on the created XML reader that should not be disposed in this scope.
             Project project = new Project(
                 XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
                 globalProperties: null,
                 toolsVersion,
                 projectCollection);
+#pragma warning restore CA2000 // The return object depends on the created XML reader that should not be disposed in this scope.
 
             Guid guid = Guid.NewGuid();
             project.FullPath = Path.Combine(TempProjectDir, "Temporary" + guid.ToString("N") + ".csproj");
@@ -975,8 +979,9 @@ namespace Microsoft.Build.UnitTests
         public static Project LoadProjectFileInTempProjectDirectory(string projectFileRelativePath, bool touchProject)
         {
             string projectFileFullPath = Path.Combine(TempProjectDir, projectFileRelativePath);
-
+#pragma warning disable CA2000 // The return object depends on the project collection that should not be disposed in this scope.
             ProjectCollection projectCollection = new ProjectCollection();
+#pragma warning restore CA2000 // The return object depends on the project collection that should not be disposed in this scope.
 
             Project project = new Project(projectFileFullPath, null, null, projectCollection);
 
@@ -1091,7 +1096,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static IList<ProjectItem> GetItems(string content, bool allItems = false, bool ignoreCondition = false)
         {
-            var projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(CleanupFileContents(content))));
+            using ProjectRootElementFromString projectRootElementFromString = new(CleanupFileContents(content));
+            ProjectRootElement projectXml = projectRootElementFromString.Project;
             Project project = new Project(projectXml);
             IList<ProjectItem> item = Helpers.MakeList(
                 ignoreCondition ?
@@ -1348,8 +1354,8 @@ namespace Microsoft.Build.UnitTests
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
-
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, toolsVersion: null);
+            using ProjectFromString projectFromString = new(content, globalProperties, toolsVersion: null);
+            Project project = projectFromString.Project;
             logger ??= new MockLogger
             {
                 AllowTaskCrashes = allowTaskCrash
@@ -1357,6 +1363,21 @@ namespace Microsoft.Build.UnitTests
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             result = project.Build(loggers);
+        }
+
+        public static void BuildProjectWithNewOMAndBinaryLogger(string content, BinaryLogger binaryLogger, out bool result, out string projectDirectory)
+        {
+            // Replace the nonstandard quotes with real ones
+            content = ObjectModelHelpers.CleanupFileContents(content);
+
+            using ProjectFromString projectFromString = new(content, null, toolsVersion: null);
+            Project project = projectFromString.Project;
+
+            List<ILogger> loggers = new List<ILogger>() { binaryLogger };
+
+            result = project.Build(loggers);
+
+            projectDirectory = project.DirectoryPath;
         }
 
         public static MockLogger BuildProjectContentUsingBuildManagerExpectResult(string content, BuildResultCode expectedResult)
@@ -1699,6 +1720,8 @@ namespace Microsoft.Build.UnitTests
 
             sb.Append("</ItemGroup>");
 
+            // Ensure there is at least one valid target in the project
+            sb.Append("<Target Name='Build'/>");
 
             foreach (var defaultTarget in (defaultTargets ?? string.Empty).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
             {
@@ -1955,7 +1978,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static void ClearDirtyFlag(ProjectRootElement project)
         {
-            project.Save(new StringWriter());
+            using var sw = new StringWriter();
+            project.Save(sw);
             Assert.False(project.HasUnsavedChanges);
         }
 

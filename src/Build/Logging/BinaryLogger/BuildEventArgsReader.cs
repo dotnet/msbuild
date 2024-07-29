@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -20,7 +18,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Logging
 {
     /// <summary>
-    /// Deserializes and returns BuildEventArgs-derived objects from a BinaryReader
+    /// Deserializes and returns BuildEventArgs-derived objects from a BinaryReader.
     /// </summary>
     public class BuildEventArgsReader : IBuildEventArgsReaderNotifications, IDisposable
     {
@@ -186,7 +184,6 @@ namespace Microsoft.Build.Logging
             Stream stream = _binaryReader.BaseStream.Slice(serializedEventLength);
 
             _lastSubStream = stream as SubStream;
-
             _recordNumber += 1;
 
             return new(recordKind, stream);
@@ -806,6 +803,7 @@ namespace Microsoft.Build.Logging
             var taskName = ReadOptionalString();
             var projectFile = ReadOptionalString();
             var taskFile = ReadOptionalString();
+            var taskAssemblyLocation = _fileFormatVersion > 19 ? ReadOptionalString() : null;
 
             var e = new TaskStartedEventArgs(
                 fields.Message,
@@ -813,7 +811,8 @@ namespace Microsoft.Build.Logging
                 projectFile,
                 taskFile,
                 taskName,
-                fields.Timestamp);
+                fields.Timestamp,
+                taskAssemblyLocation);
             e.LineNumber = fields.LineNumber;
             e.ColumnNumber = fields.ColumnNumber;
             SetCommonFields(e, fields);
@@ -1021,10 +1020,15 @@ namespace Microsoft.Build.Logging
             var kind = (TaskParameterMessageKind)ReadInt32();
             var itemType = ReadDeduplicatedString();
             var items = ReadTaskItemList() as IList;
+            var (parameterName, propertyName) = _fileFormatVersion >= 21
+                ? (ReadDeduplicatedString(), ReadDeduplicatedString())
+                : (null, null);
 
             var e = ItemGroupLoggingHelper.CreateTaskParameterEventArgs(
                 fields.BuildEventContext,
                 kind,
+                parameterName,
+                propertyName,
                 itemType,
                 items,
                 logItemMetadata: true,
@@ -1089,14 +1093,23 @@ namespace Microsoft.Build.Logging
         {
             var fields = ReadBuildEventArgsFields(readImportance: true);
 
-            var environmentVariableName = ReadDeduplicatedString();
+            string? environmentVariableName = ReadDeduplicatedString();
+            int line = 0;
+            int column = 0;
+            string? fileName = null;
+            if (_fileFormatVersion >= 22)
+            {
+                line = ReadInt32();
+                column = ReadInt32();
+                fileName = ReadDeduplicatedString();
+            }
 
-            var e = new EnvironmentVariableReadEventArgs(
-                environmentVariableName,
-                fields.Message,
-                fields.HelpKeyword,
-                fields.SenderName,
-                fields.Importance);
+            BuildEventArgs e = new EnvironmentVariableReadEventArgs(
+                    environmentVariableName ?? string.Empty,
+                    fields.Message,
+                    fileName ?? string.Empty,
+                    line,
+                    column);
             SetCommonFields(e, fields);
 
             return e;

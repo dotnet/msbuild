@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable disable
@@ -79,6 +79,11 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string DebugDumpPath => s_debugDumpPath;
 
+        /// <summary>
+        /// The file used for diagnostic log files.
+        /// </summary>
+        internal static string DumpFilePath => s_dumpFileName;
+
 #if !BUILDINGAPPXTASKS
         /// <summary>
         /// The filename that exceptions will be dumped to
@@ -99,6 +104,9 @@ namespace Microsoft.Build.Shared
              || e is ThreadAbortException
              || e is ThreadInterruptedException
              || e is AccessViolationException
+#if !TASKHOST
+             || e is CriticalTaskException
+#endif
 #if !BUILDINGAPPXTASKS
              || e is InternalErrorException
 #endif
@@ -327,39 +335,49 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void DumpExceptionToFile(Exception ex)
         {
-            // Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
-            //  this method previously had a [MethodImpl(MethodImplOptions.Synchronized)] attribute, which does lock on the type when
-            //  applied to a static method.
-            lock (typeof(ExceptionHandling))
+            try
             {
-                if (s_dumpFileName == null)
+                // Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
+                //  this method previously had a [MethodImpl(MethodImplOptions.Synchronized)] attribute, which does lock on the type when
+                //  applied to a static method.
+                lock (typeof(ExceptionHandling))
                 {
-                    Guid guid = Guid.NewGuid();
+                    if (s_dumpFileName == null)
+                    {
+                        Guid guid = Guid.NewGuid();
 
-                    // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
-                    // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
-                    // If this throws, no sense catching it, we can't log it now, and we're here
-                    // because we're a child node with no console to log to, so die
-                    Directory.CreateDirectory(DebugDumpPath);
+                        // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
+                        // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
+                        // If this throws, no sense catching it, we can't log it now, and we're here
+                        // because we're a child node with no console to log to, so die
+                        Directory.CreateDirectory(DebugDumpPath);
 
-                    var pid = Process.GetCurrentProcess().Id;
-                    // This naming pattern is assumed in ReadAnyExceptionFromFile
-                    s_dumpFileName = Path.Combine(DebugDumpPath, $"MSBuild_pid-{pid}_{guid:n}.failure.txt");
+                        var pid = Process.GetCurrentProcess().Id;
+                        // This naming pattern is assumed in ReadAnyExceptionFromFile
+                        s_dumpFileName = Path.Combine(DebugDumpPath, $"MSBuild_pid-{pid}_{guid:n}.failure.txt");
+
+                        using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
+                        {
+                            writer.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", pid);
+                            writer.WriteLine("=====================");
+                        }
+                    }
 
                     using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
                     {
-                        writer.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", pid);
-                        writer.WriteLine("=====================");
+                        // "G" format is, e.g., 6/15/2008 9:15:07 PM
+                        writer.WriteLine(DateTime.Now.ToString("G", CultureInfo.CurrentCulture));
+                        writer.WriteLine(ex.ToString());
+                        writer.WriteLine("===================");
                     }
                 }
-
-                using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
-                {
-                    // "G" format is, e.g., 6/15/2008 9:15:07 PM
-                    writer.WriteLine(DateTime.Now.ToString("G", CultureInfo.CurrentCulture));
-                    writer.WriteLine(ex.ToString());
-                    writer.WriteLine("===================");
-                }
+            }
+            
+            // Some customers experience exceptions such as 'OutOfMemory' errors when msbuild attempts to log errors to a local file.
+            // This catch helps to prevent the application from crashing in this best-effort dump-diagnostics path,
+            // but doesn't prevent the overall crash from going to Watson.
+            catch
+            {
             }
         }
 

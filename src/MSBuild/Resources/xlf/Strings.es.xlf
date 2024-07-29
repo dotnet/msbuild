@@ -32,15 +32,22 @@
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with errors</source>
-        <target state="translated">error con errores</target>
+        <source>failed with {0} error(s)</source>
+        <target state="translated">error con {0} errores</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
+        <source>failed with {0} error(s) and {1} warning(s)</source>
+        <target state="translated">error con {0} errores y {1} advertencias</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with warnings</source>
-        <target state="translated">error con advertencias</target>
+        <source>failed with {0} warning(s)</source>
+        <target state="translated">error con {0} advertencias</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -53,8 +60,8 @@
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with warnings</source>
-        <target state="translated">correcto con advertencias</target>
+        <source>succeeded with {0} warning(s)</source>
+        <target state="translated">correcto con {0} advertencias</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -123,6 +130,188 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_43_GetPropertySwitch">
+        <source>  -getProperty:propertyName,...
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
+                     the -targets option or the -getTargetResult option is
+                     used, write out the values after the build.
+    </source>
+        <target state="translated">  -getProperty:propertyName,...
+                     Escriba el valor de una o varias propiedades especificadas
+                     después de la evaluación, sin ejecutar la compilación, o si se usa
+                     la opción -targets o la opción -getTargetResult,
+                     escriba los valores después de la compilación.
+    </target>
+        <note>
+      LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_44_GetItemSwitch">
+        <source>  -getItem:itemName,...
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
+                     the values after the build.
+    </source>
+        <target state="translated">  -getItem:itemName,...
+                     Escriba el valor de uno o varios elementos especificados y
+                     sus metadatos asociados después de la evaluación sin
+                     ejecutar la compilación, o si se usa la opción -targets
+                     o la opción -getTargetResult, escriba
+                     los valores después de la compilación.
+    </target>
+        <note>
+      LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_45_GetTargetResultSwitch">
+        <source>  -getTargetResult:targetName,...
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
+    </source>
+        <target state="translated">  -getTargetResult:targetName,...
+                     Escriba el valor de salida de uno o varios destinos y
+                     los destinos especificados se ejecutarán.
+    </target>
+        <note>
+      LOCALIZATION: "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_46_FeatureAvailabilitySwitch">
+        <source>  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the
+                     strings "Undefined", "Available", "NotAvailable" and
+                     "Preview".
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
+                     (Short form: -fa)
+    </source>
+        <target state="translated">  -featureAvailability:featureName,...
+                     Compruebe la disponibilidad de la característica. El resultado es una de las
+                     cadenas "Undefined", "Available", "NotAvailable" y
+                     "Preview".
+                     - Undefined: la disponibilidad de la característica no está definida
+                     (el nombre de la característica es desconocido para el comprobador de disponibilidad
+                     de características)
+                     - NotAvailable: la característica no está disponible (a diferencia de
+                     Undefined, el nombre de la característica es conocido para el comprobador
+                     de disponibilidad de características y sabe que la característica no
+                     se admite en el motor de MSBuild actual)
+                     - Available: la característica está disponible
+                     - Preview: la característica está en versión preliminar (no estable)
+                     (Forma corta: -fa)
+    </target>
+        <note>
+      LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_47_TerminalLoggerSwitch">
+        <source>  -terminalLogger[:auto,on,off]
+                     Enable or disable the terminal logger. Terminal logger
+                     provides enhanced build output on the console in real time,
+                     organized logically by project, and designed to highlight
+                     actionable information. Specify auto (or use the option
+                     without arguments) to use the terminal logger only if the
+                     standard output is not redirected. Don't parse the output
+                     or otherwise rely on it remaining unchanged in future
+                     versions. This option is available in MSBuild 17.8 and
+                     later.
+                     (Short form: -tl)
+    </source>
+        <target state="translated">  -terminalLogger[:auto,on,off]
+                     Habilite o deshabilite el registrador de terminal. El registrador de terminal
+                     proporciona una salida de compilación mejorada en la consola en tiempo real,
+                     organizada lógicamente por proyecto y diseñada para resaltar
+                     la información accionable. Especifique auto (o use la opción
+                     sin argumentos) para utilizar el registrador de terminal solo si la
+                     salida estándar no se redirige. No analice la salida
+                     ni confíe en que permanezca sin cambios en versiones
+                     futuras. Esta opción está disponible en MSBuild 17.8 y
+                     posteriores.
+                     (Forma corta: -tl)
+    </target>
+        <note>
+      LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_48_TerminalLoggerParametersSwitch">
+        <source>  -terminalLoggerParameters: &lt;parameters&gt;
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
+                            stdout/stderr
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
+
+                      Example:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </source>
+        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
+                     Parámetros para el registrador de terminal. (Forma corta: -tlp)
+                     Los parámetros disponibles.
+                        default--Especifica el comportamiento predeterminado del registrador
+                        de terminal. Requiere uno de los siguientes valores:
+                           - `on`, `true` fuerza el uso de TerminalLogger aunque
+                            esté deshabilitado.
+                           - `off`, `false` fuerza que no se utilice TerminalLogger
+                            aunque esté habilitado.
+                           - `auto` habilita TerminalLogger cuando el terminal
+                            lo admite y la sesión no ha redirigido
+                            stdout/stderr
+                        verbosity--Reemplaza el valor -verbosity de este
+                        registrador
+                        showCommandLine--Muestra los mensajes de TaskCommandLineEvent
+
+                      Ejemplo:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </target>
+        <note>
+      LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
+        <source>  -getResultOutputFile:file
+                     Redirect output from get* into a file.
+
+                     Example:
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     This writes the value of property Bar into Biz.txt.
+    </source>
+        <target state="translated">  -getResultOutputFile:file
+                     Redirija la salida de get* a un archivo.
+
+                     Ejemplo:
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     Esto escribe el valor de la propiedad Bar en Biz.txt.
+    </target>
+        <note>
+      LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: El valor de prioridad baja no es válido. {0}.</target>
@@ -152,6 +341,26 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="LongPaths">
+        <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
+        <target state="translated">De acuerdo con la clave del Registro de Windows LongPathsEnabled, la característica LongPaths está {0}.</target>
+        <note>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</note>
+      </trans-unit>
+      <trans-unit id="LongPaths_Disabled">
+        <source>disabled</source>
+        <target state="translated">deshabilitada</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LongPaths_Enabled">
+        <source>enabled</source>
+        <target state="translated">habilitada</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LongPaths_Missing">
+        <source>not set</source>
+        <target state="translated">sin establecer</target>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
@@ -1329,11 +1538,11 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
-        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: debe proporcionar un nombre de característica para el conmutador de disponibilidad de características.</target>
+        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
+        <target state="translated">MSBUILD : error MSB1067: debe proporcionar un nombre de característica para el conmutador featureAvailability.</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
-      following the switch, as in "msbuild.exe -featureavailability:blah".
+      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
+      following the switch, as in "msbuild.exe -featureAvailability:blah".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1352,6 +1561,15 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="MissingGetResultFileError">
+        <source>MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</source>
+        <target state="translated">MSBUILD : error MSB1068: debe proporcionar un archivo para el modificador getResultOutputFile.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1068: "}UE: This happens if the user does something like "msbuild.exe -getResultOutputFile". The user must pass in an actual file
+      following the switch, as in "msbuild.exe -getTargetResult:blah -getResultOutputFile:blah.txt".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1422,7 +1640,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <target state="translated">MSBUILD : error MSB1066: Especifique uno o más parámetros para el registrador de terminales si utiliza la opción -terminalLoggerParameters</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
-      UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
+      UE: This happens if the user does something like "msbuild.exe -terminalLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -terminalLoggerParameters:default=auto".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
@@ -1659,7 +1877,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="new">{0}{1} test {2} ({3}s)</target>
+        <target state="translated">{0}{1} prueba{2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1670,7 +1888,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="new">{0}{1} test {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} prueba ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1680,11 +1898,30 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       {4}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
-      <trans-unit id="TestSummary">
-        <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
-        <target state="new">Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</target>
-        <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
-{1-5} whole number</note>
+      <trans-unit id="TestSummary_BannerAndTotal">
+        <source>Test summary: total: {0}</source>
+        <target state="translated">Resumen de pruebas: total: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Duration">
+        <source>duration: {0}s</source>
+        <target state="translated">duración: {0} s</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Failed">
+        <source>failed: {0}</source>
+        <target state="translated">con errores: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Skipped">
+        <source>skipped: {0}</source>
+        <target state="translated">omitido: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Succeeded">
+        <source>succeeded: {0}</source>
+        <target state="translated">correcto: {0}</target>
+        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
@@ -1762,11 +1999,6 @@ Esta marca es experimental y puede que no funcione según lo previsto.
      This error is shown when a user specifies a node reuse value that is not equivilant to Boolean.TrueString or Boolean.FalseString.
      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
   </note>
-      </trans-unit>
-      <trans-unit id="AbortingBuild">
-        <source>Attempting to cancel the build...</source>
-        <target state="translated">Intentando cancelar la compilación...</target>
-        <note />
       </trans-unit>
       <trans-unit id="InvalidPreprocessPath">
         <source>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</source>

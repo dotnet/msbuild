@@ -142,6 +142,11 @@ namespace Microsoft.Build.BackEnd
         /// The component which launches new MSBuild nodes.
         /// </summary>
         NodeLauncher,
+
+        /// <summary>
+        /// The Build Analyzer Manager.
+        /// </summary>
+        BuildCheckManagerProvider,
     }
 
     /// <summary>
@@ -189,6 +194,15 @@ namespace Microsoft.Build.BackEnd
         /// <param name="type">The component type to be retrieved</param>
         /// <returns>The component</returns>
         IBuildComponent GetComponent(BuildComponentType type);
+
+        /// <summary>
+        /// Gets an instance of the specified component type from the host.
+        /// </summary>
+        /// <typeparam name="TComponent"></typeparam>
+        /// <param name="type">The component type to be retrieved</param>
+        /// <returns>The component</returns>
+        TComponent GetComponent<TComponent>(BuildComponentType type)
+            where TComponent : IBuildComponent;
 
         #endregion
     }

@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -25,7 +26,7 @@ namespace Microsoft.Build.UnitTests
             _output = testOutput;
         }
 
-        private sealed class MyTool : ToolTask, IDisposable
+        private class MyTool : ToolTask, IDisposable
         {
             private string _fullToolName;
             private string _responseFileCommands = string.Empty;
@@ -232,7 +233,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DoNotFormatTaskCommandOrMessage()
         {
-            MyTool t = new MyTool();
+            using MyTool t = new MyTool();
             MockEngine3 engine = new MockEngine3();
             t.BuildEngine = engine;
             // Unmatched curly would crash if they did
@@ -242,6 +243,37 @@ namespace Microsoft.Build.UnitTests
             t.Execute();
             engine.AssertLogContains("echo hello world {");
             engine.Errors.ShouldBe(0);
+        }
+
+        /// <summary>
+        /// Process notification encoding should be consistent with console code page.
+        /// not meant to be formatted.
+        /// </summary>
+        [InlineData(0, "")]
+        [InlineData(-1, "1>&2")]
+        [Theory]
+        public void ProcessNotificationEncodingConsistentWithConsoleCodePage(int exitCode, string errorPart)
+        {
+            using MyTool t = new MyTool();
+            MockEngine engine = new MockEngine();
+            t.BuildEngine = engine;
+            t.UseCommandProcessor = true;
+            t.LogStandardErrorAsError = true;
+            t.EchoOff = true;
+            t.UseUtf8Encoding = EncodingUtilities.UseUtf8Always;
+            string content = "Building Custom Rule プロジェクト";
+            string outputMessage = exitCode == 0 ? content : $"'{content}' {errorPart}";
+            string commandLine = $"echo {outputMessage}";
+            t.MockCommandLineCommands = commandLine;
+            t.Execute();
+            t.ExitCode.ShouldBe(exitCode);
+
+            string log = engine.Log;
+            string singleQuote = NativeMethodsShared.IsWindows ? "'" : string.Empty;
+            string displayMessage = exitCode == 0 ? content : $"ERROR : {singleQuote}{content}{singleQuote}";
+            string pattern = $"{commandLine}{Environment.NewLine}\\s*{displayMessage}";
+            Regex regex = new Regex(pattern);
+            regex.Matches(log).Count.ShouldBe(1, $"{log} doesn't contain the log matching the pattern: {pattern}");
         }
 
         /// <summary>
@@ -509,7 +541,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EnvironmentVariablesToToolTask()
         {
-            MyTool task = new MyTool();
+            using MyTool task = new MyTool();
             task.BuildEngine = new MockEngine3();
             string userVarName = NativeMethodsShared.IsWindows ? "username" : "user";
             task.EnvironmentVariables = new[] { "a=b", "c=d", userVarName + "=x" /* built-in */, "path=" /* blank value */};
@@ -540,7 +572,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EnvironmentVariablesToToolTaskEqualsSign()
         {
-            MyTool task = new MyTool();
+            using MyTool task = new MyTool();
             task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "a=b=c" };
             bool result = task.Execute();
@@ -555,7 +587,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EnvironmentVariablesToToolTaskInvalid1()
         {
-            MyTool task = new MyTool();
+            using MyTool task = new MyTool();
             task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "x" };
             bool result = task.Execute();
@@ -570,7 +602,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EnvironmentVariablesToToolTaskInvalid2()
         {
-            MyTool task = new MyTool();
+            using MyTool task = new MyTool();
             task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "" };
             bool result = task.Execute();
@@ -585,7 +617,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EnvironmentVariablesToToolTaskInvalid3()
         {
-            MyTool task = new MyTool();
+            using MyTool task = new MyTool();
             task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "=a;b=c" };
             bool result = task.Execute();
@@ -600,7 +632,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EnvironmentVariablesToToolTaskNotSet()
         {
-            MyTool task = new MyTool();
+            using MyTool task = new MyTool();
             task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = null;
             bool result = task.Execute();
@@ -631,7 +663,7 @@ namespace Microsoft.Build.UnitTests
 
                     string directoryNamedSameAsTool = Directory.CreateDirectory(Path.Combine(tempDirectory, toolName)).FullName;
 
-                    MyTool task = new MyTool
+                    using MyTool task = new MyTool
                     {
                         BuildEngine = new MockEngine3(),
                         FullToolName = toolName,
@@ -680,7 +712,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetProcessStartInfoCanOverrideEnvironmentVariables()
         {
-            MyTool task = new MyTool();
+            using MyTool task = new MyTool();
             task.DoProcessStartInfoMutation = (p) => p.Environment.Remove("a");
 
             task.BuildEngine = new MockEngine3();
@@ -694,7 +726,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VisualBasicLikeEscapedQuotesInCommandAreNotMadeForwardSlashes()
         {
-            MyTool t = new MyTool();
+            using MyTool t = new MyTool();
             MockEngine3 engine = new MockEngine3();
             t.BuildEngine = engine;
             t.MockCommandLineCommands = NativeMethodsShared.IsWindows
@@ -703,6 +735,42 @@ namespace Microsoft.Build.UnitTests
             t.Execute();
             engine.AssertLogContains("echo \"hello \\\"world\\\"\"");
             engine.Errors.ShouldBe(0);
+        }
+
+        private sealed class MyToolWithCustomProcess : MyTool
+        {
+            protected override Process StartToolProcess(Process proc)
+            {
+#pragma warning disable CA2000 // Dispose objects before losing scope - caller needs the process
+                Process customProcess = new Process();
+#pragma warning restore CA2000
+                customProcess.StartInfo = proc.StartInfo;
+
+                customProcess.EnableRaisingEvents = true;
+                customProcess.Exited += ReceiveExitNotification;
+
+                customProcess.ErrorDataReceived += ReceiveStandardErrorData;
+                customProcess.OutputDataReceived += ReceiveStandardOutputData;
+                return base.StartToolProcess(customProcess);
+            }
+        }
+
+        [Fact]
+        public void UsesCustomProcess()
+        {
+            using (MyToolWithCustomProcess t = new MyToolWithCustomProcess())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                    ? "/C echo hello_stdout & echo hello_stderr >&2"
+                    : "-c \"echo hello_stdout ; echo hello_stderr >&2\"";
+
+                t.Execute();
+
+                engine.AssertLogContains("\nhello_stdout");
+                engine.AssertLogContains("\nhello_stderr");
+            }
         }
 
         /// <summary>

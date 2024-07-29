@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -15,6 +14,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
+using Microsoft.NET.StringTools;
 
 #nullable disable
 
@@ -406,6 +406,7 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.TaskName);
             WriteDeduplicatedString(e.ProjectFile);
             WriteDeduplicatedString(e.TaskFile);
+            WriteDeduplicatedString(e.TaskAssemblyLocation);
 
             return BinaryLogRecordKind.TaskStarted;
         }
@@ -544,10 +545,15 @@ namespace Microsoft.Build.Logging
 
         private BinaryLogRecordKind Write(EnvironmentVariableReadEventArgs e)
         {
-            WriteMessageFields(e, writeImportance: true);
+            WriteMessageFields(e, writeImportance: false);
             WriteDeduplicatedString(e.EnvironmentVariableName);
+            Write(e.LineNumber);
+            Write(e.ColumnNumber);
+            WriteDeduplicatedString(e.File);
+
             return BinaryLogRecordKind.EnvironmentVariableRead;
         }
+
         private BinaryLogRecordKind Write(ResponseFileUsedEventArgs e)
         {
             WriteMessageFields(e);
@@ -568,6 +574,8 @@ namespace Microsoft.Build.Logging
             Write((int)e.Kind);
             WriteDeduplicatedString(e.ItemType);
             WriteTaskItemList(e.Items, e.LogItemMetadata);
+            WriteDeduplicatedString(e.ParameterName);
+            WriteDeduplicatedString(e.PropertyName);
             if (e.Kind == TaskParameterMessageKind.AddItem
                || e.Kind == TaskParameterMessageKind.TaskOutput)
             {
@@ -1260,9 +1268,9 @@ namespace Microsoft.Build.Logging
 
         internal readonly struct HashKey : IEquatable<HashKey>
         {
-            private readonly ulong value;
+            private readonly long value;
 
-            private HashKey(ulong i)
+            private HashKey(long i)
             {
                 value = i;
             }
@@ -1275,13 +1283,13 @@ namespace Microsoft.Build.Logging
                 }
                 else
                 {
-                    value = FnvHash64.GetHashCode(text);
+                    value = FowlerNollVo1aHash.ComputeHash64Fast(text);
                 }
             }
 
             public static HashKey Combine(HashKey left, HashKey right)
             {
-                return new HashKey(FnvHash64.Combine(left.value, right.value));
+                return new HashKey(FowlerNollVo1aHash.Combine64(left.value, right.value));
             }
 
             public HashKey Add(HashKey other) => Combine(this, other);
@@ -1309,36 +1317,6 @@ namespace Microsoft.Build.Logging
             public override string ToString()
             {
                 return value.ToString();
-            }
-        }
-
-        internal static class FnvHash64
-        {
-            public const ulong Offset = 14695981039346656037;
-            public const ulong Prime = 1099511628211;
-
-            public static ulong GetHashCode(string text)
-            {
-                ulong hash = Offset;
-
-                unchecked
-                {
-                    for (int i = 0; i < text.Length; i++)
-                    {
-                        char ch = text[i];
-                        hash = (hash ^ ch) * Prime;
-                    }
-                }
-
-                return hash;
-            }
-
-            public static ulong Combine(ulong left, ulong right)
-            {
-                unchecked
-                {
-                    return (left ^ right) * Prime;
-                }
             }
         }
     }

@@ -42,7 +42,9 @@ namespace Microsoft.Build.Framework
     {
         private static readonly Dictionary<string, FeatureStatus> _featureStatusMap = new Dictionary<string, FeatureStatus>
         {
+            { "BuildCheck.Beta", FeatureStatus.Preview },
             { "EvaluationContext_SharedSDKCachePolicy", FeatureStatus.Available }, // EvaluationContext supports the SharingPolicy.SharedSDKCache flag.
+            { "TerminalLogger_MultiLineHandler", FeatureStatus.Available }, // TerminalLogger has better explicit support for rendering multi-line messages
             // Add more features here.
         };
 

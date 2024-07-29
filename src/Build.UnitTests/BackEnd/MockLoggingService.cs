@@ -4,7 +4,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
@@ -29,6 +32,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         #region ILoggingService Members
+
+        /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        public IBuildEngineDataRouter BuildEngineDataRouter => this;
 
         /// <summary>
         /// The event to raise when there is a logging exception
@@ -214,14 +222,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set { }
         }
 
-        /// <summary>
-        /// Log properties and items on ProjectEvaluationFinishedEventArgs
-        /// instead of ProjectStartedEventArgs.
-        /// </summary>
-        public bool IncludeEvaluationPropertiesAndItems
+        /// <inheritdoc cref="ILoggingService.SetIncludeEvaluationPropertiesAndItemsInEvents"/>
+        public void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent,
+            bool inEvaluationFinishedEvent)
+        { }
+
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
         {
             get => false;
-            set { }
+        }
+
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
+        {
+            get => false;
         }
 
         /// <summary>
@@ -486,6 +501,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
+        /// <inheritdoc />
+        public void LogBuildCanceled()
+        {
+        }
 
         /// <inheritdoc />
         public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
@@ -573,7 +592,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="taskName">The name of the task</param>
         /// <param name="projectFile">The project file</param>
         /// <param name="projectFileOfTaskNode">The project file containing the task node.</param>
-        public void LogTaskStarted(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode)
+        /// <param name="taskAssemblyLocation">>The location of the assembly containing the implementation of the task.</param>
+        public void LogTaskStarted(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, string taskAssemblyLocation)
         {
         }
 
@@ -584,8 +604,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="taskName">The name of the task</param>
         /// <param name="projectFile">The project file</param>
         /// <param name="projectFileOfTaskNode">The project file containing the task node.</param>
+        /// <param name="taskAssemblyLocation">>The location of the assembly containing the implementation of the task.</param>
         /// <returns>The task logging context</returns>
-        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column)
+        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, string taskAssemblyLocation)
         {
             return new BuildEventContext(0, 0, 0, 0);
         }
@@ -637,6 +658,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             throw new NotImplementedException();
         }
 
+        public void InitializeComponent(IBuildComponentHost host) => throw new NotImplementedException();
+        public void ShutdownComponent() => throw new NotImplementedException();
+
         #endregion
+
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext analysisContext)
+        { /* Ignore the data */ }
+
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext analysisContext)
+        { /* Ignore the data */ }
     }
 }

@@ -10,10 +10,12 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
+using Microsoft.Build.Experimental.BuildCheck;
 
 #nullable disable
 
@@ -68,7 +70,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// Logging services is used as a helper class to assist logging messages in getting to the correct loggers.
     /// </summary>
-    internal partial class LoggingService : ILoggingService, INodePacketHandler, IBuildComponent
+    internal partial class LoggingService : ILoggingService, INodePacketHandler
     {
         /// <summary>
         /// The default maximum size for the logging event queue.
@@ -198,12 +200,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Whether to include evaluation profiles in events.
         /// </summary>
         private bool? _includeEvaluationProfile;
-
-        /// <summary>
-        /// Whether properties and items should be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>.
-        /// </summary>
-        private bool? _includeEvaluationPropertiesAndItems;
 
         /// <summary>
         /// Whether to include task inputs in task events.
@@ -354,6 +350,11 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        public IBuildEngineDataRouter BuildEngineDataRouter => this;
 
         /// <summary>
         /// Properties we need to serialize from the child node
@@ -539,33 +540,77 @@ namespace Microsoft.Build.BackEnd.Logging
             set => _includeTaskInputs = value;
         }
 
-        /// <summary>
-        /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>?
-        /// </summary>
-        public bool IncludeEvaluationPropertiesAndItems
+        /// <inheritdoc cref="ILoggingService.SetIncludeEvaluationPropertiesAndItemsInEvents"/>
+        public void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent, bool inEvaluationFinishedEvent)
+        {
+            _evalDataBehaviorSet = true;
+            IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = inEvaluationFinishedEvent;
+            IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = inProjectStartedEvent;
+        }
+
+        private bool _evalDataBehaviorSet;
+        private bool _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
+        private bool _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
+        private void InferEvalDataBehavior()
+        {
+            if (_evalDataBehaviorSet)
+            {
+                return;
+            }
+            // Set this right away - to prevent SO exception in case of any future refactoring
+            //  that would refer to the IncludeEvaluation... properties here
+            _evalDataBehaviorSet = true;
+
+            bool? escapeHatch = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation;
+            if (escapeHatch.HasValue)
+            {
+                IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = escapeHatch.Value;
+                IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !escapeHatch.Value;
+            }
+            else
+            {
+                var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>().ToList();
+
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                {
+                    // If any logger requested the data - we need to emit them
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
+                        sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
+                    // If any logger didn't request the data - hence it's likely legacy logger
+                    //  - we need to populate the data in legacy way
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
+                        sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
+                }
+                else
+                {
+                    bool allSinksIncludeEvalData = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = allSinksIncludeEvalData;
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !allSinksIncludeEvalData;
+                }
+            }
+        }
+
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
         {
             get
             {
-                if (_includeEvaluationPropertiesAndItems == null)
-                {
-                    var escapeHatch = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation;
-                    if (escapeHatch.HasValue)
-                    {
-                        _includeEvaluationPropertiesAndItems = escapeHatch.Value;
-                    }
-                    else
-                    {
-                        var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>();
-                        // .All() on an empty list defaults to true, we want to default to false
-                        _includeEvaluationPropertiesAndItems = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
-                    }
-                }
-
-                return _includeEvaluationPropertiesAndItems ?? false;
+                InferEvalDataBehavior();
+                return _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
             }
+            private set => _includeEvaluationPropertiesAndItemsInProjectStartedEvent = value;
+        }
 
-            set => _includeEvaluationPropertiesAndItems = value;
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
+        {
+            get
+            {
+                InferEvalDataBehavior();
+                return _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
+            }
+            private set => _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = value;
         }
 
         /// <summary>
@@ -606,6 +651,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             return GetWarningsForProject(context, _warningsNotAsErrorsByProject, WarningsNotAsErrors);
         }
+
 
         /// <summary>
         /// Returns a collection of warnings to be demoted to messages for the specified build context.
@@ -1232,7 +1278,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs to process</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
-        internal virtual void ProcessLoggingEvent(object buildEvent)
+        protected internal virtual void ProcessLoggingEvent(object buildEvent)
         {
             ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
@@ -1591,6 +1637,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
             }
 
+            if (buildEventArgs is BuildCheckResultError checkResultError)
+            {
+                // If the specified BuildCheckResultError was issued, an empty ISet<string> signifies that the specified build check warnings should be treated as errors.
+                AddWarningsAsErrors(checkResultError.BuildEventContext, new HashSet<string>());
+            }
+
             if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
             {
                 WarningsConfigKey key = GetWarningsConfigKey(projectFinishedEvent);
@@ -1758,8 +1810,16 @@ namespace Microsoft.Build.BackEnd.Logging
                 Build.Logging.ConsoleLogger consoleLogger => consoleLogger.GetMinimumMessageImportance(),
                 Build.Logging.ConfigurableForwardingLogger forwardingLogger => forwardingLogger.GetMinimumMessageImportance(),
 
-                // Central forwarding loggers are used in worker nodes if logging verbosity could not be optimized, i.e. in cases
-                // where we must log everything. They can be ignored in inproc nodes.
+                // The BuildCheck connector logger consumes only high priority messages.
+                BuildCheckForwardingLogger => MessageImportance.High,
+                BuildCheckConnectorLogger => MessageImportance.High,
+
+                // If this is not an OutOfProc node, we can ignore the central forwarding logger, because we'll be
+                // setting the message importance to accurate level based on the exact needs of the central logger.
+                // That will happen in separate call to this method, with the central logger itself. This is because in the
+                // inproc case, we register the central loggers (that are the destination for the logging),
+                // wherease in the out-of-proc case, we register the forwarding loggers only - and those need to make sure
+                // to forward at minimum what is required by the central logger.
                 CentralForwardingLogger => (_nodeId > 1 ? MessageImportance.Low : null),
 
                 // The null logger has no effect on minimum verbosity.

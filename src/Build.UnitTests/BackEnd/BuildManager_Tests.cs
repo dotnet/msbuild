@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 EnableNodeReuse = false
             };
             _buildManager = new BuildManager();
-            _projectCollection = new ProjectCollection();
+            _projectCollection = new ProjectCollection(globalProperties: null, _parameters.Loggers, ToolsetDefinitionLocations.Default);
 
             _env = TestEnvironment.Create(output);
             _inProcEnvCheckTransientEnvironmentVariable = _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
@@ -137,8 +137,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -254,8 +254,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             _logger.ProjectStartedEvents.Count.ShouldBe(1);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             properties.TryGetValue("InitialProperty1", out string propertyValue).ShouldBeTrue();
             propertyValue.ShouldBe("InitialProperty1", StringCompareShould.IgnoreCase);
@@ -293,10 +293,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ");
 
-            var project = new Project(XmlReader.Create(new StringReader(contents1)), null, null, _projectCollection)
-            {
-                FullPath = _env.CreateFile(".proj").Path
-            };
+            using ProjectFromString projectFromString = new(contents1, null, null, _projectCollection);
+            Project project = projectFromString.Project;
+            project.FullPath = _env.CreateFile(".proj").Path;
 
             project.Save();
 
@@ -342,7 +341,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
             }
 
-            var projectCollection = new ProjectCollection();
+            using var projectCollection = new ProjectCollection();
 
             // Get number of MSBuild processes currently instantiated
             int numberProcsOriginally = (new List<Process>(Process.GetProcessesByName("MSBuild"))).Count;
@@ -372,7 +371,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Use a separate BuildManager for the node shutdown build, so that we don't have
             // to worry about taking dependencies on whether or not the existing ones have already
             // disappeared.
-            var shutdownManager = new BuildManager("IdleNodeShutdown");
+            using var shutdownManager = new BuildManager("IdleNodeShutdown");
             shutdownManager.Build(buildParameters, requestData);
 
             // Number of nodes after the build has to be greater than the original number
@@ -572,8 +571,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -612,8 +611,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -656,8 +655,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -705,7 +704,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
                 MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
-            BuildResult result = _buildManager.Build(_parameters, data);
+            // We need to recreate build parameters to ensure proper capturing of newly set environment variables
+            BuildParameters parameters = new BuildParameters
+            {
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = new ILogger[] { _logger },
+                EnableNodeReuse = false
+            };
+
+            BuildResult result = _buildManager.Build(parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
@@ -761,11 +768,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _env.SetEnvironmentVariable("MsBuildForwardPropertiesFromChild", "InitialProperty3;IAMNOTREAL");
             _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
 
+            _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "0");
+
             var project = CreateProject(contents, null, _projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
                 MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
-            BuildResult result = _buildManager.Build(_parameters, data);
+            // We need to recreate build parameters to ensure proper capturing of newly set environment variables
+            BuildParameters parameters = new BuildParameters
+            {
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = new ILogger[] { _logger },
+                EnableNodeReuse = false
+            };
+
+            BuildResult result = _buildManager.Build(parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
             Assert.Equal(3, _logger.ProjectStartedEvents.Count);
@@ -786,7 +803,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal("InitialProperty3", propertyValue);
 
             projectStartedEvent = _logger.ProjectStartedEvents[2];
-            Assert.Null(projectStartedEvent.Properties);
+            properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            (properties == null || properties.Count == 0).ShouldBeTrue();
         }
 
         /// <summary>
@@ -823,7 +841,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
-            Assert.Null(properties);
+            (properties == null || properties.Count == 0).ShouldBeTrue();
         }
 
         /// <summary>
@@ -875,7 +893,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
 
-            var projectCollection = new ProjectCollection();
+            using var projectCollection = new ProjectCollection();
             var newToolSet = new Toolset("CustomToolSet", "c:\\SomePath", projectCollection, null);
             projectCollection.AddToolset(newToolSet);
 
@@ -920,7 +938,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
-            Assert.Null(properties);
+            (properties == null || properties.Count == 0).ShouldBeTrue();
         }
 
         /// <summary>
@@ -1280,7 +1298,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestData data = GetBuildRequestData(contents);
             _buildManager.BeginBuild(_parameters);
             BuildSubmission submission1 = _buildManager.PendBuildRequest(data);
-            var callbackFinished = new AutoResetEvent(false);
+            using var callbackFinished = new AutoResetEvent(false);
             submission1.ExecuteAsync(submission =>
             {
                 _buildManager.EndBuild();
@@ -1973,7 +1991,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.ClearLog();
 
             // Write the second project to disk and load it into its own project collection
-            var projectCollection2 = new ProjectCollection();
+            using var projectCollection2 = new ProjectCollection();
             File.WriteAllText(p2pProject, contents2);
 
             Project project2 = projectCollection2.LoadProject(p2pProject);
@@ -2032,7 +2050,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.WriteAllText(importedProjectPath, contents2);
             File.WriteAllText(rootProjectPath, String.Format(CultureInfo.InvariantCulture, contents1, importedProjectPath));
 
-            var projectCollection = new ProjectCollection();
+            using var projectCollection = new ProjectCollection();
 
             // Run a simple build just to prove that nothing is left in the cache.
             var data = new BuildRequestData(rootProjectPath, ReadOnlyEmptyDictionary<string, string>.Instance, null, new[] { "test" }, null);
@@ -3069,7 +3087,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 };
             BuildManager.DefaultBuildManager.BeginBuild(buildParameters);
 
-            var project1DoneEvent = new AutoResetEvent(false);
+            using var project1DoneEvent = new AutoResetEvent(false);
             ThreadPool.QueueUserWorkItem(delegate
             {
                 ProjectInstance pi = BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(project1);
@@ -3080,7 +3098,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 project1DoneEvent.Set();
             });
 
-            var project2DoneEvent = new AutoResetEvent(false);
+            using var project2DoneEvent = new AutoResetEvent(false);
             ThreadPool.QueueUserWorkItem(delegate
             {
                 ProjectInstance pi = BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(project2);
@@ -3147,7 +3165,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 };
             BuildManager.DefaultBuildManager.BeginBuild(buildParameters);
 
-            var project1DoneEvent = new AutoResetEvent(false);
+            using var project1DoneEvent = new AutoResetEvent(false);
             ThreadPool.QueueUserWorkItem(delegate
             {
                 // need to kick off project 2 first so that it project 1 can get submitted before the P2P happens
@@ -3160,7 +3178,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 project1DoneEvent.Set();
             });
 
-            var project2DoneEvent = new AutoResetEvent(false);
+            using var project2DoneEvent = new AutoResetEvent(false);
             ThreadPool.QueueUserWorkItem(delegate
             {
                 ProjectInstance pi = BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(project1);
@@ -3234,7 +3252,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 };
             BuildManager.DefaultBuildManager.BeginBuild(buildParameters);
 
-            var project1DoneEvent = new AutoResetEvent(false);
+            using var project1DoneEvent = new AutoResetEvent(false);
             ThreadPool.QueueUserWorkItem(delegate
             {
                 // need to kick off project 2 first so that it project 1 can get submitted before the P2P happens
@@ -3247,7 +3265,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 project1DoneEvent.Set();
             });
 
-            var project2DoneEvent = new AutoResetEvent(false);
+            using var project2DoneEvent = new AutoResetEvent(false);
             ThreadPool.QueueUserWorkItem(delegate
             {
                 ProjectInstance pi = BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(project1);
@@ -3476,9 +3494,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private static Dictionary<string, string> ExtractProjectStartedPropertyList(IEnumerable properties)
         {
-            // Gather a sorted list of all the properties.
-            return properties?.Cast<DictionaryEntry>()
-                .ToDictionary(prop => (string)prop.Key, prop => (string)prop.Value, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> propertiesLookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Internal.Utilities.EnumerateProperties(properties, propertiesLookup,
+                static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
+
+            return propertiesLookup;
         }
 
         /// <summary>
@@ -3528,10 +3548,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private Project CreateProject(string contents, string toolsVersion, ProjectCollection projectCollection, bool deleteTempProject)
         {
-            var project = new Project(XmlReader.Create(new StringReader(contents)), null, toolsVersion, projectCollection)
-            {
-                FullPath = _env.CreateFile().Path
-            };
+            using ProjectFromString projectFromString = new(contents, null, toolsVersion, projectCollection);
+            Project project = projectFromString.Project;
+            project.FullPath = _env.CreateFile().Path;
 
             if (!deleteTempProject)
             {
@@ -3629,7 +3648,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     var p2pProjectPath = testFiles.CreatedFiles[0];
                     File.WriteAllText(p2pProjectPath, p2pProjectContents);
 
-                    var mainRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(string.Format(mainProjectContents, p2pProjectPath))), collection);
+                    using ProjectRootElementFromString projectRootElementFromString = new(string.Format(mainProjectContents, p2pProjectPath), collection);
+                    ProjectRootElement mainRootElement = projectRootElementFromString.Project;
 
                     mainRootElement.FullPath = testFiles.CreatedFiles[1];
                     mainRootElement.Save();
@@ -3780,8 +3800,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var importPath = testFiles.CreatedFiles[1];
             File.WriteAllText(importPath, CleanupFileContents(importProject));
 
-            var root = ProjectRootElement.Create(
-                XmlReader.Create(new StringReader(string.Format(mainProject, importPath))), _projectCollection);
+            using ProjectRootElementFromString projectRootElementFromString = new(string.Format(mainProject, importPath), _projectCollection);
+            ProjectRootElement root = projectRootElementFromString.Project;
             root.FullPath = Path.GetTempFileName();
             root.Save();
 
@@ -4005,7 +4025,7 @@ $@"<Project InitialTargets=`Sleep`>
 </Project>";
 
             Exception exception = null;
-            var manager = new BuildManager();
+            using var manager = new BuildManager();
 
             using (var env = TestEnvironment.Create())
             {
@@ -4345,6 +4365,30 @@ $@"<Project InitialTargets=`Sleep`>
             _buildManager.EndBuild();
 
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
+        }
+
+        [Fact]
+        public void ProjectWithNoTargets()
+        {
+            string contents = @"<Project />";
+
+            BuildRequestData data = GetBuildRequestData(contents);
+            BuildResult result = _buildManager.Build(_parameters, data);
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult);
+
+            _logger.AssertLogContains("MSB4040");
+        }
+
+        [Fact]
+        public void ProjectWithNoTargetsGraph()
+        {
+            string contents = @"<Project />";
+
+            GraphBuildRequestData data = GetGraphBuildRequestData(contents);
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult);
+
+            _logger.AssertLogContains("MSB4040");
         }
     }
 }

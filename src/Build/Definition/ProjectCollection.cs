@@ -894,11 +894,26 @@ namespace Microsoft.Build.Evaluation
                 // This is only done once, when the project collection is created. Any subsequent
                 // environment changes will be ignored. Child nodes will be passed this set
                 // of properties in their build parameters.
+                return new PropertyDictionary<ProjectPropertyInstance>(SharedReadOnlyEnvironmentProperties);
+            }
+        }
+
+        /// <summary>
+        /// Returns a shared immutable property dictionary containing the properties representing the environment.
+        /// </summary>
+        internal PropertyDictionary<ProjectPropertyInstance> SharedReadOnlyEnvironmentProperties
+        {
+            get
+            {
+                // Retrieves the environment properties.
+                // This is only done once, when the project collection is created. Any subsequent
+                // environment changes will be ignored. Child nodes will be passed this set
+                // of properties in their build parameters.
                 using (_locker.EnterDisposableReadLock())
                 {
                     if (_environmentProperties != null)
                     {
-                        return new PropertyDictionary<ProjectPropertyInstance>(_environmentProperties);
+                        return _environmentProperties;
                     }
                 }
 
@@ -906,9 +921,9 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (_environmentProperties == null)
                     {
-                        _environmentProperties = Utilities.GetEnvironmentProperties();
+                        _environmentProperties = Utilities.GetEnvironmentProperties(makeReadOnly: true);
                     }
-                    return new PropertyDictionary<ProjectPropertyInstance>(_environmentProperties);
+                    return _environmentProperties;
                 }
             }
         }
@@ -1973,6 +1988,11 @@ namespace Microsoft.Build.Evaluation
             public event BuildFinishedEventHandler BuildFinished;
 
             /// <summary>
+            /// The BuildCanceled logging event
+            /// </summary>
+            public event BuildCanceledEventHandler BuildCanceled;
+
+            /// <summary>
             /// The ProjectStarted logging event
             /// </summary>
             public event ProjectStartedEventHandler ProjectStarted;
@@ -2021,7 +2041,7 @@ namespace Microsoft.Build.Evaluation
             /// The telemetry sent event.
             /// </summary>
             public event TelemetryEventHandler TelemetryLogged;
-
+            
             /// <summary>
             /// Should evaluation events include generated metaprojects?
             /// </summary>
@@ -2390,6 +2410,14 @@ namespace Microsoft.Build.Evaluation
             private void BuildFinishedHandler(object sender, BuildFinishedEventArgs e)
             {
                 BuildFinished?.Invoke(sender, e);
+            }
+
+            /// <summary>
+            /// Handler for BuildCanceled events.
+            /// </summary>
+            private void BuildCanceledHandler(object sender, BuildCanceledEventArgs e)
+            {
+                BuildCanceled?.Invoke(sender, e);
             }
 
             /// <summary>

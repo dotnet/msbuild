@@ -83,7 +83,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
                 BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
                 Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
-                TargetEntry entry = new TargetEntry(requestEntry, this, null, lookup, null, TargetBuiltReason.None, _host, false);
+                TargetEntry entry = new TargetEntry(requestEntry, this, null, lookup, null, TargetBuiltReason.None, _host, null, false);
             });
         }
         /// <summary>
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
                 BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
-                TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), null, null, TargetBuiltReason.None, _host, false);
+                TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), null, null, TargetBuiltReason.None, _host, null, false);
             });
         }
         /// <summary>
@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
 
                 Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
-                TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), lookup, null, TargetBuiltReason.None, null, false);
+                TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), lookup, null, TargetBuiltReason.None, null, null, false);
             });
         }
         /// <summary>
@@ -853,13 +853,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 List<ILogger> loggers = new List<ILogger>();
                 loggers.Add(logger);
 
-                ProjectCollection collection = new ProjectCollection();
-                Project project = new Project(
-                    XmlReader.Create(new StringReader(content)),
+                using ProjectCollection collection = new ProjectCollection();
+                using ProjectFromString projectFromString = new(
+                    content,
                     (IDictionary<string, string>)null,
                     ObjectModelHelpers.MSBuildDefaultToolsVersion,
-                    collection)
-                { FullPath = FileUtilities.GetTemporaryFile() };
+                    collection);
+                Project project = projectFromString.Project;
+
+                project.FullPath = FileUtilities.GetTemporaryFile();
                 project.Save();
                 File.Delete(project.FullPath);
 
@@ -892,6 +894,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     NodeProviderInProc inProcNodeProvider = ((IBuildComponentHost)manager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
 
                     inProcNodeProvider?.Dispose();
+                    manager.Dispose();
                 }
             }
         }
@@ -1025,7 +1028,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
 
             Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
-            TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(targetName, project.Targets[targetName].Location), lookup, null, TargetBuiltReason.None, _host, false);
+            TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(targetName, project.Targets[targetName].Location), lookup, null, TargetBuiltReason.None, _host, null, false);
             return entry;
         }
 
@@ -1041,7 +1044,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
             config.Project = project;
             BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[1] { "foo" }), config);
-            TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(target, project.Targets[target].Location), baseEntry.Lookup, baseEntry, TargetBuiltReason.None, _host, false);
+            TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(target, project.Targets[target].Location), baseEntry.Lookup, baseEntry, TargetBuiltReason.None, _host, null, false);
             return entry;
         }
 
@@ -1175,8 +1178,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             FileStream stream = File.Create("testProject.proj");
             stream.Dispose();
-
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             return project.CreateProjectInstance();
         }
 
@@ -1324,32 +1327,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 };
             }
 
+            public TComponent GetComponent<TComponent>(BuildComponentType type) where TComponent : IBuildComponent
+                => (TComponent)GetComponent(type);
+
             /// <summary>
             /// Register a component factory.
             /// </summary>
             public void RegisterFactory(BuildComponentType type, BuildComponentFactoryDelegate factory)
             {
-            }
-
-            #endregion
-
-            #region IBuildComponent Members
-
-            /// <summary>
-            /// Sets the component host
-            /// </summary>
-            /// <param name="host">The component host</param>
-            public void InitializeComponent(IBuildComponentHost host)
-            {
-                throw new NotImplementedException();
-            }
-
-            /// <summary>
-            /// Shuts down the component
-            /// </summary>
-            public void ShutdownComponent()
-            {
-                throw new NotImplementedException();
             }
 
             #endregion

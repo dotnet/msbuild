@@ -9,11 +9,15 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Threading;
 using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -22,7 +26,6 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
@@ -92,7 +95,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             itemsByType.ImportItems(ig);
             itemsByType.ImportItems(ig2);
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, itemsByType, FileSystems.Default);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                pg,
+                itemsByType,
+                FileSystems.Default,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
 
             IList<TaskItem> itemsOut = expander.ExpandIntoTaskItemsLeaveEscaped("foo;bar;@(compile);@(resource)", ExpanderOptions.ExpandPropertiesAndItems, MockElementLocation.Instance);
 
@@ -799,7 +806,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ig.Add(i0);
             ig.Add(i1);
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, ig, FileSystems.Default);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                pg,
+                ig,
+                FileSystems.Default,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
 
             return expander;
         }
@@ -2268,9 +2279,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     ExpanderOptions.ExpandProperties,
                     Directory.GetCurrentDirectory(),
                     MockElementLocation.Instance,
-                    null,
-                    new BuildEventContext(1, 2, 3, 4),
-                    FileSystems.Default));
+                    FileSystems.Default,
+                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4))));
             Assert.True(
                 ConditionEvaluator.EvaluateCondition(
                     @"'$(PathRoot.EndsWith(" + Path.DirectorySeparatorChar + "))' == 'false'",
@@ -2279,9 +2289,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     ExpanderOptions.ExpandProperties,
                     Directory.GetCurrentDirectory(),
                     MockElementLocation.Instance,
-                    null,
-                    new BuildEventContext(1, 2, 3, 4),
-                    FileSystems.Default));
+                    FileSystems.Default,
+                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4))));
         }
 
         /// <summary>
@@ -3890,8 +3899,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
             result.ShouldBe(metadatumValue);
         }
 
-        [Fact]
-        public void PropertyFunctionHashCodeSameOnlyIfStringSame()
+        public static IEnumerable<object[]> GetHashAlgoTypes()
+            => Enum.GetNames(typeof(IntrinsicFunctions.StringHashingAlgorithm))
+                .Append(null)
+                .Select(t => new object[] { t });
+
+        [Theory]
+        [MemberData(nameof(GetHashAlgoTypes))]
+        public void PropertyFunctionHashCodeSameOnlyIfStringSame(string hashType)
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
@@ -3906,8 +3921,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 "cat12s",
                 "cat1s"
             };
-            int[] hashes = stringsToHash.Select(toHash =>
-                (int)expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('{toHash}'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance))
+            string hashTypeString = hashType == null ? "" : $", '{hashType}'";
+            object[] hashes = stringsToHash.Select(toHash =>
+                expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('{toHash}'{hashTypeString}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance))
                 .ToArray();
             for (int a = 0; a < hashes.Length; a++)
             {
@@ -3923,6 +3939,33 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     }
                 }
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetHashAlgoTypes))]
+        public void PropertyFunctionHashCodeReturnsExpectedType(string hashType)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            Type expectedType;
+
+            expectedType = hashType switch
+            {
+                null => typeof(int),
+                "Legacy" => typeof(int),
+                "Fnv1a32bit" => typeof(int),
+                "Fnv1a32bitFast" => typeof(int),
+                "Fnv1a64bit" => typeof(long),
+                "Fnv1a64bitFast" => typeof(long),
+                "Sha256" => typeof(string),
+                _ => throw new ArgumentOutOfRangeException(nameof(hashType))
+            };
+
+
+            string hashTypeString = hashType == null ? "" : $", '{hashType}'";
+            object hashValue = expander.ExpandPropertiesLeaveTypedAndEscaped($"$([MSBuild]::StableStringHash('FooBar'{hashTypeString}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            hashValue.ShouldBeOfType(expectedType);
         }
 
         [Theory]
@@ -4343,6 +4386,18 @@ $(
             var result = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::CheckFeatureAvailability({featureName}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
             Assert.Equal(availability, result);
+        }
+
+        [Theory]
+        [InlineData("\u0074\u0068\u0069\u0073\u002a\u3407\ud840\udc60\ud86a\ude30\ud86e\udc0a\ud86e\udda0\ud879\udeae\u2fd5\u0023", 2, 10, "is________")]
+        [InlineData("\ud83d\udc68\u200d\ud83d\udc68\u200d\ud83d\udc66\u200d\ud83d\udc66\ud83d\udc68\u200d\ud83d\udc68\u200d\ud83d\udc66\u200d\ud83d\udc66\u002e\u0070\u0072\u006f\u006a", 0, 8, "________")]
+        public void SubstringByAsciiChars(string featureName, int start, int length, string expected)
+        {
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
+
+            var result = expander.ExpandIntoStringLeaveEscaped($"$([MSBuild]::SubstringByAsciiChars({featureName}, {start}, {length}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal(expected, result);
         }
 
         [Fact]
@@ -4857,6 +4912,224 @@ $(
                 var alphaBetaPath = Path.Combine("alpha", "beta");
                 var alphaDeltaPath = Path.Combine("alpha", "delta");
                 squiggleItems.Select(i => i.EvaluatedInclude).ShouldBe(new[] { alphaBetaPath, alphaDeltaPath }, Case.Insensitive);
+            }
+        }
+
+        [Fact]
+        public void ExpandItem_ConvertToStringUsingInvariantCultureForNumberData()
+        {
+            var currentThread = Thread.CurrentThread;
+            var originalCulture = currentThread.CurrentCulture;
+            var originalUICulture = currentThread.CurrentUICulture;
+
+            try
+            {
+                var svSECultureInfo = new CultureInfo("sv-SE");
+                using (var env = TestEnvironment.Create())
+                {
+                    currentThread.CurrentCulture = svSECultureInfo;
+                    currentThread.CurrentUICulture = svSECultureInfo;
+                    var root = env.CreateFolder();
+
+                    var projectFile = env.CreateFile(root, ".proj",
+                        @"<Project>
+
+  <PropertyGroup>
+    <_value>$([MSBuild]::Subtract(0, 1))</_value>
+    <_otherValue Condition=""'$(_value)' &gt;= -1"">test-value</_otherValue>
+  </PropertyGroup>
+  <Target Name=""Build"" />
+</Project>");
+                    ProjectInstance projectInstance = new ProjectInstance(projectFile.Path);
+                    projectInstance.GetPropertyValue("_value").ShouldBe("-1");
+                    projectInstance.GetPropertyValue("_otherValue").ShouldBe("test-value");
+                }
+            }
+            finally
+            {
+                currentThread.CurrentCulture = originalCulture;
+                currentThread.CurrentUICulture = originalUICulture;
+            }
+        }
+
+        [Fact]
+        public void ExpandItem_ConvertToStringUsingInvariantCultureForNumberData_RespectingChangeWave()
+        {
+            // Note: Skipping the test since it is not a valid scenario when ICU mode is not used.
+            if (!ICUModeAvailable())
+            {
+                return;
+            }
+
+            var currentThread = Thread.CurrentThread;
+            var originalCulture = currentThread.CurrentCulture;
+            var originalUICulture = currentThread.CurrentUICulture;
+
+            try
+            {
+                var svSECultureInfo = new CultureInfo("sv-SE");
+                using (var env = TestEnvironment.Create())
+                {
+                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_12.ToString());
+                    currentThread.CurrentCulture = svSECultureInfo;
+                    currentThread.CurrentUICulture = svSECultureInfo;
+                    var root = env.CreateFolder();
+
+                    var projectFile = env.CreateFile(root, ".proj",
+                        @"<Project>
+
+  <PropertyGroup>
+    <_value>$([MSBuild]::Subtract(0, 1))</_value>
+    <_otherValue Condition=""'$(_value)' &gt;= -1"">test-value</_otherValue>
+  </PropertyGroup>
+  <Target Name=""Build"" />
+</Project>");
+                    var exception = Should.Throw<InvalidProjectFileException>(() =>
+                    {
+                        new ProjectInstance(projectFile.Path);
+                    });
+                    exception.BaseMessage.ShouldContain("A numeric comparison was attempted on \"$(_value)\"");
+                }
+            }
+            finally
+            {
+                currentThread.CurrentCulture = originalCulture;
+                currentThread.CurrentUICulture = originalUICulture;
+            }
+        }
+
+        [Theory]
+        [InlineData("getType")]
+        [InlineData("GetType")]
+        [InlineData("gettype")]
+        public void GetTypeMethod_ShouldNotBeAllowed(string methodName)
+        {
+            var currentThread = Thread.CurrentThread;
+            var originalCulture = currentThread.CurrentCulture;
+            var originalUICulture = currentThread.CurrentUICulture;
+            var enCultureInfo = new CultureInfo("en");
+
+            try
+            {
+                currentThread.CurrentCulture = enCultureInfo;
+                currentThread.CurrentUICulture = enCultureInfo;
+
+                using (var env = TestEnvironment.Create())
+                {
+                    var root = env.CreateFolder();
+
+                    var projectFile = env.CreateFile(root, ".proj",
+                        @$"<Project>
+            <PropertyGroup>
+                <foo>aa</foo>
+                <typeval>$(foo.{methodName}().FullName)</typeval>
+            </PropertyGroup>
+        </Project>");
+                    var exception = Should.Throw<InvalidProjectFileException>(() =>
+                    {
+                        new ProjectInstance(projectFile.Path);
+                    });
+                    exception.BaseMessage.ShouldContain($"The function \"{methodName}\" on type \"System.String\" is not available for execution as an MSBuild property function.");
+                }
+            }
+            finally
+            {
+                currentThread.CurrentCulture = originalCulture;
+                currentThread.CurrentUICulture = originalUICulture;
+            }
+        }
+
+        [Theory]
+        [InlineData("getType")]
+        [InlineData("GetType")]
+        [InlineData("gettype")]
+        public void GetTypeMethod_ShouldBeAllowed_EnabledByEnvVariable(string methodName)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+                var root = env.CreateFolder();
+
+                var projectFile = env.CreateFile(root, ".proj",
+                    @$"<Project>
+    <PropertyGroup>
+        <foo>aa</foo>
+        <typeval>$(foo.{methodName}().FullName)</typeval>
+    </PropertyGroup>
+</Project>");
+                Should.NotThrow(() =>
+                {
+                    new ProjectInstance(projectFile.Path);
+                });
+            }
+        }
+
+        [Theory]
+        [InlineData("$([System.Version]::Parse('17.12.11.10').ToString(2))")]
+        [InlineData("$([System.Text.RegularExpressions.Regex]::Replace('abc123def', 'abc', ''))")]
+        [InlineData("$([System.String]::new('Hi').Equals('Hello'))")]
+        [InlineData("$([System.IO.Path]::GetFileNameWithoutExtension('C:\\folder\\file.txt'))")]
+        [InlineData("$([System.Int32]::new(123).ToString('mm')")]
+        [InlineData("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::NormalizeDirectory('C:/folder1/./folder2/'))")]
+        [InlineData("$([Microsoft.Build.Evaluation.IntrinsicFunctions]::IsOSPlatform('Windows'))")]
+        public void FastPathValidationTest(string methodInvocationMetadata)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                // Setting this env variable allows to track if expander was using reflection for a function invocation. 
+                env.SetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection", "1");
+
+                var logger = new MockLogger();
+                ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+                loggingService.RegisterLogger(logger);
+                var loggingContext = new MockLoggingContext(
+                    loggingService,
+                    new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
+
+                _ = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                    new PropertyDictionary<ProjectPropertyInstance>(),
+                    FileSystems.Default,
+                    loggingContext)
+                    .ExpandIntoStringLeaveEscaped(methodInvocationMetadata, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+                string reflectionInfoPath = Path.Combine(Directory.GetCurrentDirectory(), "PropertyFunctionsRequiringReflection");
+
+                // the fast path was successfully resolved without reflection.
+                File.Exists(reflectionInfoPath).ShouldBeFalse();
+            }
+        }
+
+        /// <summary>
+        /// Determines if ICU mode is enabled.
+        /// Copied from: https://learn.microsoft.com/en-us/dotnet/core/extensions/globalization-icu#determine-if-your-app-is-using-icu
+        /// </summary>
+        private static bool ICUModeAvailable()
+        {
+            SortVersion sortVersion = CultureInfo.InvariantCulture.CompareInfo.Version;
+            byte[] bytes = sortVersion.SortId.ToByteArray();
+            int version = bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0];
+            return version != 0 && version == sortVersion.FullVersion;
+        }
+
+        [Fact]
+        public void PropertyFunctionRegisterBuildCheck()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                var logger = new MockLogger();
+                ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+                loggingService.RegisterLogger(logger);
+                var loggingContext = new MockLoggingContext(
+                    loggingService,
+                    new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
+                var dummyAssemblyFile = env.CreateFile(env.CreateFolder(), "test.dll");
+
+                var result = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default, loggingContext)
+                    .ExpandIntoStringLeaveEscaped($"$([MSBuild]::RegisterBuildCheck({dummyAssemblyFile.Path}))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+                result.ShouldBe(Boolean.TrueString);
+                _ = logger.AllBuildEvents.Select(be => be.ShouldBeOfType<BuildCheckAcquisitionEventArgs>());
+                logger.AllBuildEvents.Count.ShouldBe(1);
             }
         }
     }

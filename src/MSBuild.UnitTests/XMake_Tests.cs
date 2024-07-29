@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.CommandLine;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
@@ -810,6 +811,37 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData("-getProperty:Foo", "propertyContent")]
+        [InlineData("-getItem:Bar", "ItemContent")]
+        [InlineData("-getTargetResult:Biz", "Success")]
+        public void GetStarOutputsToFileIfRequested(string extraSwitch, string result)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <PropertyGroup>
+    <Foo>propertyContent</Foo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Bar Include=""ItemContent"" />
+  </ItemGroup>
+
+  <Target Name=""Biz"" />
+</Project>
+");
+            string resultFile = env.GetTempFile(".tmp").Path;
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} -getResultOutputFile:{resultFile}", out bool success);
+            success.ShouldBeTrue();
+            File.Exists(resultFile).ShouldBeTrue();
+            File.ReadAllText(resultFile).ShouldContain(result);
+
+            result = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} -getResultOutputFile:", out success);
+            success.ShouldBeFalse();
+            result.ShouldContain("MSB1068");
+        }
+
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void BuildFailsWithCompileErrorAndRestore(bool isGraphBuild)
@@ -863,6 +895,7 @@ namespace Microsoft.Build.UnitTests
 
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
+            MSBuildApp.SetConsoleUI();
         }
 
 
@@ -1956,9 +1989,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -1977,9 +2008,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected one distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -1998,9 +2027,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected a central loggers to be attached"
 
@@ -2012,9 +2039,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
 
@@ -2025,9 +2050,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -2046,9 +2069,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -2061,9 +2082,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"{fileLoggerParameters[0]};logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -2076,9 +2095,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"{fileLoggerParameters[0]};logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -2091,9 +2108,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($";Parameter1;logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -2106,9 +2121,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe(fileLoggerParameters[0] + ";" + fileLoggerParameters[1], StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -2119,9 +2132,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"Parameter1;verbosity=Normal;logFile={Path.Combine(Directory.GetCurrentDirectory(), "..", "cat.log")};Parameter1", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -2132,9 +2143,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"Parameter1;Parameter;;;Parameter;Parameter;logFile={Path.Combine(Directory.GetCurrentDirectory(), "msbuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
         }
 
@@ -2152,9 +2161,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           1);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -2579,16 +2586,64 @@ EndGlobal
         }
 
         [Theory]
+        [InlineData("", true)]
+        [InlineData("/tl:true", false)]
+        [InlineData("/nologo", false)]
+        [InlineData("/getProperty:p", false)]
+        public void EndToEndVersionMessage(string arguments, bool shouldContainVersionMessage)
+        {
+            using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
+
+            string projectContents = ObjectModelHelpers.CleanupFileContents("""
+                                                                            <Project>
+                                                                                <Target Name="Hello">
+                                                                                </Target>
+                                                                            </Project>
+                                                                            """);
+
+            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
+
+            string output = RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, _output);
+            success.ShouldBeTrue();
+
+            string expectedVersionString =
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage",
+                    ProjectCollection.DisplayVersion, NativeMethodsShared.FrameworkName);
+
+            if (shouldContainVersionMessage)
+            {
+                output.ShouldContain(expectedVersionString);
+            }
+            else
+            {
+                output.ShouldNotContain(expectedVersionString);
+            }
+        }
+
+        [Theory]
         [InlineData("/v:diagnostic", MessageImportance.Low)]
         [InlineData("/v:detailed", MessageImportance.Low)]
         [InlineData("/v:normal", MessageImportance.Normal)]
         [InlineData("/v:minimal", MessageImportance.High)]
         [InlineData("/v:quiet", MessageImportance.High - 1)]
+
         [InlineData("/v:diagnostic /bl", MessageImportance.Low)]
         [InlineData("/v:detailed /bl", MessageImportance.Low)]
         [InlineData("/v:normal /bl", MessageImportance.Low)] // v:normal but with binary logger so everything must be logged
         [InlineData("/v:minimal /bl", MessageImportance.Low)] // v:minimal but with binary logger so everything must be logged
         [InlineData("/v:quiet /bl", MessageImportance.Low)] // v:quiet but with binary logger so everything must be logged
+
+        [InlineData("/v:diagnostic /analyze", MessageImportance.Low)]
+        [InlineData("/v:detailed /analyze", MessageImportance.Low)]
+        [InlineData("/v:normal /analyze", MessageImportance.Normal)]
+        [InlineData("/v:minimal /analyze", MessageImportance.High)]
+        [InlineData("/v:quiet /analyze", MessageImportance.High)]
+
+        [InlineData("/v:diagnostic /tl", MessageImportance.Low)]
+        [InlineData("/v:detailed /tl", MessageImportance.Low)]
+        [InlineData("/v:normal /tl", MessageImportance.Normal)]
+        [InlineData("/v:minimal /tl", MessageImportance.High)]
+        [InlineData("/v:quiet /tl", MessageImportance.High - 1)]
         public void EndToEndMinimumMessageImportance(string arguments, MessageImportance expectedMinimumMessageImportance)
         {
             using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();

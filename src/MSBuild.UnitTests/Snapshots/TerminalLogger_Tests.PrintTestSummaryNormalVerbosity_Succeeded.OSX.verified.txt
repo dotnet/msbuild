@@ -1,0 +1,5 @@
+﻿  project test [32;1msucceeded[m (0.2s)
+[?25l[1F
+[?25h
+Test summary: total: 10, [31;1mfailed: 1[m, succeeded: 7, skipped: 2, duration: 1.0s
+Build [32;1msucceeded[m in 5.0s
