@@ -75,6 +75,21 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>3e18bd4f62388b829d0b9dcd1ee131431674aa5f</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.arcade" Version="9.0.0-beta.24375.3">
+      <Uri>https://github.com/dotnet/arcade</Uri>
+      <Sha>fa3d544b066661522f1ec5d5e8cfd461a29b0f8a</Sha>
+      <SourceBuild RepoName="arcade" ManagedOnly="true" />
+    </Dependency>
+    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.23475.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+      <Uri>https://github.com/dotnet/xliff-tasks</Uri>
+      <Sha>73f0850939d96131c28cf6ea6ee5aacb4da0083a</Sha>
+    </Dependency>
+    <!-- Intermediate is necessary for source build. -->
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.xliff-tasks" Version="1.0.0-beta.23475.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
+      <Uri>https://github.com/dotnet/xliff-tasks</Uri>
+      <Sha>73f0850939d96131c28cf6ea6ee5aacb4da0083a</Sha>
+      <SourceBuild RepoName="xliff-tasks" ManagedOnly="true" />
+    </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="6.11.0-rc.122">
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>c0d441fc5e99e6765c9e0b2f77de162b9866b305</Sha>
