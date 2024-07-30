@@ -1065,7 +1065,7 @@ namespace Microsoft.Build.Logging
             Write(length);
             foreach (string entry in items)
             {
-                WriteStringRecord(entry);
+                WriteDeduplicatedString(entry);
             }
         }
 

@@ -98,11 +98,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void RoundtripBuildSubmissionStartedEventArgs()
         {
-            var globalVariables = new Dictionary<string, string?>
+            var globalVariables = new Dictionary<string, string>
             {
                 {"Variable1", "Value1" },
                 {"Variable2", "" },
-                {"Variable3", null },
             };
             var entryPointProjects = new List<string>()
             {
@@ -127,7 +126,6 @@ namespace Microsoft.Build.UnitTests
                 submissionId);
 
             Roundtrip<BuildSubmissionStartedEventArgs>(args,
-                e => e.GlobalProperties.ToString(),
                 e => TranslationHelpers.GetPropertiesString(e.GlobalProperties),
                 e => TranslationHelpers.GetPropertiesString(e.EntryProjectsFullPath),
                 e => TranslationHelpers.GetPropertiesString(e.TargetNames),

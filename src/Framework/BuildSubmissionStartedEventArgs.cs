@@ -106,7 +106,7 @@ namespace Microsoft.Build.Framework
 
             int numberOfTargets = reader.ReadInt32();
             var targets = new string[numberOfTargets];
-            for (int i = 0;i < numberOfTargets; i++)
+            for (int i = 0; i < numberOfTargets; i++)
             {
                 targets[i] = reader.ReadString();
             }
