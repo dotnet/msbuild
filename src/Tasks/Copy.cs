@@ -288,7 +288,7 @@ namespace Microsoft.Build.Tasks
             }
 
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) &&
-                Traits.Instance.EscapeHatches.CopyWithoutDelete != true &&
+                !Traits.Instance.EscapeHatches.CopyWithoutDelete &&
                 destinationFileState.FileExists &&
                 !destinationFileState.IsReadOnly)
             {
