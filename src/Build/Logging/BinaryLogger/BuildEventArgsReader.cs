@@ -15,6 +15,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
 
@@ -25,9 +26,10 @@ namespace Microsoft.Build.Logging
     /// </summary>
     public class BuildEventArgsReader : IBuildEventArgsReaderNotifications, IDisposable
     {
-        private readonly BinaryReader _binaryReader;
+        private readonly IBinaryReader _binaryReader;
+        private readonly BinaryReader _basedBinaryReader;
         // This is used to verify that events deserialization is not overreading expected size.
-        private readonly TransparentReadStream _readStream;
+        // private readonly TransparentReadStream _readStream;
         private readonly int _fileFormatVersion;
         private long _recordNumber = 0;
         private bool _skipUnknownEvents;
@@ -68,12 +70,9 @@ namespace Microsoft.Build.Logging
         /// <param name="fileFormatVersion">The file format version of the log file being read.</param>
         public BuildEventArgsReader(BinaryReader binaryReader, int fileFormatVersion)
         {
-            this._readStream = TransparentReadStream.EnsureTransparentReadStream(binaryReader.BaseStream);
-            // make sure the reader we're going to use wraps the transparent stream wrapper
-            this._binaryReader = binaryReader.BaseStream == _readStream
-                ? binaryReader
-                : new BinaryReader(_readStream);
+            this._binaryReader = new BufferedBinaryReader(binaryReader.BaseStream);
             this._fileFormatVersion = fileFormatVersion;
+            this._basedBinaryReader = binaryReader;
         }
 
         /// <summary>
@@ -137,6 +136,7 @@ namespace Microsoft.Build.Logging
             if (CloseInput)
             {
                 _binaryReader.Dispose();
+                _basedBinaryReader.Dispose();
             }
         }
 
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Logging
             }
 
             int serializedEventLength = ReadInt32();
-            Stream stream = _binaryReader.BaseStream.Slice(serializedEventLength);
+            Stream stream = _binaryReader.Slice(serializedEventLength);
 
             _lastSubStream = stream as SubStream;
             _recordNumber += 1;
@@ -226,7 +226,7 @@ namespace Microsoft.Build.Logging
                 if (_fileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion)
                 {
                     serializedEventLength = ReadInt32(); // record length
-                    _readStream.BytesCountAllowedToRead = serializedEventLength;
+                    _binaryReader.BytesCountAllowedToRead = serializedEventLength;
                 }
 
                 bool hasError = false;
@@ -240,7 +240,7 @@ namespace Microsoft.Build.Logging
                     // Thrown when BinaryReader is unable to deserialize binary data into expected type.
                     e is FormatException ||
                     // Thrown when we attempt to read more bytes than what is in the next event chunk.
-                    (e is EndOfStreamException && _readStream.BytesCountAllowedToReadRemaining <= 0))
+                    (e is EndOfStreamException && _binaryReader.BytesCountAllowedToReadRemaining <= 0))
                 {
                     hasError = true;
 
@@ -264,11 +264,11 @@ namespace Microsoft.Build.Logging
                     HandleError(ErrorFactory, _skipUnknownEvents, ReaderErrorType.UnknownEventType, recordKind);
                 }
 
-                if (_readStream.BytesCountAllowedToReadRemaining > 0)
+                if (_binaryReader.BytesCountAllowedToReadRemaining > 0)
                 {
                     string ErrorFactory() => ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
                         "Binlog_ReaderUnderRead", _recordNumber, serializedEventLength,
-                        serializedEventLength - _readStream.BytesCountAllowedToReadRemaining);
+                        serializedEventLength - _binaryReader.BytesCountAllowedToReadRemaining);
 
                     HandleError(ErrorFactory, _skipUnknownEventParts, ReaderErrorType.UnknownEventData, recordKind);
                 }
@@ -283,7 +283,7 @@ namespace Microsoft.Build.Logging
                 if (noThrow)
                 {
                     RecoverableReadError?.Invoke(new BinaryLogReaderErrorEventArgs(readerErrorType, recordKind, msgFactory));
-                    SkipBytes(_readStream.BytesCountAllowedToReadRemaining);
+                    SkipBytes(_binaryReader.BytesCountAllowedToReadRemaining);
                 }
                 else
                 {
@@ -330,12 +330,12 @@ namespace Microsoft.Build.Logging
 
         private void SkipBytes(int count)
         {
-            _binaryReader.BaseStream.Seek(count, SeekOrigin.Current);
+            _binaryReader.Seek(count, SeekOrigin.Current);
         }
 
         private BinaryLogRecordKind PreprocessRecordsTillNextEvent(Func<BinaryLogRecordKind, bool> isPreprocessRecord)
         {
-            _readStream.BytesCountAllowedToRead = null;
+            _binaryReader.BytesCountAllowedToRead = null;
 
             BinaryLogRecordKind recordKind = (BinaryLogRecordKind)ReadInt32();
 
@@ -351,7 +351,7 @@ namespace Microsoft.Build.Logging
                 else if (recordKind == BinaryLogRecordKind.NameValueList)
                 {
                     ReadNameValueList();
-                    _readStream.BytesCountAllowedToRead = null;
+                    _binaryReader.BytesCountAllowedToRead = null;
                 }
                 else if (recordKind == BinaryLogRecordKind.ProjectImportArchive)
                 {
@@ -396,7 +396,7 @@ namespace Microsoft.Build.Logging
                         new ProjectImportsCollector(Path.GetRandomFileName(), false, runOnBackground: false);
                 }
 
-                Stream embeddedStream = _binaryReader.BaseStream.Slice(length);
+                Stream embeddedStream = _binaryReader.Slice(length);
 
                 // We are intentionally not grace handling corrupt embedded stream
 
@@ -446,7 +446,7 @@ namespace Microsoft.Build.Logging
             {
                 EmbeddedContentRead(new EmbeddedContentEventArgs(
                     recordKind,
-                    _binaryReader.BaseStream.Slice(length)));
+                    _binaryReader.Slice(length)));
             }
             else
             {
@@ -458,7 +458,7 @@ namespace Microsoft.Build.Logging
         {
             if (_fileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion)
             {
-                _readStream.BytesCountAllowedToRead = ReadInt32();
+                _binaryReader.BytesCountAllowedToRead = ReadInt32();
             }
 
             int count = ReadInt32();
@@ -1714,7 +1714,7 @@ namespace Microsoft.Build.Logging
             // on some platforms (net5) this method was added to BinaryReader
             // but it's not available on others. Call our own extension method
             // explicitly to avoid ambiguity.
-            return BinaryReaderExtensions.Read7BitEncodedInt(_binaryReader);
+            return _binaryReader.Read7BitEncodedInt();
         }
 
         private long ReadInt64()

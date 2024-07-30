@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 
 namespace Microsoft.Build.Shared
 {
@@ -79,6 +80,32 @@ namespace Microsoft.Build.Shared
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BuildEventContext ReadBuildEventContext(this BinaryReader reader)
+        {
+            int nodeId = reader.ReadInt32();
+            int projectContextId = reader.ReadInt32();
+            int targetId = reader.ReadInt32();
+            int taskId = reader.ReadInt32();
+            int submissionId = reader.ReadInt32();
+            int projectInstanceId = reader.ReadInt32();
+            int evaluationId = reader.ReadInt32();
+
+            var buildEventContext = new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, targetId, taskId);
+            return buildEventContext;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static BuildEventContext? ReadOptionalBuildEventContext(this IBinaryReader reader)
+        {
+            if (reader.ReadByte() == 0)
+            {
+                return null;
+            }
+
+            return reader.ReadBuildEventContext();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static BuildEventContext ReadBuildEventContext(this IBinaryReader reader)
         {
             int nodeId = reader.ReadInt32();
             int projectContextId = reader.ReadInt32();

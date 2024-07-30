@@ -25,7 +25,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Translates a PropertyDictionary of ProjectPropertyInstances.
         /// </summary>
-        /// <param name="translator">The tranlator doing the translating</param>
+        /// <param name="translator">The translator doing the translating</param>
         /// <param name="value">The dictionary to translate.</param>
         public static void TranslateProjectPropertyInstanceDictionary(this ITranslator translator, ref PropertyDictionary<ProjectPropertyInstance> value)
         {
