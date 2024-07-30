@@ -224,7 +224,7 @@
   <Target Name="BootstrapNetCore" DependsOnTargets="AcquireSdk">
 
     <ItemGroup>
-     <!-- *.deps.json are excluded because they will cause the conflicts on an attempt to build solution with the bootstraped bits. -->
+     <!-- *.deps.json are excluded because the SDK rewrites these files for consistency with the rest of the SDK, so take their version. -->
       <FreshlyBuiltNetBinaries Include="$(OutDir)**\*.*" Exclude="$(OutDir)**\*.deps.json" />
     </ItemGroup>
 
