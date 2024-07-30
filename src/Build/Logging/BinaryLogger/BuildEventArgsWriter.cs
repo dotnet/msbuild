@@ -13,6 +13,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.NET.StringTools;
 
@@ -183,6 +184,7 @@ namespace Microsoft.Build.Logging
                     TargetFinished
                     ProjectStarted
                     ProjectFinished
+                    BuildSubmissionStarted
                     BuildStarted
                     BuildFinished
                     ProjectEvaluationStarted
@@ -210,6 +212,7 @@ namespace Microsoft.Build.Logging
                 case BuildWarningEventArgs buildWarning: return Write(buildWarning);
                 case ProjectStartedEventArgs projectStarted: return Write(projectStarted);
                 case ProjectFinishedEventArgs projectFinished: return Write(projectFinished);
+                case BuildSubmissionStartedEventArgs buildSubmissionStarted: return Write(buildSubmissionStarted);
                 case BuildStartedEventArgs buildStarted: return Write(buildStarted);
                 case BuildFinishedEventArgs buildFinished: return Write(buildFinished);
                 case ProjectEvaluationStartedEventArgs projectEvaluationStarted: return Write(projectEvaluationStarted);
@@ -334,6 +337,18 @@ namespace Microsoft.Build.Logging
             }
 
             return BinaryLogRecordKind.ProjectEvaluationFinished;
+        }
+
+        private BinaryLogRecordKind Write(BuildSubmissionStartedEventArgs e)
+        {
+            WriteBuildEventArgsFields(e, writeMessage: false);
+            Write(e.GlobalProperties);
+            WriteStringList(e.EntryProjectsFullPath);
+            WriteStringList(e.TargetNames);
+            Write((int)e.Flags);
+            Write(e.SubmissionId);
+
+            return BinaryLogRecordKind.BuildSubmissionStarted;
         }
 
         private BinaryLogRecordKind Write(ProjectStartedEventArgs e)
@@ -1042,6 +1057,16 @@ namespace Microsoft.Build.Logging
             WriteNameValueList();
 
             nameValueListBuffer.Clear();
+        }
+
+        private void WriteStringList(IEnumerable<string> items)
+        {
+            int length = items.Count();
+            Write(length);
+            foreach (string entry in items)
+            {
+                WriteStringRecord(entry);
+            }
         }
 
         private void WriteNameValueList()

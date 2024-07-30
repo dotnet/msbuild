@@ -96,6 +96,46 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void RoundtripBuildSubmissionStartedEventArgs()
+        {
+            var globalVariables = new Dictionary<string, string?>
+            {
+                {"Variable1", "Value1" },
+                {"Variable2", "" },
+                {"Variable3", null },
+            };
+            var entryPointProjects = new List<string>()
+            {
+                "project1",
+                "project2",
+                "",
+            };
+            var targetNames = new List<string>()
+            {
+                "target1",
+                "target2",
+                "",
+            };
+            var flag = Execution.BuildRequestDataFlags.FailOnUnresolvedSdk;
+            var submissionId = 1234;
+
+            BuildSubmissionStartedEventArgs args = new(
+                globalVariables,
+                entryPointProjects,
+                targetNames,
+                flag,
+                submissionId);
+
+            Roundtrip<BuildSubmissionStartedEventArgs>(args,
+                e => e.GlobalProperties.ToString(),
+                e => TranslationHelpers.GetPropertiesString(e.GlobalProperties),
+                e => TranslationHelpers.GetPropertiesString(e.EntryProjectsFullPath),
+                e => TranslationHelpers.GetPropertiesString(e.TargetNames),
+                e => e.Flags.ToString(),
+                e => e.SubmissionId.ToString());
+        }
+
+        [Fact]
         public void RoundtripProjectStartedEventArgs()
         {
             var args = new ProjectStartedEventArgs(

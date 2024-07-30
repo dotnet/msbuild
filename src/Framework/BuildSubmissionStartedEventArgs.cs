@@ -18,7 +18,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public BuildSubmissionStartedEventArgs()
         {
-            GlobalProperties = new Dictionary<string, string>();
+            GlobalProperties = new Dictionary<string, string?>();
             EntryProjectsFullPath = Enumerable.Empty<string>();
             TargetNames = Enumerable.Empty<string>();
             Flags = BuildRequestDataFlags.None;
@@ -26,7 +26,7 @@ namespace Microsoft.Build.Framework
         }
 
         public BuildSubmissionStartedEventArgs(
-            IDictionary<string, string> globalProperties,
+            IReadOnlyDictionary<string, string?> globalProperties,
             IEnumerable<string> entryProjectsFullPath,
             IEnumerable<string> targetNames,
             BuildRequestDataFlags flags,
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Framework
             SubmissionId = submissionId;
         }
 
-        public IDictionary<string, string> GlobalProperties { get; set; }
+        public IReadOnlyDictionary<string, string?> GlobalProperties { get; set; }
 
         public IEnumerable<string> EntryProjectsFullPath { get; set; }
 
@@ -53,27 +53,27 @@ namespace Microsoft.Build.Framework
         {
             base.WriteToStream(writer);
 
-            writer.Write7BitEncodedInt(GlobalProperties.Count);
+            writer.Write(GlobalProperties.Count);
             foreach (var entry in GlobalProperties)
             {
                 writer.Write((string)entry.Key);
                 writer.Write((string?)entry.Value ?? "");
             }
 
-            writer.Write7BitEncodedInt(EntryProjectsFullPath.Count());
+            writer.Write(EntryProjectsFullPath.Count());
             foreach(var entry in EntryProjectsFullPath)
             {
                 writer.Write((string)entry);
             }
 
-            writer.Write7BitEncodedInt(TargetNames.Count());
+            writer.Write(TargetNames.Count());
             foreach (var entry in TargetNames)
             {
                 writer.Write((string)entry);
             }
 
-            writer.Write7BitEncodedInt((int)Flags);
-            writer.Write7BitEncodedInt((int)SubmissionId);
+            writer.Write((int)Flags);
+            writer.Write((int)SubmissionId);
         }
 
         internal override void CreateFromStream(BinaryReader reader, int version)
@@ -81,7 +81,7 @@ namespace Microsoft.Build.Framework
             base.CreateFromStream(reader, version);
 
             int numberOfProperties = reader.ReadInt32();
-            Dictionary<string, string> globalProperties = new Dictionary<string, string>(numberOfProperties);
+            Dictionary<string, string?> globalProperties = new Dictionary<string, string?>(numberOfProperties);
             for (int i = 0; i < numberOfProperties; i++)
             {
                 string key = reader.ReadString();
@@ -89,9 +89,11 @@ namespace Microsoft.Build.Framework
 
                 if (key != null && value != null)
                 {
-                    globalProperties[value] = key;
+                    globalProperties[key] = value;
                 }
             }
+
+            GlobalProperties = globalProperties;
 
             int numberOfEntries = reader.ReadInt32();
             var entries = new string[numberOfEntries];
@@ -100,6 +102,8 @@ namespace Microsoft.Build.Framework
                 entries[i] = reader.ReadString();
             }
 
+            EntryProjectsFullPath = entries;
+
             int numberOfTargets = reader.ReadInt32();
             var targets = new string[numberOfTargets];
             for (int i = 0;i < numberOfTargets; i++)
@@ -107,8 +111,10 @@ namespace Microsoft.Build.Framework
                 targets[i] = reader.ReadString();
             }
 
-            BuildRequestDataFlags flags = (BuildRequestDataFlags)reader.ReadInt32();
-            int submissionId = reader.ReadInt32();
+            TargetNames = targets;
+
+            Flags = (BuildRequestDataFlags)reader.ReadInt32();
+            SubmissionId = reader.ReadInt32();
         }
     }
 }

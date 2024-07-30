@@ -639,7 +639,7 @@ namespace Microsoft.Build.Logging
             var submissionId = ReadInt32();
 
             var e = new BuildSubmissionStartedEventArgs(
-                globalProperties,
+                (IReadOnlyDictionary<string, string?>)globalProperties,
                 entryProjectsFullPath,
                 targetNames,
                 flags,
@@ -1593,7 +1593,7 @@ namespace Microsoft.Build.Logging
 
             for (int i = 0; i < count; i++)
             {
-                string item = ReadString();
+                string item = ReadDeduplicatedString();
                 list[i] = item;
             }
 
