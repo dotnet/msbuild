@@ -79,9 +79,7 @@ The inputs necessary to start a build include:
  - The generated build imports (`.g.props` and `.g.targets`) from NuGet restore.
 
  ```mermaid
-flowchart TD
-    UI[User specific imports]
-    
+flowchart TD    
     UL["`User defined import logic
     _.props_ and _.targets_`"]
     
@@ -94,7 +92,6 @@ flowchart TD
     NI["`NuGet imports
     _.g.props_ and _.g.targets_`"]
 
-    UI --> PROJ
     UL --> PROJ
     IL --> PROJ
     NI --> PROJ
@@ -126,20 +123,20 @@ flowchart LR
     T[Targets]
 ```
 
-Evaluation may occur before or after NuGet restore has run. Since NuGet packages can contain build logic, the pre-restore evaluation should be used only to run restore. After restore, all imports are files on disk and are processed as paths by the engine. Another characteristic of imports is that they are brough within the project logic, so other projects can refence the same import logic instead of having a copy of it.
+Evaluation may occur before or after NuGet restore has run. Since NuGet packages can contain build logic, the pre-restore evaluation should be used only to run restore. After restore, all imports are files on disk and are processed as paths by the engine.
 
 The evaluation stage should not have any side effect on disk, no new or deleted files. One exception is the SDK resolution phase. The .NET SDK resolver looks for SDKs already installed or existing on disk. But MSBuild also has support for resolvers that can run arbitrary .NET code such as referencing SDKs through a network share or fetching SDK packages from a remote server.
 One such resolver that comes with the .NET SDK and Visual Studio is the NuGet's MSBuild SDK resolver (`Microsoft.Build.NuGetSdkResolver`) which downloads the SDK packages from NuGet repositories to local storage.
 
 ### Imports
-In MSBuild an import definition can have various forms - a disk path, a property expansion, a known folder, or even environmental variables. There are also some main imports that come with the execution on other platforms, like the Visual Studio or SDK can have import directories that contain wild card imports. However, when it comes to the evaluation phase in MSBuild, imports are all treated like a property plus path expansion, this includes imported NuGet packages.
+In MSBuild imports are all treated like a property plus path expansion, however they can take various forms when being defined - a disk path, a property expansion, a known folder, or even environmental variables. There are also some main imports that come with the execution on other platforms, like the Visual Studio or SDK can have import directories that contain wild card imports.
 
 Historically a single version of MSBuild supported multiple `ToolsVersions` that could result in differing imports for the same expression, but today an MSBuild distribution provides only the current version of `ToolsVersion` and selection between versions is expected to be done outside of MSBuild.
 
 ## Project Execution
 For more detailed information on execution phase visit [Microsoft Learn](https://learn.microsoft.com/visualstudio/msbuild/build-process-overview#execution-phase).
 
-The execution phase starts with a request to build a list of targets defined in the project (in its own XML or an import). Those targets and their prerequisite targets will then execute. The order of executed targets is defined using a few attributes: `BeforeTargets`, `DependsOnTargets`, and `AfterTargets`. However, the order in which targets are executed during a build will not strictly follow the one defined by those attributes. During execution, if a target that is being executed changes attributes or properties from another target, the final execution order might change due to the dependency chain changing. The full executing order can be [found here](https://learn.microsoft.com/visualstudio/msbuild/target-build-order#determine-the-target-build-order).
+The execution phase starts with a request to build a list of targets defined in the project (in its own XML or an import). Those targets and their prerequisite targets will then execute. The order of executed targets is defined using a few attributes: `BeforeTargets`, `DependsOnTargets`, and `AfterTargets`. However, the order in which targets are executed during a build will not strictly follow the one defined by those attributes as it depends on more things during a build. The full executing order can be [found here](https://learn.microsoft.com/visualstudio/msbuild/target-build-order#determine-the-target-build-order).
 
 Another target order issue arises when there is a project dependency. Project dependencies are expressed using the `MSBuild` task, so a project target can start executing and then hit a project dependency that has not been completed yet. In this case, the project that is processing the targets will be considered blocked, and will pause its execution (the node building it may be used to work on another project). Once the dependencies have been fullfilled, the original build can resume resume and the target execution will continue in the original order.
 
@@ -178,23 +175,26 @@ When a build request completes, the result is sent to the scheduler. The schedul
 If the node's operation is blocked by a dependency, it asks the scheduler for the results of the dependency's execution. If the dependency has been executed, the result is retrieved from the Project Result Cache. If the process has not been executed, the scheduler suspends the current project, making the target / project a pending request. When a request is pending, the scheduler adds to the list of requests to execute, and will eventually assign the dependency to be executed on either the current node or another one that is free.
 
 ```mermaid
----
-title: Build where project A depends on project B
----
 flowchart TD
-   A1[Build Request] --Project A--> S1[Scheduler]
+   A1[Build Request] --> S1[Scheduler]
+   
    S1 --> C1{Is cached}
-   C1 ---Yes1[Yes]--> Result1[Return result]
-   C1 ---No1[No]--> Build1[Build Project A]
-   Build1 --Dependency identified--> PB1[Project B]
-   PB1 --Request Build--> S1
+   C1 --Yes--> Result1[Return result]
+   C1 -- No --> Build1[Build Project]
+
+   Build1 --> HD{Has 
+   Dependency}
+   HD --No --> PF[Project Finished]
+   HD --Yes --> DI[Identify Project Dependency]
+
+   DI --Request Dependency Build--> S1
 ```
 
 ### Incremental build
 Incremental builds are extremely useful for local development, as it speeds consecutive builds on local machines. For this, the output from build targets is persisted to disk, which becomes one big cache for MSBuild.
 
 ## Parallelism
-Parallelism for MSBuild is implemented at the project level. Each project is assigned to a specific worker node, which will execute the tasks at the same time, with the Scheduler organizing sequence and work division. Within project targets run sequentially and within targets tasks run sequentially; however a task can maintain its own internal parallelism.
+Parallelism for MSBuild is implemented at the project level. Each project is assigned to a specific worker node, and the worker nodes will execute the project build in parallel, with the Scheduler organizing sequence and work division. Within project builds, targets run sequentially and within targets, tasks run sequentially; however a task can maintain its own internal parallelism.
 
 For multi-targeted builds parallelism between TargetFrameworks is enabled by creating distinct projects for each "inner build" from an "outer build". The outer build produces a list of projects to build. This list contains the same project file with a different global property for the target framework. This list is then passed to the MSBuild execute target so the TargetFrameworks can be built in parallel.
 
@@ -208,7 +208,7 @@ This has been partially addressed by the long lived worker nodes feature (AKA 'n
 
 ## IPC (Inter-Process Communication)
 In multi-process MSBuild execution, many OS processes exist that need to communicate with each other. There are two main reasons:
- - Dealing with blocked tasks on processes: Communicating with the engine, scheduler, cache, etc...
+ - Dealing with Build Result data: Communicating with the engine, scheduler, cache, etc...
  - Communication on task execution for a task host: Task definition, task inputs, task outputs.
 
 The transport layer for messages is a [.NET named pipe](https://learn.microsoft.com/dotnet/standard/io/how-to-use-named-pipes-for-network-interprocess-communication).
@@ -230,7 +230,7 @@ For more information please see [the spec](../documentation/MSBuild-Server.md).
 # Extensibility
 MSBuild includes some features that are related to the build process but do not fit in the previous categories. These extensibility features are critical for the build process, but they can also be customized by third parties for their own use.
 
-## Packaging system
+## Packaging
 MSBuild interacts with external packages in almost every build. However, the MSBuild engine does not recognize external packages as third parties, and it also does not handle external dependencies. This is done by a packaging system. The supported one being NuGet. As such, it is NuGet that is responsible for finding the packages, downloading them, and providing the MSBuild engine with a package path for the build.
 
 ## Restore
@@ -245,12 +245,12 @@ Since a task can be delivered as a .NET assembly, it is possible to run arbitrar
 `ToolTask` is a widely-used helper class for the use case "build a command line for and then run a command-line tool".
 
 ## Diagnosability / Loggers
-Diagnosability within MSBuild went through some changes. Before we had a debugger in additional to basic logs, where you could step through the XML during the build and debug. This was discarded in favor of a log focused approach, where MSBuild has a more robust logging system that contains more data to identify what is happening during a build.
+Current diagnosability within MSBuild follows a log focused approach, where MSBuild has a more robust logging system that contains more data to identify what is happening during a build.
 
 ### General Loggers
 Logging within MSBuild consists of various integrated and third-party loggers. Both use the [`ILogger`](https://learn.microsoft.com/dotnet/api/microsoft.build.framework.ilogger) API. Built-in loggers include the Binary Logger which produces compressed `.binlog` files, the Console and Terminal loggers for interactive output, and a Text Log. Third party loggers  receive events through `ILogger`, and multiple loggers can be connected to a single build.
 
-Third-party loggers must be specified before the build begins. Because of this, build logic (and NuGet) is not able to manipulate loggers.
+Loggers must be specified before the build begins. Because of this, build logic (and NuGet) is not able to manipulate loggers.
 
 ### Binary logger
 The Binary Logger, also called binlog, is a structured log that captures all the events within a build as well as files that are critical to the build. To read a binlog, the MSBuild CLI can replay the events through arbitrary loggers, and third-party tooling like the [Structured Log Viewer](https://msbuildlog.com) can also read binlogs.
@@ -266,7 +266,7 @@ BuildCheck is new MSBuild extensible and configurable linting/diagnostic feature
 For more information please see [the spec](../documentation/specs/BuildCheck/BuildCheck.md).
 
 ## Resolvers
-There are a few elements within the MSBuild XML that indicate that a call to the .NET SDK is necessary. When such interaction is necessary for a project build, the first thing that needs to be done is to figure out where the SDK is installed so MSBuild can access the content. This is solved by resolvers, which look for the SDK version that was specified, or gets the latest version.
+There are a few elements within the MSBuild XML that indicate that a call to the .NET SDK is necessary. When such interaction is necessary for a project build, the first thing that needs to be done is to figure out where the SDK is installed so MSBuild can access the content. This is solved by resolvers, which look for the SDK version that was specified, or gets the latest version by looking for them on the folder adjacent to where MSBuild is executing from.
 
 To read more about SDK resolver you can check the [Microsoft Learn page](https://learn.microsoft.com/visualstudio/msbuild/how-to-use-project-sdk#how-project-sdks-are-resolved), or see the [spec documentation](specs/sdk-resolvers-algorithm.md).
 
