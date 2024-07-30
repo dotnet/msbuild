@@ -974,5 +974,62 @@ namespace Microsoft.Build.UnitTests
             newGenericEvent.TaskFile.ShouldBe(genericEvent.TaskFile, StringCompareShould.IgnoreCase); // "Expected TaskFile to Match"
             newGenericEvent.TaskName.ShouldBe(genericEvent.TaskName, StringCompareShould.IgnoreCase); // "Expected TaskName to Match"
         }
+
+
+        [Fact]
+        public void TestTelemetryEventArgs()
+        {
+            // Test using reasonable values
+            TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = "Good", Properties = new Dictionary<string, string> { { "Key", "Value" } } };
+            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+
+            // Serialize
+            genericEvent.WriteToStream(_writer);
+            long streamWriteEndPosition = _stream.Position;
+
+            // Deserialize and Verify
+            _stream.Position = 0;
+            TelemetryEventArgs newGenericEvent = new TelemetryEventArgs();
+            newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
+            _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyTelemetryEvent(genericEvent, newGenericEvent);
+
+            // Test using null event name
+            _stream.Position = 0;
+            genericEvent = new TelemetryEventArgs { EventName = null, Properties = new Dictionary<string, string> { { "Key", "Value" } } };
+            // Serialize
+            genericEvent.WriteToStream(_writer);
+            streamWriteEndPosition = _stream.Position;
+
+            // Deserialize and Verify
+            _stream.Position = 0;
+            newGenericEvent = new TelemetryEventArgs();
+            newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
+            _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyTelemetryEvent(genericEvent, newGenericEvent);
+
+            // Test using null property value name
+            _stream.Position = 0;
+            genericEvent = new TelemetryEventArgs { EventName = "Good", Properties = new Dictionary<string, string> { { "Key", null } } };
+            // Serialize
+            genericEvent.WriteToStream(_writer);
+            streamWriteEndPosition = _stream.Position;
+
+            // Deserialize and Verify
+            _stream.Position = 0;
+            newGenericEvent = new TelemetryEventArgs();
+            newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
+            _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyTelemetryEvent(genericEvent, newGenericEvent);
+        }
+
+        private static void VerifyTelemetryEvent(TelemetryEventArgs expected, TelemetryEventArgs actual)
+        {
+            actual.EventName.ShouldBe(expected.EventName);
+            actual.Properties.ShouldBe(expected.Properties);
+        }
     }
 }
