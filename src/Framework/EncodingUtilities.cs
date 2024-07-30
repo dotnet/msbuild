@@ -264,11 +264,6 @@ namespace Microsoft.Build.Shared
         /// </returns>
         public static CultureInfo? GetExternalOverriddenUILanguageIfSupportableWithEncoding()
         {
-            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
-            {
-                return null;
-            }
-
             CultureInfo? externalLanguageSetting = GetExternalOverriddenUILanguage();
             if (externalLanguageSetting != null)
             {
