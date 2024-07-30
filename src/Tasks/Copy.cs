@@ -287,7 +287,7 @@ namespace Microsoft.Build.Tasks
                 MakeFileWriteable(destinationFileState, true);
             }
 
-            if (Traits.Instance.EscapeHatches.CopyWithoutDelete != true &&
+            if (!Traits.Instance.EscapeHatches.CopyWithoutDelete &&
                 destinationFileState.FileExists &&
                 !destinationFileState.IsReadOnly)
             {

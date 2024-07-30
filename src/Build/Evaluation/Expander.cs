@@ -1583,7 +1583,7 @@ namespace Microsoft.Build.Evaluation
                         environmentDerivedProperty.loggingContext = propertiesUseTracker.LoggingContext;
                     }
 
-                    propertyValue = property.EvaluatedValueEscaped;
+                    propertyValue = property.GetEvaluatedValueEscaped(elementLocation);
                 }
 
                 return propertyValue;
@@ -3862,6 +3862,14 @@ namespace Microsoft.Build.Evaluation
                             return true;
                         }
                     }
+                    else if (string.Equals(_methodMethodName, nameof(string.Equals), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.Equals(arg0);
+                            return true;
+                        }
+                    }
                 }
                 else if (objectInstance is string[] stringArray)
                 {
@@ -4308,6 +4316,22 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.NormalizeDirectory), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.NormalizeDirectory(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsOSPlatform), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.IsOSPlatform(arg0);
+                                return true;
+                            }
+                        }
                     }
                     else if (_receiverType == typeof(Path))
                     {
@@ -4405,6 +4429,14 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
+                        else if (string.Equals(_methodMethodName, nameof(Path.GetFileNameWithoutExtension), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Path.GetFileNameWithoutExtension(arg0);
+                                return true;
+                            }
+                        }
                     }
                     else if (_receiverType == typeof(Version))
                     {
@@ -4417,7 +4449,7 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
-                    else if (_receiverType == typeof(System.Guid))
+                    else if (_receiverType == typeof(Guid))
                     {
                         if (string.Equals(_methodMethodName, nameof(Guid.NewGuid), StringComparison.OrdinalIgnoreCase))
                         {
@@ -4428,8 +4460,31 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+                    else if (string.Equals(_methodMethodName, nameof(Regex.Replace), StringComparison.OrdinalIgnoreCase) && args.Length == 3)
+                    {
+                        if (TryGetArg([args[0]], out string arg1) && TryGetArg([args[1]], out string arg2) && TryGetArg([args[2]], out string arg3))
+                        {
+                            returnVal = Regex.Replace(arg1, arg2, arg3);
+                            return true;
+                        }
+                    }
                 }
-
+                else if (string.Equals(_methodMethodName, nameof(Version.ToString), StringComparison.OrdinalIgnoreCase) && objectInstance is Version v)
+                {
+                    if (TryGetArg(args, out int arg0))
+                    {
+                        returnVal = v.ToString(arg0);
+                        return true;
+                    }
+                }
+                else if (string.Equals(_methodMethodName, nameof(Int32.ToString), StringComparison.OrdinalIgnoreCase) && objectInstance is int i)
+                {
+                    if (TryGetArg(args, out string arg0))
+                    {
+                        returnVal = i.ToString(arg0);
+                        return true;
+                    }
+                }
                 if (Traits.Instance.LogPropertyFunctionsRequiringReflection)
                 {
                     LogFunctionCall("PropertyFunctionsRequiringReflection", objectInstance, args);
