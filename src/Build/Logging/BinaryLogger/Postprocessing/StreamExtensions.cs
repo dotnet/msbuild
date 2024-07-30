@@ -85,11 +85,6 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        public static Stream ToReadableSeekableStream(this Stream stream)
-        {
-            return TransparentReadStream.EnsureSeekableStream(stream);
-        }
-
         /// <summary>
         /// Creates bounded read-only, forward-only view over an underlying stream.
         /// </summary>
@@ -99,6 +94,17 @@ namespace Microsoft.Build.Logging
         public static Stream Slice(this Stream stream, long length)
         {
             return new SubStream(stream, length);
+        }
+
+        /// <summary>
+        /// Creates a stream that concatenates the current stream with another stream.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public static Stream Concat(this Stream stream, Stream other)
+        {
+            return new ConcatenatedReadStream(stream, other);
         }
     }
 }

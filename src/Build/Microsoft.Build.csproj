@@ -170,6 +170,7 @@
     <Compile Include="FileAccess\ReportedFileOperation.cs" />
     <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
+    <Compile Include="Logging\BinaryLogger\BufferedBinaryReader.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
