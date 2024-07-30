@@ -37,10 +37,9 @@ namespace Microsoft.Build.Framework
             foreach (var kvp in Properties)
             {
                 writer.Write(kvp.Key);
-                writer.Write(kvp.Value);
+                writer.WriteOptionalString(kvp.Value);
             }
         }
-
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);
@@ -51,7 +50,7 @@ namespace Microsoft.Build.Framework
             for (int i = 0; i < count; i++)
             {
                 string key = reader.ReadString();
-                string value = reader.ReadString();
+                string value = reader.ReadOptionalString();
                 Properties.Add(key, value);
             }
         }
