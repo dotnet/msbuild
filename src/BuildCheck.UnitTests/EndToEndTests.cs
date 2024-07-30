@@ -31,7 +31,7 @@ public class EndToEndTests : IDisposable
 
     public void Dispose() => _env.Dispose();
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
+    [Theory]
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
@@ -51,21 +51,23 @@ public class EndToEndTests : IDisposable
         {
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
+            output.ShouldContain("BC0103");
         }
         else
         {
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
+            output.ShouldNotContain("BC0103");
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
+    [Theory]
     [InlineData(true, true, "warning")]
     [InlineData(true, true, "error")]
-    [InlineData(true, true, "info")]
+    [InlineData(true, true, "suggestion")]
     [InlineData(false, true, "warning")]
     [InlineData(false, true, "error")]
-    [InlineData(false, true, "info")]
+    [InlineData(false, true, "suggestion")]
     [InlineData(false, false, "warning")]
     public void SampleAnalyzerIntegrationTest_ReplayBinaryLogOfAnalyzedBuild(bool buildInOutOfProcessNode, bool analysisRequested, string BC0101Severity)
     {
@@ -74,7 +76,7 @@ public class EndToEndTests : IDisposable
         var projectDirectory = Path.GetDirectoryName(projectFile.Path);
         string logFile = _env.ExpectFile(".binlog").Path;
 
-        RunnerUtilities.ExecBootstrapedMSBuild(
+        _ = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(analysisRequested ? "-analyze" : string.Empty)} -bl:{logFile}",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
@@ -93,15 +95,44 @@ public class EndToEndTests : IDisposable
         {
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
+            output.ShouldContain("BC0103");
         }
         else
         {
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
+            output.ShouldNotContain("BC0103");
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10036")]
+    [Theory]
+    [InlineData("warning", "warning BC0101", new string[] { "error BC0101" })]
+    [InlineData("error", "error BC0101", new string[] { "warning BC0101" })]
+    [InlineData("suggestion", "BC0101", new string[] { "error BC0101", "warning BC0101" })]
+    [InlineData("default", "warning BC0101", new string[] { "error BC0101" })]
+    [InlineData("none", null, new string[] { "BC0101"})]
+    public void EditorConfig_SeverityAppliedCorrectly(string BC0101Severity, string expectedOutputValues, string[] unexpectedOutputValues)
+    {
+        PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, BC0101Severity);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze",
+            out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+
+        success.ShouldBeTrue();
+
+        if (!string.IsNullOrEmpty(expectedOutputValues))
+        {
+            output.ShouldContain(expectedOutputValues);
+        }
+
+        foreach (string unexpectedOutputValue in unexpectedOutputValues)
+        {
+            output.ShouldNotContain(unexpectedOutputValue);
+        }
+    }
+
+    [Theory]
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
@@ -109,10 +140,10 @@ public class EndToEndTests : IDisposable
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
 
-        var projectDirectory = Path.GetDirectoryName(projectFile.Path);
+        string? projectDirectory = Path.GetDirectoryName(projectFile.Path);
         string logFile = _env.ExpectFile(".binlog").Path;
 
-        RunnerUtilities.ExecBootstrapedMSBuild(
+        _ = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -bl:{logFile}",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
@@ -131,97 +162,17 @@ public class EndToEndTests : IDisposable
         {
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
+            output.ShouldContain("BC0103");
         }
         else
         {
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
+            output.ShouldNotContain("BC0103");
         }
     }
 
-    private void PrepareSampleProjectsAndConfig(
-        bool buildInOutOfProcessNode,
-        out TransientTestFile projectFile,
-        string BC0101Severity = "warning")
-    {
-        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
-        TransientTestFile testFile = _env.CreateFile(workFolder, "somefile");
-
-        string contents = $"""
-            <Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Hello">
-                
-                <PropertyGroup>
-                    <OutputType>Exe</OutputType>
-                    <TargetFramework>net8.0</TargetFramework>
-                    <ImplicitUsings>enable</ImplicitUsings>
-                    <Nullable>enable</Nullable>
-                </PropertyGroup>
-                  
-                <PropertyGroup Condition="$(Test) == true">
-                    <TestProperty>Test</TestProperty>
-                </PropertyGroup>
-                 
-                <Target Name="Hello">
-                    <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
-                    <Copy SourceFiles="{testFile.Path}" DestinationFolder="{workFolder.Path}" />
-                    <MSBuild Projects=".\FooBar-Copy.csproj" Targets="Hello" />
-                </Target>
-                
-            </Project>
-            """;
-
-        string contents2 = $"""
-            <Project Sdk="Microsoft.NET.Sdk">
-                <PropertyGroup>
-                    <OutputType>Exe</OutputType>
-                    <TargetFramework>net8.0</TargetFramework>
-                    <ImplicitUsings>enable</ImplicitUsings>
-                    <Nullable>enable</Nullable>
-                </PropertyGroup>
-                                 
-                <PropertyGroup Condition="$(Test) == true">
-                    <TestProperty>Test</TestProperty>
-                </PropertyGroup>
-                                
-                <ItemGroup>
-                    <Reference Include="bin/foo.dll" />
-                </ItemGroup>
-                                
-                <Target Name="Hello">
-                    <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
-                    <Copy SourceFiles="{testFile.Path}" DestinationFolder="{workFolder.Path}" />
-                </Target>
-                               
-            </Project>
-            """;
-        projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
-        TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
-
-        TransientTestFile config = _env.CreateFile(workFolder, ".editorconfig",
-            $"""
-            root=true
-
-            [*.csproj]
-            build_check.BC0101.Severity={BC0101Severity}
-
-            build_check.BC0102.Severity=warning
-
-            build_check.COND0543.Severity=Error
-            build_check.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly
-            build_check.COND0543.CustomSwitch=QWERTY
-
-            """);
-
-        // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
-        // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
-        // See if there is a way of fixing it in the engine - tracked: https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=55702688.
-        _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
-
-        _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
-        _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
-    }
-
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10277")]
+    [Theory]
     [InlineData("AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomAnalyzerTest(string analysisCandidate, string[] expectedRegisteredRules, bool expectedRejectedAnalyzers = false)
@@ -285,5 +236,47 @@ public class EndToEndTests : IDisposable
         var attribute = doc.CreateAttribute(attributeName);
         attribute.Value = attributeValue;
         node.Attributes!.Append(attribute);
+    }
+
+    private void PrepareSampleProjectsAndConfig(
+    bool buildInOutOfProcessNode,
+    out TransientTestFile projectFile,
+    string? BC0101Severity = null)
+    {
+        string testAssetsFolderName = "SampleAnalyzerIntegrationTest";
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+        TransientTestFile testFile = _env.CreateFile(workFolder, "somefile");
+
+        string contents = ReadAndAdjustProjectContent("Project1");
+        string contents2 = ReadAndAdjustProjectContent("Project2");
+
+        projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
+        TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
+
+        CreateEditorConfig(BC0101Severity, testAssetsFolderName, workFolder);
+
+        // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
+        // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
+        // See if there is a way of fixing it in the engine - tracked: https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=55702688.
+        _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
+
+        _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
+        _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
+
+        _env.SetEnvironmentVariable("TEST", "FromEnvVariable");
+
+        string ReadAndAdjustProjectContent(string fileName) =>
+            File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, fileName))
+                .Replace("TestFilePath", testFile.Path)
+                .Replace("WorkFolderPath", workFolder.Path);
+    }
+
+    private void CreateEditorConfig(string? BC0101Severity, string testAssetsFolderName, TransientTestFolder workFolder)
+    {
+        string configContent = string.IsNullOrEmpty(BC0101Severity)
+            ? File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, ".editorconfigbasic"))
+            : File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, ".editorconfigcustomised")).Replace("BC0101Severity", BC0101Severity);
+
+        _ = _env.CreateFile(workFolder, ".editorconfig", configContent);
     }
 }

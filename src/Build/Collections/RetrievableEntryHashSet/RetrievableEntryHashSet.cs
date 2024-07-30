@@ -320,7 +320,7 @@ namespace Microsoft.Build.Collections
         /// Gets the item if any with the given name
         /// </summary>
         /// <param name="key">key to check for containment</param>
-        /// <returns>true if item contained; false if not</returns>
+        /// <returns>The item, if it was found. Otherwise, default(T).</returns>
         public T Get(string key)
         {
             return GetCore(key, 0, key?.Length ?? 0);

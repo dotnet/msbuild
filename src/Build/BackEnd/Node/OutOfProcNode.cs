@@ -781,9 +781,12 @@ namespace Microsoft.Build.Execution
                 _loggingService.IncludeTaskInputs = true;
             }
 
-            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItems)
+            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent)
             {
-                _loggingService.IncludeEvaluationPropertiesAndItems = true;
+                _loggingService.SetIncludeEvaluationPropertiesAndItemsInEvents(
+                    configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
+                    configuration.LoggingNodeConfiguration
+                        .IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent);
             }
 
             try

@@ -2516,6 +2516,11 @@ namespace Microsoft.Build.CommandLine
 #endif
 
             bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
+
+            // This is temporary until we can remove the need for the environment variable.
+            // DO NOT use this environment variable for any new features as it will be removed without further notice.
+            Environment.SetEnvironmentVariable("_MSBUILDTLENABLED", useTerminalLogger ? "1" : "0");
+
             DisplayVersionMessageIfNeeded(recursing, useTerminalLogger, commandLineSwitches);
 
             // Idle priority would prevent the build from proceeding as the user does normal actions.

@@ -9,22 +9,28 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
-/// Holder of an optional configuration from .editorconfig file (not recognized by the infrastructure)
+/// Holder of configuration from .editorconfig file (not recognized by the infrastructure)
 /// </summary>
 public class ConfigurationContext
 {
-    private ConfigurationContext(CustomConfigurationData[] customConfigurationData)
+    private ConfigurationContext(CustomConfigurationData[] customConfigurationData, BuildAnalyzerConfigurationEffective[] buildAnalyzerConfig)
     {
         CustomConfigurationData = customConfigurationData;
+        BuildAnalyzerConfig = buildAnalyzerConfig;
     }
 
-    internal static ConfigurationContext FromDataEnumeration(CustomConfigurationData[] customConfigurationData)
+    internal static ConfigurationContext FromDataEnumeration(CustomConfigurationData[] customConfigurationData, BuildAnalyzerConfigurationEffective[] buildAnalyzerConfig)
     {
-        return new ConfigurationContext(customConfigurationData);
+        return new ConfigurationContext(customConfigurationData, buildAnalyzerConfig);
     }
 
     /// <summary>
     /// Custom configuration data - per each rule that has some specified.
     /// </summary>
     public IReadOnlyList<CustomConfigurationData> CustomConfigurationData { get; init; }
+
+    /// <summary>
+    /// Infrastructure configuration data
+    /// </summary>
+    public IReadOnlyList<BuildAnalyzerConfigurationEffective> BuildAnalyzerConfig { get; init; }
 }
