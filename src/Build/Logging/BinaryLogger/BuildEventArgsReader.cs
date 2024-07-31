@@ -1593,8 +1593,11 @@ namespace Microsoft.Build.Logging
 
             for (int i = 0; i < count; i++)
             {
-                string item = ReadDeduplicatedString();
-                list[i] = item;
+                string? item = ReadDeduplicatedString();
+                if (item is not null)
+                {
+                    list[i] = item;
+                }
             }
 
             return list;
