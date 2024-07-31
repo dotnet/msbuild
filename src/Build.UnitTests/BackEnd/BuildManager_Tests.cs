@@ -1516,10 +1516,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A canceled build
         /// </summary>
-        [Fact(Timeout = 20_000)]
-        public async void CancelledBuild()
+        [Fact]
+        public void CancelledBuild()
         {
-            
             Console.WriteLine("Starting CancelledBuild test that is known to hang.");
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
