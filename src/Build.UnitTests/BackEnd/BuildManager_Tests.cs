@@ -1517,8 +1517,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build
         /// </summary>
         [Fact(Timeout = 20_000)]
-        public void CancelledBuild()
+        public async void CancelledBuild()
         {
+            
             Console.WriteLine("Starting CancelledBuild test that is known to hang.");
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -1528,7 +1529,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-
             BuildParameters parameters = new()
             {
                 ShutdownInProcNodeOnBuildFinish = true,
@@ -1544,7 +1544,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             Console.WriteLine("CancelledBuild: pend build returned");
-
 
             asyncResult.ExecuteAsync(null, null);
             Console.WriteLine("CancelledBuild: ExecuteAsync called");
