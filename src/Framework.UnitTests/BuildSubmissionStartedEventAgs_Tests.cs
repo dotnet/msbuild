@@ -23,6 +23,14 @@ namespace Microsoft.Build.Framework.UnitTests
                 {"Variable2", "" },
                 {"Variable3", null },
             };
+
+            var globalVariablesResult = new Dictionary<string, string?>
+            {
+                {"Variable1", "Value1" },
+                {"Variable2", "" },
+                {"Variable3", "" },
+            };
+
             var entryPointProjects = new List<string>()
             {
                 "project1",
@@ -55,7 +63,7 @@ namespace Microsoft.Build.Framework.UnitTests
             int packetVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
 
             argDeserialized.CreateFromStream(br, packetVersion);
-            argDeserialized.GlobalProperties.ShouldBe(globalVariables);
+            argDeserialized.GlobalProperties.ShouldBe(globalVariablesResult);
             argDeserialized.EntryProjectsFullPath.ShouldBe(entryPointProjects);
             argDeserialized.TargetNames.ShouldBe(targetNames);
             argDeserialized.Flags.ShouldBe(flag);

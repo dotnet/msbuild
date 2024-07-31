@@ -31,6 +31,7 @@ namespace Microsoft.Build.Framework
             IEnumerable<string> targetNames,
             BuildRequestDataFlags flags,
             int submissionId)
+            : base("", null, null, DateTime.UtcNow)
         {
             GlobalProperties = globalProperties;
             EntryProjectsFullPath = entryProjectsFullPath;
