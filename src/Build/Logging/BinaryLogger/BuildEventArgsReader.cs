@@ -23,10 +23,12 @@ namespace Microsoft.Build.Logging
     /// </summary>
     public class BuildEventArgsReader : IBuildEventArgsReaderNotifications, IDisposable
     {
+        /// <summary>
+        /// This is used to keep the stream alive.  Use <see cref="_binaryReader"/> instead.
+        /// </summary>
+        private readonly BinaryReader _baseBinaryReader;
+
         private readonly IBinaryReader _binaryReader;
-        private readonly BinaryReader _basedBinaryReader;
-        // This is used to verify that events deserialization is not overreading expected size.
-        // private readonly TransparentReadStream _readStream;
         private readonly int _fileFormatVersion;
         private long _recordNumber = 0;
         private bool _skipUnknownEvents;
@@ -67,9 +69,14 @@ namespace Microsoft.Build.Logging
         /// <param name="fileFormatVersion">The file format version of the log file being read.</param>
         public BuildEventArgsReader(BinaryReader binaryReader, int fileFormatVersion)
         {
+#if FALSE
             this._binaryReader = new BufferedBinaryReader(binaryReader.BaseStream);
+#else
+            this._binaryReader = new BinaryReaderWrapper(binaryReader);
+#endif
+
             this._fileFormatVersion = fileFormatVersion;
-            this._basedBinaryReader = binaryReader;
+            this._baseBinaryReader = binaryReader;
         }
 
         /// <summary>
@@ -133,7 +140,7 @@ namespace Microsoft.Build.Logging
             if (CloseInput)
             {
                 _binaryReader.Dispose();
-                _basedBinaryReader.Dispose();
+                _baseBinaryReader.Dispose();
             }
         }
 
@@ -1383,21 +1390,23 @@ namespace Microsoft.Build.Logging
 
         private BuildEventContext ReadBuildEventContext()
         {
-            int nodeId = ReadInt32();
-            int projectContextId = ReadInt32();
-            int targetId = ReadInt32();
-            int taskId = ReadInt32();
-            int submissionId = ReadInt32();
-            int projectInstanceId = ReadInt32();
+            var result = this._binaryReader.BulkRead7BitEncodedInt(_fileFormatVersion > 1 ? 7 : 6);
+
+            int nodeId = result[0];
+            int projectContextId = result[1];
+            int targetId = result[2];
+            int taskId = result[3];
+            int submissionId = result[4];
+            int projectInstanceId = result[5];
 
             // evaluationId was introduced in format version 2
             int evaluationId = BuildEventContext.InvalidEvaluationId;
             if (_fileFormatVersion > 1)
             {
-                evaluationId = ReadInt32();
+                evaluationId = result[6];
             }
 
-            var result = new BuildEventContext(
+            return new BuildEventContext(
                 submissionId,
                 nodeId,
                 evaluationId,
@@ -1405,7 +1414,6 @@ namespace Microsoft.Build.Logging
                 projectContextId,
                 targetId,
                 taskId);
-            return result;
         }
 
         private IDictionary<string, string>? ReadStringDictionary()
