@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -1076,15 +1077,34 @@ namespace Microsoft.Build.Logging
             nameValueListBuffer.Clear();
         }
 
+        private byte[] buildEventContextBuffer = new byte[5 * 7];
+
         private void Write(BuildEventContext buildEventContext)
         {
-            Write(buildEventContext.NodeId);
-            Write(buildEventContext.ProjectContextId);
-            Write(buildEventContext.TargetId);
-            Write(buildEventContext.TaskId);
-            Write(buildEventContext.SubmissionId);
-            Write(buildEventContext.ProjectInstanceId);
-            Write(buildEventContext.EvaluationId);
+            int index = 0;
+            Span<int> ints =
+            [
+                buildEventContext.NodeId,
+                buildEventContext.ProjectContextId,
+                buildEventContext.TargetId,
+                buildEventContext.TaskId,
+                buildEventContext.SubmissionId,
+                buildEventContext.ProjectInstanceId,
+                buildEventContext.EvaluationId,
+            ];
+
+            foreach(int num in ints)
+            {
+                uint v = (uint)num;   // support negative numbers
+                while (v >= 0x80)
+                {
+                    buildEventContextBuffer[index++] = (byte)(v | 0x80);
+                    v >>= 7;
+                }
+
+                buildEventContextBuffer[index++] = (byte)v;
+            }
+            this.binaryWriter.Write(buildEventContextBuffer, 0, index);
         }
 
         private void Write(IEnumerable<KeyValuePair<string, string>> keyValuePairs)
@@ -1198,9 +1218,12 @@ namespace Microsoft.Build.Logging
             Write((int)kind);
         }
 
-        internal void Write(int value)
+        private byte[] int7Buffer = new byte[5];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Write(int value)
         {
-            BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, value);
+            BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, value, int7Buffer);
         }
 
         private void Write(long value)
