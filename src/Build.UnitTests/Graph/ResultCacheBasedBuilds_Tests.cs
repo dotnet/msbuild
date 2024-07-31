@@ -566,7 +566,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
 
-            _logger.AllBuildEvents.Count.ShouldBe(5);
+            _logger.AllBuildEvents.Count.ShouldBe(6);
             _logger.Errors.First().Message.ShouldContain("MSB4255:");
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist1");
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist2");

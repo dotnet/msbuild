@@ -627,7 +627,6 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskFinishedEvent => new TaskFinishedEventArgs(null, null, null, null, null, false),
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
                 LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),
-                LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
 
 #if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
                 LoggingEventType.AssemblyLoadEvent => new AssemblyLoadBuildEventArgs(),
@@ -656,6 +655,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildCheckAcquisitionEvent => new BuildCheckAcquisitionEventArgs(),
                 LoggingEventType.BuildCheckTracingEvent => new BuildCheckTracingEventArgs(),
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
+                LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -795,6 +795,10 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.EnvironmentVariableReadEvent;
             }
+            else if (eventType == typeof(BuildSubmissionStartedEventArgs))
+            {
+                return LoggingEventType.BuildSubmissionStartedEvent;
+            }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))
             {
@@ -819,10 +823,6 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(BuildStartedEventArgs))
             {
                 return LoggingEventType.BuildStartedEvent;
-            }
-            else if (eventType == typeof(BuildSubmissionStartedEventArgs))
-            {
-                return LoggingEventType.BuildSubmissionStartedEvent;
             }
             else if (eventType == typeof(BuildWarningEventArgs))
             {
