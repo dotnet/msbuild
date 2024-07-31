@@ -80,13 +80,13 @@
       <Sha>4f5a4ad88d27b56ceeaa43ced670999c33bd2598</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.23526.1">
-      <Uri>https://github.com/dotnet/xliff-tasks</Uri>
-      <Sha>8523ee2147c37df79a26122ad11a9e29fbededf2</Sha>
+    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="9.0.0-beta.24379.1">
+      <Uri>https://github.com/dotnet/arcade</Uri>
+      <Sha>4f5a4ad88d27b56ceeaa43ced670999c33bd2598</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.11.0-rc.122">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.12.0-preview.1.37">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>c0d441fc5e99e6765c9e0b2f77de162b9866b305</Sha>
+      <Sha>29c64d451a7e9b588c6e9d5fff1557bde5ce71fe</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.12.0-1.24378.2">
       <Uri>https://github.com/dotnet/roslyn</Uri>
