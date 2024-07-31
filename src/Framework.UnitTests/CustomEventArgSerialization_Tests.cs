@@ -977,53 +977,73 @@ namespace Microsoft.Build.UnitTests
 
 
         [Fact]
-        public void TestTelemetryEventArgs()
+        public void TestTelemetryEventArgs_AllProperties()
         {
             // Test using reasonable values
             TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = "Good", Properties = new Dictionary<string, string> { { "Key", "Value" } } };
             genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
 
-            // Serialize
-            genericEvent.WriteToStream(_writer);
+            TelemetryEventArgs newGenericEvent = RoundTrip(genericEvent);
+
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyTelemetryEvent(genericEvent, newGenericEvent);
+        }
+
+        [Fact]
+        public void TestTelemetryEventArgs_NullProperties()
+        {
+            // Test using reasonable values
+            TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = "Good", Properties = null };
+            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+
+            TelemetryEventArgs newGenericEvent = RoundTrip(genericEvent);
+
+            // quirk - the properties dict is initialized to an empty dictionary by the default constructor, so it's not _really_ round-trippable.
+            // so we modify the source event for easier comparison here.
+            genericEvent.Properties = new Dictionary<string, string>();
+
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyTelemetryEvent(genericEvent, newGenericEvent);
+        }
+
+        [Fact]
+        public void TestTelemetryEventArgs_NullEventName()
+        {
+            // Test using null event name
+            TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = null, Properties = new Dictionary<string, string> { { "Key", "Value" } } };
+            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+
+            TelemetryEventArgs newGenericEvent = RoundTrip(genericEvent);
+
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyTelemetryEvent(genericEvent, newGenericEvent);
+        }
+
+        [Fact]
+        public void TestTelemetryEventArgs_NullPropertyValue()
+        {
+            // Test using null property value name
+            TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = "Good", Properties = new Dictionary<string, string> { { "Key", null } } };
+            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+
+            TelemetryEventArgs newGenericEvent = RoundTrip(genericEvent);
+
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyTelemetryEvent(genericEvent, newGenericEvent);
+        }
+
+        private T RoundTrip<T>(T original)
+            where T : BuildEventArgs, new()
+        {
+            _stream.Position = 0;
+            original.WriteToStream(_writer);
             long streamWriteEndPosition = _stream.Position;
 
-            // Deserialize and Verify
             _stream.Position = 0;
-            TelemetryEventArgs newGenericEvent = new TelemetryEventArgs();
-            newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
+            var actual = new T();
+            actual.CreateFromStream(_reader, _eventArgVersion);
             _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
-            VerifyGenericEventArg(genericEvent, newGenericEvent);
-            VerifyTelemetryEvent(genericEvent, newGenericEvent);
-
-            // Test using null event name
-            _stream.Position = 0;
-            genericEvent = new TelemetryEventArgs { EventName = null, Properties = new Dictionary<string, string> { { "Key", "Value" } } };
-            // Serialize
-            genericEvent.WriteToStream(_writer);
-            streamWriteEndPosition = _stream.Position;
-
-            // Deserialize and Verify
-            _stream.Position = 0;
-            newGenericEvent = new TelemetryEventArgs();
-            newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
-            _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
-            VerifyGenericEventArg(genericEvent, newGenericEvent);
-            VerifyTelemetryEvent(genericEvent, newGenericEvent);
-
-            // Test using null property value name
-            _stream.Position = 0;
-            genericEvent = new TelemetryEventArgs { EventName = "Good", Properties = new Dictionary<string, string> { { "Key", null } } };
-            // Serialize
-            genericEvent.WriteToStream(_writer);
-            streamWriteEndPosition = _stream.Position;
-
-            // Deserialize and Verify
-            _stream.Position = 0;
-            newGenericEvent = new TelemetryEventArgs();
-            newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
-            _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
-            VerifyGenericEventArg(genericEvent, newGenericEvent);
-            VerifyTelemetryEvent(genericEvent, newGenericEvent);
+            return actual;
         }
 
         private static void VerifyTelemetryEvent(TelemetryEventArgs expected, TelemetryEventArgs actual)
