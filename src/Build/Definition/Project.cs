@@ -3571,7 +3571,6 @@ namespace Microsoft.Build.Evaluation
             {
                 Xml.OnAfterProjectRename -= _renameHandler;
                 Xml.OnProjectXmlChanged -= ProjectRootElement_ProjectXmlChangedHandler;
-                Xml.XmlDocument.ClearAnyCachedStrings();
                 _renameHandler = null;
             }
 
