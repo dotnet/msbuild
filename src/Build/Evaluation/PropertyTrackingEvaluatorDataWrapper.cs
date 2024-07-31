@@ -10,6 +10,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
@@ -86,16 +87,17 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which does not come from the Xml.
         /// </summary>
-        public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, LoggingContext? loggingContext = null)
+        public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false)
         {
             P? originalProperty = _wrapped.GetProperty(name);
-            P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, isEnvironmentVariable, _evaluationLoggingContext);
+            P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, _evaluationLoggingContext, isEnvironmentVariable);
 
             this.TrackPropertyWrite(
                 originalProperty,
                 newProperty,
                 null,
-                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable));
+                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable),
+                loggingContext);
 
             return newProperty;
         }
@@ -107,16 +109,17 @@ namespace Microsoft.Build.Evaluation
         /// project file, and whose conditions evaluated to true.
         /// If there are none above this is null.
         /// </summary>
-        public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
+        public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, LoggingContext loggingContext)
         {
             P? originalProperty = _wrapped.GetProperty(propertyElement.Name);
-            P newProperty = _wrapped.SetProperty(propertyElement, evaluatedValueEscaped);
+            P newProperty = _wrapped.SetProperty(propertyElement, evaluatedValueEscaped, loggingContext);
 
             this.TrackPropertyWrite(
                 originalProperty,
                 newProperty,
                 propertyElement.Location,
-                PropertySource.Xml);
+                PropertySource.Xml,
+                loggingContext);
 
             return newProperty;
         }
@@ -241,9 +244,16 @@ namespace Microsoft.Build.Evaluation
             _evaluationLoggingContext.LogBuildEvent(args);
         }
 
-        private void TrackPropertyWrite(P? predecessor, P property, IElementLocation? location, PropertySource source)
+        private void TrackPropertyWrite(
+            P? predecessor,
+            P property,
+            IElementLocation? location,
+            PropertySource source,
+            LoggingContext loggingContext)
         {
             string name = property.Name;
+
+            loggingContext.ProcessPropertyWrite(new PropertyWriteInfo(property.Name, string.IsNullOrEmpty(property.EscapedValue), location));
 
             if (predecessor == null)
             {

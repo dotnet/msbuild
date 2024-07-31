@@ -396,7 +396,7 @@ namespace Microsoft.Build.Evaluation
         /// This is for the purpose of evaluations through API calls, that might not be able to pass the logging context
         ///  - BuildCheck analysis won't be executed for those.
         /// (for one of the calls we can actually pass IDataConsumingContext - as we have logging service and project)
-        /// 
+        ///
         /// </summary>
         internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata, IFileSystem fileSystem)
             : this(properties, items, fileSystem, null)
@@ -1558,7 +1558,7 @@ namespace Microsoft.Build.Evaluation
                                    MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7);
 
                 propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, elementLocation, property == null, isArtifical);
-                
+
                 if (isArtifical)
                 {
                     // It could be one of the MSBuildThisFileXXXX properties,
@@ -1654,9 +1654,8 @@ namespace Microsoft.Build.Evaluation
             {
 #if RUNTIME_TYPE_NETCORE
                 // .NET Core MSBuild used to always return empty, so match that behavior
-                // on non-Windows (no registry), and with a changewave (in case someone
-                // had a registry property and it breaks when it lights up).
-                if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                // on non-Windows (no registry).
+                if (!NativeMethodsShared.IsWindows)
                 {
                     return string.Empty;
                 }
@@ -2017,8 +2016,7 @@ namespace Microsoft.Build.Evaluation
                     if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)) != true)
                     {
                         // ...or a function "AnyHaveMetadataValue", since that will want to return false for an empty list.
-                        if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) ||
-                            expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
+                        if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
                         {
                             itemsFromCapture = new List<KeyValuePair<string, S>>();
                             return false;
@@ -3593,17 +3591,8 @@ namespace Microsoft.Build.Evaluation
                             // otherwise there is the potential of running a function twice!
                             try
                             {
-                                // If there are any out parameters, try to figure out their type and create defaults for them as appropriate before calling the method.
-                                if (args.Any(a => "_".Equals(a)))
-                                {
-                                    IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
-                                    functionResult = GetMethodResult(objectInstance, methods, args, 0);
-                                }
-                                else
-                                {
-                                    // If there are no out parameters, use InvokeMember using the standard binder - this will match and coerce as needed
-                                    functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
-                                }
+                                // First use InvokeMember using the standard binder - this will match and coerce as needed
+                                functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
                             }
                             // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
                             // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coercion is possible, so throw.
@@ -3674,48 +3663,6 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.Message);
                     }
 
-                    return null;
-                }
-            }
-
-            private object GetMethodResult(object objectInstance, IEnumerable<MethodInfo> methods, object[] args, int index)
-            {
-                for (int i = index; i < args.Length; i++)
-                {
-                    if (args[i].Equals("_"))
-                    {
-                        object toReturn = null;
-                        foreach (MethodInfo method in methods)
-                        {
-                            Type t = method.GetParameters()[i].ParameterType;
-                            args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
-                            object currentReturnValue = GetMethodResult(objectInstance, methods, args, i + 1);
-                            if (currentReturnValue is not null)
-                            {
-                                if (toReturn is null)
-                                {
-                                    toReturn = currentReturnValue;
-                                }
-                                else if (!toReturn.Equals(currentReturnValue))
-                                {
-                                    // There were multiple methods that seemed viable and gave different results. We can't differentiate between them so throw.
-                                    ErrorUtilities.ThrowArgument("CouldNotDifferentiateBetweenCompatibleMethods", _methodMethodName, args.Length);
-                                    return null;
-                                }
-                            }
-                        }
-
-                        return toReturn;
-                    }
-                }
-
-                try
-                {
-                    return _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
-                }
-                catch (Exception)
-                {
-                    // This isn't a viable option, but perhaps another set of parameters will work.
                     return null;
                 }
             }
@@ -4978,13 +4925,10 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (IntrinsicFunctionOverload.IsIntrinsicFunctionOverloadsEnabled())
+                if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
                 {
-                    if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
-                    {
-                        resultValue = integerOperation(argLong0, argLong1);
-                        return true;
-                    }
+                    resultValue = integerOperation(argLong0, argLong1);
+                    return true;
                 }
 
                 if (TryConvertToDouble(args[0], out double argDouble0) && TryConvertToDouble(args[1], out double argDouble1))
@@ -5616,16 +5560,10 @@ namespace Microsoft.Build.Evaluation
         // For reuse, the comparer is cached in a non-generic type.
         // Both comparer instances can be cached to support change wave testing.
         private static IComparer<MemberInfo>? s_comparerLongBeforeDouble;
-        private static IComparer<MemberInfo>? s_comparerDoubleBeforeLong;
 
-        internal static IComparer<MemberInfo> IntrinsicFunctionOverloadMethodComparer => IsIntrinsicFunctionOverloadsEnabled() ? LongBeforeDoubleComparer : DoubleBeforeLongComparer;
+        internal static IComparer<MemberInfo> IntrinsicFunctionOverloadMethodComparer => LongBeforeDoubleComparer;
 
         private static IComparer<MemberInfo> LongBeforeDoubleComparer => s_comparerLongBeforeDouble ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key0).CompareTo(SelectTypeOfFirstParameter(key1)));
-
-        private static IComparer<MemberInfo> DoubleBeforeLongComparer => s_comparerDoubleBeforeLong ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key1).CompareTo(SelectTypeOfFirstParameter(key0)));
-
-        // The arithmetic overload feature uses this method to test for the change wave.
-        internal static bool IsIntrinsicFunctionOverloadsEnabled() => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8);
 
         internal static bool IsKnownOverloadMethodName(string methodName) => s_knownOverloadName.Any(name => string.Equals(name, methodName, StringComparison.OrdinalIgnoreCase));
 
