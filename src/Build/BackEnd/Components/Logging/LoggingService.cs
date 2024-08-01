@@ -929,7 +929,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private void WarnOnDeprecatedCustomArgsSerialization(LogMessagePacket loggingPacket)
         {
             if (loggingPacket.EventType == LoggingEventType.CustomEvent
-                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8)
                 && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
             {
                 BuildEventArgs buildEvent = loggingPacket.NodeBuildEvent.Value.Value;

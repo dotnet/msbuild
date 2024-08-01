@@ -151,29 +151,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        // Scenario: MockSdkResolver1 has higher priority than MockSdkResolverWithResolvableSdkPattern1 and resolves sdk.
-        public void AssertFirstResolverWithPatternCantResolveChangeWave17_4()
-        {
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_4.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-                SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeResolversWithPatterns: true));
-
-                SdkReference sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
-
-                var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
-
-                result.Path.ShouldBe("resolverpath1");
-                _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain("MockSdkResolver1 running");
-                _logger.BuildMessageEvents.Select(i => i.Message).ShouldNotContain("MockSdkResolverWithResolvableSdkPattern1 running");
-                ChangeWaves.ResetStateForTests();
-            }
-        }
-
-        [Fact]
         // Scenario: MockSdkResolver1 has higher priority than MockSdkResolverWithResolvableSdkPattern1 but MockSdkResolverWithResolvableSdkPattern1 resolves sdk,
         // becuase MockSdkResolver1 is general and MockSdkResolverWithResolvableSdkPattern1 is specific.
         public void AssertFirstResolverWithPatternCanResolve()

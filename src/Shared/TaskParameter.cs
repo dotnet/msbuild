@@ -238,24 +238,10 @@ namespace Microsoft.Build.BackEnd
                     TranslatePrimitiveTypeArray(translator);
                     break;
                 case TaskParameterType.ValueType:
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
-                    {
                         TranslateValueType(translator);
-                    }
-                    else
-                    {
-                        translator.TranslateDotNet(ref _wrappedParameter);
-                    }
                     break;
                 case TaskParameterType.ValueTypeArray:
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
-                    {
                         TranslateValueTypeArray(translator);
-                    }
-                    else
-                    {
-                        translator.TranslateDotNet(ref _wrappedParameter);
-                    }
                     break;
                 case TaskParameterType.ITaskItem:
                     TranslateITaskItem(translator);
