@@ -689,6 +689,9 @@ dotnet_diagnostic.CA5402.severity = none
 # Do not hard-code certificate
 dotnet_diagnostic.CA5403.severity = none
 
+# Comparing a span to 'null' might be redundant
+dotnet_diagnostic.CA2265.severity = suggestion
+
 # Avoid using accessing Assembly file path when publishing as a single-file
 dotnet_diagnostic.IL3000.severity = none
 

@@ -1673,7 +1673,7 @@ namespace Microsoft.Build.Shared
         /// <param name="pattern">Pattern against which string is matched.</param>
         internal static bool IsMatch(ReadOnlySpan<char> input, string pattern)
         {
-            if (input == ReadOnlySpan<char>.Empty) // Comparing ReadOnlySpan with null in this scenario transforms the null to ReadOnlySpan Empty (https://github.com/dotnet/runtime/issues/84265)
+            if (input == null)
             {
                 throw new ArgumentNullException(nameof(input));
             }
