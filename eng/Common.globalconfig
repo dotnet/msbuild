@@ -1106,3 +1106,10 @@ dotnet_diagnostic.SA1652.severity = none
 
 # Do not use equality check to check for collection size.
 dotnet_diagnostic.xUnit2013.severity = none
+
+#TODO: fix xUnit new warning 
+dotnet_diagnostic.xUnit1031.severity = suggestion
+dotnet_diagnostic.xUnit1048.severity = suggestion
+dotnet_diagnostic.xUnit2020.severity = suggestion
+dotnet_diagnostic.xUnit1012.severity = suggestion
+dotnet_diagnostic.xUnit2029.severity = suggestion

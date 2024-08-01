@@ -88,9 +88,10 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>c0d441fc5e99e6765c9e0b2f77de162b9866b305</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.12.0-2.24381.4">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.11.0-3.24378.3">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>8fddb0e68be47d1b77fbcd1dc16f808a322990c6</Sha>
+      <Sha>5e3a11e2e7f952da93f9d35bd63a2fa181c0608b</Sha>
+       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="8.0.0-beta.24376.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
