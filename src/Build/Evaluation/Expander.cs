@@ -3575,7 +3575,7 @@ namespace Microsoft.Build.Evaluation
                             if (!wellKnownFunctionSuccess)
                             {
                                 // Some well-known functions need evaluated value from properties.
-                                string projectPath = properties.GetProperty("MSBuildProjectFullPath")!.EvaluatedValue;
+                                string projectPath = properties.GetProperty("MSBuildProjectFullPath")?.EvaluatedValue ?? string.Empty;
                                 wellKnownFunctionSuccess = TryExecuteWellKnownFunctionWithPropertiesParam(projectPath, out functionResult, objectInstance, args);
                             }
                         }
