@@ -11,7 +11,7 @@ namespace CustomAnalyzer
             "Title",
             "Description",
             "Message format: {0}",
-            new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Warning });
+            new BuildAnalyzerConfiguration());
 
         public override string FriendlyName => "CustomRule1";
 
