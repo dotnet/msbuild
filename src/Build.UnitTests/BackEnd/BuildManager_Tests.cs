@@ -1516,7 +1516,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A canceled build
         /// </summary>
-        [Fact]
+        [Fact(Timeout = 20_000)]
         public void CancelledBuild()
         {
             Console.WriteLine("Starting CancelledBuild test that is known to hang.");
