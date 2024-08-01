@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
@@ -37,6 +38,7 @@ public class BuildCheckManagerTests
     [InlineData(false, new[] { "Failed to register the custom analyzer: 'DummyPath'." })]
     public void ProcessAnalyzerAcquisitionTest(bool isAnalyzerRuleExist, string[] expectedMessages)
     {
+        MockConfigurationProvider();
         MockBuildCheckAcquisition(isAnalyzerRuleExist);
         MockEnabledDataSourcesDefinition();
 
@@ -50,6 +52,8 @@ public class BuildCheckManagerTests
 
     private void MockEnabledDataSourcesDefinition() => MockField("_enabledDataSources", new[] { true, true });
 
+    private void MockConfigurationProvider() => MockField("_configurationProvider", new ConfigurationProviderMock());
+
     private void MockField(string fieldName, object mockedValue)
     {
         var mockedField = _testedInstance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
@@ -58,6 +62,19 @@ public class BuildCheckManagerTests
             mockedField.SetValue(_testedInstance, mockedValue);
         }
     }
+}
+
+internal sealed class ConfigurationProviderMock : IConfigurationProvider
+{
+    public void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId) { }
+
+    public CustomConfigurationData[] GetCustomConfigurations(string projectFullPath, IReadOnlyList<string> ruleIds) => [];
+
+    public BuildAnalyzerConfigurationEffective[] GetMergedConfigurations(string projectFullPath, BuildAnalyzer analyzer) => [];
+
+    public BuildAnalyzerConfigurationEffective[] GetMergedConfigurations(BuildAnalyzerConfiguration[] userConfigs, BuildAnalyzer analyzer) => [];
+
+    public BuildAnalyzerConfiguration[] GetUserConfigurations(string projectFullPath, IReadOnlyList<string> ruleIds) => [];
 }
 
 internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionModule

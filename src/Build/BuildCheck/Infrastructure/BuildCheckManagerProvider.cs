@@ -15,6 +15,7 @@ using Microsoft.Build.Experimental.BuildCheck.Analyzers;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.BuildCheck.Infrastructure;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -33,6 +34,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
     public IBuildCheckManager Instance => GlobalInstance;
 
     public IBuildEngineDataRouter BuildEngineDataRouter => (IBuildEngineDataRouter)GlobalInstance;
+
     public static IBuildEngineDataRouter? GlobalBuildEngineDataRouter => (IBuildEngineDataRouter?)s_globalInstance;
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
@@ -68,7 +70,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
     internal sealed class BuildCheckManager : IBuildCheckManager, IBuildEngineDataRouter
     {
         private readonly TracingReporter _tracingReporter = new TracingReporter();
-        private readonly ConfigurationProvider _configurationProvider = new ConfigurationProvider();
+        private readonly IConfigurationProvider _configurationProvider = new ConfigurationProvider();
         private readonly BuildCheckCentralContext _buildCheckCentralContext;
         private readonly List<BuildAnalyzerFactoryContext> _analyzersRegistry;
         private readonly bool[] _enabledDataSources = new bool[(int)BuildCheckDataSource.ValuesCount];
