@@ -247,7 +247,6 @@ namespace Microsoft.Build.CommandLine
 
             int exitCode;
             if (
-                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) &&
                 Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
                 CanRunServerBasedOnCommandLineSwitches(

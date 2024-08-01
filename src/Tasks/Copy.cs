@@ -287,8 +287,7 @@ namespace Microsoft.Build.Tasks
                 MakeFileWriteable(destinationFileState, true);
             }
 
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) &&
-                !Traits.Instance.EscapeHatches.CopyWithoutDelete &&
+            if (!Traits.Instance.EscapeHatches.CopyWithoutDelete &&
                 destinationFileState.FileExists &&
                 !destinationFileState.IsReadOnly)
             {

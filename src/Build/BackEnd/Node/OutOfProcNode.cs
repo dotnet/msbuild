@@ -586,8 +586,6 @@ namespace Microsoft.Build.Execution
 #if RUNTIME_TYPE_NETCORE
                 if (packet is LogMessagePacketBase logMessage
                     && logMessage.EventType == LoggingEventType.CustomEvent
-                    &&
-                    (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
                     && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
                 {
                     BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
