@@ -102,7 +102,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// There are a couple of environment variables that can affect the operation of the Copy
-        /// task.  Make sure none of them are set.
+        /// task.  Make sure none of them are set. 
         /// </summary>
         public Copy_Tests(ITestOutputHelper testOutputHelper)
         {
@@ -110,8 +110,8 @@ namespace Microsoft.Build.UnitTests
             _alwaysOverwriteReadOnlyFiles = Environment.GetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar);
             _alwaysRetry = Environment.GetEnvironmentVariable(Copy.AlwaysRetryEnvVar);
 
-            Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, String.Empty);
-            Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, String.Empty);
+            Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, null);
+            Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, null);
 
             Copy.RefreshInternalEnvironmentValues();
         }
