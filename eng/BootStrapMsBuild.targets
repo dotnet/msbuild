@@ -217,7 +217,7 @@
     <PropertyGroup>
       <InstallDir>$(ArtifactsBinDir)bootstrap\core\</InstallDir>
       <!-- By default, MicrosoftNETBuildExtensionsTasksAssembly is resolved as net472 due to MSBuildRuntimeType = Full. It breaks tests execution on pipeline for Core scenarious. -->
-      <!-- <MicrosoftNETBuildExtensionsTasksAssembly>$(MSBuildThisFileDirectory)\tools\net8.0\Microsoft.NET.Build.Extensions.Tasks.dll</MicrosoftNETBuildExtensionsTasksAssembly> -->
+      <MicrosoftNETBuildExtensionsTasksAssembly>$(MSBuildThisFileDirectory)\tools\net8.0\Microsoft.NET.Build.Extensions.Tasks.dll</MicrosoftNETBuildExtensionsTasksAssembly>
     </PropertyGroup>
 
     <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(InstallDir)" Version="$(BootstrapSdkVersion)"/>
