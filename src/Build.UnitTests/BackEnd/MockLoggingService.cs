@@ -222,21 +222,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set { }
         }
 
-        /// <inheritdoc cref="ILoggingService.SetIncludeEvaluationPropertiesAndItemsInEvents"/>
-        public void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent,
-            bool inEvaluationFinishedEvent)
-        { }
-
-        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent"/>
-        public bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
+        /// <summary>
+        /// Log properties and items on ProjectEvaluationFinishedEventArgs
+        /// instead of ProjectStartedEventArgs.
+        /// </summary>
+        public bool IncludeEvaluationPropertiesAndItems
         {
             get => false;
-        }
-
-        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent"/>
-        public bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
-        {
-            get => false;
+            set { }
         }
 
         /// <summary>
