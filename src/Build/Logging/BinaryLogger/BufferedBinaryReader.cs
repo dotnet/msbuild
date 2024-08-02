@@ -209,7 +209,23 @@ namespace Microsoft.Build.Logging
                 return Array.Empty<byte>();
             }
 
-            var result = new byte[count];
+            // Avoid an allocation if the current buffer is large enough.
+            byte[] result;
+            if (count < this.bufferCapacity)
+            {
+                if (this.bufferOffset > 0)
+                {
+                    // content to the start of the buffer.
+                    LoadBuffer();
+                }
+
+                result = this.buffer;
+            }
+            else
+            {
+                result = new byte[count];
+            }
+
             Array.Copy(buffer, bufferOffset, result, 0, count);
             bufferOffset += count;
             baseStreamPosition += count;
