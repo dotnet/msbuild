@@ -26,7 +26,7 @@ namespace Microsoft.Build.Framework
         }
 
         public BuildSubmissionStartedEventArgs(
-            IReadOnlyDictionary<string, string?> globalProperties,
+            IReadOnlyDictionary<string, string?>? globalProperties,
             IEnumerable<string> entryProjectsFullPath,
             IEnumerable<string> targetNames,
             BuildRequestDataFlags flags,
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Framework
             SubmissionId = submissionId;
         }
 
-        public IReadOnlyDictionary<string, string?> GlobalProperties { get; set; }
+        public IReadOnlyDictionary<string, string?>? GlobalProperties { get; set; }
 
         public IEnumerable<string> EntryProjectsFullPath { get; set; }
 

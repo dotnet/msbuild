@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Threading;
 using System.Xml;
@@ -4301,13 +4302,16 @@ $@"<Project InitialTargets=`Sleep`>
 
             using (var buildSession = new Helpers.BuildManagerSession(_env))
             {
-                var graphResult = buildSession.BuildGraphSubmission(
-                    new GraphBuildRequestData(
-                        projectGraphEntryPoints: new[] { new ProjectGraphEntryPoint(graph.GraphRoots.First().ProjectInstance.FullPath) },
+                var requestData = new GraphBuildRequestData(
+                        projectGraphEntryPoints: new[] { new ProjectGraphEntryPoint(
+                            graph.GraphRoots.First().ProjectInstance.FullPath,
+                            new Dictionary<string, string>() { {"property1", "value1" } }) },
                         targetsToBuild: Array.Empty<string>(),
                         hostServices: null,
                         flags: BuildRequestDataFlags.None,
-                        graphBuildOptions: new GraphBuildOptions { Build = false }));
+                        graphBuildOptions: new GraphBuildOptions { Build = false });
+
+                var graphResult = buildSession.BuildGraphSubmission(requestData);
 
                 graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
                 logger = buildSession.Logger;
