@@ -277,7 +277,7 @@ namespace Microsoft.Build.UnitTests
 
             if (includeEvaluationPropertiesAndItems)
             {
-                pc.Collection.LoggingService.SetIncludeEvaluationPropertiesAndItemsInEvents(inProjectStartedEvent: false, inEvaluationFinishedEvent: true);
+                pc.Collection.LoggingService.IncludeEvaluationPropertiesAndItems = true;
             }
 
             var project = env.CreateTestProjectWithFiles(@"

@@ -2771,8 +2771,7 @@ namespace Microsoft.Build.Execution
                 , new LoggingNodeConfiguration(
                     loggingService.IncludeEvaluationMetaprojects,
                     loggingService.IncludeEvaluationProfile,
-                    loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
-                    loggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent,
+                    loggingService.IncludeEvaluationPropertiesAndItems,
                     loggingService.IncludeTaskInputs));
             }
 
