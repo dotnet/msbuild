@@ -55,37 +55,38 @@ namespace Microsoft.Build.Shared
 #if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public static void Write7BitEncodedInt(this BinaryWriter writer, int value, byte[]? buffer = null)
+        public static void Write7BitEncodedInt(this BinaryWriter writer, int value, byte[] buffer)
         {
-            if (buffer == null)
+            // Write out an int 7 bits at a time.  The high bit of the byte,
+            // when on, tells reader to continue reading more bytes.
+            int index = 0;
+            uint v = (uint)value;   // support negative numbers
+            while (v >= 0x80)
             {
-                // Write out an int 7 bits at a time.  The high bit of the byte,
-                // when on, tells reader to continue reading more bytes.
-                uint v = (uint)value;   // support negative numbers
-                while (v >= 0x80)
-                {
-                    writer.Write((byte)(v | 0x80));
-                    v >>= 7;
-                }
-
-                writer.Write((byte)v);
-                return;
+                buffer[index++] = (byte)(v | 0x80);
+                v >>= 7;
             }
-            else
+
+            buffer[index++] = (byte)v;
+            writer.Write(buffer, 0, index);
+        }
+
+#if !TASKHOST
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static void Write7BitEncodedInt(this BinaryWriter writer, int value)
+        {
+            // Write out an int 7 bits at a time.  The high bit of the byte,
+            // when on, tells reader to continue reading more bytes.
+            uint v = (uint)value;   // support negative numbers
+            while (v >= 0x80)
             {
-                // Write out an int 7 bits at a time.  The high bit of the byte,
-                // when on, tells reader to continue reading more bytes.
-                int index = 0;
-                uint v = (uint)value;   // support negative numbers
-                while (v >= 0x80)
-                {
-                    buffer[index++] = (byte)(v | 0x80);
-                    v >>= 7;
-                }
-
-                buffer[index++] = (byte)v;
-                writer.Write(buffer, 0, index);
+                writer.Write((byte)(v | 0x80));
+                v >>= 7;
             }
+
+            writer.Write((byte)v);
+            return;
         }
 
 #if !TASKHOST
