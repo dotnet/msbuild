@@ -33,11 +33,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// If we pass in an item spec that is over the max path but it can be normalized down to something under the max path, we should still work and not
-        /// throw a path too long exception
+        /// If we pass in an item spec can be normalized down to something under the max path, it should still work and not
+        /// throw a path too long exception or file not found exception
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4247")]
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -68,16 +67,16 @@ namespace Microsoft.Build.UnitTests
                     projectFile1 += "..\\";
                 }
 
-                int rootLength = Path.GetPathRoot(tempPath).Length;
-                string tempPathNoRoot = tempPath.Substring(rootLength);
+                int rootLength = Path.GetPathRoot(tempProject).Length;
+                string tempPathNoRoot = tempProject.Substring(rootLength);
 
-                projectFile1 += Path.Combine(tempPathNoRoot, fileName);
+                projectFile1 += tempPathNoRoot;
 
                 string parentProjectContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <Target Name=`Build`>
-                        <MSBuild Projects=`" + projectFile1 + @"` />
+                        <MSBuild Projects=`" + projectFile1 + @"`/>
                     </Target>
                 </Project>";
                 try
