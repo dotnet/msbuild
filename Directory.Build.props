@@ -87,12 +87,13 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
   </PropertyGroup>
 
-  <!-- TODO: Freeze the version for the current upgrade of the sdk. Delete the lines below once the Retargeting merged. -->
+  <!--  Freeze the version for the current upgrade of the sdk. 
+        TODO:Delete the lines below once the Retargeting merged. 
+  -->  
   <PropertyGroup>
       <XUnitVersion>2.4.2</XUnitVersion>
       <XUnitAnalyzersVersion>1.1.0</XUnitAnalyzersVersion>
       <XUnitRunnerConsoleVersion>$(XUnitVersion)</XUnitRunnerConsoleVersion>
       <XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
   </PropertyGroup>
-
 </Project>
