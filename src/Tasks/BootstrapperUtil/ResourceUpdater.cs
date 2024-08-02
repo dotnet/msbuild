@@ -99,11 +99,14 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                             {
                                 fileLength = (int)fs.Length;
                                 fileContent = new byte[fileLength];
-
+#if NET7_0_OR_GREATER
+                                fs.ReadExactly(fileContent, 0, fileLength);
+#else
 #pragma warning disable CA2022 // Avoid inexact read with 'Stream.Read'
-                               // TODO: Read the count of read bytes and check if it matches the expected length, if not raise an exception
-                               fs.Read(fileContent, 0, fileLength);
+                                // TODO: Read the count of read bytes and check if it matches the expected length, if not raise an exception
+                                fs.Read(fileContent, 0, fileLength);
 #pragma warning restore CA2022 // Avoid inexact read with 'Stream.Read'
+#endif
                             }
 
                             // Update the resources to include this file's data
