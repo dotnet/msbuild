@@ -3575,8 +3575,7 @@ namespace Microsoft.Build.Evaluation
                             if (!wellKnownFunctionSuccess)
                             {
                                 // Some well-known functions need evaluated value from properties.
-                                string projectPath = properties.GetProperty("MSBuildProjectFullPath")?.EvaluatedValue ?? string.Empty;
-                                wellKnownFunctionSuccess = TryExecuteWellKnownFunctionWithPropertiesParam(projectPath, out functionResult, objectInstance, args);
+                                wellKnownFunctionSuccess = TryExecuteWellKnownFunctionWithPropertiesParam(properties, out functionResult, objectInstance, args);
                             }
                         }
                         // we need to preserve the same behavior on exceptions as the actual binder
@@ -3674,7 +3673,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            private bool TryExecuteWellKnownFunctionWithPropertiesParam(string projectPath, out object returnVal, object objectInstance, object[] args)
+            private bool TryExecuteWellKnownFunctionWithPropertiesParam(IPropertyProvider<T> properties, out object returnVal, object objectInstance, object[] args)
             {
                 returnVal = null;
 
@@ -3682,6 +3681,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterBuildCheck), StringComparison.OrdinalIgnoreCase))
                     {
+                        string projectPath = properties.GetProperty("MSBuildProjectFullPath")?.EvaluatedValue ?? string.Empty;
                         ErrorUtilities.VerifyThrow(_loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
                         if (TryGetArg(args, out string arg0))
                         {

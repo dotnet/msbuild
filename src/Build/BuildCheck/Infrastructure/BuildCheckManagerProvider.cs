@@ -171,7 +171,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// To be used by acquisition module
         /// Registers the custom analyzer, the construction of analyzer is needed during registration.
         /// </summary>
-        /// <param name="projectPath">The project path is used for the correct .editorconfig resolution</param>
+        /// <param name="projectPath">The project path is used for the correct .editorconfig resolution.</param>
         /// <param name="buildCheckDataSource">Represents different data sources used in build check operations.</param>
         /// <param name="factories">A collection of build analyzer factories for rules instantiation.</param>
         /// <param name="analysisContext">The logging context of the build event.</param>
@@ -183,6 +183,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
+                Debugger.Launch();
                 foreach (var factory in factories)
                 {
                     var instance = factory();
