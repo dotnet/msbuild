@@ -46,8 +46,9 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
         }
 
         string? binPath, objPath;
-        context.Data.EvaluatedProperties.TryGetPathValue("OutputPath", out binPath);
-        context.Data.EvaluatedProperties.TryGetPathValue("IntermediateOutputPath", out objPath);
+
+        context.Data.EvaluatedProperties.TryGetValue("OutputPath", out binPath);
+        context.Data.EvaluatedProperties.TryGetValue("IntermediateOutputPath", out objPath);
 
         string? absoluteBinPath = CheckAndAddFullOutputPath(binPath, context);
         // Check objPath only if it is different from binPath
@@ -76,7 +77,7 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
         }
 
         // Normalize the path to avoid false negatives due to different path representations.
-        path = Path.GetFullPath(path);
+        path = FileUtilities.NormalizePath(path);
 
         if (_projectsPerOutputPath.TryGetValue(path!, out string? conflictingProject))
         {
