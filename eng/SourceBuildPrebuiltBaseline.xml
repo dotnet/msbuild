@@ -3,8 +3,6 @@
 
 <UsageData>
   <IgnorePatterns>
-    <UsagePattern IdentityGlob="Microsoft.Net.Compilers.Toolset/*" />
-
     <!-- 8.0 packages are not allowed in the 8.0 build, because they're not "current", so baseline them. -->
     <UsagePattern IdentityGlob="System.CodeDom/*8.0.0*" />
     <UsagePattern IdentityGlob="System.Collections.Immutable/*8.0.0*" />

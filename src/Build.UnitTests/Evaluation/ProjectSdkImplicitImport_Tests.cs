@@ -632,14 +632,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             _env.SetEnvironmentVariable("MSBuildSDKsPath", _testSdkRoot);
 
-            if (data.Mode.HasValue)
-            {
-                _env.SetEnvironmentVariable("MSBUILD_SDKREFERENCE_PROPERTY_EXPANSION_MODE", data.Mode.ToString());
-            }
-            else
-            {
-                _env.SetEnvironmentVariable("MSBUILD_SDKREFERENCE_PROPERTY_EXPANSION_MODE", null);
-            }
+                _env.SetEnvironmentVariable("MSBUILD_SDKREFERENCE_PROPERTY_EXPANSION_MODE", data.Mode?.ToString());
             
             _env.SetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER", "false");
 

@@ -71,6 +71,9 @@
     <Right>ref/net472/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
+  <!--
+    https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/diagnostic-ids
+    Suppress PKV006 for net8.0 (The target framework is dropped in the latest version.)  -->
   <Suppression>
     <DiagnosticId>PKV006</DiagnosticId>
     <Target>net8.0</Target>
