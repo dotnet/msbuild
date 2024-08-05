@@ -21,7 +21,7 @@ public class BuildExecutionCheckConfiguration
     //  nor in the editorconfig configuration file.
     public static BuildExecutionCheckConfiguration Default { get; } = new()
     {
-        EvaluationAnalysisScope = BuildCheck.EvaluationAnalysisScope.ProjectOnly,
+        EvaluationCheckScope = BuildCheck.EvaluationCheckScope.ProjectOnly,
         Severity = BuildExecutionCheckResultSeverity.None
     };
 
@@ -35,7 +35,7 @@ public class BuildExecutionCheckConfiguration
     ///
     /// If not supported by the data source - then the setting is ignored
     /// </summary>
-    public EvaluationAnalysisScope? EvaluationAnalysisScope { get; internal init; }
+    public EvaluationCheckScope? EvaluationCheckScope { get; internal init; }
 
     /// <summary>
     /// The severity of the result for the rule.
@@ -69,12 +69,12 @@ public class BuildExecutionCheckConfiguration
     /// <returns>A new instance of <see cref="BuildAnalyzerConfiguration"/> with the specified settings.</returns>
     internal static BuildExecutionCheckConfiguration Create(Dictionary<string, string>? configDictionary) => new()
     {
-        EvaluationAnalysisScope = TryExtractEvaluationAnalysisScope(configDictionary),
+        EvaluationCheckScope = TryExtractEvaluationAnalysisScope(configDictionary),
         Severity = TryExtractSeverity(configDictionary),
     };
 
 
-    private static EvaluationAnalysisScope? TryExtractEvaluationAnalysisScope(Dictionary<string, string>? config)
+    private static EvaluationCheckScope? TryExtractEvaluationAnalysisScope(Dictionary<string, string>? config)
     {
 
         if (!TryExtractValue(BuildCheckConstants.scopeConfigurationKey, config, out string? stringValue) || stringValue is null)
@@ -85,13 +85,13 @@ public class BuildExecutionCheckConfiguration
         switch (stringValue)
         {
             case "project":
-                return BuildCheck.EvaluationAnalysisScope.ProjectOnly;
+                return BuildCheck.EvaluationCheckScope.ProjectOnly;
             case "current_imports":
-                return BuildCheck.EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree;
+                return BuildCheck.EvaluationCheckScope.ProjectWithImportsFromCurrentWorkTree;
             case "without_sdks":
-                return BuildCheck.EvaluationAnalysisScope.ProjectWithImportsWithoutSdks;
+                return BuildCheck.EvaluationCheckScope.ProjectWithImportsWithoutSdks;
             case "all":
-                return BuildCheck.EvaluationAnalysisScope.ProjectWithAllImports;
+                return BuildCheck.EvaluationCheckScope.ProjectWithAllImports;
             default:
                 ThrowIncorrectValueException(BuildCheckConstants.scopeConfigurationKey, stringValue);
                 break;

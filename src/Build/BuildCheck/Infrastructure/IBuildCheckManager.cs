@@ -36,30 +36,30 @@ internal enum BuildCheckDataSource
 internal interface IBuildCheckManager
 {
     void ProcessEvaluationFinishedEventArgs(
-        ICheckContext analysisContext,
+        ICheckContext checksContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs);
 
     void ProcessEnvironmentVariableReadEventArgs(
-        ICheckContext analysisContext,
+        ICheckContext checksContext,
         EnvironmentVariableReadEventArgs envVariableReadEventArgs);
 
     void ProcessTaskStartedEventArgs(
-        ICheckContext analysisContext,
+        ICheckContext checksContext,
         TaskStartedEventArgs taskStartedEventArgs);
 
     void ProcessTaskFinishedEventArgs(
-        ICheckContext analysisContext,
+        ICheckContext checksContext,
         TaskFinishedEventArgs taskFinishedEventArgs);
 
     void ProcessTaskParameterEventArgs(
-        ICheckContext analysisContext,
+        ICheckContext checksContext,
         TaskParameterEventArgs taskParameterEventArgs);
 
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
-    void ProcessAnalyzerAcquisition(CheckAcquisitionData acquisitionData, ICheckContext analysisContext);
+    void ProcessCheckAcquisition(CheckAcquisitionData acquisitionData, ICheckContext checksContext);
 
-    Dictionary<string, TimeSpan> CreateAnalyzerTracingStats();
+    Dictionary<string, TimeSpan> CreateCheckTracingStats();
 
     void FinalizeProcessing(LoggingContext loggingContext);
 
@@ -67,13 +67,13 @@ internal interface IBuildCheckManager
     //  but as well from the ConnectorLogger - as even if interleaved, it gives the info
     //  to manager about what analyzers need to be materialized and configuration fetched.
     // No unloading of analyzers is yet considered - once loaded it stays for whole build.
-    void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, ICheckContext analysisContext, string projectFullPath);
+    void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, ICheckContext checksContext, string projectFullPath);
 
     void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
 
     void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath);
 
-    void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, ICheckContext analysisContext, string projectFullPath);
+    void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, ICheckContext checksContext, string projectFullPath);
 
     void Shutdown();
 }

@@ -9,9 +9,9 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// BuildCheck OM data representing the evaluated properties of a project.
 /// </summary>
-public class EvaluatedPropertiesAnalysisData : CheckData
+public class EvaluatedPropertiesCheckData : CheckData
 {
-    internal EvaluatedPropertiesAnalysisData(
+    internal EvaluatedPropertiesCheckData(
         string projectFilePath,
         int? projectConfigurationId,
         IReadOnlyDictionary<string, string> evaluatedProperties,

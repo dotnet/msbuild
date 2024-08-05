@@ -17,7 +17,7 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     }
 
     public void ProcessEvaluationFinishedEventArgs(
-        ICheckContext analysisContext,
+        ICheckContext checkContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
     {
     }
@@ -27,26 +27,26 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     }
 
     public void ProcessTaskStartedEventArgs(
-        ICheckContext analysisContext,
+        ICheckContext checkContext,
         TaskStartedEventArgs taskStartedEventArgs)
     {
     }
 
     public void ProcessTaskFinishedEventArgs(
-        ICheckContext analysisContext,
+        ICheckContext checkContext,
         TaskFinishedEventArgs taskFinishedEventArgs)
     {
     }
 
     public void ProcessTaskParameterEventArgs(
-        ICheckContext analysisContext,
+        ICheckContext checkContext,
         TaskParameterEventArgs taskParameterEventArgs)
     {
     }
 
     public void ProcessAnalyzerAcquisition(
         CheckAcquisitionData acquisitionData,
-        ICheckContext analysisContext)
+        ICheckContext checkContext)
     {
     }
 
@@ -54,7 +54,7 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
-    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, ICheckContext analysisContext, string fullPath)
+    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, ICheckContext checkContext, string fullPath)
     {
     }
 
@@ -66,7 +66,7 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
-    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, ICheckContext analysisContext,
+    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, ICheckContext checkContext,
         string projectFullPath)
     {
     }
@@ -90,12 +90,12 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     public void ProcessTaskParameter(BuildCheckDataSource buildCheckDataSource, TaskParameterEventArgs eventArg)
     { }
 
-    public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext buildEventContext)
+    public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext buildEventContext)
     { }
 
-    public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext buildEventContext)
+    public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext buildEventContext)
     { }
 	
-    public void ProcessEnvironmentVariableReadEventArgs(ICheckContext analysisContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
+    public void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
     { }
 }

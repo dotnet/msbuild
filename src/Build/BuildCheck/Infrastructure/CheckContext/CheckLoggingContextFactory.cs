@@ -11,12 +11,12 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
-internal class AnalysisLoggingContextFactory : ICheckContextFactory
+internal class CheckLoggingContextFactory : ICheckContextFactory
 {
     private readonly ILoggingService _loggingService;
 
-    public AnalysisLoggingContextFactory(ILoggingService loggingService) => _loggingService = loggingService;
+    public CheckLoggingContextFactory(ILoggingService loggingService) => _loggingService = loggingService;
 
-    public ICheckContext CreateAnalysisContext(BuildEventContext eventContext)
-        => new AnalysisLoggingContext(_loggingService, eventContext);
+    public ICheckContext CreateCheckContext(BuildEventContext eventContext)
+        => new CheckLoggingContext(_loggingService, eventContext);
 }

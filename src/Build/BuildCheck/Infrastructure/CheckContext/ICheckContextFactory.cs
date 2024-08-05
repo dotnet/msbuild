@@ -7,5 +7,5 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 
 internal interface ICheckContextFactory
 {
-    ICheckContext CreateAnalysisContext(BuildEventContext eventContext);
+    ICheckContext CreateCheckContext(BuildEventContext eventContext);
 }

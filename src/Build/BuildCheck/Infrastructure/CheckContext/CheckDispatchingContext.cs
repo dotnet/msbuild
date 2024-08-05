@@ -17,12 +17,12 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// <see cref="ICheckContext"/> that uses <see cref="EventArgsDispatcher"/> to dispatch.
 /// </summary>
-internal class AnalysisDispatchingContext : ICheckContext
+internal class CheckDispatchingContext : ICheckContext
 {
     private readonly EventArgsDispatcher _eventDispatcher;
     private readonly BuildEventContext _eventContext;
 
-    public AnalysisDispatchingContext(
+    public CheckDispatchingContext(
         EventArgsDispatcher dispatch,
         BuildEventContext eventContext)
     {

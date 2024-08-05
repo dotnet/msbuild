@@ -16,15 +16,15 @@ internal sealed class BuildCheckConnectorLogger : ILogger
 {
     private readonly BuildCheckBuildEventHandler _eventHandler;
     private readonly IBuildCheckManager _buildCheckManager;
-    private readonly ICheckContextFactory _analysisContextFactory;
+    private readonly ICheckContextFactory _checkContextFactory;
 
     internal BuildCheckConnectorLogger(
-        ICheckContextFactory analyzerContextFactory,
+        ICheckContextFactory checkContextFactory,
         IBuildCheckManager buildCheckManager)
     {
         _buildCheckManager = buildCheckManager;
-        _analysisContextFactory = analyzerContextFactory;
-        _eventHandler = new BuildCheckBuildEventHandler(analyzerContextFactory, buildCheckManager);
+        _checkContextFactory = checkContextFactory;
+        _eventHandler = new BuildCheckBuildEventHandler(checkContextFactory, buildCheckManager);
     }
 
     public LoggerVerbosity Verbosity { get; set; }

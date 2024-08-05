@@ -17,22 +17,22 @@ internal sealed class BuildExecutionCheckWrapper
 {
     private readonly Stopwatch _stopwatch = new Stopwatch();
 
-    public BuildExecutionCheckWrapper(BuildExecutionCheck buildAnalyzer)
+    public BuildExecutionCheckWrapper(BuildExecutionCheck buildExecutionCheck)
     {
-        BuildAnalyzer = buildAnalyzer;
+        BuildExecutionCheck = buildExecutionCheck;
     }
 
-    internal BuildExecutionCheck BuildAnalyzer { get; }
+    internal BuildExecutionCheck BuildExecutionCheck { get; }
     private bool _isInitialized = false;
 
     // Let's optimize for the scenario where users have a single .editorconfig file that applies to the whole solution.
     // In such case - configuration will be same for all projects. So we do not need to store it per project in a collection.
-    internal BuildAnalyzerConfigurationEffective? CommonConfig { get; private set; }
+    internal BuildExecutionCheckConfigurationEffective? CommonConfig { get; private set; }
 
     // start new project
     internal void StartNewProject(
         string fullProjectPath,
-        IReadOnlyList<BuildAnalyzerConfigurationEffective> userConfigs)
+        IReadOnlyList<BuildExecutionCheckConfigurationEffective> userConfigs)
     {
         if (!_isInitialized)
         {

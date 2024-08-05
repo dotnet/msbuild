@@ -14,12 +14,12 @@ internal interface IBuildEngineDataRouter
         PropertyReadInfo propertyReadInfo,
         // This is intentionally AnalysisLoggingContext instead of ICheckContext - to avoid boxing allocations
         //  on a hot path of properties reading (same for writing)
-        AnalysisLoggingContext analysisContext);
+        CheckLoggingContext checkContext);
 
     /// <summary>
     /// Signals that a property was written to.
     /// </summary>
     void ProcessPropertyWrite(
         PropertyWriteInfo propertyWriteInfo,
-        AnalysisLoggingContext analysisContext);
+        CheckLoggingContext checkContext);
 }

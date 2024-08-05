@@ -20,7 +20,7 @@ internal sealed class ConfigurationProvider
     /// <summary>
     /// The dictionary used for storing the BuildAnalyzerConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}.
     /// </summary>
-    private readonly ConcurrentDictionary<string, BuildAnalyzerConfiguration> _buildAnalyzerConfiguration = new ConcurrentDictionary<string, BuildAnalyzerConfiguration>(StringComparer.InvariantCultureIgnoreCase);
+    private readonly ConcurrentDictionary<string, BuildExecutionCheckConfiguration> _buildExecutionCheckConfiguration = new ConcurrentDictionary<string, BuildExecutionCheckConfiguration>(StringComparer.InvariantCultureIgnoreCase);
 
     /// <summary>
     /// The dictionary used for storing the key-value pairs retrieved from the .editorconfigs for specific projectfile. The key is equal to projectFullPath.
@@ -101,12 +101,12 @@ internal sealed class ConfigurationProvider
         }
     }
 
-    internal BuildAnalyzerConfigurationEffective[] GetMergedConfigurations(
+    internal BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(
         string projectFullPath,
-        BuildAnalyzer analyzer)
-        => FillConfiguration(projectFullPath, analyzer.SupportedRules, GetMergedConfiguration);
+        BuildExecutionCheck check)
+        => FillConfiguration(projectFullPath, check.SupportedRules, GetMergedConfiguration);
 
-    internal BuildAnalyzerConfiguration[] GetUserConfigurations(
+    internal BuildExecutionCheckConfiguration[] GetUserConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetUserConfiguration);
@@ -122,17 +122,17 @@ internal sealed class ConfigurationProvider
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetCustomConfiguration);
 
-    internal BuildAnalyzerConfigurationEffective[] GetMergedConfigurations(
-        BuildAnalyzerConfiguration[] userConfigs,
-        BuildAnalyzer analyzer)
+    internal BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(
+        BuildExecutionCheckConfiguration[] userConfigs,
+        BuildExecutionCheck check)
     {
-        var configurations = new BuildAnalyzerConfigurationEffective[userConfigs.Length];
+        var configurations = new BuildExecutionCheckConfigurationEffective[userConfigs.Length];
 
         for (int idx = 0; idx < userConfigs.Length; idx++)
         {
             configurations[idx] = MergeConfiguration(
-                analyzer.SupportedRules[idx].Id,
-                analyzer.SupportedRules[idx].DefaultConfiguration,
+                check.SupportedRules[idx].Id,
+                check.SupportedRules[idx].DefaultConfiguration,
                 userConfigs[idx]);
         }
 
@@ -226,19 +226,19 @@ internal sealed class ConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="ruleId"></param>
     /// <returns></returns>
-    internal BuildAnalyzerConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
+    internal BuildExecutionCheckConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
     {
         var cacheKey = $"{ruleId}-{projectFullPath}";
 
-        var editorConfigValue = _buildAnalyzerConfiguration.GetOrAdd(cacheKey, (key) =>
+        var editorConfigValue = _buildExecutionCheckConfiguration.GetOrAdd(cacheKey, (key) =>
         {
-            BuildAnalyzerConfiguration? editorConfig = BuildAnalyzerConfiguration.Null;
+            BuildExecutionCheckConfiguration? editorConfig = BuildExecutionCheckConfiguration.Null;
             editorConfig.RuleId = ruleId;
             var config = GetConfiguration(projectFullPath, ruleId);
 
             if (config.Any())
             {
-                editorConfig = BuildAnalyzerConfiguration.Create(config);
+                editorConfig = BuildExecutionCheckConfiguration.Create(config);
             }
 
             return editorConfig;
@@ -254,44 +254,44 @@ internal sealed class ConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="analyzerRule"></param>
     /// <returns></returns>
-    internal BuildAnalyzerConfigurationEffective GetMergedConfiguration(string projectFullPath, BuildAnalyzerRule analyzerRule)
-        => GetMergedConfiguration(projectFullPath, analyzerRule.Id, analyzerRule.DefaultConfiguration);
+    internal BuildExecutionCheckConfigurationEffective GetMergedConfiguration(string projectFullPath, BuildExecutionCheckRule checkRule)
+        => GetMergedConfiguration(projectFullPath, checkRule.Id, checkRule.DefaultConfiguration);
 
-    internal BuildAnalyzerConfigurationEffective MergeConfiguration(
+    internal BuildExecutionCheckConfigurationEffective MergeConfiguration(
         string ruleId,
-        BuildAnalyzerConfiguration defaultConfig,
-        BuildAnalyzerConfiguration editorConfig)
-        => new BuildAnalyzerConfigurationEffective(
+        BuildExecutionCheckConfiguration defaultConfig,
+        BuildExecutionCheckConfiguration editorConfig)
+        => new BuildExecutionCheckConfigurationEffective(
             ruleId: ruleId,
-            evaluationAnalysisScope: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.EvaluationAnalysisScope),
+            evaluationCheckScope: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.EvaluationCheckScope),
             severity: GetSeverityValue(editorConfig, defaultConfig));
 
-    private BuildAnalyzerConfigurationEffective GetMergedConfiguration(
+    private BuildExecutionCheckConfigurationEffective GetMergedConfiguration(
         string projectFullPath,
         string ruleId,
-        BuildAnalyzerConfiguration defaultConfig)
+        BuildExecutionCheckConfiguration defaultConfig)
         => MergeConfiguration(ruleId, defaultConfig, GetUserConfiguration(projectFullPath, ruleId));
 
     private T GetConfigValue<T>(
-        BuildAnalyzerConfiguration editorConfigValue,
-        BuildAnalyzerConfiguration defaultValue,
-        Func<BuildAnalyzerConfiguration, T?> propertyGetter) where T : struct
+        BuildExecutionCheckConfiguration editorConfigValue,
+        BuildExecutionCheckConfiguration defaultValue,
+        Func<BuildExecutionCheckConfiguration, T?> propertyGetter) where T : struct
         => propertyGetter(editorConfigValue) ??
            propertyGetter(defaultValue) ??
-           EnsureNonNull(propertyGetter(BuildAnalyzerConfiguration.Default));
+           EnsureNonNull(propertyGetter(BuildExecutionCheckConfiguration.Default));
 
-    private BuildAnalyzerResultSeverity GetSeverityValue(BuildAnalyzerConfiguration editorConfigValue, BuildAnalyzerConfiguration defaultValue)
+    private BuildExecutionCheckResultSeverity GetSeverityValue(BuildExecutionCheckConfiguration editorConfigValue, BuildExecutionCheckConfiguration defaultValue)
     {
-        BuildAnalyzerResultSeverity? resultSeverity = null;
+        BuildExecutionCheckResultSeverity? resultSeverity = null;
 
         // Consider Default as null, so the severity from the default value could be selected.
         // Default severity is not recognized by the infrastructure and serves for configuration purpuses only. 
-        if (editorConfigValue.Severity != null && editorConfigValue.Severity != BuildAnalyzerResultSeverity.Default)
+        if (editorConfigValue.Severity != null && editorConfigValue.Severity != BuildExecutionCheckResultSeverity.Default)
         {
             resultSeverity = editorConfigValue.Severity;
         }
 
-        resultSeverity ??= defaultValue.Severity ?? EnsureNonNull(BuildAnalyzerConfiguration.Default.Severity);
+        resultSeverity ??= defaultValue.Severity ?? EnsureNonNull(BuildExecutionCheckConfiguration.Default.Severity);
 
         return resultSeverity.Value;
     }

@@ -6,19 +6,19 @@ using Microsoft.Build.Logging;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
-internal class AnalysisDispatchingContextFactory : ICheckContextFactory
+internal class CheckDispatchingContextFactory : ICheckContextFactory
 {
     private readonly EventArgsDispatcher _eventDispatcher;
 
     public event AnyEventHandler? AnyEventRaised;
 
-    public AnalysisDispatchingContextFactory(EventArgsDispatcher eventDispatcher)
+    public CheckDispatchingContextFactory(EventArgsDispatcher eventDispatcher)
     {
         _eventDispatcher = eventDispatcher;
 
         _eventDispatcher.AnyEventRaised += (sender, e) => AnyEventRaised?.Invoke(sender, e);
     }
 
-    public ICheckContext CreateAnalysisContext(BuildEventContext eventContext)
-        => new AnalysisDispatchingContext(_eventDispatcher, eventContext);
+    public ICheckContext CreateCheckContext(BuildEventContext eventContext)
+        => new CheckDispatchingContext(_eventDispatcher, eventContext);
 }

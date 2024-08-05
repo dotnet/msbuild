@@ -7,23 +7,23 @@ using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Analyzers;
 
-internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
+internal sealed class NoEnvironmentVariablePropertyCheck : BuildExecutionCheck
 {
     /// <summary>
     /// Contains the list of reported environment variables.
     /// </summary>
     private readonly HashSet<EnvironmentVariableIdentityKey> _environmentVariablesReported = new HashSet<EnvironmentVariableIdentityKey>();
 
-    public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
+    public static BuildExecutionCheckRule SupportedRule = new BuildExecutionCheckRule(
         "BC0103",
         "NoEnvironmentVariablePropertyAnalyzer",
         "No implicit property derived from an environment variable should be used during the build",
         "Property is derived from environment variable: '{0}' with value: '{1}'. Properties should be passed explicitly using the /p option.",
-        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Suggestion });
+        new BuildExecutionCheckConfiguration() { Severity = BuildExecutionCheckResultSeverity.Suggestion });
 
     public override string FriendlyName => "MSBuild.NoEnvironmentVariablePropertyAnalyzer";
 
-    public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } = [SupportedRule];
+    public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = [SupportedRule];
 
     public override void Initialize(ConfigurationContext configurationContext)
     {

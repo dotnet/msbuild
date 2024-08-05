@@ -10,7 +10,7 @@ using System.Linq;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
-using static Microsoft.Build.Experimental.BuildCheck.TaskInvocationAnalysisData;
+using static Microsoft.Build.Experimental.BuildCheck.TaskInvocationCheckData;
 
 #if FEATURE_MSIOREDIST
 using Path = Microsoft.IO.Path;
@@ -18,18 +18,18 @@ using Path = Microsoft.IO.Path;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Analyzers;
 
-internal sealed class DoubleWritesAnalyzer : BuildAnalyzer
+internal sealed class DoubleWritesCheck : BuildExecutionCheck
 {
-    public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
+    public static BuildExecutionCheckRule SupportedRule = new BuildExecutionCheckRule(
         "BC0102",
         "DoubleWrites",
         "Two tasks should not write the same file",
         "Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.",
-        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Warning });
+        new BuildExecutionCheckConfiguration() { Severity = BuildExecutionCheckResultSeverity.Warning });
 
     public override string FriendlyName => "MSBuild.DoubleWritesAnalyzer";
 
-    public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } = [SupportedRule];
+    public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = [SupportedRule];
 
     public override void Initialize(ConfigurationContext configurationContext)
     {
@@ -46,7 +46,7 @@ internal sealed class DoubleWritesAnalyzer : BuildAnalyzer
     /// </summary>
     private readonly Dictionary<string, (string projectFilePath, string taskName)> _filesWritten = new(StringComparer.CurrentCultureIgnoreCase);
 
-    private void TaskInvocationAction(BuildCheckDataContext<TaskInvocationAnalysisData> context)
+    private void TaskInvocationAction(BuildCheckDataContext<TaskInvocationCheckData> context)
     {
         // This analyzer uses a hard-coded list of tasks known to write files.
         switch (context.Data.TaskName)
@@ -58,7 +58,7 @@ internal sealed class DoubleWritesAnalyzer : BuildAnalyzer
         }
     }
 
-    private void AnalyzeCompilerTask(BuildCheckDataContext<TaskInvocationAnalysisData> context)
+    private void AnalyzeCompilerTask(BuildCheckDataContext<TaskInvocationCheckData> context)
     {
         var taskParameters = context.Data.Parameters;
 
@@ -78,7 +78,7 @@ internal sealed class DoubleWritesAnalyzer : BuildAnalyzer
         }
     }
 
-    private void AnalyzeCopyTask(BuildCheckDataContext<TaskInvocationAnalysisData> context)
+    private void AnalyzeCopyTask(BuildCheckDataContext<TaskInvocationCheckData> context)
     {
         var taskParameters = context.Data.Parameters;
 
@@ -101,7 +101,7 @@ internal sealed class DoubleWritesAnalyzer : BuildAnalyzer
         }
     }
 
-    private void AnalyzeWrite(BuildCheckDataContext<TaskInvocationAnalysisData> context, string fileBeingWritten)
+    private void AnalyzeWrite(BuildCheckDataContext<TaskInvocationCheckData> context, string fileBeingWritten)
     {
         if (!string.IsNullOrEmpty(fileBeingWritten))
         {

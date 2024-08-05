@@ -19,7 +19,7 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// Making this a record struct to avoid allocations (unless called through interface - which leads to boxing).
 /// This is wanted since this can be used in a hot path (of property reads and writes)
 /// </remarks>
-internal readonly struct AnalysisLoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
+internal readonly struct CheckLoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
     : ICheckContext
 {
     public BuildEventContext BuildEventContext => eventContext;

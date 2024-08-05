@@ -64,18 +64,18 @@ public class BuildCheckDataContext<T> where T : CheckData
 {
     private readonly BuildExecutionCheckWrapper _executionCheckWrapper;
     private readonly ICheckContext _checkContext;
-    private readonly BuildAnalyzerConfigurationEffective[] _configPerRule;
-    private readonly Action<BuildExecutionCheckWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> _resultHandler;
+    private readonly BuildExecutionCheckConfigurationEffective[] _configPerRule;
+    private readonly Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult> _resultHandler;
 
     internal BuildCheckDataContext(
-        BuildExecutionCheckWrapper analyzerWrapper,
+        BuildExecutionCheckWrapper checkWrapper,
         ICheckContext loggingContext,
         BuildExecutionCheckConfigurationEffective[] configPerRule,
         Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult> resultHandler,
         T data)
     {
-        _executionCheckWrapper = analyzerWrapper;
-        _executionCheckContext = loggingContext;
+        _executionCheckWrapper = checkWrapper;
+        _checkContext = loggingContext;
         _configPerRule = configPerRule;
         _resultHandler = resultHandler;
         Data = data;

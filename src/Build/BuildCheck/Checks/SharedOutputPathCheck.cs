@@ -13,17 +13,17 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Analyzers;
 
-internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
+internal sealed class SharedOutputPathCheck : BuildExecutionCheck
 {
     private const string RuleId = "BC0101";
-    public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(RuleId, "ConflictingOutputPath",
+    public static BuildExecutionCheckRule SupportedRule = new BuildExecutionCheckRule(RuleId, "ConflictingOutputPath",
         "Two projects should not share their OutputPath nor IntermediateOutputPath locations",
         "Projects {0} and {1} have conflicting output paths: {2}.",
-        new BuildAnalyzerConfiguration() { RuleId = RuleId, Severity = BuildAnalyzerResultSeverity.Warning });
+        new BuildExecutionCheckConfiguration() { RuleId = RuleId, Severity = BuildExecutionCheckResultSeverity.Warning });
 
     public override string FriendlyName => "MSBuild.SharedOutputPathAnalyzer";
 
-    public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } = [SupportedRule];
+    public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = [SupportedRule];
 
     public override void Initialize(ConfigurationContext configurationContext)
     {
