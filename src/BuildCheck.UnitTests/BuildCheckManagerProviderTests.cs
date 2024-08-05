@@ -66,10 +66,10 @@ internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionMo
 
     internal BuildCheckAcquisitionModuleMock(bool isAnalyzerRuleExistForTest) => _isAnalyzerRuleExistForTest = isAnalyzerRuleExistForTest;
 
-    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(AnalyzerAcquisitionData analyzerAcquisitionData, IAnalysisContext analysisContext)
+    public List<BuildExecutionCheckFactory> CreateBuildAnalyzerFactories(CheckAcquisitionData analyzerAcquisitionData, ICheckContext analysisContext)
         => _isAnalyzerRuleExistForTest
-        ? new List<BuildAnalyzerFactory>() { () => new BuildAnalyzerRuleMock("Rule1"), () => new BuildAnalyzerRuleMock("Rule2") }
-        : new List<BuildAnalyzerFactory>();
+        ? new List<BuildExecutionCheckFactory>() { () => new BuildAnalyzerRuleMock("Rule1"), () => new BuildAnalyzerRuleMock("Rule2") }
+        : new List<BuildExecutionCheckFactory>();
 }
 
 internal sealed class BuildAnalyzerRuleMock : BuildAnalyzer

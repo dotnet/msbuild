@@ -63,15 +63,15 @@ public abstract class AnalysisData(string projectFilePath, int? projectConfigura
 public class BuildCheckDataContext<T> where T : AnalysisData
 {
     private readonly BuildAnalyzerWrapper _analyzerWrapper;
-    private readonly IAnalysisContext _analysisContext;
+    private readonly ICheckContext _analysisContext;
     private readonly BuildAnalyzerConfigurationEffective[] _configPerRule;
-    private readonly Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> _resultHandler;
+    private readonly Action<BuildAnalyzerWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> _resultHandler;
 
     internal BuildCheckDataContext(
         BuildAnalyzerWrapper analyzerWrapper,
-        IAnalysisContext loggingContext,
+        ICheckContext loggingContext,
         BuildAnalyzerConfigurationEffective[] configPerRule,
-        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> resultHandler,
+        Action<BuildAnalyzerWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> resultHandler,
         T data)
     {
         _analyzerWrapper = analyzerWrapper;

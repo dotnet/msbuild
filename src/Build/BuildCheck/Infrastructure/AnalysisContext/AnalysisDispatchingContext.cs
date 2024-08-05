@@ -15,9 +15,9 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
-/// <see cref="IAnalysisContext"/> that uses <see cref="EventArgsDispatcher"/> to dispatch.
+/// <see cref="ICheckContext"/> that uses <see cref="EventArgsDispatcher"/> to dispatch.
 /// </summary>
-internal class AnalysisDispatchingContext : IAnalysisContext
+internal class AnalysisDispatchingContext : ICheckContext
 {
     private readonly EventArgsDispatcher _eventDispatcher;
     private readonly BuildEventContext _eventContext;

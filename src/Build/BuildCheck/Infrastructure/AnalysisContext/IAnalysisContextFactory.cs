@@ -5,7 +5,7 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
-internal interface IAnalysisContextFactory
+internal interface ICheckContextFactory
 {
-    IAnalysisContext CreateAnalysisContext(BuildEventContext eventContext);
+    ICheckContext CreateAnalysisContext(BuildEventContext eventContext);
 }

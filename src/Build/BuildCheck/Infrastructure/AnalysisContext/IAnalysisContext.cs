@@ -14,7 +14,7 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// Interface that contains an instance of <see cref="BuildEventContext"/> and methods to dispatch it.
 /// </summary>
-internal interface IAnalysisContext
+internal interface ICheckContext
 {
     /// <summary>
     /// Instance of <see cref="BuildEventContext"/>.

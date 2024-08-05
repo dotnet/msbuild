@@ -15,17 +15,17 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// Each rule can have its own configuration, which can differ per each project.
 /// The <see cref="EvaluationAnalysisScope"/> setting must be same for all rules in the same analyzer (but can differ between projects)
 /// </summary>
-public class BuildAnalyzerConfiguration
+public class BuildExecutionCheckConfiguration
 {
     // Defaults to be used if any configuration property is not specified neither as default
     //  nor in the editorconfig configuration file.
-    public static BuildAnalyzerConfiguration Default { get; } = new()
+    public static BuildExecutionCheckConfiguration Default { get; } = new()
     {
         EvaluationAnalysisScope = BuildCheck.EvaluationAnalysisScope.ProjectOnly,
-        Severity = BuildAnalyzerResultSeverity.None
+        Severity = BuildExecutionCheckResultSeverity.None
     };
 
-    public static BuildAnalyzerConfiguration Null { get; } = new();
+    public static BuildExecutionCheckConfiguration Null { get; } = new();
 
     public string? RuleId { get; internal set; }
 
@@ -40,7 +40,7 @@ public class BuildAnalyzerConfiguration
     /// <summary>
     /// The severity of the result for the rule.
     /// </summary>
-    public BuildAnalyzerResultSeverity? Severity { get; internal init; }
+    public BuildExecutionCheckResultSeverity? Severity { get; internal init; }
 
     /// <summary>
     /// Whether the analyzer rule is enabled.
@@ -51,9 +51,9 @@ public class BuildAnalyzerConfiguration
         get
         {
             // Do not consider Default as enabled, because the default severity of the rule coule be set to None
-            if (Severity.HasValue && Severity.Value != BuildAnalyzerResultSeverity.Default)
+            if (Severity.HasValue && Severity.Value != BuildExecutionCheckResultSeverity.Default)
             {
-                return !Severity.Value.Equals(BuildAnalyzerResultSeverity.None);
+                return !Severity.Value.Equals(BuildExecutionCheckResultSeverity.None);
             }
 
             return null;
@@ -67,7 +67,7 @@ public class BuildAnalyzerConfiguration
     /// </summary>
     /// <param name="configDictionary">The configuration dictionary containing the settings for the build analyzer. The configuration's keys are expected to be in lower case or the EqualityComparer to ignore case.</param>
     /// <returns>A new instance of <see cref="BuildAnalyzerConfiguration"/> with the specified settings.</returns>
-    internal static BuildAnalyzerConfiguration Create(Dictionary<string, string>? configDictionary) => new()
+    internal static BuildExecutionCheckConfiguration Create(Dictionary<string, string>? configDictionary) => new()
     {
         EvaluationAnalysisScope = TryExtractEvaluationAnalysisScope(configDictionary),
         Severity = TryExtractSeverity(configDictionary),
@@ -100,7 +100,7 @@ public class BuildAnalyzerConfiguration
         return null;
     }
 
-    private static BuildAnalyzerResultSeverity? TryExtractSeverity(Dictionary<string, string>? config)
+    private static BuildExecutionCheckResultSeverity? TryExtractSeverity(Dictionary<string, string>? config)
     {
         if (!TryExtractValue(BuildCheckConstants.severityConfigurationKey, config, out string? stringValue) || stringValue is null)
         {
@@ -110,15 +110,15 @@ public class BuildAnalyzerConfiguration
         switch (stringValue)
         {
             case "none":
-                return BuildAnalyzerResultSeverity.None;
+                return BuildExecutionCheckResultSeverity.None;
             case "default":
-                return BuildAnalyzerResultSeverity.Default;
+                return BuildExecutionCheckResultSeverity.Default;
             case "suggestion":
-                return BuildAnalyzerResultSeverity.Suggestion;
+                return BuildExecutionCheckResultSeverity.Suggestion;
             case "warning":
-                return BuildAnalyzerResultSeverity.Warning;
+                return BuildExecutionCheckResultSeverity.Warning;
             case "error":
-                return BuildAnalyzerResultSeverity.Error;
+                return BuildExecutionCheckResultSeverity.Error;
             default:
                 ThrowIncorrectValueException(BuildCheckConstants.severityConfigurationKey, stringValue);
                 break;

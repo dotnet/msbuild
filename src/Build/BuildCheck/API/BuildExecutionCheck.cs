@@ -9,29 +9,29 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
-/// Base class for build analyzers.
-/// Same base will be used for custom and built-in analyzers.
-/// <see cref="BuildAnalyzer"/> is a unit of build analysis execution, but it can contain multiple rules - each representing a distinct violation.
+/// Base class for build checks.
+/// Same base will be used for custom and built-in checks.
+/// <see cref="BuildExecutionCheck"/> is a unit of build checks execution, but it can contain multiple rules - each representing a distinct violation.
 /// </summary>
-public abstract class BuildAnalyzer : IDisposable
+public abstract class BuildExecutionCheck : IDisposable
 {
     /// <summary>
-    /// Friendly name of the analyzer.
+    /// Friendly name of the check.
     /// Should be unique - as it will be used in the tracing stats, infrastructure error messages, etc.
     /// </summary>
     public abstract string FriendlyName { get; }
 
     /// <summary>
-    /// Single or multiple rules supported by the analyzer.
+    /// Single or multiple rules supported by the check.
     /// </summary>
-    public abstract IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; }
+    public abstract IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; }
 
     /// <summary>
-    /// Optional initialization of the analyzer.
+    /// Optional initialization of the check.
     /// </summary>
     /// <param name="configurationContext">
     /// Custom data (not recognized by the infrastructure) passed from .editorconfig
-    /// Currently the custom data has to be identical for all rules in the analyzer and all projects.
+    /// Currently the custom data has to be identical for all rules in the check and all projects.
     /// </param>
     public abstract void Initialize(ConfigurationContext configurationContext);
 

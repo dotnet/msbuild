@@ -17,7 +17,7 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     }
 
     public void ProcessEvaluationFinishedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext analysisContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
     {
     }
@@ -27,26 +27,26 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     }
 
     public void ProcessTaskStartedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext analysisContext,
         TaskStartedEventArgs taskStartedEventArgs)
     {
     }
 
     public void ProcessTaskFinishedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext analysisContext,
         TaskFinishedEventArgs taskFinishedEventArgs)
     {
     }
 
     public void ProcessTaskParameterEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext analysisContext,
         TaskParameterEventArgs taskParameterEventArgs)
     {
     }
 
     public void ProcessAnalyzerAcquisition(
-        AnalyzerAcquisitionData acquisitionData,
-        IAnalysisContext analysisContext)
+        CheckAcquisitionData acquisitionData,
+        ICheckContext analysisContext)
     {
     }
 
@@ -54,7 +54,7 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
-    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string fullPath)
+    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, ICheckContext analysisContext, string fullPath)
     {
     }
 
@@ -66,7 +66,7 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
-    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext,
+    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, ICheckContext analysisContext,
         string projectFullPath)
     {
     }
@@ -96,6 +96,6 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext buildEventContext)
     { }
 	
-    public void ProcessEnvironmentVariableReadEventArgs(IAnalysisContext analysisContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
+    public void ProcessEnvironmentVariableReadEventArgs(ICheckContext analysisContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
     { }
 }

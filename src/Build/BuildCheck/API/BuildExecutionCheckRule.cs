@@ -5,13 +5,13 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
 /// Represents a rule that is a unit of build analysis.
-/// <see cref="BuildAnalyzer"/> is a unit of executing the analysis, but it can be discovering multiple distinct violation types,
-///  for this reason a single <see cref="BuildAnalyzer"/> can expose multiple <see cref="BuildAnalyzerRule"/>s.
+/// <see cref="BuildExecutionCheck"/> is a unit of executing the analysis, but it can be discovering multiple distinct violation types,
+///  for this reason a single <see cref="BuildExecutionCheck"/> can expose multiple <see cref="BuildExecutionCheckRule"/>s.
 /// </summary>
-public class BuildAnalyzerRule
+public class BuildExecutionCheckRule
 {
-    public BuildAnalyzerRule(string id, string title, string description, string messageFormat,
-        BuildAnalyzerConfiguration defaultConfiguration)
+    public BuildExecutionCheckRule(string id, string title, string description, string messageFormat,
+        BuildExecutionCheckConfiguration defaultConfiguration)
     {
         Id = id;
         Title = title;
@@ -51,5 +51,5 @@ public class BuildAnalyzerRule
     /// The default configuration - overridable by the user via .editorconfig.
     /// If no user specified configuration is provided, this default will be used.
     /// </summary>
-    public BuildAnalyzerConfiguration DefaultConfiguration { get; }
+    public BuildExecutionCheckConfiguration DefaultConfiguration { get; }
 }

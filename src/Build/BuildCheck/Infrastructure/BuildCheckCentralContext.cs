@@ -98,24 +98,24 @@ internal sealed class BuildCheckCentralContext
 
     internal void RunEvaluatedPropertiesActions(
         EvaluatedPropertiesAnalysisData evaluatedPropertiesAnalysisData,
-        IAnalysisContext analysisContext,
-        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
+        ICheckContext analysisContext,
+        Action<BuildAnalyzerWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.EvaluatedPropertiesActions, evaluatedPropertiesAnalysisData,
             analysisContext, resultHandler);
 
     internal void RunParsedItemsActions(
         ParsedItemsAnalysisData parsedItemsAnalysisData,
-        IAnalysisContext analysisContext,
-        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
+        ICheckContext analysisContext,
+        Action<BuildAnalyzerWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ParsedItemsActions, parsedItemsAnalysisData,
             analysisContext, resultHandler);
 
     internal void RunTaskInvocationActions(
         TaskInvocationAnalysisData taskInvocationAnalysisData,
-        IAnalysisContext analysisContext,
-        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
+        ICheckContext analysisContext,
+        Action<BuildAnalyzerWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.TaskInvocationActions, taskInvocationAnalysisData,
             analysisContext, resultHandler);
@@ -123,7 +123,7 @@ internal sealed class BuildCheckCentralContext
     internal void RunPropertyReadActions(
         PropertyReadData propertyReadDataData,
         AnalysisLoggingContext analysisContext,
-        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
+        Action<BuildAnalyzerWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.PropertyReadActions, propertyReadDataData,
             analysisContext, resultHandler);
@@ -131,15 +131,15 @@ internal sealed class BuildCheckCentralContext
     internal void RunPropertyWriteActions(
         PropertyWriteData propertyWriteData,
         AnalysisLoggingContext analysisContext,
-        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
+        Action<BuildAnalyzerWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.PropertyWriteActions, propertyWriteData,
             analysisContext, resultHandler);
 
     internal void RunProjectProcessingDoneActions(
         ProjectProcessingDoneData projectProcessingDoneData,
-        IAnalysisContext analysisContext,
-        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
+        ICheckContext analysisContext,
+        Action<BuildAnalyzerWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ProjectProcessingDoneActions, projectProcessingDoneData,
             analysisContext, resultHandler);
@@ -147,8 +147,8 @@ internal sealed class BuildCheckCentralContext
     private void RunRegisteredActions<T>(
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks,
         T analysisData,
-        IAnalysisContext analysisContext,
-        Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> resultHandler)
+        ICheckContext analysisContext,
+        Action<BuildAnalyzerWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> resultHandler)
     where T : AnalysisData
     {
         string projectFullPath = analysisData.ProjectFilePath;

@@ -13,16 +13,16 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// <summary>
 /// A wrapping, enriching class for BuildAnalyzer - so that we have additional data and functionality.
 /// </summary>
-internal sealed class BuildAnalyzerWrapper
+internal sealed class BuildExecutionCheckWrapper
 {
     private readonly Stopwatch _stopwatch = new Stopwatch();
 
-    public BuildAnalyzerWrapper(BuildAnalyzer buildAnalyzer)
+    public BuildExecutionCheckWrapper(BuildExecutionCheck buildAnalyzer)
     {
         BuildAnalyzer = buildAnalyzer;
     }
 
-    internal BuildAnalyzer BuildAnalyzer { get; }
+    internal BuildExecutionCheck BuildAnalyzer { get; }
     private bool _isInitialized = false;
 
     // Let's optimize for the scenario where users have a single .editorconfig file that applies to the whole solution.

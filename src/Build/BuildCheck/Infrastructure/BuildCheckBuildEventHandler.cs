@@ -16,16 +16,16 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 internal class BuildCheckBuildEventHandler
 {
     private readonly IBuildCheckManager _buildCheckManager;
-    private readonly IAnalysisContextFactory _analyzerContextFactory;
+    private readonly ICheckContextFactory _checkContextFactory;
 
     private readonly Dictionary<Type, Action<BuildEventArgs>> _eventHandlers;
 
     internal BuildCheckBuildEventHandler(
-        IAnalysisContextFactory analyzerContextFactory,
+        ICheckContextFactory checkContextFactory,
         IBuildCheckManager buildCheckManager)
     {
         _buildCheckManager = buildCheckManager;
-        _analyzerContextFactory = analyzerContextFactory;
+        _checkContextFactory = checkContextFactory;
 
         _eventHandlers = new()
         {
@@ -56,7 +56,7 @@ internal class BuildCheckBuildEventHandler
         if (!IsMetaProjFile(eventArgs.ProjectFile))
         {
             _buildCheckManager.ProcessEvaluationFinishedEventArgs(
-                _analyzerContextFactory.CreateAnalysisContext(eventArgs.BuildEventContext!),
+                _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!),
                 eventArgs);
 
             _buildCheckManager.EndProjectEvaluation(BuildCheckDataSource.EventArgs, eventArgs.BuildEventContext!);
@@ -124,7 +124,7 @@ internal class BuildCheckBuildEventHandler
         LogAnalyzerStats(_analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)));
     }
 
-    private void LogAnalyzerStats(IAnalysisContext analysisContext)
+    private void LogAnalyzerStats(ICheckContext analysisContext)
     {
         Dictionary<string, TimeSpan> infraStats = new Dictionary<string, TimeSpan>();
         Dictionary<string, TimeSpan> analyzerStats = new Dictionary<string, TimeSpan>();

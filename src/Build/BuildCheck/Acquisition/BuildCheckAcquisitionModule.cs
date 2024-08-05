@@ -25,19 +25,19 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
     /// <summary>
     /// Creates a list of factory delegates for building analyzer rules instances from a given assembly path.
     /// </summary>
-    public List<BuildAnalyzerFactory> CreateBuildAnalyzerFactories(
-        AnalyzerAcquisitionData analyzerAcquisitionData,
-        IAnalysisContext analysisContext)
+    public List<BuildExecutionCheckFactory> CreateBuildExecutionCheckFactories(
+        CheckAcquisitionData checkAcquisitionData,
+        ICheckContext analysisContext)
     {
-        var analyzersFactories = new List<BuildAnalyzerFactory>();
+        var analyzersFactories = new List<BuildExecutionCheckFactory>();
 
         try
         {
             Assembly? assembly = null;
 #if FEATURE_ASSEMBLYLOADCONTEXT
-            assembly = s_coreClrAssemblyLoader.LoadFromPath(analyzerAcquisitionData.AssemblyPath);
+            assembly = s_coreClrAssemblyLoader.LoadFromPath(checkAcquisitionData.AssemblyPath);
 #else
-            assembly = Assembly.LoadFrom(analyzerAcquisitionData.AssemblyPath);
+            assembly = Assembly.LoadFrom(checkAcquisitionData.AssemblyPath);
 #endif
 
             IList<Type> availableTypes = assembly.GetExportedTypes();

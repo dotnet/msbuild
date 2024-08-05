@@ -47,7 +47,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
     // This requires MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION set to 1
     internal void ProcessEvaluationFinishedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext analysisContext,
         ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
     {
         Dictionary<string, string> propertiesLookup = new Dictionary<string, string>();
@@ -89,7 +89,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     }
 
     internal void ProcessTaskStartedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext analysisContext,
         TaskStartedEventArgs taskStartedEventArgs)
     {
         if (!_buildCheckCentralContext.HasTaskInvocationActions)
@@ -126,7 +126,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     }
 
     internal void ProcessTaskFinishedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext analysisContext,
         TaskFinishedEventArgs taskFinishedEventArgs)
     {
         if (!_buildCheckCentralContext.HasTaskInvocationActions)
@@ -148,7 +148,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     }
 
     internal void ProcessTaskParameterEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext analysisContext,
         TaskParameterEventArgs taskParameterEventArgs)
     {
         if (!_buildCheckCentralContext.HasTaskInvocationActions)
@@ -193,7 +193,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 analysisContext,
                 ReportResult);
 
-    public void ProcessProjectDone(IAnalysisContext analysisContext, string projectFullPath)
+    public void ProcessProjectDone(ICheckContext analysisContext, string projectFullPath)
         => _buildCheckCentralContext.RunProjectProcessingDoneActions(
                 new ProjectProcessingDoneData(projectFullPath, analysisContext.BuildEventContext.ProjectInstanceId),
                 analysisContext,
@@ -201,7 +201,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
     private static void ReportResult(
         BuildAnalyzerWrapper analyzerWrapper,
-        IAnalysisContext analysisContext,
+        ICheckContext analysisContext,
         BuildAnalyzerConfigurationEffective[] configPerRule,
         BuildCheckResult result)
     {
