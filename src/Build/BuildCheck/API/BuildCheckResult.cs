@@ -16,28 +16,28 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 public sealed class BuildCheckResult : IBuildCheckResult
 {
-    public static BuildCheckResult Create(BuildAnalyzerRule rule, ElementLocation location, params string[] messageArgs)
+    public static BuildCheckResult Create(BuildExecutionCheckRule rule, ElementLocation location, params string[] messageArgs)
     {
         return new BuildCheckResult(rule, location, messageArgs);
     }
 
-    public BuildCheckResult(BuildAnalyzerRule buildAnalyzerRule, ElementLocation location, string[] messageArgs)
+    public BuildCheckResult(BuildExecutionCheckRule buildExecutionCheckRule, ElementLocation location, string[] messageArgs)
     {
-        BuildAnalyzerRule = buildAnalyzerRule;
+        BuildExecutionCheckRule = buildExecutionCheckRule;
         Location = location;
         MessageArgs = messageArgs;
     }
 
-    internal BuildEventArgs ToEventArgs(BuildAnalyzerResultSeverity severity)
+    internal BuildEventArgs ToEventArgs(BuildExecutionCheckResultSeverity severity)
         => severity switch
         {
-            BuildAnalyzerResultSeverity.Suggestion => new BuildCheckResultMessage(this),
-            BuildAnalyzerResultSeverity.Warning => new BuildCheckResultWarning(this, BuildAnalyzerRule.Id),
-            BuildAnalyzerResultSeverity.Error => new BuildCheckResultError(this, BuildAnalyzerRule.Id),
+            BuildExecutionCheckResultSeverity.Suggestion => new BuildCheckResultMessage(this),
+            BuildExecutionCheckResultSeverity.Warning => new BuildCheckResultWarning(this, BuildExecutionCheckRule.Id),
+            BuildExecutionCheckResultSeverity.Error => new BuildCheckResultError(this, BuildExecutionCheckRule.Id),
             _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null),
         };
 
-    public BuildAnalyzerRule BuildAnalyzerRule { get; }
+    public BuildExecutionCheckRule BuildExecutionCheckRule { get; }
 
     /// <summary>
     /// Optional location of the finding (in near future we might need to support multiple locations).
@@ -47,11 +47,11 @@ public sealed class BuildCheckResult : IBuildCheckResult
     public string LocationString => Location.LocationString;
 
     public string[] MessageArgs { get; }
-    public string MessageFormat => BuildAnalyzerRule.MessageFormat;
+    public string MessageFormat => BuildExecutionCheckRule.MessageFormat;
 
     // Here we will provide different link for built-in rules and custom rules - once we have the base classes differentiated.
     public string FormatMessage() =>
-        _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))}https://aka.ms/buildcheck/codes#{BuildAnalyzerRule.Id} - {string.Format(BuildAnalyzerRule.MessageFormat, MessageArgs)}";
+        _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))}https://aka.ms/buildcheck/codes#{BuildExecutionCheckRule.Id} - {string.Format(BuildExecutionCheckRule.MessageFormat, MessageArgs)}";
 
     private string? _message;
 }

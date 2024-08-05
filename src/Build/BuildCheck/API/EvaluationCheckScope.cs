@@ -9,7 +9,7 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 ///
 /// Ignored by infrastructure if the current datasource doesn't support this level of setting.
 /// </summary>
-public enum EvaluationAnalysisScope
+public enum EvaluationCheckScope
 {
     /// <summary>
     /// Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded.
