@@ -35,19 +35,19 @@ public class EndToEndTests : IDisposable
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
-    public void SampleAnalyzerIntegrationTest_AnalyzeOnBuild(bool buildInOutOfProcessNode, bool analysisRequested)
+    public void SampleCheckIntegrationTest_AnalyzeOnBuild(bool buildInOutOfProcessNode, bool checkRequested)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
-            (analysisRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+            (checkRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
         _env.Output.WriteLine(output);
 
         success.ShouldBeTrue();
 
         // The analyzer warnings should appear - but only if analysis was requested.
-        if (analysisRequested)
+        if (checkRequested)
         {
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
@@ -69,7 +69,7 @@ public class EndToEndTests : IDisposable
     [InlineData(false, true, "error")]
     [InlineData(false, true, "suggestion")]
     [InlineData(false, false, "warning")]
-    public void SampleAnalyzerIntegrationTest_ReplayBinaryLogOfAnalyzedBuild(bool buildInOutOfProcessNode, bool analysisRequested, string BC0101Severity)
+    public void SampleCheckIntegrationTest_ReplayBinaryLogOfAnalyzedBuild(bool buildInOutOfProcessNode, bool checkRequested, string BC0101Severity)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, BC0101Severity);
 
@@ -77,7 +77,7 @@ public class EndToEndTests : IDisposable
         string logFile = _env.ExpectFile(".binlog").Path;
 
         _ = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(analysisRequested ? "-analyze" : string.Empty)} -bl:{logFile}",
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(checkRequested ? "-analyze" : string.Empty)} -bl:{logFile}",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
         success.ShouldBeTrue();
@@ -91,7 +91,7 @@ public class EndToEndTests : IDisposable
         success.ShouldBeTrue();
 
         // The conflicting outputs warning appears - but only if analysis was requested
-        if (analysisRequested)
+        if (checkRequested)
         {
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
@@ -136,7 +136,7 @@ public class EndToEndTests : IDisposable
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
-    public void SampleAnalyzerIntegrationTest_AnalyzeOnBinaryLogReplay(bool buildInOutOfProcessNode, bool analysisRequested)
+    public void SampleCheckIntegrationTest_AnalyzeOnBinaryLogReplay(bool buildInOutOfProcessNode, bool checkRequested)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
 
@@ -150,7 +150,7 @@ public class EndToEndTests : IDisposable
         success.ShouldBeTrue();
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-         $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(analysisRequested ? "-analyze" : string.Empty)}",
+         $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(checkRequested ? "-analyze" : string.Empty)}",
          out success, false, _env.Output, timeoutMilliseconds: 120_000);
 
         _env.Output.WriteLine(output);
@@ -158,7 +158,7 @@ public class EndToEndTests : IDisposable
         success.ShouldBeTrue();
 
         // The conflicting outputs warning appears - but only if analysis was requested
-        if (analysisRequested)
+        if (checkRequested)
         {
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
@@ -175,33 +175,33 @@ public class EndToEndTests : IDisposable
     [Theory]
     [InlineData("AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
-    public void CustomAnalyzerTest(string analysisCandidate, string[] expectedRegisteredRules, bool expectedRejectedAnalyzers = false)
+    public void CustomCheckTest(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)
     {
         using (var env = TestEnvironment.Create())
         {
-            var analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
-            AddCustomDataSourceToNugetConfig(analysisCandidatePath);
+            var checkCandidatePath = Path.Combine(TestAssetsRootPath, checkCandidate);
+            AddCustomDataSourceToNugetConfig(checkCandidatePath);
 
-            string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:n",
+            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:n",
                 out bool successBuild);
-            successBuild.ShouldBeTrue(projectAnalysisBuildLog);
+            successBuild.ShouldBeTrue(projectCheckBuildLog);
 
             foreach (string registeredRule in expectedRegisteredRules)
             {
-                projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerSuccessfulAcquisition", registeredRule));
+                projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerSuccessfulAcquisition", registeredRule));
             }
 
-            if (expectedRejectedAnalyzers)
+            if (expectedRejectedChecks)
             {
-                projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerBaseTypeNotAssignable", "InvalidAnalyzer", "InvalidCustomAnalyzer, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
+                projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerBaseTypeNotAssignable", "InvalidAnalyzer", "InvalidCustomAnalyzer, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
             }
         }
     }
 
-    private void AddCustomDataSourceToNugetConfig(string analysisCandidatePath)
+    private void AddCustomDataSourceToNugetConfig(string checkCandidatePath)
     {
-        var nugetTemplatePath = Path.Combine(analysisCandidatePath, "nugetTemplate.config");
+        var nugetTemplatePath = Path.Combine(checkCandidatePath, "nugetTemplate.config");
 
         var doc = new XmlDocument();
         doc.LoadXml(File.ReadAllText(nugetTemplatePath));
@@ -210,10 +210,10 @@ public class EndToEndTests : IDisposable
             XmlNode? packageSourcesNode = doc.SelectSingleNode("//packageSources");
 
             // The test packages are generated during the test project build and saved in CustomAnalyzers folder.
-            string analyzersPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.Parent?.FullName ?? string.Empty, "CustomAnalyzers");
-            AddPackageSource(doc, packageSourcesNode, "Key", analyzersPackagesPath);
+            string checksPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.Parent?.FullName ?? string.Empty, "CustomAnalyzers");
+            AddPackageSource(doc, packageSourcesNode, "Key", checksPackagesPath);
 
-            doc.Save(Path.Combine(analysisCandidatePath, "nuget.config"));
+            doc.Save(Path.Combine(checkCandidatePath, "nuget.config"));
         }
     }
 

@@ -12,38 +12,38 @@ namespace Microsoft.Build.BuildCheck.UnitTests;
 public class BuildAnalyzerConfigurationEffectiveTests
 {
     [Theory]
-    [InlineData("ruleId", EvaluationAnalysisScope.ProjectOnly, BuildAnalyzerResultSeverity.Warning,  true)]
-    [InlineData("ruleId2", EvaluationAnalysisScope.ProjectOnly, BuildAnalyzerResultSeverity.Warning,  true)]
-    [InlineData("ruleId", EvaluationAnalysisScope.ProjectOnly, BuildAnalyzerResultSeverity.Error, false)]
+    [InlineData("ruleId", EvaluationCheckScope.ProjectOnly, BuildExecutionCheckResultSeverity.Warning,  true)]
+    [InlineData("ruleId2", EvaluationCheckScope.ProjectOnly, BuildExecutionCheckResultSeverity.Warning,  true)]
+    [InlineData("ruleId", EvaluationCheckScope.ProjectOnly, BuildExecutionCheckResultSeverity.Error, false)]
     public void IsSameConfigurationAsTest(
         string secondRuleId,
-        EvaluationAnalysisScope secondScope,
-        BuildAnalyzerResultSeverity secondSeverity,
+        EvaluationCheckScope secondScope,
+        BuildExecutionCheckResultSeverity secondSeverity,
         bool isExpectedToBeSame)
     {
-        BuildAnalyzerConfigurationEffective configuration1 = new BuildAnalyzerConfigurationEffective(
+        BuildExecutionCheckConfigurationEffective configuration1 = new BuildExecutionCheckConfigurationEffective(
                        ruleId: "ruleId",
-                       evaluationAnalysisScope: EvaluationAnalysisScope.ProjectOnly,
-                       severity: BuildAnalyzerResultSeverity.Warning);
+                       evaluationCheckScope: EvaluationCheckScope.ProjectOnly,
+                       severity: BuildExecutionCheckResultSeverity.Warning);
 
-        BuildAnalyzerConfigurationEffective configuration2 = new BuildAnalyzerConfigurationEffective(
+        BuildExecutionCheckConfigurationEffective configuration2 = new BuildExecutionCheckConfigurationEffective(
             ruleId: secondRuleId,
-            evaluationAnalysisScope: secondScope,
+            evaluationCheckScope: secondScope,
             severity: secondSeverity);
 
         configuration1.IsSameConfigurationAs(configuration2).ShouldBe(isExpectedToBeSame);
     }
 
     [Theory]
-    [InlineData( BuildAnalyzerResultSeverity.Warning, true)]
-    [InlineData(BuildAnalyzerResultSeverity.Suggestion, true)]
-    [InlineData(BuildAnalyzerResultSeverity.Error, true)]
-    [InlineData(BuildAnalyzerResultSeverity.None, false)]
-    public void BuildAnalyzerConfigurationInternal_Constructor_SeverityConfig(BuildAnalyzerResultSeverity severity, bool isEnabledExpected)
+    [InlineData( BuildExecutionCheckResultSeverity.Warning, true)]
+    [InlineData(BuildExecutionCheckResultSeverity.Suggestion, true)]
+    [InlineData(BuildExecutionCheckResultSeverity.Error, true)]
+    [InlineData(BuildExecutionCheckResultSeverity.None, false)]
+    public void BuildAnalyzerConfigurationInternal_Constructor_SeverityConfig(BuildExecutionCheckResultSeverity severity, bool isEnabledExpected)
     {
-        BuildAnalyzerConfigurationEffective configuration = new BuildAnalyzerConfigurationEffective(
+        BuildExecutionCheckConfigurationEffective configuration = new BuildExecutionCheckConfigurationEffective(
                        ruleId: "ruleId",
-                       evaluationAnalysisScope: EvaluationAnalysisScope.ProjectOnly,
+                       evaluationCheckScope: EvaluationCheckScope.ProjectOnly,
                        severity: severity);
 
         configuration.IsEnabled.ShouldBe(isEnabledExpected);
@@ -54,10 +54,10 @@ public class BuildAnalyzerConfigurationEffectiveTests
     {
         Should.Throw<ArgumentOutOfRangeException>(() =>
         {
-            new BuildAnalyzerConfigurationEffective(
+            new BuildExecutionCheckConfigurationEffective(
                         ruleId: "ruleId",
-                        evaluationAnalysisScope: EvaluationAnalysisScope.ProjectOnly,
-                        severity: BuildAnalyzerResultSeverity.Default);
+                        evaluationCheckScope: EvaluationCheckScope.ProjectOnly,
+                        severity: BuildExecutionCheckResultSeverity.Default);
         });
     }
 }

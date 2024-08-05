@@ -35,18 +35,18 @@ public class BuildCheckManagerTests
     [Theory]
     [InlineData(true, new[] { "Custom analyzer rule: 'Rule1' has been registered successfully.", "Custom analyzer rule: 'Rule2' has been registered successfully." })]
     [InlineData(false, new[] { "Failed to register the custom analyzer: 'DummyPath'." })]
-    public void ProcessAnalyzerAcquisitionTest(bool isAnalyzerRuleExist, string[] expectedMessages)
+    public void ProcessCheckAcquisitionTest(bool isCheckRuleExist, string[] expectedMessages)
     {
-        MockBuildCheckAcquisition(isAnalyzerRuleExist);
+        MockBuildCheckAcquisition(isCheckRuleExist);
         MockEnabledDataSourcesDefinition();
 
-        _testedInstance.ProcessAnalyzerAcquisition(new AnalyzerAcquisitionData("DummyPath"), new AnalysisLoggingContext(_loggingService, new BuildEventContext(1, 2, 3, 4, 5, 6, 7)));
+        _testedInstance.ProcessCheckAcquisition(new CheckAcquisitionData("DummyPath"), new CheckLoggingContext(_loggingService, new BuildEventContext(1, 2, 3, 4, 5, 6, 7)));
 
         _logger.AllBuildEvents.Where(be => be.GetType() == typeof(BuildMessageEventArgs)).Select(be => be.Message).ToArray()
             .ShouldBeEquivalentTo(expectedMessages);
     }
 
-    private void MockBuildCheckAcquisition(bool isAnalyzerRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isAnalyzerRuleExist));
+    private void MockBuildCheckAcquisition(bool isCheckRuleExist) => MockField("_acquisitionModule", new BuildCheckAcquisitionModuleMock(isCheckRuleExist));
 
     private void MockEnabledDataSourcesDefinition() => MockField("_enabledDataSources", new[] { true, true });
 
@@ -62,33 +62,33 @@ public class BuildCheckManagerTests
 
 internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionModule
 {
-    private readonly bool _isAnalyzerRuleExistForTest = true;
+    private readonly bool _isCheckRuleExistForTest = true;
 
-    internal BuildCheckAcquisitionModuleMock(bool isAnalyzerRuleExistForTest) => _isAnalyzerRuleExistForTest = isAnalyzerRuleExistForTest;
+    internal BuildCheckAcquisitionModuleMock(bool isCheckRuleExistForTest) => _isCheckRuleExistForTest = isCheckRuleExistForTest;
 
-    public List<BuildExecutionCheckFactory> CreateBuildAnalyzerFactories(CheckAcquisitionData analyzerAcquisitionData, ICheckContext analysisContext)
-        => _isAnalyzerRuleExistForTest
-        ? new List<BuildExecutionCheckFactory>() { () => new BuildAnalyzerRuleMock("Rule1"), () => new BuildAnalyzerRuleMock("Rule2") }
+    public List<BuildExecutionCheckFactory> CreateBuildExecutionCheckFactories(CheckAcquisitionData checkAcquisitionData, ICheckContext checkContext)
+        => _isCheckRuleExistForTest
+        ? new List<BuildExecutionCheckFactory>() { () => new BuildExecutionCheckRuleMock("Rule1"), () => new BuildExecutionCheckRuleMock("Rule2") }
         : new List<BuildExecutionCheckFactory>();
 }
 
-internal sealed class BuildAnalyzerRuleMock : BuildAnalyzer
+internal sealed class BuildExecutionCheckRuleMock : BuildExecutionCheck
 {
-    public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
+    public static BuildExecutionCheckRule SupportedRule = new BuildExecutionCheckRule(
         "X01234",
         "Title",
         "Description",
         "Message format: {0}",
-        new BuildAnalyzerConfiguration());
+        new BuildExecutionCheckConfiguration());
 
-    internal BuildAnalyzerRuleMock(string friendlyName)
+    internal BuildExecutionCheckRuleMock(string friendlyName)
     {
         FriendlyName = friendlyName;
     }
 
     public override string FriendlyName { get; }
 
-    public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } = new List<BuildAnalyzerRule>() { SupportedRule };
+    public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = new List<BuildExecutionCheckRule>() { SupportedRule };
 
     public override void Initialize(ConfigurationContext configurationContext)
     {

@@ -13,25 +13,25 @@ using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests
 {
-    public sealed class DoubleWritesAnalyzer_Tests
+    public sealed class DoubleWritesCheck_Tests
     {
         private sealed class MockBuildCheckRegistrationContext : IBuildCheckRegistrationContext
         {
-            private event Action<BuildCheckDataContext<TaskInvocationAnalysisData>>? _taskInvocationAction;
+            private event Action<BuildCheckDataContext<TaskInvocationCheckData>>? _taskInvocationAction;
 
             public List<BuildCheckResult> Results { get; } = new();
 
             public void RegisterEvaluatedPropertiesAction(Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction) => throw new NotImplementedException();
-            public void RegisterParsedItemsAction(Action<BuildCheckDataContext<ParsedItemsAnalysisData>> parsedItemsAction) => throw new NotImplementedException();
+            public void RegisterParsedItemsAction(Action<BuildCheckDataContext<ParsedItemsCheckData>> parsedItemsAction) => throw new NotImplementedException();
 
-            public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationAnalysisData>> taskInvocationAction)
+            public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction)
                 => _taskInvocationAction += taskInvocationAction;
 
-            public void TriggerTaskInvocationAction(TaskInvocationAnalysisData data)
+            public void TriggerTaskInvocationAction(TaskInvocationCheckData data)
             {
                 if (_taskInvocationAction is not null)
                 {
-                    BuildCheckDataContext<TaskInvocationAnalysisData> context = new BuildCheckDataContext<TaskInvocationAnalysisData>(
+                    BuildCheckDataContext<TaskInvocationCheckData> context = new BuildCheckDataContext<TaskInvocationCheckData>(
                         null!,
                         null!,
                         null!,
@@ -41,25 +41,25 @@ namespace Microsoft.Build.BuildCheck.UnitTests
                 }
             }
 
-            private void ResultHandler(BuildAnalyzerWrapper wrapper, ICheckContext context, BuildAnalyzerConfigurationEffective[] configs, BuildCheckResult result)
+            private void ResultHandler(BuildExecutionCheckWrapper wrapper, ICheckContext context, BuildExecutionCheckConfigurationEffective[] configs, BuildCheckResult result)
                 => Results.Add(result);
         }
 
-        private readonly DoubleWritesAnalyzer _analyzer;
+        private readonly DoubleWritesCheck _check;
 
         private readonly MockBuildCheckRegistrationContext _registrationContext;
 
-        public DoubleWritesAnalyzer_Tests()
+        public DoubleWritesCheck_Tests()
         {
-            _analyzer = new DoubleWritesAnalyzer();
+            _check = new DoubleWritesCheck();
             _registrationContext = new MockBuildCheckRegistrationContext();
-            _analyzer.RegisterActions(_registrationContext);
+            _check.RegisterActions(_registrationContext);
         }
 
-        private TaskInvocationAnalysisData MakeTaskInvocationData(string taskName, Dictionary<string, TaskInvocationAnalysisData.TaskParameter> parameters)
+        private TaskInvocationCheckData MakeTaskInvocationData(string taskName, Dictionary<string, TaskInvocationCheckData.TaskParameter> parameters)
         {
             string projectFile = NativeMethodsShared.IsWindows ? @"C:\fake\project.proj" : "/fake/project.proj";
-            return new TaskInvocationAnalysisData(
+            return new TaskInvocationCheckData(
                 projectFile,
                 null,
                 Construction.ElementLocation.EmptyLocation,
@@ -71,19 +71,19 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         [Fact]
         public void TestCopyTask()
         {
-            _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData("Copy", new Dictionary<string, TaskInvocationAnalysisData.TaskParameter>
+            _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData("Copy", new Dictionary<string, TaskInvocationCheckData.TaskParameter>
                 {
-                    { "SourceFiles", new TaskInvocationAnalysisData.TaskParameter("source1", IsOutput: false) },
-                    { "DestinationFolder", new TaskInvocationAnalysisData.TaskParameter("outdir", IsOutput: false) },
+                    { "SourceFiles", new TaskInvocationCheckData.TaskParameter("source1", IsOutput: false) },
+                    { "DestinationFolder", new TaskInvocationCheckData.TaskParameter("outdir", IsOutput: false) },
                 }));
-            _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData("Copy", new Dictionary<string, TaskInvocationAnalysisData.TaskParameter>
+            _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData("Copy", new Dictionary<string, TaskInvocationCheckData.TaskParameter>
                 {
-                    { "SourceFiles", new TaskInvocationAnalysisData.TaskParameter("source1", IsOutput: false) },
-                    { "DestinationFiles", new TaskInvocationAnalysisData.TaskParameter(Path.Combine("outdir", "source1"), IsOutput: false) },
+                    { "SourceFiles", new TaskInvocationCheckData.TaskParameter("source1", IsOutput: false) },
+                    { "DestinationFiles", new TaskInvocationCheckData.TaskParameter(Path.Combine("outdir", "source1"), IsOutput: false) },
                 }));
 
             _registrationContext.Results.Count.ShouldBe(1);
-            _registrationContext.Results[0].BuildAnalyzerRule.Id.ShouldBe("BC0102");
+            _registrationContext.Results[0].BuildExecutionCheckRule.Id.ShouldBe("BC0102");
         }
 
         [Theory]
@@ -94,17 +94,17 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         {
             for (int i = 0; i < 2; i++)
             {
-                _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData(taskName, new Dictionary<string, TaskInvocationAnalysisData.TaskParameter>
+                _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData(taskName, new Dictionary<string, TaskInvocationCheckData.TaskParameter>
                     {
-                        { "OutputAssembly", new TaskInvocationAnalysisData.TaskParameter("out.dll", IsOutput: false) },
-                        { "OutputRefAssembly", new TaskInvocationAnalysisData.TaskParameter("out_ref.dll", IsOutput: false) },
-                        { "DocumentationFile", new TaskInvocationAnalysisData.TaskParameter("out.xml", IsOutput: false) },
-                        { "PdbFile", new TaskInvocationAnalysisData.TaskParameter("out.pdb", IsOutput: false) },
+                        { "OutputAssembly", new TaskInvocationCheckData.TaskParameter("out.dll", IsOutput: false) },
+                        { "OutputRefAssembly", new TaskInvocationCheckData.TaskParameter("out_ref.dll", IsOutput: false) },
+                        { "DocumentationFile", new TaskInvocationCheckData.TaskParameter("out.xml", IsOutput: false) },
+                        { "PdbFile", new TaskInvocationCheckData.TaskParameter("out.pdb", IsOutput: false) },
                     }));
             }
 
             _registrationContext.Results.Count.ShouldBe(4);
-            _registrationContext.Results.ForEach(result => result.BuildAnalyzerRule.Id.ShouldBe("BC0102"));
+            _registrationContext.Results.ForEach(result => result.BuildExecutionCheckRule.Id.ShouldBe("BC0102"));
         }
     }
 }

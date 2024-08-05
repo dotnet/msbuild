@@ -117,8 +117,8 @@ public class ConfigurationProvider_Tests
         buildConfig.ShouldNotBeNull();
 
         buildConfig.IsEnabled.ShouldBe(true);
-        buildConfig.Severity.ShouldBe(BuildAnalyzerResultSeverity.Error);
-        buildConfig.EvaluationAnalysisScope.ShouldBe(EvaluationAnalysisScope.ProjectOnly);
+        buildConfig.Severity.ShouldBe(BuildExecutionCheckResultSeverity.Error);
+        buildConfig.EvaluationCheckScope.ShouldBe(EvaluationCheckScope.ProjectOnly);
     }
 
     [Fact]
@@ -216,27 +216,27 @@ public class ConfigurationProvider_Tests
     }
 
     [Theory]
-    [InlineData(BuildAnalyzerResultSeverity.Warning, BuildAnalyzerResultSeverity.Warning, true)]
-    [InlineData(BuildAnalyzerResultSeverity.Error, BuildAnalyzerResultSeverity.Error, true)]
-    [InlineData(BuildAnalyzerResultSeverity.Default, BuildAnalyzerResultSeverity.Warning, true)]
-    [InlineData(BuildAnalyzerResultSeverity.Suggestion, BuildAnalyzerResultSeverity.Suggestion, true)]
-    [InlineData(BuildAnalyzerResultSeverity.None, BuildAnalyzerResultSeverity.None, false)]
-    [InlineData(null, BuildAnalyzerResultSeverity.Warning, true)]
-    public void GetConfigurationProvider_MergesSeverity_Correctly(BuildAnalyzerResultSeverity? buildAnalyzerResultSeverity, BuildAnalyzerResultSeverity expectedSeverity, bool expectedEnablment)
+    [InlineData(BuildExecutionCheckResultSeverity.Warning, BuildExecutionCheckResultSeverity.Warning, true)]
+    [InlineData(BuildExecutionCheckResultSeverity.Error, BuildExecutionCheckResultSeverity.Error, true)]
+    [InlineData(BuildExecutionCheckResultSeverity.Default, BuildExecutionCheckResultSeverity.Warning, true)]
+    [InlineData(BuildExecutionCheckResultSeverity.Suggestion, BuildExecutionCheckResultSeverity.Suggestion, true)]
+    [InlineData(BuildExecutionCheckResultSeverity.None, BuildExecutionCheckResultSeverity.None, false)]
+    [InlineData(null, BuildExecutionCheckResultSeverity.Warning, true)]
+    public void GetConfigurationProvider_MergesSeverity_Correctly(BuildExecutionCheckResultSeverity? buildExecutionCheckResultSeverity, BuildExecutionCheckResultSeverity expectedSeverity, bool expectedEnablment)
     {
         var configurationProvider = new ConfigurationProvider();
-        BuildAnalyzerConfiguration buildAnalyzerConfiguration = new BuildAnalyzerConfiguration()
+        BuildExecutionCheckConfiguration buildExecutionCheckConfiguration = new BuildExecutionCheckConfiguration()
         {
-            Severity = buildAnalyzerResultSeverity
+            Severity = buildExecutionCheckResultSeverity
         };
 
-        BuildAnalyzerConfiguration defaultValue = new BuildAnalyzerConfiguration()
+        BuildExecutionCheckConfiguration defaultValue = new BuildExecutionCheckConfiguration()
         {
-            Severity = BuildAnalyzerResultSeverity.Warning
+            Severity = BuildExecutionCheckResultSeverity.Warning
         };
 
-        var internalBuildAnalyzer = configurationProvider.MergeConfiguration("ruleId", defaultValue, buildAnalyzerConfiguration);
-        internalBuildAnalyzer.Severity.ShouldBe(expectedSeverity);
-        internalBuildAnalyzer.IsEnabled.ShouldBe(expectedEnablment);
+        var internalBuildExecutionCheck = configurationProvider.MergeConfiguration("ruleId", defaultValue, buildExecutionCheckConfiguration);
+        internalBuildExecutionCheck.Severity.ShouldBe(expectedSeverity);
+        internalBuildExecutionCheck.IsEnabled.ShouldBe(expectedEnablment);
     }
 }
