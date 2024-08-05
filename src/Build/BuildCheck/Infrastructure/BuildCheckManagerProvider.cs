@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using Microsoft.Build.BackEnd;
@@ -183,7 +182,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
-                Debugger.Launch();
                 foreach (var factory in factories)
                 {
                     var instance = factory();
