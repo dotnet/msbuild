@@ -2,20 +2,20 @@
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
 
-namespace CustomAnalyzer
+namespace CustomCheck
 {
-    public sealed class Analyzer2 : BuildAnalyzer
+    public sealed class Check2 : BuildExecutionCheck
     {
-        public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
+        public static BuildExecutionCheckRule SupportedRule = new BuildExecutionCheckRule(
             "X01235",
             "Title",
             "Description",
             "Message format: {0}",
-            new BuildAnalyzerConfiguration());
+            new BuildExecutionCheckConfiguration());
 
         public override string FriendlyName => "CustomRule2";
 
-        public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } = new List<BuildAnalyzerRule>() { SupportedRule };
+        public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = new List<BuildExecutionCheckRule>() { SupportedRule };
 
         public override void Initialize(ConfigurationContext configurationContext)
         {

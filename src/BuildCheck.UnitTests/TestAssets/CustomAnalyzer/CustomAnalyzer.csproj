@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="CustomAnalyzer.props" Pack="true" PackagePath="build\CustomAnalyzer.props" />
+    <None Include="CustomCheck.props" Pack="true" PackagePath="build\CustomCheck.props" />
     <Content Include="README.md" />
   </ItemGroup>
 

@@ -9,7 +9,7 @@ using System;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
-public class BuildAnalyzerConfigurationEffectiveTests
+public class BuildExecutionCheckConfigurationEffectiveTests
 {
     [Theory]
     [InlineData("ruleId", EvaluationCheckScope.ProjectOnly, BuildExecutionCheckResultSeverity.Warning,  true)]
@@ -39,7 +39,7 @@ public class BuildAnalyzerConfigurationEffectiveTests
     [InlineData(BuildExecutionCheckResultSeverity.Suggestion, true)]
     [InlineData(BuildExecutionCheckResultSeverity.Error, true)]
     [InlineData(BuildExecutionCheckResultSeverity.None, false)]
-    public void BuildAnalyzerConfigurationInternal_Constructor_SeverityConfig(BuildExecutionCheckResultSeverity severity, bool isEnabledExpected)
+    public void BuildExecutionCheckConfigurationInternal_Constructor_SeverityConfig(BuildExecutionCheckResultSeverity severity, bool isEnabledExpected)
     {
         BuildExecutionCheckConfigurationEffective configuration = new BuildExecutionCheckConfigurationEffective(
                        ruleId: "ruleId",
@@ -50,7 +50,7 @@ public class BuildAnalyzerConfigurationEffectiveTests
     }
 
     [Fact]
-    public void BuildAnalyzerConfigurationInternal_Constructor_SeverityConfig_Fails()
+    public void BuildExecutionCheckConfigurationInternal_Constructor_SeverityConfig_Fails()
     {
         Should.Throw<ArgumentOutOfRangeException>(() =>
         {

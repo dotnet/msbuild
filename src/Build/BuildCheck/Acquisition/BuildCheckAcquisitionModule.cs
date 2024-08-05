@@ -29,7 +29,7 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
         CheckAcquisitionData checkAcquisitionData,
         ICheckContext analysisContext)
     {
-        var analyzersFactories = new List<BuildExecutionCheckFactory>();
+        var checksFactories = new List<BuildExecutionCheckFactory>();
 
         try
         {
@@ -41,17 +41,17 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
 #endif
 
             IList<Type> availableTypes = assembly.GetExportedTypes();
-            IList<Type> analyzerTypes = availableTypes.Where(t => typeof(BuildAnalyzer).IsAssignableFrom(t)).ToArray();
+            IList<Type> checkTypes = availableTypes.Where(t => typeof(BuildExecutionCheck).IsAssignableFrom(t)).ToArray();
 
-            foreach (Type analyzerCandidate in analyzerTypes)
+            foreach (Type checkCandidate in checkTypes)
             {
-                analyzersFactories.Add(() => (BuildAnalyzer)Activator.CreateInstance(analyzerCandidate)!);
-                analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerRegistered", analyzerCandidate.Name, analyzerCandidate.Assembly);
+                checksFactories.Add(() => (BuildExecutionCheck)Activator.CreateInstance(checkCandidate)!);
+                analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerRegistered", checkCandidate.Name, checkCandidate.Assembly);
             }
 
-            if (availableTypes.Count != analyzerTypes.Count)
+            if (availableTypes.Count != checkTypes.Count)
             {
-                availableTypes.Except(analyzerTypes).ToList()
+                availableTypes.Except(checkTypes).ToList()
                     .ForEach(t => analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
             }
         }
@@ -70,6 +70,6 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", ex?.Message);
         }
 
-        return analyzersFactories;
+        return checksFactories;
     }
 }

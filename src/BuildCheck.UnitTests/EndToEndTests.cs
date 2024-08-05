@@ -35,7 +35,7 @@ public class EndToEndTests : IDisposable
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
-    public void SampleCheckIntegrationTest_AnalyzeOnBuild(bool buildInOutOfProcessNode, bool checkRequested)
+    public void SampleCheckIntegrationTest_CheckOnBuild(bool buildInOutOfProcessNode, bool checkRequested)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
 
@@ -69,7 +69,7 @@ public class EndToEndTests : IDisposable
     [InlineData(false, true, "error")]
     [InlineData(false, true, "suggestion")]
     [InlineData(false, false, "warning")]
-    public void SampleCheckIntegrationTest_ReplayBinaryLogOfAnalyzedBuild(bool buildInOutOfProcessNode, bool checkRequested, string BC0101Severity)
+    public void SampleCheckIntegrationTest_ReplayBinaryLogOfCheckedBuild(bool buildInOutOfProcessNode, bool checkRequested, string BC0101Severity)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, BC0101Severity);
 
@@ -136,7 +136,7 @@ public class EndToEndTests : IDisposable
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
-    public void SampleCheckIntegrationTest_AnalyzeOnBinaryLogReplay(bool buildInOutOfProcessNode, bool checkRequested)
+    public void SampleCheckIntegrationTest_CheckOnBinaryLogReplay(bool buildInOutOfProcessNode, bool checkRequested)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
 
