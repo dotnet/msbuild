@@ -11,7 +11,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
-using Microsoft.Build.Experimental.BuildCheck.Analyzers;
+using Microsoft.Build.Experimental.BuildCheck.Checks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Evaluation;
@@ -103,7 +103,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             _tracingReporter.AddSetDataSourceStats(stopwatch.Elapsed);
         }
 
-        public void ProcessChecksAcquisition(
+        public void ProcessCheckAcquisition(
             CheckAcquisitionData acquisitionData,
             ICheckContext checkContext)
         {
@@ -153,13 +153,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private void RegisterBuiltInChecks(BuildCheckDataSource buildCheckDataSource)
         {
-            _ChecksRegistry.AddRange(
+            _checkRegistry.AddRange(
                 s_builtInFactoriesPerDataSource[(int)buildCheckDataSource]
                     .Select(v => new BuildExecutionCheckFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
 
             if (s_testFactoriesPerDataSource is not null)
             {
-                _checksRegistry.AddRange(
+                _checkRegistry.AddRange(
                     s_testFactoriesPerDataSource[(int)buildCheckDataSource]
                         .Select(v => new BuildExecutionCheckFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
             }
@@ -180,7 +180,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 foreach (BuildExecutionCheckFactory factory in factories)
                 {
-                    _checksRegistry.Add(new BuildExecutionCheckFactoryContext(factory, ruleIds, defaultEnablement));
+                    _checkRegistry.Add(new BuildExecutionCheckFactoryContext(factory, ruleIds, defaultEnablement));
 
                     var instance = factory();
                     checkContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.FriendlyName);
@@ -205,7 +205,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 foreach (var factory in factories)
                 {
                     var instance = factory();
-                    _checksRegistry.Add(new BuildExecutionCheckFactoryContext(
+                    _checkRegistry.Add(new BuildExecutionCheckFactoryContext(
                         factory,
                         instance.SupportedRules.Select(r => r.Id).ToArray(),
                         instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true)));
@@ -300,7 +300,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             // If it's already constructed - just control the custom settings do not differ
             Stopwatch stopwatch = Stopwatch.StartNew();
             List<BuildExecutionCheckFactoryContext> checksToRemove = new();
-            foreach (BuildExecutionCheckFactoryContext checkFactoryContext in _checksRegistry)
+            foreach (BuildExecutionCheckFactoryContext checkFactoryContext in _checkRegistry)
             {
                 try
                 {
@@ -320,13 +320,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             checksToRemove.ForEach(c =>
             {
-                _checksRegistry.Remove(c);
+                _checkRegistry.Remove(c);
                 checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting analyzer '{c.FriendlyName}'");
             });
             foreach (var checkToRemove in checksToRemove.Select(a => a.MaterializedCheck).Where(a => a != null))
             {
                 _buildCheckCentralContext.DeregisterCheck(checkToRemove!);
-                _tracingReporter.AddCheckStats(checkToRemove!.BuildCheck.FriendlyName, checkToRemove.Elapsed);
+                _tracingReporter.AddCheckStats(checkToRemove!.BuildExecutionCheck.FriendlyName, checkToRemove.Elapsed);
                 checkToRemove.BuildExecutionCheck.Dispose();
             }
 
@@ -373,7 +373,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         public Dictionary<string, TimeSpan> CreateCheckTracingStats()
         {
-            foreach (BuildExecutionCheckFactoryContext checkFactoryContext in _checksRegistry)
+            foreach (BuildExecutionCheckFactoryContext checkFactoryContext in _checkRegistry)
             {
                 if (checkFactoryContext.MaterializedCheck != null)
                 {
@@ -525,7 +525,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             public bool IsEnabledByDefault { get; init; } = isEnabledByDefault;
 
-            public string FriendlyName => MaterializedCheck?.BuildCheck.FriendlyName ?? factory().FriendlyName;
+            public string FriendlyName => MaterializedCheck?.BuildExecutionCheck.FriendlyName ?? factory().FriendlyName;
         }
     }
 }

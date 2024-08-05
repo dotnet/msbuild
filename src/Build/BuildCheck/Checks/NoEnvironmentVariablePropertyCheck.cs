@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
 
-namespace Microsoft.Build.Experimental.BuildCheck.Analyzers;
+namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
 internal sealed class NoEnvironmentVariablePropertyCheck : BuildExecutionCheck
 {

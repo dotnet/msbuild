@@ -11,7 +11,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental.BuildCheck.Analyzers;
+namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
 internal sealed class SharedOutputPathCheck : BuildExecutionCheck
 {
