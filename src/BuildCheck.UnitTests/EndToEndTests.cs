@@ -199,7 +199,10 @@ public class EndToEndTests : IDisposable
 
             if (expectedRejectedAnalyzers)
             {
-                projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerBaseTypeNotAssignable", "InvalidAnalyzer", "InvalidCustomAnalyzer, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
+                projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    "CustomAnalyzerBaseTypeNotAssignable",
+                    "InvalidAnalyzer",
+                    "InvalidCustomAnalyzer, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
             }
         }
     }
