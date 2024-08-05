@@ -436,14 +436,11 @@ namespace Microsoft.Build.Evaluation
 
             private static void ProcessNonWildCardItemUpdates(Dictionary<string, UpdateOperation> itemsWithNoWildcards, OrderedItemDataCollection.Builder items)
             {
-#if DEBUG
-                ErrorUtilities.VerifyThrow(itemsWithNoWildcards.All(fragment => !MSBuildConstants.CharactersForExpansion.Any(fragment.Key.Contains)), $"{nameof(itemsWithNoWildcards)} should not contain any text fragments with wildcards.");
-#endif
                 if (itemsWithNoWildcards.Count > 0)
                 {
                     for (int i = 0; i < items.Count; i++)
                     {
-                        string fullPath = FileUtilities.GetFullPath(items[i].Item.EvaluatedIncludeEscaped, items[i].Item.ProjectDirectory);
+                        string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(items[i].Item.EvaluatedInclude, items[i].Item.ProjectDirectory);
                         if (itemsWithNoWildcards.TryGetValue(fullPath, out UpdateOperation op))
                         {
                             items[i] = op.UpdateItem(items[i]);
