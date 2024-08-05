@@ -303,12 +303,15 @@ namespace Microsoft.Build.UnitTests
                             if (logMessage)
                             {
                                 string msg = eventArgs.Message;
-                                if (eventArgs is BuildMessageEventArgs m && m.LineNumber != 0)
+                                if (!string.IsNullOrEmpty(msg))
                                 {
-                                    msg = $"{m.File}({m.LineNumber},{m.ColumnNumber}): {msg}";
+                                    if (eventArgs is BuildMessageEventArgs m && m.LineNumber != 0)
+                                    {
+                                        msg = $"{m.File}({m.LineNumber},{m.ColumnNumber}): {msg}";
+                                    }
+                                    _fullLog.AppendLine(msg);
+                                    _testOutputHelper?.WriteLine(msg);
                                 }
-                                _fullLog.AppendLine(msg);
-                                _testOutputHelper?.WriteLine(msg);
                             }
                             break;
                         }
