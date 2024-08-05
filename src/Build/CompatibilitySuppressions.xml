@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
@@ -25,27 +25,6 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerResultSeverity.Info</Target>
-    <Left>lib/net8.0/Microsoft.Build.dll</Left>
-    <Right>lib/net8.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Microsoft.Build.Execution.BuildResult.get_BuildRequestDataFlags</Target>
-    <Left>lib/net8.0/Microsoft.Build.dll</Left>
-    <Right>lib/net8.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Microsoft.Build.Experimental.BuildCheck.AnalysisData.#ctor(System.String)</Target>
-    <Left>lib/net8.0/Microsoft.Build.dll</Left>
-    <Right>lib/net8.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerResultSeverity.Info</Target>
     <Left>ref/net472/Microsoft.Build.dll</Left>
     <Right>ref/net472/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -62,27 +41,6 @@
     <Target>M:Microsoft.Build.Experimental.BuildCheck.AnalysisData.#ctor(System.String)</Target>
     <Left>ref/net472/Microsoft.Build.dll</Left>
     <Right>ref/net472/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerResultSeverity.Info</Target>
-    <Left>ref/net8.0/Microsoft.Build.dll</Left>
-    <Right>ref/net8.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Microsoft.Build.Execution.BuildResult.get_BuildRequestDataFlags</Target>
-    <Left>ref/net8.0/Microsoft.Build.dll</Left>
-    <Right>ref/net8.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Microsoft.Build.Experimental.BuildCheck.AnalysisData.#ctor(System.String)</Target>
-    <Left>ref/net8.0/Microsoft.Build.dll</Left>
-    <Right>ref/net8.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
@@ -102,20 +60,6 @@
   <Suppression>
     <DiagnosticId>CP0011</DiagnosticId>
     <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerResultSeverity.Error</Target>
-    <Left>lib/net8.0/Microsoft.Build.dll</Left>
-    <Right>lib/net8.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0011</DiagnosticId>
-    <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerResultSeverity.Warning</Target>
-    <Left>lib/net8.0/Microsoft.Build.dll</Left>
-    <Right>lib/net8.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0011</DiagnosticId>
-    <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerResultSeverity.Error</Target>
     <Left>ref/net472/Microsoft.Build.dll</Left>
     <Right>ref/net472/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -127,18 +71,11 @@
     <Right>ref/net472/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
+  <!--
+    https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/diagnostic-ids
+    Suppress PKV006 for net8.0 (The target framework is dropped in the latest version.)  -->
   <Suppression>
-    <DiagnosticId>CP0011</DiagnosticId>
-    <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerResultSeverity.Error</Target>
-    <Left>ref/net8.0/Microsoft.Build.dll</Left>
-    <Right>ref/net8.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0011</DiagnosticId>
-    <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerResultSeverity.Warning</Target>
-    <Left>ref/net8.0/Microsoft.Build.dll</Left>
-    <Right>ref/net8.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
+    <DiagnosticId>PKV006</DiagnosticId>
+    <Target>net8.0</Target>
   </Suppression>
 </Suppressions>

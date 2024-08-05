@@ -57,7 +57,7 @@
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
-    <BootstrapSdkVersion>8.0.302</BootstrapSdkVersion>
+    <BootstrapSdkVersion>9.0.100-preview.6.24328.19</BootstrapSdkVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
@@ -75,4 +75,14 @@
       <FileVersion>$(VersionPrefix).$(FileVersion.Split('.')[3])</FileVersion>
     </PropertyGroup>
   </Target>
+
+  <!--  Freeze the version for the current upgrade of the sdk. 
+        TODO:Delete the lines below once the Retargeting merged. 
+  -->
+  <PropertyGroup>
+    <XUnitVersion>2.4.2</XUnitVersion>
+    <XUnitAnalyzersVersion>1.1.0</XUnitAnalyzersVersion>
+    <XUnitRunnerConsoleVersion>$(XUnitVersion)</XUnitRunnerConsoleVersion>
+    <XUnitRunnerVisualStudioVersion>2.4.3</XUnitRunnerVisualStudioVersion>
+  </PropertyGroup>
 </Project>
