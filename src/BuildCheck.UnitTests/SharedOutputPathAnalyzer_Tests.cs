@@ -71,7 +71,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         {
             // Paths separators are messed up.
             string projectFile1 = NativeMethodsShared.IsWindows ? "C:\\fake\\project1.proj" : "/fake/project1.proj";
-            string projectFile2 = NativeMethodsShared.IsWindows ? "C:\\fake/project2.proj" : "/fake\\project2.proj";
+            string projectFile2 = NativeMethodsShared.IsWindows ? "C:\\fake\\project2.proj" : "/fake/project2.proj";
 
             _registrationContext.TriggerEvaluatedPropertiesAction(MakeEvaluatedPropertiesAction(
                 projectFile1,
