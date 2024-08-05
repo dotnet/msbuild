@@ -40,21 +40,10 @@ namespace Microsoft.Build.Evaluation
                 ImmutableArray<I>.Builder? itemsToAdd = null;
 
                 Lazy<Func<string, bool>>? excludeTester = null;
-                ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
-                if (_excludes != null)
-                {
-                    // STEP 4: Evaluate, split, expand and subtract any Exclude
-                    foreach (string exclude in _excludes)
-                    {
-                        string excludeExpanded = _expander.ExpandIntoStringLeaveEscaped(exclude, ExpanderOptions.ExpandPropertiesAndItems, _itemElement.ExcludeLocation);
-                        var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
-                        excludePatterns.AddRange(excludeSplits);
-                    }
 
-                    if (excludePatterns.Count > 0)
-                    {
-                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory));
-                    }
+                if (_excludes.Count > 0)
+                {
+                    excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(_excludes, _rootDirectory));
                 }
 
                 ISet<string>? excludePatternsForGlobs = null;
@@ -100,7 +89,7 @@ namespace Microsoft.Build.Evaluation
 
                             if (excludePatternsForGlobs == null)
                             {
-                                excludePatternsForGlobs = BuildExcludePatternsForGlobs(globsToIgnore, excludePatterns);
+                                excludePatternsForGlobs = BuildExcludePatternsForGlobs(globsToIgnore, _excludes);
                             }
 
                             string[] includeSplitFilesEscaped;
@@ -142,14 +131,14 @@ namespace Microsoft.Build.Evaluation
                 return itemsToAdd?.ToImmutable() ?? ImmutableArray<I>.Empty;
             }
 
-            private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)
+            private static ImmutableHashSet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableSegmentedList<string> excludePatterns)
             {
                 var anyExcludes = excludePatterns.Count > 0;
                 var anyGlobsToIgnore = globsToIgnore.Count > 0;
 
                 if (anyGlobsToIgnore && anyExcludes)
                 {
-                    return excludePatterns.Concat(globsToIgnore).ToImmutableHashSet();
+                    return globsToIgnore.Union(excludePatterns);
                 }
 
                 return anyExcludes ? excludePatterns.ToImmutableHashSet() : globsToIgnore;
@@ -157,7 +146,7 @@ namespace Microsoft.Build.Evaluation
 
             protected override void MutateItems(ImmutableArray<I> items)
             {
-                DecorateItemsWithMetadata(items.Select(i => new ItemBatchingContext(i)), _metadata);
+                DecorateItemsWithMetadata(items, _metadata);
             }
 
             protected override void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder)

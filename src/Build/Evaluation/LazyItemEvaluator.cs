@@ -465,7 +465,6 @@ namespace Microsoft.Build.Evaluation
             private static readonly ImmutableDictionary<string, LazyItemList> s_emptyIgnoreCase = ImmutableDictionary.Create<string, LazyItemList>(StringComparer.OrdinalIgnoreCase);
 
             public ProjectItemElement ItemElement { get; set; }
-            public string ItemType { get; set; }
             public ItemSpec<P, I> ItemSpec { get; set; }
 
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
@@ -477,7 +476,6 @@ namespace Microsoft.Build.Evaluation
             public OperationBuilder(ProjectItemElement itemElement, bool conditionResult)
             {
                 ItemElement = itemElement;
-                ItemType = itemElement.ItemType;
                 ConditionResult = conditionResult;
             }
         }
@@ -546,10 +544,12 @@ namespace Microsoft.Build.Evaluation
 
         private IncludeOperation BuildIncludeOperation(string rootDirectory, ProjectItemElement itemElement, bool conditionResult)
         {
-            IncludeOperationBuilder operationBuilder = new IncludeOperationBuilder(itemElement, conditionResult);
-            operationBuilder.ElementOrder = _nextElementOrder++;
-            operationBuilder.RootDirectory = rootDirectory;
-            operationBuilder.ConditionResult = conditionResult;
+            IncludeOperationBuilder operationBuilder = new(itemElement, conditionResult)
+            {
+                ElementOrder = _nextElementOrder++,
+                RootDirectory = rootDirectory,
+                ConditionResult = conditionResult,
+            };
 
             // Process include
             ProcessItemSpec(rootDirectory, itemElement.Include, itemElement.IncludeLocation, operationBuilder);
@@ -561,7 +561,7 @@ namespace Microsoft.Build.Evaluation
             {
                 // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
                 //  if so we need to add the right item reference
-                string evaluatedExclude = _expander.ExpandIntoStringLeaveEscaped(itemElement.Exclude, ExpanderOptions.ExpandProperties, itemElement.ExcludeLocation);
+                string evaluatedExclude = _expander.ExpandIntoStringLeaveEscaped(itemElement.Exclude, ExpanderOptions.ExpandPropertiesAndItems, itemElement.ExcludeLocation);
 
                 if (evaluatedExclude.Length > 0)
                 {

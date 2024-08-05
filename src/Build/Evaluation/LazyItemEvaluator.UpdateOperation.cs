@@ -17,7 +17,7 @@ namespace Microsoft.Build.Evaluation
         private class UpdateOperation : LazyItemOperation
         {
             private readonly ImmutableArray<ProjectMetadataElement> _metadata;
-            private ImmutableList<ItemBatchingContext>.Builder _itemsToUpdate = null;
+            private ImmutableArray<ItemBatchingContext>.Builder _itemsToUpdate = null;
             private ItemSpecMatchesItem _matchItemSpec = null;
             private bool? _needToExpandMetadataForEachItem = null;
 
@@ -49,7 +49,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 SetMatchItemSpec();
-                _itemsToUpdate ??= ImmutableList.CreateBuilder<ItemBatchingContext>();
+                _itemsToUpdate ??= ImmutableArray.CreateBuilder<ItemBatchingContext>();
                 _itemsToUpdate.Clear();
 
                 for (int i = 0; i < listBuilder.Count; i++)
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                DecorateItemsWithMetadata(_itemsToUpdate.ToImmutableList(), _metadata, _needToExpandMetadataForEachItem);
+                DecorateItemsWithMetadata(_itemsToUpdate.ToImmutableArray(), _metadata, _needToExpandMetadataForEachItem);
             }
 
             /// <summary>
@@ -77,13 +77,13 @@ namespace Microsoft.Build.Evaluation
                 if (_conditionResult)
                 {
                     SetMatchItemSpec();
-                    _itemsToUpdate ??= ImmutableList.CreateBuilder<ItemBatchingContext>();
+                    _itemsToUpdate ??= ImmutableArray.CreateBuilder<ItemBatchingContext>();
                     _itemsToUpdate.Clear();
                     MatchResult matchResult = _matchItemSpec(_itemSpec, item.Item);
                     if (matchResult.IsMatch)
                     {
                         ItemData clonedData = UpdateItem(item, matchResult.CapturedItemsFromReferencedItemTypes);
-                        DecorateItemsWithMetadata(_itemsToUpdate.ToImmutableList(), _metadata, _needToExpandMetadataForEachItem);
+                        DecorateItemsWithMetadata(_itemsToUpdate.ToImmutableArray(), _metadata, _needToExpandMetadataForEachItem);
                         return clonedData;
                     }
                 }
