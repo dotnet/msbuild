@@ -54,7 +54,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         Internal.Utilities.EnumerateProperties(evaluationFinishedEventArgs.Properties, propertiesLookup,
             static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
 
-        EvaluatedPropertiesAnalysisData analysisData =
+        EvaluatedPropertiesCheckData analysisData =
             new(evaluationFinishedEventArgs.ProjectFile!,
                 evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
                 propertiesLookup,

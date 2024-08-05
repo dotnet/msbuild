@@ -21,7 +21,7 @@ internal sealed class BuildCheckCentralContext
         => _configurationProvider = configurationProvider;
 
     private record CallbackRegistry(
-        List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<EvaluatedPropertiesAnalysisData>>)> EvaluatedPropertiesActions,
+        List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>>)> EvaluatedPropertiesActions,
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<ParsedItemsAnalysisData>>)> ParsedItemsActions,
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<TaskInvocationAnalysisData>>)> TaskInvocationActions,
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<PropertyReadData>>)> PropertyReadActions,
@@ -53,7 +53,7 @@ internal sealed class BuildCheckCentralContext
     internal bool HasPropertyReadActions => _globalCallbacks.PropertyReadActions.Count > 0;
     internal bool HasPropertyWriteActions => _globalCallbacks.PropertyWriteActions.Count > 0;
 
-    internal void RegisterEvaluatedPropertiesAction(BuildAnalyzerWrapper analyzer, Action<BuildCheckDataContext<EvaluatedPropertiesAnalysisData>> evaluatedPropertiesAction)
+    internal void RegisterEvaluatedPropertiesAction(BuildAnalyzerWrapper analyzer, Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction)
         // Here we might want to communicate to node that props need to be sent.
         //  (it was being communicated via MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION)
         => RegisterAction(analyzer, evaluatedPropertiesAction, _globalCallbacks.EvaluatedPropertiesActions);
@@ -97,7 +97,7 @@ internal sealed class BuildCheckCentralContext
     }
 
     internal void RunEvaluatedPropertiesActions(
-        EvaluatedPropertiesAnalysisData evaluatedPropertiesAnalysisData,
+        EvaluatedPropertiesCheckData evaluatedPropertiesAnalysisData,
         ICheckContext analysisContext,
         Action<BuildAnalyzerWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
             resultHandler)

@@ -19,7 +19,7 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 /// <param name="projectFilePath">Currently built project.</param>
 /// <param name="projectConfigurationId">The unique id of a project with unique global properties set.</param>
-public abstract class AnalysisData(string projectFilePath, int? projectConfigurationId)
+public abstract class CheckData(string projectFilePath, int? projectConfigurationId)
 {
     private string? _projectFileDirectory;
     // The id is going to be used in future revision
@@ -60,22 +60,22 @@ public abstract class AnalysisData(string projectFilePath, int? projectConfigura
 /// Data passed from infrastructure to build analyzers.
 /// </summary>
 /// <typeparam name="T">The type of the actual data for analysis.</typeparam>
-public class BuildCheckDataContext<T> where T : AnalysisData
+public class BuildCheckDataContext<T> where T : CheckData
 {
-    private readonly BuildAnalyzerWrapper _analyzerWrapper;
-    private readonly ICheckContext _analysisContext;
+    private readonly BuildExecutionCheckWrapper _executionCheckWrapper;
+    private readonly ICheckContext _checkContext;
     private readonly BuildAnalyzerConfigurationEffective[] _configPerRule;
-    private readonly Action<BuildAnalyzerWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> _resultHandler;
+    private readonly Action<BuildExecutionCheckWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> _resultHandler;
 
     internal BuildCheckDataContext(
-        BuildAnalyzerWrapper analyzerWrapper,
+        BuildExecutionCheckWrapper analyzerWrapper,
         ICheckContext loggingContext,
-        BuildAnalyzerConfigurationEffective[] configPerRule,
-        Action<BuildAnalyzerWrapper, ICheckContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult> resultHandler,
+        BuildExecutionCheckConfigurationEffective[] configPerRule,
+        Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult> resultHandler,
         T data)
     {
-        _analyzerWrapper = analyzerWrapper;
-        _analysisContext = loggingContext;
+        _executionCheckWrapper = analyzerWrapper;
+        _executionCheckContext = loggingContext;
         _configPerRule = configPerRule;
         _resultHandler = resultHandler;
         Data = data;
@@ -86,7 +86,7 @@ public class BuildCheckDataContext<T> where T : AnalysisData
     /// </summary>
     /// <param name="result"></param>
     public void ReportResult(BuildCheckResult result)
-        => _resultHandler(_analyzerWrapper, _analysisContext, _configPerRule, result);
+        => _resultHandler(_executionCheckWrapper, _checkContext, _configPerRule, result);
 
     /// <summary>
     /// Data to be analyzed.

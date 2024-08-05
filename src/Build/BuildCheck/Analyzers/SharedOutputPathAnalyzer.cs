@@ -38,7 +38,7 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
     private readonly Dictionary<string, string> _projectsPerOutputPath = new(StringComparer.CurrentCultureIgnoreCase);
     private readonly HashSet<string> _projects = new(StringComparer.CurrentCultureIgnoreCase);
 
-    private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesAnalysisData> context)
+    private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
     {
         if (!_projects.Add(context.Data.ProjectFilePath))
         {
@@ -61,7 +61,7 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
         }
     }
 
-    private string? CheckAndAddFullOutputPath(string? path, BuildCheckDataContext<EvaluatedPropertiesAnalysisData> context)
+    private string? CheckAndAddFullOutputPath(string? path, BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
     {
         if (string.IsNullOrEmpty(path))
         {

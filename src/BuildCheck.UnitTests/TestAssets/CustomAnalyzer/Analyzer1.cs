@@ -27,7 +27,7 @@ namespace CustomAnalyzer
             registrationContext.RegisterEvaluatedPropertiesAction(EvaluatedPropertiesAction);
         }
 
-        private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesAnalysisData> context)
+        private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
         {
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,

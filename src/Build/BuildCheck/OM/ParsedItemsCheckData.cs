@@ -42,9 +42,9 @@ public class ItemsHolder(IEnumerable<ProjectItemElement> items, IEnumerable<Proj
 /// <summary>
 /// BuildCheck OM data representing the evaluated items of a project.
 /// </summary>
-public class ParsedItemsAnalysisData : AnalysisData
+public class ParsedItemsCheckData : CheckData
 {
-    internal ParsedItemsAnalysisData(
+    internal ParsedItemsCheckData(
         string projectFilePath,
         int? projectConfigurationId,
         ItemsHolder itemsHolder) :
@@ -56,7 +56,7 @@ public class ParsedItemsAnalysisData : AnalysisData
 /// <summary>
 /// BuildCheck OM data representing a task executed by a project.
 /// </summary>
-public sealed class TaskInvocationAnalysisData : AnalysisData
+public sealed class TaskInvocationCheckData : CheckData
 {
     /// <summary>
     /// Represents an input or output parameter of a task.
@@ -107,7 +107,7 @@ public sealed class TaskInvocationAnalysisData : AnalysisData
         }
     }
 
-    internal TaskInvocationAnalysisData(
+    internal TaskInvocationCheckData(
         string projectFilePath,
         int? projectConfigurationId,
         ElementLocation taskInvocationLocation,
