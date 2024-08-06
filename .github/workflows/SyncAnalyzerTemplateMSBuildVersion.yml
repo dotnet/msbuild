@@ -24,12 +24,13 @@ jobs:
 
             # Check if the XML file exists
             if (-Not (Test-Path -Path $xmlFilePath)) {
-                throw "Versons.props file not found: $xmlFilePath"
+                throw "Versions.props file not found: $xmlFilePath"
             }
 
             # Load and parse the XML content
             [xml]$xmlContent = Get-Content -Path $xmlFilePath
             $versionPrefix = [string]$xmlContent.Project.PropertyGroup.VersionPrefix
+            $versionPrefix = $versionPrefix.Trim()
 
             # Validate the versionPrefix
             if ([string]::IsNullOrWhiteSpace($versionPrefix)) {
@@ -45,7 +46,7 @@ jobs:
             $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
 
             # Update the defaultValue of MicrosoftBuildVersion in the JSON template
-            $jsonContent.symbols.MicrosoftBuildVersion.defaultValue = $versionPrefix.Trim()
+            $jsonContent.symbols.MicrosoftBuildVersion.defaultValue = $versionPrefix
 
             # Convert the JSON content back to a string
             $jsonString = $jsonContent | ConvertTo-Json -Depth 10
@@ -53,16 +54,92 @@ jobs:
             # Write the updated JSON back to the file
             Set-Content -Path $jsonFilePath -Value $jsonString
             Write-Output "Updated MicrosoftBuildVersion to $versionPrefix"
+
+            # Set the versionPrefix and template filePath as an output
+            Add-Content -Path $env:GITHUB_ENV -Value "versionPrefix=$versionPrefix"
+            Add-Content -Path $env:GITHUB_ENV -Value "jsonFilePath=$jsonFilePath"
+            Write-Output "Extracted versionPrefix: $versionPrefix"
+            Write-Output "Extracted jsonFilePath: $jsonFilePath"
         }
         catch {
             Write-Error "An error occurred: $_"
         }
 
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v6
+      uses: actions/github-script@v7
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        commit-message: 'Update MicrosoftBuildVersion in analyzer template'
-        branch: 'update-msbuild-version-for-analyzer-template'
-        title: 'Update MicrosoftBuildVersion in analyzer template'
-        body: '[Automated] Update the MicrosoftBuildVersion defaultValue in the template.json.'
+        script: |
+          const baseBranch = process.env.baseBranch;
+          const versionPrefix = process.env.versionPrefix;
+          const filePath = process.env.jsonFilePath;
+          const newBranch = `${baseBranch}-update-msbuild-version-for-analyzer-template`;
+          const commitMessage = `Update MicrosoftBuildVersion to ${versionPrefix}`;
+          const prBody = '[Automated] Update the MicrosoftBuildVersion defaultValue in the template.json.';
+          const prTitle = 'Update MicrosoftBuildVersion in analyzer template';
+          
+          // Main execution
+          (async () => {
+            try {
+              // Configure git
+              await configureGit();
+          
+              // Create and switch to the new branch
+              await createAndSwitchBranch(newBranch);
+          
+              // Check if the branch already exists on the remote
+              const shouldOpenPullRequest = await checkBranchExists(newBranch);
+          
+              // Stage and commit the changes
+              await stageAndCommitChanges(filePath, commitMessage);
+          
+              // Push the new branch to the repository
+              await pushBranch(newBranch);
+          
+              // Create the pull request if needed
+              if (shouldOpenPullRequest) {
+                await createPullRequest(baseBranch, newBranch, prTitle, prBody);
+              } else {
+                console.log("The PR already exists, skipping opening a new PR.");
+              }
+            } catch (error) {
+              core.setFailed(error);
+            }
+          })();
+          
+          async function configureGit() {
+            await exec.exec(`git config user.name "github-actions"`);
+            await exec.exec(`git config user.email "github-actions@github.com"`);
+          }
+          
+          async function createAndSwitchBranch(branch) {
+            await exec.exec('git', ['checkout', '-b', branch]);
+          }
+          
+          async function checkBranchExists(branch) {
+            try {
+              await exec.exec(`git ls-remote --exit-code --heads origin ${branch}`);
+              return false;
+            } catch {
+              return true;
+            }
+          }
+          
+          async function stageAndCommitChanges(filePath, commitMessage) {
+            await exec.exec(`git add ${filePath}`);
+            await exec.exec(`git commit -m "${commitMessage}"`);
+          }
+          
+          async function pushBranch(branch) {
+            await exec.exec(`git push --force --set-upstream origin HEAD:${branch}`);
+          }
+          
+          async function createPullRequest(baseBranch, newBranch, title, body) {
+            await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              head: newBranch,
+              base: baseBranch
+            });
+          }
