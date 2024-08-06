@@ -10,7 +10,11 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 public class BuildAnalyzerRule
 {
-    public BuildAnalyzerRule(string id, string title, string description, string messageFormat,
+    public BuildAnalyzerRule(
+        string id,
+        string title,
+        string description,
+        string messageFormat,
         BuildAnalyzerConfiguration defaultConfiguration)
     {
         Id = id;
@@ -45,7 +49,7 @@ public class BuildAnalyzerRule
     /// <summary>
     /// Message format that will be used by the actual reports (<see cref="BuildCheckResult"/>) - those will just supply the actual arguments.
     /// </summary>
-    public string MessageFormat { get; }
+    public string MessageFormat { get; set; }
 
     /// <summary>
     /// The default configuration - overridable by the user via .editorconfig.
