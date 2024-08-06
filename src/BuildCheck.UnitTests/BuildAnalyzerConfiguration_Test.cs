@@ -75,14 +75,12 @@ public class BuildAnalyzerConfiguration_Test
     }
 
     [Theory]
-    [InlineData("project", EvaluationAnalysisScope.ProjectOnly)]
-    [InlineData("PROJECT", EvaluationAnalysisScope.ProjectOnly)]
-    [InlineData("current_imports", EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree)]
-    [InlineData("CURRENT_IMPORTS", EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree)]
-    [InlineData("without_sdks", EvaluationAnalysisScope.ProjectWithImportsWithoutSdks)]
-    [InlineData("WITHOUT_SDKS", EvaluationAnalysisScope.ProjectWithImportsWithoutSdks)]
-    [InlineData("all", EvaluationAnalysisScope.ProjectWithAllImports)]
-    [InlineData("ALL", EvaluationAnalysisScope.ProjectWithAllImports)]
+    [InlineData("projectfile", EvaluationAnalysisScope.ProjectFileOnly)]
+    [InlineData("PROJECTFILE", EvaluationAnalysisScope.ProjectFileOnly)]
+    [InlineData("work_tree_imports", EvaluationAnalysisScope.WorkTreeImports)]
+    [InlineData("WORK_TREE_IMPORTS", EvaluationAnalysisScope.WorkTreeImports)]
+    [InlineData("all", EvaluationAnalysisScope.All)]
+    [InlineData("ALL", EvaluationAnalysisScope.All)]
     public void CreateBuildAnalyzerConfiguration_EvaluationAnalysisScope(string parameter, EvaluationAnalysisScope? expected)
     {
         var config = new Dictionary<string, string>()

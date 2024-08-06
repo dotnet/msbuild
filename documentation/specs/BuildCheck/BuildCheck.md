@@ -209,9 +209,8 @@ Option `EvaluationAnalysisScope` with following possible options will be availab
 
 | EvaluationAnalysisScope (Solution Explorer)   | EditorConfig option      |  Behavior  | 
 | ------------- | ------------- |   ------------- |
-| ProjectOnly | `project` | Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded. | 
-| ProjectWithImportsFromCurrentWorkTree | `current_imports` |  Only the data from currently analyzed project and imports from files under the entry project or solution will be sent to the analyzer. Other imports will be discarded. | 
-| ProjectWithImportsWithoutSdks | `without_sdks` | Imports from SDKs will not be sent to the analyzer. Other imports will be sent. | 
+| ProjectFileOnly | `projectfile` | Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded. | 
+| WorkTreeImports | `work_tree_imports` |  Only the data from currently analyzed project and imports from files not recognized to be in nuget cache or SDK install folder will be sent to the analyzer. Other imports will be discarded. |  
 | ProjectWithAllImports | `all` | All data will be sent to the analyzer. | 
 
 All rules of a single analyzer must have the `EvaluationAnalysisScope` configured to a same value. If any rule from the analyzer have the value configured differently - a warning will be issued during the build and analyzer will be deregistered.

@@ -118,7 +118,7 @@ public class ConfigurationProvider_Tests
 
         buildConfig.IsEnabled.ShouldBe(true);
         buildConfig.Severity.ShouldBe(BuildAnalyzerResultSeverity.Error);
-        buildConfig.EvaluationAnalysisScope.ShouldBe(EvaluationAnalysisScope.ProjectOnly);
+        buildConfig.EvaluationAnalysisScope.ShouldBe(EvaluationAnalysisScope.ProjectFileOnly);
     }
 
     [Fact]
