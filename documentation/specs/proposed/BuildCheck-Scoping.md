@@ -34,7 +34,7 @@ In a build, some MSBuild files are imported many times (repo-wide imports like a
 * `SdkImport`: An import from an MSBuild SDK
 * `All`: All sources, including things like common targets
 
-## Categorizing a file 
+## Categorizing a file
 
 We should categorize files as soon as possible, so that we can avoid overhead of analyzing things that won't be in scope.
 
@@ -45,3 +45,13 @@ Repo root is known by projects that use SourceLink (on by default as of .NET 8),
 NuGet packages are in the folders defined by property `$(NuGetPackageFolders)`, which is available pretty early in evaluation because it's set in `ProjectName.csproj.nuget.g.props`. If we can hold categorization until that's available, we might be in good shape.
 
 We should be able to easily recognize SDK paths and the MSBuild directory to categories SDKs and common imports.
+
+## The V1 functionality
+
+Based on the design above - a simplified first version will be provided.
+Scoping categories:
+ * `ProjectFile`
+ * `WorkTreeImports`
+ * `All`
+
+Only the `WorkTreeImports` has specific handling - it will be achieved by excluding known 'immutable locations' (sdk, framework, reference assemblies and nuget cache roots) and everything else will be regarded as 'user code'. It is a significant simplification - but allows not relying on the need to obtain source control metadata, that might not be yet available early in the build.
