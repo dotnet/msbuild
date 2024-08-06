@@ -14,6 +14,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Set baseBranch variable
+      id: vars
+      run: echo "baseBranch=${{ github.ref_name }}" >> $GITHUB_ENV
+
     - name: Update analyzer template version with version from Versions.props
       shell: pwsh
       run: |
