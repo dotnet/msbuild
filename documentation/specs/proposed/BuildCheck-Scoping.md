@@ -34,7 +34,7 @@ In a build, some MSBuild files are imported many times (repo-wide imports like a
 * `SdkImport`: An import from an MSBuild SDK
 * `All`: All sources, including things like common targets
 
-## Categorizing a file
+## Categorizing a file 
 
 We should categorize files as soon as possible, so that we can avoid overhead of analyzing things that won't be in scope.
 
