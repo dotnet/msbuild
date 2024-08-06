@@ -2,7 +2,7 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>17.12.0</VersionPrefix>
+    <VersionPrefix>17.11.0</VersionPrefix>
     <PackageValidationBaselineVersion>17.11.0-preview-24318-05</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
