@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-	  <MSBuildCheck>$([MSBuild]::RegisterBuildCheck($(MSBuildThisFileDirectory)Company.AnalyzerTemplate.dll))</MSBuildCheck>
+	  <MSBuildCheck>$([MSBuild]::RegisterBuildCheck($(MSBuildThisFileDirectory)Company.CheckTemplate.dll))</MSBuildCheck>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.Build" Version="1.0.0-MicrosoftBuildPackageVersion" />

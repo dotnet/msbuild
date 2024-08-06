@@ -2784,7 +2784,7 @@ namespace Microsoft.Build.CommandLine
         private static bool IsBuildCheckEnabled(CommandLineSwitches commandLineSwitches)
         {
             // Opt-in behavior to be determined by: https://github.com/dotnet/msbuild/issues/9723
-            bool isBuildCheckEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze);
+            bool isBuildCheckEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Check);
             return isBuildCheckEnabled;
         }
 

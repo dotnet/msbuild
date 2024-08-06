@@ -181,7 +181,7 @@ internal sealed class BuildCheckCentralContext
                 }
             }
 
-            // Here we might want to check the configPerRule[0].EvaluationAnalysisScope - if the input data supports that
+            // Here we might want to check the configPerRule[0].EvaluationsCheckScope - if the input data supports that
             // The decision and implementation depends on the outcome of the investigation tracked in:
             // https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57851137
 

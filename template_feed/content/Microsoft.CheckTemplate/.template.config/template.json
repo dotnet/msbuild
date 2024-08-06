@@ -5,27 +5,27 @@
       "Common",
       "Library"
     ],
-    "name": "MSBuild custom analyzer skeleton project.",
+    "name": "MSBuild custom check skeleton project.",
     "generatorVersions": "[1.0.0.0-*)",
-    "description": "A project for creating a MSBuild analyzer library that targets .NET Standard",
-    "groupIdentity": "Microsoft.AnalyzerTemplate",
-    "identity": "Microsoft.AnalyzerTemplate",
-    "shortName": "msbuildanalyzer",
+    "description": "A project for creating a MSBuild check library that targets .NET Standard",
+    "groupIdentity": "Microsoft.CheckTemplate",
+    "identity": "Microsoft.CheckTemplate",
+    "shortName": "msbuildcheck",
     "tags": {
       "language": "C#",
       "type": "project"
     },
-    "sourceName": "Company.AnalyzerTemplate",
+    "sourceName": "Company.CheckTemplate",
     "preferNameDirectory": true,
     "primaryOutputs": [
       {
-        "path": "Company.AnalyzerTemplate.csproj"
+        "path": "Company.CheckTemplate.csproj"
       }
    ],
    "symbols": {
     "MicrosoftBuildVersion": {
       "type": "parameter",
-      "description": "Overrides the default Microsoft.Build version where analyzer's interfaces are placed",
+      "description": "Overrides the default Microsoft.Build version where check's interfaces are placed",
       "datatype": "text",
       "defaultValue": "17.11.0",
       "replaces": "1.0.0-MicrosoftBuildPackageVersion",

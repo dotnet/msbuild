@@ -41,7 +41,7 @@ public class EndToEndTests : IDisposable
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
-            (checkRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+            (checkRequested ? " -check" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
         _env.Output.WriteLine(output);
 
         success.ShouldBeTrue();
@@ -77,7 +77,7 @@ public class EndToEndTests : IDisposable
         string logFile = _env.ExpectFile(".binlog").Path;
 
         _ = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(checkRequested ? "-analyze" : string.Empty)} -bl:{logFile}",
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(checkRequested ? "-check" : string.Empty)} -bl:{logFile}",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
         success.ShouldBeTrue();
@@ -116,7 +116,7 @@ public class EndToEndTests : IDisposable
         PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, BC0101Severity);
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze",
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
         success.ShouldBeTrue();
@@ -150,7 +150,7 @@ public class EndToEndTests : IDisposable
         success.ShouldBeTrue();
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-         $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(checkRequested ? "-analyze" : string.Empty)}",
+         $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(checkRequested ? "-check" : string.Empty)}",
          out success, false, _env.Output, timeoutMilliseconds: 120_000);
 
         _env.Output.WriteLine(output);
@@ -183,7 +183,7 @@ public class EndToEndTests : IDisposable
             AddCustomDataSourceToNugetConfig(checkCandidatePath);
 
             string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:n",
+                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -check -verbosity:n",
                 out bool successBuild);
             successBuild.ShouldBeTrue(projectCheckBuildLog);
 

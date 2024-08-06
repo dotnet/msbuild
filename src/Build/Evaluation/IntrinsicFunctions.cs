@@ -703,7 +703,7 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
 
-            loggingContext.LogComment(MessageImportance.Low, "CustomAnalyzerAssemblyNotExist", pathToAssembly);
+            loggingContext.LogComment(MessageImportance.Low, "CustomCheckAssemblyNotExist", pathToAssembly);
 
             return false;
         }

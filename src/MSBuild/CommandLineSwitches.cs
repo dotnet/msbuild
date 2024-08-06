@@ -100,7 +100,7 @@ namespace Microsoft.Build.CommandLine
             WarningsNotAsErrors,
             WarningsAsMessages,
             BinaryLogger,
-            Analyze,
+            Check,
             Restore,
             ProfileEvaluation,
             RestoreProperty,
@@ -277,7 +277,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  new string[] { "warnnotaserror", "noerr" },           ParameterizedSwitch.WarningsNotAsErrors,        null,                           true,           "MissingWarnNotAsErrorParameterError", true,   false,   "HelpMessage_40_WarnNotAsErrorSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false,   "HelpMessage_29_WarnAsMessageSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "binarylogger", "bl" },                ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false,   "HelpMessage_30_BinaryLoggerSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "analyze", },                          ParameterizedSwitch.Analyze,                    null,                           false,          null,                                  true,   false,   null),
+            new ParameterizedSwitchInfo(  new string[] { "check", },                            ParameterizedSwitch.Check,                      null,                           false,          null,                                  true,   false,   null),
             new ParameterizedSwitchInfo(  new string[] { "restore", "r" },                      ParameterizedSwitch.Restore,                    null,                           false,          null,                                  true,   false,   "HelpMessage_31_RestoreSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "profileevaluation", "prof" },         ParameterizedSwitch.ProfileEvaluation,          null,                           false,          "MissingProfileParameterError",        true,   false,   "HelpMessage_32_ProfilerSwitch"),
             new ParameterizedSwitchInfo(  new string[] { "restoreproperty", "rp" },             ParameterizedSwitch.RestoreProperty,            null,                           true,           "MissingPropertyError",                true,   false,   "HelpMessage_33_RestorePropertySwitch"),
@@ -467,7 +467,7 @@ namespace Microsoft.Build.CommandLine
                 Debug.Assert(i == (int)(s_parameterizedSwitchesMap[i].parameterizedSwitch),
                     "The map of parameterized switches must be ordered the same way as the ParameterizedSwitch enumeration.");
                 if (s_parameterizedSwitchesMap[i].parameterizedSwitch is not ParameterizedSwitch.Project and
-                    not ParameterizedSwitch.NodeMode and not ParameterizedSwitch.Analyze)
+                    not ParameterizedSwitch.NodeMode and not ParameterizedSwitch.Check)
                 {
                     Debug.Assert(!string.IsNullOrEmpty(s_parameterizedSwitchesMap[i].resourceId), "All parameterized switches should be cross-checked against the help message strings except from project switch");
                 }
