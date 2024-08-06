@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - jennybai/SyncVersionFlow
     paths:
       - 'eng/Versions.props'
 
@@ -50,27 +49,41 @@ jobs:
             # Load the JSON template
             $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
 
-            # Update the defaultValue of MicrosoftBuildVersion in the JSON template
-            $jsonContent.symbols.MicrosoftBuildVersion.defaultValue = $versionPrefix
-
-            # Convert the JSON content back to a string
-            $jsonString = $jsonContent | ConvertTo-Json -Depth 10
-
-            # Write the updated JSON back to the file
-            Set-Content -Path $jsonFilePath -Value $jsonString
-            Write-Output "Updated MicrosoftBuildVersion to $versionPrefix"
+            # Check if the versionPrefix is different from the current defaultValue
+            if ($versionPrefix -ne $jsonContent.symbols.MicrosoftBuildVersion.defaultValue) {
+                # Update the defaultValue of MicrosoftBuildVersion in the JSON template
+                $jsonContent.symbols.MicrosoftBuildVersion.defaultValue = $versionPrefix
+        
+                # Convert the JSON content back to a string
+                $jsonString = $jsonContent | ConvertTo-Json -Depth 10
+        
+                # Write the updated JSON back to the file
+                Set-Content -Path $jsonFilePath -Value $jsonString
+                Write-Output "Updated MicrosoftBuildVersion to $versionPrefix"
+        
+                # Set the updateNeeded output variable to true
+                $updateNeeded = "true"
+            } else {
+                Write-Output "No update needed. MicrosoftBuildVersion is already $versionPrefix"
+        
+                # Set the updateNeeded output variable to false
+                $updateNeeded = "false"
+            }
 
             # Set the versionPrefix and template filePath as an output
             Add-Content -Path $env:GITHUB_ENV -Value "versionPrefix=$versionPrefix"
             Add-Content -Path $env:GITHUB_ENV -Value "jsonFilePath=$jsonFilePath"
+            Add-Content -Path $env:GITHUB_ENV -Value "updateNeeded=$updateNeeded"
             Write-Output "Extracted versionPrefix: $versionPrefix"
             Write-Output "Extracted jsonFilePath: $jsonFilePath"
+            Write-Output "Update needed: $updateNeeded"
         }
         catch {
             Write-Error "An error occurred: $_"
         }
 
     - name: Create Pull Request
+      if: env.updateNeeded == 'true'
       uses: actions/github-script@v7
       with:
         script: |
@@ -91,8 +104,8 @@ jobs:
               // Create and switch to the new branch
               await createAndSwitchBranch(newBranch);
           
-              // Check if the branch already exists on the remote
-              const shouldOpenPullRequest = await checkBranchExists(newBranch);
+              // Check if the branch PR already exists on the remote
+              const shouldOpenPullRequest = await checkBranchPRExists(newBranch,baseBranch);
           
               // Stage and commit the changes
               await stageAndCommitChanges(filePath, commitMessage);
@@ -120,12 +133,20 @@ jobs:
             await exec.exec('git', ['checkout', '-b', branch]);
           }
           
-          async function checkBranchExists(branch) {
-            try {
-              await exec.exec(`git ls-remote --exit-code --heads origin ${branch}`);
-              return false;
-            } catch {
+          async function checkBranchPRExists(newBranch,baseBranch) {
+            // Check if a pull request already exists
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: newBranch,
+              base: baseBranch,
+              state: 'open',
+            });
+          
+            if (pullRequests.length === 0) {
               return true;
+            } else {
+              return false;
             }
           }
           
