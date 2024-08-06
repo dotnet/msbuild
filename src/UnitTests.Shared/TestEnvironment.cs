@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests
                     item.AssertInvariant(Output);
                 }
 
-                SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+                SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
                 ChangeWaves.ResetStateForTests();
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }

@@ -86,8 +86,8 @@ try {
   {
     $buildToolPath = Join-Path $bootstrapRoot "core\dotnet.exe"
     # The version must be consistent with BootstrapSdkVersion
-    $buildToolCommand = Join-Path $bootstrapRoot "core\sdk\8.0.302\MSBuild.dll"
-    $buildToolFramework = "net8.0"
+    $buildToolCommand = Join-Path $bootstrapRoot "core\sdk\9.0.100-preview.6.24328.19\MSBuild.dll"
+    $buildToolFramework = "net9.0"
   }
 
   # Use separate artifacts folder for stage 2

@@ -269,7 +269,7 @@ EndGlobal
                 }
                 finally
                 {
-                    Environment.SetEnvironmentVariable("MSBuildSolutionBatchTargets", "");
+                    Environment.SetEnvironmentVariable("MSBuildSolutionBatchTargets", null);
                 }
             }
         }

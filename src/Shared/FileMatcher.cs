@@ -1673,9 +1673,9 @@ namespace Microsoft.Build.Shared
         /// <param name="pattern">Pattern against which string is matched.</param>
         internal static bool IsMatch(ReadOnlySpan<char> input, string pattern)
         {
-            if (input == null)
+            if (input == ReadOnlySpan<char>.Empty)
             {
-                throw new ArgumentNullException(nameof(input));
+                ErrorUtilities.ThrowInternalError("Unexpected empty 'input' provided.");
             }
             if (pattern == null)
             {

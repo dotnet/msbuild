@@ -162,7 +162,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             byte[] buffer = new byte[2];
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
+#pragma warning disable CA2022 // Avoid inexact read with 'Stream.Read'
                 s.Read(buffer, 0, 2);
+#pragma warning restore CA2022 // Avoid inexact read with 'Stream.Read'
             }
 
             // if first two bytes are "MZ" then we're looking at an .exe or a .dll not a .manifest
