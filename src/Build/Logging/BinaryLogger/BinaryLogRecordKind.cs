@@ -15,7 +15,6 @@ namespace Microsoft.Build.Logging
         EndOfFile = 0,
         BuildStarted,
         BuildFinished,
-        BuildSubmissionStarted,
         ProjectStarted,
         ProjectFinished,
         TargetStarted,
@@ -41,5 +40,6 @@ namespace Microsoft.Build.Logging
         TaskParameter,
         ResponseFileUsed,
         AssemblyLoad,
+        BuildSubmissionStarted,
     }
 }
