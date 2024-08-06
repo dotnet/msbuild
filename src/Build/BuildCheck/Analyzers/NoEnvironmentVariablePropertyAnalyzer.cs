@@ -18,7 +18,7 @@ internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
         "BC0103",
         "NoEnvironmentVariablePropertyAnalyzer",
         "No implicit property derived from an environment variable should be used during the build",
-        "Property is derived from environment variable: '{0}' with value: '{1}'. Properties should be passed explicitly using the /p option.",
+        "Property is derived from environment variable: '{0}'. Properties should be passed explicitly using the /p option.",
         new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Suggestion });
 
     public override string FriendlyName => "MSBuild.NoEnvironmentVariablePropertyAnalyzer";
@@ -44,8 +44,7 @@ internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
                     context.ReportResult(BuildCheckResult.Create(
                         SupportedRule,
                         ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
-                        envVariableData.Key,
-                        envVariableData.Value.EnvVarValue));
+                        envVariableData.Key));
 
                     _environmentVariablesReported.Add(identityKey);
                 }
