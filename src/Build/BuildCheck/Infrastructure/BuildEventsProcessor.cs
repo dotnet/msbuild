@@ -17,7 +17,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     /// Represents a task currently being executed.
     /// </summary>
     /// <remarks>
-    /// <see cref="TaskParameters"/> is stored in its own field typed as a mutable dictionary because <see cref="AnalysisData"/>
+    /// <see cref="TaskParameters"/> is stored in its own field typed as a mutable dictionary because <see cref="CheckData"/>
     /// is immutable.
     /// </remarks>
     private struct ExecutingTaskData
@@ -94,7 +94,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     {
         if (!_buildCheckCentralContext.HasTaskInvocationActions)
         {
-            // No analyzer is interested in task invocation actions -> nothing to do.
+            // No check is interested in task invocation actions -> nothing to do.
             return;
         }
 
@@ -131,7 +131,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     {
         if (!_buildCheckCentralContext.HasTaskInvocationActions)
         {
-            // No analyzer is interested in task invocation actions -> nothing to do.
+            // No check is interested in task invocation actions -> nothing to do.
             return;
         }
 
@@ -153,7 +153,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     {
         if (!_buildCheckCentralContext.HasTaskInvocationActions)
         {
-            // No analyzer is interested in task invocation actions -> nothing to do.
+            // No check is interested in task invocation actions -> nothing to do.
             return;
         }
 
@@ -209,7 +209,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         {
             checkContext.DispatchAsErrorFromText(null, null, null,
                 BuildEventFileInfo.Empty,
-                $"The analyzer '{checkWrapper.BuildExecutionCheck.FriendlyName}' reported a result for a rule '{result.BuildExecutionCheckRule.Id}' that it does not support.");
+                $"The check '{checkWrapper.BuildExecutionCheck.FriendlyName}' reported a result for a rule '{result.BuildExecutionCheckRule.Id}' that it does not support.");
             return;
         }
 

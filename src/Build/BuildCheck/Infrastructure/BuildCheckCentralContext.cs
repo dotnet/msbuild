@@ -11,7 +11,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 /// <summary>
-/// A manager of the runs of the analyzers - deciding based on configuration of what to run and what to postfilter.
+/// A manager of the runs of the checks - deciding based on configuration of what to run and what to postfilter.
 /// </summary>
 internal sealed class BuildCheckCentralContext
 {
@@ -44,7 +44,7 @@ internal sealed class BuildCheckCentralContext
     private readonly CallbackRegistry _globalCallbacks = new();
 
     // This we can potentially use to subscribe for receiving evaluated props in the
-    //  build event args. However - this needs to be done early on, when analyzers might not be known yet
+    //  build event args. However - this needs to be done early on, when checks might not be known yet
     internal bool HasEvaluatedPropertiesActions => _globalCallbacks.EvaluatedPropertiesActions.Count > 0;
 
     internal bool HasParsedItemsActions => _globalCallbacks.ParsedItemsActions.Count > 0;
@@ -130,19 +130,19 @@ internal sealed class BuildCheckCentralContext
 
     internal void RunPropertyWriteActions(
         PropertyWriteData propertyWriteData,
-        CheckLoggingContext analysisContext,
+        CheckLoggingContext checkContext,
         Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.PropertyWriteActions, propertyWriteData,
-            analysisContext, resultHandler);
+            checkContext, resultHandler);
 
     internal void RunProjectProcessingDoneActions(
         ProjectProcessingDoneData projectProcessingDoneData,
-        ICheckContext analysisContext,
+        ICheckContext checkContext,
         Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ProjectProcessingDoneActions, projectProcessingDoneData,
-            analysisContext, resultHandler);
+            checkContext, resultHandler);
 
     private void RunRegisteredActions<T>(
         List<(BuildExecutionCheckWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks,
@@ -156,7 +156,7 @@ internal sealed class BuildCheckCentralContext
         foreach (var checkCallback in registeredCallbacks)
         {
             // Tracing - https://github.com/dotnet/msbuild/issues/9629 - we might want to account this entire block
-            //  to the relevant analyzer (with BuildAnalyzerConfigurationEffectiveonly the currently accounted part as being the 'core-execution' subspan)
+            //  to the relevant check (with BuildCheckConfigurationEffectively the currently accounted part as being the 'core-execution' subspan)
 
             BuildExecutionCheckConfigurationEffective? commonConfig = checkCallback.Item1.CommonConfig;
             BuildExecutionCheckConfigurationEffective[] configPerRule;

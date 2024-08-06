@@ -9,11 +9,11 @@ using Microsoft.Build.Experimental.BuildCheck.Utilities;
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
-/// Configuration for a build analyzer.
-/// Default values can be specified by the Analyzer in code.
+/// Configuration for a build check.
+/// Default values can be specified by the Check in code.
 /// Users can overwrite the defaults by explicit settings in the .editorconfig file.
 /// Each rule can have its own configuration, which can differ per each project.
-/// The <see cref="EvaluationAnalysisScope"/> setting must be same for all rules in the same analyzer (but can differ between projects)
+/// The <see cref="EvaluationCheckScope"/> setting must be same for all rules in the same check (but can differ between projects)
 /// </summary>
 public class BuildExecutionCheckConfiguration
 {
@@ -31,7 +31,7 @@ public class BuildExecutionCheckConfiguration
 
     /// <summary>
     /// This applies only to specific events, that can distinguish whether they are directly inferred from
-    ///  the current project, or from some import. If supported it can help tuning the level of detail or noise from analysis.
+    ///  the current project, or from some import. If supported it can help tuning the level of detail or noise from check.
     ///
     /// If not supported by the data source - then the setting is ignored
     /// </summary>
@@ -43,14 +43,14 @@ public class BuildExecutionCheckConfiguration
     public BuildExecutionCheckResultSeverity? Severity { get; internal init; }
 
     /// <summary>
-    /// Whether the analyzer rule is enabled.
-    /// If all rules within the analyzer are not enabled, it will not be run.
-    /// If some rules are enabled and some are not, the analyzer will be run and reports will be post-filtered.
+    /// Whether the check rule is enabled.
+    /// If all rules within the check are not enabled, it will not be run.
+    /// If some rules are enabled and some are not, the check will be run and reports will be post-filtered.
     /// </summary>
     public bool? IsEnabled {
         get
         {
-            // Do not consider Default as enabled, because the default severity of the rule coule be set to None
+            // Do not consider Default as enabled, because the default severity of the rule could be set to None
             if (Severity.HasValue && Severity.Value != BuildExecutionCheckResultSeverity.Default)
             {
                 return !Severity.Value.Equals(BuildExecutionCheckResultSeverity.None);
@@ -61,20 +61,20 @@ public class BuildExecutionCheckConfiguration
     }
 
     /// <summary>
-    /// Creates a <see cref="BuildAnalyzerConfiguration"/> object based on the provided configuration dictionary.
-    /// If the BuildAnalyzerConfiguration's property name presented in the dictionary, the value of this key-value pair is parsed and assigned to the instance's field.
+    /// Creates a <see cref="BuildExecutionCheckConfiguration"/> object based on the provided configuration dictionary.
+    /// If the BuildCheckConfiguration's property name presented in the dictionary, the value of this key-value pair is parsed and assigned to the instance's field.
     /// If parsing failed the value will be equal to null.
     /// </summary>
-    /// <param name="configDictionary">The configuration dictionary containing the settings for the build analyzer. The configuration's keys are expected to be in lower case or the EqualityComparer to ignore case.</param>
-    /// <returns>A new instance of <see cref="BuildAnalyzerConfiguration"/> with the specified settings.</returns>
+    /// <param name="configDictionary">The configuration dictionary containing the settings for the build check. The configuration's keys are expected to be in lower case or the EqualityComparer to ignore case.</param>
+    /// <returns>A new instance of <see cref="BuildExecutionCheckConfiguration"/> with the specified settings.</returns>
     internal static BuildExecutionCheckConfiguration Create(Dictionary<string, string>? configDictionary) => new()
     {
-        EvaluationCheckScope = TryExtractEvaluationAnalysisScope(configDictionary),
+        EvaluationCheckScope = TryExtractEvaluationCheckScope(configDictionary),
         Severity = TryExtractSeverity(configDictionary),
     };
 
 
-    private static EvaluationCheckScope? TryExtractEvaluationAnalysisScope(Dictionary<string, string>? config)
+    private static EvaluationCheckScope? TryExtractEvaluationCheckScope(Dictionary<string, string>? config)
     {
 
         if (!TryExtractValue(BuildCheckConstants.scopeConfigurationKey, config, out string? stringValue) || stringValue is null)

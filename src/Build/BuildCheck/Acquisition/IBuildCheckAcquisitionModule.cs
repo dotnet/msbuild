@@ -10,7 +10,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Acquisition;
 internal interface IBuildCheckAcquisitionModule
 {
     /// <summary>
-    /// Creates a list of factory delegates for building analyzer rules instances from a given assembly path.
+    /// Creates a list of factory delegates for building check rules instances from a given assembly path.
     /// </summary>
-    List<BuildExecutionCheckFactory> CreateBuildExecutionCheckFactories(CheckAcquisitionData analyzerAcquisitionData, ICheckContext analysisContext);
+    List<BuildExecutionCheckFactory> CreateBuildExecutionCheckFactories(CheckAcquisitionData checkAcquisitionData, ICheckContext checkContext);
 }

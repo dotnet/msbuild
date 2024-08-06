@@ -16,12 +16,12 @@ internal sealed class NoEnvironmentVariablePropertyCheck : BuildExecutionCheck
 
     public static BuildExecutionCheckRule SupportedRule = new BuildExecutionCheckRule(
         "BC0103",
-        "NoEnvironmentVariablePropertyAnalyzer",
+        "NoEnvironmentVariablePropertyCheck",
         "No implicit property derived from an environment variable should be used during the build",
         "Property is derived from environment variable: '{0}' with value: '{1}'. Properties should be passed explicitly using the /p option.",
         new BuildExecutionCheckConfiguration() { Severity = BuildExecutionCheckResultSeverity.Suggestion });
 
-    public override string FriendlyName => "MSBuild.NoEnvironmentVariablePropertyAnalyzer";
+    public override string FriendlyName => "MSBuild.NoEnvironmentVariablePropertyCheck";
 
     public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = [SupportedRule];
 

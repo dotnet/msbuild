@@ -340,7 +340,7 @@ namespace Microsoft.Build.Evaluation
         /// Properties may be null.
         ///
         /// Used for tests and for ToolsetReader - that operates agnostic on the project
-        ///   - so no logging context is passed, and no BuildCheck analysis will be executed.
+        ///   - so no logging context is passed, and no BuildCheck check will be executed.
         /// </summary>
         internal Expander(IPropertyProvider<P> properties, IFileSystem fileSystem)
         : this(properties, fileSystem, null)
@@ -394,7 +394,7 @@ namespace Microsoft.Build.Evaluation
         /// Any or all may be null.
         ///
         /// This is for the purpose of evaluations through API calls, that might not be able to pass the logging context
-        ///  - BuildCheck analysis won't be executed for those.
+        ///  - BuildCheck checking won't be executed for those.
         /// (for one of the calls we can actually pass IDataConsumingContext - as we have logging service and project)
         ///
         /// </summary>

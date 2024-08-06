@@ -27,7 +27,7 @@ internal sealed class DoubleWritesCheck : BuildExecutionCheck
         "Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.",
         new BuildExecutionCheckConfiguration() { Severity = BuildExecutionCheckResultSeverity.Warning });
 
-    public override string FriendlyName => "MSBuild.DoubleWritesAnalyzer";
+    public override string FriendlyName => "MSBuild.DoubleWritesCheck";
 
     public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = [SupportedRule];
 
@@ -48,37 +48,37 @@ internal sealed class DoubleWritesCheck : BuildExecutionCheck
 
     private void TaskInvocationAction(BuildCheckDataContext<TaskInvocationCheckData> context)
     {
-        // This analyzer uses a hard-coded list of tasks known to write files.
+        // This check uses a hard-coded list of tasks known to write files.
         switch (context.Data.TaskName)
         {
             case "Csc":
             case "Vbc":
-            case "Fsc": AnalyzeCompilerTask(context); break;
-            case "Copy": AnalyzeCopyTask(context); break;
+            case "Fsc": CheckCompilerTask(context); break;
+            case "Copy": CheckCopyTask(context); break;
         }
     }
 
-    private void AnalyzeCompilerTask(BuildCheckDataContext<TaskInvocationCheckData> context)
+    private void CheckCompilerTask(BuildCheckDataContext<TaskInvocationCheckData> context)
     {
         var taskParameters = context.Data.Parameters;
 
         // Compiler tasks have several parameters representing files being written.
-        AnalyzeParameter("OutputAssembly");
-        AnalyzeParameter("OutputRefAssembly");
-        AnalyzeParameter("DocumentationFile");
-        AnalyzeParameter("PdbFile");
+        CheckParameter("OutputAssembly");
+        CheckParameter("OutputRefAssembly");
+        CheckParameter("DocumentationFile");
+        CheckParameter("PdbFile");
 
-        void AnalyzeParameter(string parameterName)
+        void CheckParameter(string parameterName)
         {
             if (taskParameters.TryGetValue(parameterName, out TaskParameter? taskParameter))
             {
                 string outputPath = taskParameter.EnumerateStringValues().FirstOrDefault() ?? "";
-                AnalyzeWrite(context, outputPath);
+                CheckWrite(context, outputPath);
             }
         }
     }
 
-    private void AnalyzeCopyTask(BuildCheckDataContext<TaskInvocationCheckData> context)
+    private void CheckCopyTask(BuildCheckDataContext<TaskInvocationCheckData> context)
     {
         var taskParameters = context.Data.Parameters;
 
@@ -89,19 +89,19 @@ internal sealed class DoubleWritesCheck : BuildExecutionCheck
             string destinationFolderPath = destinationFolder.EnumerateStringValues().FirstOrDefault() ?? "";
             foreach (string sourceFilePath in sourceFiles.EnumerateStringValues())
             {
-                AnalyzeWrite(context, Path.Combine(destinationFolderPath, Path.GetFileName(sourceFilePath)));
+                CheckWrite(context, Path.Combine(destinationFolderPath, Path.GetFileName(sourceFilePath)));
             }
         }
         else if (taskParameters.TryGetValue("DestinationFiles", out TaskParameter? destinationFiles))
         {
             foreach (string destinationFilePath in destinationFiles.EnumerateStringValues())
             {
-                AnalyzeWrite(context, destinationFilePath);
+                CheckWrite(context, destinationFilePath);
             }
         }
     }
 
-    private void AnalyzeWrite(BuildCheckDataContext<TaskInvocationCheckData> context, string fileBeingWritten)
+    private void CheckWrite(BuildCheckDataContext<TaskInvocationCheckData> context, string fileBeingWritten)
     {
         if (!string.IsNullOrEmpty(fileBeingWritten))
         {

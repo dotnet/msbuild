@@ -18,7 +18,7 @@ internal sealed class ConfigurationProvider
     private const string BuildCheck_ConfigurationKey = "build_check";
 
     /// <summary>
-    /// The dictionary used for storing the BuildAnalyzerConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}.
+    /// The dictionary used for storing the BuildCheckConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}.
     /// </summary>
     private readonly ConcurrentDictionary<string, BuildExecutionCheckConfiguration> _buildExecutionCheckConfiguration = new ConcurrentDictionary<string, BuildExecutionCheckConfiguration>(StringComparer.InvariantCultureIgnoreCase);
 
@@ -38,7 +38,7 @@ internal sealed class ConfigurationProvider
     };
 
     /// <summary>
-    /// Gets the user specified unrecognized configuration for the given analyzer rule.
+    /// Gets the user specified unrecognized configuration for the given check rule.
     /// 
     /// The configuration module should as well check that CustomConfigurationData
     ///  for a particular rule is equal across the whole build (for all projects)  - otherwise it should error out.
@@ -217,10 +217,10 @@ internal sealed class ConfigurationProvider
     }
 
     /// <summary>
-    /// Gets effective user specified (or default) configuration for the given analyzer rule.
+    /// Gets effective user specified (or default) configuration for the given check rule.
     /// The configuration values CAN be null upon this operation.
     /// 
-    /// The configuration module should as well check that BuildAnalyzerConfigurationInternal.EvaluationAnalysisScope
+    /// The configuration module should as well check that BuildCheckConfigurationInternal.EvaluationCheckScope
     ///  for all rules is equal - otherwise it should error out.
     /// </summary>
     /// <param name="projectFullPath"></param>
@@ -248,11 +248,11 @@ internal sealed class ConfigurationProvider
     }
 
     /// <summary>
-    /// Gets effective configuration for the given analyzer rule.
+    /// Gets effective configuration for the given check rule.
     /// The configuration values are guaranteed to be non-null upon this merge operation.
     /// </summary>
     /// <param name="projectFullPath"></param>
-    /// <param name="analyzerRule"></param>
+    /// <param name="checkRule"></param>
     /// <returns></returns>
     internal BuildExecutionCheckConfigurationEffective GetMergedConfiguration(string projectFullPath, BuildExecutionCheckRule checkRule)
         => GetMergedConfiguration(projectFullPath, checkRule.Id, checkRule.DefaultConfiguration);

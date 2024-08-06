@@ -65,8 +65,8 @@ internal interface IBuildCheckManager
 
     // All those to be called from RequestBuilder,
     //  but as well from the ConnectorLogger - as even if interleaved, it gives the info
-    //  to manager about what analyzers need to be materialized and configuration fetched.
-    // No unloading of analyzers is yet considered - once loaded it stays for whole build.
+    //  to manager about what checks need to be materialized and configuration fetched.
+    // No unloading of checks is yet considered - once loaded it stays for whole build.
     void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, ICheckContext checksContext, string projectFullPath);
 
     void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);

@@ -21,7 +21,7 @@ internal sealed class SharedOutputPathCheck : BuildExecutionCheck
         "Projects {0} and {1} have conflicting output paths: {2}.",
         new BuildExecutionCheckConfiguration() { RuleId = RuleId, Severity = BuildExecutionCheckResultSeverity.Warning });
 
-    public override string FriendlyName => "MSBuild.SharedOutputPathAnalyzer";
+    public override string FriendlyName => "MSBuild.SharedOutputPathCheck";
 
     public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = [SupportedRule];
 

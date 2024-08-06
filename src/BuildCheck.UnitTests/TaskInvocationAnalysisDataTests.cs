@@ -26,7 +26,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             public static BuildExecutionCheckRule SupportedRule = new BuildExecutionCheckRule("BC0000", "TestRule", "TestDescription", "TestMessage",
                 new BuildExecutionCheckConfiguration() { Severity = BuildExecutionCheckResultSeverity.Warning });
 
-            public override string FriendlyName => "MSBuild.TestAnalyzer";
+            public override string FriendlyName => "MSBuild.TestCheck";
 
             public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = [SupportedRule];
 

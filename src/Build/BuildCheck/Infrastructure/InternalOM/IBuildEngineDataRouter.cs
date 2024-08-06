@@ -5,14 +5,14 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 /// <summary>
 /// The module that routes the data to the final consumer.
-/// Typically, it is the BuildCheck (in case of in-node analysis) or LoggingService
-///  (in case of centralized analysis, where the data will first be wrapped to BuildEventArgs and sent to central node).
+/// Typically, it is the BuildCheck (in case of in-node check) or LoggingService
+///  (in case of centralized check, where the data will first be wrapped to BuildEventArgs and sent to central node).
 /// </summary>
 internal interface IBuildEngineDataRouter
 {
     void ProcessPropertyRead(
         PropertyReadInfo propertyReadInfo,
-        // This is intentionally AnalysisLoggingContext instead of ICheckContext - to avoid boxing allocations
+        // This is intentionally CheckLoggingContext instead of ICheckContext - to avoid boxing allocations
         //  on a hot path of properties reading (same for writing)
         CheckLoggingContext checkContext);
 

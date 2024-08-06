@@ -11,7 +11,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 /// <summary>
-/// A wrapping, enriching class for BuildAnalyzer - so that we have additional data and functionality.
+/// A wrapping, enriching class for BuildCheck - so that we have additional data and functionality.
 /// </summary>
 internal sealed class BuildExecutionCheckWrapper
 {

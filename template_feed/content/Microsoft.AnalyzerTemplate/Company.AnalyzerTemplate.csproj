@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Company.AnalyzerTemplate.props" Pack="true" PackagePath="build\Company.AnalyzerTemplate.props" />
+    <None Include="Company.CheckTemplate.props" Pack="true" PackagePath="build\Company.CheckTemplate.props" />
     <Content Include="README.md" />
   </ItemGroup>
 

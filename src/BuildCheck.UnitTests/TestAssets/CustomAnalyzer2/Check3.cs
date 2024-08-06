@@ -19,7 +19,7 @@ namespace CustomCheck2
 
         public override void Initialize(ConfigurationContext configurationContext)
         {
-            // configurationContext to be used only if analyzer needs external configuration data.
+            // configurationContext to be used only if check needs external configuration data.
         }
 
         public override void RegisterActions(IBuildCheckRegistrationContext registrationContext)

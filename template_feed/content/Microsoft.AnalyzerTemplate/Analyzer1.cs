@@ -2,24 +2,24 @@
 using Microsoft.Build.Experimental.BuildCheck;
 using System.Collections.Generic;
 
-namespace Company.AnalyzerTemplate
+namespace Company.CheckTemplate
 {
-    public sealed class Analyzer1 : BuildAnalyzer
+    public sealed class Check1 : BuildExecutionCheck
     {
-        public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
+        public static BuildCheckRule SupportedRule = new BuildExecutionCheckRule(
             "X01234",
             "Title",
             "Description",
             "Message format: {0}",
-            new BuildAnalyzerConfiguration());
+            new BuildCheckConfiguration());
 
-        public override string FriendlyName => "Company.Analyzer1";
+        public override string FriendlyName => "Company.Check1";
 
-        public override IReadOnlyList<BuildAnalyzerRule> SupportedRules { get; } = new List<BuildAnalyzerRule>() { SupportedRule };
+        public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = new List<BuildExecutionCheckRule>() { SupportedRule };
 
         public override void Initialize(ConfigurationContext configurationContext)
         {
-            // configurationContext to be used only if analyzer needs external configuration data.
+            // configurationContext to be used only if check needs external configuration data.
         }
 
 
@@ -28,7 +28,7 @@ namespace Company.AnalyzerTemplate
             registrationContext.RegisterEvaluatedPropertiesAction(EvaluatedPropertiesAction);
         }
 
-        private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesAnalysisData> context)
+        private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
         {
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,

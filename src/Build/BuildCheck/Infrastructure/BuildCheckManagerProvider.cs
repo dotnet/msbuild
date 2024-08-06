@@ -88,7 +88,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         /// <summary>
         /// Notifies the manager that the data source will be used -
-        ///   so it should register the built-in analyzers for the source if it hasn't been done yet.
+        ///   so it should register the built-in checks for the source if it hasn't been done yet.
         /// </summary>
         /// <param name="buildCheckDataSource"></param>
         public void SetDataSource(BuildCheckDataSource buildCheckDataSource)
@@ -117,7 +117,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
                 else
                 {
-                    checkContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerFailedAcquisition", acquisitionData.AssemblyPath);
+                    checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckFailedAcquisition", acquisitionData.AssemblyPath);
                 }
             }
             else
@@ -147,7 +147,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         ];
 
         /// <summary>
-        /// For tests only. TODO: Remove when analyzer acquisition is done.
+        /// For tests only. TODO: Remove when check acquisition is done.
         /// </summary>
         internal static (string[] ruleIds, bool defaultEnablement, BuildExecutionCheckFactory factory)[][]? s_testFactoriesPerDataSource;
 
@@ -167,7 +167,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         /// <summary>
         /// To be used by acquisition module.
-        /// Registers the custom analyzers, the construction of analyzers is deferred until the first using project is encountered.
+        /// Registers the custom checks, the construction of checks is deferred until the first using project is encountered.
         /// </summary>
         internal void RegisterCustomChecks(
             BuildCheckDataSource buildCheckDataSource,
@@ -183,18 +183,18 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     _checkRegistry.Add(new BuildExecutionCheckFactoryContext(factory, ruleIds, defaultEnablement));
 
                     var instance = factory();
-                    checkContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.FriendlyName);
+                    checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckSuccessfulAcquisition", instance.FriendlyName);
                 }
             }
         }
 
         /// <summary>
         /// To be used by acquisition module
-        /// Registers the custom analyzer, the construction of analyzer is needed during registration.
+        /// Registers the custom check, the construction of check is needed during registration.
         /// </summary>
         /// <param name="buildCheckDataSource">Represents different data sources used in build check operations.</param>
-        /// <param name="factories">A collection of build analyzer factories for rules instantiation.</param>
-        /// <param name="analysisContext">The logging context of the build event.</param>
+        /// <param name="factories">A collection of build check factories for rules instantiation.</param>
+        /// <param name="checkContext">The logging context of the build event.</param>
         internal void RegisterCustomCheck(
             BuildCheckDataSource buildCheckDataSource,
             IEnumerable<BuildExecutionCheckFactory> factories,
@@ -209,17 +209,17 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         factory,
                         instance.SupportedRules.Select(r => r.Id).ToArray(),
                         instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true)));
-                    checkContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.FriendlyName);
+                    checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckSuccessfulAcquisition", instance.FriendlyName);
                 }
             }
         }
 
         private void SetupSingleCheck(BuildExecutionCheckFactoryContext checkFactoryContext, string projectFullPath)
         {
-            // For custom analyzers - it should run only on projects where referenced
+            // For custom checks - it should run only on projects where referenced
             // (otherwise error out - https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57849480)
             // on others it should work similarly as disabling them.
-            // Disabled analyzer should not only post-filter results - it shouldn't even see the data 
+            // Disabled check should not only post-filter results - it shouldn't even see the data 
             BuildExecutionCheckWrapper wrapper;
             BuildExecutionCheckConfigurationEffective[] configurations;
             if (checkFactoryContext.MaterializedCheck == null)
@@ -229,7 +229,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
                 if (userConfigs.All(c => !(c.IsEnabled ?? checkFactoryContext.IsEnabledByDefault)))
                 {
-                    // the analyzer was not yet instantiated nor mounted - so nothing to do here now.
+                    // the check was not yet instantiated nor mounted - so nothing to do here now.
                     return;
                 }
 
@@ -245,7 +245,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 checkFactoryContext.MaterializedCheck = wrapper;
                 BuildExecutionCheck check = wrapper.BuildExecutionCheck;
 
-                // This is to facilitate possible perf improvement for custom analyzers - as we might want to
+                // This is to facilitate possible perf improvement for custom checks - as we might want to
                 //  avoid loading the assembly and type just to check if it's supported.
                 // If we expose a way to declare the enablement status and rule ids during registration (e.g. via
                 //  optional arguments of the intrinsic property function) - we can then avoid loading it.
@@ -258,10 +258,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 )
                 {
                     throw new BuildCheckConfigurationException(
-                        $"The analyzer '{check.FriendlyName}' exposes rules '{check.SupportedRules.Select(r => r.Id).ToCsvString()}', but different rules were declared during registration: '{checkFactoryContext.RuleIds.ToCsvString()}'");
+                        $"The check '{check.FriendlyName}' exposes rules '{check.SupportedRules.Select(r => r.Id).ToCsvString()}', but different rules were declared during registration: '{checkFactoryContext.RuleIds.ToCsvString()}'");
                 }
 
-                // technically all analyzers rules could be disabled, but that would mean
+                // technically all checks rules could be disabled, but that would mean
                 // that the provided 'IsEnabledByDefault' value wasn't correct - the only
                 // price to be paid in that case is slight performance cost.
 
@@ -286,7 +286,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             if (configurations.GroupBy(c => c.EvaluationCheckScope).Count() > 1)
             {
                 throw new BuildCheckConfigurationException(
-                    string.Format("All rules for a single analyzer should have the same EvaluationAnalysisScope for a single project (violating rules: [{0}], project: {1})",
+                    string.Format("All rules for a single check should have the same EvaluationCheckScope for a single project (violating rules: [{0}], project: {1})",
                         checkFactoryContext.RuleIds.ToCsvString(),
                         projectFullPath));
             }
@@ -294,8 +294,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private void SetupChecksForNewProject(string projectFullPath, ICheckContext checkContext)
         {
-            // Only add analyzers here
-            // On an execution node - we might remove and dispose the analyzers once project is done
+            // Only add checks here
+            // On an execution node - we might remove and dispose the checks once project is done
 
             // If it's already constructed - just control the custom settings do not differ
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -321,7 +321,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             checksToRemove.ForEach(c =>
             {
                 _checkRegistry.Remove(c);
-                checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting analyzer '{c.FriendlyName}'");
+                checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting check '{c.FriendlyName}'");
             });
             foreach (var checkToRemove in checksToRemove.Select(a => a.MaterializedCheck).Where(a => a != null))
             {
@@ -447,7 +447,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         /*
          *
-         * Following methods are for future use (should we decide to approach in-execution analysis)
+         * Following methods are for future use (should we decide to approach in-execution check)
          *
          */
 

@@ -15,7 +15,7 @@ using System.IO;
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
-/// Base for a data passed from infrastructure to build analyzers.
+/// Base for a data passed from infrastructure to build checks.
 /// </summary>
 /// <param name="projectFilePath">Currently built project.</param>
 /// <param name="projectConfigurationId">The unique id of a project with unique global properties set.</param>
@@ -57,9 +57,9 @@ public abstract class CheckData(string projectFilePath, int? projectConfiguratio
 }
 
 /// <summary>
-/// Data passed from infrastructure to build analyzers.
+/// Data passed from infrastructure to build checks.
 /// </summary>
-/// <typeparam name="T">The type of the actual data for analysis.</typeparam>
+/// <typeparam name="T">The type of the actual data for checking.</typeparam>
 public class BuildCheckDataContext<T> where T : CheckData
 {
     private readonly BuildExecutionCheckWrapper _executionCheckWrapper;
@@ -82,14 +82,14 @@ public class BuildCheckDataContext<T> where T : CheckData
     }
 
     /// <summary>
-    /// Method for reporting the result of the build analyzer rule.
+    /// Method for reporting the result of the build check rule.
     /// </summary>
     /// <param name="result"></param>
     public void ReportResult(BuildCheckResult result)
         => _resultHandler(_executionCheckWrapper, _checkContext, _configPerRule, result);
 
     /// <summary>
-    /// Data to be analyzed.
+    /// Data to be checked.
     /// </summary>
     public T Data { get; }
 }

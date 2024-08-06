@@ -33,8 +33,8 @@ public class BuildCheckManagerTests
     }
 
     [Theory]
-    [InlineData(true, new[] { "Custom analyzer rule: 'Rule1' has been registered successfully.", "Custom analyzer rule: 'Rule2' has been registered successfully." })]
-    [InlineData(false, new[] { "Failed to register the custom analyzer: 'DummyPath'." })]
+    [InlineData(true, new[] { "Custom check rule: 'Rule1' has been registered successfully.", "Custom check rule: 'Rule2' has been registered successfully." })]
+    [InlineData(false, new[] { "Failed to register the custom check: 'DummyPath'." })]
     public void ProcessCheckAcquisitionTest(bool isCheckRuleExist, string[] expectedMessages)
     {
         MockBuildCheckAcquisition(isCheckRuleExist);
@@ -92,7 +92,7 @@ internal sealed class BuildExecutionCheckRuleMock : BuildExecutionCheck
 
     public override void Initialize(ConfigurationContext configurationContext)
     {
-        // configurationContext to be used only if analyzer needs external configuration data.
+        // configurationContext to be used only if check needs external configuration data.
     }
 
     public override void RegisterActions(IBuildCheckRegistrationContext registrationContext)

@@ -2107,25 +2107,25 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </comment>
   </data>
-  <data name="CustomAnalyzerSuccessfulAcquisition" xml:space="preserve">
-    <value>Custom analyzer rule: '{0}' has been registered successfully.</value>
-    <comment>The message is emitted on successful loading of the custom analyzer rule in process.</comment>
+  <data name="CustomCheckSuccessfulAcquisition" xml:space="preserve">
+    <value>Custom check rule: '{0}' has been registered successfully.</value>
+    <comment>The message is emitted on successful loading of the custom check rule in process.</comment>
   </data>
-  <data name="CustomAnalyzerFailedAcquisition" xml:space="preserve">
-    <value>Failed to register the custom analyzer: '{0}'.</value>
-    <comment>The message is emitted on failed loading of the custom analyzer in process.</comment>
+  <data name="CustomCheckFailedAcquisition" xml:space="preserve">
+    <value>Failed to register the custom check: '{0}'.</value>
+    <comment>The message is emitted on failed loading of the custom check in process.</comment>
   </data>
-  <data name="CustomAnalyzerFailedRuleLoading" xml:space="preserve">
-    <value>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</value>
-    <comment>The message is emitted on failed loading of the custom analyzer rule in process.</comment>
+  <data name="CustomCheckFailedRuleLoading" xml:space="preserve">
+    <value>Failed to instantiate the custom check rule with the following exception: '{0}'.</value>
+    <comment>The message is emitted on failed loading of the custom check rule in process.</comment>
   </data>
-  <data name="CustomAnalyzerAssemblyNotExist" xml:space="preserve">
-    <value>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</value>
-    <comment>The message is emitted when the custom analyzer assembly can not be found.</comment>
+  <data name="CustomCheckAssemblyNotExist" xml:space="preserve">
+    <value>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</value>
+    <comment>The message is emitted when the custom check assembly can not be found.</comment>
   </data>
-  <data name="CustomAnalyzerBaseTypeNotAssignable" xml:space="preserve">
-    <value>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</value>
-    <comment>The message is emitted when the custom analyzer assembly can not be successfully registered.</comment>
+  <data name="CustomCheckBaseTypeNotAssignable" xml:space="preserve">
+    <value>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildExecutionCheck base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</value>
+    <comment>The message is emitted when the custom check assembly can not be successfully registered.</comment>
   </data>
   <data name="TaskAssemblyLocationMismatch" xml:space="preserve">
     <value>Task assembly was loaded from '{0}' while the desired location was '{1}'.</value>
@@ -2136,8 +2136,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="BuildCheckEnabled" xml:space="preserve">
     <value>The BuildCheck is enabled for this build.</value>
   </data>
-  <data name="CustomAnalyzerRegistered" xml:space="preserve">
-    <value>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</value>
+  <data name="CustomCheckRegistered" xml:space="preserve">
+    <value>The custom check: '{0}' is registered for the build from the location: '{1}'.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

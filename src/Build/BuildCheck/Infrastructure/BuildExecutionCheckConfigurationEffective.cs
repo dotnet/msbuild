@@ -7,7 +7,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 /// <summary>
-/// Counterpart type for BuildAnalyzerConfiguration - with all properties non-nullable
+/// Counterpart type for BuildCheckConfiguration - with all properties non-nullable
 /// </summary>
 public sealed class BuildExecutionCheckConfigurationEffective
 {
@@ -32,7 +32,7 @@ public sealed class BuildExecutionCheckConfigurationEffective
     public bool IsEnabled => Severity >= BuildExecutionCheckResultSeverity.Suggestion;
 
     // Intentionally not checking the RuleId
-    //  as for analyzers with multiple rules, we can squash config to a single one,
+    //  as for checks with multiple rules, we can squash config to a single one,
     //  if the ruleId is the only thing differing.
     public bool IsSameConfigurationAs(BuildExecutionCheckConfigurationEffective? other) =>
         other != null &&

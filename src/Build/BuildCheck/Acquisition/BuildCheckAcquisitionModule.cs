@@ -23,11 +23,11 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
 #endif
 
     /// <summary>
-    /// Creates a list of factory delegates for building analyzer rules instances from a given assembly path.
+    /// Creates a list of factory delegates for building check rules instances from a given assembly path.
     /// </summary>
     public List<BuildExecutionCheckFactory> CreateBuildExecutionCheckFactories(
         CheckAcquisitionData checkAcquisitionData,
-        ICheckContext analysisContext)
+        ICheckContext checkContext)
     {
         var checksFactories = new List<BuildExecutionCheckFactory>();
 
@@ -46,13 +46,13 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             foreach (Type checkCandidate in checkTypes)
             {
                 checksFactories.Add(() => (BuildExecutionCheck)Activator.CreateInstance(checkCandidate)!);
-                analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerRegistered", checkCandidate.Name, checkCandidate.Assembly);
+                checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckRegistered", checkCandidate.Name, checkCandidate.Assembly);
             }
 
             if (availableTypes.Count != checkTypes.Count)
             {
                 availableTypes.Except(checkTypes).ToList()
-                    .ForEach(t => analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerBaseTypeNotAssignable", t.Name, t.Assembly));
+                    .ForEach(t => checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckBaseTypeNotAssignable", t.Name, t.Assembly));
             }
         }
         catch (ReflectionTypeLoadException ex)
@@ -61,13 +61,13 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             {
                 foreach (Exception? loaderException in ex.LoaderExceptions)
                 {
-                    analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", loaderException?.Message);
+                    checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckFailedRuleLoading", loaderException?.Message);
                 }
             }
         }
         catch (Exception ex)
         {
-            analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerFailedRuleLoading", ex?.Message);
+            checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckFailedRuleLoading", ex?.Message);
         }
 
         return checksFactories;

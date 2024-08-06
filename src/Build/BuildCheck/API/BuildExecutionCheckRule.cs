@@ -4,8 +4,8 @@
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
-/// Represents a rule that is a unit of build analysis.
-/// <see cref="BuildExecutionCheck"/> is a unit of executing the analysis, but it can be discovering multiple distinct violation types,
+/// Represents a rule that is a unit of a build check.
+/// <see cref="BuildExecutionCheck"/> is a unit of executing the check, but it can be discovering multiple distinct violation types,
 ///  for this reason a single <see cref="BuildExecutionCheck"/> can expose multiple <see cref="BuildExecutionCheckRule"/>s.
 /// </summary>
 public class BuildExecutionCheckRule
