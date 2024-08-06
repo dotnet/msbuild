@@ -46,7 +46,7 @@ public class EndToEndTests : IDisposable
 
         success.ShouldBeTrue();
 
-        // The analyzer warnings should appear - but only if analysis was requested.
+        // The check warnings should appear - but only if check was requested.
         if (checkRequested)
         {
             output.ShouldContain("BC0101");
@@ -90,7 +90,7 @@ public class EndToEndTests : IDisposable
 
         success.ShouldBeTrue();
 
-        // The conflicting outputs warning appears - but only if analysis was requested
+        // The conflicting outputs warning appears - but only if check was requested
         if (checkRequested)
         {
             output.ShouldContain("BC0101");
@@ -157,7 +157,7 @@ public class EndToEndTests : IDisposable
 
         success.ShouldBeTrue();
 
-        // The conflicting outputs warning appears - but only if analysis was requested
+        // The conflicting outputs warning appears - but only if check was requested
         if (checkRequested)
         {
             output.ShouldContain("BC0101");
@@ -173,8 +173,8 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
-    [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
+    [InlineData("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
+    [InlineData("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomCheckTest(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)
     {
         using (var env = TestEnvironment.Create())
@@ -189,12 +189,12 @@ public class EndToEndTests : IDisposable
 
             foreach (string registeredRule in expectedRegisteredRules)
             {
-                projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerSuccessfulAcquisition", registeredRule));
+                projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomCheckSuccessfulAcquisition", registeredRule));
             }
 
             if (expectedRejectedChecks)
             {
-                projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerBaseTypeNotAssignable", "InvalidAnalyzer", "InvalidCustomAnalyzer, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
+                projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomCheckBaseTypeNotAssignable", "InvalidCheck", "InvalidCustomCheck, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
             }
         }
     }
@@ -209,8 +209,8 @@ public class EndToEndTests : IDisposable
         {
             XmlNode? packageSourcesNode = doc.SelectSingleNode("//packageSources");
 
-            // The test packages are generated during the test project build and saved in CustomAnalyzers folder.
-            string checksPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.Parent?.FullName ?? string.Empty, "CustomAnalyzers");
+            // The test packages are generated during the test project build and saved in CustomChecks folder.
+            string checksPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.Parent?.FullName ?? string.Empty, "CustomChecks");
             AddPackageSource(doc, packageSourcesNode, "Key", checksPackagesPath);
 
             doc.Save(Path.Combine(checkCandidatePath, "nuget.config"));
@@ -243,7 +243,7 @@ public class EndToEndTests : IDisposable
     out TransientTestFile projectFile,
     string? BC0101Severity = null)
     {
-        string testAssetsFolderName = "SampleAnalyzerIntegrationTest";
+        string testAssetsFolderName = "SampleCheckIntegrationTest";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
         TransientTestFile testFile = _env.CreateFile(workFolder, "somefile");
 
@@ -256,7 +256,7 @@ public class EndToEndTests : IDisposable
         CreateEditorConfig(BC0101Severity, testAssetsFolderName, workFolder);
 
         // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
-        // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
+        // This discrepancy breaks path equality checks in MSBuild checks if we pass to MSBuild full path to the initial project.
         // See if there is a way of fixing it in the engine - tracked: https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=55702688.
         _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
 
