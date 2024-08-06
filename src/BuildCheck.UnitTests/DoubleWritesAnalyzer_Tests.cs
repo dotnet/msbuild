@@ -15,36 +15,6 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 {
     public sealed class DoubleWritesAnalyzer_Tests
     {
-        private sealed class MockBuildCheckRegistrationContext : IBuildCheckRegistrationContext
-        {
-            private event Action<BuildCheckDataContext<TaskInvocationAnalysisData>>? _taskInvocationAction;
-
-            public List<BuildCheckResult> Results { get; } = new();
-
-            public void RegisterEvaluatedPropertiesAction(Action<BuildCheckDataContext<EvaluatedPropertiesAnalysisData>> evaluatedPropertiesAction) => throw new NotImplementedException();
-            public void RegisterParsedItemsAction(Action<BuildCheckDataContext<ParsedItemsAnalysisData>> parsedItemsAction) => throw new NotImplementedException();
-
-            public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationAnalysisData>> taskInvocationAction)
-                => _taskInvocationAction += taskInvocationAction;
-
-            public void TriggerTaskInvocationAction(TaskInvocationAnalysisData data)
-            {
-                if (_taskInvocationAction is not null)
-                {
-                    BuildCheckDataContext<TaskInvocationAnalysisData> context = new BuildCheckDataContext<TaskInvocationAnalysisData>(
-                        null!,
-                        null!,
-                        null!,
-                        ResultHandler,
-                        data);
-                    _taskInvocationAction(context);
-                }
-            }
-
-            private void ResultHandler(BuildAnalyzerWrapper wrapper, IAnalysisContext context, BuildAnalyzerConfigurationInternal[] configs, BuildCheckResult result)
-                => Results.Add(result);
-        }
-
         private readonly DoubleWritesAnalyzer _analyzer;
 
         private readonly MockBuildCheckRegistrationContext _registrationContext;
@@ -61,6 +31,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             string projectFile = NativeMethodsShared.IsWindows ? @"C:\fake\project.proj" : "/fake/project.proj";
             return new TaskInvocationAnalysisData(
                 projectFile,
+                null,
                 Construction.ElementLocation.EmptyLocation,
                 taskName,
                 projectFile,

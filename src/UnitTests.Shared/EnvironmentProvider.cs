@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests.Shared
             string? environmentOverride = _getEnvironmentVariable(Constants.DotnetMsbuildSdkResolverCliDir);
             if (!string.IsNullOrEmpty(environmentOverride))
             {
-                return Path.Combine(environmentOverride, Constants.DotNet + Constants.ExeSuffix);
+                return GetDotnetExePathFromFolder(environmentOverride);
             }
 
             string? dotnetExe = _getCurrentProcessPath();
@@ -104,6 +104,8 @@ namespace Microsoft.Build.UnitTests.Shared
 
             return dotnetExe;
         }
+
+        public static string? GetDotnetExePathFromFolder(string? netRootFolder) => Path.Combine(netRootFolder ?? string.Empty, Constants.DotNet + Constants.ExeSuffix);
 
         public static string? GetDotnetExePath(Func<string, string?>? getEnvironmentVariable = null)
         {

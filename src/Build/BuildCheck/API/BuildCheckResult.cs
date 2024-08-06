@@ -32,8 +32,8 @@ public sealed class BuildCheckResult : IBuildCheckResult
         => severity switch
         {
             BuildAnalyzerResultSeverity.Suggestion => new BuildCheckResultMessage(this),
-            BuildAnalyzerResultSeverity.Warning => new BuildCheckResultWarning(this),
-            BuildAnalyzerResultSeverity.Error => new BuildCheckResultError(this),
+            BuildAnalyzerResultSeverity.Warning => new BuildCheckResultWarning(this, BuildAnalyzerRule.Id),
+            BuildAnalyzerResultSeverity.Error => new BuildCheckResultError(this, BuildAnalyzerRule.Id),
             _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null),
         };
 
@@ -51,7 +51,7 @@ public sealed class BuildCheckResult : IBuildCheckResult
 
     // Here we will provide different link for built-in rules and custom rules - once we have the base classes differentiated.
     public string FormatMessage() =>
-        _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))}{BuildAnalyzerRule.Id}: https://aka.ms/buildcheck/codes#{BuildAnalyzerRule.Id} - {string.Format(BuildAnalyzerRule.MessageFormat, MessageArgs)}";
+        _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))}https://aka.ms/buildcheck/codes#{BuildAnalyzerRule.Id} - {string.Format(BuildAnalyzerRule.MessageFormat, MessageArgs)}";
 
     private string? _message;
 }

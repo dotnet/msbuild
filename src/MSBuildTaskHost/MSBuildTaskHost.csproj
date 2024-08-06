@@ -40,10 +40,6 @@
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
-    <!-- EnvironmentVariableReadEventArgs shouldn't be used in TaskHosts, but it means we need fewer ifdefs. -->
-    <Compile Include="..\Framework\EnvironmentVariableReadEventArgs.cs">
-      <Link>EnvironmentVariableReadEventArgs.cs</Link>
-    </Compile>
     <Compile Include="..\Framework\BuildEnvironmentState.cs">
       <Link>BuildEnvironmentState.cs</Link>
     </Compile>

@@ -31,11 +31,27 @@ The actual OM exposed to users will be translating/mapping/proxying the underlyi
 ### Sourcing unexposed data from within execution
 
 For agility we'll be able to source internal data during the evaluation and/or execution directly from the build engine, without the `BuildEventArgs` exposure.
+
+To simplify the switch between 'in-node direct data' and 'properly remoted data that can be exposed via public OM' we will internally expose execution data consuming interface - that will be implemented by `LoggingService` as well as BuildCheck infrastructure. This way we can have a simple toggle logic in `LoggingService` that will either forward data to BuildCheck infrastructure (in-proc) or translate them to appropriate `BuildEventArgs` and send them via logging infrastructure.
+
+The following diagram ilustrates the case where data are being consumed directly in node - minimizing the performance and resources impact:
+
+![In node data](BuildCheck/in-node-direct-data.png)
+
+Once the implemented BuildCheck will solidify the idea of need for specific data, those can then be remoted via logging infrastructure and then publicly exposed after translation in BuildCheck central logger connector:
+
+![Cross node data](BuildCheck/cross-node-remoted-data.png)
+
+In both cases the sink for the data is actualy a `LoggingContext` - this is to ensure a valid `BuildEventContext` for all data that might be consumed by BuildCheck. BuildCheck needs to know the currently build project path (for proper configuration of the rules and proper reporting) - for this reasen we need to ensure passing of `BuildEventContext` with all data.
+
+
+#### Sample in-node data case - evaluated project
+
 One example of rich data that might be helpful for internal analyses is [`Project`](https://github.com/dotnet/msbuild/blob/28f488a74ed75bf5f21ca93ac2463a8cb1586d79/src/Build/Definition/Project.cs#L49). This OM is not currently being used during the standard build execution (`ProjectInstance` is used instead) - but we can conditionaly create and expose `Project` and satisfy the current internal consumers of `ProjectInstance` - spike of that is available [in experimental branch](https://github.com/dotnet/msbuild/compare/main...JanKrivanek:msbuild:research/analyzers-evaluation-hooking#diff-08a12a2fa138c3bfcabc7639bb75dda8534f3b662db4aca4f2b5595dbf9ba197).
 
 ## Execution Modes
 
-**Replay Mode** - so that users can choose to perform analyses post build, without impacting the performance of the build. And so that some level of analysis can be run on artifacts from builds produced by older versions of MSBuild.
+**Replay Mode** - so that users can choose to perform analyses post build, without impacting the performance of the build. And so that some level of analysis can be run on artifacts from builds produced by MSBuild from NET 9.0 / VS 17.12 or newer. The older versions won't be supported.
 
 **Live mode** - this is what users are used to from compilation analyses. Integrating into build execution will as well help driving adoption by opting-in users by default to some level of checking and hence exposing them to the feature.
 
@@ -106,7 +122,7 @@ Planned model:
 
 # Configuration
 
-**TBD** - implementation details to be amended by @f-alizada 
+[Configuration implmentation details](../../../src/Build/BuildCheck/Infrastructure/EditorConfig/README.md).
 
 ## High-level logic
 

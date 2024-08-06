@@ -9,12 +9,13 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
-using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
+using Microsoft.Build.Experimental.BuildCheck;
 
 #nullable disable
 
@@ -355,6 +356,11 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        public IBuildEngineDataRouter BuildEngineDataRouter => this;
 
         /// <summary>
         /// Properties we need to serialize from the child node
@@ -923,7 +929,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private void WarnOnDeprecatedCustomArgsSerialization(LogMessagePacket loggingPacket)
         {
             if (loggingPacket.EventType == LoggingEventType.CustomEvent
-                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8)
                 && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
             {
                 BuildEventArgs buildEvent = loggingPacket.NodeBuildEvent.Value.Value;
@@ -1590,6 +1595,12 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
+            }
+
+            if (buildEventArgs is BuildCheckResultError checkResultError)
+            {
+                // If the specified BuildCheckResultError was issued, an empty ISet<string> signifies that the specified build check warnings should be treated as errors.
+                AddWarningsAsErrors(checkResultError.BuildEventContext, new HashSet<string>());
             }
 
             if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
