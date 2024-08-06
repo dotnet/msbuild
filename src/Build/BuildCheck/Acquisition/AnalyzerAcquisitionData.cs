@@ -13,15 +13,17 @@ namespace Microsoft.Build.Experimental.BuildCheck.Acquisition;
 // https://github.com/dotnet/msbuild/issues/9633
 // Acquisition
 //  define the data that will be passed to the acquisition module (and remoted if needed)
-internal class AnalyzerAcquisitionData(string assemblyPath)
+internal class AnalyzerAcquisitionData(string assemblyPath, string projectPath)
 {
     public string AssemblyPath { get; init; } = assemblyPath;
+
+    public string ProjectPath { get; init; } = projectPath;
 }
 
 internal static class AnalyzerAcquisitionDataExtensions
 {
     public static AnalyzerAcquisitionData ToAnalyzerAcquisitionData(this BuildCheckAcquisitionEventArgs eventArgs) =>
-        new(eventArgs.AcquisitionPath);
+        new(eventArgs.AcquisitionPath, eventArgs.ProjectPath);
 
-    public static BuildCheckAcquisitionEventArgs ToBuildEventArgs(this AnalyzerAcquisitionData data) => new(data.AssemblyPath);
+    public static BuildCheckAcquisitionEventArgs ToBuildEventArgs(this AnalyzerAcquisitionData data) => new(data.AssemblyPath, data.ProjectPath);
 }
