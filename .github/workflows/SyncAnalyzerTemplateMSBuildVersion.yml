@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - jennybai/SyncVersionFlow
     paths:
       - 'eng/Versions.props'
 
