@@ -102,12 +102,12 @@ internal sealed class ConfigurationProvider : IConfigurationProvider
         }
     }
 
-    public BuildAnalyzerConfigurationEffective[] GetMergedConfigurations(
+    public BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(
         string projectFullPath,
         BuildExecutionCheck check)
         => FillConfiguration(projectFullPath, check.SupportedRules, GetMergedConfiguration);
 
-    public BuildAnalyzerConfiguration[] GetUserConfigurations(
+    public BuildExecutionCheckConfiguration[] GetUserConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetUserConfiguration);
@@ -123,9 +123,9 @@ internal sealed class ConfigurationProvider : IConfigurationProvider
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetCustomConfiguration);
 
-    public BuildAnalyzerConfigurationEffective[] GetMergedConfigurations(
-        BuildAnalyzerConfiguration[] userConfigs,
-        BuildAnalyzer analyzer)
+    public BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(
+        BuildExecutionCheckConfiguration[] userConfigs,
+        BuildExecutionCheck check)
     {
         var configurations = new BuildExecutionCheckConfigurationEffective[userConfigs.Length];
 

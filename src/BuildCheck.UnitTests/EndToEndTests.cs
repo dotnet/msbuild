@@ -187,8 +187,8 @@ public class EndToEndTests : IDisposable
             var checkCandidatePath = Path.Combine(TestAssetsRootPath, checkCandidate);
             AddCustomDataSourceToNugetConfig(checkCandidatePath);
 
-            string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore -analyze -verbosity:n",
+            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n",
                 out bool successBuild);
             successBuild.ShouldBeTrue(projectCheckBuildLog);
 
@@ -199,35 +199,35 @@ public class EndToEndTests : IDisposable
 
             if (expectedRejectedChecks)
             {
-                projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
-                    "CustomAnalyzerBaseTypeNotAssignable",
-                    "InvalidAnalyzer",
-                    "InvalidCustomAnalyzer, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
+                projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    "CustomCheckBaseTypeNotAssignable",
+                    "InvalidCheck",
+                    "InvalidCustomCheck, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
             }
         }
     }
 
     [Theory]
-    [InlineData("AnalysisCandidate", "X01234", "error", "error X01234")]
-    [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", "X01234", "warning", "warning X01234")]
-    public void CustomAnalyzerTest_WithEditorConfig(string analysisCandidate, string ruleId, string severity, string expectedMessage)
+    [InlineData("CheckCandidate", "X01234", "error", "error X01234")]
+    [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234")]
+    public void CustomCheckTest_WithEditorConfig(string checkCandidate, string ruleId, string severity, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())
         {
-            var analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
-            AddCustomDataSourceToNugetConfig(analysisCandidatePath);
-            File.WriteAllText(Path.Combine(analysisCandidatePath, EditorConfigFileName), ReadEditorConfig(new List<(string, string)>() { (ruleId, severity) }, analysisCandidatePath));
+            var checkCandidatePath = Path.Combine(TestAssetsRootPath, checkCandidate);
+            AddCustomDataSourceToNugetConfig(checkCandidatePath);
+            File.WriteAllText(Path.Combine(checkCandidatePath, EditorConfigFileName), ReadEditorConfig(new List<(string, string)>() { (ruleId, severity) }, checkCandidatePath));
 
-            string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore -analyze -verbosity:n", out bool _, timeoutMilliseconds: 1200_0000);
+            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool _, timeoutMilliseconds: 1200_0000);
 
-            projectAnalysisBuildLog.ShouldContain(expectedMessage);
+            projectCheckBuildLog.ShouldContain(expectedMessage);
         }
     }
 
-    private void AddCustomDataSourceToNugetConfig(string analysisCandidatePath)
+    private void AddCustomDataSourceToNugetConfig(string checkCandidatePath)
     {
-        var nugetTemplatePath = Path.Combine(analysisCandidatePath, "nugetTemplate.config");
+        var nugetTemplatePath = Path.Combine(checkCandidatePath, "nugetTemplate.config");
 
         var doc = new XmlDocument();
         doc.LoadXml(File.ReadAllText(nugetTemplatePath));

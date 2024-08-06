@@ -15,7 +15,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// <summary>
 /// Central logger for the build check infrastructure.
 /// Receives events from the <see cref="BuildCheckForwardingLogger"/>.
-/// Processes the events and forwards them to the <see cref="IBuildCheckManager"/> and registered analyzers.
+/// Processes the events and forwards them to the <see cref="IBuildCheckManager"/> and registered checks.
 /// </summary>
 /// <remarks>
 /// Ensure that the consuming events are in sync with <see cref="BuildCheckForwardingLogger"/>.

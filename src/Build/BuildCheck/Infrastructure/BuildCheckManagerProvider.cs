@@ -112,10 +112,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             Stopwatch stopwatch = Stopwatch.StartNew();
             if (IsInProcNode)
             {
-                var checkFactories = _acquisitionModule.CreateBuildExecutionCheckFactories(acquisitionData, checkContext);
-                if (checkFactories.Count != 0)
+                var checksFactories = _acquisitionModule.CreateBuildExecutionCheckFactories(acquisitionData, checkContext);
+                if (checksFactories.Count != 0)
                 {
-                    RegisterCustomAnalyzer(acquisitionData.ProjectPath, BuildCheckDataSource.EventArgs, analyzersFactories, analysisContext);
+                    RegisterCustomCheck(acquisitionData.ProjectPath, BuildCheckDataSource.EventArgs, checksFactories, checkContext);
                 }
                 else
                 {
@@ -173,9 +173,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// </summary>
         /// <param name="projectPath">The project path is used for the correct .editorconfig resolution.</param>
         /// <param name="buildCheckDataSource">Represents different data sources used in build check operations.</param>
-        /// <param name="factories">A collection of build analyzer factories for rules instantiation.</param>
-        /// <param name="analysisContext">The logging context of the build event.</param>
-        internal void RegisterCustomAnalyzer(
+        /// <param name="factories">A collection of build check factories for rules instantiation.</param>
+        /// <param name="checkContext">The logging context of the build event.</param>
+        internal void RegisterCustomCheck(
             string projectPath,
             BuildCheckDataSource buildCheckDataSource,
             IEnumerable<BuildExecutionCheckFactory> factories,
@@ -186,16 +186,16 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 foreach (var factory in factories)
                 {
                     var instance = factory();
-                    var analyzerFactoryContext = new BuildAnalyzerFactoryContext(
+                    var checkFactoryContext = new BuildExecutionCheckFactoryContext(
                         factory,
                         instance.SupportedRules.Select(r => r.Id).ToArray(),
                         instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true));
 
-                    if (analyzerFactoryContext != null)
+                    if (checkFactoryContext != null)
                     {
-                        _analyzersRegistry.Add(analyzerFactoryContext);
-                        SetupSingleAnalyzer(analyzerFactoryContext, projectPath);
-                        analysisContext.DispatchAsComment(MessageImportance.Normal, "CustomAnalyzerSuccessfulAcquisition", instance.FriendlyName);
+                        _checkRegistry.Add(checkFactoryContext);
+                        SetupSingleCheck(checkFactoryContext, projectPath);
+                        checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckSuccessfulAcquisition", instance.FriendlyName);
                     }
                 }
             }

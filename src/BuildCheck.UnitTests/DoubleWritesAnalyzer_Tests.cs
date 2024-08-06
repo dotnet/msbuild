@@ -15,7 +15,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 {
     public sealed class DoubleWritesCheck_Tests
     {
-        private readonly DoubleWritesAnalyzer _analyzer;
+        private readonly DoubleWritesCheck _check;
 
         private readonly MockBuildCheckRegistrationContext _registrationContext;
 

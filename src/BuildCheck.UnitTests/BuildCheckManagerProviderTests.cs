@@ -39,10 +39,10 @@ public class BuildCheckManagerTests
     public void ProcessCheckAcquisitionTest(bool isCheckRuleExist, string[] expectedMessages)
     {
         MockConfigurationProvider();
-        MockBuildCheckAcquisition(isAnalyzerRuleExist);
+        MockBuildCheckAcquisition(isCheckRuleExist);
         MockEnabledDataSourcesDefinition();
 
-        _testedInstance.ProcessAnalyzerAcquisition(new AnalyzerAcquisitionData("DummyPath", "ProjectPath"), new AnalysisLoggingContext(_loggingService, new BuildEventContext(1, 2, 3, 4, 5, 6, 7)));
+        _testedInstance.ProcessCheckAcquisition(new CheckAcquisitionData("DummyPath", "ProjectPath"), new CheckLoggingContext(_loggingService, new BuildEventContext(1, 2, 3, 4, 5, 6, 7)));
 
         _logger.AllBuildEvents.Where(be => be.GetType() == typeof(BuildMessageEventArgs)).Select(be => be.Message).ToArray()
             .ShouldBeEquivalentTo(expectedMessages);
@@ -70,11 +70,11 @@ internal sealed class ConfigurationProviderMock : IConfigurationProvider
 
     public CustomConfigurationData[] GetCustomConfigurations(string projectFullPath, IReadOnlyList<string> ruleIds) => [];
 
-    public BuildAnalyzerConfigurationEffective[] GetMergedConfigurations(string projectFullPath, BuildAnalyzer analyzer) => [];
+    public BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(string projectFullPath, BuildExecutionCheck check) => [];
 
-    public BuildAnalyzerConfigurationEffective[] GetMergedConfigurations(BuildAnalyzerConfiguration[] userConfigs, BuildAnalyzer analyzer) => [];
+    public BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(BuildExecutionCheckConfiguration[] userConfigs, BuildExecutionCheck check) => [];
 
-    public BuildAnalyzerConfiguration[] GetUserConfigurations(string projectFullPath, IReadOnlyList<string> ruleIds) => [];
+    public BuildExecutionCheckConfiguration[] GetUserConfigurations(string projectFullPath, IReadOnlyList<string> ruleIds) => [];
 }
 
 internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionModule

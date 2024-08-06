@@ -8,31 +8,31 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Experimental.BuildCheck;
-using Microsoft.Build.Experimental.BuildCheck.Analyzers;
+using Microsoft.Build.Experimental.BuildCheck.Checks;
 using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests
 {
-    public class SharedOutputPathAnalyzer_Tests
+    public class SharedOutputPathCheck_Tests
     {
-        private readonly SharedOutputPathAnalyzer _analyzer;
+        private readonly SharedOutputPathCheck _check;
 
         private readonly MockBuildCheckRegistrationContext _registrationContext;
 
-        public SharedOutputPathAnalyzer_Tests()
+        public SharedOutputPathCheck_Tests()
         {
-            _analyzer = new SharedOutputPathAnalyzer();
+            _check = new SharedOutputPathCheck();
             _registrationContext = new MockBuildCheckRegistrationContext();
-            _analyzer.RegisterActions(_registrationContext);
+            _check.RegisterActions(_registrationContext);
         }
 
-        private EvaluatedPropertiesAnalysisData MakeEvaluatedPropertiesAction(
+        private EvaluatedPropertiesCheckData MakeEvaluatedPropertiesAction(
             string projectFile,
             Dictionary<string, string>? evaluatedProperties,
             IReadOnlyDictionary<string, (string EnvVarValue, string File, int Line, int Column)>? evaluatedEnvVars)
         {
-            return new EvaluatedPropertiesAnalysisData(
+            return new EvaluatedPropertiesCheckData(
                 projectFile,
                 null,
                 evaluatedProperties ?? new Dictionary<string, string>(),
@@ -62,7 +62,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
                 },
                 null));
 
-            // Relative paths coincide but full does not. SharedOutputPathAnalyzer should not report it.
+            // Relative paths coincide but full does not. SharedOutputPathCheck should not report it.
             _registrationContext.Results.Count.ShouldBe(0);
         }
 
@@ -91,8 +91,8 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 
             // 2 reports for bin and obj folders.
             _registrationContext.Results.Count.ShouldBe(2);
-            _registrationContext.Results[0].BuildAnalyzerRule.Id.ShouldBe("BC0101");
-            _registrationContext.Results[1].BuildAnalyzerRule.Id.ShouldBe("BC0101");
+            _registrationContext.Results[0].BuildExecutionCheckRule.Id.ShouldBe("BC0101");
+            _registrationContext.Results[1].BuildExecutionCheckRule.Id.ShouldBe("BC0101");
 
             // Check that paths are formed with correct paths separators
             string wrongPathSeparator = NativeMethodsShared.IsWindows ? "/" : "\\";
@@ -136,7 +136,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             _registrationContext.Results.Count.ShouldBe(4); // 4 reports for two pairs of project: (1, 2) and (1, 3).
             foreach (var result in _registrationContext.Results)
             {
-                result.BuildAnalyzerRule.Id.ShouldBe("BC0101");
+                result.BuildExecutionCheckRule.Id.ShouldBe("BC0101");
             }
         }
     }

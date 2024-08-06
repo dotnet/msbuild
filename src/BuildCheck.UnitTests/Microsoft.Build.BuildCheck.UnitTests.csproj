@@ -45,10 +45,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TestAssets\AnalysisCandidateWithMultipleAnalyzersInjected\.editorconfigtest">
+    <Compile Remove="TestAssets\SampleAnalyzerIntegrationTest\**" />
+    <EmbeddedResource Remove="TestAssets\SampleAnalyzerIntegrationTest\**" />
+    <None Remove="TestAssets\SampleAnalyzerIntegrationTest\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="TestAssets\SampleCheckIntegrationTest\.editorconfigcustomised" />
+    <None Remove="TestAssets\SampleCheckIntegrationTest\.editorconfigcustomised" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestAssets\CheckCandidateWithMultipleChecksInjected\.editorconfigtest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="TestAssets\AnalysisCandidate\.editorconfigtest">
+    <None Update="TestAssets\CheckCandidate\.editorconfigtest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
