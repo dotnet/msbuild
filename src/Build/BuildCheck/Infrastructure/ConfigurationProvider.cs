@@ -8,10 +8,11 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Experimental.BuildCheck;
 using System.Collections.Concurrent;
 using Microsoft.Build.Experimental.BuildCheck.Utilities;
+using Microsoft.Build.BuildCheck.Infrastructure;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-internal sealed class ConfigurationProvider
+internal sealed class ConfigurationProvider : IConfigurationProvider
 {
     private readonly EditorConfigParser _editorConfigParser = new EditorConfigParser();
 
@@ -84,7 +85,7 @@ internal sealed class ConfigurationProvider
     /// <param name="ruleId"></param>
     /// <throws><see cref="BuildCheckConfigurationException"/> If CustomConfigurationData differs in a build for a same ruleId</throws>
     /// <returns></returns>
-    internal void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
+    public void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
     {
         var configuration = GetCustomConfiguration(projectFullPath, ruleId);
         VerifyCustomConfigurationEquality(ruleId, configuration);
@@ -101,12 +102,12 @@ internal sealed class ConfigurationProvider
         }
     }
 
-    internal BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(
+    public BuildAnalyzerConfigurationEffective[] GetMergedConfigurations(
         string projectFullPath,
         BuildExecutionCheck check)
         => FillConfiguration(projectFullPath, check.SupportedRules, GetMergedConfiguration);
 
-    internal BuildExecutionCheckConfiguration[] GetUserConfigurations(
+    public BuildAnalyzerConfiguration[] GetUserConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetUserConfiguration);
@@ -122,9 +123,9 @@ internal sealed class ConfigurationProvider
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetCustomConfiguration);
 
-    internal BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(
-        BuildExecutionCheckConfiguration[] userConfigs,
-        BuildExecutionCheck check)
+    public BuildAnalyzerConfigurationEffective[] GetMergedConfigurations(
+        BuildAnalyzerConfiguration[] userConfigs,
+        BuildAnalyzer analyzer)
     {
         var configurations = new BuildExecutionCheckConfigurationEffective[userConfigs.Length];
 

@@ -1,49 +1,49 @@
 {
-    "$schema": "http://json.schemastore.org/template",
-    "author": "Microsoft",
-    "classifications": [
-      "Common",
-      "Library"
-    ],
-    "name": "MSBuild custom check skeleton project.",
-    "generatorVersions": "[1.0.0.0-*)",
-    "description": "A project for creating a MSBuild check library that targets .NET Standard",
-    "groupIdentity": "Microsoft.CheckTemplate",
-    "identity": "Microsoft.CheckTemplate",
-    "shortName": "msbuildcheck",
-    "tags": {
-      "language": "C#",
-      "type": "project"
-    },
-    "sourceName": "Company.CheckTemplate",
-    "preferNameDirectory": true,
-    "primaryOutputs": [
-      {
-        "path": "Company.CheckTemplate.csproj"
-      }
-   ],
-   "symbols": {
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Microsoft",
+  "classifications": [
+    "Common",
+    "Library"
+  ],
+  "name": "MSBuild custom check skeleton project.",
+  "generatorVersions": "[1.0.0.0-*)",
+  "description": "A project for creating a MSBuild check library that targets .NET Standard",
+  "groupIdentity": "Microsoft.CheckTemplate",
+  "identity": "Microsoft.CheckTemplate",
+  "shortName": "msbuildcheck",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "Company.CheckTemplate",
+  "preferNameDirectory": true,
+  "primaryOutputs": [
+    {
+      "path": "Company.CheckTemplate.csproj"
+    }
+  ],
+  "symbols": {
     "MicrosoftBuildVersion": {
       "type": "parameter",
       "description": "Overrides the default Microsoft.Build version where check's interfaces are placed",
       "datatype": "text",
-      "defaultValue": "17.11.0",
+      "defaultValue": "17.12.0",
       "replaces": "1.0.0-MicrosoftBuildPackageVersion",
       "displayName": "Microsoft.Build default package version override"
     }
-   },
-    "postActions": [
-      {
-        "id": "restore",
-        "condition": "(!skipRestore)",
-        "description": "Restore NuGet packages required by this project.",
-        "manualInstructions": [
-          {
-            "text": "Run 'dotnet restore'"
-          }
-        ],
-        "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
-        "continueOnError": true
-      }
-    ]
-  }
+  },
+  "postActions": [
+    {
+      "id": "restore",
+      "condition": "(!skipRestore)",
+      "description": "Restore NuGet packages required by this project.",
+      "manualInstructions": [
+        {
+          "text": "Run 'dotnet restore'"
+        }
+      ],
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "continueOnError": true
+    }
+  ]
+}

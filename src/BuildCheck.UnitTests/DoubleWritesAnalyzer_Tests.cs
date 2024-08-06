@@ -15,37 +15,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 {
     public sealed class DoubleWritesCheck_Tests
     {
-        private sealed class MockBuildCheckRegistrationContext : IBuildCheckRegistrationContext
-        {
-            private event Action<BuildCheckDataContext<TaskInvocationCheckData>>? _taskInvocationAction;
-
-            public List<BuildCheckResult> Results { get; } = new();
-
-            public void RegisterEvaluatedPropertiesAction(Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction) => throw new NotImplementedException();
-            public void RegisterParsedItemsAction(Action<BuildCheckDataContext<ParsedItemsCheckData>> parsedItemsAction) => throw new NotImplementedException();
-
-            public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction)
-                => _taskInvocationAction += taskInvocationAction;
-
-            public void TriggerTaskInvocationAction(TaskInvocationCheckData data)
-            {
-                if (_taskInvocationAction is not null)
-                {
-                    BuildCheckDataContext<TaskInvocationCheckData> context = new BuildCheckDataContext<TaskInvocationCheckData>(
-                        null!,
-                        null!,
-                        null!,
-                        ResultHandler,
-                        data);
-                    _taskInvocationAction(context);
-                }
-            }
-
-            private void ResultHandler(BuildExecutionCheckWrapper wrapper, ICheckContext context, BuildExecutionCheckConfigurationEffective[] configs, BuildCheckResult result)
-                => Results.Add(result);
-        }
-
-        private readonly DoubleWritesCheck _check;
+        private readonly DoubleWritesAnalyzer _analyzer;
 
         private readonly MockBuildCheckRegistrationContext _registrationContext;
 

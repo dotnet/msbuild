@@ -44,4 +44,13 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="TestAssets\AnalysisCandidateWithMultipleAnalyzersInjected\.editorconfigtest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestAssets\AnalysisCandidate\.editorconfigtest">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

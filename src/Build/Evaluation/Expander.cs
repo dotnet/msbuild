@@ -3569,8 +3569,14 @@ namespace Microsoft.Build.Evaluation
                         try
                         {
                             // First attempt to recognize some well-known functions to avoid binding
-                            // and potential first-chance MissingMethodExceptions
+                            // and potential first-chance MissingMethodExceptions.
                             wellKnownFunctionSuccess = TryExecuteWellKnownFunction(out functionResult, objectInstance, args);
+
+                            if (!wellKnownFunctionSuccess)
+                            {
+                                // Some well-known functions need evaluated value from properties.
+                                wellKnownFunctionSuccess = TryExecuteWellKnownFunctionWithPropertiesParam(properties, out functionResult, objectInstance, args);
+                            }
                         }
                         // we need to preserve the same behavior on exceptions as the actual binder
                         catch (Exception ex)
@@ -3665,6 +3671,27 @@ namespace Microsoft.Build.Evaluation
 
                     return null;
                 }
+            }
+
+            private bool TryExecuteWellKnownFunctionWithPropertiesParam(IPropertyProvider<T> properties, out object returnVal, object objectInstance, object[] args)
+            {
+                returnVal = null;
+
+                if (_receiverType == typeof(IntrinsicFunctions))
+                {
+                    if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterBuildCheck), StringComparison.OrdinalIgnoreCase))
+                    {
+                        string projectPath = properties.GetProperty("MSBuildProjectFullPath")?.EvaluatedValue ?? string.Empty;
+                        ErrorUtilities.VerifyThrow(_loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = IntrinsicFunctions.RegisterBuildCheck(projectPath, arg0, _loggingContext);
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
             }
 
             /// <summary>
@@ -3932,16 +3959,6 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (_receiverType == typeof(IntrinsicFunctions))
                     {
-                        if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterBuildCheck), StringComparison.OrdinalIgnoreCase))
-                        {
-                            ErrorUtilities.VerifyThrow(_loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.RegisterBuildCheck(arg0, _loggingContext);
-                                return true;
-                            }
-                        }
-
                         if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.EnsureTrailingSlash), StringComparison.OrdinalIgnoreCase))
                         {
                             if (TryGetArg(args, out string arg0))

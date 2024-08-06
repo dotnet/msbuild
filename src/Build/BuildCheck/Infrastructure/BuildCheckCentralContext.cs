@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental.BuildCheck;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
@@ -15,9 +16,9 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// </summary>
 internal sealed class BuildCheckCentralContext
 {
-    private readonly ConfigurationProvider _configurationProvider;
+    private readonly IConfigurationProvider _configurationProvider;
 
-    internal BuildCheckCentralContext(ConfigurationProvider configurationProvider)
+    internal BuildCheckCentralContext(IConfigurationProvider configurationProvider)
         => _configurationProvider = configurationProvider;
 
     private record CallbackRegistry(
