@@ -239,6 +239,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="BuildCheckAcquisitionEventArgs"/>
         /// </summary>
         BuildCheckAcquisitionEvent = 39,
+
+        /// <summary>
+        /// Event is <see cref="BuildSubmissionStartedEventArgs"/>
+        /// </summary>
+        BuildSubmissionStartedEvent = 40,
     }
     #endregion
 
@@ -650,6 +655,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildCheckAcquisitionEvent => new BuildCheckAcquisitionEventArgs(),
                 LoggingEventType.BuildCheckTracingEvent => new BuildCheckTracingEventArgs(),
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
+                LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -788,6 +794,10 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(EnvironmentVariableReadEventArgs))
             {
                 return LoggingEventType.EnvironmentVariableReadEvent;
+            }
+            else if (eventType == typeof(BuildSubmissionStartedEventArgs))
+            {
+                return LoggingEventType.BuildSubmissionStartedEvent;
             }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))

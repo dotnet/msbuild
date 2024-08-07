@@ -75,13 +75,15 @@ namespace Microsoft.Build.Logging
         //   - TaskParameterEventArgs: Added ParameterName and PropertyName properties
         // version 22:
         //    - extend EnvironmentVariableRead with location where environment variable was used.
+        // version 23:
+        //    - new record kind: BuildSubmissionStartedEventArgs
         // This should be never changed.
         // The minimum version of the binary log reader that can read log of above version.
         internal const int ForwardCompatibilityMinimalVersion = 18;
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 22;
+        internal const int FileFormatVersion = 23;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being
