@@ -10,6 +10,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Utilities;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -20,6 +21,8 @@ internal class BuildCheckBuildEventHandler
 
     private readonly Dictionary<Type, Action<BuildEventArgs>> _eventHandlers;
 
+    private IDictionary<int, bool> _projectRestore;
+
     internal BuildCheckBuildEventHandler(
         IAnalysisContextFactory analyzerContextFactory,
         IBuildCheckManager buildCheckManager)
@@ -27,8 +30,10 @@ internal class BuildCheckBuildEventHandler
         _buildCheckManager = buildCheckManager;
         _analyzerContextFactory = analyzerContextFactory;
 
+        _projectRestore = new Dictionary<int, bool>();
         _eventHandlers = new()
         {
+            { typeof(BuildSubmissionStartedEventArgs), (BuildEventArgs e) => HandleBuildSubmissionStartedEvent((BuildSubmissionStartedEventArgs)e) },
             { typeof(ProjectEvaluationFinishedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationFinishedEvent((ProjectEvaluationFinishedEventArgs)e) },
             { typeof(ProjectEvaluationStartedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs)e) },
             { typeof(EnvironmentVariableReadEventArgs), (BuildEventArgs e) => HandleEnvironmentVariableReadEvent((EnvironmentVariableReadEventArgs)e) },
@@ -45,9 +50,35 @@ internal class BuildCheckBuildEventHandler
 
     public void HandleBuildEvent(BuildEventArgs e)
     {
+        if (
+            e.GetType() != typeof(BuildSubmissionStartedEventArgs) &&
+            e.BuildEventContext is not null &&
+            _projectRestore.TryGetValue(e.BuildEventContext.SubmissionId, out bool isRestoring) &&
+            isRestoring)
+        {
+            return;
+        }
+
         if (_eventHandlers.TryGetValue(e.GetType(), out Action<BuildEventArgs>? handler))
         {
             handler(e);
+        }
+    }
+
+    private void HandleBuildSubmissionStartedEvent(BuildSubmissionStartedEventArgs eventArgs)
+    {
+        if (_projectRestore.TryGetValue(eventArgs.SubmissionId, out bool isRestoring))
+        {
+            if (isRestoring)
+            {
+                _projectRestore[eventArgs.SubmissionId] = false;
+            }
+        }
+        else
+        {
+            eventArgs.GlobalProperties.TryGetValue(MSBuildConstants.MSBuildIsRestoring, out string? restoreProperty);
+            bool isRestore = restoreProperty is not null ? Convert.ToBoolean(restoreProperty) : false;
+            _projectRestore.Add(eventArgs.SubmissionId, isRestore);
         }
     }
 
