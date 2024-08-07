@@ -62,7 +62,7 @@ namespace Microsoft.Build.BackEnd.Logging
         ShuttingDown,
 
         /// <summary>
-        /// The logging service completly shutdown
+        /// The logging service completely shutdown.
         /// </summary>
         Shutdown
     }
@@ -101,11 +101,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private static Lazy<PropertyInfo> s_projectStartedEventArgsToolsVersion = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("ToolsVersion", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
 
         #region Data
-
-        /// <summary>
-        /// The mapping of build request configuration ids to project file names.
-        /// </summary>
-        private ConcurrentDictionary<int, string> _projectFileMap;
 
         /// <summary>
         /// The current state of the logging service
@@ -296,7 +291,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="nodeId">The node identifier.</param>
         protected LoggingService(LoggerMode loggerMode, int nodeId)
         {
-            _projectFileMap = new ConcurrentDictionary<int, string>();
+            ProjectFileMap = new ConcurrentDictionary<int, string>();
             _logMode = loggerMode;
             _loggers = new List<ILogger>();
             _loggerDescriptions = new List<LoggerDescription>();
@@ -361,6 +356,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Router of the build engine runtime execution information.
         /// </summary>
         public IBuildEngineDataRouter BuildEngineDataRouter => this;
+
+
+        /// <summary>
+        /// The mapping of build request configuration ids to project file names.
+        /// </summary>
+        public ConcurrentDictionary<int, string> ProjectFileMap { get; }
 
         /// <summary>
         /// Properties we need to serialize from the child node
@@ -1858,7 +1859,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private string GetAndVerifyProjectFileFromContext(BuildEventContext context)
         {
-            _projectFileMap.TryGetValue(context.ProjectContextId, out string projectFile);
+            ProjectFileMap.TryGetValue(context.ProjectContextId, out string projectFile);
 
             // PERF: Not using VerifyThrow to avoid boxing an int in the non-error case.
             if (projectFile == null)

@@ -113,10 +113,8 @@ internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath, str
 internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
 {
     public BuildCheckResultWarning(IBuildCheckResult result, string code)
-        : base(subcategory: null, code: code, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: result.FormatMessage(), helpKeyword: null, senderName: null)
-    {
-        RawMessage = result.FormatMessage();
-    }
+        : base(subcategory: null, code: code, file: result.ProjectFile, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: result.FormatMessage(), helpKeyword: null, senderName: null)
+        => RawMessage = result.FormatMessage();
 
     internal BuildCheckResultWarning() { }
 
@@ -138,10 +136,8 @@ internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
 internal sealed class BuildCheckResultError : BuildErrorEventArgs
 {
     public BuildCheckResultError(IBuildCheckResult result, string code)
-        : base(subcategory: null, code: code, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: result.FormatMessage(), helpKeyword: null, senderName: null)
-    {
-        RawMessage = result.FormatMessage();
-    }
+        : base(subcategory: null, code: code, file: result.ProjectFile, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: result.FormatMessage(), helpKeyword: null, senderName: null)
+        => RawMessage = result.FormatMessage();
 
     internal BuildCheckResultError() { }
 
@@ -165,6 +161,7 @@ internal sealed class BuildCheckResultMessage : BuildMessageEventArgs
     public BuildCheckResultMessage(IBuildCheckResult result)
     {
         RawMessage = result.FormatMessage();
+        File = result.ProjectFile;
     }
 
     internal BuildCheckResultMessage() { }
@@ -174,6 +171,7 @@ internal sealed class BuildCheckResultMessage : BuildMessageEventArgs
         base.WriteToStream(writer);
 
         writer.Write(RawMessage!);
+        writer.Write(File);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
@@ -181,5 +179,6 @@ internal sealed class BuildCheckResultMessage : BuildMessageEventArgs
         base.CreateFromStream(reader, version);
 
         RawMessage = reader.ReadString();
+        File = reader.ReadString();
     }
 }

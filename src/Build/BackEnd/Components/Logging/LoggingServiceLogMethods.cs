@@ -134,7 +134,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
-                _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
+                ProjectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
                 ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
                 buildEvent.ProjectFile = projectFile;
             }
@@ -174,7 +174,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 buildEvent.BuildEventContext = buildEventContext;
                 if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                 {
-                    _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
+                    ProjectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
                     ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
                     buildEvent.ProjectFile = projectFile;
                 }
@@ -326,7 +326,7 @@ namespace Microsoft.Build.BackEnd.Logging
             buildEvent.BuildEventContext = buildEventContext;
             if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
-                _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
+                ProjectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
                 ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
                 buildEvent.ProjectFile = projectFile;
             }
@@ -414,7 +414,7 @@ namespace Microsoft.Build.BackEnd.Logging
             int projectContextId = NextProjectId;
 
             // In the future if some LogProjectCacheStarted event is created, move this there to align with evaluation and build execution.
-            _projectFileMap[projectContextId] = projectFile;
+            ProjectFileMap[projectContextId] = projectFile;
 
             // Because the project cache runs in the BuildManager, it makes some sense to associate logging with the in-proc node.
             // If a invalid node id is used the messages become deferred in the console logger and spit out at the end.
@@ -505,17 +505,17 @@ namespace Microsoft.Build.BackEnd.Logging
                 projectContextId = NextProjectId;
 
                 // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
-                if (_projectFileMap.ContainsKey(projectContextId))
+                if (ProjectFileMap.ContainsKey(projectContextId))
                 {
                     ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should not already be in the ID-to-file mapping!", projectContextId, projectFile);
                 }
 
-                _projectFileMap[projectContextId] = projectFile;
+                ProjectFileMap[projectContextId] = projectFile;
             }
             else
             {
                 // A projectContextId was provided, so use it with some sanity checks
-                if (_projectFileMap.TryGetValue(projectContextId, out string existingProjectFile))
+                if (ProjectFileMap.TryGetValue(projectContextId, out string existingProjectFile))
                 {
                     if (!projectFile.Equals(existingProjectFile, StringComparison.OrdinalIgnoreCase))
                     {
@@ -532,7 +532,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", projectContextId);
                     }
 
-                    _projectFileMap[projectContextId] = projectFile;
+                    ProjectFileMap[projectContextId] = projectFile;
                 }
             }
 
@@ -585,7 +585,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ProcessLoggingEvent(buildEvent);
 
             // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
-            if (!_projectFileMap.TryRemove(projectBuildEventContext.ProjectContextId, out _))
+            if (!ProjectFileMap.TryRemove(projectBuildEventContext.ProjectContextId, out _))
             {
                 ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should be in the ID-to-file mapping!", projectBuildEventContext.ProjectContextId, projectFile);
             }

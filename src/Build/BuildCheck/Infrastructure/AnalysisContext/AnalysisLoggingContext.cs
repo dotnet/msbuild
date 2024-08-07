@@ -1,11 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -25,8 +20,15 @@ internal readonly struct AnalysisLoggingContext(ILoggingService loggingService, 
     public BuildEventContext BuildEventContext => eventContext;
 
     public void DispatchBuildEvent(BuildEventArgs buildEvent)
-        => loggingService
-            .LogBuildEvent(buildEvent);
+    {
+        // When logging happens out of process, we need to map the project context id to the project file on the receiving side.
+        if (ShouldUpdateProjectFileMap(buildEvent))
+        {
+            UpdateProjectFileMap(buildEvent);
+        }
+
+        loggingService.LogBuildEvent(buildEvent);
+    }
 
     public void DispatchAsComment(MessageImportance importance, string messageResourceName, params object?[] messageArgs)
         => loggingService
@@ -39,4 +41,25 @@ internal readonly struct AnalysisLoggingContext(ILoggingService loggingService, 
     public void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
         => loggingService
             .LogErrorFromText(eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
+
+    private bool ShouldUpdateProjectFileMap(BuildEventArgs buildEvent) => buildEvent.BuildEventContext != null &&
+               buildEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId &&
+               !loggingService.ProjectFileMap.ContainsKey(buildEvent.BuildEventContext.ProjectContextId);
+
+    private void UpdateProjectFileMap(BuildEventArgs buildEvent)
+    {
+        string file = GetFileFromBuildEvent(buildEvent);
+        if (!string.IsNullOrEmpty(file))
+        {
+            loggingService.ProjectFileMap[buildEvent.BuildEventContext!.ProjectContextId] = file;
+        }
+    }
+
+    private string GetFileFromBuildEvent(BuildEventArgs buildEvent) => buildEvent switch
+    {
+        BuildWarningEventArgs we => we.File,
+        BuildErrorEventArgs ee => ee.File,
+        BuildMessageEventArgs me => me.File,
+        _ => string.Empty,
+    };
 }

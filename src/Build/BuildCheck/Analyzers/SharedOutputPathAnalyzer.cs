@@ -85,6 +85,7 @@ internal sealed class SharedOutputPathAnalyzer : BuildAnalyzer
                 SupportedRule,
                 // Populating precise location tracked via https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=58661732
                 ElementLocation.EmptyLocation,
+                projectPath,
                 Path.GetFileName(projectPath),
                 Path.GetFileName(conflictingProject),
                 path!));

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
@@ -57,6 +58,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Router of the build engine runtime execution information.
         /// </summary>
         IBuildEngineDataRouter BuildEngineDataRouter { get; }
+
+        /// <summary>
+        /// The mapping of build request configuration ids to project file names.
+        /// </summary>
+        ConcurrentDictionary<int, string> ProjectFileMap { get; }
 
         /// <summary>
         /// Provide the current state of the loggingService.

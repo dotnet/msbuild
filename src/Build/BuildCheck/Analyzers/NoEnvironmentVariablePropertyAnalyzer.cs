@@ -56,6 +56,7 @@ internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
                         context.ReportResult(BuildCheckResult.Create(
                             SupportedRule,
                             ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
+                            context.Data.ProjectFilePath,
                             $"'{envVariableData.Key}' with value: '{envVariableData.Value.EnvVarValue}'"));
                     }
                     else
@@ -63,6 +64,7 @@ internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
                         context.ReportResult(BuildCheckResult.Create(
                             SupportedRule,
                             ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
+                            context.Data.ProjectFilePath,
                             $"'{envVariableData.Key}'"));
                     }
 

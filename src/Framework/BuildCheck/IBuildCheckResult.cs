@@ -1,12 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
@@ -18,7 +12,14 @@ internal interface IBuildCheckResult
     /// Optional location of the finding (in near future we might need to support multiple locations).
     /// </summary>
     string LocationString { get; }
+
+    /// <summary>
+    /// Gets project file path where the finding was reported.
+    /// </summary>
+    string ProjectFile { get; }
+
     string[] MessageArgs { get; }
+
     string MessageFormat { get; }
 
     string FormatMessage();

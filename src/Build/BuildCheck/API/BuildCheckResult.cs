@@ -16,15 +16,13 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 public sealed class BuildCheckResult : IBuildCheckResult
 {
-    public static BuildCheckResult Create(BuildAnalyzerRule rule, ElementLocation location, params string[] messageArgs)
-    {
-        return new BuildCheckResult(rule, location, messageArgs);
-    }
+    public static BuildCheckResult Create(BuildAnalyzerRule rule, ElementLocation location, string projectFile, params string[] messageArgs) => new BuildCheckResult(rule, location, projectFile, messageArgs);
 
-    public BuildCheckResult(BuildAnalyzerRule buildAnalyzerRule, ElementLocation location, string[] messageArgs)
+    public BuildCheckResult(BuildAnalyzerRule buildAnalyzerRule, ElementLocation location, string projectFile, string[] messageArgs)
     {
         BuildAnalyzerRule = buildAnalyzerRule;
         Location = location;
+        ProjectFile = projectFile;
         MessageArgs = messageArgs;
     }
 
@@ -43,6 +41,11 @@ public sealed class BuildCheckResult : IBuildCheckResult
     /// Optional location of the finding (in near future we might need to support multiple locations).
     /// </summary>
     public ElementLocation Location { get; }
+
+    /// <summary>
+    /// Gets project file path where the finding was reported.
+    /// </summary>
+    public string ProjectFile { get; }
 
     public string LocationString => Location.LocationString;
 
