@@ -16,7 +16,6 @@ using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using Microsoft.Build.Experimental.BuildCheck;
-using System.Diagnostics;
 
 #nullable disable
 
