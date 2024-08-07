@@ -208,7 +208,7 @@ public class EndToEndTests : IDisposable
     [Theory]
     [InlineData("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
-    public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedCheck = false)
+    public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)
     {
         using (var env = TestEnvironment.Create())
         {
@@ -244,7 +244,10 @@ public class EndToEndTests : IDisposable
         {
             var checkCandidatePath = Path.Combine(TestAssetsRootPath, checkCandidate);
             AddCustomDataSourceToNugetConfig(checkCandidatePath);
-            File.WriteAllText(Path.Combine(checkCandidatePath, EditorConfigFileName), ReadEditorConfig(new List<(string, string)>() { (ruleId, severity) }, checkCandidatePath));
+            File.WriteAllText(Path.Combine(checkCandidatePath, EditorConfigFileName), ReadEditorConfig(
+                new List<(string, string)>() { (ruleId, severity) },
+                ruleToCustomConfig: null,
+                checkCandidatePath));
 
             string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool _, timeoutMilliseconds: 1200_0000);

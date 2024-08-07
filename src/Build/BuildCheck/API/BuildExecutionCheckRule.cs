@@ -10,12 +10,12 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 public class BuildExecutionCheckRule
 {
-    public BuildAnalyzerRule(
+    public BuildExecutionCheckRule(
         string id, 
         string title, 
         string description, 
         string messageFormat,
-        BuildAnalyzerConfiguration defaultConfiguration)
+        BuildExecutionCheckConfiguration defaultConfiguration)
     {
         Id = id;
         Title = title;
