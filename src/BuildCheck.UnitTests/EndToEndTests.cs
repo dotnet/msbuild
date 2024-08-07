@@ -254,9 +254,12 @@ public class EndToEndTests : IDisposable
     {
         using (var env = TestEnvironment.Create())
         {
-            var analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
+            string analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
+
+            // Can't use Transitive environment due to the need to dogfood local nuget packages.
             AddCustomDataSourceToNugetConfig(analysisCandidatePath);
-            File.WriteAllText(Path.Combine(analysisCandidatePath, EditorConfigFileName), ReadEditorConfig(
+            string editorConfigName = Path.Combine(analysisCandidatePath, EditorConfigFileName);
+            File.WriteAllText(editorConfigName, ReadEditorConfig(
                 new List<(string, string)>() { (ruleId, severity) },
                 ruleToCustomConfig: null,
                 analysisCandidatePath));
@@ -265,6 +268,9 @@ public class EndToEndTests : IDisposable
                 $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore -analyze -verbosity:n", out bool _, timeoutMilliseconds: 120_000);
 
             projectAnalysisBuildLog.ShouldContain(expectedMessage);
+
+            // Cleanup
+            File.Delete(editorConfigName);
         }
     }
 
