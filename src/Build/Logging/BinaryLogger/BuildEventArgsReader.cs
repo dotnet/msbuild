@@ -625,13 +625,7 @@ namespace Microsoft.Build.Logging
             var fields = ReadBuildEventArgsFields();
 
             IDictionary<string, string>? globalProperties = null;
-            // See ReadProjectEvaluationFinishedEventArgs for details on why we always store global properties in newer version.
-            if (_fileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion ||
-                ReadBoolean())
-            {
-                globalProperties = ReadStringDictionary();
-            }
-            globalProperties = globalProperties ?? new Dictionary<string, string>();
+            globalProperties = ReadStringDictionary() ?? new Dictionary<string, string>();
 
             var entryProjectsFullPath = ReadStringIEnumerable() ?? Enumerable.Empty<string>();
             var targetNames = ReadStringIEnumerable() ?? Enumerable.Empty<string>();

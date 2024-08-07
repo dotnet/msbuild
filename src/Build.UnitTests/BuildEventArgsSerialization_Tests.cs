@@ -102,6 +102,7 @@ namespace Microsoft.Build.UnitTests
             {
                 {"Variable1", "Value1" },
                 {"Variable2", "" },
+                {"Variable3", null },
             };
             var entryPointProjects = new List<string>()
             {

@@ -58,7 +58,7 @@ namespace Microsoft.Build.Framework
             foreach (var entry in GlobalProperties)
             {
                 writer.Write((string)entry.Key);
-                writer.Write((string?)entry.Value ?? "");
+                writer.WriteOptionalString(entry.Value);
             }
 
             writer.Write(EntryProjectsFullPath.Count());
@@ -86,9 +86,9 @@ namespace Microsoft.Build.Framework
             for (int i = 0; i < numberOfProperties; i++)
             {
                 string key = reader.ReadString();
-                string value = reader.ReadString();
+                string? value = reader.ReadOptionalString();
 
-                if (key != null && value != null)
+                if (key != null)
                 {
                     globalProperties[key] = value;
                 }
