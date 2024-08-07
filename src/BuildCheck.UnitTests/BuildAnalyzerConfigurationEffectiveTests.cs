@@ -12,9 +12,9 @@ namespace Microsoft.Build.BuildCheck.UnitTests;
 public class BuildAnalyzerConfigurationEffectiveTests
 {
     [Theory]
-    [InlineData("ruleId", EvaluationAnalysisScope.ProjectOnly, BuildAnalyzerResultSeverity.Warning,  true)]
-    [InlineData("ruleId2", EvaluationAnalysisScope.ProjectOnly, BuildAnalyzerResultSeverity.Warning,  true)]
-    [InlineData("ruleId", EvaluationAnalysisScope.ProjectOnly, BuildAnalyzerResultSeverity.Error, false)]
+    [InlineData("ruleId", EvaluationAnalysisScope.ProjectFileOnly, BuildAnalyzerResultSeverity.Warning,  true)]
+    [InlineData("ruleId2", EvaluationAnalysisScope.ProjectFileOnly, BuildAnalyzerResultSeverity.Warning,  true)]
+    [InlineData("ruleId", EvaluationAnalysisScope.ProjectFileOnly, BuildAnalyzerResultSeverity.Error, false)]
     public void IsSameConfigurationAsTest(
         string secondRuleId,
         EvaluationAnalysisScope secondScope,
@@ -23,7 +23,7 @@ public class BuildAnalyzerConfigurationEffectiveTests
     {
         BuildAnalyzerConfigurationEffective configuration1 = new BuildAnalyzerConfigurationEffective(
                        ruleId: "ruleId",
-                       evaluationAnalysisScope: EvaluationAnalysisScope.ProjectOnly,
+                       evaluationAnalysisScope: EvaluationAnalysisScope.ProjectFileOnly,
                        severity: BuildAnalyzerResultSeverity.Warning);
 
         BuildAnalyzerConfigurationEffective configuration2 = new BuildAnalyzerConfigurationEffective(
@@ -43,7 +43,7 @@ public class BuildAnalyzerConfigurationEffectiveTests
     {
         BuildAnalyzerConfigurationEffective configuration = new BuildAnalyzerConfigurationEffective(
                        ruleId: "ruleId",
-                       evaluationAnalysisScope: EvaluationAnalysisScope.ProjectOnly,
+                       evaluationAnalysisScope: EvaluationAnalysisScope.ProjectFileOnly,
                        severity: severity);
 
         configuration.IsEnabled.ShouldBe(isEnabledExpected);
@@ -56,7 +56,7 @@ public class BuildAnalyzerConfigurationEffectiveTests
         {
             new BuildAnalyzerConfigurationEffective(
                         ruleId: "ruleId",
-                        evaluationAnalysisScope: EvaluationAnalysisScope.ProjectOnly,
+                        evaluationAnalysisScope: EvaluationAnalysisScope.ProjectFileOnly,
                         severity: BuildAnalyzerResultSeverity.Default);
         });
     }

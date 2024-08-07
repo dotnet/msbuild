@@ -48,6 +48,7 @@ public sealed class BuildCheckResult : IBuildCheckResult
     public string LocationString => Location.LocationString;
 
     public string[] MessageArgs { get; }
+
     public string MessageFormat => BuildAnalyzerRule.MessageFormat;
 
     // Here we will provide different link for built-in rules and custom rules - once we have the base classes differentiated.

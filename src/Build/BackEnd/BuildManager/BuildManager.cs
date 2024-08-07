@@ -1375,10 +1375,24 @@ namespace Microsoft.Build.Execution
             where TRequestData : BuildRequestDataBase
             where TResultData : BuildResultBase
         {
-            // TODO: here we should add BuildRequestStarted https://github.com/dotnet/msbuild/issues/10145
-            // BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-            // ((IBuildComponentHost)this).LoggingService.LogBuildEvent()
+            // For the current submission we only know the SubmissionId and that it happened on scheduler node - all other BuildEventContext dimensions are unknown now.
+            BuildEventContext buildEventContext = new BuildEventContext(
+                submission.SubmissionId,
+                nodeId: 1,
+                BuildEventContext.InvalidProjectInstanceId,
+                BuildEventContext.InvalidProjectContextId,
+                BuildEventContext.InvalidTargetId,
+                BuildEventContext.InvalidTaskId);
 
+            BuildSubmissionStartedEventArgs submissionStartedEvent = new(
+                submission.BuildRequestDataBase.GlobalPropertiesLookup,
+                submission.BuildRequestDataBase.EntryProjectsFullPath,
+                submission.BuildRequestDataBase.TargetNames,
+                submission.BuildRequestDataBase.Flags,
+                submission.SubmissionId);
+            submissionStartedEvent.BuildEventContext = buildEventContext;
+
+            ((IBuildComponentHost)this).LoggingService.LogBuildEvent(submissionStartedEvent);
 
             if (submission is BuildSubmission buildSubmission)
             {
@@ -2757,8 +2771,7 @@ namespace Microsoft.Build.Execution
                 , new LoggingNodeConfiguration(
                     loggingService.IncludeEvaluationMetaprojects,
                     loggingService.IncludeEvaluationProfile,
-                    loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
-                    loggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent,
+                    loggingService.IncludeEvaluationPropertiesAndItems,
                     loggingService.IncludeTaskInputs));
             }
 

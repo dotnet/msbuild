@@ -396,7 +396,7 @@ namespace Microsoft.Build.Evaluation
         /// This is for the purpose of evaluations through API calls, that might not be able to pass the logging context
         ///  - BuildCheck analysis won't be executed for those.
         /// (for one of the calls we can actually pass IDataConsumingContext - as we have logging service and project)
-        /// 
+        ///
         /// </summary>
         internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata, IFileSystem fileSystem)
             : this(properties, items, fileSystem, null)
@@ -1558,7 +1558,7 @@ namespace Microsoft.Build.Evaluation
                                    MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7);
 
                 propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, elementLocation, property == null, isArtifical);
-                
+
                 if (isArtifical)
                 {
                     // It could be one of the MSBuildThisFileXXXX properties,
@@ -1654,9 +1654,8 @@ namespace Microsoft.Build.Evaluation
             {
 #if RUNTIME_TYPE_NETCORE
                 // .NET Core MSBuild used to always return empty, so match that behavior
-                // on non-Windows (no registry), and with a changewave (in case someone
-                // had a registry property and it breaks when it lights up).
-                if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                // on non-Windows (no registry).
+                if (!NativeMethodsShared.IsWindows)
                 {
                     return string.Empty;
                 }
@@ -2017,8 +2016,7 @@ namespace Microsoft.Build.Evaluation
                     if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)) != true)
                     {
                         // ...or a function "AnyHaveMetadataValue", since that will want to return false for an empty list.
-                        if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) ||
-                            expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
+                        if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
                         {
                             itemsFromCapture = new List<KeyValuePair<string, S>>();
                             return false;
@@ -3571,8 +3569,14 @@ namespace Microsoft.Build.Evaluation
                         try
                         {
                             // First attempt to recognize some well-known functions to avoid binding
-                            // and potential first-chance MissingMethodExceptions
+                            // and potential first-chance MissingMethodExceptions.
                             wellKnownFunctionSuccess = TryExecuteWellKnownFunction(out functionResult, objectInstance, args);
+
+                            if (!wellKnownFunctionSuccess)
+                            {
+                                // Some well-known functions need evaluated value from properties.
+                                wellKnownFunctionSuccess = TryExecuteWellKnownFunctionWithPropertiesParam(properties, out functionResult, objectInstance, args);
+                            }
                         }
                         // we need to preserve the same behavior on exceptions as the actual binder
                         catch (Exception ex)
@@ -3667,6 +3671,27 @@ namespace Microsoft.Build.Evaluation
 
                     return null;
                 }
+            }
+
+            private bool TryExecuteWellKnownFunctionWithPropertiesParam(IPropertyProvider<T> properties, out object returnVal, object objectInstance, object[] args)
+            {
+                returnVal = null;
+
+                if (_receiverType == typeof(IntrinsicFunctions))
+                {
+                    if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterBuildCheck), StringComparison.OrdinalIgnoreCase))
+                    {
+                        string projectPath = properties.GetProperty("MSBuildProjectFullPath")?.EvaluatedValue ?? string.Empty;
+                        ErrorUtilities.VerifyThrow(_loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = IntrinsicFunctions.RegisterBuildCheck(projectPath, arg0, _loggingContext);
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
             }
 
             /// <summary>
@@ -3934,16 +3959,6 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (_receiverType == typeof(IntrinsicFunctions))
                     {
-                        if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterBuildCheck), StringComparison.OrdinalIgnoreCase))
-                        {
-                            ErrorUtilities.VerifyThrow(_loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.RegisterBuildCheck(arg0, _loggingContext);
-                                return true;
-                            }
-                        }
-
                         if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.EnsureTrailingSlash), StringComparison.OrdinalIgnoreCase))
                         {
                             if (TryGetArg(args, out string arg0))
@@ -4927,13 +4942,10 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (IntrinsicFunctionOverload.IsIntrinsicFunctionOverloadsEnabled())
+                if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
                 {
-                    if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
-                    {
-                        resultValue = integerOperation(argLong0, argLong1);
-                        return true;
-                    }
+                    resultValue = integerOperation(argLong0, argLong1);
+                    return true;
                 }
 
                 if (TryConvertToDouble(args[0], out double argDouble0) && TryConvertToDouble(args[1], out double argDouble1))
@@ -5565,16 +5577,10 @@ namespace Microsoft.Build.Evaluation
         // For reuse, the comparer is cached in a non-generic type.
         // Both comparer instances can be cached to support change wave testing.
         private static IComparer<MemberInfo>? s_comparerLongBeforeDouble;
-        private static IComparer<MemberInfo>? s_comparerDoubleBeforeLong;
 
-        internal static IComparer<MemberInfo> IntrinsicFunctionOverloadMethodComparer => IsIntrinsicFunctionOverloadsEnabled() ? LongBeforeDoubleComparer : DoubleBeforeLongComparer;
+        internal static IComparer<MemberInfo> IntrinsicFunctionOverloadMethodComparer => LongBeforeDoubleComparer;
 
         private static IComparer<MemberInfo> LongBeforeDoubleComparer => s_comparerLongBeforeDouble ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key0).CompareTo(SelectTypeOfFirstParameter(key1)));
-
-        private static IComparer<MemberInfo> DoubleBeforeLongComparer => s_comparerDoubleBeforeLong ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key1).CompareTo(SelectTypeOfFirstParameter(key0)));
-
-        // The arithmetic overload feature uses this method to test for the change wave.
-        internal static bool IsIntrinsicFunctionOverloadsEnabled() => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8);
 
         internal static bool IsKnownOverloadMethodName(string methodName) => s_knownOverloadName.Any(name => string.Equals(name, methodName, StringComparison.OrdinalIgnoreCase));
 

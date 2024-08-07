@@ -271,13 +271,10 @@ namespace Microsoft.Build.Utilities
 
             try
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
-                {
-                    var processes = GetProcessesLockingFile(filePath);
-                    message = !string.IsNullOrEmpty(processes)
-                        ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LockCheck.FileLocked", processes)
-                        : String.Empty;
-                }
+                var processes = GetProcessesLockingFile(filePath);
+                message = !string.IsNullOrEmpty(processes)
+                    ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LockCheck.FileLocked", processes)
+                    : String.Empty;
             }
             catch (Exception)
             {

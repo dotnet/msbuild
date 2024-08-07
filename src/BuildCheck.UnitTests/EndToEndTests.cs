@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.IO.Ports;
+using System.Linq;
 using System.Xml;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -16,6 +19,8 @@ namespace Microsoft.Build.BuildCheck.UnitTests;
 
 public class EndToEndTests : IDisposable
 {
+    private const string EditorConfigFileName = ".editorconfig";
+
     private readonly TestEnvironment _env;
 
     public EndToEndTests(ITestOutputHelper output)
@@ -92,7 +97,7 @@ public class EndToEndTests : IDisposable
     [InlineData(false, false)]
     public void SampleAnalyzerIntegrationTest_AnalyzeOnBuild(bool buildInOutOfProcessNode, bool analysisRequested)
     {
-        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", "warning") });
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
@@ -126,7 +131,7 @@ public class EndToEndTests : IDisposable
     [InlineData(false, false, "warning")]
     public void SampleAnalyzerIntegrationTest_ReplayBinaryLogOfAnalyzedBuild(bool buildInOutOfProcessNode, bool analysisRequested, string BC0101Severity)
     {
-        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, BC0101Severity);
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", BC0101Severity) });
 
         var projectDirectory = Path.GetDirectoryName(projectFile.Path);
         string logFile = _env.ExpectFile(".binlog").Path;
@@ -168,7 +173,7 @@ public class EndToEndTests : IDisposable
     [InlineData("none", null, new string[] { "BC0101"})]
     public void EditorConfig_SeverityAppliedCorrectly(string BC0101Severity, string expectedOutputValues, string[] unexpectedOutputValues)
     {
-        PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, BC0101Severity);
+        PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", BC0101Severity) });
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze",
@@ -193,7 +198,7 @@ public class EndToEndTests : IDisposable
     [InlineData(false, false)]
     public void SampleAnalyzerIntegrationTest_AnalyzeOnBinaryLogReplay(bool buildInOutOfProcessNode, bool analysisRequested)
     {
-        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", "warning") });
 
         string? projectDirectory = Path.GetDirectoryName(projectFile.Path);
         string logFile = _env.ExpectFile(".binlog").Path;
@@ -228,9 +233,37 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
+    [InlineData(null, "Property is derived from environment variable: 'TEST'. Properties should be passed explicitly using the /p option.")]
+    [InlineData(true, "Property is derived from environment variable: 'TEST' with value: 'FromEnvVariable'. Properties should be passed explicitly using the /p option.")]
+    [InlineData(false, "Property is derived from environment variable: 'TEST'. Properties should be passed explicitly using the /p option.")]
+    public void NoEnvironmentVariableProperty_Test(bool? customConfigEnabled, string expectedMessage)
+    {
+        List<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? customConfigData = null;
+
+        if (customConfigEnabled.HasValue)
+        {
+            customConfigData = new List<(string, (string, string))>()
+            {
+                ("BC0103", ("allow_displaying_environment_variable_value", customConfigEnabled.Value ? "true" : "false")),
+            };
+        }
+
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode: true,
+            out TransientTestFile projectFile,
+            new List<(string, string)>() { ("BC0103", "error") },
+            customConfigData);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze", out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+
+        output.ShouldContain(expectedMessage);
+    }
+
+    [Theory]
     [InlineData("AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
-    public void CustomAnalyzerTest(string analysisCandidate, string[] expectedRegisteredRules, bool expectedRejectedAnalyzers = false)
+    public void CustomAnalyzerTest_NoEditorConfig(string analysisCandidate, string[] expectedRegisteredRules, bool expectedRejectedAnalyzers = false)
     {
         using (var env = TestEnvironment.Create())
         {
@@ -238,7 +271,7 @@ public class EndToEndTests : IDisposable
             AddCustomDataSourceToNugetConfig(analysisCandidatePath);
 
             string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:n",
+                $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore -analyze -verbosity:n",
                 out bool successBuild);
             successBuild.ShouldBeTrue(projectAnalysisBuildLog);
 
@@ -249,8 +282,32 @@ public class EndToEndTests : IDisposable
 
             if (expectedRejectedAnalyzers)
             {
-                projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerBaseTypeNotAssignable", "InvalidAnalyzer", "InvalidCustomAnalyzer, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
+                projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    "CustomAnalyzerBaseTypeNotAssignable",
+                    "InvalidAnalyzer",
+                    "InvalidCustomAnalyzer, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
             }
+        }
+    }
+
+    [Theory]
+    [InlineData("AnalysisCandidate", "X01234", "error", "error X01234")]
+    [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", "X01234", "warning", "warning X01234")]
+    public void CustomAnalyzerTest_WithEditorConfig(string analysisCandidate, string ruleId, string severity, string expectedMessage)
+    {
+        using (var env = TestEnvironment.Create())
+        {
+            var analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
+            AddCustomDataSourceToNugetConfig(analysisCandidatePath);
+            File.WriteAllText(Path.Combine(analysisCandidatePath, EditorConfigFileName), ReadEditorConfig(
+                new List<(string, string)>() { (ruleId, severity) },
+                ruleToCustomConfig: null,
+                analysisCandidatePath));
+
+            string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore -analyze -verbosity:n", out bool _, timeoutMilliseconds: 120_000);
+
+            projectAnalysisBuildLog.ShouldContain(expectedMessage);
         }
     }
 
@@ -294,9 +351,10 @@ public class EndToEndTests : IDisposable
     }
 
     private void PrepareSampleProjectsAndConfig(
-    bool buildInOutOfProcessNode,
-    out TransientTestFile projectFile,
-    string? BC0101Severity = null)
+        bool buildInOutOfProcessNode,
+        out TransientTestFile projectFile,
+        IEnumerable<(string RuleId, string Severity)>? ruleToSeverity,
+        IEnumerable<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? ruleToCustomConfig = null)
     {
         string testAssetsFolderName = "SampleAnalyzerIntegrationTest";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
@@ -308,7 +366,7 @@ public class EndToEndTests : IDisposable
         projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
         TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
 
-        CreateEditorConfig(BC0101Severity, testAssetsFolderName, workFolder);
+        _env.CreateFile(workFolder, ".editorconfig", ReadEditorConfig(ruleToSeverity, ruleToCustomConfig, testAssetsFolderName));
 
         // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
         // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
@@ -326,12 +384,38 @@ public class EndToEndTests : IDisposable
                 .Replace("WorkFolderPath", workFolder.Path);
     }
 
-    private void CreateEditorConfig(string? BC0101Severity, string testAssetsFolderName, TransientTestFolder workFolder)
+    private string ReadEditorConfig(
+        IEnumerable<(string RuleId, string Severity)>? ruleToSeverity,
+        IEnumerable<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? ruleToCustomConfig,
+        string testAssetsFolderName)
     {
-        string configContent = string.IsNullOrEmpty(BC0101Severity)
-            ? File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, ".editorconfigbasic"))
-            : File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, ".editorconfigcustomised")).Replace("BC0101Severity", BC0101Severity);
+        string configContent = File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, $"{EditorConfigFileName}test"));
 
-        _ = _env.CreateFile(workFolder, ".editorconfig", configContent);
+        PopulateRuleToSeverity(ruleToSeverity, ref configContent);
+        PopulateRuleToCustomConfig(ruleToCustomConfig, ref configContent);
+
+        return configContent;
+    }
+
+    private void PopulateRuleToSeverity(IEnumerable<(string RuleId, string Severity)>? ruleToSeverity, ref string configContent)
+    {
+        if (ruleToSeverity != null && ruleToSeverity.Any())
+        {
+            foreach (var rule in ruleToSeverity)
+            {
+                configContent = configContent.Replace($"build_check.{rule.RuleId}.Severity={rule.RuleId}Severity", $"build_check.{rule.RuleId}.Severity={rule.Severity}");
+            }
+        }
+    }
+
+    private void PopulateRuleToCustomConfig(IEnumerable<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? ruleToCustomConfig, ref string configContent)
+    {
+        if (ruleToCustomConfig != null && ruleToCustomConfig.Any())
+        {
+            foreach (var rule in ruleToCustomConfig)
+            {
+                configContent = configContent.Replace($"build_check.{rule.RuleId}.CustomConfig=dummy", $"build_check.{rule.RuleId}.{rule.CustomConfig.ConfigKey}={rule.CustomConfig.Value}");
+            }
+        }
     }
 }

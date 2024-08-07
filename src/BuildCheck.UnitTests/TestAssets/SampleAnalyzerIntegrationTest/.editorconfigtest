@@ -4,7 +4,9 @@ root=true
 build_check.BC0101.Severity=BC0101Severity
 
 build_check.BC0102.Severity=warning
+
 build_check.BC0103.Severity=warning
+build_check.BC0103.CustomConfig=dummy
 
 build_check.COND0543.Severity=Error
 build_check.COND0543.EvaluationAnalysisScope=AnalyzedProjectOnly

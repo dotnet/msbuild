@@ -586,8 +586,6 @@ namespace Microsoft.Build.Execution
 #if RUNTIME_TYPE_NETCORE
                 if (packet is LogMessagePacketBase logMessage
                     && logMessage.EventType == LoggingEventType.CustomEvent
-                    &&
-                    (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
                     && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
                 {
                     BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
@@ -781,12 +779,9 @@ namespace Microsoft.Build.Execution
                 _loggingService.IncludeTaskInputs = true;
             }
 
-            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent)
+            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItems)
             {
-                _loggingService.SetIncludeEvaluationPropertiesAndItemsInEvents(
-                    configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
-                    configuration.LoggingNodeConfiguration
-                        .IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent);
+                _loggingService.IncludeEvaluationPropertiesAndItems = true;
             }
 
             try

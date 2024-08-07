@@ -9,17 +9,23 @@ namespace Microsoft.Build.Experimental.BuildCheck.Analyzers;
 
 internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
 {
+    public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
+                "BC0103",
+                "NoEnvironmentVariablePropertyAnalyzer",
+                "No implicit property derived from an environment variable should be used during the build",
+                "Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.",
+                new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Suggestion });
+
+    private const string RuleId = "BC0103";
+
+    private const string VerboseEnvVariableOutputKey = "allow_displaying_environment_variable_value";
+
     /// <summary>
     /// Contains the list of reported environment variables.
     /// </summary>
     private readonly HashSet<EnvironmentVariableIdentityKey> _environmentVariablesReported = new HashSet<EnvironmentVariableIdentityKey>();
 
-    public static BuildAnalyzerRule SupportedRule = new BuildAnalyzerRule(
-        "BC0103",
-        "NoEnvironmentVariablePropertyAnalyzer",
-        "No implicit property derived from an environment variable should be used during the build",
-        "Property is derived from environment variable: '{0}' with value: '{1}'. Properties should be passed explicitly using the /p option.",
-        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Suggestion });
+    private bool _isVerboseEnvVarOutput;
 
     public override string FriendlyName => "MSBuild.NoEnvironmentVariablePropertyAnalyzer";
 
@@ -27,7 +33,11 @@ internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
 
     public override void Initialize(ConfigurationContext configurationContext)
     {
-        // No custom configuration
+        foreach (CustomConfigurationData customConfigurationData in configurationContext.CustomConfigurationData)
+        {
+            bool? isVerboseEnvVarOutput = GetVerboseEnvVarOutputConfig(customConfigurationData, RuleId);
+            _isVerboseEnvVarOutput = isVerboseEnvVarOutput.HasValue && isVerboseEnvVarOutput.Value;           
+        }
     }
 
     public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEvaluatedPropertiesAction(ProcessEnvironmentVariableReadAction);
@@ -41,17 +51,31 @@ internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
                 EnvironmentVariableIdentityKey identityKey = new(envVariableData.Key, envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column);
                 if (!_environmentVariablesReported.Contains(identityKey))
                 {
-                    context.ReportResult(BuildCheckResult.Create(
-                        SupportedRule,
-                        ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
-                        envVariableData.Key,
-                        envVariableData.Value.EnvVarValue));
+                    if (_isVerboseEnvVarOutput)
+                    {
+                        context.ReportResult(BuildCheckResult.Create(
+                            SupportedRule,
+                            ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
+                            $"'{envVariableData.Key}' with value: '{envVariableData.Value.EnvVarValue}'"));
+                    }
+                    else
+                    {
+                        context.ReportResult(BuildCheckResult.Create(
+                            SupportedRule,
+                            ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
+                            $"'{envVariableData.Key}'"));
+                    }
 
                     _environmentVariablesReported.Add(identityKey);
                 }
             }
         }
     }
+
+    private static bool? GetVerboseEnvVarOutputConfig(CustomConfigurationData customConfigurationData, string ruleId) => customConfigurationData.RuleId.Equals(ruleId, StringComparison.InvariantCultureIgnoreCase)
+            && (customConfigurationData.ConfigurationData?.TryGetValue(VerboseEnvVariableOutputKey, out string? configVal) ?? false)
+            ? bool.Parse(configVal)
+            : null;
 
     internal class EnvironmentVariableIdentityKey(string environmentVariableName, string file, int line, int column) : IEquatable<EnvironmentVariableIdentityKey>
     {
