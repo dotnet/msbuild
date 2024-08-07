@@ -178,9 +178,37 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
+    [InlineData(null, "Property is derived from environment variable: 'TEST'. Properties should be passed explicitly using the /p option.")]
+    [InlineData(true, "Property is derived from environment variable: 'TEST' with value: 'FromEnvVariable'. Properties should be passed explicitly using the /p option.")]
+    [InlineData(false, "Property is derived from environment variable: 'TEST'. Properties should be passed explicitly using the /p option.")]
+    public void NoEnvironmentVariableProperty_Test(bool? customConfigEnabled, string expectedMessage)
+    {
+        List<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? customConfigData = null;
+
+        if (customConfigEnabled.HasValue)
+        {
+            customConfigData = new List<(string, (string, string))>()
+            {
+                ("BC0103", ("allow_displaying_environment_variable_value", customConfigEnabled.Value ? "true" : "false")),
+            };
+        }
+
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode: true,
+            out TransientTestFile projectFile,
+            new List<(string, string)>() { ("BC0103", "error") },
+            customConfigData);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+
+        output.ShouldContain(expectedMessage);
+    }
+
+    [Theory]
     [InlineData("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
-    public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)
+    public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedCheck = false)
     {
         using (var env = TestEnvironment.Create())
         {
@@ -267,7 +295,8 @@ public class EndToEndTests : IDisposable
     private void PrepareSampleProjectsAndConfig(
         bool buildInOutOfProcessNode,
         out TransientTestFile projectFile,
-        IEnumerable<(string RuleId, string Severity)>? ruleToSeverity)
+        IEnumerable<(string RuleId, string Severity)>? ruleToSeverity,
+        IEnumerable<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? ruleToCustomConfig = null)
     {
         string testAssetsFolderName = "SampleCheckIntegrationTest";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
@@ -279,7 +308,7 @@ public class EndToEndTests : IDisposable
         projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
         TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
 
-        _env.CreateFile(workFolder, ".editorconfig", ReadEditorConfig(ruleToSeverity, testAssetsFolderName));
+        _env.CreateFile(workFolder, ".editorconfig", ReadEditorConfig(ruleToSeverity, ruleToCustomConfig, testAssetsFolderName));
 
         // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
         // This discrepancy breaks path equality checks in MSBuild checks if we pass to MSBuild full path to the initial project.
@@ -297,10 +326,21 @@ public class EndToEndTests : IDisposable
                 .Replace("WorkFolderPath", workFolder.Path);
     }
 
-    private string ReadEditorConfig(IEnumerable<(string RuleId, string Severity)>? ruleToSeverity, string testAssetsFolderName)
+    private string ReadEditorConfig(
+        IEnumerable<(string RuleId, string Severity)>? ruleToSeverity,
+        IEnumerable<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? ruleToCustomConfig,
+        string testAssetsFolderName)
     {
         string configContent = File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, $"{EditorConfigFileName}test"));
 
+        PopulateRuleToSeverity(ruleToSeverity, ref configContent);
+        PopulateRuleToCustomConfig(ruleToCustomConfig, ref configContent);
+
+        return configContent;
+    }
+
+    private void PopulateRuleToSeverity(IEnumerable<(string RuleId, string Severity)>? ruleToSeverity, ref string configContent)
+    {
         if (ruleToSeverity != null && ruleToSeverity.Any())
         {
             foreach (var rule in ruleToSeverity)
@@ -308,7 +348,16 @@ public class EndToEndTests : IDisposable
                 configContent = configContent.Replace($"build_check.{rule.RuleId}.Severity={rule.RuleId}Severity", $"build_check.{rule.RuleId}.Severity={rule.Severity}");
             }
         }
+    }
 
-        return configContent;
+    private void PopulateRuleToCustomConfig(IEnumerable<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? ruleToCustomConfig, ref string configContent)
+    {
+        if (ruleToCustomConfig != null && ruleToCustomConfig.Any())
+        {
+            foreach (var rule in ruleToCustomConfig)
+            {
+                configContent = configContent.Replace($"build_check.{rule.RuleId}.CustomConfig=dummy", $"build_check.{rule.RuleId}.{rule.CustomConfig.ConfigKey}={rule.CustomConfig.Value}");
+            }
+        }
     }
 }

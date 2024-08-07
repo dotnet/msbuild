@@ -138,12 +138,14 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private static readonly (string[] ruleIds, bool defaultEnablement, BuildExecutionCheckFactory factory)[][] s_builtInFactoriesPerDataSource =
         [
+
             // BuildCheckDataSource.EventArgs
             [
                 ([SharedOutputPathCheck.SupportedRule.Id], SharedOutputPathCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<SharedOutputPathCheck>),
                 ([DoubleWritesCheck.SupportedRule.Id], DoubleWritesCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<DoubleWritesCheck>),
                 ([NoEnvironmentVariablePropertyCheck.SupportedRule.Id], NoEnvironmentVariablePropertyCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<NoEnvironmentVariablePropertyCheck>)
             ],
+
             // BuildCheckDataSource.Execution
             []
         ];
