@@ -13,7 +13,7 @@ internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
                 "BC0103",
                 "NoEnvironmentVariablePropertyAnalyzer",
                 "No implicit property derived from an environment variable should be used during the build",
-                StandardMessage,
+                "Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.",
                 new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Suggestion });
 
     private const string RuleId = "BC0103";
@@ -24,10 +24,6 @@ internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
     /// Contains the list of reported environment variables.
     /// </summary>
     private readonly HashSet<EnvironmentVariableIdentityKey> _environmentVariablesReported = new HashSet<EnvironmentVariableIdentityKey>();
-
-    private const string VerboseMessage = "Property is derived from environment variable: '{0}' with value: '{1}'. Properties should be passed explicitly using the /p option.";
-
-    private const string StandardMessage = "Property is derived from environment variable: '{0}'. Properties should be passed explicitly using the /p option.";
 
     private bool _isVerboseEnvVarOutput;
 
@@ -57,19 +53,17 @@ internal sealed class NoEnvironmentVariablePropertyAnalyzer : BuildAnalyzer
                 {
                     if (_isVerboseEnvVarOutput)
                     {
-                        SupportedRule.MessageFormat = VerboseMessage;
                         context.ReportResult(BuildCheckResult.Create(
                             SupportedRule,
                             ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
-                            envVariableData.Key,
-                            envVariableData.Value.EnvVarValue));
+                            $"'{envVariableData.Key}' with value: '{envVariableData.Value.EnvVarValue}'"));
                     }
                     else
                     {
                         context.ReportResult(BuildCheckResult.Create(
                             SupportedRule,
                             ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
-                            envVariableData.Key));
+                            $"'{envVariableData.Key}'"));
                     }
 
                     _environmentVariablesReported.Add(identityKey);

@@ -49,7 +49,7 @@ public class BuildAnalyzerRule
     /// <summary>
     /// Message format that will be used by the actual reports (<see cref="BuildCheckResult"/>) - those will just supply the actual arguments.
     /// </summary>
-    public string MessageFormat { get; set; }
+    public string MessageFormat { get; }
 
     /// <summary>
     /// The default configuration - overridable by the user via .editorconfig.
