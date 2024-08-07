@@ -32,6 +32,7 @@ namespace CustomAnalyzer
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,
                 ElementLocation.EmptyLocation,
+                "Foo1.csproj",
                 "Argument for the message format"));
         }
     }

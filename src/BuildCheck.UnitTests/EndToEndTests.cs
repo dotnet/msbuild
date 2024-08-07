@@ -85,7 +85,10 @@ public class EndToEndTests : IDisposable
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(analysisRequested ? "-analyze" : string.Empty)} -bl:{logFile}",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
-        success.ShouldBeTrue();
+        if (BC0101Severity != "error")
+        {
+            success.ShouldBeTrue();
+        }
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
          $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic",
@@ -93,7 +96,10 @@ public class EndToEndTests : IDisposable
 
         _env.Output.WriteLine(output);
 
-        success.ShouldBeTrue();
+        if (BC0101Severity != "error")
+        {
+            success.ShouldBeTrue();
+        }
 
         // The conflicting outputs warning appears - but only if analysis was requested
         if (analysisRequested)
@@ -124,7 +130,10 @@ public class EndToEndTests : IDisposable
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
-        success.ShouldBeTrue();
+        if (BC0101Severity != "error")
+        {
+            success.ShouldBeTrue();
+        }
 
         if (!string.IsNullOrEmpty(expectedOutputValues))
         {
@@ -218,14 +227,17 @@ public class EndToEndTests : IDisposable
             string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore -analyze -verbosity:n",
                 out bool successBuild);
-            successBuild.ShouldBeTrue(projectAnalysisBuildLog);
 
             foreach (string registeredRule in expectedRegisteredRules)
             {
                 projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerSuccessfulAcquisition", registeredRule));
             }
 
-            if (expectedRejectedAnalyzers)
+            if (!expectedRejectedAnalyzers)
+            {
+                successBuild.ShouldBeTrue(projectAnalysisBuildLog);
+            }
+            else
             {
                 projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
                     "CustomAnalyzerBaseTypeNotAssignable",

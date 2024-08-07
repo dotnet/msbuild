@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -245,6 +246,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             get => MessageImportance.Low;
         }
+
+        public ConcurrentDictionary<int, string> ProjectFileMap => new ConcurrentDictionary<int, string>();
 
         public void AddWarningsAsMessages(BuildEventContext buildEventContext, ISet<string> codes)
         {
