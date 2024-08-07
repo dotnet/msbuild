@@ -21,7 +21,7 @@ public class BuildAnalyzerConfiguration
     //  nor in the editorconfig configuration file.
     public static BuildAnalyzerConfiguration Default { get; } = new()
     {
-        EvaluationAnalysisScope = BuildCheck.EvaluationAnalysisScope.ProjectOnly,
+        EvaluationAnalysisScope = BuildCheck.EvaluationAnalysisScope.ProjectFileOnly,
         Severity = BuildAnalyzerResultSeverity.None
     };
 
@@ -84,14 +84,13 @@ public class BuildAnalyzerConfiguration
 
         switch (stringValue)
         {
-            case "project":
-                return BuildCheck.EvaluationAnalysisScope.ProjectOnly;
-            case "current_imports":
-                return BuildCheck.EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree;
-            case "without_sdks":
-                return BuildCheck.EvaluationAnalysisScope.ProjectWithImportsWithoutSdks;
+            case "projectfile":
+            case "project_file":
+                return BuildCheck.EvaluationAnalysisScope.ProjectFileOnly;
+            case "work_tree_imports":
+                return BuildCheck.EvaluationAnalysisScope.WorkTreeImports;
             case "all":
-                return BuildCheck.EvaluationAnalysisScope.ProjectWithAllImports;
+                return BuildCheck.EvaluationAnalysisScope.All;
             default:
                 ThrowIncorrectValueException(BuildCheckConstants.scopeConfigurationKey, stringValue);
                 break;
