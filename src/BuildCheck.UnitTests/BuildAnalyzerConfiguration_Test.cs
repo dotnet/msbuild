@@ -75,8 +75,9 @@ public class BuildAnalyzerConfiguration_Test
     }
 
     [Theory]
+    [InlineData("project_file", EvaluationAnalysisScope.ProjectFileOnly)]
     [InlineData("projectfile", EvaluationAnalysisScope.ProjectFileOnly)]
-    [InlineData("PROJECTFILE", EvaluationAnalysisScope.ProjectFileOnly)]
+    [InlineData("PROJECT_FILE", EvaluationAnalysisScope.ProjectFileOnly)]
     [InlineData("work_tree_imports", EvaluationAnalysisScope.WorkTreeImports)]
     [InlineData("WORK_TREE_IMPORTS", EvaluationAnalysisScope.WorkTreeImports)]
     [InlineData("all", EvaluationAnalysisScope.All)]

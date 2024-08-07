@@ -108,7 +108,7 @@ public class ConfigurationProvider_Tests
 
         [*.csproj]
         build_check.rule_id.severity=error
-        build_check.rule_id.scope=projectfile
+        build_check.rule_id.scope=project_file
         """);
 
         var configurationProvider = new ConfigurationProvider();

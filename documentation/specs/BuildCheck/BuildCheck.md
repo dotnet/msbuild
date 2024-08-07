@@ -209,7 +209,7 @@ Option `EvaluationAnalysisScope` with following possible options will be availab
 
 | EvaluationAnalysisScope (Solution Explorer)   | EditorConfig option      |  Behavior  | 
 | ------------- | ------------- |   ------------- |
-| ProjectFileOnly | `projectfile` | Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded. | 
+| ProjectFileOnly | `project_file` | Only the data from currently analyzed project will be sent to the analyzer. Imports will be discarded. | 
 | WorkTreeImports | `work_tree_imports` |  Only the data from currently analyzed project and imports from files not recognized to be in nuget cache or SDK install folder will be sent to the analyzer. Other imports will be discarded. |  
 | ProjectWithAllImports | `all` | All data will be sent to the analyzer. | 
 
