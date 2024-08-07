@@ -274,6 +274,21 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void DoesNotRunOnRestore(bool buildInOutOfProcessNode)
+    {
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", "warning") });
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:2 -nr:False -t:restore -check",
+            out bool success, timeoutMilliseconds: 120_000000);
+
+        success.ShouldBeTrue();
+        output.ShouldNotContain("BC0101");
+    }
+
     private void AddCustomDataSourceToNugetConfig(string analysisCandidatePath)
     {
         var nugetTemplatePath = Path.Combine(analysisCandidatePath, "nugetTemplate.config");
