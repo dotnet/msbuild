@@ -13,5 +13,5 @@ public interface IBuildCheckRegistrationContext
 
     void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction);
 
-    void RegisterBuildFinishedAction(Action<BuildCheckDataContext<BuildFinishedAnalysisData>> buildFinishedAction);
+    void RegisterBuildFinishedAction(Action<BuildCheckDataContext<BuildFinishedCheckData>> buildFinishedAction);
 }

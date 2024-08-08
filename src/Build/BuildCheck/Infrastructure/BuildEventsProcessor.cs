@@ -99,7 +99,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         }
     }
 
-    internal void ProcessBuildDone(IAnalysisContext analysisContext)
+    internal void ProcessBuildDone(ICheckContext checkContext)
     {
         if (!_buildCheckCentralContext.HasBuildFinishedActions)
         {
@@ -107,7 +107,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             return;
         }
 
-        _buildCheckCentralContext.RunBuildFinishedActions(new BuildFinishedAnalysisData(), analysisContext, ReportResult);
+        _buildCheckCentralContext.RunBuildFinishedActions(new BuildFinishedCheckData(), checkContext, ReportResult);
     }
 
     internal void ProcessTaskStartedEventArgs(

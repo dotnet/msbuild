@@ -416,6 +416,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.Create(Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerRule,Microsoft.Build.Construction.ElementLocation,System.String[])</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.get_BuildAnalyzerRule</Target>
     <Left>ref/net8.0/Microsoft.Build.dll</Left>
     <Right>ref/net8.0/Microsoft.Build.dll</Right>
@@ -444,6 +451,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0006</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterBuildFinishedAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.Experimental.BuildCheck.BuildFinishedCheckData}})</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0006</DiagnosticId>
     <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterEvaluatedPropertiesAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.Experimental.BuildCheck.EvaluatedPropertiesCheckData}})</Target>
     <Left>lib/net472/Microsoft.Build.dll</Left>
     <Right>lib/net472/Microsoft.Build.dll</Right>
@@ -465,6 +479,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0006</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterBuildFinishedAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.Experimental.BuildCheck.BuildFinishedCheckData}})</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0006</DiagnosticId>
     <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterEvaluatedPropertiesAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.Experimental.BuildCheck.EvaluatedPropertiesCheckData}})</Target>
     <Left>lib/net8.0/Microsoft.Build.dll</Left>
     <Right>lib/net8.0/Microsoft.Build.dll</Right>
@@ -482,6 +503,13 @@
     <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterTaskInvocationAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.Experimental.BuildCheck.TaskInvocationCheckData}})</Target>
     <Left>lib/net8.0/Microsoft.Build.dll</Left>
     <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0006</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterBuildFinishedAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.Experimental.BuildCheck.BuildFinishedCheckData}})</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
