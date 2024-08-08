@@ -217,35 +217,35 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerAssemblyNotExist">
-        <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
-        <target state="translated">No se pudo encontrar el ensamblado del analizador personalizado especificado: '{0}'. Compruebe si existe.</target>
-        <note>The message is emitted when the custom analyzer assembly can not be found.</note>
+      <trans-unit id="CustomCheckAssemblyNotExist">
+        <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
+        <target state="new">Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</target>
+        <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
-        <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">No se pudo cargar el tipo de analizador personalizado: '{0}' del ensamblado: '{1}'. Asegúrese de que hereda la clase base Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. Si no está pensado para ser un analizador personalizado, no debe exponerse. Más información: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
-        <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
+      <trans-unit id="CustomCheckBaseTypeNotAssignable">
+        <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="new">Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerFailedAcquisition">
-        <source>Failed to register the custom analyzer: '{0}'.</source>
-        <target state="translated">No se pudo registrar el analizador personalizado: '{0}'.</target>
-        <note>The message is emitted on failed loading of the custom analyzer in process.</note>
+      <trans-unit id="CustomCheckFailedAcquisition">
+        <source>Failed to register the custom check: '{0}'.</source>
+        <target state="new">Failed to register the custom check: '{0}'.</target>
+        <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerFailedRuleLoading">
-        <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
-        <target state="translated">No se pudo crear una instancia de la regla del analizador personalizado con la siguiente excepción: '{0}'.</target>
-        <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
+      <trans-unit id="CustomCheckFailedRuleLoading">
+        <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
+        <target state="new">Failed to instantiate the custom check rule with the following exception: '{0}'.</target>
+        <note>The message is emitted on failed loading of the custom check rule in process.</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerRegistered">
-        <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">El analizador personalizado: '{0}' está registrado para la compilación desde la ubicación: '{1}'.</target>
+      <trans-unit id="CustomCheckRegistered">
+        <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
+        <target state="new">The custom check: '{0}' is registered for the build from the location: '{1}'.</target>
         <note />
       </trans-unit>
-      <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
-        <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
-        <target state="translated">La regla del analizador personalizado: '{0}' se ha registrado correctamente.</target>
-        <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
+      <trans-unit id="CustomCheckSuccessfulAcquisition">
+        <source>Custom check rule: '{0}' has been registered successfully.</source>
+        <target state="new">Custom check rule: '{0}' has been registered successfully.</target>
+        <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
