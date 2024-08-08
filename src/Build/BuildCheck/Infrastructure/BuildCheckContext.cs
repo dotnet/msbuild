@@ -31,6 +31,6 @@ internal sealed class BuildCheckRegistrationContext(BuildAnalyzerWrapper analyze
     public void RegisterPropertyWriteAction(Action<BuildCheckDataContext<PropertyWriteData>> propertyWriteAction)
         => buildCheckCentralContext.RegisterPropertyWriteAction(analyzerWrapper, propertyWriteAction);
 
-    public void RegisterProjectProcessingDoneAction(Action<BuildCheckDataContext<ProjectProcessingDoneData>> projectDoneAction)
-        => buildCheckCentralContext.RegisterProjectProcessingDoneAction(analyzerWrapper, projectDoneAction);
+    public void RegisterProjectRequestProcessingDoneAction(Action<BuildCheckDataContext<ProjectRequestProcessingDoneData>> projectDoneAction)
+        => buildCheckCentralContext.RegisterProjectRequestProcessingDoneAction(analyzerWrapper, projectDoneAction);
 }

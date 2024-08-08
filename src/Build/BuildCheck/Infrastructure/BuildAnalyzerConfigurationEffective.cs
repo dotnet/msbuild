@@ -23,6 +23,10 @@ public sealed class BuildAnalyzerConfigurationEffective
         Severity = severity;
     }
 
+    internal static BuildAnalyzerConfigurationEffective Default { get; } =
+        new(string.Empty, BuildAnalyzerConfiguration.Default.EvaluationAnalysisScope!.Value,
+            BuildAnalyzerConfiguration.Default.Severity!.Value);
+
     public string RuleId { get; }
 
     public EvaluationAnalysisScope EvaluationAnalysisScope { get; }

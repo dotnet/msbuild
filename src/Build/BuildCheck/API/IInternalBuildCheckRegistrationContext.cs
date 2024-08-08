@@ -9,5 +9,5 @@ internal interface IInternalBuildCheckRegistrationContext : IBuildCheckRegistrat
 
     void RegisterPropertyWriteAction(Action<BuildCheckDataContext<PropertyWriteData>> propertyWriteAction);
 
-    void RegisterProjectProcessingDoneAction(Action<BuildCheckDataContext<ProjectProcessingDoneData>> propertyWriteAction);
+    void RegisterProjectRequestProcessingDoneAction(Action<BuildCheckDataContext<ProjectRequestProcessingDoneData>> propertyWriteAction);
 }

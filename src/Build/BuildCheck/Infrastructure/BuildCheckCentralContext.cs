@@ -27,7 +27,7 @@ internal sealed class BuildCheckCentralContext
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<TaskInvocationAnalysisData>>)> TaskInvocationActions,
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<PropertyReadData>>)> PropertyReadActions,
         List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<PropertyWriteData>>)> PropertyWriteActions,
-        List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<ProjectProcessingDoneData>>)> ProjectProcessingDoneActions)
+        List<(BuildAnalyzerWrapper, Action<BuildCheckDataContext<ProjectRequestProcessingDoneData>>)> ProjectRequestProcessingDoneActions)
     {
         public CallbackRegistry() : this([], [], [], [], [], []) { }
 
@@ -37,7 +37,7 @@ internal sealed class BuildCheckCentralContext
             ParsedItemsActions.RemoveAll(a => a.Item1 == analyzer);
             PropertyReadActions.RemoveAll(a => a.Item1 == analyzer);
             PropertyWriteActions.RemoveAll(a => a.Item1 == analyzer);
-            ProjectProcessingDoneActions.RemoveAll(a => a.Item1 == analyzer);
+            ProjectRequestProcessingDoneActions.RemoveAll(a => a.Item1 == analyzer);
         }
     }
 
@@ -71,8 +71,8 @@ internal sealed class BuildCheckCentralContext
     internal void RegisterPropertyWriteAction(BuildAnalyzerWrapper analyzer, Action<BuildCheckDataContext<PropertyWriteData>> propertyWriteAction)
         => RegisterAction(analyzer, propertyWriteAction, _globalCallbacks.PropertyWriteActions);
 
-    internal void RegisterProjectProcessingDoneAction(BuildAnalyzerWrapper analyzer, Action<BuildCheckDataContext<ProjectProcessingDoneData>> projectDoneAction)
-        => RegisterAction(analyzer, projectDoneAction, _globalCallbacks.ProjectProcessingDoneActions);
+    internal void RegisterProjectRequestProcessingDoneAction(BuildAnalyzerWrapper analyzer, Action<BuildCheckDataContext<ProjectRequestProcessingDoneData>> projectDoneAction)
+        => RegisterAction(analyzer, projectDoneAction, _globalCallbacks.ProjectRequestProcessingDoneActions);
 
     private void RegisterAction<T>(
         BuildAnalyzerWrapper wrappedAnalyzer,
@@ -138,11 +138,11 @@ internal sealed class BuildCheckCentralContext
             analysisContext, resultHandler);
 
     internal void RunProjectProcessingDoneActions(
-        ProjectProcessingDoneData projectProcessingDoneData,
+        ProjectRequestProcessingDoneData projectProcessingDoneData,
         IAnalysisContext analysisContext,
         Action<BuildAnalyzerWrapper, IAnalysisContext, BuildAnalyzerConfigurationEffective[], BuildCheckResult>
             resultHandler)
-        => RunRegisteredActions(_globalCallbacks.ProjectProcessingDoneActions, projectProcessingDoneData,
+        => RunRegisteredActions(_globalCallbacks.ProjectRequestProcessingDoneActions, projectProcessingDoneData,
             analysisContext, resultHandler);
 
     private void RunRegisteredActions<T>(
