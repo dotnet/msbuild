@@ -254,11 +254,11 @@ public class EndToEndTests : IDisposable
     {
         using (var env = TestEnvironment.Create())
         {
-            string analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
+            string checkCandidatePath = Path.Combine(TestAssetsRootPath, checkCandidate);
 
             // Can't use Transitive environment due to the need to dogfood local nuget packages.
-            AddCustomDataSourceToNugetConfig(analysisCandidatePath);
-            string editorConfigName = Path.Combine(analysisCandidatePath, EditorConfigFileName);
+            AddCustomDataSourceToNugetConfig(checkCandidatePath);
+            string editorConfigName = Path.Combine(checkCandidatePath, EditorConfigFileName);
             File.WriteAllText(editorConfigName, ReadEditorConfig(
                 new List<(string, string)>() { (ruleId, severity) },
                 ruleToCustomConfig: null,
