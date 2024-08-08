@@ -14,7 +14,7 @@ To enable verbose logging in order to troubleshoot issue(s), enable [binary logg
 
 _Cmd:_
 ```cmd
-dotnet build -bl -analyze
+dotnet build -bl -check
 ```
 
 ## <a name="BC0101"></a>BC0101 - Shared output path.

@@ -18,7 +18,7 @@ internal class PropertyReadData(
     IMsBuildElementLocation elementLocation,
     bool isUninitialized,
     PropertyReadContext propertyReadContext)
-    : AnalysisData(projectFilePath, projectConfigurationId)
+    : CheckData(projectFilePath, projectConfigurationId)
 {
     public PropertyReadData(
         string projectFilePath,
