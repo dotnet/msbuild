@@ -3,13 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Framework;
-using static Microsoft.Build.Experimental.BuildCheck.Infrastructure.BuildCheckManagerProvider;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -20,7 +14,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// In the future we may need more specific behavior.
 /// </summary>
 /// <remarks>
-/// Ensure that events filtering is in sync with <see cref="BuildCheckConnectorLogger"/>
+/// Ensure that events filtering is in sync with <see cref="BuildCheckConnectorLogger"/>.
 /// </remarks>
 internal class BuildCheckForwardingLogger : IForwardingLogger
 {
@@ -33,7 +27,7 @@ internal class BuildCheckForwardingLogger : IForwardingLogger
     public string? Parameters { get; set; }
 
     /// <summary>
-    /// Set of events to be forwarded to  <see cref="BuildCheckConnectorLogger"/>
+    /// Set of events to be forwarded to  <see cref="BuildCheckConnectorLogger"/>.
     /// </summary>
     private HashSet<Type> _eventsToForward = new HashSet<Type>
     {
@@ -46,15 +40,13 @@ internal class BuildCheckForwardingLogger : IForwardingLogger
         typeof(BuildCheckAcquisitionEventArgs),
         typeof(TaskStartedEventArgs),
         typeof(TaskFinishedEventArgs),
-        typeof(TaskParameterEventArgs)
+        typeof(TaskParameterEventArgs),
+        typeof(TaskCommandLineEventArgs)
     };
 
     public void Initialize(IEventSource eventSource, int nodeCount) => Initialize(eventSource);
 
-    public void Initialize(IEventSource eventSource)
-    {
-        eventSource.AnyEventRaised += EventSource_AnyEventRaised;
-    }
+    public void Initialize(IEventSource eventSource) => eventSource.AnyEventRaised += EventSource_AnyEventRaised;
 
     public void EventSource_AnyEventRaised(object sender, BuildEventArgs buildEvent)
     {

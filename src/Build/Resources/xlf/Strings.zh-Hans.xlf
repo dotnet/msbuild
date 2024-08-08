@@ -318,6 +318,11 @@
         <target state="translated">MSB4255: 以下输入结果缓存文件不存在:“{0}”</target>
         <note />
       </trans-unit>
+      <trans-unit id="IntrinsicTasksExecutionFinished">
+        <source>Intrinsic Tasks Execution Finished for the project: ("{0}")</source>
+        <target state="new">Intrinsic Tasks Execution Finished for the project: ("{0}")</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">版本字符串的格式不正确。</target>

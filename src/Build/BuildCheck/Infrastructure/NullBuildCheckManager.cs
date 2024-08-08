@@ -95,7 +95,10 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
 
     public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext buildEventContext)
     { }
-	
+
     public void ProcessEnvironmentVariableReadEventArgs(IAnalysisContext analysisContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
+    { }
+
+    public void ProcessIntrinsicTasksExecutionFinishedEventArgs(IAnalysisContext analysisContext, ProjectIntrinsicTasksExecutionFinishedEventArgs projectIntrinsicTasksExecutionFinishedEventArgs)
     { }
 }

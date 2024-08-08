@@ -54,6 +54,25 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         return propertiesLookup;
     }
 
+    internal void ProcessProjectIntrinsicTasksExecutionFinishedEventArgs(
+        IAnalysisContext analysisContext,
+        ProjectIntrinsicTasksExecutionFinishedEventArgs intrinsicTasksExecutionFinishedEventArgs)
+    {
+        if (_buildCheckCentralContext.HasEvaluatedPropertiesActions)
+        {
+            EvaluatedPropertiesAnalysisData analysisData =
+                new(intrinsicTasksExecutionFinishedEventArgs.ProjectFile!,
+                    intrinsicTasksExecutionFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
+
+                    // Properties lookup is empty because BuildResult does not have properties/items populated if a special build request flag not specified.
+                    // It is possible to gather this data from other build events if it's ever needed.
+                    new Dictionary<string, string>(),
+                    _evaluatedEnvironmentVariables);
+
+            _buildCheckCentralContext.RunEvaluatedPropertiesActions(analysisData, analysisContext, ReportResult);
+        }
+    }
+
     // This requires MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION set to 1
     internal void ProcessEvaluationFinishedEventArgs(
         IAnalysisContext analysisContext,

@@ -1207,8 +1207,18 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Build the targets
-                BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
-                    allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
+                BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this, allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
+
+                if (_componentHost.BuildParameters.IsBuildCheckEnabled)
+                {
+                    buildCheckManager.ProcessIntrinsicTasksExecutionFinishedEventArgs(
+                       new AnalysisLoggingContext(_nodeLoggingContext.LoggingService, _requestEntry.Request.BuildEventContext),
+                       new(ResourceUtilities.GetResourceString("IntrinsicTasksExecutionFinished"), _requestEntry.RequestConfiguration.ProjectFullPath)
+                       {
+                           BuildEventContext = _requestEntry.Request.BuildEventContext,
+                           ProjectFile = _requestEntry.RequestConfiguration.ProjectFullPath,
+                       });
+                }
 
                 result = _requestEntry.Request.ProxyTargets == null
                     ? result

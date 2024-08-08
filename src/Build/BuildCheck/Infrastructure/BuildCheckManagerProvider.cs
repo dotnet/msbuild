@@ -461,11 +461,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
         }
 
-        public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath)
-        {
+        public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath) =>
             // There can be multiple ProjectStarted-ProjectFinished per single configuration project build (each request for different target)
             _projectsByContextId[buildEventContext.ProjectContextId] = projectFullPath;
-        }
 
         public void EndProjectRequest(
             BuildCheckDataSource buildCheckDataSource,
@@ -503,6 +501,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 propertyWriteInfo);
             _buildEventsProcessor.ProcessPropertyWrite(propertyWriteData, analysisContext);
         }
+
+        public void ProcessIntrinsicTasksExecutionFinishedEventArgs(
+            IAnalysisContext analysisContext,
+            ProjectIntrinsicTasksExecutionFinishedEventArgs intrinsicTasksExecutionFinishedEventArgs) =>
+            _buildEventsProcessor.ProcessProjectIntrinsicTasksExecutionFinishedEventArgs(analysisContext, intrinsicTasksExecutionFinishedEventArgs);
+
 
         public void Shutdown()
         { /* Too late here for any communication to the main node or for logging anything */ }

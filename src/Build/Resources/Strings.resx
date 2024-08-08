@@ -2139,6 +2139,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="CustomAnalyzerRegistered" xml:space="preserve">
     <value>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</value>
   </data>
+  <data name="IntrinsicTasksExecutionFinished" xml:space="preserve">
+    <value>Intrinsic Tasks Execution Finished for the project: ("{0}")</value>
+  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 

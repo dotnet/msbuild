@@ -76,4 +76,8 @@ internal interface IBuildCheckManager
     void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string projectFullPath);
 
     void Shutdown();
+
+    void ProcessIntrinsicTasksExecutionFinishedEventArgs(
+        IAnalysisContext analysisContext,
+        ProjectIntrinsicTasksExecutionFinishedEventArgs projectIntrinsicTasksExecutionFinishedEventArgs);
 }
