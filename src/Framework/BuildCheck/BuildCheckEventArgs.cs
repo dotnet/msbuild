@@ -79,7 +79,7 @@ internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath, str
     }
 
     /// <summary>
-    /// Gets the path to the analyzer assembly that needs to be loaded into the application context.
+    /// Gets the path to the check assembly that needs to be loaded into the application context.
     /// </summary>
     /// <remarks>
     /// The <see cref="AcquisitionPath"/> property contains the file system path to the assembly
