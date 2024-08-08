@@ -282,7 +282,7 @@ public class EndToEndTests : IDisposable
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", "warning") });
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m: -nr:False -t:restore -analyze",
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -t:restore -analyze",
             out bool success);
 
         success.ShouldBeTrue();
