@@ -21,7 +21,7 @@ internal class BuildCheckBuildEventHandler
 
     private readonly Dictionary<Type, Action<BuildEventArgs>> _eventHandlers;
 
-    private bool isRestoring = false;
+    private bool _isRestoring = false;
 
     internal BuildCheckBuildEventHandler(
         IAnalysisContextFactory analyzerContextFactory,
@@ -51,9 +51,8 @@ internal class BuildCheckBuildEventHandler
     {
         // Skip event handling during restore phase
         if (
-            isRestoring &&
-            e.GetType() != typeof(BuildSubmissionStartedEventArgs) &&
-            e.BuildEventContext is not null)
+            _isRestoring &&
+            e.GetType() != typeof(BuildSubmissionStartedEventArgs))
         {
             return;
         }
@@ -66,15 +65,8 @@ internal class BuildCheckBuildEventHandler
 
     private void HandleBuildSubmissionStartedEvent(BuildSubmissionStartedEventArgs eventArgs)
     {
-        if (isRestoring)
-        {
-            isRestoring = false;
-        }
-        else
-        {
-            eventArgs.GlobalProperties.TryGetValue(MSBuildConstants.MSBuildIsRestoring, out string? restoreProperty);
-            isRestoring = restoreProperty is not null ? Convert.ToBoolean(restoreProperty) : false;
-        }
+        eventArgs.GlobalProperties.TryGetValue(MSBuildConstants.MSBuildIsRestoring, out string? restoreProperty);
+        _isRestoring = restoreProperty is not null ? Convert.ToBoolean(restoreProperty) : false;
     }
 
     private void HandleProjectEvaluationFinishedEvent(ProjectEvaluationFinishedEventArgs eventArgs)
