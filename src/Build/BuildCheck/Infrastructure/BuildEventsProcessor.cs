@@ -236,9 +236,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
         BuildEventArgs eventArgs = result.ToEventArgs(config.Severity);
 
-        // TODO: This is a workaround for https://github.com/dotnet/msbuild/issues/10176
-        // eventArgs.BuildEventContext = loggingContext.BuildEventContext;
-        eventArgs.BuildEventContext = BuildEventContext.Invalid;
+        eventArgs.BuildEventContext = analysisContext.BuildEventContext;
 
         checkContext.DispatchBuildEvent(eventArgs);
     }

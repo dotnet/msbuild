@@ -85,7 +85,10 @@ public class EndToEndTests : IDisposable
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(checkRequested ? "-check" : string.Empty)} -bl:{logFile}",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
-        success.ShouldBeTrue();
+        if (BC0101Severity != "error")
+        {
+            success.ShouldBeTrue();
+        }
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
          $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic",
@@ -93,7 +96,10 @@ public class EndToEndTests : IDisposable
 
         _env.Output.WriteLine(output);
 
-        success.ShouldBeTrue();
+        if (BC0101Severity != "error")
+        {
+            success.ShouldBeTrue();
+        }
 
         // The conflicting outputs warning appears - but only if check was requested
         if (checkRequested)
@@ -115,7 +121,7 @@ public class EndToEndTests : IDisposable
     [InlineData("error", "error BC0101", new string[] { "warning BC0101" })]
     [InlineData("suggestion", "BC0101", new string[] { "error BC0101", "warning BC0101" })]
     [InlineData("default", "warning BC0101", new string[] { "error BC0101" })]
-    [InlineData("none", null, new string[] { "BC0101"})]
+    [InlineData("none", null, new string[] { "BC0101" })]
     public void EditorConfig_SeverityAppliedCorrectly(string BC0101Severity, string expectedOutputValues, string[] unexpectedOutputValues)
     {
         PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", BC0101Severity) });
@@ -124,7 +130,10 @@ public class EndToEndTests : IDisposable
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
-        success.ShouldBeTrue();
+        if (BC0101Severity != "error")
+        {
+            success.ShouldBeTrue();
+        }
 
         if (!string.IsNullOrEmpty(expectedOutputValues))
         {
@@ -218,14 +227,17 @@ public class EndToEndTests : IDisposable
             string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n",
                 out bool successBuild);
-            successBuild.ShouldBeTrue(projectCheckBuildLog);
 
             foreach (string registeredRule in expectedRegisteredRules)
             {
                 projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomCheckSuccessfulAcquisition", registeredRule));
             }
 
-            if (expectedRejectedChecks)
+            if (!expectedRejectedChecks)
+            {
+                successBuild.ShouldBeTrue(projectCheckBuildLog);
+            }
+            else
             {
                 projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
                     "CustomCheckBaseTypeNotAssignable",
@@ -242,9 +254,12 @@ public class EndToEndTests : IDisposable
     {
         using (var env = TestEnvironment.Create())
         {
-            var checkCandidatePath = Path.Combine(TestAssetsRootPath, checkCandidate);
-            AddCustomDataSourceToNugetConfig(checkCandidatePath);
-            File.WriteAllText(Path.Combine(checkCandidatePath, EditorConfigFileName), ReadEditorConfig(
+            string analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
+
+            // Can't use Transitive environment due to the need to dogfood local nuget packages.
+            AddCustomDataSourceToNugetConfig(analysisCandidatePath);
+            string editorConfigName = Path.Combine(analysisCandidatePath, EditorConfigFileName);
+            File.WriteAllText(editorConfigName, ReadEditorConfig(
                 new List<(string, string)>() { (ruleId, severity) },
                 ruleToCustomConfig: null,
                 checkCandidatePath));
@@ -253,6 +268,9 @@ public class EndToEndTests : IDisposable
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool _, timeoutMilliseconds: 1200_0000);
 
             projectCheckBuildLog.ShouldContain(expectedMessage);
+            
+            // Cleanup
+            File.Delete(editorConfigName);
         }
     }
 
