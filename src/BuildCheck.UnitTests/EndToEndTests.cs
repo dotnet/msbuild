@@ -282,11 +282,13 @@ public class EndToEndTests : IDisposable
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", "warning") });
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:2 -nr:False -t:restore -check",
-            out bool success, timeoutMilliseconds: 120_000000);
+            $"{Path.GetFileName(projectFile.Path)} /m: -nr:False -t:restore -analyze",
+            out bool success);
 
         success.ShouldBeTrue();
         output.ShouldNotContain("BC0101");
+        output.ShouldNotContain("BC0102");
+        output.ShouldNotContain("BC0103");
     }
 
     private void AddCustomDataSourceToNugetConfig(string analysisCandidatePath)
