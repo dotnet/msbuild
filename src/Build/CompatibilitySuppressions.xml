@@ -198,6 +198,27 @@
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
+    <DiagnosticId>CP0006</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterBuildFinishedAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.Experimental.BuildCheck.BuildFinishedAnalysisData}})</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0006</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterBuildFinishedAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.Experimental.BuildCheck.BuildFinishedAnalysisData}})</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0006</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterBuildFinishedAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.Experimental.BuildCheck.BuildFinishedAnalysisData}})</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
     <DiagnosticId>CP0011</DiagnosticId>
     <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerResultSeverity.Error</Target>
     <Left>lib/net472/Microsoft.Build.dll</Left>
