@@ -364,6 +364,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             => _buildEventsProcessor
                 .ProcessTaskStartedEventArgs(checkContext, taskStartedEventArgs);
 
+        public void ProcessBuildFinished(ICheckContext checkContext)
+            => _buildEventsProcessor.ProcessBuildDone(checkContext);
+
         public void ProcessTaskFinishedEventArgs(
             ICheckContext checkContext,
             TaskFinishedEventArgs taskFinishedEventArgs)
