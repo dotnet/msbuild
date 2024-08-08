@@ -5,7 +5,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 /// <summary>
 /// Consumer of the data from the build engine.
-/// Currently, this is used to send data for analysis to the BuildCheck.
+/// Currently, this is used to send data for checks to the BuildCheck.
 /// In the future we can multiplex the data to other consumers (e.g. copilot).
 /// </summary>
 internal interface IBuildEngineDataConsumer
@@ -19,5 +19,5 @@ internal interface IBuildEngineDataConsumer
     void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo);
 
     // TODO: We might want to move acquisition data processing into this interface as well
-    // void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData);
+    // void ProcessCheckAcquisition(CheckAcquisitionData acquisitionData);
 }
