@@ -137,6 +137,8 @@ internal class BuildCheckBuildEventHandler
 
     private void HandleBuildFinishedEvent(BuildFinishedEventArgs eventArgs)
     {
+        _buildCheckManager.ProcessBuildFinished(_checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!));
+
         _stats.Merge(_buildCheckManager.CreateCheckTracingStats(), (span1, span2) => span1 + span2);
 
         LogCheckStats(_checkContextFactory.CreateCheckContext(GetBuildEventContext(eventArgs)));

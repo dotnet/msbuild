@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
@@ -26,6 +27,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
     private readonly HashSet<EnvironmentVariableIdentityKey> _environmentVariablesReported = new HashSet<EnvironmentVariableIdentityKey>();
 
     private bool _isVerboseEnvVarOutput;
+    private EvaluationCheckScope _scope;
 
     public override string FriendlyName => "MSBuild.NoEnvironmentVariablePropertyCheck";
 
@@ -33,6 +35,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
 
     public override void Initialize(ConfigurationContext configurationContext)
     {
+        _scope = configurationContext.CheckConfig[0].EvaluationCheckScope;
         foreach (CustomConfigurationData customConfigurationData in configurationContext.CustomConfigurationData)
         {
             bool? isVerboseEnvVarOutput = GetVerboseEnvVarOutputConfig(customConfigurationData, RuleId);
@@ -48,6 +51,11 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
         {
             foreach (var envVariableData in context.Data.EvaluatedEnvironmentVariables)
             {
+                if (!CheckScopeClassifier.IsActionInObservedScope(_scope, envVariableData.Value.File,
+                        context.Data.ProjectFilePath))
+                {
+                    continue;
+                }
                 EnvironmentVariableIdentityKey identityKey = new(envVariableData.Key, envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column);
                 if (!_environmentVariablesReported.Contains(identityKey))
                 {
