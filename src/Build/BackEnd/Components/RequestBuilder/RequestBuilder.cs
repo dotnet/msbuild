@@ -1121,7 +1121,7 @@ namespace Microsoft.Build.BackEnd
                 // Load the project
                 if (!_requestEntry.RequestConfiguration.IsLoaded)
                 {
-                    buildCheckManager.StartProjectEvaluation(
+                    buildCheckManager.ProjectFirstEncountered(
                         BuildCheckDataSource.BuildExecution,
                         new AnalysisLoggingContext(_nodeLoggingContext.LoggingService, _requestEntry.Request.BuildEventContext),
                         _requestEntry.RequestConfiguration.ProjectFullPath);
@@ -1147,14 +1147,12 @@ namespace Microsoft.Build.BackEnd
             finally
             {
                 buildCheckManager.EndProjectEvaluation(
-                    BuildCheckDataSource.BuildExecution,
                     _requestEntry.Request.BuildEventContext);
             }
 
             _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
             buildCheckManager.StartProjectRequest(
-                BuildCheckDataSource.BuildExecution,
-                _requestEntry.Request.BuildEventContext,
+                _projectLoggingContext.BuildEventContext,
                 _requestEntry.RequestConfiguration.ProjectFullPath);
 
             try
@@ -1225,8 +1223,7 @@ namespace Microsoft.Build.BackEnd
             finally
             {
                 buildCheckManager.EndProjectRequest(
-                    BuildCheckDataSource.BuildExecution,
-                    new AnalysisLoggingContext(_nodeLoggingContext.LoggingService, _requestEntry.Request.BuildEventContext),
+                    new AnalysisLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext),
                     _requestEntry.RequestConfiguration.ProjectFullPath);
             }
 

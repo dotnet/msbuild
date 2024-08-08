@@ -22,4 +22,11 @@ internal interface IBuildEngineDataRouter
     void ProcessPropertyWrite(
         PropertyWriteInfo propertyWriteInfo,
         AnalysisLoggingContext analysisContext);
+
+    /// <summary>
+    /// Signals that evaluation in current node is starting
+    /// </summary>
+    /// <param name="analysisContext"></param>
+    /// <param name="projectFullPath"></param>
+    void StartProjectEvaluation(IAnalysisContext analysisContext, string projectFullPath);
 }

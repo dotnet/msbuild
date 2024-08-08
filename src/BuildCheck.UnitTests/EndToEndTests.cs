@@ -76,19 +76,21 @@ public class EndToEndTests : IDisposable
         TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
         TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -analyze", out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -analyze /v:detailed", out bool success);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
 
         output.ShouldMatch(@"BC0201: .* Property: \[MyProp11\]");
         output.ShouldMatch(@"BC0202: .* Property: \[MyPropT2\]");
-        output.ShouldMatch(@"BC0203: .* Property: \[MyProp13\]");
+        // since it's just suggestion, it doesn't have a colon ':'
+        output.ShouldMatch(@"BC0203 .* Property: \[MyProp13\]");
 
         // each finding should be found just once - but reported twice, due to summary
         Regex.Matches(output, "BC0201: .* Property").Count.ShouldBe(2);
         Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
-        Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(2);
+        // since it's not an error - it's not in summary
+        Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(1);
     }
 
     [Theory]

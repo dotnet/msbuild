@@ -67,13 +67,18 @@ internal interface IBuildCheckManager
     //  but as well from the ConnectorLogger - as even if interleaved, it gives the info
     //  to manager about what analyzers need to be materialized and configuration fetched.
     // No unloading of analyzers is yet considered - once loaded it stays for whole build.
-    void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string projectFullPath);
 
-    void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
+    // Project might be encountered first time in some node, but be already evaluated in another - so StartProjectEvaluation won't happen
+    //  - but we still need to know about it, hence the dedicated event.
+    void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string projectFullPath);
 
-    void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath);
+    void StartProjectEvaluation(IAnalysisContext analysisContext, string projectFullPath);
 
-    void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string projectFullPath);
+    void EndProjectEvaluation(BuildEventContext buildEventContext);
+
+    void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath);
+
+    void EndProjectRequest(IAnalysisContext analysisContext, string projectFullPath);
 
     void Shutdown();
 }

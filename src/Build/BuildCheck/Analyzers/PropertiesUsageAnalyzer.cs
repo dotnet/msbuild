@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Collections;
@@ -28,7 +29,7 @@ internal class PropertiesUsageAnalyzer : InternalBuildAnalyzer
     private static readonly BuildAnalyzerRule _unusedPropertyRule = new BuildAnalyzerRule("BC0203", "UnusedPropertyDeclared",
         "A property that is not used should not be declared.",
         "Property: [{0}] was declared/initialized, but it was never used.",
-        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.None, EvaluationAnalysisScope = EvaluationAnalysisScope.ProjectFileOnly });
+        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Suggestion, EvaluationAnalysisScope = EvaluationAnalysisScope.ProjectFileOnly });
 
     internal static readonly IReadOnlyList<BuildAnalyzerRule> SupportedRulesList = [_usedBeforeInitializedRule, _initializedAfterUsedRule, _unusedPropertyRule];
 
@@ -111,7 +112,7 @@ internal class PropertiesUsageAnalyzer : InternalBuildAnalyzer
             registrationContext.RegisterPropertyWriteAction(ProcessPropertyWrite);
         }
 
-        if (_unusedPropertyEnabled)
+        if (_unusedPropertyEnabled || _uninitializedReadEnabled)
         {
             registrationContext.RegisterProjectRequestProcessingDoneAction(DoneWithProject);
         }
