@@ -32,7 +32,7 @@ internal static class CheckScopeClassifier
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     internal static bool IsActionInObservedScope(
-        EvaluationAnalysisScope scope,
+        EvaluationCheckScope scope,
         string? filePathOfEvent,
         string projectFileFullPath)
     {

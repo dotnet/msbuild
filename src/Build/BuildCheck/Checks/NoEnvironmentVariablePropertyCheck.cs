@@ -27,7 +27,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
     private readonly HashSet<EnvironmentVariableIdentityKey> _environmentVariablesReported = new HashSet<EnvironmentVariableIdentityKey>();
 
     private bool _isVerboseEnvVarOutput;
-    private EvaluationAnalysisScope _scope;
+    private EvaluationCheckScope _scope;
 
     public override string FriendlyName => "MSBuild.NoEnvironmentVariablePropertyCheck";
 
@@ -35,7 +35,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
 
     public override void Initialize(ConfigurationContext configurationContext)
     {
-        _scope = configurationContext.BuildAnalyzerConfig[0].EvaluationAnalysisScope;
+        _scope = configurationContext.CheckConfig[0].EvaluationCheckScope;
         foreach (CustomConfigurationData customConfigurationData in configurationContext.CustomConfigurationData)
         {
             bool? isVerboseEnvVarOutput = GetVerboseEnvVarOutputConfig(customConfigurationData, RuleId);
@@ -51,7 +51,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
         {
             foreach (var envVariableData in context.Data.EvaluatedEnvironmentVariables)
             {
-                if (!AnalysisScopeClassifier.IsActionInObservedScope(_scope, envVariableData.Value.File,
+                if (!CheckScopeClassifier.IsActionInObservedScope(_scope, envVariableData.Value.File,
                         context.Data.ProjectFilePath))
                 {
                     continue;
