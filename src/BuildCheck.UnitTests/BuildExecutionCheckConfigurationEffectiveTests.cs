@@ -9,24 +9,24 @@ using System;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
-public class BuildExecutionCheckConfigurationEffectiveTests
+public class CheckConfigurationEffectiveTests
 {
     [Theory]
-    [InlineData("ruleId", EvaluationCheckScope.ProjectFileOnly, BuildExecutionCheckResultSeverity.Warning,  true)]
-    [InlineData("ruleId2", EvaluationCheckScope.ProjectFileOnly, BuildExecutionCheckResultSeverity.Warning,  true)]
-    [InlineData("ruleId", EvaluationCheckScope.ProjectFileOnly, BuildExecutionCheckResultSeverity.Error, false)]
+    [InlineData("ruleId", EvaluationCheckScope.ProjectFileOnly, CheckResultSeverity.Warning,  true)]
+    [InlineData("ruleId2", EvaluationCheckScope.ProjectFileOnly, CheckResultSeverity.Warning,  true)]
+    [InlineData("ruleId", EvaluationCheckScope.ProjectFileOnly, CheckResultSeverity.Error, false)]
     public void IsSameConfigurationAsTest(
         string secondRuleId,
         EvaluationCheckScope secondScope,
-        BuildExecutionCheckResultSeverity secondSeverity,
+        CheckResultSeverity secondSeverity,
         bool isExpectedToBeSame)
     {
-        BuildExecutionCheckConfigurationEffective configuration1 = new BuildExecutionCheckConfigurationEffective(
+        CheckConfigurationEffective configuration1 = new CheckConfigurationEffective(
                        ruleId: "ruleId",
                        evaluationCheckScope: EvaluationCheckScope.ProjectFileOnly,
-                       severity: BuildExecutionCheckResultSeverity.Warning);
+                       severity: CheckResultSeverity.Warning);
 
-        BuildExecutionCheckConfigurationEffective configuration2 = new BuildExecutionCheckConfigurationEffective(
+        CheckConfigurationEffective configuration2 = new CheckConfigurationEffective(
             ruleId: secondRuleId,
             evaluationCheckScope: secondScope,
             severity: secondSeverity);
@@ -35,13 +35,13 @@ public class BuildExecutionCheckConfigurationEffectiveTests
     }
 
     [Theory]
-    [InlineData( BuildExecutionCheckResultSeverity.Warning, true)]
-    [InlineData(BuildExecutionCheckResultSeverity.Suggestion, true)]
-    [InlineData(BuildExecutionCheckResultSeverity.Error, true)]
-    [InlineData(BuildExecutionCheckResultSeverity.None, false)]
-    public void BuildExecutionCheckConfigurationInternal_Constructor_SeverityConfig(BuildExecutionCheckResultSeverity severity, bool isEnabledExpected)
+    [InlineData( CheckResultSeverity.Warning, true)]
+    [InlineData(CheckResultSeverity.Suggestion, true)]
+    [InlineData(CheckResultSeverity.Error, true)]
+    [InlineData(CheckResultSeverity.None, false)]
+    public void CheckConfigurationInternal_Constructor_SeverityConfig(CheckResultSeverity severity, bool isEnabledExpected)
     {
-        BuildExecutionCheckConfigurationEffective configuration = new BuildExecutionCheckConfigurationEffective(
+        CheckConfigurationEffective configuration = new CheckConfigurationEffective(
                        ruleId: "ruleId",
                        evaluationCheckScope: EvaluationCheckScope.ProjectFileOnly,
                        severity: severity);
@@ -50,14 +50,14 @@ public class BuildExecutionCheckConfigurationEffectiveTests
     }
 
     [Fact]
-    public void BuildExecutionCheckConfigurationInternal_Constructor_SeverityConfig_Fails()
+    public void CheckConfigurationInternal_Constructor_SeverityConfig_Fails()
     {
         Should.Throw<ArgumentOutOfRangeException>(() =>
         {
-            new BuildExecutionCheckConfigurationEffective(
+            new CheckConfigurationEffective(
                         ruleId: "ruleId",
                         evaluationCheckScope: EvaluationCheckScope.ProjectFileOnly,
-                        severity: BuildExecutionCheckResultSeverity.Default);
+                        severity: CheckResultSeverity.Default);
         });
     }
 }

@@ -15,17 +15,17 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// Each rule can have its own configuration, which can differ per each project.
 /// The <see cref="EvaluationCheckScope"/> setting must be same for all rules in the same check (but can differ between projects)
 /// </summary>
-public class BuildExecutionCheckConfiguration
+public class CheckConfiguration
 {
     // Defaults to be used if any configuration property is not specified neither as default
     //  nor in the editorconfig configuration file.
-    public static BuildExecutionCheckConfiguration Default { get; } = new()
+    public static CheckConfiguration Default { get; } = new()
     {
         EvaluationCheckScope = BuildCheck.EvaluationCheckScope.ProjectFileOnly,
-        Severity = BuildExecutionCheckResultSeverity.None
+        Severity = CheckResultSeverity.None
     };
 
-    public static BuildExecutionCheckConfiguration Null { get; } = new();
+    public static CheckConfiguration Null { get; } = new();
 
     public string? RuleId { get; internal set; }
 
@@ -40,7 +40,7 @@ public class BuildExecutionCheckConfiguration
     /// <summary>
     /// The severity of the result for the rule.
     /// </summary>
-    public BuildExecutionCheckResultSeverity? Severity { get; internal init; }
+    public CheckResultSeverity? Severity { get; internal init; }
 
     /// <summary>
     /// Whether the check rule is enabled.
@@ -51,9 +51,9 @@ public class BuildExecutionCheckConfiguration
         get
         {
             // Do not consider Default as enabled, because the default severity of the rule could be set to None
-            if (Severity.HasValue && Severity.Value != BuildExecutionCheckResultSeverity.Default)
+            if (Severity.HasValue && Severity.Value != CheckResultSeverity.Default)
             {
-                return !Severity.Value.Equals(BuildExecutionCheckResultSeverity.None);
+                return !Severity.Value.Equals(CheckResultSeverity.None);
             }
 
             return null;
@@ -61,13 +61,13 @@ public class BuildExecutionCheckConfiguration
     }
 
     /// <summary>
-    /// Creates a <see cref="BuildExecutionCheckConfiguration"/> object based on the provided configuration dictionary.
+    /// Creates a <see cref="CheckConfiguration"/> object based on the provided configuration dictionary.
     /// If the BuildCheckConfiguration's property name presented in the dictionary, the value of this key-value pair is parsed and assigned to the instance's field.
     /// If parsing failed the value will be equal to null.
     /// </summary>
     /// <param name="configDictionary">The configuration dictionary containing the settings for the build check. The configuration's keys are expected to be in lower case or the EqualityComparer to ignore case.</param>
-    /// <returns>A new instance of <see cref="BuildExecutionCheckConfiguration"/> with the specified settings.</returns>
-    internal static BuildExecutionCheckConfiguration Create(Dictionary<string, string>? configDictionary) => new()
+    /// <returns>A new instance of <see cref="CheckConfiguration"/> with the specified settings.</returns>
+    internal static CheckConfiguration Create(Dictionary<string, string>? configDictionary) => new()
     {
         EvaluationCheckScope = TryExtractEvaluationCheckScope(configDictionary),
         Severity = TryExtractSeverity(configDictionary),
@@ -99,7 +99,7 @@ public class BuildExecutionCheckConfiguration
         return null;
     }
 
-    private static BuildExecutionCheckResultSeverity? TryExtractSeverity(Dictionary<string, string>? config)
+    private static CheckResultSeverity? TryExtractSeverity(Dictionary<string, string>? config)
     {
         if (!TryExtractValue(BuildCheckConstants.severityConfigurationKey, config, out string? stringValue) || stringValue is null)
         {
@@ -109,15 +109,15 @@ public class BuildExecutionCheckConfiguration
         switch (stringValue)
         {
             case "none":
-                return BuildExecutionCheckResultSeverity.None;
+                return CheckResultSeverity.None;
             case "default":
-                return BuildExecutionCheckResultSeverity.Default;
+                return CheckResultSeverity.Default;
             case "suggestion":
-                return BuildExecutionCheckResultSeverity.Suggestion;
+                return CheckResultSeverity.Suggestion;
             case "warning":
-                return BuildExecutionCheckResultSeverity.Warning;
+                return CheckResultSeverity.Warning;
             case "error":
-                return BuildExecutionCheckResultSeverity.Error;
+                return CheckResultSeverity.Error;
             default:
                 ThrowIncorrectValueException(BuildCheckConstants.severityConfigurationKey, stringValue);
                 break;

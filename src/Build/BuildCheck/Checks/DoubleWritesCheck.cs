@@ -18,18 +18,18 @@ using Path = Microsoft.IO.Path;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
-internal sealed class DoubleWritesCheck : BuildExecutionCheck
+internal sealed class DoubleWritesCheck : Check
 {
-    public static BuildExecutionCheckRule SupportedRule = new BuildExecutionCheckRule(
+    public static CheckRule SupportedRule = new CheckRule(
         "BC0102",
         "DoubleWrites",
         "Two tasks should not write the same file",
         "Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.",
-        new BuildExecutionCheckConfiguration() { Severity = BuildExecutionCheckResultSeverity.Warning });
+        new CheckConfiguration() { Severity = CheckResultSeverity.Warning });
 
     public override string FriendlyName => "MSBuild.DoubleWritesCheck";
 
-    public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = [SupportedRule];
+    public override IReadOnlyList<CheckRule> SupportedRules { get; } = [SupportedRule];
 
     public override void Initialize(ConfigurationContext configurationContext)
     {

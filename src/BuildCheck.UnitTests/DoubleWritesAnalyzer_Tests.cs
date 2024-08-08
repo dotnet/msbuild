@@ -53,7 +53,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
                 }));
 
             _registrationContext.Results.Count.ShouldBe(1);
-            _registrationContext.Results[0].BuildExecutionCheckRule.Id.ShouldBe("BC0102");
+            _registrationContext.Results[0].CheckRule.Id.ShouldBe("BC0102");
         }
 
         [Theory]
@@ -74,7 +74,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             }
 
             _registrationContext.Results.Count.ShouldBe(4);
-            _registrationContext.Results.ForEach(result => result.BuildExecutionCheckRule.Id.ShouldBe("BC0102"));
+            _registrationContext.Results.ForEach(result => result.CheckRule.Id.ShouldBe("BC0102"));
         }
     }
 }

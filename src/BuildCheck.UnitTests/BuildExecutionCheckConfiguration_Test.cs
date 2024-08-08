@@ -9,12 +9,12 @@ using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
-public class BuildExecutionCheckConfiguration_Test
+public class CheckConfiguration_Test
 {
     [Fact]
     public void CreateWithNull_ReturnsObjectWithNullValues()
     {
-        var buildConfig = BuildExecutionCheckConfiguration.Create(null);
+        var buildConfig = CheckConfiguration.Create(null);
         buildConfig.ShouldNotBeNull();
         buildConfig.Severity.ShouldBeNull();
         buildConfig.IsEnabled.ShouldBeNull();
@@ -24,7 +24,7 @@ public class BuildExecutionCheckConfiguration_Test
     [Fact]
     public void CreateWithEmpty_ReturnsObjectWithNullValues()
     {
-        var buildConfig = BuildExecutionCheckConfiguration.Create(new Dictionary<string, string>());
+        var buildConfig = CheckConfiguration.Create(new Dictionary<string, string>());
         buildConfig.ShouldNotBeNull();
         buildConfig.Severity.ShouldBeNull();
         buildConfig.IsEnabled.ShouldBeNull();
@@ -32,24 +32,24 @@ public class BuildExecutionCheckConfiguration_Test
     }
 
     [Theory]
-    [InlineData("error", BuildExecutionCheckResultSeverity.Error)]
-    [InlineData("ERROR", BuildExecutionCheckResultSeverity.Error)]
-    [InlineData("suggestion", BuildExecutionCheckResultSeverity.Suggestion)]
-    [InlineData("SUGGESTION", BuildExecutionCheckResultSeverity.Suggestion)]
-    [InlineData("warning", BuildExecutionCheckResultSeverity.Warning)]
-    [InlineData("WARNING", BuildExecutionCheckResultSeverity.Warning)]
-    [InlineData("NONE", BuildExecutionCheckResultSeverity.None)]
-    [InlineData("none", BuildExecutionCheckResultSeverity.None)]
-    [InlineData("default", BuildExecutionCheckResultSeverity.Default)]
-    [InlineData("DEFAULT", BuildExecutionCheckResultSeverity.Default)]
-    public void CreateBuildExecutionCheckConfiguration_Severity(string parameter, BuildExecutionCheckResultSeverity? expected)
+    [InlineData("error", CheckResultSeverity.Error)]
+    [InlineData("ERROR", CheckResultSeverity.Error)]
+    [InlineData("suggestion", CheckResultSeverity.Suggestion)]
+    [InlineData("SUGGESTION", CheckResultSeverity.Suggestion)]
+    [InlineData("warning", CheckResultSeverity.Warning)]
+    [InlineData("WARNING", CheckResultSeverity.Warning)]
+    [InlineData("NONE", CheckResultSeverity.None)]
+    [InlineData("none", CheckResultSeverity.None)]
+    [InlineData("default", CheckResultSeverity.Default)]
+    [InlineData("DEFAULT", CheckResultSeverity.Default)]
+    public void CreateCheckConfiguration_Severity(string parameter, CheckResultSeverity? expected)
     {
         var config = new Dictionary<string, string>()
         {
             { "severity" , parameter },
         };
 
-        var buildConfig = BuildExecutionCheckConfiguration.Create(config);
+        var buildConfig = CheckConfiguration.Create(config);
 
         buildConfig.ShouldNotBeNull();
         buildConfig.Severity.ShouldBe(expected);
@@ -62,14 +62,14 @@ public class BuildExecutionCheckConfiguration_Test
     [InlineData("suggestion", true)]
     [InlineData("none", false)]
     [InlineData("default", null)]
-    public void CreateBuildExecutionCheckConfiguration_SeverityAndEnabledOrder(string parameter, bool? expected)
+    public void CreateCheckConfiguration_SeverityAndEnabledOrder(string parameter, bool? expected)
     {
         var config = new Dictionary<string, string>()
         {
             { "severity", parameter },
         };
         
-        var buildConfig = BuildExecutionCheckConfiguration.Create(config);
+        var buildConfig = CheckConfiguration.Create(config);
 
         buildConfig.IsEnabled.ShouldBe(expected);
     }
@@ -82,14 +82,14 @@ public class BuildExecutionCheckConfiguration_Test
     [InlineData("WORK_TREE_IMPORTS", EvaluationCheckScope.WorkTreeImports)]
     [InlineData("all", EvaluationCheckScope.All)]
     [InlineData("ALL", EvaluationCheckScope.All)]
-    public void CreateBuildExecutionCheckConfiguration_EvaluationCheckScope(string parameter, EvaluationCheckScope? expected)
+    public void CreateCheckConfiguration_EvaluationCheckScope(string parameter, EvaluationCheckScope? expected)
     {
         var config = new Dictionary<string, string>()
         {
             { "scope" , parameter },
         };
 
-        var buildConfig = BuildExecutionCheckConfiguration.Create(config);
+        var buildConfig = CheckConfiguration.Create(config);
 
         buildConfig.ShouldNotBeNull();
         buildConfig.EvaluationCheckScope.ShouldBe(expected);
@@ -101,7 +101,7 @@ public class BuildExecutionCheckConfiguration_Test
     [Theory]
     [InlineData("scope", "incorrec-value")]
     [InlineData("severity", "incorrec-value")]
-    public void CreateBuildExecutionCheckConfiguration_ExceptionOnInvalidInputValue(string key, string value)
+    public void CreateCheckConfiguration_ExceptionOnInvalidInputValue(string key, string value)
     {
         var config = new Dictionary<string, string>()
         {
@@ -110,7 +110,7 @@ public class BuildExecutionCheckConfiguration_Test
 
         var exception = Should.Throw<BuildCheckConfigurationException>(() =>
         {
-            BuildExecutionCheckConfiguration.Create(config);
+            CheckConfiguration.Create(config);
         });
         exception.Message.ShouldContain($"Incorrect value provided in config for key {key}");
     }

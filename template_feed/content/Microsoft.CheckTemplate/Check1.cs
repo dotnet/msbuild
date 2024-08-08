@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace Company.CheckTemplate
 {
-    public sealed class Check1 : BuildExecutionCheck
+    public sealed class Check1 : Check
     {
-        public static BuildCheckRule SupportedRule = new BuildExecutionCheckRule(
+        public static BuildCheckRule SupportedRule = new CheckRule(
             "X01234",
             "Title",
             "Description",
@@ -15,7 +15,7 @@ namespace Company.CheckTemplate
 
         public override string FriendlyName => "Company.Check1";
 
-        public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = new List<BuildExecutionCheckRule>() { SupportedRule };
+        public override IReadOnlyList<CheckRule> SupportedRules { get; } = new List<CheckRule>() { SupportedRule };
 
         public override void Initialize(ConfigurationContext configurationContext)
         {

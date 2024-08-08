@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-internal sealed class BuildCheckRegistrationContext(BuildExecutionCheckWrapper checkWrapper, BuildCheckCentralContext buildCheckCentralContext) : IBuildCheckRegistrationContext
+internal sealed class BuildCheckRegistrationContext(CheckWrapper checkWrapper, BuildCheckCentralContext buildCheckCentralContext) : IBuildCheckRegistrationContext
 {
     public void RegisterEvaluatedPropertiesAction(Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction)
     {

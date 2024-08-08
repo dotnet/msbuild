@@ -4,18 +4,18 @@ using Microsoft.Build.Experimental.BuildCheck;
 
 namespace CustomCheck2
 {
-    public sealed class Check3 : BuildExecutionCheck
+    public sealed class Check3 : Check
     {
-        public static BuildExecutionCheckRule SupportedRule = new BuildExecutionCheckRule(
+        public static CheckRule SupportedRule = new CheckRule(
             "X01235",
             "Title",
             "Description",
             "Message format: {0}",
-            new BuildExecutionCheckConfiguration());
+            new CheckConfiguration());
 
         public override string FriendlyName => "CustomRule3";
 
-        public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = new List<BuildExecutionCheckRule>() { SupportedRule };
+        public override IReadOnlyList<CheckRule> SupportedRules { get; } = new List<CheckRule>() { SupportedRule };
 
         public override void Initialize(ConfigurationContext configurationContext)
         {

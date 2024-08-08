@@ -13,7 +13,7 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// Holder for the key-value pairs of unstructured data from .editorconfig file,
 ///  that were attribute to a particular rule, but were not recognized by the infrastructure.
-/// The configuration data that is recognized by the infrastructure is passed as <see cref="BuildExecutionCheckConfiguration"/>.
+/// The configuration data that is recognized by the infrastructure is passed as <see cref="CheckConfiguration"/>.
 /// </summary>
 public sealed class CustomConfigurationData
 {

@@ -70,11 +70,11 @@ internal sealed class ConfigurationProviderMock : IConfigurationProvider
 
     public CustomConfigurationData[] GetCustomConfigurations(string projectFullPath, IReadOnlyList<string> ruleIds) => [];
 
-    public BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(string projectFullPath, BuildExecutionCheck check) => [];
+    public CheckConfigurationEffective[] GetMergedConfigurations(string projectFullPath, Check check) => [];
 
-    public BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(BuildExecutionCheckConfiguration[] userConfigs, BuildExecutionCheck check) => [];
+    public CheckConfigurationEffective[] GetMergedConfigurations(CheckConfiguration[] userConfigs, Check check) => [];
 
-    public BuildExecutionCheckConfiguration[] GetUserConfigurations(string projectFullPath, IReadOnlyList<string> ruleIds) => [];
+    public CheckConfiguration[] GetUserConfigurations(string projectFullPath, IReadOnlyList<string> ruleIds) => [];
 }
 
 internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionModule
@@ -83,29 +83,29 @@ internal sealed class BuildCheckAcquisitionModuleMock : IBuildCheckAcquisitionMo
 
     internal BuildCheckAcquisitionModuleMock(bool isCheckRuleExistForTest) => _isCheckRuleExistForTest = isCheckRuleExistForTest;
 
-    public List<BuildExecutionCheckFactory> CreateBuildExecutionCheckFactories(CheckAcquisitionData checkAcquisitionData, ICheckContext checkContext)
+    public List<CheckFactory> CreateCheckFactories(CheckAcquisitionData checkAcquisitionData, ICheckContext checkContext)
         => _isCheckRuleExistForTest
-        ? new List<BuildExecutionCheckFactory>() { () => new BuildExecutionCheckRuleMock("Rule1"), () => new BuildExecutionCheckRuleMock("Rule2") }
-        : new List<BuildExecutionCheckFactory>();
+        ? new List<CheckFactory>() { () => new CheckRuleMock("Rule1"), () => new CheckRuleMock("Rule2") }
+        : new List<CheckFactory>();
 }
 
-internal sealed class BuildExecutionCheckRuleMock : BuildExecutionCheck
+internal sealed class CheckRuleMock : Check
 {
-    public static BuildExecutionCheckRule SupportedRule = new BuildExecutionCheckRule(
+    public static CheckRule SupportedRule = new CheckRule(
         "X01234",
         "Title",
         "Description",
         "Message format: {0}",
-        new BuildExecutionCheckConfiguration());
+        new CheckConfiguration());
 
-    internal BuildExecutionCheckRuleMock(string friendlyName)
+    internal CheckRuleMock(string friendlyName)
     {
         FriendlyName = friendlyName;
     }
 
     public override string FriendlyName { get; }
 
-    public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = new List<BuildExecutionCheckRule>() { SupportedRule };
+    public override IReadOnlyList<CheckRule> SupportedRules { get; } = new List<CheckRule>() { SupportedRule };
 
     public override void Initialize(ConfigurationContext configurationContext)
     {

@@ -6,7 +6,7 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// The severity of reported result (or preconfigured or user configured severity for a rule).
 /// </summary>
-public enum BuildExecutionCheckResultSeverity
+public enum CheckResultSeverity
 {
     /// <summary>
     /// When set, the default value of the BuildCheck rule will be used.

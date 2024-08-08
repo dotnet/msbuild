@@ -19,16 +19,16 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 {
     public class TaskInvocationCheckDataTests : IDisposable
     {
-        internal sealed class TestCheck : BuildExecutionCheck
+        internal sealed class TestCheck : Check
         {
-            #region BuildExecutionCheck initialization
+            #region Check initialization
 
-            public static BuildExecutionCheckRule SupportedRule = new BuildExecutionCheckRule("BC0000", "TestRule", "TestDescription", "TestMessage",
-                new BuildExecutionCheckConfiguration() { Severity = BuildExecutionCheckResultSeverity.Warning });
+            public static CheckRule SupportedRule = new CheckRule("BC0000", "TestRule", "TestDescription", "TestMessage",
+                new CheckConfiguration() { Severity = CheckResultSeverity.Warning });
 
             public override string FriendlyName => "MSBuild.TestCheck";
 
-            public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = [SupportedRule];
+            public override IReadOnlyList<CheckRule> SupportedRules { get; } = [SupportedRule];
 
             public override void Initialize(ConfigurationContext configurationContext)
             { }

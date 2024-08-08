@@ -21,7 +21,7 @@ internal sealed class ConfigurationProvider : IConfigurationProvider
     /// <summary>
     /// The dictionary used for storing the BuildCheckConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}.
     /// </summary>
-    private readonly ConcurrentDictionary<string, BuildExecutionCheckConfiguration> _buildExecutionCheckConfiguration = new ConcurrentDictionary<string, BuildExecutionCheckConfiguration>(StringComparer.InvariantCultureIgnoreCase);
+    private readonly ConcurrentDictionary<string, CheckConfiguration> _buildExecutionCheckConfiguration = new ConcurrentDictionary<string, CheckConfiguration>(StringComparer.InvariantCultureIgnoreCase);
 
     /// <summary>
     /// The dictionary used for storing the key-value pairs retrieved from the .editorconfigs for specific projectfile. The key is equal to projectFullPath.
@@ -102,12 +102,12 @@ internal sealed class ConfigurationProvider : IConfigurationProvider
         }
     }
 
-    public BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(
+    public CheckConfigurationEffective[] GetMergedConfigurations(
         string projectFullPath,
-        BuildExecutionCheck check)
+        Check check)
         => FillConfiguration(projectFullPath, check.SupportedRules, GetMergedConfiguration);
 
-    public BuildExecutionCheckConfiguration[] GetUserConfigurations(
+    public CheckConfiguration[] GetUserConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetUserConfiguration);
@@ -123,11 +123,11 @@ internal sealed class ConfigurationProvider : IConfigurationProvider
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetCustomConfiguration);
 
-    public BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(
-        BuildExecutionCheckConfiguration[] userConfigs,
-        BuildExecutionCheck check)
+    public CheckConfigurationEffective[] GetMergedConfigurations(
+        CheckConfiguration[] userConfigs,
+        Check check)
     {
-        var configurations = new BuildExecutionCheckConfigurationEffective[userConfigs.Length];
+        var configurations = new CheckConfigurationEffective[userConfigs.Length];
 
         for (int idx = 0; idx < userConfigs.Length; idx++)
         {
@@ -227,19 +227,19 @@ internal sealed class ConfigurationProvider : IConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="ruleId"></param>
     /// <returns></returns>
-    internal BuildExecutionCheckConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
+    internal CheckConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
     {
         var cacheKey = $"{ruleId}-{projectFullPath}";
 
         var editorConfigValue = _buildExecutionCheckConfiguration.GetOrAdd(cacheKey, (key) =>
         {
-            BuildExecutionCheckConfiguration? editorConfig = BuildExecutionCheckConfiguration.Null;
+            CheckConfiguration? editorConfig = CheckConfiguration.Null;
             editorConfig.RuleId = ruleId;
             var config = GetConfiguration(projectFullPath, ruleId);
 
             if (config.Any())
             {
-                editorConfig = BuildExecutionCheckConfiguration.Create(config);
+                editorConfig = CheckConfiguration.Create(config);
             }
 
             return editorConfig;
@@ -255,44 +255,44 @@ internal sealed class ConfigurationProvider : IConfigurationProvider
     /// <param name="projectFullPath"></param>
     /// <param name="checkRule"></param>
     /// <returns></returns>
-    internal BuildExecutionCheckConfigurationEffective GetMergedConfiguration(string projectFullPath, BuildExecutionCheckRule checkRule)
+    internal CheckConfigurationEffective GetMergedConfiguration(string projectFullPath, CheckRule checkRule)
         => GetMergedConfiguration(projectFullPath, checkRule.Id, checkRule.DefaultConfiguration);
 
-    internal BuildExecutionCheckConfigurationEffective MergeConfiguration(
+    internal CheckConfigurationEffective MergeConfiguration(
         string ruleId,
-        BuildExecutionCheckConfiguration defaultConfig,
-        BuildExecutionCheckConfiguration editorConfig)
-        => new BuildExecutionCheckConfigurationEffective(
+        CheckConfiguration defaultConfig,
+        CheckConfiguration editorConfig)
+        => new CheckConfigurationEffective(
             ruleId: ruleId,
             evaluationCheckScope: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.EvaluationCheckScope),
             severity: GetSeverityValue(editorConfig, defaultConfig));
 
-    private BuildExecutionCheckConfigurationEffective GetMergedConfiguration(
+    private CheckConfigurationEffective GetMergedConfiguration(
         string projectFullPath,
         string ruleId,
-        BuildExecutionCheckConfiguration defaultConfig)
+        CheckConfiguration defaultConfig)
         => MergeConfiguration(ruleId, defaultConfig, GetUserConfiguration(projectFullPath, ruleId));
 
     private T GetConfigValue<T>(
-        BuildExecutionCheckConfiguration editorConfigValue,
-        BuildExecutionCheckConfiguration defaultValue,
-        Func<BuildExecutionCheckConfiguration, T?> propertyGetter) where T : struct
+        CheckConfiguration editorConfigValue,
+        CheckConfiguration defaultValue,
+        Func<CheckConfiguration, T?> propertyGetter) where T : struct
         => propertyGetter(editorConfigValue) ??
            propertyGetter(defaultValue) ??
-           EnsureNonNull(propertyGetter(BuildExecutionCheckConfiguration.Default));
+           EnsureNonNull(propertyGetter(CheckConfiguration.Default));
 
-    private BuildExecutionCheckResultSeverity GetSeverityValue(BuildExecutionCheckConfiguration editorConfigValue, BuildExecutionCheckConfiguration defaultValue)
+    private CheckResultSeverity GetSeverityValue(CheckConfiguration editorConfigValue, CheckConfiguration defaultValue)
     {
-        BuildExecutionCheckResultSeverity? resultSeverity = null;
+        CheckResultSeverity? resultSeverity = null;
 
         // Consider Default as null, so the severity from the default value could be selected.
         // Default severity is not recognized by the infrastructure and serves for configuration purpuses only. 
-        if (editorConfigValue.Severity != null && editorConfigValue.Severity != BuildExecutionCheckResultSeverity.Default)
+        if (editorConfigValue.Severity != null && editorConfigValue.Severity != CheckResultSeverity.Default)
         {
             resultSeverity = editorConfigValue.Severity;
         }
 
-        resultSeverity ??= defaultValue.Severity ?? EnsureNonNull(BuildExecutionCheckConfiguration.Default.Severity);
+        resultSeverity ??= defaultValue.Severity ?? EnsureNonNull(CheckConfiguration.Default.Severity);
 
         return resultSeverity.Value;
     }

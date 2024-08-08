@@ -62,16 +62,16 @@ public abstract class CheckData(string projectFilePath, int? projectConfiguratio
 /// <typeparam name="T">The type of the actual data for checking.</typeparam>
 public class BuildCheckDataContext<T> where T : CheckData
 {
-    private readonly BuildExecutionCheckWrapper _executionCheckWrapper;
+    private readonly CheckWrapper _executionCheckWrapper;
     private readonly ICheckContext _checkContext;
-    private readonly BuildExecutionCheckConfigurationEffective[] _configPerRule;
-    private readonly Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult> _resultHandler;
+    private readonly CheckConfigurationEffective[] _configPerRule;
+    private readonly Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult> _resultHandler;
 
     internal BuildCheckDataContext(
-        BuildExecutionCheckWrapper checkWrapper,
+        CheckWrapper checkWrapper,
         ICheckContext loggingContext,
-        BuildExecutionCheckConfigurationEffective[] configPerRule,
-        Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult> resultHandler,
+        CheckConfigurationEffective[] configPerRule,
+        Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult> resultHandler,
         T data)
     {
         _executionCheckWrapper = checkWrapper;

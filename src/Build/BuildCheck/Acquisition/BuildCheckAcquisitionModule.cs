@@ -23,11 +23,11 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
     /// <summary>
     /// Creates a list of factory delegates for building check rules instances from a given assembly path.
     /// </summary>
-    public List<BuildExecutionCheckFactory> CreateBuildExecutionCheckFactories(
+    public List<CheckFactory> CreateCheckFactories(
         CheckAcquisitionData checkAcquisitionData,
         ICheckContext checkContext)
     {
-        var checksFactories = new List<BuildExecutionCheckFactory>();
+        var checksFactories = new List<CheckFactory>();
 
         try
         {
@@ -39,11 +39,11 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
 #endif
 
             IList<Type> availableTypes = assembly.GetExportedTypes();
-            IList<Type> checkTypes = availableTypes.Where(t => typeof(BuildExecutionCheck).IsAssignableFrom(t)).ToArray();
+            IList<Type> checkTypes = availableTypes.Where(t => typeof(Check).IsAssignableFrom(t)).ToArray();
 
             foreach (Type checkCandidate in checkTypes)
             {
-                checksFactories.Add(() => (BuildExecutionCheck)Activator.CreateInstance(checkCandidate)!);
+                checksFactories.Add(() => (Check)Activator.CreateInstance(checkCandidate)!);
                 checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckRegistered", checkCandidate.Name, checkCandidate.Assembly);
             }
 

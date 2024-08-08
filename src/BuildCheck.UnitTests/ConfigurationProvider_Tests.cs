@@ -117,7 +117,7 @@ public class ConfigurationProvider_Tests
         buildConfig.ShouldNotBeNull();
 
         buildConfig.IsEnabled.ShouldBe(true);
-        buildConfig.Severity.ShouldBe(BuildExecutionCheckResultSeverity.Error);
+        buildConfig.Severity.ShouldBe(CheckResultSeverity.Error);
         buildConfig.EvaluationCheckScope.ShouldBe(EvaluationCheckScope.ProjectFileOnly);
     }
 
@@ -216,27 +216,27 @@ public class ConfigurationProvider_Tests
     }
 
     [Theory]
-    [InlineData(BuildExecutionCheckResultSeverity.Warning, BuildExecutionCheckResultSeverity.Warning, true)]
-    [InlineData(BuildExecutionCheckResultSeverity.Error, BuildExecutionCheckResultSeverity.Error, true)]
-    [InlineData(BuildExecutionCheckResultSeverity.Default, BuildExecutionCheckResultSeverity.Warning, true)]
-    [InlineData(BuildExecutionCheckResultSeverity.Suggestion, BuildExecutionCheckResultSeverity.Suggestion, true)]
-    [InlineData(BuildExecutionCheckResultSeverity.None, BuildExecutionCheckResultSeverity.None, false)]
-    [InlineData(null, BuildExecutionCheckResultSeverity.Warning, true)]
-    public void GetConfigurationProvider_MergesSeverity_Correctly(BuildExecutionCheckResultSeverity? buildExecutionCheckResultSeverity, BuildExecutionCheckResultSeverity expectedSeverity, bool expectedEnablment)
+    [InlineData(CheckResultSeverity.Warning, CheckResultSeverity.Warning, true)]
+    [InlineData(CheckResultSeverity.Error, CheckResultSeverity.Error, true)]
+    [InlineData(CheckResultSeverity.Default, CheckResultSeverity.Warning, true)]
+    [InlineData(CheckResultSeverity.Suggestion, CheckResultSeverity.Suggestion, true)]
+    [InlineData(CheckResultSeverity.None, CheckResultSeverity.None, false)]
+    [InlineData(null, CheckResultSeverity.Warning, true)]
+    public void GetConfigurationProvider_MergesSeverity_Correctly(CheckResultSeverity? buildExecutionCheckResultSeverity, CheckResultSeverity expectedSeverity, bool expectedEnablment)
     {
         var configurationProvider = new ConfigurationProvider();
-        BuildExecutionCheckConfiguration buildExecutionCheckConfiguration = new BuildExecutionCheckConfiguration()
+        CheckConfiguration buildExecutionCheckConfiguration = new CheckConfiguration()
         {
             Severity = buildExecutionCheckResultSeverity
         };
 
-        BuildExecutionCheckConfiguration defaultValue = new BuildExecutionCheckConfiguration()
+        CheckConfiguration defaultValue = new CheckConfiguration()
         {
-            Severity = BuildExecutionCheckResultSeverity.Warning
+            Severity = CheckResultSeverity.Warning
         };
 
-        var internalBuildExecutionCheck = configurationProvider.MergeConfiguration("ruleId", defaultValue, buildExecutionCheckConfiguration);
-        internalBuildExecutionCheck.Severity.ShouldBe(expectedSeverity);
-        internalBuildExecutionCheck.IsEnabled.ShouldBe(expectedEnablment);
+        var internalCheck = configurationProvider.MergeConfiguration("ruleId", defaultValue, buildExecutionCheckConfiguration);
+        internalCheck.Severity.ShouldBe(expectedSeverity);
+        internalCheck.IsEnabled.ShouldBe(expectedEnablment);
     }
 }

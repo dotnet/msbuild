@@ -8,17 +8,17 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 internal interface IConfigurationProvider
 {
-    BuildExecutionCheckConfiguration[] GetUserConfigurations(
+    CheckConfiguration[] GetUserConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds);
 
-    BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(
+    CheckConfigurationEffective[] GetMergedConfigurations(
         string projectFullPath,
-        BuildExecutionCheck check);
+        Check check);
 
-    BuildExecutionCheckConfigurationEffective[] GetMergedConfigurations(
-        BuildExecutionCheckConfiguration[] userConfigs,
-        BuildExecutionCheck check);
+    CheckConfigurationEffective[] GetMergedConfigurations(
+        CheckConfiguration[] userConfigs,
+        Check check);
 
     CustomConfigurationData[] GetCustomConfigurations(
         string projectFullPath,

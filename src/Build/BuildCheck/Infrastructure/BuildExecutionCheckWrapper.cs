@@ -13,26 +13,26 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// <summary>
 /// A wrapping, enriching class for BuildCheck - so that we have additional data and functionality.
 /// </summary>
-internal sealed class BuildExecutionCheckWrapper
+internal sealed class CheckWrapper
 {
     private readonly Stopwatch _stopwatch = new Stopwatch();
 
-    public BuildExecutionCheckWrapper(BuildExecutionCheck buildExecutionCheck)
+    public CheckWrapper(Check buildExecutionCheck)
     {
-        BuildExecutionCheck = buildExecutionCheck;
+        Check = buildExecutionCheck;
     }
 
-    internal BuildExecutionCheck BuildExecutionCheck { get; }
+    internal Check Check { get; }
     private bool _isInitialized = false;
 
     // Let's optimize for the scenario where users have a single .editorconfig file that applies to the whole solution.
     // In such case - configuration will be same for all projects. So we do not need to store it per project in a collection.
-    internal BuildExecutionCheckConfigurationEffective? CommonConfig { get; private set; }
+    internal CheckConfigurationEffective? CommonConfig { get; private set; }
 
     // start new project
     internal void StartNewProject(
         string fullProjectPath,
-        IReadOnlyList<BuildExecutionCheckConfigurationEffective> userConfigs)
+        IReadOnlyList<CheckConfigurationEffective> userConfigs)
     {
         if (!_isInitialized)
         {

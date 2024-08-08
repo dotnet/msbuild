@@ -5,17 +5,17 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
 /// Represents a rule that is a unit of a build check.
-/// <see cref="BuildExecutionCheck"/> is a unit of executing the check, but it can be discovering multiple distinct violation types,
-///  for this reason a single <see cref="BuildExecutionCheck"/> can expose multiple <see cref="BuildExecutionCheckRule"/>s.
+/// <see cref="Check"/> is a unit of executing the check, but it can be discovering multiple distinct violation types,
+///  for this reason a single <see cref="Check"/> can expose multiple <see cref="CheckRule"/>s.
 /// </summary>
-public class BuildExecutionCheckRule
+public class CheckRule
 {
-    public BuildExecutionCheckRule(
+    public CheckRule(
         string id, 
         string title, 
         string description, 
         string messageFormat,
-        BuildExecutionCheckConfiguration defaultConfiguration)
+        CheckConfiguration defaultConfiguration)
     {
         Id = id;
         Title = title;
@@ -55,5 +55,5 @@ public class BuildExecutionCheckRule
     /// The default configuration - overridable by the user via .editorconfig.
     /// If no user specified configuration is provided, this default will be used.
     /// </summary>
-    public BuildExecutionCheckConfiguration DefaultConfiguration { get; }
+    public CheckConfiguration DefaultConfiguration { get; }
 }

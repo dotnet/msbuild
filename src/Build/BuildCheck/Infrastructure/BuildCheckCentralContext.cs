@@ -22,16 +22,16 @@ internal sealed class BuildCheckCentralContext
         => _configurationProvider = configurationProvider;
 
     private record CallbackRegistry(
-        List<(BuildExecutionCheckWrapper, Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>>)> EvaluatedPropertiesActions,
-        List<(BuildExecutionCheckWrapper, Action<BuildCheckDataContext<ParsedItemsCheckData>>)> ParsedItemsActions,
-        List<(BuildExecutionCheckWrapper, Action<BuildCheckDataContext<TaskInvocationCheckData>>)> TaskInvocationActions,
-        List<(BuildExecutionCheckWrapper, Action<BuildCheckDataContext<PropertyReadData>>)> PropertyReadActions,
-        List<(BuildExecutionCheckWrapper, Action<BuildCheckDataContext<PropertyWriteData>>)> PropertyWriteActions,
-        List<(BuildExecutionCheckWrapper, Action<BuildCheckDataContext<ProjectProcessingDoneData>>)> ProjectProcessingDoneActions)
+        List<(CheckWrapper, Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>>)> EvaluatedPropertiesActions,
+        List<(CheckWrapper, Action<BuildCheckDataContext<ParsedItemsCheckData>>)> ParsedItemsActions,
+        List<(CheckWrapper, Action<BuildCheckDataContext<TaskInvocationCheckData>>)> TaskInvocationActions,
+        List<(CheckWrapper, Action<BuildCheckDataContext<PropertyReadData>>)> PropertyReadActions,
+        List<(CheckWrapper, Action<BuildCheckDataContext<PropertyWriteData>>)> PropertyWriteActions,
+        List<(CheckWrapper, Action<BuildCheckDataContext<ProjectProcessingDoneData>>)> ProjectProcessingDoneActions)
     {
         public CallbackRegistry() : this([], [], [], [], [], []) { }
 
-        internal void DeregisterCheck(BuildExecutionCheckWrapper check)
+        internal void DeregisterCheck(CheckWrapper check)
         {
             EvaluatedPropertiesActions.RemoveAll(a => a.Item1 == check);
             ParsedItemsActions.RemoveAll(a => a.Item1 == check);
@@ -54,30 +54,30 @@ internal sealed class BuildCheckCentralContext
     internal bool HasPropertyReadActions => _globalCallbacks.PropertyReadActions.Count > 0;
     internal bool HasPropertyWriteActions => _globalCallbacks.PropertyWriteActions.Count > 0;
 
-    internal void RegisterEvaluatedPropertiesAction(BuildExecutionCheckWrapper check, Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction)
+    internal void RegisterEvaluatedPropertiesAction(CheckWrapper check, Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction)
         // Here we might want to communicate to node that props need to be sent.
         //  (it was being communicated via MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION)
         => RegisterAction(check, evaluatedPropertiesAction, _globalCallbacks.EvaluatedPropertiesActions);
 
-    internal void RegisterParsedItemsAction(BuildExecutionCheckWrapper check, Action<BuildCheckDataContext<ParsedItemsCheckData>> parsedItemsAction)
+    internal void RegisterParsedItemsAction(CheckWrapper check, Action<BuildCheckDataContext<ParsedItemsCheckData>> parsedItemsAction)
         => RegisterAction(check, parsedItemsAction, _globalCallbacks.ParsedItemsActions);
 
-    internal void RegisterTaskInvocationAction(BuildExecutionCheckWrapper check, Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction)
+    internal void RegisterTaskInvocationAction(CheckWrapper check, Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction)
         => RegisterAction(check, taskInvocationAction, _globalCallbacks.TaskInvocationActions);
 
-    internal void RegisterPropertyReadAction(BuildExecutionCheckWrapper check, Action<BuildCheckDataContext<PropertyReadData>> propertyReadAction)
+    internal void RegisterPropertyReadAction(CheckWrapper check, Action<BuildCheckDataContext<PropertyReadData>> propertyReadAction)
         => RegisterAction(check, propertyReadAction, _globalCallbacks.PropertyReadActions);
 
-    internal void RegisterPropertyWriteAction(BuildExecutionCheckWrapper check, Action<BuildCheckDataContext<PropertyWriteData>> propertyWriteAction)
+    internal void RegisterPropertyWriteAction(CheckWrapper check, Action<BuildCheckDataContext<PropertyWriteData>> propertyWriteAction)
         => RegisterAction(check, propertyWriteAction, _globalCallbacks.PropertyWriteActions);
 
-    internal void RegisterProjectProcessingDoneAction(BuildExecutionCheckWrapper check, Action<BuildCheckDataContext<ProjectProcessingDoneData>> projectDoneAction)
+    internal void RegisterProjectProcessingDoneAction(CheckWrapper check, Action<BuildCheckDataContext<ProjectProcessingDoneData>> projectDoneAction)
         => RegisterAction(check, projectDoneAction, _globalCallbacks.ProjectProcessingDoneActions);
 
     private void RegisterAction<T>(
-        BuildExecutionCheckWrapper wrappedCheck,
+        CheckWrapper wrappedCheck,
         Action<BuildCheckDataContext<T>> handler,
-        List<(BuildExecutionCheckWrapper, Action<BuildCheckDataContext<T>>)> handlersRegistry)
+        List<(CheckWrapper, Action<BuildCheckDataContext<T>>)> handlersRegistry)
         where T : CheckData
     {
         void WrappedHandler(BuildCheckDataContext<T> context)
@@ -92,7 +92,7 @@ internal sealed class BuildCheckCentralContext
         }
     }
 
-    internal void DeregisterCheck(BuildExecutionCheckWrapper check)
+    internal void DeregisterCheck(CheckWrapper check)
     {
         _globalCallbacks.DeregisterCheck(check);
     }
@@ -100,7 +100,7 @@ internal sealed class BuildCheckCentralContext
     internal void RunEvaluatedPropertiesActions(
         EvaluatedPropertiesCheckData evaluatedPropertiesCheckData,
         ICheckContext checkContext,
-        Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult>
+        Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.EvaluatedPropertiesActions, evaluatedPropertiesCheckData,
             checkContext, resultHandler);
@@ -108,7 +108,7 @@ internal sealed class BuildCheckCentralContext
     internal void RunParsedItemsActions(
         ParsedItemsCheckData parsedItemsCheckData,
         ICheckContext checkContext,
-        Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult>
+        Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ParsedItemsActions, parsedItemsCheckData,
             checkContext, resultHandler);
@@ -116,7 +116,7 @@ internal sealed class BuildCheckCentralContext
     internal void RunTaskInvocationActions(
         TaskInvocationCheckData taskInvocationCheckData,
         ICheckContext checkContext,
-        Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult>
+        Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.TaskInvocationActions, taskInvocationCheckData,
             checkContext, resultHandler);
@@ -124,7 +124,7 @@ internal sealed class BuildCheckCentralContext
     internal void RunPropertyReadActions(
         PropertyReadData propertyReadDataData,
         CheckLoggingContext checkContext,
-        Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult>
+        Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.PropertyReadActions, propertyReadDataData,
             checkContext, resultHandler);
@@ -132,7 +132,7 @@ internal sealed class BuildCheckCentralContext
     internal void RunPropertyWriteActions(
         PropertyWriteData propertyWriteData,
         CheckLoggingContext checkContext,
-        Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult>
+        Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.PropertyWriteActions, propertyWriteData,
             checkContext, resultHandler);
@@ -140,16 +140,16 @@ internal sealed class BuildCheckCentralContext
     internal void RunProjectProcessingDoneActions(
         ProjectProcessingDoneData projectProcessingDoneData,
         ICheckContext checkContext,
-        Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult>
+        Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ProjectProcessingDoneActions, projectProcessingDoneData,
             checkContext, resultHandler);
 
     private void RunRegisteredActions<T>(
-        List<(BuildExecutionCheckWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks,
+        List<(CheckWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks,
         T checkData,
         ICheckContext checkContext,
-        Action<BuildExecutionCheckWrapper, ICheckContext, BuildExecutionCheckConfigurationEffective[], BuildCheckResult> resultHandler)
+        Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult> resultHandler)
     where T : CheckData
     {
         string projectFullPath = checkData.ProjectFilePath;
@@ -159,8 +159,8 @@ internal sealed class BuildCheckCentralContext
             // Tracing - https://github.com/dotnet/msbuild/issues/9629 - we might want to account this entire block
             //  to the relevant check (with BuildCheckConfigurationEffectively the currently accounted part as being the 'core-execution' subspan)
 
-            BuildExecutionCheckConfigurationEffective? commonConfig = checkCallback.Item1.CommonConfig;
-            BuildExecutionCheckConfigurationEffective[] configPerRule;
+            CheckConfigurationEffective? commonConfig = checkCallback.Item1.CommonConfig;
+            CheckConfigurationEffective[] configPerRule;
 
             if (commonConfig != null)
             {
@@ -175,7 +175,7 @@ internal sealed class BuildCheckCentralContext
             {
                 configPerRule =
                     _configurationProvider.GetMergedConfigurations(projectFullPath,
-                        checkCallback.Item1.BuildExecutionCheck);
+                        checkCallback.Item1.Check);
                 if (configPerRule.All(c => !c.IsEnabled))
                 {
                     return;

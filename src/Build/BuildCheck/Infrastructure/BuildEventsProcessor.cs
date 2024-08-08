@@ -211,23 +211,23 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 ReportResult);
 
     private static void ReportResult(
-        BuildExecutionCheckWrapper checkWrapper,
+        CheckWrapper checkWrapper,
         ICheckContext checkContext,
-        BuildExecutionCheckConfigurationEffective[] configPerRule,
+        CheckConfigurationEffective[] configPerRule,
         BuildCheckResult result)
     {
-        if (!checkWrapper.BuildExecutionCheck.SupportedRules.Contains(result.BuildExecutionCheckRule))
+        if (!checkWrapper.Check.SupportedRules.Contains(result.CheckRule))
         {
             checkContext.DispatchAsErrorFromText(null, null, null,
                 BuildEventFileInfo.Empty,
-                $"The check '{checkWrapper.BuildExecutionCheck.FriendlyName}' reported a result for a rule '{result.BuildExecutionCheckRule.Id}' that it does not support.");
+                $"The check '{checkWrapper.Check.FriendlyName}' reported a result for a rule '{result.CheckRule.Id}' that it does not support.");
             return;
         }
 
-        BuildExecutionCheckConfigurationEffective config = configPerRule.Length == 1
+        CheckConfigurationEffective config = configPerRule.Length == 1
             ? configPerRule[0]
             : configPerRule.First(r =>
-                r.RuleId.Equals(result.BuildExecutionCheckRule.Id, StringComparison.CurrentCultureIgnoreCase));
+                r.RuleId.Equals(result.CheckRule.Id, StringComparison.CurrentCultureIgnoreCase));
 
         if (!config.IsEnabled)
         {

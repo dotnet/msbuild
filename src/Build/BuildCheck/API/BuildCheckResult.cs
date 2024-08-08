@@ -16,28 +16,28 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 public sealed class BuildCheckResult : IBuildCheckResult
 {
-    public static BuildCheckResult Create(BuildExecutionCheckRule rule, ElementLocation location, params string[] messageArgs)
+    public static BuildCheckResult Create(CheckRule rule, ElementLocation location, params string[] messageArgs)
     {
         return new BuildCheckResult(rule, location, messageArgs);
     }
 
-    public BuildCheckResult(BuildExecutionCheckRule buildExecutionCheckRule, ElementLocation location, string[] messageArgs)
+    public BuildCheckResult(CheckRule buildExecutionCheckRule, ElementLocation location, string[] messageArgs)
     {
-        BuildExecutionCheckRule = buildExecutionCheckRule;
+        CheckRule = buildExecutionCheckRule;
         Location = location;
         MessageArgs = messageArgs;
     }
 
-    internal BuildEventArgs ToEventArgs(BuildExecutionCheckResultSeverity severity)
+    internal BuildEventArgs ToEventArgs(CheckResultSeverity severity)
         => severity switch
         {
-            BuildExecutionCheckResultSeverity.Suggestion => new BuildCheckResultMessage(this),
-            BuildExecutionCheckResultSeverity.Warning => new BuildCheckResultWarning(this, BuildExecutionCheckRule.Id),
-            BuildExecutionCheckResultSeverity.Error => new BuildCheckResultError(this, BuildExecutionCheckRule.Id),
+            CheckResultSeverity.Suggestion => new BuildCheckResultMessage(this),
+            CheckResultSeverity.Warning => new BuildCheckResultWarning(this, CheckRule.Id),
+            CheckResultSeverity.Error => new BuildCheckResultError(this, CheckRule.Id),
             _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null),
         };
 
-    public BuildExecutionCheckRule BuildExecutionCheckRule { get; }
+    public CheckRule CheckRule { get; }
 
     /// <summary>
     /// Optional location of the finding (in near future we might need to support multiple locations).
@@ -47,11 +47,11 @@ public sealed class BuildCheckResult : IBuildCheckResult
     public string LocationString => Location.LocationString;
 
     public string[] MessageArgs { get; }
-    public string MessageFormat => BuildExecutionCheckRule.MessageFormat;
+    public string MessageFormat => CheckRule.MessageFormat;
 
     // Here we will provide different link for built-in rules and custom rules - once we have the base classes differentiated.
     public string FormatMessage() =>
-        _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))}https://aka.ms/buildcheck/codes#{BuildExecutionCheckRule.Id} - {string.Format(BuildExecutionCheckRule.MessageFormat, MessageArgs)}";
+        _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))}https://aka.ms/buildcheck/codes#{CheckRule.Id} - {string.Format(CheckRule.MessageFormat, MessageArgs)}";
 
     private string? _message;
 }

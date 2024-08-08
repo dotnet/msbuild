@@ -9,11 +9,11 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// <summary>
 /// Counterpart type for BuildCheckConfiguration - with all properties non-nullable
 /// </summary>
-public sealed class BuildExecutionCheckConfigurationEffective
+public sealed class CheckConfigurationEffective
 {
-    public BuildExecutionCheckConfigurationEffective(string ruleId, EvaluationCheckScope evaluationCheckScope, BuildExecutionCheckResultSeverity severity)
+    public CheckConfigurationEffective(string ruleId, EvaluationCheckScope evaluationCheckScope, CheckResultSeverity severity)
     {
-        if (severity == BuildExecutionCheckResultSeverity.Default)
+        if (severity == CheckResultSeverity.Default)
         {
             throw new ArgumentOutOfRangeException(nameof(severity), severity, "Severity 'Default' is not recognized by the BuildCheck reports infrastructure");
         }
@@ -27,14 +27,14 @@ public sealed class BuildExecutionCheckConfigurationEffective
 
     public EvaluationCheckScope EvaluationCheckScope { get; }
 
-    public BuildExecutionCheckResultSeverity Severity { get; }
+    public CheckResultSeverity Severity { get; }
 
-    public bool IsEnabled => Severity >= BuildExecutionCheckResultSeverity.Suggestion;
+    public bool IsEnabled => Severity >= CheckResultSeverity.Suggestion;
 
     // Intentionally not checking the RuleId
     //  as for checks with multiple rules, we can squash config to a single one,
     //  if the ruleId is the only thing differing.
-    public bool IsSameConfigurationAs(BuildExecutionCheckConfigurationEffective? other) =>
+    public bool IsSameConfigurationAs(CheckConfigurationEffective? other) =>
         other != null &&
         Severity == other.Severity &&
         EvaluationCheckScope == other.EvaluationCheckScope;

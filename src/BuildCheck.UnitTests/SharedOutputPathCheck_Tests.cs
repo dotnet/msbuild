@@ -86,8 +86,8 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 
             // 2 reports for bin and obj folders.
             _registrationContext.Results.Count.ShouldBe(2);
-            _registrationContext.Results[0].BuildExecutionCheckRule.Id.ShouldBe("BC0101");
-            _registrationContext.Results[1].BuildExecutionCheckRule.Id.ShouldBe("BC0101");
+            _registrationContext.Results[0].CheckRule.Id.ShouldBe("BC0101");
+            _registrationContext.Results[1].CheckRule.Id.ShouldBe("BC0101");
 
             // Check that paths are formed with correct paths separators
             string wrongPathSeparator = NativeMethodsShared.IsWindows ? "/" : "\\";
@@ -131,7 +131,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             _registrationContext.Results.Count.ShouldBe(4); // 4 reports for two pairs of project: (1, 2) and (1, 3).
             foreach (var result in _registrationContext.Results)
             {
-                result.BuildExecutionCheckRule.Id.ShouldBe("BC0101");
+                result.CheckRule.Id.ShouldBe("BC0101");
             }
         }
     }

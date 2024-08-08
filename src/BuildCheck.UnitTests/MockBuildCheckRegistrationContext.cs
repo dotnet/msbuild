@@ -49,7 +49,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             }
         }
 
-        private void ResultHandler(BuildExecutionCheckWrapper wrapper, ICheckContext context, BuildExecutionCheckConfigurationEffective[] configs, BuildCheckResult result)
+        private void ResultHandler(CheckWrapper wrapper, ICheckContext context, CheckConfigurationEffective[] configs, BuildCheckResult result)
             => Results.Add(result);
     }
 }

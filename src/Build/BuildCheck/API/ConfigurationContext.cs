@@ -13,13 +13,13 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 public class ConfigurationContext
 {
-    private ConfigurationContext(CustomConfigurationData[] customConfigurationData, BuildExecutionCheckConfigurationEffective[] buildExecutionCheckConfig)
+    private ConfigurationContext(CustomConfigurationData[] customConfigurationData, CheckConfigurationEffective[] buildExecutionCheckConfig)
     {
         CustomConfigurationData = customConfigurationData;
-        BuildExecutionCheckConfig = buildExecutionCheckConfig;
+        CheckConfig = buildExecutionCheckConfig;
     }
 
-    internal static ConfigurationContext FromDataEnumeration(CustomConfigurationData[] customConfigurationData, BuildExecutionCheckConfigurationEffective[] buildExecutionCheckConfig)
+    internal static ConfigurationContext FromDataEnumeration(CustomConfigurationData[] customConfigurationData, CheckConfigurationEffective[] buildExecutionCheckConfig)
     {
         return new ConfigurationContext(customConfigurationData, buildExecutionCheckConfig);
     }
@@ -32,5 +32,5 @@ public class ConfigurationContext
     /// <summary>
     /// Infrastructure configuration data
     /// </summary>
-    public IReadOnlyList<BuildExecutionCheckConfigurationEffective> BuildExecutionCheckConfig { get; init; }
+    public IReadOnlyList<CheckConfigurationEffective> CheckConfig { get; init; }
 }

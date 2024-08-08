@@ -7,14 +7,14 @@ using Microsoft.Build.Construction;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
-internal sealed class NoEnvironmentVariablePropertyCheck : BuildExecutionCheck
+internal sealed class NoEnvironmentVariablePropertyCheck : Check
 {
-    public static BuildExecutionCheckRule SupportedRule = new BuildExecutionCheckRule(
+    public static CheckRule SupportedRule = new CheckRule(
                 "BC0103",
                 "NoEnvironmentVariablePropertyCheck",
                 "No implicit property derived from an environment variable should be used during the build",
                 "Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.",
-                new BuildExecutionCheckConfiguration() { Severity = BuildExecutionCheckResultSeverity.Suggestion });
+                new CheckConfiguration() { Severity = CheckResultSeverity.Suggestion });
 
     private const string RuleId = "BC0103";
 
@@ -29,7 +29,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : BuildExecutionCheck
 
     public override string FriendlyName => "MSBuild.NoEnvironmentVariablePropertyCheck";
 
-    public override IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; } = [SupportedRule];
+    public override IReadOnlyList<CheckRule> SupportedRules { get; } = [SupportedRule];
 
     public override void Initialize(ConfigurationContext configurationContext)
     {

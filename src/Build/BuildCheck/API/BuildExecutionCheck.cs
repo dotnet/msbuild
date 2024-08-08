@@ -11,9 +11,9 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// Base class for build checks.
 /// Same base will be used for custom and built-in checks.
-/// <see cref="BuildExecutionCheck"/> is a unit of build checks execution, but it can contain multiple rules - each representing a distinct violation.
+/// <see cref="Check"/> is a unit of build checks execution, but it can contain multiple rules - each representing a distinct violation.
 /// </summary>
-public abstract class BuildExecutionCheck : IDisposable
+public abstract class Check : IDisposable
 {
     /// <summary>
     /// Friendly name of the check.
@@ -24,7 +24,7 @@ public abstract class BuildExecutionCheck : IDisposable
     /// <summary>
     /// Single or multiple rules supported by the check.
     /// </summary>
-    public abstract IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; }
+    public abstract IReadOnlyList<CheckRule> SupportedRules { get; }
 
     /// <summary>
     /// Optional initialization of the check.

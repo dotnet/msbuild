@@ -19,8 +19,8 @@ using Microsoft.Build.BuildCheck.Infrastructure;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-internal delegate BuildExecutionCheck BuildExecutionCheckFactory();
-internal delegate BuildExecutionCheckWrapper BuildExecutionCheckWrapperFactory(ConfigurationContext configurationContext);
+internal delegate Check CheckFactory();
+internal delegate CheckWrapper CheckWrapperFactory(ConfigurationContext configurationContext);
 
 /// <summary>
 /// The central manager for the BuildCheck - this is the integration point with MSBuild infrastructure.
@@ -72,14 +72,14 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly TracingReporter _tracingReporter = new TracingReporter();
         private readonly IConfigurationProvider _configurationProvider = new ConfigurationProvider();
         private readonly BuildCheckCentralContext _buildCheckCentralContext;
-        private readonly List<BuildExecutionCheckFactoryContext> _checkRegistry;
+        private readonly List<CheckFactoryContext> _checkRegistry;
         private readonly bool[] _enabledDataSources = new bool[(int)BuildCheckDataSource.ValuesCount];
         private readonly BuildEventsProcessor _buildEventsProcessor;
         private readonly IBuildCheckAcquisitionModule _acquisitionModule;
 
         internal BuildCheckManager()
         {
-            _checkRegistry = new List<BuildExecutionCheckFactoryContext>();
+            _checkRegistry = new List<CheckFactoryContext>();
             _acquisitionModule = new BuildCheckAcquisitionModule();
             _buildCheckCentralContext = new(_configurationProvider);
             _buildEventsProcessor = new(_buildCheckCentralContext);
@@ -112,7 +112,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             Stopwatch stopwatch = Stopwatch.StartNew();
             if (IsInProcNode)
             {
-                var checksFactories = _acquisitionModule.CreateBuildExecutionCheckFactories(acquisitionData, checkContext);
+                var checksFactories = _acquisitionModule.CreateCheckFactories(acquisitionData, checkContext);
                 if (checksFactories.Count != 0)
                 {
                     RegisterCustomCheck(acquisitionData.ProjectPath, BuildCheckDataSource.EventArgs, checksFactories, checkContext);
@@ -136,7 +136,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private static T Construct<T>() where T : new() => new();
 
-        private static readonly (string[] ruleIds, bool defaultEnablement, BuildExecutionCheckFactory factory)[][] s_builtInFactoriesPerDataSource =
+        private static readonly (string[] ruleIds, bool defaultEnablement, CheckFactory factory)[][] s_builtInFactoriesPerDataSource =
         [
 
             // BuildCheckDataSource.EventArgs
@@ -153,19 +153,19 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// <summary>
         /// For tests only. TODO: Remove when check acquisition is done.
         /// </summary>
-        internal static (string[] ruleIds, bool defaultEnablement, BuildExecutionCheckFactory factory)[][]? s_testFactoriesPerDataSource;
+        internal static (string[] ruleIds, bool defaultEnablement, CheckFactory factory)[][]? s_testFactoriesPerDataSource;
 
         private void RegisterBuiltInChecks(BuildCheckDataSource buildCheckDataSource)
         {
             _checkRegistry.AddRange(
                 s_builtInFactoriesPerDataSource[(int)buildCheckDataSource]
-                    .Select(v => new BuildExecutionCheckFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
+                    .Select(v => new CheckFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
 
             if (s_testFactoriesPerDataSource is not null)
             {
                 _checkRegistry.AddRange(
                     s_testFactoriesPerDataSource[(int)buildCheckDataSource]
-                        .Select(v => new BuildExecutionCheckFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
+                        .Select(v => new CheckFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
             }
         }
 
@@ -180,7 +180,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         internal void RegisterCustomCheck(
             string projectPath,
             BuildCheckDataSource buildCheckDataSource,
-            IEnumerable<BuildExecutionCheckFactory> factories,
+            IEnumerable<CheckFactory> factories,
             ICheckContext checkContext)
         {
             if (_enabledDataSources[(int)buildCheckDataSource])
@@ -188,7 +188,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 foreach (var factory in factories)
                 {
                     var instance = factory();
-                    var checkFactoryContext = new BuildExecutionCheckFactoryContext(
+                    var checkFactoryContext = new CheckFactoryContext(
                         factory,
                         instance.SupportedRules.Select(r => r.Id).ToArray(),
                         instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true));
@@ -203,17 +203,17 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
-        private void SetupSingleCheck(BuildExecutionCheckFactoryContext checkFactoryContext, string projectFullPath)
+        private void SetupSingleCheck(CheckFactoryContext checkFactoryContext, string projectFullPath)
         {
             // For custom checks - it should run only on projects where referenced
             // (otherwise error out - https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57849480)
             // on others it should work similarly as disabling them.
             // Disabled check should not only post-filter results - it shouldn't even see the data 
-            BuildExecutionCheckWrapper wrapper;
-            BuildExecutionCheckConfigurationEffective[] configurations;
+            CheckWrapper wrapper;
+            CheckConfigurationEffective[] configurations;
             if (checkFactoryContext.MaterializedCheck == null)
             {
-                BuildExecutionCheckConfiguration[] userConfigs =
+                CheckConfiguration[] userConfigs =
                     _configurationProvider.GetUserConfigurations(projectFullPath, checkFactoryContext.RuleIds);
 
                 if (userConfigs.All(c => !(c.IsEnabled ?? checkFactoryContext.IsEnabledByDefault)))
@@ -225,14 +225,14 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 CustomConfigurationData[] customConfigData =
                     _configurationProvider.GetCustomConfigurations(projectFullPath, checkFactoryContext.RuleIds);
 
-                BuildExecutionCheck uninitializedCheck = checkFactoryContext.Factory();
+                Check uninitializedCheck = checkFactoryContext.Factory();
                 configurations = _configurationProvider.GetMergedConfigurations(userConfigs, uninitializedCheck);
 
                 ConfigurationContext configurationContext = ConfigurationContext.FromDataEnumeration(customConfigData, configurations);
 
                 wrapper = checkFactoryContext.Initialize(uninitializedCheck, configurationContext);
                 checkFactoryContext.MaterializedCheck = wrapper;
-                BuildExecutionCheck check = wrapper.BuildExecutionCheck;
+                Check check = wrapper.Check;
 
                 // This is to facilitate possible perf improvement for custom checks - as we might want to
                 //  avoid loading the assembly and type just to check if it's supported.
@@ -263,7 +263,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 wrapper = checkFactoryContext.MaterializedCheck;
 
-                configurations = _configurationProvider.GetMergedConfigurations(projectFullPath, wrapper.BuildExecutionCheck);
+                configurations = _configurationProvider.GetMergedConfigurations(projectFullPath, wrapper.Check);
 
                 _configurationProvider.CheckCustomConfigurationDataValidity(projectFullPath,
                     checkFactoryContext.RuleIds[0]);
@@ -288,8 +288,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             // If it's already constructed - just control the custom settings do not differ
             Stopwatch stopwatch = Stopwatch.StartNew();
-            List<BuildExecutionCheckFactoryContext> checksToRemove = new();
-            foreach (BuildExecutionCheckFactoryContext checkFactoryContext in _checkRegistry)
+            List<CheckFactoryContext> checksToRemove = new();
+            foreach (CheckFactoryContext checkFactoryContext in _checkRegistry)
             {
                 try
                 {
@@ -315,8 +315,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             foreach (var checkToRemove in checksToRemove.Select(a => a.MaterializedCheck).Where(a => a != null))
             {
                 _buildCheckCentralContext.DeregisterCheck(checkToRemove!);
-                _tracingReporter.AddCheckStats(checkToRemove!.BuildExecutionCheck.FriendlyName, checkToRemove.Elapsed);
-                checkToRemove.BuildExecutionCheck.Dispose();
+                _tracingReporter.AddCheckStats(checkToRemove!.Check.FriendlyName, checkToRemove.Elapsed);
+                checkToRemove.Check.Dispose();
             }
 
             stopwatch.Stop();
@@ -378,7 +378,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         public Dictionary<string, TimeSpan> CreateCheckTracingStats()
         {
-            foreach (BuildExecutionCheckFactoryContext checkFactoryContext in _checkRegistry)
+            foreach (CheckFactoryContext checkFactoryContext in _checkRegistry)
             {
                 if (checkFactoryContext.MaterializedCheck != null)
                 {
@@ -507,30 +507,30 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         public void Shutdown()
         { /* Too late here for any communication to the main node or for logging anything */ }
 
-        private class BuildExecutionCheckFactoryContext(
-            BuildExecutionCheckFactory factory,
+        private class CheckFactoryContext(
+            CheckFactory factory,
             string[] ruleIds,
             bool isEnabledByDefault)
         {
-            public BuildExecutionCheck Factory()
+            public Check Factory()
             {
-                BuildExecutionCheck ba = factory();
+                Check ba = factory();
                 return ba;
             }
 
-            public BuildExecutionCheckWrapper Initialize(BuildExecutionCheck ba, ConfigurationContext configContext)
+            public CheckWrapper Initialize(Check ba, ConfigurationContext configContext)
             {
                 ba.Initialize(configContext);
-                return new BuildExecutionCheckWrapper(ba);
+                return new CheckWrapper(ba);
             }
 
-            public BuildExecutionCheckWrapper? MaterializedCheck { get; set; }
+            public CheckWrapper? MaterializedCheck { get; set; }
 
             public string[] RuleIds { get; init; } = ruleIds;
 
             public bool IsEnabledByDefault { get; init; } = isEnabledByDefault;
 
-            public string FriendlyName => MaterializedCheck?.BuildExecutionCheck.FriendlyName ?? factory().FriendlyName;
+            public string FriendlyName => MaterializedCheck?.Check.FriendlyName ?? factory().FriendlyName;
         }
     }
 }
