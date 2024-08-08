@@ -99,6 +99,17 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         }
     }
 
+    internal void ProcessBuildDone(IAnalysisContext analysisContext)
+    {
+        if (!_buildCheckCentralContext.HasBuildFinishedActions)
+        {
+            // No analyzer is interested in the event -> nothing to do.
+            return;
+        }
+
+        _buildCheckCentralContext.RunBuildFinishedActions(new BuildFinishedAnalysisData(), analysisContext, ReportResult);
+    }
+
     internal void ProcessTaskStartedEventArgs(
         IAnalysisContext analysisContext,
         TaskStartedEventArgs taskStartedEventArgs)

@@ -22,6 +22,8 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationAnalysisData>> taskInvocationAction)
             => _taskInvocationAction += taskInvocationAction;
 
+        public void RegisterBuildFinishedAction(Action<BuildCheckDataContext<BuildFinishedAnalysisData>> buildFinishedAction) => throw new NotImplementedException();
+
         public void TriggerTaskInvocationAction(TaskInvocationAnalysisData data)
         {
             if (_taskInvocationAction is not null)

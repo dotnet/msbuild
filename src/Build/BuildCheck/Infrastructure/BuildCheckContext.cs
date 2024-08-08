@@ -21,4 +21,7 @@ internal sealed class BuildCheckRegistrationContext(BuildAnalyzerWrapper analyze
     {
         buildCheckCentralContext.RegisterTaskInvocationAction(analyzerWrapper, taskInvocationAction);
     }
+
+    public void RegisterBuildFinishedAction(Action<BuildCheckDataContext<BuildFinishedAnalysisData>> buildFinishedAction)
+        => buildCheckCentralContext.RegisterBuildFinishedAction(analyzerWrapper, buildFinishedAction);
 }

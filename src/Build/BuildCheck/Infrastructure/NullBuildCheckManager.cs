@@ -22,6 +22,10 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
+    public void ProcessBuildFinished(IAnalysisContext analysisContext)
+    {
+    }
+
     public void SetDataSource(BuildCheckDataSource buildCheckDataSource)
     {
     }

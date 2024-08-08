@@ -55,6 +55,9 @@ internal interface IBuildCheckManager
         IAnalysisContext analysisContext,
         TaskParameterEventArgs taskParameterEventArgs);
 
+    void ProcessBuildFinished(IAnalysisContext analysisContext);
+
+
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
     void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, IAnalysisContext analysisContext);
