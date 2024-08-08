@@ -75,14 +75,13 @@ public class BuildExecutionCheckConfiguration_Test
     }
 
     [Theory]
-    [InlineData("project", EvaluationCheckScope.ProjectOnly)]
-    [InlineData("PROJECT", EvaluationCheckScope.ProjectOnly)]
-    [InlineData("current_imports", EvaluationCheckScope.ProjectWithImportsFromCurrentWorkTree)]
-    [InlineData("CURRENT_IMPORTS", EvaluationCheckScope.ProjectWithImportsFromCurrentWorkTree)]
-    [InlineData("without_sdks", EvaluationCheckScope.ProjectWithImportsWithoutSdks)]
-    [InlineData("WITHOUT_SDKS", EvaluationCheckScope.ProjectWithImportsWithoutSdks)]
-    [InlineData("all", EvaluationCheckScope.ProjectWithAllImports)]
-    [InlineData("ALL", EvaluationCheckScope.ProjectWithAllImports)]
+    [InlineData("project_file", EvaluationCheckScope.ProjectFileOnly)]
+    [InlineData("projectfile", EvaluationCheckScope.ProjectFileOnly)]
+    [InlineData("PROJECT_FILE", EvaluationCheckScope.ProjectFileOnly)]
+    [InlineData("work_tree_imports", EvaluationCheckScope.WorkTreeImports)]
+    [InlineData("WORK_TREE_IMPORTS", EvaluationCheckScope.WorkTreeImports)]
+    [InlineData("all", EvaluationCheckScope.All)]
+    [InlineData("ALL", EvaluationCheckScope.All)]
     public void CreateBuildExecutionCheckConfiguration_EvaluationCheckScope(string parameter, EvaluationCheckScope? expected)
     {
         var config = new Dictionary<string, string>()

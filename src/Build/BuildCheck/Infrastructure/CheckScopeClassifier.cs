@@ -7,7 +7,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
-internal static class AnalysisScopeClassifier
+internal static class CheckScopeClassifier
 {
     /// <summary>
     /// Indicates whether given location is in the observed scope, based on currently built project path.
@@ -18,20 +18,20 @@ internal static class AnalysisScopeClassifier
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     internal static bool IsActionInObservedScope(
-        EvaluationAnalysisScope scope,
+        EvaluationCheckScope scope,
         IMsBuildElementLocation? location,
         string projectFileFullPath)
     {
         switch (scope)
         {
-            case EvaluationAnalysisScope.ProjectFileOnly:
+            case EvaluationCheckScope.ProjectFileOnly:
                 return location != null && location.File == projectFileFullPath;
-            case EvaluationAnalysisScope.WorkTreeImports:
+            case EvaluationCheckScope.WorkTreeImports:
                 return
                     location != null &&
                     !FileClassifier.Shared.IsNonModifiable(location.File) &&
                     !IsGeneratedNugetImport(location.File);
-            case EvaluationAnalysisScope.All:
+            case EvaluationCheckScope.All:
                 return true;
             default:
                 throw new ArgumentOutOfRangeException(nameof(scope), scope, null);

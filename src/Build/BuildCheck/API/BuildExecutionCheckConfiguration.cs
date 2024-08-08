@@ -90,7 +90,7 @@ public class BuildExecutionCheckConfiguration
             case "work_tree_imports":
                 return BuildCheck.EvaluationCheckScope.WorkTreeImports;
             case "all":
-                return BuildCheck.EvaluationCheckScope.ProjectWithAllImports;
+                return BuildCheck.EvaluationCheckScope.All;
             default:
                 ThrowIncorrectValueException(BuildCheckConstants.scopeConfigurationKey, stringValue);
                 break;

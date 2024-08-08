@@ -12,9 +12,9 @@ namespace Microsoft.Build.BuildCheck.UnitTests;
 public class BuildExecutionCheckConfigurationEffectiveTests
 {
     [Theory]
-    [InlineData("ruleId", EvaluationCheckScope.ProjectOnly, BuildExecutionCheckResultSeverity.Warning,  true)]
-    [InlineData("ruleId2", EvaluationCheckScope.ProjectOnly, BuildExecutionCheckResultSeverity.Warning,  true)]
-    [InlineData("ruleId", EvaluationCheckScope.ProjectOnly, BuildExecutionCheckResultSeverity.Error, false)]
+    [InlineData("ruleId", EvaluationCheckScope.ProjectFileOnly, BuildExecutionCheckResultSeverity.Warning,  true)]
+    [InlineData("ruleId2", EvaluationCheckScope.ProjectFileOnly, BuildExecutionCheckResultSeverity.Warning,  true)]
+    [InlineData("ruleId", EvaluationCheckScope.ProjectFileOnly, BuildExecutionCheckResultSeverity.Error, false)]
     public void IsSameConfigurationAsTest(
         string secondRuleId,
         EvaluationCheckScope secondScope,
@@ -23,7 +23,7 @@ public class BuildExecutionCheckConfigurationEffectiveTests
     {
         BuildExecutionCheckConfigurationEffective configuration1 = new BuildExecutionCheckConfigurationEffective(
                        ruleId: "ruleId",
-                       evaluationCheckScope: EvaluationCheckScope.ProjectOnly,
+                       evaluationCheckScope: EvaluationCheckScope.ProjectFileOnly,
                        severity: BuildExecutionCheckResultSeverity.Warning);
 
         BuildExecutionCheckConfigurationEffective configuration2 = new BuildExecutionCheckConfigurationEffective(
@@ -43,7 +43,7 @@ public class BuildExecutionCheckConfigurationEffectiveTests
     {
         BuildExecutionCheckConfigurationEffective configuration = new BuildExecutionCheckConfigurationEffective(
                        ruleId: "ruleId",
-                       evaluationCheckScope: EvaluationCheckScope.ProjectOnly,
+                       evaluationCheckScope: EvaluationCheckScope.ProjectFileOnly,
                        severity: severity);
 
         configuration.IsEnabled.ShouldBe(isEnabledExpected);
@@ -56,7 +56,7 @@ public class BuildExecutionCheckConfigurationEffectiveTests
         {
             new BuildExecutionCheckConfigurationEffective(
                         ruleId: "ruleId",
-                        evaluationCheckScope: EvaluationCheckScope.ProjectOnly,
+                        evaluationCheckScope: EvaluationCheckScope.ProjectFileOnly,
                         severity: BuildExecutionCheckResultSeverity.Default);
         });
     }
