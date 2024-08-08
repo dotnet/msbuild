@@ -11,9 +11,9 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 public class CheckRule
 {
     public CheckRule(
-        string id, 
-        string title, 
-        string description, 
+        string id,
+        string title,
+        string description,
         string messageFormat,
         CheckConfiguration defaultConfiguration)
     {
