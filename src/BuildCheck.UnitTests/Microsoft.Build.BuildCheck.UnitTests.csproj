@@ -17,9 +17,9 @@
   </ItemGroup>
   
   <ItemGroup Label="TestAssests">
-    <ProjectReference Include=".\TestAssets\CustomAnalyzer\CustomAnalyzer.csproj" />
-    <ProjectReference Include=".\TestAssets\CustomAnalyzer2\CustomAnalyzer2.csproj" />
-    <ProjectReference Include=".\TestAssets\InvalidCustomAnalyzer\InvalidCustomAnalyzer.csproj" />
+    <ProjectReference Include=".\TestAssets\CustomCheck\CustomCheck.csproj" />
+    <ProjectReference Include=".\TestAssets\CustomCheck2\CustomCheck2.csproj" />
+    <ProjectReference Include=".\TestAssets\InvalidCustomCheck\InvalidCustomCheck.csproj" />
   </ItemGroup>
 
   <ItemGroup>
