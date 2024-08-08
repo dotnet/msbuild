@@ -9,7 +9,7 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
-/// Representation of a single report of a single finding from a BuildCheck
+/// Representation of a single report of a single finding from a Check
 /// Each rule has upfront known message format - so only the concrete arguments are added
 /// Optionally a location is attached - in the near future we might need to support multiple locations
 ///  (for 2 cases - a) grouped result for multiple occurrences; b) a single report for a finding resulting from combination of multiple locations)

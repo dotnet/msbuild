@@ -104,7 +104,7 @@ How we'll internally handle the distributed model:
 ## Check Lifecycle
 
 Planned model:
-* Check factories get registered with the BuildCheck infrastructure (`BuildCheckManager`)
+* Checks factories get registered with the BuildCheck infrastructure (`BuildCheckManager`)
     * For inbox checks - this happens on startup.
     * For custom checks - this happens on connecting `ILogger` instance in scheduler node receives acquistion event (`BuildCheckAcquisitionEventArgs`). This event is being sent by worker node as soon as it hits a special marker (a magic property function call) during early evaluation. Loading is not processed by worker node as currently we want custom checks only in the main node (as they will be only given data proxied from BuildEventArgs).
     The `BuildCheckAcquisitionEventArgs` should be sent prior `ProjectEvaluationStartedEventArgs` (buffering will need to take place), or main node will need to replay some initial data after custom check is registered.

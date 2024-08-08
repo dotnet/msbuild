@@ -55,7 +55,7 @@ Majority of following cases are included in appropriate context within the scena
 * Bulk configuration of multiple rules (based on prefixes).
 * Specifying scope of MSBuild imports that will be considered for check (so that e.g. data from sdk won't even be passed to check, if not requested).
 * Attempts to try to configure standard msbuild warnings/errors via `.editorconfig` should lead to fail fast errors.
-* Configuring check levels when checking from binlog - beyond the collected editorconfigs
+* Configuring BuildCheck levels when checking from binlog - beyond the collected editorconfigs
 * Structured information in VS error window (similarly to the Roslyn check reports - reports have titles, details, locations, searchable codes and exposed links leading to detailed documentation).
 
 
@@ -65,7 +65,7 @@ Majority of following cases are included in appropriate context within the scena
 * Localization support (for reports message formats, identifiers, etc.).
 * Custom checks have equal data access as the inbox checks. We'll aim to ship checks that use public BuildCheck API/OM surface. But for extra agility we might chose to implement and ship some checks using unexposed data.
 * All inbox checks reports have precise location(s) of issues (however for each individual check not providing precise location we should have a very strong reason, why location cannot be provided and why it still brings value even without precise location).
-* Opt-out of check on code-level (something like C# `#pragma warning disable`, but within msbuild xml files).
+* Opt-out of BuildCheck on code-level (something like C# `#pragma warning disable`, but within msbuild xml files).
 * Simplified authoring experience via dedicated reference assembly.
 * Restore phase check.
 * Turning check off/on based on target (e.g. multi-targeted builds, calling MSBuild task etc.).
