@@ -236,7 +236,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
         BuildEventArgs eventArgs = result.ToEventArgs(config.Severity);
 
-        eventArgs.BuildEventContext = analysisContext.BuildEventContext;
+        eventArgs.BuildEventContext = checkContext.BuildEventContext;
 
         checkContext.DispatchBuildEvent(eventArgs);
     }
