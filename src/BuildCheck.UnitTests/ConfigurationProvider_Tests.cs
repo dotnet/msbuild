@@ -108,7 +108,7 @@ public class ConfigurationProvider_Tests
 
         [*.csproj]
         build_check.rule_id.severity=error
-        build_check.rule_id.scope=project
+        build_check.rule_id.scope=project_file
         """);
 
         var configurationProvider = new ConfigurationProvider();
@@ -118,7 +118,7 @@ public class ConfigurationProvider_Tests
 
         buildConfig.IsEnabled.ShouldBe(true);
         buildConfig.Severity.ShouldBe(BuildExecutionCheckResultSeverity.Error);
-        buildConfig.EvaluationCheckScope.ShouldBe(EvaluationCheckScope.ProjectOnly);
+        buildConfig.EvaluationCheckScope.ShouldBe(EvaluationCheckScope.ProjectFileOnly);
     }
 
     [Fact]

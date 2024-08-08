@@ -209,9 +209,8 @@ Option `EvaluationCheckScope` with following possible options will be available:
 
 | EvaluationCheckScope (Solution Explorer)   | EditorConfig option      |  Behavior  | 
 | ------------- | ------------- |   ------------- |
-| ProjectOnly | `project` | Only the data from currently checked project will be sent to the check. Imports will be discarded. | 
-| ProjectWithImportsFromCurrentWorkTree | `current_imports` |  Only the data from currently checked project and imports from files under the entry project or solution will be sent to the check. Other imports will be discarded. | 
-| ProjectWithImportsWithoutSdks | `without_sdks` | Imports from SDKs will not be sent to the check. Other imports will be sent. | 
+| ProjectFileOnly | `project_file` | Only the data from currently checked project will be sent to the check. Imports will be discarded. | 
+| WorkTreeImports | `work_tree_imports` |  Only the data from currently checked project and imports from files not recognized to be in nuget cache or SDK install folder will be sent to the check. Other imports will be discarded. |  
 | ProjectWithAllImports | `all` | All data will be sent to the check. | 
 
 All rules of a single check must have the `EvaluationCheckScope` configured to a same value. If any rule from the check have the value configured differently - a warning will be issued during the build and check will be deregistered.

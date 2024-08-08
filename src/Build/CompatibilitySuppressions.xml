@@ -10,6 +10,34 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectOnly</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectWithAllImports</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectWithImportsWithoutSdks</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Microsoft.Build.Execution.BuildResult.get_BuildRequestDataFlags</Target>
     <Left>lib/net472/Microsoft.Build.dll</Left>
     <Right>lib/net472/Microsoft.Build.dll</Right>
@@ -31,6 +59,34 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectOnly</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectWithAllImports</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectWithImportsWithoutSdks</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Microsoft.Build.Execution.BuildResult.get_BuildRequestDataFlags</Target>
     <Left>lib/net8.0/Microsoft.Build.dll</Left>
     <Right>lib/net8.0/Microsoft.Build.dll</Right>
@@ -52,6 +108,34 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectOnly</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectWithAllImports</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectWithImportsWithoutSdks</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Microsoft.Build.Execution.BuildResult.get_BuildRequestDataFlags</Target>
     <Left>ref/net472/Microsoft.Build.dll</Left>
     <Right>ref/net472/Microsoft.Build.dll</Right>
@@ -67,6 +151,34 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildExecutionCheckResultSeverity.Info</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectOnly</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectWithAllImports</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectWithImportsFromCurrentWorkTree</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Microsoft.Build.Experimental.BuildCheck.EvaluationAnalysisScope.ProjectWithImportsWithoutSdks</Target>
     <Left>ref/net8.0/Microsoft.Build.dll</Left>
     <Right>ref/net8.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

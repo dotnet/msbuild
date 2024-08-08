@@ -45,22 +45,33 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     /// </summary>
     private readonly Dictionary<TaskKey, ExecutingTaskData> _tasksBeingExecuted = [];
 
-    // This requires MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION set to 1
-    internal void ProcessEvaluationFinishedEventArgs(
-        ICheckContext checkContext,
-        ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
+    internal static Dictionary<string, string> ExtractPropertiesLookup(ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
     {
         Dictionary<string, string> propertiesLookup = new Dictionary<string, string>();
         Internal.Utilities.EnumerateProperties(evaluationFinishedEventArgs.Properties, propertiesLookup,
             static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
 
-        EvaluatedPropertiesCheckData checkData =
-            new(evaluationFinishedEventArgs.ProjectFile!,
-                evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
-                propertiesLookup,
-                _evaluatedEnvironmentVariables);
+        return propertiesLookup;
+    }
 
-        _buildCheckCentralContext.RunEvaluatedPropertiesActions(checkData, checkContext, ReportResult);
+    // This requires MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION set to 1
+    internal void ProcessEvaluationFinishedEventArgs(
+        ICheckContext checkContext,
+        ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs,
+        Dictionary<string, string>? propertiesLookup)
+    {
+        if (_buildCheckCentralContext.HasEvaluatedPropertiesActions)
+        {
+            propertiesLookup ??= ExtractPropertiesLookup(evaluationFinishedEventArgs);
+
+            EvaluatedPropertiesCheckData checkData =
+                new(evaluationFinishedEventArgs.ProjectFile!,
+                    evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
+                    propertiesLookup!,
+                    _evaluatedEnvironmentVariables);
+
+            _buildCheckCentralContext.RunEvaluatedPropertiesActions(checkData, checkContext, ReportResult);
+        }
 
         if (_buildCheckCentralContext.HasParsedItemsActions)
         {

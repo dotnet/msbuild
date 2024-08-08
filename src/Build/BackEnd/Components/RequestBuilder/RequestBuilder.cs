@@ -1404,10 +1404,7 @@ namespace Microsoft.Build.BackEnd
             ProjectInstance project = _requestEntry?.RequestConfiguration?.Project;
             if (project != null)
             {
-                // example: C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2
-                FileClassifier.Shared.RegisterImmutableDirectory(project.GetPropertyValue("FrameworkPathOverride")?.Trim());
-                // example: C:\Program Files\dotnet\
-                FileClassifier.Shared.RegisterImmutableDirectory(project.GetPropertyValue("NetCoreRoot")?.Trim());
+                FileClassifier.Shared.RegisterKnownImmutableLocations(project.GetPropertyValue);
             }
         }
 

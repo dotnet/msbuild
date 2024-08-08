@@ -326,8 +326,24 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         public void ProcessEvaluationFinishedEventArgs(
             ICheckContext checkContext,
             ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
-            => _buildEventsProcessor
-                .ProcessEvaluationFinishedEventArgs(checkContext, evaluationFinishedEventArgs);
+        {
+            Dictionary<string, string>? propertiesLookup = null;
+            // The FileClassifier is normally initialized by executing build requests.
+            // However, if we are running in a main node that has no execution nodes - we need to initialize it here (from events).
+            if (!IsInProcNode)
+            {
+                propertiesLookup =
+                    BuildEventsProcessor.ExtractPropertiesLookup(evaluationFinishedEventArgs);
+                Func<string, string?> getPropertyValue = p =>
+                    propertiesLookup.TryGetValue(p, out string? value) ? value : null;
+
+                FileClassifier.Shared.RegisterFrameworkLocations(getPropertyValue);
+                FileClassifier.Shared.RegisterKnownImmutableLocations(getPropertyValue);
+            }
+
+            _buildEventsProcessor
+                .ProcessEvaluationFinishedEventArgs(analysisContext, evaluationFinishedEventArgs, propertiesLookup);
+        }
 
         public void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
         {

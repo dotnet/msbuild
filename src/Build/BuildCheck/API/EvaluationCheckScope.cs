@@ -14,20 +14,16 @@ public enum EvaluationCheckScope
     /// <summary>
     /// Only the data from currently checked project will be sent to the check. Imports will be discarded.
     /// </summary>
-    ProjectOnly,
+    ProjectFileOnly,
 
     /// <summary>
-    /// Only the data from currently checked project and imports from files under the entry project or solution will be sent to the checks. Other imports will be discarded.
+    /// Only the data from currently checked project and imports from files not recognized to be in nuget cache or SDK install folder will be sent to the check. Other imports will be discarded.
+    /// The generated nuget.g.props, nuget.g.targets will be ignored as well.
     /// </summary>
-    ProjectWithImportsFromCurrentWorkTree,
-
-    /// <summary>
-    /// Imports from SDKs will not be sent to the check. Other imports will be sent.
-    /// </summary>
-    ProjectWithImportsWithoutSdks,
+    WorkTreeImports,
 
     /// <summary>
     /// All data will be sent to the check.
     /// </summary>
-    ProjectWithAllImports,
+    All,
 }

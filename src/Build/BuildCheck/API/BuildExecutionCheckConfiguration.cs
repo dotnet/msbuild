@@ -21,7 +21,7 @@ public class BuildExecutionCheckConfiguration
     //  nor in the editorconfig configuration file.
     public static BuildExecutionCheckConfiguration Default { get; } = new()
     {
-        EvaluationCheckScope = BuildCheck.EvaluationCheckScope.ProjectOnly,
+        EvaluationCheckScope = BuildCheck.EvaluationCheckScope.ProjectFileOnly,
         Severity = BuildExecutionCheckResultSeverity.None
     };
 
@@ -84,12 +84,11 @@ public class BuildExecutionCheckConfiguration
 
         switch (stringValue)
         {
-            case "project":
-                return BuildCheck.EvaluationCheckScope.ProjectOnly;
-            case "current_imports":
-                return BuildCheck.EvaluationCheckScope.ProjectWithImportsFromCurrentWorkTree;
-            case "without_sdks":
-                return BuildCheck.EvaluationCheckScope.ProjectWithImportsWithoutSdks;
+            case "projectfile":
+            case "project_file":
+                return BuildCheck.EvaluationCheckScope.ProjectFileOnly;
+            case "work_tree_imports":
+                return BuildCheck.EvaluationCheckScope.WorkTreeImports;
             case "all":
                 return BuildCheck.EvaluationCheckScope.ProjectWithAllImports;
             default:
