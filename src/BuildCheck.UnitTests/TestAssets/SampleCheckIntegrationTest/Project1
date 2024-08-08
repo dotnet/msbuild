@@ -6,11 +6,12 @@
        <ImplicitUsings>enable</ImplicitUsings>
        <Nullable>enable</Nullable>
    </PropertyGroup>
-     
+
+   <Import Project="ImportedFile1.props" />
+
    <PropertyGroup Condition="$(Test) == true">
        <TestProperty>Test</TestProperty>
    </PropertyGroup>
-
 
    <Target Name="Hello">
        <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
