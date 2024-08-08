@@ -52,6 +52,27 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.#ctor(Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerRule,Microsoft.Build.Construction.ElementLocation,System.String[])</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.Create(Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerRule,Microsoft.Build.Construction.ElementLocation,System.String[])</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.get_Location</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerResultSeverity.Info</Target>
     <Left>lib/net8.0/Microsoft.Build.dll</Left>
     <Right>lib/net8.0/Microsoft.Build.dll</Right>
@@ -101,6 +122,27 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.#ctor(Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerRule,Microsoft.Build.Construction.ElementLocation,System.String[])</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.Create(Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerRule,Microsoft.Build.Construction.ElementLocation,System.String[])</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.get_Location</Target>
+    <Left>lib/net8.0/Microsoft.Build.dll</Left>
+    <Right>lib/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerResultSeverity.Info</Target>
     <Left>ref/net472/Microsoft.Build.dll</Left>
     <Right>ref/net472/Microsoft.Build.dll</Right>
@@ -150,6 +192,27 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.#ctor(Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerRule,Microsoft.Build.Construction.ElementLocation,System.String[])</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.Create(Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerRule,Microsoft.Build.Construction.ElementLocation,System.String[])</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.get_Location</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerResultSeverity.Info</Target>
     <Left>ref/net8.0/Microsoft.Build.dll</Left>
     <Right>ref/net8.0/Microsoft.Build.dll</Right>
@@ -193,6 +256,27 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Microsoft.Build.Experimental.BuildCheck.AnalysisData.#ctor(System.String)</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.#ctor(Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerRule,Microsoft.Build.Construction.ElementLocation,System.String[])</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.Create(Microsoft.Build.Experimental.BuildCheck.BuildAnalyzerRule,Microsoft.Build.Construction.ElementLocation,System.String[])</Target>
+    <Left>ref/net8.0/Microsoft.Build.dll</Left>
+    <Right>ref/net8.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.BuildCheckResult.get_Location</Target>
     <Left>ref/net8.0/Microsoft.Build.dll</Left>
     <Right>ref/net8.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
