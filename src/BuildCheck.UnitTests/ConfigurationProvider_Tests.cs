@@ -222,12 +222,12 @@ public class ConfigurationProvider_Tests
     [InlineData(CheckResultSeverity.Suggestion, CheckResultSeverity.Suggestion, true)]
     [InlineData(CheckResultSeverity.None, CheckResultSeverity.None, false)]
     [InlineData(null, CheckResultSeverity.Warning, true)]
-    public void GetConfigurationProvider_MergesSeverity_Correctly(CheckResultSeverity? buildExecutionCheckResultSeverity, CheckResultSeverity expectedSeverity, bool expectedEnablment)
+    public void GetConfigurationProvider_MergesSeverity_Correctly(CheckResultSeverity? checkResultSeverity, CheckResultSeverity expectedSeverity, bool expectedEnablment)
     {
         var configurationProvider = new ConfigurationProvider();
-        CheckConfiguration buildExecutionCheckConfiguration = new CheckConfiguration()
+        CheckConfiguration checkConfiguration = new CheckConfiguration()
         {
-            Severity = buildExecutionCheckResultSeverity
+            Severity = checkResultSeverity
         };
 
         CheckConfiguration defaultValue = new CheckConfiguration()
@@ -235,7 +235,7 @@ public class ConfigurationProvider_Tests
             Severity = CheckResultSeverity.Warning
         };
 
-        var internalCheck = configurationProvider.MergeConfiguration("ruleId", defaultValue, buildExecutionCheckConfiguration);
+        var internalCheck = configurationProvider.MergeConfiguration("ruleId", defaultValue, checkConfiguration);
         internalCheck.Severity.ShouldBe(expectedSeverity);
         internalCheck.IsEnabled.ShouldBe(expectedEnablment);
     }

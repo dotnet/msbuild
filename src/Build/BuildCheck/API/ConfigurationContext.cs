@@ -13,15 +13,15 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 public class ConfigurationContext
 {
-    private ConfigurationContext(CustomConfigurationData[] customConfigurationData, CheckConfigurationEffective[] buildExecutionCheckConfig)
+    private ConfigurationContext(CustomConfigurationData[] customConfigurationData, CheckConfigurationEffective[] checkConfig)
     {
         CustomConfigurationData = customConfigurationData;
-        CheckConfig = buildExecutionCheckConfig;
+        CheckConfig = checkConfig;
     }
 
-    internal static ConfigurationContext FromDataEnumeration(CustomConfigurationData[] customConfigurationData, CheckConfigurationEffective[] buildExecutionCheckConfig)
+    internal static ConfigurationContext FromDataEnumeration(CustomConfigurationData[] customConfigurationData, CheckConfigurationEffective[] checkConfig)
     {
-        return new ConfigurationContext(customConfigurationData, buildExecutionCheckConfig);
+        return new ConfigurationContext(customConfigurationData, checkConfig);
     }
 
     /// <summary>

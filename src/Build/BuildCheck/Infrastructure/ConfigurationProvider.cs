@@ -21,7 +21,7 @@ internal sealed class ConfigurationProvider : IConfigurationProvider
     /// <summary>
     /// The dictionary used for storing the BuildCheckConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}.
     /// </summary>
-    private readonly ConcurrentDictionary<string, CheckConfiguration> _buildExecutionCheckConfiguration = new ConcurrentDictionary<string, CheckConfiguration>(StringComparer.InvariantCultureIgnoreCase);
+    private readonly ConcurrentDictionary<string, CheckConfiguration> _checkConfiguration = new ConcurrentDictionary<string, CheckConfiguration>(StringComparer.InvariantCultureIgnoreCase);
 
     /// <summary>
     /// The dictionary used for storing the key-value pairs retrieved from the .editorconfigs for specific projectfile. The key is equal to projectFullPath.
@@ -231,7 +231,7 @@ internal sealed class ConfigurationProvider : IConfigurationProvider
     {
         var cacheKey = $"{ruleId}-{projectFullPath}";
 
-        var editorConfigValue = _buildExecutionCheckConfiguration.GetOrAdd(cacheKey, (key) =>
+        var editorConfigValue = _checkConfiguration.GetOrAdd(cacheKey, (key) =>
         {
             CheckConfiguration? editorConfig = CheckConfiguration.Null;
             editorConfig.RuleId = ruleId;

@@ -441,7 +441,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             if (buildCheckDataSource == BuildCheckDataSource.EventArgs && IsInProcNode)
             {
                 // Skipping this event - as it was already handled by the in-proc node.
-                // This is because in-proc node has the BuildEventArgs source and BuildExecution source
+                // This is because in-proc node has the BuildEventArgs source and check source
                 //  both in a single manager. The project started is first encountered by the execution before the EventArg is sent
                 return;
             }

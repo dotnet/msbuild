@@ -17,9 +17,9 @@ internal sealed class CheckWrapper
 {
     private readonly Stopwatch _stopwatch = new Stopwatch();
 
-    public CheckWrapper(Check buildExecutionCheck)
+    public CheckWrapper(Check check)
     {
-        Check = buildExecutionCheck;
+        Check = check;
     }
 
     internal Check Check { get; }
@@ -52,7 +52,7 @@ internal sealed class CheckWrapper
         }
     }
 
-    // to be used on eval node (BuildCheckDataSource.BuildExecution)
+    // to be used on eval node (BuildCheckDataSource.check)
     internal void Uninitialize()
     {
         _isInitialized = false;

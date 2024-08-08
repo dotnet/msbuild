@@ -21,9 +21,9 @@ public sealed class BuildCheckResult : IBuildCheckResult
         return new BuildCheckResult(rule, location, messageArgs);
     }
 
-    public BuildCheckResult(CheckRule buildExecutionCheckRule, ElementLocation location, string[] messageArgs)
+    public BuildCheckResult(CheckRule checkConfig, ElementLocation location, string[] messageArgs)
     {
-        CheckRule = buildExecutionCheckRule;
+        CheckRule = checkConfig;
         Location = location;
         MessageArgs = messageArgs;
     }
