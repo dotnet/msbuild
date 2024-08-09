@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd.Components.Logging
         public void LogProjectEvaluationStarted()
         {
             LoggingService.LogProjectEvaluationStarted(BuildEventContext, _projectFile);
-            LoggingService.BuildEngineDataRouter.StartProjectEvaluation(
+            LoggingService.BuildEngineDataRouter.ProcessProjectEvaluationStarted(
                 new CheckLoggingContext(LoggingService, BuildEventContext), _projectFile);
         }
 

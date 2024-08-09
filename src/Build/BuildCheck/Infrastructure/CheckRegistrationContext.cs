@@ -8,7 +8,7 @@ using Microsoft.Build.Experimental.BuildCheck.Checks;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-internal sealed class BuildCheckRegistrationContext(CheckWrapper checkWrapper, BuildCheckCentralContext buildCheckCentralContext) : IInternalBuildCheckRegistrationContext
+internal sealed class CheckRegistrationContext(CheckWrapper checkWrapper, BuildCheckCentralContext buildCheckCentralContext) : IInternalCheckRegistrationContext
 {
     public void RegisterEvaluatedPropertiesAction(Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction)
     {

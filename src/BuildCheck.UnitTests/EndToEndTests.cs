@@ -45,31 +45,20 @@ public class EndToEndTests : IDisposable
         string contents = """
                               <Project DefaultTargets="PrintEnvVar">
 
-                              <PropertyGroup>
-                              <!--
-                              <MyProp1>value-of-prop1</MyProp1>
-                              <MyProp2>$(MyProp1)</MyProp2>
-                              <MyProp3>blah</MyProp3>
-                              -->
+                              <!-- MyProp4 is not defined - but it's checked against empty - which is allowed -->
+                              <PropertyGroup Condition="'$(MyProp4)' == ''">
+                                <!-- MyProp3 defined here - but not used anywhere -->
+                                <!-- MyProp1 used here - but not defined -->
+                                <MyProp3>$(MyProp1)</MyProp3>
                               </PropertyGroup>
 
-
-                              <PropertyGroup Condition="'$(MyProp12)' == ''">
-                                <MyProp13>$(MyProp11)</MyProp13>
-                              </PropertyGroup>
-
-
-                              <!--
-                              <ItemGroup>
-                                <a Include="$(nonexistent)" />
-                              </ItemGroup>
-                              -->
 
                               <Target Name="PrintEnvVar">
-                              <Message Text="MyPropT2 has value $(MyPropT2)" Importance="High" Condition="'$(MyPropT2)' == ''" />
-                              <PropertyGroup>
-                              <MyPropT2>$(MyPropT2);xxx</MyPropT2>
-                              </PropertyGroup>
+                                  <!-- MyProp2 used here - but defined later -->
+                                  <Message Text="MyProp2 has value $(MyProp2)" Importance="High" Condition="'$(MyProp2)' == ''" />
+                                  <PropertyGroup>
+                                    <MyProp2>$(MyProp2);xxx</MyProp2>
+                                  </PropertyGroup>
                               </Target>
 
                               </Project>
@@ -82,10 +71,10 @@ public class EndToEndTests : IDisposable
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
 
-        output.ShouldMatch(@"BC0201: .* Property: \[MyProp11\]");
-        output.ShouldMatch(@"BC0202: .* Property: \[MyPropT2\]");
+        output.ShouldMatch(@"BC0201: .* Property: \[MyProp1\]");
+        output.ShouldMatch(@"BC0202: .* Property: \[MyProp2\]");
         // since it's just suggestion, it doesn't have a colon ':'
-        output.ShouldMatch(@"BC0203 .* Property: \[MyProp13\]");
+        output.ShouldMatch(@"BC0203 .* Property: \[MyProp3\]");
 
         // each finding should be found just once - but reported twice, due to summary
         Regex.Matches(output, "BC0201: .* Property").Count.ShouldBe(2);

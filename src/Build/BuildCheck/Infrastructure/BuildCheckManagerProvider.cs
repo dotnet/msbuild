@@ -260,7 +260,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
                 // Create the wrapper and register to central context
                 wrapper.StartNewProject(projectFullPath, configurations);
-                var wrappedContext = new BuildCheckRegistrationContext(wrapper, _buildCheckCentralContext);
+                var wrappedContext = new CheckRegistrationContext(wrapper, _buildCheckCentralContext);
                 check.RegisterActions(wrappedContext);
             }
             else
@@ -481,7 +481,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             SetupChecksForNewProject(projectFullPath, checkContext);
         }
 
-        public void StartProjectEvaluation(
+        public void ProcessProjectEvaluationStarted(
             ICheckContext checkContext,
             string projectFullPath)
         {

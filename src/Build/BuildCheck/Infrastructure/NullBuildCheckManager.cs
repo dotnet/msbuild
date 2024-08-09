@@ -63,7 +63,7 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
-    public void StartProjectEvaluation(ICheckContext checkContext, string fullPath)
+    public void ProcessProjectEvaluationStarted(ICheckContext checkContext, string projectFullPath)
     {
     }
 

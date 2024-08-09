@@ -103,7 +103,7 @@ internal class PropertiesUsageCheck : InternalCheck
         return null;
     }
 
-    public override void RegisterInternalActions(IInternalBuildCheckRegistrationContext registrationContext)
+    public override void RegisterInternalActions(IInternalCheckRegistrationContext registrationContext)
     {
         registrationContext.RegisterPropertyReadAction(ProcessPropertyRead);
 
