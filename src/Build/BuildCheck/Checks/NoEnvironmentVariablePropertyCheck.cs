@@ -43,16 +43,15 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
         }
     }
 
-    public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEvaluatedPropertiesAction(ProcessEnvironmentVariableReadAction);
+    public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEnvironmentVariableReadAction(ProcessEnvironmentVariableReadAction);
 
-    private void ProcessEnvironmentVariableReadAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
+    private void ProcessEnvironmentVariableReadAction(BuildCheckDataContext<EnvironmentVariableCheckData> context)
     {
         if (context.Data.EvaluatedEnvironmentVariables.Count != 0)
         {
             foreach (var envVariableData in context.Data.EvaluatedEnvironmentVariables)
             {
-                if (!CheckScopeClassifier.IsActionInObservedScope(_scope, envVariableData.Value.File,
-                        context.Data.ProjectFilePath))
+                if (!CheckScopeClassifier.IsActionInObservedScope(_scope, envVariableData.Value.File, context.Data.ProjectFilePath))
                 {
                     continue;
                 }

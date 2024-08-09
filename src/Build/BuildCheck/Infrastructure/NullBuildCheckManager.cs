@@ -99,7 +99,7 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
 
     public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext buildEventContext)
     { }
-	
+
     public void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
     { }
 }
