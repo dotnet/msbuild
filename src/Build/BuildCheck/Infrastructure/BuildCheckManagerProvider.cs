@@ -350,6 +350,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             if (projectEvaluationEventArgs is EnvironmentVariableReadEventArgs evr)
             {
                 _buildEventsProcessor.ProcessEnvironmentVariableReadEventArgs(
+                    checkContext,
                     evr.EnvironmentVariableName,
                     evr.Message ?? string.Empty,
                     evr.File,

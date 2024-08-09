@@ -4,10 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Infrastructure;
-using Microsoft.Build.Experimental.BuildCheck;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -27,9 +24,13 @@ internal sealed class BuildCheckCentralContext
         List<(CheckWrapper, Action<BuildCheckDataContext<TaskInvocationCheckData>>)> TaskInvocationActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<PropertyReadData>>)> PropertyReadActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<PropertyWriteData>>)> PropertyWriteActions,
-        List<(CheckWrapper, Action<BuildCheckDataContext<ProjectProcessingDoneData>>)> ProjectProcessingDoneActions)
+        List<(CheckWrapper, Action<BuildCheckDataContext<ProjectProcessingDoneData>>)> ProjectProcessingDoneActions,
+        List<(CheckWrapper, Action<BuildCheckDataContext<EnvironmentVariableCheckData>>)> EnvironmentVariableCheckDataActions)
     {
-        public CallbackRegistry() : this([], [], [], [], [], []) { }
+        public CallbackRegistry()
+            : this([], [], [], [], [], [], [])
+        {
+        }
 
         internal void DeregisterCheck(CheckWrapper check)
         {
@@ -51,8 +52,13 @@ internal sealed class BuildCheckCentralContext
     internal bool HasParsedItemsActions => _globalCallbacks.ParsedItemsActions.Count > 0;
 
     internal bool HasTaskInvocationActions => _globalCallbacks.TaskInvocationActions.Count > 0;
+
     internal bool HasPropertyReadActions => _globalCallbacks.PropertyReadActions.Count > 0;
+
     internal bool HasPropertyWriteActions => _globalCallbacks.PropertyWriteActions.Count > 0;
+
+    internal void RegisterEnvironmentVariableReadAction(CheckWrapper check, Action<BuildCheckDataContext<EnvironmentVariableCheckData>> environmentVariableAction)
+       => RegisterAction(check, environmentVariableAction, _globalCallbacks.EnvironmentVariableCheckDataActions);
 
     internal void RegisterEvaluatedPropertiesAction(CheckWrapper check, Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction)
         // Here we might want to communicate to node that props need to be sent.
@@ -92,10 +98,14 @@ internal sealed class BuildCheckCentralContext
         }
     }
 
-    internal void DeregisterCheck(CheckWrapper check)
-    {
-        _globalCallbacks.DeregisterCheck(check);
-    }
+    internal void DeregisterCheck(CheckWrapper check) => _globalCallbacks.DeregisterCheck(check);
+
+    internal void RunEnvironmentVariableActions(
+        EnvironmentVariableCheckData environmentVariableCheckData,
+        ICheckContext checkContext,
+        Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
+            resultHandler)
+        => RunRegisteredActions(_globalCallbacks.EnvironmentVariableCheckDataActions, environmentVariableCheckData, checkContext, resultHandler);
 
     internal void RunEvaluatedPropertiesActions(
         EvaluatedPropertiesCheckData evaluatedPropertiesCheckData,

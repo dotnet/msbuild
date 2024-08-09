@@ -40,9 +40,9 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
         }
     }
 
-    public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEvaluatedPropertiesAction(ProcessEnvironmentVariableReadAction);
+    public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEnvironmentVariableReadAction(ProcessEnvironmentVariableReadAction);
 
-    private void ProcessEnvironmentVariableReadAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
+    private void ProcessEnvironmentVariableReadAction(BuildCheckDataContext<EnvironmentVariableCheckData> context)
     {
         if (context.Data.EvaluatedEnvironmentVariables.Count != 0)
         {
