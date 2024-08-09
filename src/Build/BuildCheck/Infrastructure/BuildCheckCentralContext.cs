@@ -25,10 +25,11 @@ internal sealed class BuildCheckCentralContext
         List<(CheckWrapper, Action<BuildCheckDataContext<PropertyReadData>>)> PropertyReadActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<PropertyWriteData>>)> PropertyWriteActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<ProjectProcessingDoneData>>)> ProjectProcessingDoneActions,
+        List<(CheckWrapper, Action<BuildCheckDataContext<BuildFinishedCheckData>>)> BuildFinishedActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<EnvironmentVariableCheckData>>)> EnvironmentVariableCheckDataActions)
     {
         public CallbackRegistry()
-            : this([], [], [], [], [], [], [])
+            : this([], [], [], [], [], [], [], [])
         {
         }
 
@@ -39,6 +40,7 @@ internal sealed class BuildCheckCentralContext
             PropertyReadActions.RemoveAll(a => a.Item1 == check);
             PropertyWriteActions.RemoveAll(a => a.Item1 == check);
             ProjectProcessingDoneActions.RemoveAll(a => a.Item1 == check);
+            BuildFinishedActions.RemoveAll(a => a.Item1 == check);
         }
     }
 
@@ -56,6 +58,7 @@ internal sealed class BuildCheckCentralContext
     internal bool HasPropertyReadActions => _globalCallbacks.PropertyReadActions.Count > 0;
 
     internal bool HasPropertyWriteActions => _globalCallbacks.PropertyWriteActions.Count > 0;
+    internal bool HasBuildFinishedActions => _globalCallbacks.BuildFinishedActions.Count > 0;
 
     internal void RegisterEnvironmentVariableReadAction(CheckWrapper check, Action<BuildCheckDataContext<EnvironmentVariableCheckData>> environmentVariableAction)
        => RegisterAction(check, environmentVariableAction, _globalCallbacks.EnvironmentVariableCheckDataActions);
@@ -73,6 +76,9 @@ internal sealed class BuildCheckCentralContext
 
     internal void RegisterPropertyReadAction(CheckWrapper check, Action<BuildCheckDataContext<PropertyReadData>> propertyReadAction)
         => RegisterAction(check, propertyReadAction, _globalCallbacks.PropertyReadActions);
+
+    internal void RegisterBuildFinishedAction(CheckWrapper check, Action<BuildCheckDataContext<BuildFinishedCheckData>> buildFinishedAction)
+        => RegisterAction(check, buildFinishedAction, _globalCallbacks.BuildFinishedActions);
 
     internal void RegisterPropertyWriteAction(CheckWrapper check, Action<BuildCheckDataContext<PropertyWriteData>> propertyWriteAction)
         => RegisterAction(check, propertyWriteAction, _globalCallbacks.PropertyWriteActions);
@@ -155,6 +161,14 @@ internal sealed class BuildCheckCentralContext
         => RunRegisteredActions(_globalCallbacks.ProjectProcessingDoneActions, projectProcessingDoneData,
             checkContext, resultHandler);
 
+    internal void RunBuildFinishedActions(
+        BuildFinishedCheckData buildFinishedCheckData,
+        ICheckContext checkContext,
+        Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
+            resultHandler)
+        => RunRegisteredActions(_globalCallbacks.BuildFinishedActions, buildFinishedCheckData,
+            checkContext, resultHandler);
+
     private void RunRegisteredActions<T>(
         List<(CheckWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks,
         T checkData,
@@ -167,7 +181,7 @@ internal sealed class BuildCheckCentralContext
         foreach (var checkCallback in registeredCallbacks)
         {
             // Tracing - https://github.com/dotnet/msbuild/issues/9629 - we might want to account this entire block
-            //  to the relevant check (with BuildCheckConfigurationEffectively the currently accounted part as being the 'core-execution' subspan)
+            //  to the relevant check (with BuildCheckConfigurationEffective only the currently accounted part as being the 'core-execution' subspan)
 
             CheckConfigurationEffective? commonConfig = checkCallback.Item1.CommonConfig;
             CheckConfigurationEffective[] configPerRule;

@@ -18,4 +18,7 @@ internal sealed class BuildCheckRegistrationContext(CheckWrapper checkWrapper, B
 
     public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction) =>
         buildCheckCentralContext.RegisterTaskInvocationAction(checkWrapper, taskInvocationAction);
+
+    public void RegisterBuildFinishedAction(Action<BuildCheckDataContext<BuildFinishedCheckData>> buildFinishedAction) => 
+        buildCheckCentralContext.RegisterBuildFinishedAction(checkWrapper, buildFinishedAction);
 }

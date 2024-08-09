@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
@@ -208,9 +209,49 @@ public class EndToEndTests : IDisposable
             customConfigData);
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output);
 
         output.ShouldContain(expectedMessage);
+    }
+
+    [Theory]
+    [InlineData(EvaluationCheckScope.ProjectFileOnly)]
+    [InlineData(EvaluationCheckScope.WorkTreeImports)]
+    [InlineData(EvaluationCheckScope.All)]
+    public void NoEnvironmentVariableProperty_Scoping(EvaluationCheckScope scope)
+    {
+        List<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? customConfigData = null;
+
+        string editorconfigScope = scope switch
+        {
+            EvaluationCheckScope.ProjectFileOnly => "project_file",
+            EvaluationCheckScope.WorkTreeImports => "work_tree_imports",
+            EvaluationCheckScope.All => "all",
+            _ => throw new ArgumentOutOfRangeException(nameof(scope), scope, null),
+        };
+
+        customConfigData = new List<(string, (string, string))>()
+        {
+            ("BC0103", ("scope", editorconfigScope)),
+        };
+
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode: true,
+            out TransientTestFile projectFile,
+            new List<(string, string)>() { ("BC0103", "error") },
+            customConfigData);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output);
+
+        if(scope == EvaluationCheckScope.ProjectFileOnly)
+        {
+            output.ShouldNotContain("Property is derived from environment variable: 'TestImported'. Properties should be passed explicitly using the /p option.");
+        }
+        else
+        {
+            output.ShouldContain("Property is derived from environment variable: 'TestImported'. Properties should be passed explicitly using the /p option.");
+        }
     }
 
     [Theory]
@@ -273,6 +314,23 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void DoesNotRunOnRestore(bool buildInOutOfProcessNode)
+    {
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", "warning") });
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -t:restore -check",
+            out bool success);
+
+        success.ShouldBeTrue();
+        output.ShouldNotContain("BC0101");
+        output.ShouldNotContain("BC0102");
+        output.ShouldNotContain("BC0103");
+    }
+
     private void AddCustomDataSourceToNugetConfig(string checkCandidatePath)
     {
         var nugetTemplatePath = Path.Combine(checkCandidatePath, "nugetTemplate.config");
@@ -324,9 +382,11 @@ public class EndToEndTests : IDisposable
 
         string contents = ReadAndAdjustProjectContent("Project1");
         string contents2 = ReadAndAdjustProjectContent("Project2");
+        string contentsImported = ReadAndAdjustProjectContent("ImportedFile1");
 
         projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
         TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
+        TransientTestFile importedFile1 = _env.CreateFile(workFolder, "ImportedFile1.props", contentsImported);
 
         _env.CreateFile(workFolder, ".editorconfig", ReadEditorConfig(ruleToSeverity, ruleToCustomConfig, testAssetsFolderName));
 
@@ -339,6 +399,7 @@ public class EndToEndTests : IDisposable
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
 
         _env.SetEnvironmentVariable("TEST", "FromEnvVariable");
+        _env.SetEnvironmentVariable("TestImported", "FromEnv");
 
         string ReadAndAdjustProjectContent(string fileName) =>
             File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, fileName))

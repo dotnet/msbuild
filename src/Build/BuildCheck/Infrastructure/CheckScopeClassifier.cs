@@ -21,16 +21,30 @@ internal static class CheckScopeClassifier
         EvaluationCheckScope scope,
         IMsBuildElementLocation? location,
         string projectFileFullPath)
+        => IsActionInObservedScope(scope, location?.File, projectFileFullPath);
+
+    /// <summary>
+    /// Indicates whether given location is in the observed scope, based on currently built project path.
+    /// </summary>
+    /// <param name="scope"></param>
+    /// <param name="filePathOfEvent"></param>
+    /// <param name="projectFileFullPath"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    internal static bool IsActionInObservedScope(
+        EvaluationCheckScope scope,
+        string? filePathOfEvent,
+        string projectFileFullPath)
     {
         switch (scope)
         {
             case EvaluationCheckScope.ProjectFileOnly:
-                return location != null && location.File == projectFileFullPath;
+                return filePathOfEvent == projectFileFullPath;
             case EvaluationCheckScope.WorkTreeImports:
                 return
-                    location != null &&
-                    !FileClassifier.Shared.IsNonModifiable(location.File) &&
-                    !IsGeneratedNugetImport(location.File);
+                    filePathOfEvent != null &&
+                    !FileClassifier.Shared.IsNonModifiable(filePathOfEvent) &&
+                    !IsGeneratedNugetImport(filePathOfEvent);
             case EvaluationCheckScope.All:
                 return true;
             default:
