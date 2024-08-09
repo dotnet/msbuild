@@ -10,23 +10,25 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 {
     internal sealed class MockBuildCheckRegistrationContext : IBuildCheckRegistrationContext
     {
-        private event Action<BuildCheckDataContext<TaskInvocationAnalysisData>>? _taskInvocationAction;
-        private event Action<BuildCheckDataContext<EvaluatedPropertiesAnalysisData>>? _evaluatedPropertiesAction;
+        private event Action<BuildCheckDataContext<TaskInvocationCheckData>>? _taskInvocationAction;
+        private event Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>>? _evaluatedPropertiesAction;
 
         public List<BuildCheckResult> Results { get; } = new();
 
-        public void RegisterEvaluatedPropertiesAction(Action<BuildCheckDataContext<EvaluatedPropertiesAnalysisData>> evaluatedPropertiesAction)
+        public void RegisterEvaluatedPropertiesAction(Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction)
             => _evaluatedPropertiesAction += evaluatedPropertiesAction;
-        public void RegisterParsedItemsAction(Action<BuildCheckDataContext<ParsedItemsAnalysisData>> parsedItemsAction) => throw new NotImplementedException();
+        public void RegisterParsedItemsAction(Action<BuildCheckDataContext<ParsedItemsCheckData>> parsedItemsAction) => throw new NotImplementedException();
 
-        public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationAnalysisData>> taskInvocationAction)
+        public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction)
             => _taskInvocationAction += taskInvocationAction;
 
-        public void TriggerTaskInvocationAction(TaskInvocationAnalysisData data)
+        public void RegisterBuildFinishedAction(Action<BuildCheckDataContext<BuildFinishedCheckData>> buildFinishedAction) => throw new NotImplementedException();
+
+        public void TriggerTaskInvocationAction(TaskInvocationCheckData data)
         {
             if (_taskInvocationAction is not null)
             {
-                BuildCheckDataContext<TaskInvocationAnalysisData> context = new BuildCheckDataContext<TaskInvocationAnalysisData>(
+                BuildCheckDataContext<TaskInvocationCheckData> context = new BuildCheckDataContext<TaskInvocationCheckData>(
                     null!,
                     null!,
                     null!,
@@ -35,11 +37,11 @@ namespace Microsoft.Build.BuildCheck.UnitTests
                 _taskInvocationAction(context);
             }
         }
-        public void TriggerEvaluatedPropertiesAction(EvaluatedPropertiesAnalysisData data)
+        public void TriggerEvaluatedPropertiesAction(EvaluatedPropertiesCheckData data)
         {
             if (_evaluatedPropertiesAction is not null)
             {
-                BuildCheckDataContext<EvaluatedPropertiesAnalysisData> context = new BuildCheckDataContext<EvaluatedPropertiesAnalysisData>(
+                BuildCheckDataContext<EvaluatedPropertiesCheckData> context = new BuildCheckDataContext<EvaluatedPropertiesCheckData>(
                     null!,
                     null!,
                     null!,
@@ -49,7 +51,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             }
         }
 
-        private void ResultHandler(BuildAnalyzerWrapper wrapper, IAnalysisContext context, BuildAnalyzerConfigurationEffective[] configs, BuildCheckResult result)
+        private void ResultHandler(CheckWrapper wrapper, ICheckContext context, CheckConfigurationEffective[] configs, BuildCheckResult result)
             => Results.Add(result);
     }
 }

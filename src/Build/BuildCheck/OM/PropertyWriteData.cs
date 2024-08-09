@@ -17,7 +17,7 @@ internal class PropertyWriteData(
     string propertyName,
     IMsBuildElementLocation? elementLocation,
     bool isEmpty)
-    : AnalysisData(projectFilePath, projectConfigurationId)
+    : CheckData(projectFilePath, projectConfigurationId)
 {
     public PropertyWriteData(string projectFilePath, int? projectConfigurationId, PropertyWriteInfo propertyWriteInfo)
         : this(projectFilePath,
