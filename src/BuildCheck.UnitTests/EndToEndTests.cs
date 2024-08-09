@@ -38,33 +38,15 @@ public class EndToEndTests : IDisposable
 
     public void Dispose() => _env.Dispose();
 
-    [Fact]
-    public void PropertiesUsageAnalyzerTest()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void PropertiesUsageAnalyzerTest(bool buildInOutOfProcessNode)
     {
-        using TestEnvironment env = TestEnvironment.Create();
-        string contents = """
-                              <Project DefaultTargets="PrintEnvVar">
-
-                              <!-- MyProp4 is not defined - but it's checked against empty - which is allowed -->
-                              <PropertyGroup Condition="'$(MyProp4)' == ''">
-                                <!-- MyProp3 defined here - but not used anywhere -->
-                                <!-- MyProp1 used here - but not defined -->
-                                <MyProp3>$(MyProp1)</MyProp3>
-                              </PropertyGroup>
-
-
-                              <Target Name="PrintEnvVar">
-                                  <!-- MyProp2 used here - but defined later -->
-                                  <Message Text="MyProp2 has value $(MyProp2)" Importance="High" Condition="'$(MyProp2)' == ''" />
-                                  <PropertyGroup>
-                                    <MyProp2>$(MyProp2);xxx</MyProp2>
-                                  </PropertyGroup>
-                              </Target>
-
-                              </Project>
-                              """;
-        TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
-        TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode,
+            out TransientTestFile projectFile,
+            "PropsCheckTest.csproj");
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check /v:detailed", out bool success);
         _env.Output.WriteLine(output);
@@ -420,20 +402,23 @@ public class EndToEndTests : IDisposable
     private void PrepareSampleProjectsAndConfig(
         bool buildInOutOfProcessNode,
         out TransientTestFile projectFile,
-        IEnumerable<(string RuleId, string Severity)>? ruleToSeverity,
+        string entryProjectAssetName,
+        IEnumerable<string>? supplementalAssetNames = null,
+        IEnumerable<(string RuleId, string Severity)>? ruleToSeverity = null,
         IEnumerable<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? ruleToCustomConfig = null)
     {
         string testAssetsFolderName = "SampleCheckIntegrationTest";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
         TransientTestFile testFile = _env.CreateFile(workFolder, "somefile");
 
-        string contents = ReadAndAdjustProjectContent("Project1");
-        string contents2 = ReadAndAdjustProjectContent("Project2");
-        string contentsImported = ReadAndAdjustProjectContent("ImportedFile1");
+        string contents = ReadAndAdjustProjectContent(entryProjectAssetName);
+        projectFile = _env.CreateFile(workFolder, entryProjectAssetName, contents);
 
-        projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
-        TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
-        TransientTestFile importedFile1 = _env.CreateFile(workFolder, "ImportedFile1.props", contentsImported);
+        foreach (string supplementalAssetName in supplementalAssetNames ?? Enumerable.Empty<string>())
+        {
+            string supplementalContent = ReadAndAdjustProjectContent(supplementalAssetName);
+            TransientTestFile supplementalFile = _env.CreateFile(workFolder, supplementalAssetName, supplementalContent);
+        }
 
         _env.CreateFile(workFolder, ".editorconfig", ReadEditorConfig(ruleToSeverity, ruleToCustomConfig, testAssetsFolderName));
 
@@ -453,6 +438,19 @@ public class EndToEndTests : IDisposable
                 .Replace("TestFilePath", testFile.Path)
                 .Replace("WorkFolderPath", workFolder.Path);
     }
+
+    private void PrepareSampleProjectsAndConfig(
+        bool buildInOutOfProcessNode,
+        out TransientTestFile projectFile,
+        IEnumerable<(string RuleId, string Severity)>? ruleToSeverity,
+        IEnumerable<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? ruleToCustomConfig = null)
+        => PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode,
+            out projectFile,
+            "Project1.csproj",
+            new[] { "Project2.csproj", "ImportedFile1.props" },
+            ruleToSeverity,
+            ruleToCustomConfig);
 
     private string ReadEditorConfig(
         IEnumerable<(string RuleId, string Severity)>? ruleToSeverity,
