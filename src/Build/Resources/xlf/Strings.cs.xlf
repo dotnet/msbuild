@@ -318,11 +318,6 @@
         <target state="translated">MSB4255: Následující vstupní soubory mezipaměti pro výsledky neexistují: {0}</target>
         <note />
       </trans-unit>
-      <trans-unit id="IntrinsicTasksExecutionFinished">
-        <source>Intrinsic Tasks Execution Finished for the project: ("{0}")</source>
-        <target state="new">Intrinsic Tasks Execution Finished for the project: ("{0}")</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">Řetězec verze nemá správný formát.</target>

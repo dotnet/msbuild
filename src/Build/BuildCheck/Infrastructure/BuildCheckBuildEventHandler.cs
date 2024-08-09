@@ -40,7 +40,6 @@ internal class BuildCheckBuildEventHandler
             { typeof(TaskFinishedEventArgs), (BuildEventArgs e) => HandleTaskFinishedEvent((TaskFinishedEventArgs)e) },
             { typeof(TaskParameterEventArgs), (BuildEventArgs e) => HandleTaskParameterEvent((TaskParameterEventArgs)e) },
             { typeof(BuildFinishedEventArgs), (BuildEventArgs e) => HandleBuildFinishedEvent((BuildFinishedEventArgs)e) },
-            { typeof(ProjectIntrinsicTasksExecutionFinishedEventArgs), (BuildEventArgs e) => HandleIntrinsicTasksExecutionFinishedEvent((ProjectIntrinsicTasksExecutionFinishedEventArgs)e) },
         };
     }
 
@@ -111,11 +110,6 @@ internal class BuildCheckBuildEventHandler
 
     private void HandleEnvironmentVariableReadEvent(EnvironmentVariableReadEventArgs eventArgs)
         => _buildCheckManager.ProcessEnvironmentVariableReadEventArgs(
-                _analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)),
-                eventArgs);
-
-    private void HandleIntrinsicTasksExecutionFinishedEvent(ProjectIntrinsicTasksExecutionFinishedEventArgs eventArgs)
-        => _buildCheckManager.ProcessIntrinsicTasksExecutionFinishedEventArgs(
                 _analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)),
                 eventArgs);
 
