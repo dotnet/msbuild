@@ -73,7 +73,7 @@ internal interface IBuildCheckManager
 	
     // Project might be encountered first time in some node, but be already evaluated in another - so StartProjectEvaluation won't happen
     //  - but we still need to know about it, hence the dedicated event.
-    void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string projectFullPath);
+    void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, ICheckContext analysisContext, string projectFullPath);
 
     void StartProjectEvaluation(ICheckContext checksContext, string projectFullPath);
 

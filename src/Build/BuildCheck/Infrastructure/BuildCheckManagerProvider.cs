@@ -9,7 +9,6 @@ using System.Threading;
 using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Analyzers;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Checks;
@@ -149,9 +148,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             // BuildCheckDataSource.Execution
             [
-                (PropertiesUsageAnalyzer.SupportedRulesList.Select(r => r.Id).ToArray(),
-                    PropertiesUsageAnalyzer.SupportedRulesList.Any(r => r.DefaultConfiguration.IsEnabled ?? false),
-                    Construct<PropertiesUsageAnalyzer>)
+                (PropertiesUsageCheck.SupportedRulesList.Select(r => r.Id).ToArray(),
+                    PropertiesUsageCheck.SupportedRulesList.Any(r => r.DefaultConfiguration.IsEnabled ?? false),
+                    Construct<PropertiesUsageCheck>)
             ]
         ];
 
@@ -511,7 +510,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             string projectFullPath)
         {
             _buildEventsProcessor.ProcessProjectDone(checkContext, projectFullPath);
-            _projectsByContextId.TryRemove(checkContext.BuildEventContext.ProjectContextId, out _);
         }
 
         public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext checkContext)

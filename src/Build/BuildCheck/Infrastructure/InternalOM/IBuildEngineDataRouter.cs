@@ -28,5 +28,5 @@ internal interface IBuildEngineDataRouter
     /// </summary>
     /// <param name="checkContext"></param>
     /// <param name="projectFullPath"></param>
-    void StartProjectEvaluation(ICheckLoggingContext checkContext, string projectFullPath);
+    void StartProjectEvaluation(ICheckContext checkContext, string projectFullPath);
 }

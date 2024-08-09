@@ -32,7 +32,7 @@ namespace Microsoft.Build.BackEnd.Components.Logging
         {
             LoggingService.LogProjectEvaluationStarted(BuildEventContext, _projectFile);
             LoggingService.BuildEngineDataRouter.StartProjectEvaluation(
-                new AnalysisLoggingContext(LoggingService, BuildEventContext), _projectFile);
+                new CheckLoggingContext(LoggingService, BuildEventContext), _projectFile);
         }
 
         /// <summary>

@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Build.Experimental.BuildCheck;
 
-namespace Microsoft.Build.BuildCheck.Analyzers;
+namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
 internal interface IInternalBuildCheckRegistrationContext : IBuildCheckRegistrationContext
 {

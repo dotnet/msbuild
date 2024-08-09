@@ -12,4 +12,4 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 /// <param name="projectFilePath"></param>
 /// <param name="projectConfigurationId"></param>
-internal class ProjectRequestProcessingDoneData(string projectFilePath, int? projectConfigurationId) : AnalysisData(projectFilePath, projectConfigurationId);
+internal class ProjectRequestProcessingDoneData(string projectFilePath, int? projectConfigurationId) : CheckData(projectFilePath, projectConfigurationId);

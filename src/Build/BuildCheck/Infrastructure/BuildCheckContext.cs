@@ -3,8 +3,8 @@
 
 using System;
 using System.Threading;
-using Microsoft.Build.BuildCheck.Analyzers;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Checks;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 

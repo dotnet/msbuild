@@ -12,59 +12,59 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.BuildCheck.Analyzers;
+namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
-internal class PropertiesUsageAnalyzer : InternalBuildAnalyzer
+internal class PropertiesUsageCheck : InternalCheck
 {
-    private static readonly BuildAnalyzerRule _usedBeforeInitializedRule = new BuildAnalyzerRule("BC0201", "PropertyUsedBeforeDeclared",
+    private static readonly CheckRule _usedBeforeInitializedRule = new CheckRule("BC0201", "PropertyUsedBeforeDeclared",
         "A property that is accessed should be declared first.",
         "Property: [{0}] was accessed, but it was never initialized.",
-        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Warning, EvaluationAnalysisScope = EvaluationAnalysisScope.ProjectFileOnly });
+        new CheckConfiguration() { Severity = CheckResultSeverity.Warning, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
 
-    private static readonly BuildAnalyzerRule _initializedAfterUsedRule = new BuildAnalyzerRule("BC0202", "PropertyDeclaredAfterUsed",
+    private static readonly CheckRule _initializedAfterUsedRule = new CheckRule("BC0202", "PropertyDeclaredAfterUsed",
         "A property should be declared before it is first used.",
         "Property: [{0}] first declared/initialized at [{1}] used before it was initialized.",
-        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Warning, EvaluationAnalysisScope = EvaluationAnalysisScope.ProjectFileOnly });
+        new CheckConfiguration() { Severity = CheckResultSeverity.Warning, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
 
-    private static readonly BuildAnalyzerRule _unusedPropertyRule = new BuildAnalyzerRule("BC0203", "UnusedPropertyDeclared",
+    private static readonly CheckRule _unusedPropertyRule = new CheckRule("BC0203", "UnusedPropertyDeclared",
         "A property that is not used should not be declared.",
         "Property: [{0}] was declared/initialized, but it was never used.",
-        new BuildAnalyzerConfiguration() { Severity = BuildAnalyzerResultSeverity.Suggestion, EvaluationAnalysisScope = EvaluationAnalysisScope.ProjectFileOnly });
+        new CheckConfiguration() { Severity = CheckResultSeverity.Suggestion, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
 
-    internal static readonly IReadOnlyList<BuildAnalyzerRule> SupportedRulesList = [_usedBeforeInitializedRule, _initializedAfterUsedRule, _unusedPropertyRule];
+    internal static readonly IReadOnlyList<CheckRule> SupportedRulesList = [_usedBeforeInitializedRule, _initializedAfterUsedRule, _unusedPropertyRule];
 
     public override string FriendlyName => "MSBuild.PropertiesUsageAnalyzer";
 
-    public override IReadOnlyList<BuildAnalyzerRule> SupportedRules => SupportedRulesList;
+    public override IReadOnlyList<CheckRule> SupportedRules => SupportedRulesList;
 
     private const string _allowUninitPropsInConditionsKey = "AllowUninitializedPropertiesInConditions";
     private bool _allowUninitPropsInConditions = false;
     // Each check can have it's scope and enablement
-    private EvaluationAnalysisScope _uninitializedReadScope;
-    private EvaluationAnalysisScope _unusedPropertyScope;
-    private EvaluationAnalysisScope _initializedAfterUseScope;
+    private EvaluationCheckScope _uninitializedReadScope;
+    private EvaluationCheckScope _unusedPropertyScope;
+    private EvaluationCheckScope _initializedAfterUseScope;
     private bool _uninitializedReadEnabled;
     private bool _unusedPropertyEnabled;
     private bool _initializedAfterUseEnabled;
     public override void Initialize(ConfigurationContext configurationContext)
     {
-        var config = configurationContext.BuildAnalyzerConfig.FirstOrDefault(c => c.RuleId == _usedBeforeInitializedRule.Id)
-                ?? BuildAnalyzerConfigurationEffective.Default;
+        var config = configurationContext.CheckConfig.FirstOrDefault(c => c.RuleId == _usedBeforeInitializedRule.Id)
+                ?? CheckConfigurationEffective.Default;
 
         _uninitializedReadEnabled = config.IsEnabled;
-        _uninitializedReadScope = config.EvaluationAnalysisScope;
+        _uninitializedReadScope = config.EvaluationCheckScope;
 
-        config = configurationContext.BuildAnalyzerConfig.FirstOrDefault(c => c.RuleId == _unusedPropertyRule.Id)
-                 ?? BuildAnalyzerConfigurationEffective.Default;
+        config = configurationContext.CheckConfig.FirstOrDefault(c => c.RuleId == _unusedPropertyRule.Id)
+                 ?? CheckConfigurationEffective.Default;
 
         _unusedPropertyEnabled = config.IsEnabled;
-        _unusedPropertyScope = config.EvaluationAnalysisScope;
+        _unusedPropertyScope = config.EvaluationCheckScope;
 
-        config = configurationContext.BuildAnalyzerConfig.FirstOrDefault(c => c.RuleId == _usedBeforeInitializedRule.Id)
-                 ?? BuildAnalyzerConfigurationEffective.Default;
+        config = configurationContext.CheckConfig.FirstOrDefault(c => c.RuleId == _usedBeforeInitializedRule.Id)
+                 ?? CheckConfigurationEffective.Default;
 
         _initializedAfterUseEnabled = config.IsEnabled;
-        _initializedAfterUseScope = config.EvaluationAnalysisScope;
+        _initializedAfterUseScope = config.EvaluationCheckScope;
 
         bool? allowUninitPropsInConditionsRule1 = null;
         bool? allowUninitPropsInConditionsRule2 = null;
@@ -131,7 +131,7 @@ internal class PropertiesUsageAnalyzer : InternalBuildAnalyzer
         PropertyWriteData writeData = context.Data;
 
         // If we want to track unused properties - store all definitions that are in scope.
-        if (_unusedPropertyEnabled && AnalysisScopeClassifier.IsActionInObservedScope(_unusedPropertyScope,
+        if (_unusedPropertyEnabled && CheckScopeClassifier.IsActionInObservedScope(_unusedPropertyScope,
                 writeData.ElementLocation, writeData.ProjectFilePath))
         {
             _writenProperties[writeData.PropertyName] = writeData.ElementLocation;
@@ -152,7 +152,7 @@ internal class PropertiesUsageAnalyzer : InternalBuildAnalyzer
                     writeData.PropertyName, writeData.ElementLocation?.LocationString ?? string.Empty));
             }
 
-            if (AnalysisScopeClassifier.IsActionInObservedScope(_initializedAfterUseScope,
+            if (CheckScopeClassifier.IsActionInObservedScope(_initializedAfterUseScope,
                     writeData.ElementLocation, writeData.ProjectFilePath) &&
                 _uninitializedReadsOutOfScope.TryGetValue(writeData.PropertyName, out IMsBuildElementLocation? uninitOutScopeReadLocation))
             {
@@ -188,7 +188,7 @@ internal class PropertiesUsageAnalyzer : InternalBuildAnalyzer
             // We want to wait with reporting uninitialized reads until we are sure there wasn't later attempts to initialize them.
             if (_initializedAfterUseEnabled)
             {
-                if (AnalysisScopeClassifier.IsActionInObservedScope(_initializedAfterUseScope,
+                if (CheckScopeClassifier.IsActionInObservedScope(_initializedAfterUseScope,
                         readData.ElementLocation, readData.ProjectFilePath))
                 {
                     _uninitializedReadsInScope[readData.PropertyName] = readData.ElementLocation;
@@ -199,7 +199,7 @@ internal class PropertiesUsageAnalyzer : InternalBuildAnalyzer
                     _uninitializedReadsOutOfScope[readData.PropertyName] = readData.ElementLocation;
                 }
             }
-            else if (AnalysisScopeClassifier.IsActionInObservedScope(_uninitializedReadScope,
+            else if (CheckScopeClassifier.IsActionInObservedScope(_uninitializedReadScope,
                          readData.ElementLocation, readData.ProjectFilePath))
             {
                 // report immediately

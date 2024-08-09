@@ -75,7 +75,7 @@ internal sealed class BuildCheckCentralContext
         => RegisterAction(check, propertyWriteAction, _globalCallbacks.PropertyWriteActions);
 
     internal void RegisterProjectRequestProcessingDoneAction(CheckWrapper check, Action<BuildCheckDataContext<ProjectRequestProcessingDoneData>> projectDoneAction)
-        => RegisterAction(check, projectDoneAction, _globalCallbacks.ProjectProcessingDoneActions);
+        => RegisterAction(check, projectDoneAction, _globalCallbacks.ProjectRequestProcessingDoneActions);
 
     internal void RegisterBuildFinishedAction(CheckWrapper check, Action<BuildCheckDataContext<BuildFinishedCheckData>> buildFinishedAction)
         => RegisterAction(check, buildFinishedAction, _globalCallbacks.BuildFinishedActions);
@@ -148,7 +148,7 @@ internal sealed class BuildCheckCentralContext
         ICheckContext checkContext,
         Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
-        => RunRegisteredActions(_globalCallbacks.ProjectProcessingDoneActions, projectProcessingDoneData,
+        => RunRegisteredActions(_globalCallbacks.ProjectRequestProcessingDoneActions, projectProcessingDoneData,
             checkContext, resultHandler);
 
     internal void RunBuildFinishedActions(
