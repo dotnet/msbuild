@@ -217,7 +217,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
     public void ProcessProjectDone(ICheckContext checkContext, string projectFullPath)
         => _buildCheckCentralContext.RunProjectProcessingDoneActions(
-                new ProjectProcessingDoneData(projectFullPath, checkContext.BuildEventContext.ProjectInstanceId),
+                new ProjectRequestProcessingDoneData(projectFullPath, checkContext.BuildEventContext.ProjectInstanceId),
                 checkContext,
                 ReportResult);
 

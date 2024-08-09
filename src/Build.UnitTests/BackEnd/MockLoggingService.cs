@@ -661,5 +661,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext checkContext)
         { /* Ignore the data */ }
+
+        public void ProcessProjectEvaluationStarted(ICheckContext analysisContext, string projectFullPath)
+        { /* Ignore the data */ }
     }
 }

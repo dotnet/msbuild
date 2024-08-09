@@ -26,4 +26,7 @@ internal sealed class BuildCheckConfigurationException : Exception
     {
         this.buildCheckConfigurationErrorScope = buildCheckConfigurationErrorScope;
     }
+
+    public BuildCheckConfigurationException(string message, Exception innerException) : base(message, innerException)
+    { }
 }

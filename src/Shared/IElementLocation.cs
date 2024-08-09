@@ -20,7 +20,7 @@ namespace Microsoft.Build.Shared
     /// This is currently internal - but it is prepared to be made public once it will be needed by other public BuildCheck OM
     /// (e.g. by property read/write OM)
     /// </remarks>
-    internal interface IMsBuildElementLocation
+    public interface IMsBuildElementLocation
     {
         /// <summary>
         /// The file from which this particular element originated.  It may

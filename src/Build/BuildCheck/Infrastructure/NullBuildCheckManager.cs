@@ -58,48 +58,35 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
-    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, ICheckContext checkContext, string fullPath)
-    {
-    }
-
-    public void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    {
-    }
-
-    public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath)
-    {
-    }
-
-    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, ICheckContext checkContext,
+    public void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, ICheckContext checkContext,
         string projectFullPath)
     {
     }
 
-    public void YieldProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void ProcessProjectEvaluationStarted(ICheckContext checkContext, string projectFullPath)
     {
     }
 
-    public void ResumeProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void EndProjectEvaluation(BuildEventContext buildEventContext)
+    {
+    }
+
+    public void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath)
+    {
+    }
+
+    public void EndProjectRequest(ICheckContext checkContext, string projectFullPath)
     {
     }
 
     public Dictionary<string, TimeSpan> CreateCheckTracingStats() => new Dictionary<string, TimeSpan>();
-
-    public void StartTaskInvocation(BuildCheckDataSource buildCheckDataSource, TaskStartedEventArgs eventArgs)
-    { }
-
-    public void EndTaskInvocation(BuildCheckDataSource buildCheckDataSource, TaskFinishedEventArgs eventArgs)
-    { }
-
-    public void ProcessTaskParameter(BuildCheckDataSource buildCheckDataSource, TaskParameterEventArgs eventArg)
-    { }
 
     public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext buildEventContext)
     { }
 
     public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext buildEventContext)
     { }
-	
+
     public void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
     { }
 }

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.IO.Ports;
 using System.Linq;
 using System.Xml;
@@ -36,6 +37,51 @@ public class EndToEndTests : IDisposable
     private static string TestAssetsRootPath { get; } = Path.Combine(AssemblyLocation, "TestAssets");
 
     public void Dispose() => _env.Dispose();
+
+    [Fact]
+    public void PropertiesUsageAnalyzerTest()
+    {
+        using TestEnvironment env = TestEnvironment.Create();
+        string contents = """
+                              <Project DefaultTargets="PrintEnvVar">
+
+                              <!-- MyProp4 is not defined - but it's checked against empty - which is allowed -->
+                              <PropertyGroup Condition="'$(MyProp4)' == ''">
+                                <!-- MyProp3 defined here - but not used anywhere -->
+                                <!-- MyProp1 used here - but not defined -->
+                                <MyProp3>$(MyProp1)</MyProp3>
+                              </PropertyGroup>
+
+
+                              <Target Name="PrintEnvVar">
+                                  <!-- MyProp2 used here - but defined later -->
+                                  <Message Text="MyProp2 has value $(MyProp2)" Importance="High" Condition="'$(MyProp2)' == ''" />
+                                  <PropertyGroup>
+                                    <MyProp2>$(MyProp2);xxx</MyProp2>
+                                  </PropertyGroup>
+                              </Target>
+
+                              </Project>
+                              """;
+        TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
+        TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check /v:detailed", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+
+        output.ShouldMatch(@"BC0201: .* Property: \[MyProp1\]");
+        output.ShouldMatch(@"BC0202: .* Property: \[MyProp2\]");
+        // since it's just suggestion, it doesn't have a colon ':'
+        output.ShouldMatch(@"BC0203 .* Property: \[MyProp3\]");
+
+        // each finding should be found just once - but reported twice, due to summary
+        Regex.Matches(output, "BC0201: .* Property").Count.ShouldBe(2);
+        Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
+        // since it's not an error - it's not in summary
+        Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(1);
+    }
 
     [Theory]
     [InlineData(true, true)]

@@ -36,7 +36,7 @@ internal class BuildCheckBuildEventHandler
             { typeof(ProjectEvaluationFinishedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationFinishedEvent((ProjectEvaluationFinishedEventArgs)e) },
             { typeof(ProjectEvaluationStartedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs)e) },
             { typeof(EnvironmentVariableReadEventArgs), (BuildEventArgs e) => HandleEnvironmentVariableReadEvent((EnvironmentVariableReadEventArgs)e) },
-            { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => _buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!, ((ProjectStartedEventArgs)e).ProjectFile!) },
+            { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => _buildCheckManager.StartProjectRequest(e.BuildEventContext!, ((ProjectStartedEventArgs)e).ProjectFile!) },
             { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => HandleProjectFinishedRequest((ProjectFinishedEventArgs)e) },
             { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => HandleBuildCheckTracingEvent((BuildCheckTracingEventArgs)e) },
             { typeof(BuildCheckAcquisitionEventArgs), (BuildEventArgs e) => HandleBuildCheckAcquisitionEvent((BuildCheckAcquisitionEventArgs)e) },
@@ -79,7 +79,7 @@ internal class BuildCheckBuildEventHandler
                 _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!),
                 eventArgs);
 
-            _buildCheckManager.EndProjectEvaluation(BuildCheckDataSource.EventArgs, eventArgs.BuildEventContext!);
+            _buildCheckManager.EndProjectEvaluation(eventArgs.BuildEventContext!);
         }
     }
 
@@ -87,16 +87,19 @@ internal class BuildCheckBuildEventHandler
     {
         if (!IsMetaProjFile(eventArgs.ProjectFile))
         {
-            _buildCheckManager.StartProjectEvaluation(
+            var checkContext = _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!);
+            _buildCheckManager.ProjectFirstEncountered(
                 BuildCheckDataSource.EventArgs,
-                _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!),
+                checkContext,
+                eventArgs.ProjectFile!);
+            _buildCheckManager.ProcessProjectEvaluationStarted(
+                checkContext,
                 eventArgs.ProjectFile!);
         }
     }
 
     private void HandleProjectFinishedRequest(ProjectFinishedEventArgs eventArgs)
         => _buildCheckManager.EndProjectRequest(
-                BuildCheckDataSource.EventArgs,
                 _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!),
                 eventArgs!.ProjectFile!);
 
