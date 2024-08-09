@@ -38,6 +38,7 @@ internal class BuildCheckForwardingLogger : IForwardingLogger
     private HashSet<Type> _eventsToForward = new HashSet<Type>
     {
         typeof(EnvironmentVariableReadEventArgs),
+        typeof(BuildSubmissionStartedEventArgs),
         typeof(ProjectEvaluationFinishedEventArgs),
         typeof(ProjectEvaluationStartedEventArgs),
         typeof(ProjectStartedEventArgs),
