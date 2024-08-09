@@ -3,7 +3,4 @@
   <PropertyGroup>
 	  <MSBuildCheck>$([MSBuild]::RegisterBuildCheck($(MSBuildThisFileDirectory)Company.CheckTemplate.dll))</MSBuildCheck>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageVersion Include="Microsoft.Build" Version="1.0.0-MicrosoftBuildPackageVersion" />
-  </ItemGroup>
 </Project>
