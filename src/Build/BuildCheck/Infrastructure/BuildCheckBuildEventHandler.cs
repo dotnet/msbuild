@@ -19,9 +19,9 @@ internal class BuildCheckBuildEventHandler
     private readonly IBuildCheckManager _buildCheckManager;
     private readonly ICheckContextFactory _checkContextFactory;
 
-    private readonly Dictionary<Type, Action<BuildEventArgs>> _eventHandlers;
-
-    private bool _isRestoring = false;
+    private Dictionary<Type, Action<BuildEventArgs>> _eventHandlers;
+    private readonly Dictionary<Type, Action<BuildEventArgs>> _eventHandlersFull;
+    private readonly Dictionary<Type, Action<BuildEventArgs>> _eventHandlersRestore;
 
     internal BuildCheckBuildEventHandler(
         ICheckContextFactory checkContextFactory,
@@ -30,7 +30,7 @@ internal class BuildCheckBuildEventHandler
         _buildCheckManager = buildCheckManager;
         _checkContextFactory = checkContextFactory;
 
-        _eventHandlers = new()
+        _eventHandlersFull = new()
         {
             { typeof(BuildSubmissionStartedEventArgs), (BuildEventArgs e) => HandleBuildSubmissionStartedEvent((BuildSubmissionStartedEventArgs)e) },
             { typeof(ProjectEvaluationFinishedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationFinishedEvent((ProjectEvaluationFinishedEventArgs)e) },
@@ -45,18 +45,18 @@ internal class BuildCheckBuildEventHandler
             { typeof(TaskParameterEventArgs), (BuildEventArgs e) => HandleTaskParameterEvent((TaskParameterEventArgs)e) },
             { typeof(BuildFinishedEventArgs), (BuildEventArgs e) => HandleBuildFinishedEvent((BuildFinishedEventArgs)e) },
         };
+
+        // During restore we'll wait only for restore to be done.
+        _eventHandlersRestore = new()
+        {
+            { typeof(BuildSubmissionStartedEventArgs), (BuildEventArgs e) => HandleBuildSubmissionStartedEvent((BuildSubmissionStartedEventArgs)e) },
+        };
+
+        _eventHandlers = _eventHandlersFull;
     }
 
     public void HandleBuildEvent(BuildEventArgs e)
     {
-        // Skip event handling during restore phase
-        if (
-            _isRestoring &&
-            e.GetType() != typeof(BuildSubmissionStartedEventArgs))
-        {
-            return;
-        }
-
         if (_eventHandlers.TryGetValue(e.GetType(), out Action<BuildEventArgs>? handler))
         {
             handler(e);
@@ -66,7 +66,9 @@ internal class BuildCheckBuildEventHandler
     private void HandleBuildSubmissionStartedEvent(BuildSubmissionStartedEventArgs eventArgs)
     {
         eventArgs.GlobalProperties.TryGetValue(MSBuildConstants.MSBuildIsRestoring, out string? restoreProperty);
-        _isRestoring = restoreProperty is not null ? Convert.ToBoolean(restoreProperty) : false;
+        bool isRestoring = restoreProperty is not null && Convert.ToBoolean(restoreProperty);
+
+        _eventHandlers = isRestoring ? _eventHandlersRestore : _eventHandlersFull;
     }
 
     private void HandleProjectEvaluationFinishedEvent(ProjectEvaluationFinishedEventArgs eventArgs)
