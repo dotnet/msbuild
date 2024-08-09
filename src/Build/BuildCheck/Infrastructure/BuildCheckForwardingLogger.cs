@@ -16,7 +16,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// <summary>
 /// Forwarding logger for the build check infrastructure.
 /// For now we just want to forward all events that are needed for BuildCheckConnectorLogger and filter out all other.
-/// If the custom analyzer is detected, starts to unconditionally forward all events.
+/// If the custom check is detected, starts to unconditionally forward all events.
 /// In the future we may need more specific behavior.
 /// </summary>
 /// <remarks>
