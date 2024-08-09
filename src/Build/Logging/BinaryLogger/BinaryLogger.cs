@@ -76,8 +76,9 @@ namespace Microsoft.Build.Logging
         // version 22:
         //    - extend EnvironmentVariableRead with location where environment variable was used.
         // version 23:
-        //    - new record kind: BuildSubmissionStartedEventArgs
-        // This should be never changed.
+        //    - new record kinds: BuildCheckMessageEvent, BuildCheckWarningEvent, BuildCheckErrorEvent,
+        //    BuildCheckTracingEvent, BuildCheckAcquisitionEvent, BuildSubmissionStartedEvent
+
         // The minimum version of the binary log reader that can read log of above version.
         internal const int ForwardCompatibilityMinimalVersion = 18;
 

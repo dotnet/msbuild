@@ -51,8 +51,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
         {
             foreach (var envVariableData in context.Data.EvaluatedEnvironmentVariables)
             {
-                if (!CheckScopeClassifier.IsActionInObservedScope(_scope, envVariableData.Value.File,
-                        context.Data.ProjectFilePath))
+                if (!CheckScopeClassifier.IsActionInObservedScope(_scope, envVariableData.Value.File, context.Data.ProjectFilePath))
                 {
                     continue;
                 }
