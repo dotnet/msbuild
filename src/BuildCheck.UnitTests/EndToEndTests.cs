@@ -77,7 +77,7 @@ public class EndToEndTests : IDisposable
         TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
         TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -analyze /v:detailed", out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check /v:detailed", out bool success);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
