@@ -1105,9 +1105,13 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
 
             // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
+            bool isRestoring = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring] is null;
 
-            var buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance;
-            buildCheckManager.SetDataSource(BuildCheckDataSource.BuildExecution);
+            var buildCheckManager = isRestoring
+                ? (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance
+                : null;
+
+            buildCheckManager?.SetDataSource(BuildCheckDataSource.BuildExecution);
 
             // Make sure it is null before loading the configuration into the request, because if there is a problem
             // we do not wand to have an invalid projectLoggingContext floating around. Also if this is null the error will be
@@ -1121,9 +1125,9 @@ namespace Microsoft.Build.BackEnd
                 // Load the project
                 if (!_requestEntry.RequestConfiguration.IsLoaded)
                 {
-                    buildCheckManager.ProjectFirstEncountered(
+                    buildCheckManager?.ProjectFirstEncountered(
                         BuildCheckDataSource.BuildExecution,
-                        new AnalysisLoggingContext(_nodeLoggingContext.LoggingService, _requestEntry.Request.BuildEventContext),
+                        new CheckLoggingContext(_nodeLoggingContext.LoggingService, _requestEntry.Request.BuildEventContext),
                         _requestEntry.RequestConfiguration.ProjectFullPath);
 
                     _requestEntry.RequestConfiguration.LoadProjectIntoConfiguration(
@@ -1146,12 +1150,12 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-                buildCheckManager.EndProjectEvaluation(
+                buildCheckManager?.EndProjectEvaluation(
                     _requestEntry.Request.BuildEventContext);
             }
 
             _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
-            buildCheckManager.StartProjectRequest(
+            buildCheckManager?.StartProjectRequest(
                 _projectLoggingContext.BuildEventContext,
                 _requestEntry.RequestConfiguration.ProjectFullPath);
 
@@ -1222,8 +1226,8 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-                buildCheckManager.EndProjectRequest(
-                    new AnalysisLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext),
+                buildCheckManager?.EndProjectRequest(
+                    new CheckLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext),
                     _requestEntry.RequestConfiguration.ProjectFullPath);
             }
 

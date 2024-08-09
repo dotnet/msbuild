@@ -1288,8 +1288,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (loggingPacket?.NodeBuildEvent != null && _componentHost != null)
             {
-                var projectStartedEventArgs = loggingPacket.NodeBuildEvent.Value.Value as ProjectStartedEventArgs;
-                if (projectStartedEventArgs != null && _configCache.Value != null)
+                if (loggingPacket.NodeBuildEvent.Value.Value is ProjectStartedEventArgs projectStartedEventArgs && _configCache.Value != null)
                 {
                     ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(projectStartedEventArgs.ProjectId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
                     BuildRequestConfiguration buildRequestConfiguration = _configCache.Value[projectStartedEventArgs.ProjectId];
@@ -1300,6 +1299,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     s_projectStartedEventArgsGlobalProperties.Value.SetValue(projectStartedEventArgs, buildRequestConfiguration.GlobalProperties.ToDictionary(), index: null);
 
                     s_projectStartedEventArgsToolsVersion.Value.SetValue(projectStartedEventArgs, buildRequestConfiguration.ToolsVersion, null);
+
+                    // When logging happens out of process, we need to map the project context id to the project file on the receiving side.
+                    if (!_projectFileMap.ContainsKey(projectStartedEventArgs.BuildEventContext.ProjectContextId))
+                    {
+                        _projectFileMap[projectStartedEventArgs.BuildEventContext.ProjectContextId] = projectStartedEventArgs.ProjectFile;
+                    }
                 }
             }
         }

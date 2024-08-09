@@ -798,13 +798,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #endregion
 
-        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext analysisContext)
-            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.ProcessPropertyRead(propertyReadInfo, analysisContext);
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext checkContext)
+            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.ProcessPropertyRead(propertyReadInfo, checkContext);
 
-        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext analysisContext)
-            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.ProcessPropertyWrite(propertyWriteInfo, analysisContext);
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext checkContext)
+            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.ProcessPropertyWrite(propertyWriteInfo, checkContext);
 
-        public void StartProjectEvaluation(IAnalysisContext analysisContext, string projectFullPath)
-            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.StartProjectEvaluation(analysisContext, projectFullPath);
+        public void StartProjectEvaluation(ICheckContext checkContext, string projectFullPath)
+            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.StartProjectEvaluation(checkContext, projectFullPath);
     }
 }
