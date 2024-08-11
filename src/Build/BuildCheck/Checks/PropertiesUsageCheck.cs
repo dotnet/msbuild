@@ -118,13 +118,13 @@ internal class PropertiesUsageCheck : InternalCheck
         }
     }
 
-    private Dictionary<string, IMsBuildElementLocation?> _writenProperties = new(MSBuildNameIgnoreCaseComparer.Default);
+    private Dictionary<string, IMSBuildElementLocation?> _writenProperties = new(MSBuildNameIgnoreCaseComparer.Default);
     private HashSet<string> _readProperties = new(MSBuildNameIgnoreCaseComparer.Default);
     // For the 'Property Initialized after used' check - we are interested in cases where:
     //   1. Property is read anywhere and then initialized in the checked scope.
     //   2. Property is read in the checked scope and then initialized anywhere.
-    private Dictionary<string, IMsBuildElementLocation> _uninitializedReadsInScope = new(MSBuildNameIgnoreCaseComparer.Default);
-    private Dictionary<string, IMsBuildElementLocation> _uninitializedReadsOutOfScope = new(MSBuildNameIgnoreCaseComparer.Default);
+    private Dictionary<string, IMSBuildElementLocation> _uninitializedReadsInScope = new(MSBuildNameIgnoreCaseComparer.Default);
+    private Dictionary<string, IMSBuildElementLocation> _uninitializedReadsOutOfScope = new(MSBuildNameIgnoreCaseComparer.Default);
 
     private void ProcessPropertyWrite(BuildCheckDataContext<PropertyWriteData> context)
     {
@@ -142,7 +142,7 @@ internal class PropertiesUsageCheck : InternalCheck
             // For initialized after used check - we can remove the read from dictionary after hitting write - because
             //  once the property is written it should no more be uninitialized (so shouldn't be added again).
 
-            if (_uninitializedReadsInScope.TryGetValue(writeData.PropertyName, out IMsBuildElementLocation? uninitInScopeReadLocation))
+            if (_uninitializedReadsInScope.TryGetValue(writeData.PropertyName, out IMSBuildElementLocation? uninitInScopeReadLocation))
             {
                 _uninitializedReadsInScope.Remove(writeData.PropertyName);
 
@@ -154,7 +154,7 @@ internal class PropertiesUsageCheck : InternalCheck
 
             if (CheckScopeClassifier.IsActionInObservedScope(_initializedAfterUseScope,
                     writeData.ElementLocation, writeData.ProjectFilePath) &&
-                _uninitializedReadsOutOfScope.TryGetValue(writeData.PropertyName, out IMsBuildElementLocation? uninitOutScopeReadLocation))
+                _uninitializedReadsOutOfScope.TryGetValue(writeData.PropertyName, out IMSBuildElementLocation? uninitOutScopeReadLocation))
             {
                 _uninitializedReadsOutOfScope.Remove(writeData.PropertyName);
 
@@ -236,7 +236,7 @@ internal class PropertiesUsageCheck : InternalCheck
         }
 
         _readProperties = new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
-        _writenProperties = new Dictionary<string, IMsBuildElementLocation?>(MSBuildNameIgnoreCaseComparer.Default);
-        _uninitializedReadsInScope = new Dictionary<string, IMsBuildElementLocation>(MSBuildNameIgnoreCaseComparer.Default);
+        _writenProperties = new Dictionary<string, IMSBuildElementLocation?>(MSBuildNameIgnoreCaseComparer.Default);
+        _uninitializedReadsInScope = new Dictionary<string, IMSBuildElementLocation>(MSBuildNameIgnoreCaseComparer.Default);
     }
 }
