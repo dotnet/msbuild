@@ -219,32 +219,32 @@
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
-        <target state="new">Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</target>
+        <target state="translated">지정한 사용자 지정 검사 어셈블리를 찾지 못했습니다. '{0}'. 있는지 확인하세요.</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="new">Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">어셈블리에서 사용자 지정 검사 유형 '{0}'을(를) 로드하지 못했습니다. '{1}'. Microsoft.Build.Experimental.BuildCheck.Check 기본 클래스를 상속해야 합니다. 사용자 지정 검사가 아닌 경우 노출되지 않아야 합니다. 추가 정보: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
         <source>Failed to register the custom check: '{0}'.</source>
-        <target state="new">Failed to register the custom check: '{0}'.</target>
+        <target state="translated">사용자 지정 검사를 등록하지 못했습니다. '{0}'.</target>
         <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedRuleLoading">
         <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
-        <target state="new">Failed to instantiate the custom check rule with the following exception: '{0}'.</target>
+        <target state="translated">다음 예외로 인해 사용자 지정 검사 규칙을 인스턴스화하지 못했습니다. '{0}'.</target>
         <note>The message is emitted on failed loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckRegistered">
         <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="new">The custom check: '{0}' is registered for the build from the location: '{1}'.</target>
+        <target state="translated">사용자 지정 검사 '{0}'이(가) 다음 위치의 빌드에 등록되었습니다. '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckSuccessfulAcquisition">
         <source>Custom check rule: '{0}' has been registered successfully.</source>
-        <target state="new">Custom check rule: '{0}' has been registered successfully.</target>
+        <target state="translated">사용자 지정 검사 규칙 '{0}'이(가) 등록되었습니다.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">

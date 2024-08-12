@@ -219,32 +219,32 @@
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
-        <target state="new">Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</target>
+        <target state="translated">Fehler beim Suchen der angegebenen benutzerdefinierten Prüfassembly: {0}. Überprüfen Sie, ob sie vorhanden ist.</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="new">Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">Fehler beim Laden des benutzerdefinierten Prüftyps „{0}“ aus der Assembly: {1}. Stellen Sie sicher, dass es die Basisklasse „Microsoft.Build.Experimental.BuildCheck.Check“ erbt. Wenn es sich nicht um eine benutzerdefinierte Überprüfung handelt, sollte es nicht verfügbar gemacht werden. Weitere Informationen: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
         <source>Failed to register the custom check: '{0}'.</source>
-        <target state="new">Failed to register the custom check: '{0}'.</target>
+        <target state="translated">Fehler beim Registrieren der benutzerdefinierten Überprüfung: „{0}”.</target>
         <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedRuleLoading">
         <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
-        <target state="new">Failed to instantiate the custom check rule with the following exception: '{0}'.</target>
+        <target state="translated">Fehler beim Instanziieren der benutzerdefinierten Prüfregel. Ausnahme: {0}.</target>
         <note>The message is emitted on failed loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckRegistered">
         <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="new">The custom check: '{0}' is registered for the build from the location: '{1}'.</target>
+        <target state="translated">Dies benutzerdefinierte Überprüfung „{0}“ ist für den Build vom Folgenden aus registriert: „{1}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckSuccessfulAcquisition">
         <source>Custom check rule: '{0}' has been registered successfully.</source>
-        <target state="new">Custom check rule: '{0}' has been registered successfully.</target>
+        <target state="translated">Die benutzerdefinierte Prüfregel „{0}“ wurde erfolgreich registriert.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
