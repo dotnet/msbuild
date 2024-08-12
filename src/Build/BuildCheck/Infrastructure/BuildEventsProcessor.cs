@@ -38,7 +38,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
     private readonly SimpleProjectRootElementCache _cache = new SimpleProjectRootElementCache();
     private readonly BuildCheckCentralContext _buildCheckCentralContext = buildCheckCentralContext;
-    private Dictionary<string, (string EnvVarValue, IMsBuildElementLocation Location)> _evaluatedEnvironmentVariables = new();
+    private Dictionary<string, (string EnvVarValue, IMSBuildElementLocation Location)> _evaluatedEnvironmentVariables = new();
 
     /// <summary>
     /// Keeps track of in-flight tasks. Keyed by task ID as passed in <see cref="BuildEventContext.TaskId"/>.
@@ -223,7 +223,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
     public void ProcessProjectDone(ICheckContext checkContext, string projectFullPath)
         => _buildCheckCentralContext.RunProjectProcessingDoneActions(
-                new ProjectProcessingDoneData(projectFullPath, checkContext.BuildEventContext.ProjectInstanceId),
+                new ProjectRequestProcessingDoneData(projectFullPath, checkContext.BuildEventContext.ProjectInstanceId),
                 checkContext,
                 ReportResult);
 

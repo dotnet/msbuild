@@ -22,7 +22,7 @@ internal class CheckScopeClassifier : IDisposable
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     internal static bool IsActionInObservedScope(
         EvaluationCheckScope scope,
-        IMsBuildElementLocation? location,
+        IMSBuildElementLocation? location,
         string projectFileFullPath)
         => IsActionInObservedScope(scope, location?.File, projectFileFullPath);
 

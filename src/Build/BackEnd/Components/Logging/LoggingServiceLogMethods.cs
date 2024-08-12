@@ -803,5 +803,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext checkContext)
             => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.ProcessPropertyWrite(propertyWriteInfo, checkContext);
+
+        public void ProcessProjectEvaluationStarted(ICheckContext checkContext, string projectFullPath)
+            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.ProcessProjectEvaluationStarted(checkContext, projectFullPath);
     }
 }

@@ -14,11 +14,11 @@ public class EnvironmentVariableCheckData : CheckData
     internal EnvironmentVariableCheckData(
         string projectFilePath,
         int? projectConfigurationId,
-        IReadOnlyDictionary<string, (string EnvVarValue, IMsBuildElementLocation Location)> evaluatedEnvironmentVariables)
+        IReadOnlyDictionary<string, (string EnvVarValue, IMSBuildElementLocation Location)> evaluatedEnvironmentVariables)
         : base(projectFilePath, projectConfigurationId) => EvaluatedEnvironmentVariables = evaluatedEnvironmentVariables;
 
     /// <summary>
     /// Gets the evaluated environment variables and their metadata.
     /// </summary>
-    public IReadOnlyDictionary<string, (string EnvVarValue, IMsBuildElementLocation Location)> EvaluatedEnvironmentVariables { get; }
+    public IReadOnlyDictionary<string, (string EnvVarValue, IMSBuildElementLocation Location)> EvaluatedEnvironmentVariables { get; }
 }

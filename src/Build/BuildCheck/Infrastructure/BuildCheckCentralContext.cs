@@ -24,7 +24,7 @@ internal sealed class BuildCheckCentralContext
         List<(CheckWrapper, Action<BuildCheckDataContext<TaskInvocationCheckData>>)> TaskInvocationActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<PropertyReadData>>)> PropertyReadActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<PropertyWriteData>>)> PropertyWriteActions,
-        List<(CheckWrapper, Action<BuildCheckDataContext<ProjectProcessingDoneData>>)> ProjectProcessingDoneActions,
+        List<(CheckWrapper, Action<BuildCheckDataContext<ProjectRequestProcessingDoneData>>)> ProjectRequestProcessingDoneActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<BuildFinishedCheckData>>)> BuildFinishedActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<EnvironmentVariableCheckData>>)> EnvironmentVariableCheckDataActions)
     {
@@ -39,7 +39,7 @@ internal sealed class BuildCheckCentralContext
             ParsedItemsActions.RemoveAll(a => a.Item1 == check);
             PropertyReadActions.RemoveAll(a => a.Item1 == check);
             PropertyWriteActions.RemoveAll(a => a.Item1 == check);
-            ProjectProcessingDoneActions.RemoveAll(a => a.Item1 == check);
+            ProjectRequestProcessingDoneActions.RemoveAll(a => a.Item1 == check);
             BuildFinishedActions.RemoveAll(a => a.Item1 == check);
         }
     }
@@ -77,14 +77,14 @@ internal sealed class BuildCheckCentralContext
     internal void RegisterPropertyReadAction(CheckWrapper check, Action<BuildCheckDataContext<PropertyReadData>> propertyReadAction)
         => RegisterAction(check, propertyReadAction, _globalCallbacks.PropertyReadActions);
 
-    internal void RegisterBuildFinishedAction(CheckWrapper check, Action<BuildCheckDataContext<BuildFinishedCheckData>> buildFinishedAction)
-        => RegisterAction(check, buildFinishedAction, _globalCallbacks.BuildFinishedActions);
-
     internal void RegisterPropertyWriteAction(CheckWrapper check, Action<BuildCheckDataContext<PropertyWriteData>> propertyWriteAction)
         => RegisterAction(check, propertyWriteAction, _globalCallbacks.PropertyWriteActions);
 
-    internal void RegisterProjectProcessingDoneAction(CheckWrapper check, Action<BuildCheckDataContext<ProjectProcessingDoneData>> projectDoneAction)
-        => RegisterAction(check, projectDoneAction, _globalCallbacks.ProjectProcessingDoneActions);
+    internal void RegisterProjectRequestProcessingDoneAction(CheckWrapper check, Action<BuildCheckDataContext<ProjectRequestProcessingDoneData>> projectDoneAction)
+        => RegisterAction(check, projectDoneAction, _globalCallbacks.ProjectRequestProcessingDoneActions);
+
+    internal void RegisterBuildFinishedAction(CheckWrapper check, Action<BuildCheckDataContext<BuildFinishedCheckData>> buildFinishedAction)
+        => RegisterAction(check, buildFinishedAction, _globalCallbacks.BuildFinishedActions);
 
     private void RegisterAction<T>(
         CheckWrapper wrappedCheck,
@@ -153,11 +153,11 @@ internal sealed class BuildCheckCentralContext
             checkContext, resultHandler);
 
     internal void RunProjectProcessingDoneActions(
-        ProjectProcessingDoneData projectProcessingDoneData,
+        ProjectRequestProcessingDoneData projectProcessingDoneData,
         ICheckContext checkContext,
         Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
-        => RunRegisteredActions(_globalCallbacks.ProjectProcessingDoneActions, projectProcessingDoneData,
+        => RunRegisteredActions(_globalCallbacks.ProjectRequestProcessingDoneActions, projectProcessingDoneData,
             checkContext, resultHandler);
 
     internal void RunBuildFinishedActions(

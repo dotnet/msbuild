@@ -147,7 +147,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             ],
 
             // BuildCheckDataSource.Execution
-            []
+            [
+                (PropertiesUsageCheck.SupportedRulesList.Select(r => r.Id).ToArray(),
+                    PropertiesUsageCheck.SupportedRulesList.Any(r => r.DefaultConfiguration.IsEnabled ?? false),
+                    Construct<PropertiesUsageCheck>)
+            ]
         ];
 
         /// <summary>
@@ -256,7 +260,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
                 // Create the wrapper and register to central context
                 wrapper.StartNewProject(projectFullPath, configurations);
-                var wrappedContext = new BuildCheckRegistrationContext(wrapper, _buildCheckCentralContext);
+                var wrappedContext = new CheckRegistrationContext(wrapper, _buildCheckCentralContext);
                 check.RegisterActions(wrappedContext);
             }
             else
@@ -413,34 +417,59 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             loggingContext.LogBuildEvent(checkEventArg);
         }
 
-        private readonly ConcurrentDictionary<int, string> _projectsByContextId = new();
+        private readonly ConcurrentDictionary<int, string> _projectsByInstnaceId = new();
+        private readonly ConcurrentDictionary<int, string> _projectsByEvaluationId = new();
+
         /// <summary>
         /// This method fetches the project full path from the context id.
         /// This is needed because the full path is needed for configuration and later for fetching configured checks
         ///  (future version might optimize by using the ProjectContextId directly for fetching the checks).
         /// </summary>
         /// <param name="buildEventContext"></param>
+        /// <param name="projectFullPath"></param>
         /// <returns></returns>
-        private string GetProjectFullPath(BuildEventContext buildEventContext)
+        private bool TryGetProjectFullPath(BuildEventContext buildEventContext, out string projectFullPath)
         {
-            const string defaultProjectFullPath = "Unknown_Project";
-
-            if (_projectsByContextId.TryGetValue(buildEventContext.ProjectContextId, out string? projectFullPath))
+            if (buildEventContext.EvaluationId >= 0)
             {
-                return projectFullPath;
+                if (_projectsByEvaluationId.TryGetValue(buildEventContext.EvaluationId, out string? val))
+                {
+                    projectFullPath = val;
+                    return true;
+                }
             }
-            else if (buildEventContext.ProjectContextId == BuildEventContext.InvalidProjectContextId &&
-                     _projectsByContextId.Count == 1)
+            else if (buildEventContext.ProjectInstanceId >= 0)
             {
-                // The coalescing is for a rare possibility of a race where other thread removed the item (between the if check and fetch here).
+                if (_projectsByInstnaceId.TryGetValue(buildEventContext.ProjectInstanceId, out string? val))
+                {
+                    projectFullPath = val;
+                    return true;
+                }
+            }
+            else if (_projectsByInstnaceId.Count == 1)
+            {
+                projectFullPath = _projectsByInstnaceId.FirstOrDefault().Value;
+                // This is for a rare possibility of a race where other thread removed the item (between the if check and fetch here).
                 // We currently do not support multiple projects in parallel in a single node anyway.
-                return _projectsByContextId.FirstOrDefault().Value ?? defaultProjectFullPath;
+                if (!string.IsNullOrEmpty(projectFullPath))
+                {
+                    return true;
+                }
+            }
+            else if (_projectsByEvaluationId.Count == 1)
+            {
+                projectFullPath = _projectsByEvaluationId.FirstOrDefault().Value;
+                if (!string.IsNullOrEmpty(projectFullPath))
+                {
+                    return true;
+                }
             }
 
-            return defaultProjectFullPath;
+            projectFullPath = string.Empty;
+            return false;
         }
 
-        public void StartProjectEvaluation(
+        public void ProjectFirstEncountered(
             BuildCheckDataSource buildCheckDataSource,
             ICheckContext checkContext,
             string projectFullPath)
@@ -454,7 +483,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
 
             SetupChecksForNewProject(projectFullPath, checkContext);
-            _projectsByContextId[checkContext.BuildEventContext.ProjectContextId] = projectFullPath;
+        }
+
+        public void ProcessProjectEvaluationStarted(
+            ICheckContext checkContext,
+            string projectFullPath)
+        {
+            _projectsByEvaluationId[checkContext.BuildEventContext.EvaluationId] = projectFullPath;
         }
 
         /*
@@ -464,23 +499,21 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
          */
 
 
-        public void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+        public void EndProjectEvaluation(BuildEventContext buildEventContext)
         {
         }
 
-        public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath)
+        public void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath)
         {
             // There can be multiple ProjectStarted-ProjectFinished per single configuration project build (each request for different target)
-            _projectsByContextId[buildEventContext.ProjectContextId] = projectFullPath;
+            _projectsByInstnaceId[buildEventContext.ProjectInstanceId] = projectFullPath;
         }
 
         public void EndProjectRequest(
-            BuildCheckDataSource buildCheckDataSource,
             ICheckContext checkContext,
             string projectFullPath)
         {
             _buildEventsProcessor.ProcessProjectDone(checkContext, projectFullPath);
-            _projectsByContextId.TryRemove(checkContext.BuildEventContext.ProjectContextId, out _);
         }
 
         public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext checkContext)
@@ -490,11 +523,14 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            PropertyReadData propertyReadData = new(
-                GetProjectFullPath(checkContext.BuildEventContext),
-                checkContext.BuildEventContext.ProjectInstanceId,
-                propertyReadInfo);
-            _buildEventsProcessor.ProcessPropertyRead(propertyReadData, checkContext);
+            if (TryGetProjectFullPath(checkContext.BuildEventContext, out string projectFullPath))
+            {
+                PropertyReadData propertyReadData = new(
+                    projectFullPath,
+                    checkContext.BuildEventContext.ProjectInstanceId,
+                    propertyReadInfo);
+                _buildEventsProcessor.ProcessPropertyRead(propertyReadData, checkContext);
+            }
         }
 
         public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext checkContext)
@@ -504,11 +540,14 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            PropertyWriteData propertyWriteData = new(
-                GetProjectFullPath(checkContext.BuildEventContext),
-                checkContext.BuildEventContext.ProjectInstanceId,
-                propertyWriteInfo);
-            _buildEventsProcessor.ProcessPropertyWrite(propertyWriteData, checkContext);
+            if (TryGetProjectFullPath(checkContext.BuildEventContext, out string projectFullPath))
+            {
+                PropertyWriteData propertyWriteData = new(
+                    projectFullPath,
+                    checkContext.BuildEventContext.ProjectInstanceId,
+                    propertyWriteInfo);
+                _buildEventsProcessor.ProcessPropertyWrite(propertyWriteData, checkContext);
+            }
         }
 
         public void Shutdown()
@@ -527,7 +566,19 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             public CheckWrapper Initialize(Check ba, ConfigurationContext configContext)
             {
-                ba.Initialize(configContext);
+                try
+                {
+                    ba.Initialize(configContext);
+                }
+                catch (BuildCheckConfigurationException)
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    throw new BuildCheckConfigurationException(
+                        $"The Check '{ba.FriendlyName}' failed to initialize: {e.Message}", e);
+                }
                 return new CheckWrapper(ba);
             }
 

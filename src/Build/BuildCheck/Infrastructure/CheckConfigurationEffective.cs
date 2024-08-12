@@ -23,6 +23,10 @@ public sealed class CheckConfigurationEffective
         Severity = severity;
     }
 
+    internal static CheckConfigurationEffective Default { get; } =
+        new(string.Empty, CheckConfiguration.Default.EvaluationCheckScope!.Value,
+            CheckConfiguration.Default.Severity!.Value);
+
     public string RuleId { get; }
 
     public EvaluationCheckScope EvaluationCheckScope { get; }

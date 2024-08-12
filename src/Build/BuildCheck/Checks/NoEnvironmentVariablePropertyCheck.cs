@@ -100,11 +100,11 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check, IDisposable
             ? bool.Parse(configVal)
             : null;
 
-    internal class EnvironmentVariableIdentityKey(string environmentVariableName, IMsBuildElementLocation location) : IEquatable<EnvironmentVariableIdentityKey>
+    internal class EnvironmentVariableIdentityKey(string environmentVariableName, IMSBuildElementLocation location) : IEquatable<EnvironmentVariableIdentityKey>
     {
         public string EnvironmentVariableName { get; } = environmentVariableName;
 
-        public IMsBuildElementLocation Location { get; } = location;
+        public IMSBuildElementLocation Location { get; } = location;
 
         public override bool Equals(object? obj) => Equals(obj as EnvironmentVariableIdentityKey);
 

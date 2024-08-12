@@ -15,7 +15,7 @@ internal class PropertyWriteData(
     string projectFilePath,
     int? projectConfigurationId,
     string propertyName,
-    IMsBuildElementLocation? elementLocation,
+    IMSBuildElementLocation? elementLocation,
     bool isEmpty)
     : CheckData(projectFilePath, projectConfigurationId)
 {
@@ -37,7 +37,7 @@ internal class PropertyWriteData(
     /// If the location is null, it means that the property doesn't come from xml, but rather other sources
     ///  (environment variable, global property, toolset properties etc.).
     /// </summary>
-    public IMsBuildElementLocation? ElementLocation { get; } = elementLocation;
+    public IMSBuildElementLocation? ElementLocation { get; } = elementLocation;
 
     /// <summary>
     /// Was any value written? (E.g. if we set propA with value propB, while propB is undefined - the isEmpty will be true).
