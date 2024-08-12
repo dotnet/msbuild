@@ -32,9 +32,9 @@ public sealed class BuildCheckResult : IBuildCheckResult
     internal BuildEventArgs ToEventArgs(CheckResultSeverity severity)
         => severity switch
         {
-            CheckResultSeverity.Suggestion => new BuildCheckResultMessage(this),
-            CheckResultSeverity.Warning => new BuildCheckResultWarning(this, CheckRule.Id),
-            CheckResultSeverity.Error => new BuildCheckResultError(this, CheckRule.Id),
+            CheckResultSeverity.Suggestion => new BuildCheckResultMessage(FormatMessage()),
+            CheckResultSeverity.Warning => new BuildCheckResultWarning(FormatMessage(), CheckRule.Id),
+            CheckResultSeverity.Error => new BuildCheckResultError(FormatMessage(), CheckRule.Id),
             _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null),
         };
 
@@ -48,6 +48,7 @@ public sealed class BuildCheckResult : IBuildCheckResult
     public string LocationString => Location.LocationString;
 
     public string[] MessageArgs { get; }
+
     public string MessageFormat => CheckRule.MessageFormat;
 
     // Here we will provide different link for built-in rules and custom rules - once we have the base classes differentiated.

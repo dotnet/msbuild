@@ -233,10 +233,10 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData(null, "Property is derived from environment variable: 'TEST'. Properties should be passed explicitly using the /p option.")]
-    [InlineData(true, "Property is derived from environment variable: 'TEST' with value: 'FromEnvVariable'. Properties should be passed explicitly using the /p option.")]
-    [InlineData(false, "Property is derived from environment variable: 'TEST'. Properties should be passed explicitly using the /p option.")]
-    public void NoEnvironmentVariableProperty_Test(bool? customConfigEnabled, string expectedMessage)
+    [InlineData(null, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." } )]
+    [InlineData(true, new[] { "Property is derived from environment variable: 'TestFromTarget' with value 'FromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation' with value 'FromEvaluation'." })]
+    [InlineData(false, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." } )]
+    public void NoEnvironmentVariableProperty_Test(bool? customConfigEnabled, string[] expectedMessages)
     {
         List<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? customConfigData = null;
 
@@ -257,7 +257,10 @@ public class EndToEndTests : IDisposable
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output);
 
-        output.ShouldContain(expectedMessage);
+        foreach (string expectedMessage in expectedMessages)
+        {
+            output.ShouldContain(expectedMessage);
+        }
     }
 
     [Theory]
@@ -351,10 +354,10 @@ public class EndToEndTests : IDisposable
                 checkCandidatePath));
 
             string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool _, timeoutMilliseconds: 1200_0000);
+                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool _);
 
             projectCheckBuildLog.ShouldContain(expectedMessage);
-            
+
             // Cleanup
             File.Delete(editorConfigName);
         }
@@ -444,7 +447,9 @@ public class EndToEndTests : IDisposable
         _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
 
-        _env.SetEnvironmentVariable("TEST", "FromEnvVariable");
+        // Needed for testing check BC0103
+        _env.SetEnvironmentVariable("TestFromTarget", "FromTarget");
+        _env.SetEnvironmentVariable("TestFromEvaluation", "FromEvaluation");
         _env.SetEnvironmentVariable("TestImported", "FromEnv");
 
         string ReadAndAdjustProjectContent(string fileName) =>

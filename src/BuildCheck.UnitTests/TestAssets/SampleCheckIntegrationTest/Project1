@@ -13,13 +13,17 @@
        <TestProperty>Test</TestProperty>
    </PropertyGroup>
 
+    <PropertyGroup>
+        <ReadFromEnv>$(TestFromEvaluation)</ReadFromEnv>
+    </PropertyGroup>
+
    <Target Name="Hello">
        <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
        <Copy SourceFiles="TestFilePath" DestinationFolder="WorkFolderPath" />
        <MSBuild Projects=".\FooBar-Copy.csproj" Targets="Hello" />
 
        <PropertyGroup>
-         <ReadFromEnvVariable>$(TEST)</ReadFromEnvVariable>
+         <ReadFromEnvVariable>$(TestFromTarget)</ReadFromEnvVariable>
        </PropertyGroup>
 
        <Message Importance="High" Text="$(ReadFromEnvVariable)" />

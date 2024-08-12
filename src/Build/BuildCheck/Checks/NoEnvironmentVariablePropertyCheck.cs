@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
@@ -22,7 +23,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check, IDisposable
 
     private const string VerboseEnvVariableOutputKey = "allow_displaying_environment_variable_value";
 
-    private readonly List<BuildCheckResult> _buildCheckResults = new List<BuildCheckResult>();
+    private readonly Stack<BuildCheckResult> _buildCheckResults = new Stack<BuildCheckResult>();
 
     private BuildCheckDataContext<EnvironmentVariableCheckData>? _dataContext;
 
@@ -49,8 +50,9 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check, IDisposable
 
         CheckScopeClassifier.NotifyOnScopingReadiness += (string? projectFilePath) =>
         {
-            foreach (BuildCheckResult result in _buildCheckResults)
+            while (_buildCheckResults.Count > 0)
             {
+                BuildCheckResult result = _buildCheckResults.Pop();
                 if (!CheckScopeClassifier.IsActionInObservedScope(_scope, result.Location.File, projectFilePath ?? string.Empty))
                 {
                     continue;
@@ -67,31 +69,34 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check, IDisposable
     {
         if (context.Data.EvaluatedEnvironmentVariables.Count != 0)
         {
-            foreach (var envVariableData in context.Data.EvaluatedEnvironmentVariables)
+            foreach (KeyValuePair<string, (string EnvVarValue, IMSBuildElementLocation Location)> envVariableData in context.Data.EvaluatedEnvironmentVariables)
             {
                 EnvironmentVariableIdentityKey identityKey = new(envVariableData.Key, envVariableData.Value.Location);
                 if (!_environmentVariablesReported.Contains(identityKey))
                 {
-                    if (_isVerboseEnvVarOutput)
+                    string buildCheckResultMessageArgs = _isVerboseEnvVarOutput ? $"'{envVariableData.Key}' with value: '{envVariableData.Value.EnvVarValue}'" : $"'{envVariableData.Key}'";
+
+                    // Scope information is available after evaluation of the project file. If it is not ready, we will report the check later.
+                    if (CheckScopeClassifier.IsScopingReady && CheckScopeClassifier.IsActionInObservedScope(_scope, envVariableData.Value.Location.File, context.Data.ProjectFilePath ?? string.Empty))
                     {
-                        _buildCheckResults.Add(BuildCheckResult.Create(
+                        context.ReportResult(BuildCheckResult.Create(
                             SupportedRule,
                             ElementLocation.Create(envVariableData.Value.Location.File, envVariableData.Value.Location.Line, envVariableData.Value.Location.Column),
-                            $"'{envVariableData.Key}' with value: '{envVariableData.Value.EnvVarValue}'"));
+                            buildCheckResultMessageArgs));
                     }
                     else
                     {
-                        _buildCheckResults.Add(BuildCheckResult.Create(
+                        _dataContext = context;
+
+                        _buildCheckResults.Push(BuildCheckResult.Create(
                             SupportedRule,
                             ElementLocation.Create(envVariableData.Value.Location.File, envVariableData.Value.Location.Line, envVariableData.Value.Location.Column),
-                            $"'{envVariableData.Key}'"));
+                            buildCheckResultMessageArgs));
                     }
 
                     _environmentVariablesReported.Add(identityKey);
                 }
             }
-
-            _dataContext = context;
         }
     }
 

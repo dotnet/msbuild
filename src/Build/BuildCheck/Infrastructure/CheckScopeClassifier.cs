@@ -12,6 +12,8 @@ internal class CheckScopeClassifier : IDisposable
 {
     internal static event Action<string?>? NotifyOnScopingReadiness;
 
+    internal static bool IsScopingReady;
+
     /// <summary>
     /// Indicates whether given location is in the observed scope, based on currently built project path.
     /// </summary>
@@ -55,7 +57,11 @@ internal class CheckScopeClassifier : IDisposable
         }
     }
 
-    internal static void RaiseNotifyOnScopingReadiness(string? projectFilePath) => NotifyOnScopingReadiness?.Invoke(projectFilePath);
+    internal static void RaiseNotifyOnScopingReadiness(string? projectFilePath)
+    {
+        IsScopingReady = true;
+        NotifyOnScopingReadiness?.Invoke(projectFilePath);
+    }
 
     private static bool IsGeneratedNugetImport(string file) => file.EndsWith("nuget.g.props", StringComparison.OrdinalIgnoreCase) ||
         file.EndsWith("nuget.g.targets", StringComparison.OrdinalIgnoreCase);
