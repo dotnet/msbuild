@@ -49,7 +49,7 @@ This practice can result in inconsistent build outcomes and makes debugging diff
 
 "A property that is accessed should be declared first."
 
-This check indicates that a property was acessed without being declared (the declaration might have happen later - see [BC0202](#BC0202) for such checking). Only accessing in the configured scope (by default it's the project file only) are checked.
+This check indicates that a property was accessed without being declared (the declaration might have happen later - see [BC0202](#BC0202) for such checking). Only accessing in the configured scope (by default it's the project file only) are checked.
 
 There are couple cases which are allowed by the check:
 
@@ -73,7 +73,7 @@ There are couple cases which are allowed by the check:
 
 "A property should be declared before it is first used."
 
-This check indicates that a property was acessed before it was declared. The default scope of this rule is the project file only. The scope captures the read and write operations as well. So this rule reports:
+This check indicates that a property was accessed before it was declared. The default scope of this rule is the project file only. The scope captures the read and write operations as well. So this rule reports:
  * Uninitialized reads that happened anywhere during the build, while the uninitialized property was later defined within the scope of this check (e.g. project file).
  * Uninitialized reads that happened within the scope of check (e.g. project file), while later defined anywhere in the build
 
