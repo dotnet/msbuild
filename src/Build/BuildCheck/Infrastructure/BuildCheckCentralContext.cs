@@ -118,8 +118,7 @@ internal sealed class BuildCheckCentralContext
         ICheckContext checkContext,
         Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
-        => RunRegisteredActions(_globalCallbacks.EvaluatedPropertiesActions, evaluatedPropertiesCheckData,
-            checkContext, resultHandler);
+        => RunRegisteredActions(_globalCallbacks.EvaluatedPropertiesActions, evaluatedPropertiesCheckData, checkContext, resultHandler);
 
     internal void RunParsedItemsActions(
         ParsedItemsCheckData parsedItemsCheckData,
@@ -197,9 +196,7 @@ internal sealed class BuildCheckCentralContext
             }
             else
             {
-                configPerRule =
-                    _configurationProvider.GetMergedConfigurations(projectFullPath,
-                        checkCallback.Item1.Check);
+                configPerRule = _configurationProvider.GetMergedConfigurations(projectFullPath, checkCallback.Item1.Check);
                 if (configPerRule.All(c => !c.IsEnabled))
                 {
                     return;

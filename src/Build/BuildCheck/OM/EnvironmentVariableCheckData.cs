@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
@@ -13,11 +14,11 @@ public class EnvironmentVariableCheckData : CheckData
     internal EnvironmentVariableCheckData(
         string projectFilePath,
         int? projectConfigurationId,
-        IReadOnlyDictionary<string, (string EnvVarValue, string File, int Line, int Column)> evaluatedEnvironmentVariables)
+        IReadOnlyDictionary<string, (string EnvVarValue, IMsBuildElementLocation Location)> evaluatedEnvironmentVariables)
         : base(projectFilePath, projectConfigurationId) => EvaluatedEnvironmentVariables = evaluatedEnvironmentVariables;
 
     /// <summary>
     /// Gets the evaluated environment variables and their metadata.
     /// </summary>
-    public IReadOnlyDictionary<string, (string EnvVarValue, string File, int Line, int Column)> EvaluatedEnvironmentVariables { get; }
+    public IReadOnlyDictionary<string, (string EnvVarValue, IMsBuildElementLocation Location)> EvaluatedEnvironmentVariables { get; }
 }

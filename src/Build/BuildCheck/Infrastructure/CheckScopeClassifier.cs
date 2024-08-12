@@ -7,8 +7,11 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
-internal static class CheckScopeClassifier
+
+internal class CheckScopeClassifier : IDisposable
 {
+    internal static event Action<string?>? NotifyOnScopingReadiness;
+
     /// <summary>
     /// Indicates whether given location is in the observed scope, based on currently built project path.
     /// </summary>
@@ -52,9 +55,23 @@ internal static class CheckScopeClassifier
         }
     }
 
-    private static bool IsGeneratedNugetImport(string file)
+    internal static void RaiseNotifyOnScopingReadiness(string? projectFilePath) => NotifyOnScopingReadiness?.Invoke(projectFilePath);
+
+    private static bool IsGeneratedNugetImport(string file) => file.EndsWith("nuget.g.props", StringComparison.OrdinalIgnoreCase) ||
+        file.EndsWith("nuget.g.targets", StringComparison.OrdinalIgnoreCase);
+
+    public void Dispose()
     {
-        return file.EndsWith("nuget.g.props", StringComparison.OrdinalIgnoreCase) ||
-               file.EndsWith("nuget.g.targets", StringComparison.OrdinalIgnoreCase);
+        // Remove all subscribers
+        if (NotifyOnScopingReadiness != null)
+        {
+            foreach (Delegate d in NotifyOnScopingReadiness.GetInvocationList())
+            {
+                NotifyOnScopingReadiness -= (Action<string>)d;
+            }
+        }
+
+        // Set the event to null
+        NotifyOnScopingReadiness = null;
     }
 }

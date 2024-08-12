@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
-internal sealed class NoEnvironmentVariablePropertyCheck : Check
+internal sealed class NoEnvironmentVariablePropertyCheck : Check, IDisposable
 {
     public static CheckRule SupportedRule = new CheckRule(
                 "BC0103",
@@ -20,6 +21,10 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
     private const string RuleId = "BC0103";
 
     private const string VerboseEnvVariableOutputKey = "allow_displaying_environment_variable_value";
+
+    private readonly List<BuildCheckResult> _buildCheckResults = new List<BuildCheckResult>();
+
+    private BuildCheckDataContext<EnvironmentVariableCheckData>? _dataContext;
 
     /// <summary>
     /// Contains the list of reported environment variables.
@@ -39,8 +44,21 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
         foreach (CustomConfigurationData customConfigurationData in configurationContext.CustomConfigurationData)
         {
             bool? isVerboseEnvVarOutput = GetVerboseEnvVarOutputConfig(customConfigurationData, RuleId);
-            _isVerboseEnvVarOutput = isVerboseEnvVarOutput.HasValue && isVerboseEnvVarOutput.Value;           
+            _isVerboseEnvVarOutput = isVerboseEnvVarOutput.HasValue && isVerboseEnvVarOutput.Value;
         }
+
+        CheckScopeClassifier.NotifyOnScopingReadiness += (string? projectFilePath) =>
+        {
+            foreach (BuildCheckResult result in _buildCheckResults)
+            {
+                if (!CheckScopeClassifier.IsActionInObservedScope(_scope, result.Location.File, projectFilePath ?? string.Empty))
+                {
+                    continue;
+                }
+
+                _dataContext?.ReportResult(result);
+            }
+        };
     }
 
     public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEnvironmentVariableReadAction(ProcessEnvironmentVariableReadAction);
@@ -51,31 +69,29 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
         {
             foreach (var envVariableData in context.Data.EvaluatedEnvironmentVariables)
             {
-                if (!CheckScopeClassifier.IsActionInObservedScope(_scope, envVariableData.Value.File, context.Data.ProjectFilePath))
-                {
-                    continue;
-                }
-                EnvironmentVariableIdentityKey identityKey = new(envVariableData.Key, envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column);
+                EnvironmentVariableIdentityKey identityKey = new(envVariableData.Key, envVariableData.Value.Location);
                 if (!_environmentVariablesReported.Contains(identityKey))
                 {
                     if (_isVerboseEnvVarOutput)
                     {
-                        context.ReportResult(BuildCheckResult.Create(
+                        _buildCheckResults.Add(BuildCheckResult.Create(
                             SupportedRule,
-                            ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
+                            ElementLocation.Create(envVariableData.Value.Location.File, envVariableData.Value.Location.Line, envVariableData.Value.Location.Column),
                             $"'{envVariableData.Key}' with value: '{envVariableData.Value.EnvVarValue}'"));
                     }
                     else
                     {
-                        context.ReportResult(BuildCheckResult.Create(
+                        _buildCheckResults.Add(BuildCheckResult.Create(
                             SupportedRule,
-                            ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
+                            ElementLocation.Create(envVariableData.Value.Location.File, envVariableData.Value.Location.Line, envVariableData.Value.Location.Column),
                             $"'{envVariableData.Key}'"));
                     }
 
                     _environmentVariablesReported.Add(identityKey);
                 }
             }
+
+            _dataContext = context;
         }
     }
 
@@ -84,31 +100,28 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
             ? bool.Parse(configVal)
             : null;
 
-    internal class EnvironmentVariableIdentityKey(string environmentVariableName, string file, int line, int column) : IEquatable<EnvironmentVariableIdentityKey>
+    internal class EnvironmentVariableIdentityKey(string environmentVariableName, IMsBuildElementLocation location) : IEquatable<EnvironmentVariableIdentityKey>
     {
         public string EnvironmentVariableName { get; } = environmentVariableName;
 
-        public string File { get; } = file;
-
-        public int Line { get; } = line;
-
-        public int Column { get; } = column;
+        public IMsBuildElementLocation Location { get; } = location;
 
         public override bool Equals(object? obj) => Equals(obj as EnvironmentVariableIdentityKey);
 
         public bool Equals(EnvironmentVariableIdentityKey? other) =>
             other != null &&
             EnvironmentVariableName == other.EnvironmentVariableName &&
-            File == other.File &&
-            Line == other.Line &&
-            Column == other.Column;
+            Location.File == other.Location.File &&
+            Location.Line == other.Location.Line &&
+            Location.Column == other.Location.Column;
 
         public override int GetHashCode()
         {
             int hashCode = 17;
-            hashCode = hashCode * 31 + (File != null ? File.GetHashCode() : 0);
-            hashCode = hashCode * 31 + Line.GetHashCode();
-            hashCode = hashCode * 31 + Column.GetHashCode();
+            hashCode = hashCode * 31 + (Location.File != null ? Location.File.GetHashCode() : 0);
+            hashCode = hashCode * 31 + Location.Line.GetHashCode();
+            hashCode = hashCode * 31 + Location.Column.GetHashCode();
+
             return hashCode;
         }
     }

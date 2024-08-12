@@ -328,6 +328,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
         {
             Dictionary<string, string>? propertiesLookup = null;
+
             // The FileClassifier is normally initialized by executing build requests.
             // However, if we are running in a main node that has no execution nodes - we need to initialize it here (from events).
             if (!IsInProcNode)
@@ -343,6 +344,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(checkContext, evaluationFinishedEventArgs, propertiesLookup);
+
+            CheckScopeClassifier.RaiseNotifyOnScopingReadiness(evaluationFinishedEventArgs?.ProjectFile);
         }
 
         public void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
