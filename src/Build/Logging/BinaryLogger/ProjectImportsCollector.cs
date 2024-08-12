@@ -7,6 +7,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -33,6 +35,7 @@ namespace Microsoft.Build.Logging
 
         // this will form a chain of file write tasks, running sequentially on a background thread
         private Task _currentTask = Task.CompletedTask;
+        internal event AnyEventHandler? FileIOExceptionEvent;
 
         internal static void FlushBlobToFile(
             string logFilePath,
@@ -143,8 +146,10 @@ namespace Microsoft.Build.Logging
                     addFileWorker(filePath);
                     return true;
                 }
-                catch
-                { }
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                {
+                    InvokeFileIOErrorEvent(filePath, TaskLoggingHelper.GetInnerExceptionMessageString(e));
+                }
 
                 return false;
             }
@@ -164,6 +169,16 @@ namespace Microsoft.Build.Logging
 
             using FileStream content = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
             AddFileData(filePath, content, null);
+        }
+
+        private void InvokeFileIOErrorEvent(string filePath, string message)
+        {
+            BuildEventArgs args = new BuildMessageEventArgs(
+                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectImportsCollectorFileIOFail", filePath, message),
+                helpKeyword: null,
+                senderName: nameof(ProjectImportsCollector),
+                MessageImportance.Low);
+            FileIOExceptionEvent?.Invoke(this, args);
         }
 
         /// <remarks>

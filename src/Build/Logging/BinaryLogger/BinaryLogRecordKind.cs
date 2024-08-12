@@ -40,5 +40,6 @@ namespace Microsoft.Build.Logging
         TaskParameter,
         ResponseFileUsed,
         AssemblyLoad,
+        BuildSubmissionStarted,
     }
 }

@@ -17,11 +17,11 @@ internal class TracingReporter
 
     // Infrastructure time keepers
     // TODO: add more timers throughout BuildCheck run
-    private TimeSpan analyzerAcquisitionTime;
-    private TimeSpan analyzerSetDataSourceTime;
-    private TimeSpan newProjectAnalyzersTime;
+    private TimeSpan checkAcquisitionTime;
+    private TimeSpan checkSetDataSourceTime;
+    private TimeSpan newProjectChecksTime;
 
-    public void AddAnalyzerStats(string name, TimeSpan subtotal)
+    public void AddCheckStats(string name, TimeSpan subtotal)
     {
         if (TracingStats.TryGetValue(name, out TimeSpan existing))
         {
@@ -35,25 +35,25 @@ internal class TracingReporter
 
     public void AddAcquisitionStats(TimeSpan subtotal)
     {
-        analyzerAcquisitionTime += subtotal;
+        checkAcquisitionTime += subtotal;
     }
 
     public void AddSetDataSourceStats(TimeSpan subtotal)
     {
-        analyzerSetDataSourceTime += subtotal;
+        checkSetDataSourceTime += subtotal;
     }
 
     public void AddNewProjectStats(TimeSpan subtotal)
     {
-        newProjectAnalyzersTime += subtotal;
+        newProjectChecksTime += subtotal;
     }
 
-    public void AddAnalyzerInfraStats()
+    public void AddCheckInfraStats()
     {
         var infraStats = new Dictionary<string, TimeSpan>() {
-                { $"{BuildCheckConstants.infraStatPrefix}analyzerAcquisitionTime", analyzerAcquisitionTime },
-                { $"{BuildCheckConstants.infraStatPrefix}analyzerSetDataSourceTime", analyzerSetDataSourceTime },
-                { $"{BuildCheckConstants.infraStatPrefix}newProjectAnalyzersTime", newProjectAnalyzersTime }
+                { $"{BuildCheckConstants.infraStatPrefix}checkAcquisitionTime", checkAcquisitionTime },
+                { $"{BuildCheckConstants.infraStatPrefix}checkSetDataSourceTime", checkSetDataSourceTime },
+                { $"{BuildCheckConstants.infraStatPrefix}newProjectChecksTime", newProjectChecksTime }
             };
 
         TracingStats.Merge(infraStats, (span1, span2) => span1 + span2);

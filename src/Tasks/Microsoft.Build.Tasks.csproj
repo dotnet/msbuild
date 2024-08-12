@@ -251,7 +251,6 @@
     <Compile Include="LC.cs" />
     <Compile Include="ListOperators\FindUnderPath.cs" />
     <Compile Include="ListOperators\RemoveDuplicates.cs" />
-    <Compile Include="LockCheck.cs" />
     <Compile Include="MakeDir.cs" />
     <Compile Include="ManifestUtil\*.cs" Exclude="ManifestUtil\CngLightup.cs" />
     <Compile Include="Message.cs" />
@@ -432,12 +431,6 @@
     </Content>
     <Content Include="Microsoft.Common.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <!-- For .NET Core, Microsoft.Common.props needs to be in version subfolder for bootstrap build, but in MSBuild exe
-         path for some tests.  So include it twice. -->
-    <Content Include="Microsoft.Common.props" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>Current\Microsoft.Common.props</Link>
     </Content>
     <Content Include="Microsoft.Common.tasks">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

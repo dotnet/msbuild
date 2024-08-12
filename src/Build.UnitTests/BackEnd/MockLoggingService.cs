@@ -4,7 +4,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
@@ -29,6 +32,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         #region ILoggingService Members
+
+        /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        public IBuildEngineDataRouter BuildEngineDataRouter => this;
 
         /// <summary>
         /// The event to raise when there is a logging exception
@@ -486,6 +494,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
+        /// <inheritdoc />
+        public void LogBuildCanceled()
+        {
+        }
 
         /// <inheritdoc />
         public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
@@ -639,6 +651,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
             throw new NotImplementedException();
         }
 
+        public void InitializeComponent(IBuildComponentHost host) => throw new NotImplementedException();
+        public void ShutdownComponent() => throw new NotImplementedException();
+
         #endregion
+
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext checkContext)
+        { /* Ignore the data */ }
+
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext checkContext)
+        { /* Ignore the data */ }
+
+        public void ProcessProjectEvaluationStarted(ICheckContext analysisContext, string projectFullPath)
+        { /* Ignore the data */ }
     }
 }

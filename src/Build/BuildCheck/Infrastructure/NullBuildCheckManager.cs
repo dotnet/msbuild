@@ -5,21 +5,24 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
-using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-internal class NullBuildCheckManager : IBuildCheckManager
+internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRouter
 {
     public void Shutdown()
     {
     }
 
     public void ProcessEvaluationFinishedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        ICheckContext checkContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
+    {
+    }
+
+    public void ProcessBuildFinished(ICheckContext analysisContext)
     {
     }
 
@@ -27,22 +30,27 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
-    public void ProcessTaskStartedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+    public void ProcessTaskStartedEventArgs(
+        ICheckContext checkContext,
         TaskStartedEventArgs taskStartedEventArgs)
     {
     }
 
-    public void ProcessTaskFinishedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+    public void ProcessTaskFinishedEventArgs(
+        ICheckContext checkContext,
         TaskFinishedEventArgs taskFinishedEventArgs)
     {
     }
 
-    public void ProcessTaskParameterEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+    public void ProcessTaskParameterEventArgs(
+        ICheckContext checkContext,
         TaskParameterEventArgs taskParameterEventArgs)
     {
     }
 
-    public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, BuildEventContext buildEventContext) 
+    public void ProcessCheckAcquisition(
+        CheckAcquisitionData acquisitionData,
+        ICheckContext checkContext)
     {
     }
 
@@ -50,38 +58,35 @@ internal class NullBuildCheckManager : IBuildCheckManager
     {
     }
 
-    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string fullPath)
+    public void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, ICheckContext checkContext,
+        string projectFullPath)
     {
     }
 
-    public void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void ProcessProjectEvaluationStarted(ICheckContext checkContext, string projectFullPath)
     {
     }
 
-    public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void EndProjectEvaluation(BuildEventContext buildEventContext)
     {
     }
 
-    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath)
     {
     }
 
-    public void YieldProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void EndProjectRequest(ICheckContext checkContext, string projectFullPath)
     {
     }
 
-    public void ResumeProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    {
-    }
+    public Dictionary<string, TimeSpan> CreateCheckTracingStats() => new Dictionary<string, TimeSpan>();
 
-    public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats() => new Dictionary<string, TimeSpan>();
-
-    public void StartTaskInvocation(BuildCheckDataSource buildCheckDataSource, TaskStartedEventArgs eventArgs)
+    public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext buildEventContext)
     { }
 
-    public void EndTaskInvocation(BuildCheckDataSource buildCheckDataSource, TaskFinishedEventArgs eventArgs)
+    public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext buildEventContext)
     { }
 
-    public void ProcessTaskParameter(BuildCheckDataSource buildCheckDataSource, TaskParameterEventArgs eventArg)
+    public void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
     { }
 }

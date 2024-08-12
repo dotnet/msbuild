@@ -96,6 +96,45 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void RoundtripBuildSubmissionStartedEventArgs()
+        {
+            var globalVariables = new Dictionary<string, string>
+            {
+                {"Variable1", "Value1" },
+                {"Variable2", "" },
+                {"Variable3", null },
+            };
+            var entryPointProjects = new List<string>()
+            {
+                "project1",
+                "project2",
+                "",
+            };
+            var targetNames = new List<string>()
+            {
+                "target1",
+                "target2",
+                "",
+            };
+            var flag = Execution.BuildRequestDataFlags.FailOnUnresolvedSdk;
+            var submissionId = 1234;
+
+            BuildSubmissionStartedEventArgs args = new(
+                globalVariables,
+                entryPointProjects,
+                targetNames,
+                flag,
+                submissionId);
+
+            Roundtrip<BuildSubmissionStartedEventArgs>(args,
+                e => TranslationHelpers.GetPropertiesString(e.GlobalProperties),
+                e => TranslationHelpers.GetPropertiesString(e.EntryProjectsFullPath),
+                e => TranslationHelpers.GetPropertiesString(e.TargetNames),
+                e => e.Flags.ToString(),
+                e => e.SubmissionId.ToString());
+        }
+
+        [Fact]
         public void RoundtripProjectStartedEventArgs()
         {
             var args = new ProjectStartedEventArgs(
@@ -209,7 +248,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void RoundtripEnvironmentVariableReadEventArgs()
         {
-            EnvironmentVariableReadEventArgs args = new("VarName", "VarValue");
+            EnvironmentVariableReadEventArgs args = new("VarName", "VarValue", "file", 10, 20);
             args.BuildEventContext = new BuildEventContext(4, 5, 6, 7);
             Roundtrip(args,
                 e => e.Message,
@@ -798,22 +837,6 @@ namespace Microsoft.Build.UnitTests
                 e => e.EvaluatedCondition,
                 e => e.OriginalBuildEventContext.ToString(),
                 e => e.OriginallySucceeded.ToString());
-        }
-
-        [Fact]
-        public void RoundTripEnvironmentVariableReadEventArgs()
-        {
-            var args = new EnvironmentVariableReadEventArgs(
-                environmentVariableName: Guid.NewGuid().ToString(),
-                message: Guid.NewGuid().ToString(),
-                helpKeyword: Guid.NewGuid().ToString(),
-                senderName: Guid.NewGuid().ToString());
-
-            Roundtrip(args,
-                e => e.EnvironmentVariableName,
-                e => e.Message,
-                e => e.HelpKeyword,
-                e => e.SenderName);
         }
 
         [Fact]
