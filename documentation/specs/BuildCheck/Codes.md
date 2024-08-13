@@ -59,7 +59,7 @@ There are couple cases which are allowed by the check:
 * Checking the property for emptyness - e.g.:
   `<PropertyGroup Condition="'$(PropertyThatMightNotBeDefined)' == ''">`
 
-* Any usage of property in condition. This can be opted out vie the configuration `AllowUninitializedPropertiesInConditions` - e.g.:
+* Any usage of property in condition. This can be opted out via the configuration `AllowUninitializedPropertiesInConditions` - e.g.:
   ```ini
   [*.csproj]
   build_check.BC0201.severity=error
