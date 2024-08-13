@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
@@ -10,14 +9,14 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
-internal sealed class NoEnvironmentVariablePropertyCheck : Check, IDisposable
+internal sealed class NoEnvironmentVariablePropertyCheck : Check
 {
     public static CheckRule SupportedRule = new CheckRule(
-                "BC0103",
-                "NoEnvironmentVariablePropertyCheck",
-                "No implicit property derived from an environment variable should be used during the build",
-                "Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.",
-                new CheckConfiguration() { Severity = CheckResultSeverity.Suggestion });
+        "BC0103",
+        "NoEnvironmentVariablePropertyCheck",
+        "No implicit property derived from an environment variable should be used during the build",
+        "Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.",
+        new CheckConfiguration() { Severity = CheckResultSeverity.Suggestion });
 
     private const string RuleId = "BC0103";
 

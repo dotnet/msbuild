@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -125,7 +124,7 @@ namespace Microsoft.Build.Logging
         /// <param name="binaryWriter">A BinaryWriter to write the BuildEventArgs instances to</param>
         public BuildEventArgsWriter(BinaryWriter binaryWriter)
         {
-            this.originalStream = binaryWriter.BaseStream;
+            originalStream = binaryWriter.BaseStream;
 
             // this doesn't exceed 30K for smaller binlogs so seems like a reasonable
             // starting point to avoid reallocations in the common case
@@ -318,7 +317,6 @@ namespace Microsoft.Build.Logging
         private BinaryLogRecordKind Write(BuildCheckResultMessage e)
         {
             WriteBuildEventArgsFields(e, writeMessage: true);
-            WriteDeduplicatedString(e.RawMessage);
 
             return BinaryLogRecordKind.BuildCheckMessage;
         }
@@ -326,16 +324,13 @@ namespace Microsoft.Build.Logging
         private BinaryLogRecordKind Write(BuildCheckResultWarning e)
         {
             WriteBuildEventArgsFields(e, writeMessage: true);
-            WriteDeduplicatedString(e.RawMessage);
 
             return BinaryLogRecordKind.BuildCheckWarning;
         }
 
         private BinaryLogRecordKind Write(BuildCheckResultError e)
         {
-            Debugger.Launch();
-            WriteBuildEventArgsFields(e, writeMessage: false);
-            WriteDeduplicatedString(e.RawMessage);
+            WriteBuildEventArgsFields(e, writeMessage: true);
 
             return BinaryLogRecordKind.BuildCheckError;
         }
@@ -484,6 +479,11 @@ namespace Microsoft.Build.Logging
 
         private BinaryLogRecordKind Write(BuildErrorEventArgs e)
         {
+            if (e is BuildCheckResultError buildCheckError)
+            {
+                return Write(buildCheckError);
+            }
+
             WriteBuildEventArgsFields(e);
             WriteArguments(e.RawArguments);
             WriteDeduplicatedString(e.Subcategory);
@@ -494,17 +494,17 @@ namespace Microsoft.Build.Logging
             Write(e.ColumnNumber);
             Write(e.EndLineNumber);
             Write(e.EndColumnNumber);
-
-            if (e is BuildCheckResultError buildCheckError)
-            {
-                return Write(buildCheckError);
-            }
 
             return BinaryLogRecordKind.Error;
         }
 
         private BinaryLogRecordKind Write(BuildWarningEventArgs e)
         {
+            if (e is BuildCheckResultWarning buildCheckWarning)
+            {
+                return Write(buildCheckWarning);
+            }
+
             WriteBuildEventArgsFields(e);
             WriteArguments(e.RawArguments);
             WriteDeduplicatedString(e.Subcategory);
@@ -515,11 +515,6 @@ namespace Microsoft.Build.Logging
             Write(e.ColumnNumber);
             Write(e.EndLineNumber);
             Write(e.EndColumnNumber);
-
-            if (e is BuildCheckResultWarning buildCheckWarning)
-            {
-                return Write(buildCheckWarning);
-            }
 
             return BinaryLogRecordKind.Warning;
         }
@@ -632,6 +627,7 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.ResponseFilePath);
             return BinaryLogRecordKind.ResponseFileUsed;
         }
+
         private BinaryLogRecordKind Write(TaskCommandLineEventArgs e)
         {
             WriteMessageFields(e, writeMessage: false, writeImportance: true);

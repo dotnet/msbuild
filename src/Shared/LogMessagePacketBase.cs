@@ -991,12 +991,12 @@ namespace Microsoft.Build.Shared
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
         private void WriteProjectEvaluationStartedEventToStream(ProjectEvaluationStartedEventArgs args, ITranslator translator)
         {
-            WriteBuildStatusEvent(args, args.ProjectFile, args.RawTimestamp, translator);
+            WriteEvaluationEvent(args, args.ProjectFile, args.RawTimestamp, translator);
         }
 
         private void WriteProjectEvaluationFinishedEventToStream(ProjectEvaluationFinishedEventArgs args, ITranslator translator)
         {
-            WriteBuildStatusEvent(args, args.ProjectFile, args.RawTimestamp, translator);
+            WriteEvaluationEvent(args, args.ProjectFile, args.RawTimestamp, translator);
 
             WriteProperties(args.GlobalProperties, translator);
             WriteProperties(args.Properties, translator);
@@ -1004,7 +1004,7 @@ namespace Microsoft.Build.Shared
             WriteProfileResult(args.ProfilerResult, translator);
         }
 
-        private static void WriteBuildStatusEvent(BuildStatusEventArgs args, string projectFile, DateTime timestamp, ITranslator translator)
+        private static void WriteEvaluationEvent(BuildStatusEventArgs args, string projectFile, DateTime timestamp, ITranslator translator)
         {
             var buildEventContext = args.BuildEventContext;
             translator.Translate(ref buildEventContext);

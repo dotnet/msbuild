@@ -234,7 +234,7 @@ public class EndToEndTests : IDisposable
 
     [Theory]
     [InlineData(null, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." } )]
-    [InlineData(true, new[] { "Property is derived from environment variable: 'TestFromTarget' with value 'FromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation' with value 'FromEvaluation'." })]
+    [InlineData(true, new[] { "Property is derived from environment variable: 'TestFromTarget' with value: 'FromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation' with value: 'FromEvaluation'." })]
     [InlineData(false, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." } )]
     public void NoEnvironmentVariableProperty_Test(bool? customConfigEnabled, string[] expectedMessages)
     {

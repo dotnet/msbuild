@@ -1242,12 +1242,13 @@ namespace Microsoft.Build.Logging
             return e;
         }
 
-        private BuildEventArgs ReadBuildCheckEventArgs<T>(Func<BuildEventArgsFields, string, T> createEvent) where T : BuildEventArgs
+        private BuildEventArgs ReadBuildCheckEventArgs<T>(Func<BuildEventArgsFields, string, T> createEvent)
+            where T : BuildEventArgs
         {
-            var fields = ReadBuildEventArgsFields(readImportance: true);
-            var rawMessage = ReadDeduplicatedString() ?? string.Empty;
-            var e = createEvent(fields, rawMessage);
+            var fields = ReadBuildEventArgsFields();
+            var e = createEvent(fields, fields.Message);
             SetCommonFields(e, fields);
+
             return e;
         }
 
@@ -1259,23 +1260,25 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadBuildCheckTracingEventArgs()
         {
-            var fields = ReadBuildEventArgsFields(readImportance: true);
+            var fields = ReadBuildEventArgsFields();
             var rawTracingData = ReadStringDictionary() ?? new Dictionary<string, string>();
 
             var e = new BuildCheckTracingEventArgs(rawTracingData.ToDictionary(
                 kvp => kvp.Key,
                 kvp => TimeSpan.FromTicks(long.Parse(kvp.Value))));
             SetCommonFields(e, fields);
+
             return e;
         }
 
         private BuildEventArgs ReadBuildCheckAcquisitionEventArgs()
         {
-            var fields = ReadBuildEventArgsFields(readImportance: true);
+            var fields = ReadBuildEventArgsFields();
             var acquisitionPath = ReadString();
             var projectPath = ReadString();
             var e = new BuildCheckAcquisitionEventArgs(acquisitionPath, projectPath);
             SetCommonFields(e, fields);
+
             return e;
         }
 
