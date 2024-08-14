@@ -68,7 +68,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
             {
                 context.ReportResult(BuildCheckResult.Create(SupportedRule, context.Data.EvaluatedEnvironmentVariable.Location, buildCheckResultMessageArgs));
             }
-            else if (_scope == EvaluationCheckScope.WorkTreeImports)
+            else if (_scope != EvaluationCheckScope.ProjectFileOnly)
             {
                 _dataContext ??= context;
                 _buildCheckResults.Push(BuildCheckResult.Create(SupportedRule, context.Data.EvaluatedEnvironmentVariable.Location, buildCheckResultMessageArgs));
