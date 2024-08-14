@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BuildCheck.Infrastructure;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
@@ -27,9 +26,9 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
     private BuildCheckDataContext<EnvironmentVariableCheckData>? _dataContext;
 
     /// <summary>
-    /// Contains the list of reported environment variables.
+    /// Contains the list of viewed environment variables.
     /// </summary>
-    private readonly HashSet<EnvironmentVariableIdentityKey> _environmentVariablesReported = new HashSet<EnvironmentVariableIdentityKey>();
+    private readonly HashSet<EnvironmentVariableIdentityKey> _environmentVariablesCache = new HashSet<EnvironmentVariableIdentityKey>();
 
     private bool _isVerboseEnvVarOutput;
     private EvaluationCheckScope _scope;
@@ -47,55 +46,35 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
             _isVerboseEnvVarOutput = isVerboseEnvVarOutput.HasValue && isVerboseEnvVarOutput.Value;
         }
 
-        CheckScopeClassifier.NotifyOnScopingReadiness += (string? projectFilePath) =>
-        {
-            while (_buildCheckResults.Count > 0)
-            {
-                BuildCheckResult result = _buildCheckResults.Pop();
-                if (!CheckScopeClassifier.IsActionInObservedScope(_scope, result.Location.File, projectFilePath ?? string.Empty))
-                {
-                    continue;
-                }
-
-                _dataContext?.ReportResult(result);
-            }
-        };
+        CheckScopeClassifier.NotifyOnScopingReadiness += HandleScopeReadiness;
     }
 
     public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEnvironmentVariableReadAction(ProcessEnvironmentVariableReadAction);
 
+    public override void Dispose() => CheckScopeClassifier.NotifyOnScopingReadiness -= HandleScopeReadiness;
+
     private void ProcessEnvironmentVariableReadAction(BuildCheckDataContext<EnvironmentVariableCheckData> context)
     {
-        if (context.Data.EvaluatedEnvironmentVariables.Count != 0)
+        EnvironmentVariableIdentityKey identityKey = new(context.Data.EvaluatedEnvironmentVariable.EnvVarValue, context.Data.EvaluatedEnvironmentVariable.Location);
+        if (!_environmentVariablesCache.Contains(identityKey))
         {
-            foreach (KeyValuePair<string, (string EnvVarValue, IMSBuildElementLocation Location)> envVariableData in context.Data.EvaluatedEnvironmentVariables)
+            string buildCheckResultMessageArgs = _isVerboseEnvVarOutput ? $"'{context.Data.EvaluatedEnvironmentVariable.EnvVarValue}' with value: '{context.Data.EvaluatedEnvironmentVariable.EnvVarValue}'" : $"'{context.Data.EvaluatedEnvironmentVariable.EnvVarValue}'";
+
+            // Scope information is available after evaluation of the project file. If it is not ready, we will report the check later.
+            if (CheckScopeClassifier.IsScopingReady && CheckScopeClassifier.IsActionInObservedScope(
+                _scope,
+                context.Data.EvaluatedEnvironmentVariable.Location.File,
+                context.Data.ProjectFilePath ?? string.Empty))
             {
-                EnvironmentVariableIdentityKey identityKey = new(envVariableData.Key, envVariableData.Value.Location);
-                if (!_environmentVariablesReported.Contains(identityKey))
-                {
-                    string buildCheckResultMessageArgs = _isVerboseEnvVarOutput ? $"'{envVariableData.Key}' with value: '{envVariableData.Value.EnvVarValue}'" : $"'{envVariableData.Key}'";
-
-                    // Scope information is available after evaluation of the project file. If it is not ready, we will report the check later.
-                    if (CheckScopeClassifier.IsScopingReady && CheckScopeClassifier.IsActionInObservedScope(_scope, envVariableData.Value.Location.File, context.Data.ProjectFilePath ?? string.Empty))
-                    {
-                        context.ReportResult(BuildCheckResult.Create(
-                            SupportedRule,
-                            ElementLocation.Create(envVariableData.Value.Location.File, envVariableData.Value.Location.Line, envVariableData.Value.Location.Column),
-                            buildCheckResultMessageArgs));
-                    }
-                    else
-                    {
-                        _dataContext = context;
-
-                        _buildCheckResults.Push(BuildCheckResult.Create(
-                            SupportedRule,
-                            ElementLocation.Create(envVariableData.Value.Location.File, envVariableData.Value.Location.Line, envVariableData.Value.Location.Column),
-                            buildCheckResultMessageArgs));
-                    }
-
-                    _environmentVariablesReported.Add(identityKey);
-                }
+                context.ReportResult(BuildCheckResult.Create(SupportedRule, context.Data.EvaluatedEnvironmentVariable.Location, buildCheckResultMessageArgs));
             }
+            else if (_scope == EvaluationCheckScope.WorkTreeImports)
+            {
+                _dataContext ??= context;
+                _buildCheckResults.Push(BuildCheckResult.Create(SupportedRule, context.Data.EvaluatedEnvironmentVariable.Location, buildCheckResultMessageArgs));
+            }
+
+            _environmentVariablesCache.Add(identityKey);
         }
     }
 
@@ -103,6 +82,20 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
             && (customConfigurationData.ConfigurationData?.TryGetValue(VerboseEnvVariableOutputKey, out string? configVal) ?? false)
             ? bool.Parse(configVal)
             : null;
+
+    private void HandleScopeReadiness(string? projectFilePath)
+    {
+        while (_buildCheckResults.Count > 0)
+        {
+            BuildCheckResult result = _buildCheckResults.Pop();
+            if (!CheckScopeClassifier.IsActionInObservedScope(_scope, result.Location.File, projectFilePath ?? string.Empty))
+            {
+                continue;
+            }
+
+            _dataContext?.ReportResult(result);
+        }
+    }
 
     internal class EnvironmentVariableIdentityKey(string environmentVariableName, IMSBuildElementLocation location) : IEquatable<EnvironmentVariableIdentityKey>
     {

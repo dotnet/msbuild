@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
@@ -14,11 +13,11 @@ public class EnvironmentVariableCheckData : CheckData
     internal EnvironmentVariableCheckData(
         string projectFilePath,
         int? projectConfigurationId,
-        IReadOnlyDictionary<string, (string EnvVarValue, IMSBuildElementLocation Location)> evaluatedEnvironmentVariables)
-        : base(projectFilePath, projectConfigurationId) => EvaluatedEnvironmentVariables = evaluatedEnvironmentVariables;
+        (string EnvVarValue, IMSBuildElementLocation Location) evaluatedEnvironmentVariable)
+        : base(projectFilePath, projectConfigurationId) => EvaluatedEnvironmentVariable = evaluatedEnvironmentVariable;
 
     /// <summary>
-    /// Gets the evaluated environment variables and their metadata.
+    /// Gets the evaluated environment variable.
     /// </summary>
-    public IReadOnlyDictionary<string, (string EnvVarValue, IMSBuildElementLocation Location)> EvaluatedEnvironmentVariables { get; }
+    public (string EnvVarValue, IMSBuildElementLocation Location) EvaluatedEnvironmentVariable { get; }
 }

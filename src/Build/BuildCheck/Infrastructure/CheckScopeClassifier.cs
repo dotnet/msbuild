@@ -8,7 +8,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 
-internal class CheckScopeClassifier : IDisposable
+internal class CheckScopeClassifier
 {
     internal static event Action<string?>? NotifyOnScopingReadiness;
 
@@ -65,19 +65,4 @@ internal class CheckScopeClassifier : IDisposable
 
     private static bool IsGeneratedNugetImport(string file) => file.EndsWith("nuget.g.props", StringComparison.OrdinalIgnoreCase) ||
         file.EndsWith("nuget.g.targets", StringComparison.OrdinalIgnoreCase);
-
-    public void Dispose()
-    {
-        // Remove all subscribers
-        if (NotifyOnScopingReadiness != null)
-        {
-            foreach (Delegate d in NotifyOnScopingReadiness.GetInvocationList())
-            {
-                NotifyOnScopingReadiness -= (Action<string>)d;
-            }
-        }
-
-        // Set the event to null
-        NotifyOnScopingReadiness = null;
-    }
 }
