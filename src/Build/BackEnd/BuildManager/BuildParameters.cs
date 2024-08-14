@@ -840,7 +840,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Gets or sets an indication of build analysis enablement.
+        /// Gets or sets an indication of build check enablement.
         /// </summary>
         public bool IsBuildCheckEnabled
         {

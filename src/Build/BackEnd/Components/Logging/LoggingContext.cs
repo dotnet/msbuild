@@ -316,12 +316,12 @@ namespace Microsoft.Build.BackEnd.Logging
         public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo)
             => _loggingService.BuildEngineDataRouter.ProcessPropertyRead(
                     propertyReadInfo,
-                    new AnalysisLoggingContext(_loggingService, BuildEventContext));
+                    new CheckLoggingContext(_loggingService, BuildEventContext));
 
         public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo)
             => _loggingService.BuildEngineDataRouter.ProcessPropertyWrite(
                     propertyWriteInfo,
-                    new AnalysisLoggingContext(_loggingService, BuildEventContext));
+                    new CheckLoggingContext(_loggingService, BuildEventContext));
 
         private protected void CheckValidity()
         {
