@@ -193,6 +193,36 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    [Fact]
+    public void EditorConfig_CustomConfigAppliedCorrectly()
+    {
+        using (var env = TestEnvironment.Create())
+        {
+            string checkCandidatePath = Path.Combine(TestAssetsRootPath, "CheckCandidate");
+            string message = "An extra message for the analyzer";
+            // Can't use Transitive environment due to the need to dogfood local nuget packages.
+            AddCustomDataSourceToNugetConfig(checkCandidatePath);
+            string editorConfigName = Path.Combine(checkCandidatePath, EditorConfigFileName);
+            File.WriteAllText(editorConfigName, ReadEditorConfig(
+                new List<(string, string)>() { ("X01234", "warning") },
+                new List<(string, (string, string))>
+                {
+                    ("X01234",("setMessage", message))
+                },
+                checkCandidatePath));
+
+            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(checkCandidatePath, $"CheckCandidate.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool success, timeoutMilliseconds: 1200_0000);
+            success.ShouldBeTrue();
+
+            projectCheckBuildLog.ShouldContain("warning X01234");
+            projectCheckBuildLog.ShouldContain(message);
+
+            // Cleanup
+            File.Delete(editorConfigName);
+        }
+    }
+
     [Theory]
     [InlineData(true, true)]
     [InlineData(false, true)]
@@ -435,7 +465,7 @@ public class EndToEndTests : IDisposable
         TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
         TransientTestFile importedFile1 = _env.CreateFile(workFolder, "ImportedFile1.props", contentsImported);
 
-        _env.CreateFile(workFolder, ".editorconfig", ReadEditorConfig(ruleToSeverity, ruleToCustomConfig, testAssetsFolderName));
+        var configFile = _env.CreateFile(workFolder, ".editorconfig", ReadEditorConfig(ruleToSeverity, ruleToCustomConfig, testAssetsFolderName));
 
         // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
         // This discrepancy breaks path equality checks in MSBuild checks if we pass to MSBuild full path to the initial project.

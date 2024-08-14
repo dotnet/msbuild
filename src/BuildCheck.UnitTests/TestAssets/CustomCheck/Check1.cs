@@ -17,9 +17,17 @@ namespace CustomCheck
 
         public override IReadOnlyList<CheckRule> SupportedRules { get; } = new List<CheckRule>() { SupportedRule };
 
+        private string message = "Argument for the message format";
+
         public override void Initialize(ConfigurationContext configurationContext)
         {
+            var customData = configurationContext.CustomConfigurationData[0].ConfigurationData;
             // configurationContext to be used only if check needs external configuration data.
+            if (customData is not null &&
+                configurationContext.CustomConfigurationData[0].RuleId == "X01234")
+            {
+                message = customData["setmessage"];
+            }
         }
 
         public override void RegisterActions(IBuildCheckRegistrationContext registrationContext)
@@ -32,7 +40,7 @@ namespace CustomCheck
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,
                 ElementLocation.EmptyLocation,
-                "Argument for the message format"));
+                message));
         }
     }
 }
