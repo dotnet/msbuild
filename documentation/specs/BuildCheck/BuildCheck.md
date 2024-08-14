@@ -205,19 +205,20 @@ build_check.BC0101.severity=warning
 
 #### Scope of Check
 
-Option `EvaluationCheckScope` with following possible options will be available:
+Option `EvaluationCheckScope` (just `scope` in `.editorconfig`) with following possible options will be available:
 
-| EvaluationCheckScope (Solution Explorer)   | EditorConfig option      |  Behavior  | 
+| EvaluationCheckScope (scope)   | EditorConfig option      |  Behavior  | 
 | ------------- | ------------- |   ------------- |
 | ProjectFileOnly | `project_file` | Only the data from currently checked project will be sent to the check. Imports will be discarded. | 
 | WorkTreeImports | `work_tree_imports` |  Only the data from currently checked project and imports from files not recognized to be in nuget cache or SDK install folder will be sent to the check. Other imports will be discarded. |  
 | ProjectWithAllImports | `all` | All data will be sent to the check. | 
 
-All rules of a single check must have the `EvaluationCheckScope` configured to a same value. If any rule from the check have the value configured differently - a warning will be issued during the build and check will be deregistered.
+Same rule can have `EvaluationCheckScope` configured to different values for different projects. If check has multiple rules (this is e.g. case of PropertyUsageCheck rules - [BC0201](Codes.md#bc0201---usage-of-undefined-property), [BC0202](Codes.md#bc0202---property-first-declared-after-it-was-used) and [BC0203](Codes.md#bc0203----property-declared-but-never-used)) - those can have the `EvaluationCheckScope` set to distinc values.
 
-Same rule can have `EvaluationCheckScope` configured to different values for different projects.
+Currently the proper filtering of data is at the discretion of the Check - as the infrastructure might not be able to decide what can be considered in scope (e.g. in case of [BC0203](Codes.md#bc0203----property-declared-but-never-used) - "_Property declared, but never used_" - the property writes (definitions) are scoped, but reads (usages) are not, while [BC0201](Codes.md#bc0201---usage-of-undefined-property) "_Usage of undefined property_" needs to scope reads, but not writes (definitions). Identical input data need to be scoped differently based on the meaning of the Check). 
 
-BuildCheck might not be able to guarantee to properly filter the data with this distinction for all [registration types](#RegisterActions) - in case an explicit value is attempted to be configured (either [from the check code](#BuildExecutionCheckConfiguration) or from `.editorconfig` file) for an check that has a subscription to unfilterable data - a warning will be issued during the build and check will be deregistered.
+Some checks migh completely ignore the `EvaluationCheckScope` setting - as they can operate on data, that are sourced from build execution (as opposed from build evaluation) and hence the scoping is not possible. This is e.g. case of [BC0102](Codes.md#bc0102---double-writes) "_Double Writes_" check.
+
 
 #### Configuring evalution scope
 
