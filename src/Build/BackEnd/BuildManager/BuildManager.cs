@@ -3280,25 +3280,19 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public void Initialize(IEventSource eventSource)
             {
-                // The concrete type we get should always be our internal
-                // implementation and up-to-date, but we need to meet the
-                // external contract so can't specify that for the
-                // argument.
-
-                IEventSource4 eventSource4 = (IEventSource4)eventSource;
-
                 // Most checks in LoggingService are "does any attached logger
                 // specifically opt into this new behavior?". As such, the
                 // NullLogger shouldn't opt into them explicitly and should
                 // let other loggers opt in.
 
-                // IncludeEvaluationPropertiesAndItems is different though,
-                // because its check is "do ALL attached loggers opt into
-                // the new behavior?", since the new behavior removes
-                // information from old loggers. So the NullLogger must
-                // opt in to ensure it doesn't accidentally veto the new
-                // behavior.
-                eventSource4.IncludeEvaluationPropertiesAndItems();
+                // IncludeEvaluationPropertiesAndItems was different,
+                // because it checked "do ALL attached loggers opt into
+                // the new behavior?".
+                // It was fixed and hence we need to be careful not to opt in
+                // the behavior as it was done before - but let the other loggers choose.
+                //
+                // For this reason NullLogger MUST NOT call
+                // ((IEventSource4)eventSource).IncludeEvaluationPropertiesAndItems();
             }
 
             /// <summary>
