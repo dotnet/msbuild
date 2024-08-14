@@ -68,10 +68,14 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
                     context.Data.EvaluatedEnvironmentVariable.Location,
                     buildCheckResultMessageArgs));
             }
-            else if (_scope != EvaluationCheckScope.ProjectFileOnly)
+            else
             {
                 _dataContext ??= context;
-                _buildCheckResults.Push(BuildCheckResult.Create(SupportedRule, context.Data.EvaluatedEnvironmentVariable.Location, buildCheckResultMessageArgs));
+
+                _buildCheckResults.Push(BuildCheckResult.Create(
+                    SupportedRule,
+                    context.Data.EvaluatedEnvironmentVariable.Location,
+                    buildCheckResultMessageArgs));
             }
 
             _environmentVariablesCache.Add(identityKey);
