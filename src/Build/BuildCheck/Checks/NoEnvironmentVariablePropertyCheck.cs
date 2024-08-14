@@ -58,15 +58,15 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
         EnvironmentVariableIdentityKey identityKey = new(context.Data.EvaluatedEnvironmentVariable.EnvVarValue, context.Data.EvaluatedEnvironmentVariable.Location);
         if (!_environmentVariablesCache.Contains(identityKey))
         {
-            string buildCheckResultMessageArgs = _isVerboseEnvVarOutput ? $"'{context.Data.EvaluatedEnvironmentVariable.EnvVarValue}' with value: '{context.Data.EvaluatedEnvironmentVariable.EnvVarValue}'" : $"'{context.Data.EvaluatedEnvironmentVariable.EnvVarValue}'";
+            string buildCheckResultMessageArgs = _isVerboseEnvVarOutput ? $"'{context.Data.EvaluatedEnvironmentVariable.EnvVarKey}' with value: '{context.Data.EvaluatedEnvironmentVariable.EnvVarValue}'" : $"'{context.Data.EvaluatedEnvironmentVariable.EnvVarKey}'";
 
             // Scope information is available after evaluation of the project file. If it is not ready, we will report the check later.
-            if (CheckScopeClassifier.IsScopingReady && CheckScopeClassifier.IsActionInObservedScope(
-                _scope,
-                context.Data.EvaluatedEnvironmentVariable.Location.File,
-                context.Data.ProjectFilePath ?? string.Empty))
+            if (CheckScopeClassifier.IsScopingReady && CheckScopeClassifier.IsActionInObservedScope(_scope, context.Data.EvaluatedEnvironmentVariable.Location.File, context.Data.ProjectFilePath ?? string.Empty))
             {
-                context.ReportResult(BuildCheckResult.Create(SupportedRule, context.Data.EvaluatedEnvironmentVariable.Location, buildCheckResultMessageArgs));
+                context.ReportResult(BuildCheckResult.Create(
+                    SupportedRule,
+                    context.Data.EvaluatedEnvironmentVariable.Location,
+                    buildCheckResultMessageArgs));
             }
             else if (_scope != EvaluationCheckScope.ProjectFileOnly)
             {

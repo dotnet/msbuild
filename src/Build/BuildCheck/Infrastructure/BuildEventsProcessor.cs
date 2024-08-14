@@ -91,7 +91,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     /// </summary>
     internal void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, string envVarName, string envVarValue, string file, int line, int column)
     {
-        EnvironmentVariableCheckData checkData = new(file, checkContext.BuildEventContext?.ProjectInstanceId, (envVarName, ElementLocation.Create(file, line, column)));
+        EnvironmentVariableCheckData checkData = new(file, checkContext.BuildEventContext?.ProjectInstanceId, (envVarName, envVarValue, ElementLocation.Create(file, line, column)));
 
         _buildCheckCentralContext.RunEnvironmentVariableActions(checkData, checkContext, ReportResult);
     }

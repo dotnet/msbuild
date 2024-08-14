@@ -13,11 +13,11 @@ public class EnvironmentVariableCheckData : CheckData
     internal EnvironmentVariableCheckData(
         string projectFilePath,
         int? projectConfigurationId,
-        (string EnvVarValue, IMSBuildElementLocation Location) evaluatedEnvironmentVariable)
+        (string EnvVarKey, string EnvVarValue, IMSBuildElementLocation Location) evaluatedEnvironmentVariable)
         : base(projectFilePath, projectConfigurationId) => EvaluatedEnvironmentVariable = evaluatedEnvironmentVariable;
 
     /// <summary>
     /// Gets the evaluated environment variable.
     /// </summary>
-    public (string EnvVarValue, IMSBuildElementLocation Location) EvaluatedEnvironmentVariable { get; }
+    public (string EnvVarKey, string EnvVarValue, IMSBuildElementLocation Location) EvaluatedEnvironmentVariable { get; }
 }
