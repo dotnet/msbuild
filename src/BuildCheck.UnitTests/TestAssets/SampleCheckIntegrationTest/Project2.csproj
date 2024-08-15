@@ -11,7 +11,7 @@
     </PropertyGroup>
                     
     <ItemGroup>
-        <Reference Include="bin/foo.dll" />
+        <Reference Include="bin/Project1.dll" />
     </ItemGroup>
                     
     <Target Name="Hello">
