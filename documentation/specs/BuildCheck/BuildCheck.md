@@ -213,11 +213,11 @@ Option `EvaluationCheckScope` (just `scope` in `.editorconfig`) with following p
 | WorkTreeImports | `work_tree_imports` |  Only the data from currently checked project and imports from files not recognized to be in nuget cache or SDK install folder will be sent to the check. Other imports will be discarded. |  
 | ProjectWithAllImports | `all` | All data will be sent to the check. | 
 
-Same rule can have `EvaluationCheckScope` configured to different values for different projects. If check has multiple rules (this is e.g. case of PropertyUsageCheck rules - [BC0201](Codes.md#bc0201---usage-of-undefined-property), [BC0202](Codes.md#bc0202---property-first-declared-after-it-was-used) and [BC0203](Codes.md#bc0203----property-declared-but-never-used)) - those can have the `EvaluationCheckScope` set to distinc values.
+Same rule can have `EvaluationCheckScope` configured to different values for different projects. If check has multiple rules (this is e.g. case of PropertyUsageCheck rules - [BC0201](Codes.md#bc0201---usage-of-undefined-property), [BC0202](Codes.md#bc0202---property-first-declared-after-it-was-used) and [BC0203](Codes.md#bc0203----property-declared-but-never-used)) - those can have the `EvaluationCheckScope` set to distinct values.
 
 Currently the proper filtering of data is at the discretion of the Check - as the infrastructure might not be able to decide what can be considered in scope (e.g. in case of [BC0203](Codes.md#bc0203----property-declared-but-never-used) - "_Property declared, but never used_" - the property writes (definitions) are scoped, but reads (usages) are not, while [BC0201](Codes.md#bc0201---usage-of-undefined-property) "_Usage of undefined property_" needs to scope reads, but not writes (definitions). Identical input data need to be scoped differently based on the meaning of the Check). 
 
-Some checks migh completely ignore the `EvaluationCheckScope` setting - as they can operate on data, that are sourced from build execution (as opposed from build evaluation) and hence the scoping is not possible. This is e.g. case of [BC0102](Codes.md#bc0102---double-writes) "_Double Writes_" check.
+Some checks might completely ignore the `EvaluationCheckScope` setting - as they can operate on data, that are sourced from build execution (as opposed from build evaluation) and hence the scoping is not possible. This is e.g. case of [BC0102](Codes.md#bc0102---double-writes) "_Double Writes_" check.
 
 
 #### Configuring evalution scope
