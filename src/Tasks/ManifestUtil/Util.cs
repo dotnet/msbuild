@@ -246,6 +246,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 if (string.IsNullOrEmpty(targetFrameWorkVersion) || CompareFrameworkVersions(targetFrameWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
                 {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                    // codeql[cs/weak-crypto] .NET 4.0 and earlier versions cannot parse SHA-2. Newer Frameworks use SHA256.
                     hashAlg = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA1CryptoServiceProvider"
