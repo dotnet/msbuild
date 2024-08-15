@@ -10,9 +10,9 @@ namespace Microsoft.Build.BuildCheck.Infrastructure;
 
 internal class CheckScopeClassifier
 {
-    internal static event Action<string?>? NotifyOnScopingReadiness;
+    internal static event Action? NotifyOnScopingReadiness;
 
-    internal static bool IsScopingReady;
+    internal static Func<EvaluationCheckScope, bool> IsScopingReady => (scope) => scope == EvaluationCheckScope.ProjectFileOnly;
 
     /// <summary>
     /// Indicates whether given location is in the observed scope, based on currently built project path.
@@ -57,11 +57,7 @@ internal class CheckScopeClassifier
         }
     }
 
-    internal static void RaiseNotifyOnScopingReadiness(string? projectFilePath)
-    {
-        IsScopingReady = true;
-        NotifyOnScopingReadiness?.Invoke(projectFilePath);
-    }
+    internal static void RaiseNotifyOnScopingReadiness() => NotifyOnScopingReadiness?.Invoke();
 
     private static bool IsGeneratedNugetImport(string file) => file.EndsWith("nuget.g.props", StringComparison.OrdinalIgnoreCase) ||
         file.EndsWith("nuget.g.targets", StringComparison.OrdinalIgnoreCase);

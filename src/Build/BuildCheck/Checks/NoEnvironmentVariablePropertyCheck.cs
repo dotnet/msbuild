@@ -21,7 +21,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
 
     private const string VerboseEnvVariableOutputKey = "allow_displaying_environment_variable_value";
 
-    private readonly Stack<BuildCheckResult> _buildCheckResults = new Stack<BuildCheckResult>();
+    private readonly Queue<(string projectPath, BuildCheckResult checkResult)> _buildCheckResults = new Queue<(string, BuildCheckResult)>();
 
     private BuildCheckDataContext<EnvironmentVariableCheckData>? _dataContext;
 
@@ -61,18 +61,20 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
             string buildCheckResultMessageArgs = _isVerboseEnvVarOutput ? $"'{context.Data.EvaluatedEnvironmentVariable.EnvVarKey}' with value: '{context.Data.EvaluatedEnvironmentVariable.EnvVarValue}'" : $"'{context.Data.EvaluatedEnvironmentVariable.EnvVarKey}'";
 
             // Scope information is available after evaluation of the project file. If it is not ready, we will report the check later.
-            if (CheckScopeClassifier.IsScopingReady && CheckScopeClassifier.IsActionInObservedScope(_scope, context.Data.EvaluatedEnvironmentVariable.Location.File, context.Data.ProjectFilePath ?? string.Empty))
-            {
-                context.ReportResult(BuildCheckResult.Create(
-                    SupportedRule,
-                    context.Data.EvaluatedEnvironmentVariable.Location,
-                    buildCheckResultMessageArgs));
-            }
-            else
+            if (!CheckScopeClassifier.IsScopingReady(_scope))
             {
                 _dataContext ??= context;
 
-                _buildCheckResults.Push(BuildCheckResult.Create(
+                _buildCheckResults.Enqueue(
+                    (context.Data.ProjectFilePath,
+                     BuildCheckResult.Create(
+                         SupportedRule,
+                         context.Data.EvaluatedEnvironmentVariable.Location,
+                         buildCheckResultMessageArgs)));
+            }
+            else if (CheckScopeClassifier.IsActionInObservedScope(_scope, context.Data.EvaluatedEnvironmentVariable.Location.File, context.Data.ProjectFilePath))
+            {
+                context.ReportResult(BuildCheckResult.Create(
                     SupportedRule,
                     context.Data.EvaluatedEnvironmentVariable.Location,
                     buildCheckResultMessageArgs));
@@ -87,12 +89,12 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
             ? bool.Parse(configVal)
             : null;
 
-    private void HandleScopeReadiness(string? projectFilePath)
+    private void HandleScopeReadiness()
     {
         while (_buildCheckResults.Count > 0)
         {
-            BuildCheckResult result = _buildCheckResults.Pop();
-            if (!CheckScopeClassifier.IsActionInObservedScope(_scope, result.Location.File, projectFilePath ?? string.Empty))
+            (string projectPath, BuildCheckResult result) = _buildCheckResults.Dequeue();
+            if (!CheckScopeClassifier.IsActionInObservedScope(_scope, result.Location.File, projectPath))
             {
                 continue;
             }

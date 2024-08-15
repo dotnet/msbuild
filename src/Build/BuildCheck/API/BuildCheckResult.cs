@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -13,14 +12,11 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// Representation of a single report of a single finding from a Check
 /// Each rule has upfront known message format - so only the concrete arguments are added
 /// Optionally a location is attached - in the near future we might need to support multiple locations
-///  (for 2 cases - a) grouped result for multiple occurrences; b) a single report for a finding resulting from combination of multiple locations)
+///  (for 2 cases - a) grouped result for multiple occurrences; b) a single report for a finding resulting from combination of multiple locations).
 /// </summary>
 public sealed class BuildCheckResult : IBuildCheckResult
 {
-    public static BuildCheckResult Create(CheckRule rule, IMSBuildElementLocation location, params string[] messageArgs)
-    {
-        return new BuildCheckResult(rule, location, messageArgs);
-    }
+    public static BuildCheckResult Create(CheckRule rule, IMSBuildElementLocation location, params string[] messageArgs) => new BuildCheckResult(rule, location, messageArgs);
 
     public BuildCheckResult(CheckRule checkConfig, IMSBuildElementLocation location, string[] messageArgs)
     {

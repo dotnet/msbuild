@@ -89,9 +89,9 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     /// <summary>
     /// The method collects events associated with the used environment variables in projects.
     /// </summary>
-    internal void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, string envVarName, string envVarValue, string file, int line, int column)
+    internal void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, string projectPath, string envVarKey, string envVarValue, IElementLocation elementLocation)
     {
-        EnvironmentVariableCheckData checkData = new(file, checkContext.BuildEventContext?.ProjectInstanceId, (envVarName, envVarValue, ElementLocation.Create(file, line, column)));
+        EnvironmentVariableCheckData checkData = new(projectPath, checkContext.BuildEventContext?.ProjectInstanceId, (envVarKey, envVarValue, elementLocation));
 
         _buildCheckCentralContext.RunEnvironmentVariableActions(checkData, checkContext, ReportResult);
     }

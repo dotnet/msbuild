@@ -4,18 +4,17 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Checks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.BuildCheck.Infrastructure;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -349,20 +348,24 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(checkContext, evaluationFinishedEventArgs, propertiesLookup);
 
-            CheckScopeClassifier.RaiseNotifyOnScopingReadiness(evaluationFinishedEventArgs?.ProjectFile);
+            CheckScopeClassifier.RaiseNotifyOnScopingReadiness();
         }
 
         public void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
         {
             if (projectEvaluationEventArgs is EnvironmentVariableReadEventArgs evr)
             {
-                _buildEventsProcessor.ProcessEnvironmentVariableReadEventArgs(
-                    checkContext,
-                    evr.EnvironmentVariableName,
-                    evr.Message ?? string.Empty,
-                    evr.File,
-                    evr.LineNumber,
-                    evr.ColumnNumber);
+                TryGetProjectFullPath(checkContext.BuildEventContext, out string projectPath);
+
+                if (!string.IsNullOrEmpty(projectPath))
+                {
+                    _buildEventsProcessor.ProcessEnvironmentVariableReadEventArgs(
+                        checkContext,
+                        projectPath,
+                        evr.EnvironmentVariableName,
+                        evr.Message ?? string.Empty,
+                        ElementLocation.Create(evr.File, evr.LineNumber, evr.ColumnNumber));
+                }
             }
         }
 
@@ -417,7 +420,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             loggingContext.LogBuildEvent(checkEventArg);
         }
 
-        private readonly ConcurrentDictionary<int, string> _projectsByInstnaceId = new();
+        private readonly ConcurrentDictionary<int, string> _projectsByInstanceId = new();
         private readonly ConcurrentDictionary<int, string> _projectsByEvaluationId = new();
 
         /// <summary>
@@ -440,15 +443,15 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
             else if (buildEventContext.ProjectInstanceId >= 0)
             {
-                if (_projectsByInstnaceId.TryGetValue(buildEventContext.ProjectInstanceId, out string? val))
+                if (_projectsByInstanceId.TryGetValue(buildEventContext.ProjectInstanceId, out string? val))
                 {
                     projectFullPath = val;
                     return true;
                 }
             }
-            else if (_projectsByInstnaceId.Count == 1)
+            else if (_projectsByInstanceId.Count == 1)
             {
-                projectFullPath = _projectsByInstnaceId.FirstOrDefault().Value;
+                projectFullPath = _projectsByInstanceId.FirstOrDefault().Value;
                 // This is for a rare possibility of a race where other thread removed the item (between the if check and fetch here).
                 // We currently do not support multiple projects in parallel in a single node anyway.
                 if (!string.IsNullOrEmpty(projectFullPath))
@@ -506,7 +509,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         public void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath)
         {
             // There can be multiple ProjectStarted-ProjectFinished per single configuration project build (each request for different target)
-            _projectsByInstnaceId[buildEventContext.ProjectInstanceId] = projectFullPath;
+            _projectsByInstanceId[buildEventContext.ProjectInstanceId] = projectFullPath;
         }
 
         public void EndProjectRequest(
