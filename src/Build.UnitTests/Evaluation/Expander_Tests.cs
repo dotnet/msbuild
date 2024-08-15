@@ -1292,6 +1292,39 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.True(false);
         }
+
+        [Fact]
+        public void StaticMethodWithThrowawayParameterSupported()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+<Project>
+  <PropertyGroup>
+    <MyProperty>Value is $([System.Int32]::TryParse(""3"", _))</MyProperty>
+  </PropertyGroup>
+  <Target Name='Build'>
+    <Message Text='$(MyProperty)' />
+  </Target>
+</Project>");
+
+            logger.FullLog.ShouldContain("Value is True");
+        }
+
+        [Fact]
+        public void StaticMethodWithThrowawayParameterSupported2()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+<Project>
+  <PropertyGroup>
+    <MyProperty>Value is $([System.Int32]::TryParse(""notANumber"", _))</MyProperty>
+  </PropertyGroup>
+  <Target Name='Build'>
+    <Message Text='$(MyProperty)' />
+  </Target>
+</Project>");
+
+            logger.FullLog.ShouldContain("Value is False");
+        }
+
         /// <summary>
         /// Creates a set of complicated item metadata and properties, and items to exercise
         /// the Expander class.  The data here contains escaped characters, metadata that
