@@ -652,7 +652,6 @@ namespace Microsoft.Build.BackEnd.Logging
             return GetWarningsForProject(context, _warningsNotAsErrorsByProject, WarningsNotAsErrors);
         }
 
-
         /// <summary>
         /// Returns a collection of warnings to be demoted to messages for the specified build context.
         /// </summary>
