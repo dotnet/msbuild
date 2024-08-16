@@ -1196,6 +1196,8 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(path1) && !string.IsNullOrEmpty(path2),
                 "Need to specify paths to compare.");
+            ProjectErrorUtilities.VerifyThrowInvalidProject(path1.IndexOfAny(Path.GetInvalidPathChars()) == -1, _project.ProjectFileLocation, "InvalidPath", path1);
+            ProjectErrorUtilities.VerifyThrowInvalidProject(path2.IndexOfAny(Path.GetInvalidPathChars()) == -1, _project.ProjectFileLocation, "InvalidPath", path2);
 
             path1 = Path.Combine(_project.Directory, path1);
             var path1WriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(path1);
