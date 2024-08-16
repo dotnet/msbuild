@@ -8,11 +8,24 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 
-internal class CheckScopeClassifier
+internal static class CheckScopeClassifier
 {
+    static CheckScopeClassifier() =>
+        FileClassifier.Shared.OnImmutablePathsInitialized += () =>
+        {
+            NotifyOnScopingReadiness?.Invoke();
+
+            FileClassifier.Shared.OnImmutablePathsInitialized -= () => NotifyOnScopingReadiness?.Invoke();
+        };
+
     internal static event Action? NotifyOnScopingReadiness;
 
-    internal static Func<EvaluationCheckScope, bool> IsScopingReady => (scope) => scope == EvaluationCheckScope.ProjectFileOnly;
+    internal static bool IsScopingInitialized => FileClassifier.Shared.IsImmutablePathsInitialized;
+
+    /// <summary>
+    /// Notifies the subscribers that the scoping is ready.
+    /// </summary>
+    internal static Func<EvaluationCheckScope, bool> IsScopingReady => (scope) => (scope is EvaluationCheckScope.ProjectFileOnly or EvaluationCheckScope.All) || IsScopingInitialized;
 
     /// <summary>
     /// Indicates whether given location is in the observed scope, based on currently built project path.
@@ -56,8 +69,6 @@ internal class CheckScopeClassifier
                 throw new ArgumentOutOfRangeException(nameof(scope), scope, null);
         }
     }
-
-    internal static void RaiseNotifyOnScopingReadiness() => NotifyOnScopingReadiness?.Invoke();
 
     private static bool IsGeneratedNugetImport(string file) => file.EndsWith("nuget.g.props", StringComparison.OrdinalIgnoreCase) ||
         file.EndsWith("nuget.g.targets", StringComparison.OrdinalIgnoreCase);

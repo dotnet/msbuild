@@ -339,17 +339,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             _buildEventsProcessor
                 .ProcessEvaluationFinishedEventArgs(checkContext, evaluationFinishedEventArgs, propertiesLookup);
-
-            CheckScopeClassifier.RaiseNotifyOnScopingReadiness();
         }
 
         public void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
         {
             if (projectEvaluationEventArgs is EnvironmentVariableReadEventArgs evr)
             {
-                TryGetProjectFullPath(checkContext.BuildEventContext, out string projectPath);
-
-                if (!string.IsNullOrEmpty(projectPath))
+                if (TryGetProjectFullPath(checkContext.BuildEventContext, out string projectPath))
                 {
                     _buildEventsProcessor.ProcessEnvironmentVariableReadEventArgs(
                         checkContext,

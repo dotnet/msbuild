@@ -21,9 +21,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
 
     private const string VerboseEnvVariableOutputKey = "allow_displaying_environment_variable_value";
 
-    private readonly Queue<(string projectPath, BuildCheckResult checkResult)> _buildCheckResults = new Queue<(string, BuildCheckResult)>();
-
-    private BuildCheckDataContext<EnvironmentVariableCheckData>? _dataContext;
+    private readonly Queue<(string projectPath, BuildCheckResult checkResult, BuildCheckDataContext<EnvironmentVariableCheckData>)> _buildCheckResults = new Queue<(string, BuildCheckResult, BuildCheckDataContext<EnvironmentVariableCheckData>)>();
 
     /// <summary>
     /// Contains the list of viewed environment variables.
@@ -51,32 +49,29 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
 
     public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEnvironmentVariableReadAction(ProcessEnvironmentVariableReadAction);
 
-    public override void Dispose() => CheckScopeClassifier.NotifyOnScopingReadiness -= HandleScopeReadiness;
-
     private void ProcessEnvironmentVariableReadAction(BuildCheckDataContext<EnvironmentVariableCheckData> context)
     {
-        EnvironmentVariableIdentityKey identityKey = new(context.Data.EvaluatedEnvironmentVariable.EnvVarValue, context.Data.EvaluatedEnvironmentVariable.Location);
+        EnvironmentVariableIdentityKey identityKey = new(context.Data.EnvironmentVariableName, context.Data.EnvironmentVariableLocation);
         if (!_environmentVariablesCache.Contains(identityKey))
         {
-            string buildCheckResultMessageArgs = _isVerboseEnvVarOutput ? $"'{context.Data.EvaluatedEnvironmentVariable.EnvVarKey}' with value: '{context.Data.EvaluatedEnvironmentVariable.EnvVarValue}'" : $"'{context.Data.EvaluatedEnvironmentVariable.EnvVarKey}'";
+            string buildCheckResultMessageArgs = _isVerboseEnvVarOutput ? $"'{context.Data.EnvironmentVariableName}' with value: '{context.Data.EnvironmentVariableValue}'" : $"'{context.Data.EnvironmentVariableName}'";
 
             // Scope information is available after evaluation of the project file. If it is not ready, we will report the check later.
             if (!CheckScopeClassifier.IsScopingReady(_scope))
             {
-                _dataContext ??= context;
-
                 _buildCheckResults.Enqueue(
                     (context.Data.ProjectFilePath,
-                     BuildCheckResult.Create(
-                         SupportedRule,
-                         context.Data.EvaluatedEnvironmentVariable.Location,
-                         buildCheckResultMessageArgs)));
+                    BuildCheckResult.Create(
+                        SupportedRule,
+                        context.Data.EnvironmentVariableLocation,
+                        buildCheckResultMessageArgs),
+                    context));
             }
-            else if (CheckScopeClassifier.IsActionInObservedScope(_scope, context.Data.EvaluatedEnvironmentVariable.Location.File, context.Data.ProjectFilePath))
+            else if (CheckScopeClassifier.IsActionInObservedScope(_scope, context.Data.EnvironmentVariableLocation.File, context.Data.ProjectFilePath))
             {
                 context.ReportResult(BuildCheckResult.Create(
                     SupportedRule,
-                    context.Data.EvaluatedEnvironmentVariable.Location,
+                    context.Data.EnvironmentVariableLocation,
                     buildCheckResultMessageArgs));
             }
 
@@ -93,14 +88,16 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
     {
         while (_buildCheckResults.Count > 0)
         {
-            (string projectPath, BuildCheckResult result) = _buildCheckResults.Dequeue();
+            (string projectPath, BuildCheckResult result, BuildCheckDataContext<EnvironmentVariableCheckData> context) = _buildCheckResults.Dequeue();
             if (!CheckScopeClassifier.IsActionInObservedScope(_scope, result.Location.File, projectPath))
             {
                 continue;
             }
 
-            _dataContext?.ReportResult(result);
+            context.ReportResult(result);
         }
+
+        CheckScopeClassifier.NotifyOnScopingReadiness -= HandleScopeReadiness;
     }
 
     internal class EnvironmentVariableIdentityKey(string environmentVariableName, IMSBuildElementLocation location) : IEquatable<EnvironmentVariableIdentityKey>
