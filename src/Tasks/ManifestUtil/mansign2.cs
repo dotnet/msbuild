@@ -586,7 +586,7 @@ namespace System.Deployment.Internal.CodeSigning
                 else
                 {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                    // codeql[cs/weak-crypto] SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.
+                    // codeql[cs/weak-crypto] SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/139025
                     using (SHA1 sha1 = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA1CryptoServiceProvider"
@@ -649,7 +649,7 @@ namespace System.Deployment.Internal.CodeSigning
                 else
                 {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                    // codeql[cs/weak-crypto] SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.
+                    // codeql[cs/weak-crypto] SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/139025
                     using (SHA1 sha1 = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA1CryptoServiceProvider"
