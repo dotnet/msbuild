@@ -1205,6 +1205,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // codeql[cs/dangerous-binary-deserialization] This code needs explicit opt-in to be used (ChangeWaves.Wave17_10). This exists as a temporary compat opt-in for old 3rd party loggers, before they are migrated based on documented guidance.
+                // The opt-in documentation: https://github.com/dotnet/msbuild/blob/main/documentation/wiki/ChangeWaves.md#1710
                 BinaryFormatter formatter = new BinaryFormatter();
                 formatter.Serialize(_packetStream, value);
             }
