@@ -274,14 +274,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 // Update the wrapper
                 wrapper.StartNewProject(projectFullPath, configurations);
             }
-
-            if (configurations.GroupBy(c => c.EvaluationCheckScope).Count() > 1)
-            {
-                throw new BuildCheckConfigurationException(
-                    string.Format("All rules for a single check should have the same EvaluationCheckScope for a single project (violating rules: [{0}], project: {1})",
-                        checkFactoryContext.RuleIds.ToCsvString(),
-                        projectFullPath));
-            }
         }
 
         private void SetupChecksForNewProject(string projectFullPath, ICheckContext checkContext)
