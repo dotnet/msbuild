@@ -11,3 +11,7 @@ build_check.BC0103.CustomConfig=dummy
 build_check.COND0543.Severity=Error
 build_check.COND0543.EvaluationCheckScope=CheckedProjectOnly
 build_check.COND0543.CustomSwitch=QWERTY
+
+build_check.BC0201.Severity=warning
+build_check.BC0202.Severity=warning
+build_check.BC0203.Severity=warning

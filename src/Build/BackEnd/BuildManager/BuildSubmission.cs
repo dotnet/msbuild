@@ -202,6 +202,16 @@ namespace Microsoft.Build.Execution
             return BuildResult!;
         }
 
+        /// <summary>
+        /// Whether the build has started.
+        /// </summary>
+        internal override bool IsStarted
+        {
+            get => BuildRequest != null;
+            // Ignore the set - the submission is started once the BuildRequest is set.
+            set { }
+        }
+
         protected internal override BuildResult CreateFailedResult(Exception exception)
         {
             ErrorUtilities.VerifyThrow(BuildRequest != null,
