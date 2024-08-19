@@ -16,7 +16,7 @@
    <Target Name="Hello">
        <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
        <Copy SourceFiles="TestFilePath" DestinationFolder="WorkFolderPath" />
-       <MSBuild Projects=".\FooBar-Copy.csproj" Targets="Hello" />
+       <MSBuild Projects=".\Project2.csproj" Targets="Hello" />
 
        <PropertyGroup>
          <ReadFromEnvVariable>$(TEST)</ReadFromEnvVariable>

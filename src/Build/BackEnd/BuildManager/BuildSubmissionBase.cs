@@ -77,7 +77,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Whether the build has started.
         /// </summary>
-        internal bool IsStarted { get; set; }
+        internal abstract bool IsStarted { get; set; }
 
         /// <summary>
         /// Indicates that all logging events for this submission are complete.
