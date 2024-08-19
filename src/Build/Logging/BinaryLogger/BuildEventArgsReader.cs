@@ -6,11 +6,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
@@ -294,6 +296,7 @@ namespace Microsoft.Build.Logging
             {
                 BinaryLogRecordKind.BuildStarted => ReadBuildStartedEventArgs(),
                 BinaryLogRecordKind.BuildFinished => ReadBuildFinishedEventArgs(),
+                BinaryLogRecordKind.BuildSubmissionStarted => ReadBuildSubmissionStartedEventArgs(),
                 BinaryLogRecordKind.ProjectStarted => ReadProjectStartedEventArgs(),
                 BinaryLogRecordKind.ProjectFinished => ReadProjectFinishedEventArgs(),
                 BinaryLogRecordKind.TargetStarted => ReadTargetStartedEventArgs(),
@@ -614,6 +617,29 @@ namespace Microsoft.Build.Logging
                 succeeded,
                 fields.Timestamp);
             SetCommonFields(e, fields);
+            return e;
+        }
+
+        private BuildEventArgs ReadBuildSubmissionStartedEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+
+            IDictionary<string, string>? globalProperties = null;
+            globalProperties = ReadStringDictionary() ?? new Dictionary<string, string>();
+
+            var entryProjectsFullPath = ReadStringIEnumerable() ?? Enumerable.Empty<string>();
+            var targetNames = ReadStringIEnumerable() ?? Enumerable.Empty<string>();
+            var flags = (BuildRequestDataFlags)ReadInt32();
+            var submissionId = ReadInt32();
+
+            var e = new BuildSubmissionStartedEventArgs(
+                (IReadOnlyDictionary<string, string?>)globalProperties,
+                entryProjectsFullPath,
+                targetNames,
+                flags,
+                submissionId);
+            SetCommonFields(e, fields);
+
             return e;
         }
 
@@ -1091,12 +1117,18 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgs ReadEnvironmentVariableReadEventArgs()
         {
-            var fields = ReadBuildEventArgsFields();
+            var fields = ReadBuildEventArgsFields(readImportance: true);
 
             string? environmentVariableName = ReadDeduplicatedString();
-            int line = ReadInt32();
-            int column = ReadInt32();
-            string? fileName = ReadDeduplicatedString();
+            int line = 0;
+            int column = 0;
+            string? fileName = null;
+            if (_fileFormatVersion >= 22)
+            {
+                line = ReadInt32();
+                column = ReadInt32();
+                fileName = ReadDeduplicatedString();
+            }
 
             BuildEventArgs e = new EnvironmentVariableReadEventArgs(
                     environmentVariableName ?? string.Empty,
@@ -1544,6 +1576,28 @@ namespace Microsoft.Build.Logging
             {
                 ITaskItem item = ReadTaskItem();
                 list[i] = item;
+            }
+
+            return list;
+        }
+
+        private IEnumerable<string>? ReadStringIEnumerable()
+        {
+            int count = ReadInt32();
+            if (count == 0)
+            {
+                return null;
+            }
+
+            var list = new string[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                string? item = ReadDeduplicatedString();
+                if (item is not null)
+                {
+                    list[i] = item;
+                }
             }
 
             return list;

@@ -71,15 +71,15 @@ internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tr
     }
 }
 
-internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath) : BuildCheckEventArgs
+internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath, string projectPath) : BuildCheckEventArgs
 {
     internal BuildCheckAcquisitionEventArgs()
-        : this(string.Empty)
+        : this(string.Empty, string.Empty)
     {
     }
 
     /// <summary>
-    /// Gets the path to the analyzer assembly that needs to be loaded into the application context.
+    /// Gets the path to the check assembly that needs to be loaded into the application context.
     /// </summary>
     /// <remarks>
     /// The <see cref="AcquisitionPath"/> property contains the file system path to the assembly
@@ -91,11 +91,14 @@ internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath) : B
     /// </value>
     public string AcquisitionPath { get; private set; } = acquisitionPath;
 
+    public string ProjectPath { get; private set; } = projectPath;
+
     internal override void WriteToStream(BinaryWriter writer)
     {
         base.WriteToStream(writer);
 
         writer.Write(AcquisitionPath);
+        writer.Write(ProjectPath);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
@@ -103,8 +106,10 @@ internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath) : B
         base.CreateFromStream(reader, version);
 
         AcquisitionPath = reader.ReadString();
+        ProjectPath = reader.ReadString();
     }
 }
+
 internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
 {
     public BuildCheckResultWarning(IBuildCheckResult result, string code)

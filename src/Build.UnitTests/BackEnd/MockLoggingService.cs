@@ -6,6 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
@@ -30,6 +32,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         #region ILoggingService Members
+
+        /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        public IBuildEngineDataRouter BuildEngineDataRouter => this;
 
         /// <summary>
         /// The event to raise when there is a logging exception
@@ -215,14 +222,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set { }
         }
 
-        /// <summary>
-        /// Log properties and items on ProjectEvaluationFinishedEventArgs
-        /// instead of ProjectStartedEventArgs.
-        /// </summary>
-        public bool IncludeEvaluationPropertiesAndItems
+        /// <inheritdoc cref="ILoggingService.SetIncludeEvaluationPropertiesAndItemsInEvents"/>
+        public void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent,
+            bool inEvaluationFinishedEvent)
+        { }
+
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
         {
             get => false;
-            set { }
+        }
+
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
+        {
+            get => false;
         }
 
         /// <summary>
@@ -648,5 +662,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ShutdownComponent() => throw new NotImplementedException();
 
         #endregion
+
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext checkContext)
+        { /* Ignore the data */ }
+
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext checkContext)
+        { /* Ignore the data */ }
+
+        public void ProcessProjectEvaluationStarted(ICheckContext analysisContext, string projectFullPath)
+        { /* Ignore the data */ }
     }
 }

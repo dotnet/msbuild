@@ -50,6 +50,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
             GC.Collect();
         }
 
+        [Fact]
+        public void EnsureProjectEvaluationFinishedIsLogged()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile projectFile = env.CreateFile("project.proj", $@"
+<Project Sdk=""Microsoft.NETT.Sdk"">
+  <Target Name=""DefaultTarget"">
+  </Target>
+</Project>
+");
+
+            MockLogger logger = new();
+            using ProjectCollection collection = new(new Dictionary<string, string>(), [logger], ToolsetDefinitionLocations.Default);
+            Assert.Throws<InvalidProjectFileException>(() => collection.LoadProject(projectFile.Path));
+            logger.EvaluationFinishedEvents.ShouldNotBeEmpty();
+        }
+
         [Theory]
         [MemberData(nameof(ImportLoadingScenarioTestData))]
         public void VerifyLoadingImportScenarios(string importParameter, bool shouldSucceed)

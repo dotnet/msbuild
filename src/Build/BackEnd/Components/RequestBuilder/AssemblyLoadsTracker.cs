@@ -66,7 +66,7 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
 #if FEATURE_APPDOMAIN
         public static void StopTracking(AppDomain appDomain)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && !appDomain.IsDefaultAppDomain())
+            if (!appDomain.IsDefaultAppDomain())
             {
                 lock (s_instances)
                 {
@@ -106,20 +106,15 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
             string? initiatorName,
             AppDomain? appDomain)
         {
-            if (
-                // Feature is not enabled
-                !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) ||
+            if (// We do not want to load all assembly loads (including those triggered by builtin types)
+                !Traits.Instance.LogAllAssemblyLoads &&
                 (
-                    // We do not want to load all assembly loads (including those triggered by builtin types)
-                    !Traits.Instance.LogAllAssemblyLoads &&
-                    (
-                        // Load will be initiated by internal type - so we are not interested in those
-                        initiatorType?.Assembly == Assembly.GetExecutingAssembly()
-                        ||
-                        IsBuiltinType(initiatorType?.FullName)
-                        ||
-                        IsBuiltinType(initiatorName)
-                    )
+                    // Load will be initiated by internal type - so we are not interested in those
+                    initiatorType?.Assembly == Assembly.GetExecutingAssembly()
+                    ||
+                    IsBuiltinType(initiatorType?.FullName)
+                    ||
+                    IsBuiltinType(initiatorName)
                 )
             )
             {
@@ -171,7 +166,9 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
             if (_loggingContext?.BuildEventContext != null)
             {
                 buildArgs.BuildEventContext = _loggingContext.BuildEventContext;
-                _loggingContext.LogBuildEvent(buildArgs);
+                // bypass the logging context validity check: it's possible that the load happened
+                // on a thread unrelated to the context we're tracking loads in
+                _loggingContext.LoggingService.LogBuildEvent(buildArgs);
             }
             _loggingService?.LogBuildEvent(buildArgs);
         }

@@ -36,44 +36,52 @@ internal enum BuildCheckDataSource
 internal interface IBuildCheckManager
 {
     void ProcessEvaluationFinishedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checksContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs);
 
     void ProcessEnvironmentVariableReadEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checksContext,
         EnvironmentVariableReadEventArgs envVariableReadEventArgs);
 
     void ProcessTaskStartedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checksContext,
         TaskStartedEventArgs taskStartedEventArgs);
 
     void ProcessTaskFinishedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checksContext,
         TaskFinishedEventArgs taskFinishedEventArgs);
 
     void ProcessTaskParameterEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checksContext,
         TaskParameterEventArgs taskParameterEventArgs);
+
+    void ProcessBuildFinished(ICheckContext analysisContext);
 
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
-    void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData, IAnalysisContext analysisContext);
+    void ProcessCheckAcquisition(CheckAcquisitionData acquisitionData, ICheckContext checksContext);
 
-    Dictionary<string, TimeSpan> CreateAnalyzerTracingStats();
+    Dictionary<string, TimeSpan> CreateCheckTracingStats();
 
     void FinalizeProcessing(LoggingContext loggingContext);
 
     // All those to be called from RequestBuilder,
     //  but as well from the ConnectorLogger - as even if interleaved, it gives the info
-    //  to manager about what analyzers need to be materialized and configuration fetched.
-    // No unloading of analyzers is yet considered - once loaded it stays for whole build.
-    void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string fullPath);
+    //  to manager about what checks need to be materialized and configuration fetched.
+    // No unloading of checks is yet considered - once loaded it stays for whole build.
+    
+	
+    // Project might be encountered first time in some node, but be already evaluated in another - so StartProjectEvaluation won't happen
+    //  - but we still need to know about it, hence the dedicated event.
+    void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, ICheckContext analysisContext, string projectFullPath);
 
-    void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
+    void ProcessProjectEvaluationStarted(ICheckContext checksContext, string projectFullPath);
 
-    void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
+    void EndProjectEvaluation(BuildEventContext buildEventContext);
 
-    void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
+    void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath);
+
+    void EndProjectRequest(ICheckContext checksContext, string projectFullPath);
 
     void Shutdown();
 }

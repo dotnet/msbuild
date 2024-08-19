@@ -202,6 +202,16 @@ namespace Microsoft.Build.Execution
             return BuildResult!;
         }
 
+        /// <summary>
+        /// Whether the build has started.
+        /// </summary>
+        internal override bool IsStarted
+        {
+            get => BuildRequest != null;
+            // Ignore the set - the submission is started once the BuildRequest is set.
+            set { }
+        }
+
         protected internal override BuildResult CreateFailedResult(Exception exception)
         {
             ErrorUtilities.VerifyThrow(BuildRequest != null,
@@ -232,5 +242,27 @@ namespace Microsoft.Build.Execution
                 BuildResult.SetOverallResult(overallResult: false);
             }
         }
+
+        // WARNING!: Do not remove the below proxy properties.
+        //  They are required to make the OM forward compatible
+        //  (code built against this OM should run against binaries with previous version of OM).
+
+        /// <inheritdoc cref="BuildSubmissionBase{BuildRequestData, BuildResult}.BuildResult"/>
+        public new BuildResult? BuildResult => base.BuildResult;
+
+        /// <inheritdoc cref="BuildSubmissionBase.BuildManager"/>
+        public new BuildManager BuildManager => base.BuildManager;
+
+        /// <inheritdoc cref="BuildSubmissionBase.SubmissionId"/>
+        public new int SubmissionId => base.SubmissionId;
+
+        /// <inheritdoc cref="BuildSubmissionBase.AsyncContext"/>
+        public new object? AsyncContext => base.AsyncContext;
+
+        /// <inheritdoc cref="BuildSubmissionBase.WaitHandle"/>
+        public new WaitHandle WaitHandle => base.WaitHandle;
+
+        /// <inheritdoc cref="BuildSubmissionBase.IsCompleted"/>
+        public new bool IsCompleted => base.IsCompleted;
     }
 }
