@@ -213,6 +213,11 @@ namespace Microsoft.Build.UnitTests
             {
                 _reportTelemetry = true;
             }
+
+            if (eventSource is IEventSource4 eventSource4)
+            {
+                eventSource4.IncludeEvaluationPropertiesAndItems();
+            }
         }
 
         /// <summary>
