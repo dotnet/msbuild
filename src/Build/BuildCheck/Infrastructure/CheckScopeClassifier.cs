@@ -10,13 +10,10 @@ namespace Microsoft.Build.BuildCheck.Infrastructure;
 
 internal static class CheckScopeClassifier
 {
-    static CheckScopeClassifier() =>
-        FileClassifier.Shared.OnImmutablePathsInitialized += () =>
-        {
-            NotifyOnScopingReadiness?.Invoke();
-
-            FileClassifier.Shared.OnImmutablePathsInitialized -= () => NotifyOnScopingReadiness?.Invoke();
-        };
+    static CheckScopeClassifier()
+    {
+        FileClassifier.Shared.OnImmutablePathsInitialized += SubscribeImmutablePathsInitialized;
+    }
 
     internal static event Action? NotifyOnScopingReadiness;
 
@@ -70,6 +67,14 @@ internal static class CheckScopeClassifier
         }
     }
 
-    private static bool IsGeneratedNugetImport(string file) => file.EndsWith("nuget.g.props", StringComparison.OrdinalIgnoreCase) ||
-        file.EndsWith("nuget.g.targets", StringComparison.OrdinalIgnoreCase);
+    private static bool IsGeneratedNugetImport(string file) =>
+        file.EndsWith("nuget.g.props", StringComparison.OrdinalIgnoreCase)
+        || file.EndsWith("nuget.g.targets", StringComparison.OrdinalIgnoreCase);
+
+    private static void SubscribeImmutablePathsInitialized()
+    {
+        NotifyOnScopingReadiness?.Invoke();
+
+        FileClassifier.Shared.OnImmutablePathsInitialized -= () => NotifyOnScopingReadiness?.Invoke();
+    }
 }

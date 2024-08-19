@@ -235,7 +235,7 @@ public class EndToEndTests : IDisposable
             customConfigData);
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output, timeoutMilliseconds: 12000_000);
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output);
 
         foreach (string expectedMessage in expectedMessages)
         {

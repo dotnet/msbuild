@@ -79,6 +79,7 @@ namespace Microsoft.Build.Logging
         //    - new record kinds: BuildCheckMessageEvent, BuildCheckWarningEvent, BuildCheckErrorEvent,
         //    BuildCheckTracingEvent, BuildCheckAcquisitionEvent, BuildSubmissionStartedEvent
 
+        // This should be never changed.
         // The minimum version of the binary log reader that can read log of above version.
         internal const int ForwardCompatibilityMinimalVersion = 18;
 
