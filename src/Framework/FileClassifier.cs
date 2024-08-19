@@ -51,7 +51,7 @@ namespace Microsoft.Build.Framework
             get => _isImmutablePathsInitialized;
             private set
             {
-                if (!_isImmutablePathsInitialized)
+                if (!_isImmutablePathsInitialized && value)
                 {
                     OnImmutablePathsInitialized?.Invoke();
                 }
