@@ -186,6 +186,11 @@
         <target state="translated">MSB9903: PreferNativeArm64 は、Win32 アプリケーション マニフェストを必要とし、NoWin32Manifest と相互に排他的です。</target>
         <note>{StrBegin="MSB9903: "}</note>
       </trans-unit>
+      <trans-unit id="CommonTarget.NonExistentProjectReference">
+        <source>MSB9008: The referenced project {0} does not exist.</source>
+        <target state="new">MSB9008: The referenced project {0} does not exist.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
         <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
         <target state="translated">MSB9904: PreferNativeArm64 が有効である場合、プラットフォームが AnyCPU に設定されていることを確認してください。現在のプラットフォーム: {0}。</target>

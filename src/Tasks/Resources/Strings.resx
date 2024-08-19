@@ -3103,6 +3103,10 @@
     <value>{0}: {1} item type is deprecated. Use EmbeddedResource items instead.</value>
   </data>
 
+  <data name="CommonTarget.NonExistentProjectReference">
+    <value>MSB9008: The referenced project {0} does not exist.</value>
+  </data>
+
   <!--
         The tasks message bucket is: MSB3001 - MSB3999
 

@@ -186,6 +186,11 @@
         <target state="translated">MSB9903: Možnost PreferNativeArm64 vyžaduje manifest aplikace Win32 a vzájemně se vylučuje s možností NoWin32Manifest.</target>
         <note>{StrBegin="MSB9903: "}</note>
       </trans-unit>
+      <trans-unit id="CommonTarget.NonExistentProjectReference">
+        <source>MSB9008: The referenced project {0} does not exist.</source>
+        <target state="new">MSB9008: The referenced project {0} does not exist.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
         <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
         <target state="translated">MSB9904: Pokud je povolená možnost PreferNativeArm64, ujistěte se, že je platforma nastavená na AnyCPU. Aktuální platforma: {0}.</target>

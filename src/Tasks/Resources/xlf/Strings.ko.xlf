@@ -186,6 +186,11 @@
         <target state="translated">MSB9903: PreferNativeArm64에는 Win32 애플리케이션 매니페스트가 필요하며 NoWin32Manifest와 함께 사용할 수 없습니다.</target>
         <note>{StrBegin="MSB9903: "}</note>
       </trans-unit>
+      <trans-unit id="CommonTarget.NonExistentProjectReference">
+        <source>MSB9008: The referenced project {0} does not exist.</source>
+        <target state="new">MSB9008: The referenced project {0} does not exist.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
         <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
         <target state="translated">MSB9904: PreferNativeArm64를 사용하도록 설정한 경우 플랫폼이 AnyCPU로 설정되어 있는지 확인합니다. 현재 플랫폼: {0}.</target>
