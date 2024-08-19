@@ -194,17 +194,19 @@ public class EndToEndTests : IDisposable
     }
 
     [Fact]
-    public void EditorConfig_CustomConfigAppliedCorrectly()
+    public void CheckHasAccessToAllConfigs()
     {
         using (var env = TestEnvironment.Create())
         {
             string checkCandidatePath = Path.Combine(TestAssetsRootPath, "CheckCandidate");
-            string message = "An extra message for the analyzer";
+            string message = ": An extra message for the analyzer";
+            string severity = "warning";
+
             // Can't use Transitive environment due to the need to dogfood local nuget packages.
             AddCustomDataSourceToNugetConfig(checkCandidatePath);
             string editorConfigName = Path.Combine(checkCandidatePath, EditorConfigFileName);
             File.WriteAllText(editorConfigName, ReadEditorConfig(
-                new List<(string, string)>() { ("X01234", "warning") },
+                new List<(string, string)>() { ("X01234", severity) },
                 new List<(string, (string, string))>
                 {
                     ("X01234",("setMessage", message))
@@ -216,7 +218,7 @@ public class EndToEndTests : IDisposable
             success.ShouldBeTrue();
 
             projectCheckBuildLog.ShouldContain("warning X01234");
-            projectCheckBuildLog.ShouldContain(message);
+            projectCheckBuildLog.ShouldContain(severity + message);
 
             // Cleanup
             File.Delete(editorConfigName);

@@ -21,12 +21,13 @@ namespace CustomCheck
 
         public override void Initialize(ConfigurationContext configurationContext)
         {
+            var infraData = configurationContext.CheckConfig[0];
             var customData = configurationContext.CustomConfigurationData[0].ConfigurationData;
             // configurationContext to be used only if check needs external configuration data.
             if (customData is not null &&
                 configurationContext.CustomConfigurationData[0].RuleId == "X01234")
             {
-                message = customData["setmessage"];
+                message = infraData.Severity + customData["setmessage"];
             }
         }
 
