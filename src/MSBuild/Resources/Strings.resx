@@ -1788,13 +1788,13 @@
     <comment>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</comment>
   </data>
   <data name="SAC_Evaluation" xml:space="preserve">
-    <value>2 in evaluation</value>
+    <value>2: in evaluation</value>
   </data>
   <data name="SAC_Enforcement" xml:space="preserve">
-    <value>1 in enforcement</value>
+    <value>1: in enforcement</value>
   </data>
   <data name="SAC_Off" xml:space="preserve">
-    <value>0 turned off</value>
+    <value>0: turned off</value>
   </data>
   <!-- **** TerminalLogger strings end **** -->
     <!--
