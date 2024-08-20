@@ -72,7 +72,6 @@
     <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
   </Suppression>
 
-
   <!-- PKV004 for netstandard2.0-supporting TFs that we do not have runtime assemblies for.
        This is intentional, because you can only use MSBuild in the context of a .NET SDK
        (on net7.0, as of MSBuild 17.4) or in the context of Visual Studio (net472), but we
