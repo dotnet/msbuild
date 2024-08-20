@@ -202,8 +202,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         we're in legacy mode and we shall assume the current Configuration/Platform combination as invalid.
         Whether this is considered an error or a warning depends on the value of $(SkipInvalidConfigurations).
     -->
-    <_InvalidConfigurationError Condition=" '$(SkipInvalidConfigurations)' != 'true' ">true</_InvalidConfigurationError>
-    <_InvalidConfigurationWarning Condition=" '$(SkipInvalidConfigurations)' == 'true' ">true</_InvalidConfigurationWarning>
+    <_InvalidConfigurationMessageSeverity Condition=" '$(SkipInvalidConfigurations)' == 'true' ">Warning</_InvalidConfigurationMessageSeverity>
+    <_InvalidConfigurationMessageSeverity Condition=" '$(SkipInvalidConfigurations)' != 'true' ">Error</_InvalidConfigurationMessageSeverity>
   </PropertyGroup>
 
   <!--
@@ -834,19 +834,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="_CheckForInvalidConfigurationAndPlatform"
       BeforeTargets="$(BuildDependsOn);Build;$(RebuildDependsOn);Rebuild;$(CleanDependsOn);Clean">
+    <PropertyGroup>
+      <_InvalidConfigurationMessageResourceName Condition=" '$(BuildingInsideVisualStudio)' == 'true' ">CommonSdk.InvalidConfigurationTextWhenBuildingInsideVisualStudio</_InvalidConfigurationMessageResourceName>
+      <_InvalidConfigurationMessageResourceName Condition=" '$(BuildingInsideVisualStudio)' != 'true' ">CommonSdk.InvalidConfigurationTextWhenBuildingOutsideVisualStudio</_InvalidConfigurationMessageResourceName>
+    </PropertyGroup>
 
-    <MSBuildInternalMessage Condition=" '$(_InvalidConfigurationError)' == 'true' and '$(BuildingInsideVisualStudio)' == 'true'" ResourceName="CommonTarget.InvalidConfigurationTextWithBuildingInsideVisualStudio" Severity="Error" FormatArguments="$(MSBuildProjectFile);$(_OriginalConfiguration);$(_OriginalPlatform)"/>
-    <MSBuildInternalMessage Condition=" '$(_InvalidConfigurationError)' == 'true' and '$(BuildingInsideVisualStudio)' != 'true'" ResourceName="CommonTarget.InvalidConfigurationTextWithoutBuildingInsideVisualStudio" Severity="Error" FormatArguments="$(MSBuildProjectFile);$(_OriginalConfiguration);$(_OriginalPlatform)"/>
-    <MSBuildInternalMessage Condition=" '$(_InvalidConfigurationWarning)' == 'true' and '$(BuildingInsideVisualStudio)' == 'true'" ResourceName="CommonTarget.InvalidConfigurationTextWithBuildingInsideVisualStudio" Severity="Warning" FormatArguments="$(MSBuildProjectFile);$(_OriginalConfiguration);$(_OriginalPlatform)"/>
-    <MSBuildInternalMessage Condition=" '$(_InvalidConfigurationWarning)' == 'true' and '$(BuildingInsideVisualStudio)' != 'true'" ResourceName="CommonTarget.InvalidConfigurationTextWithoutBuildingInsideVisualStudio" Severity="Warning" FormatArguments="$(MSBuildProjectFile);$(_OriginalConfiguration);$(_OriginalPlatform)"/>
+    <MSBuildInternalMessage ResourceName="$(_InvalidConfigurationMessageResourceName)" Severity="$(_InvalidConfigurationMessageSeverity)" FormatArguments="$(MSBuildProjectFile);$(_OriginalConfiguration);$(_OriginalPlatform)"/>
 
     <Message Condition="'$(DesignTimeBuild)' != 'true'" Text="Configuration=$(Configuration)" Importance="Low" />
     <Message Condition="'$(DesignTimeBuild)' != 'true'" Text="Platform=$(Platform)" Importance="Low" />
 
     <!-- Although we try to ensure a trailing slash, it's possible to circumvent this if the property is set on the command line -->
-    <MSBuildInternalMessage Condition="'$(OutDir)' != '' and !HasTrailingSlash('$(OutDir)')" ResourceName="CommonTarget.PropertyWithTrailingSlash"  Severity="Error" FormatArguments="OutDir"/>
-    <MSBuildInternalMessage Condition="'$(IntermediateOutputPath)' != '' and !HasTrailingSlash('$(IntermediateOutputPath)')" ResourceName="CommonTarget.PropertyWithTrailingSlash"  Severity="Error" FormatArguments="IntermediateOutputPath"/>
-    <MSBuildInternalMessage Condition="'$(BaseIntermediateOutputPath)' != '' and !HasTrailingSlash('$(BaseIntermediateOutputPath)')" ResourceName="CommonTarget.PropertyWithTrailingSlash"  Severity="Error" FormatArguments="BaseIntermediateOutputPath"/>
+    <MSBuildInternalMessage Condition="'$(OutDir)' != '' and !HasTrailingSlash('$(OutDir)')" ResourceName="CommonSdk.PropertyWithTrailingSlash"  Severity="Error" FormatArguments="OutDir"/>
+    <MSBuildInternalMessage Condition="'$(IntermediateOutputPath)' != '' and !HasTrailingSlash('$(IntermediateOutputPath)')" ResourceName="CommonSdk.PropertyWithTrailingSlash"  Severity="Error" FormatArguments="IntermediateOutputPath"/>
+    <MSBuildInternalMessage Condition="'$(BaseIntermediateOutputPath)' != '' and !HasTrailingSlash('$(BaseIntermediateOutputPath)')" ResourceName="CommonSdk.PropertyWithTrailingSlash"  Severity="Error" FormatArguments="BaseIntermediateOutputPath"/>
 
     <!-- Also update the value of PlatformTargetAsMSBuildArchitecture per the value of Prefer32Bit.  We are doing
          this here because Prefer32Bit may be set anywhere in the targets, so we can't depend on it having the
@@ -855,11 +856,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <PlatformTargetAsMSBuildArchitecture>x86</PlatformTargetAsMSBuildArchitecture>
     </PropertyGroup>
 
-    <MSBuildInternalMessage Condition=" '$(Prefer32Bit)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled" Severity="Error"/>
+    <MSBuildInternalMessage Condition=" '$(Prefer32Bit)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonSdk.Prefer32BitAndPreferNativeArm64Enabled" Severity="Error"/>
 
-    <MSBuildInternalMessage Condition=" '$(NoWin32Manifest)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled" Severity="Error"/>
+    <MSBuildInternalMessage Condition=" '$(NoWin32Manifest)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonSdk.NoWin32ManifestAndPreferNativeArm64Enabled" Severity="Error"/>
 
-    <MSBuildInternalMessage Condition=" '$(PreferNativeArm64)' == 'true' and '$(Platform)' != 'AnyCPU' " ResourceName="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled" Severity="Warning" FormatArguments="$(Platform)" />
+    <MSBuildInternalMessage Condition=" '$(PreferNativeArm64)' == 'true' and '$(Platform)' != 'AnyCPU' " ResourceName="CommonSdk.PlatformIsAnyCPUAndPreferNativeArm64Enabled" Severity="Warning" FormatArguments="$(Platform)" />
 
     <!--
       Log an error if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project
@@ -868,7 +869,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
     <MSBuildInternalMessage
       Condition=" '$(_InitialMSBuildProjectExtensionsPath)' != '' And '$(MSBuildProjectExtensionsPath)' != '$(_InitialMSBuildProjectExtensionsPath)' "
-      ResourceName="CommonTarget.MSBuildProjectExtensionsPathModifiedAfterUse"
+      ResourceName="CommonSdk.MSBuildProjectExtensionsPathModifiedAfterUse"
       Severity="Error"
     />
 
@@ -884,7 +885,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
     <MSBuildInternalMessage
       Condition=" '$(EnableBaseIntermediateOutputPathMismatchWarning)' == 'true' And '$(_InitialBaseIntermediateOutputPath)' != '$(BaseIntermediateOutputPath)' And '$(BaseIntermediateOutputPath)' != '$(MSBuildProjectExtensionsPath)' "
-      ResourceName="CommonTarget.BaseIntermediateOutputPathMismatchWarning"
+      ResourceName="CommonSdk.BaseIntermediateOutputPathMismatchWarning"
       Severity="Warning"
     />
   </Target>
@@ -1135,7 +1136,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="Run"
       DependsOnTargets="$(RunDependsOn)">
 
-    <MSBuildInternalMessage Condition="'$(TargetExt)'!='.exe'" ResouceName="CommonTarget.RunTargetDependsOnMessage" Severity="Error" FormatArguments="$(TargetPath)"/>
+    <MSBuildInternalMessage Condition="'$(TargetExt)'!='.exe'" ResouceName="CommonSdk.RunTargetDependsOnMessage" Severity="Error" FormatArguments="$(TargetPath)"/>
     <Exec Command="$(TargetPath) $(StartArguments)" WorkingDirectory="$(OutDir)" Condition=" '$(StartWorkingDirectory)' == '' "/>
     <Exec Command="$(TargetPath) $(StartArguments)" WorkingDirectory="$(StartWorkingDirectory)" Condition=" '$(StartWorkingDirectory)' != '' "/>
 
@@ -1963,7 +1964,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Returns="@(_ThisProjectBuildMetadata)">
 
     <MSBuildInternalMessage Condition="'$(IsCrossTargetingBuild)' == 'true'"
-      ResouceName="CommonTarget.CrossTargetingGetTargetFrameworks"
+      ResouceName="CommonSdk.CrossTargetingGetTargetFrameworks"
       Severity="Error"
     />
 
@@ -2180,17 +2181,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <!-- Issue a warning for each non-existent project. -->
+    <PropertyGroup>
+      <NonExistentProjectReferenceSecuity  Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' != 'True'">Warning</NonExistentProjectReferenceSecuity>
+      <NonExistentProjectReferenceSecuity  Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' == 'True'">Error</NonExistentProjectReferenceSecuity>
+    </PropertyGroup>
     <MSBuildInternalMessage
-      Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' != 'True'"
-      ResourceName="CommonTarget.NonExistentProjectReference"
-      severity="warning"
-      FormatArguments="@(_MSBuildProjectReferenceNonexistent->'%(Identity)')"
-    />
-
-    <MSBuildInternalMessage
-      Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' == 'True'"
-      ResourceName="CommonTarget.NonExistentProjectReference"
-      Severity="Error"
+      ResourceName="CommonSdk.NonExistentProjectReference"
+      Severity="$(NonExistentProjectReferenceSecuity)"
       FormatArguments="@(_MSBuildProjectReferenceNonexistent->'%(Identity)')"
     />
 
@@ -3272,10 +3269,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <RespectAlreadyAssignedItemCulture Condition="'$(RespectAlreadyAssignedItemCulture)' == ''">false</RespectAlreadyAssignedItemCulture>
     </PropertyGroup>
 
-    <MSBuildInternalMessage Condition="'@(ResxWithNoCulture)'!=''" ResouceName="CommonTarget.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9000;ResxWithNoCulture" />
-    <MSBuildInternalMessage Condition="'@(ResxWithCulture)'!=''" ResouceName="CommonTarget.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9001;ResxWithCulture" />
-    <MSBuildInternalMessage Condition="'@(NonResxWithCulture)'!=''" ResouceName="CommonTarget.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9002;NonResxWithCulture" />
-    <MSBuildInternalMessage Condition="'@(NonResxWithNoCulture)'!=''" ResouceName="CommonTarget.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9003;NonResxWithNoCulture" />
+    <MSBuildInternalMessage Condition="'@(ResxWithNoCulture)'!=''" ResouceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9000;ResxWithNoCulture" />
+    <MSBuildInternalMessage Condition="'@(ResxWithCulture)'!=''" ResouceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9001;ResxWithCulture" />
+    <MSBuildInternalMessage Condition="'@(NonResxWithCulture)'!=''" ResouceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9002;NonResxWithCulture" />
+    <MSBuildInternalMessage Condition="'@(NonResxWithNoCulture)'!=''" ResouceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9003;NonResxWithNoCulture" />
 
     <ItemGroup>
       <_LicxFile Include="@(EmbeddedResource)" Condition="'%(Extension)'=='.licx'"/>
@@ -3651,13 +3648,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <MSBuildInternalMessage
       Condition="'@(ManifestResourceWithNoCulture)'!='' and '%(ManifestResourceWithNoCulture.EmittedForCompatibilityOnly)'==''"
-      ResouceName="CommonTarget.ManifestResourceWithNoCultureWarning"
-      Severity="warning"
+      ResouceName="CommonSdk.ManifestResourceWithNoCultureWarning"
+      Severity="Warning"
       FormatArguments="MSB9004;ManifestResourceWithNoCulture;false;Resx" />
     <MSBuildInternalMessage
       Condition="'@(ManifestNonResxWithNoCultureOnDisk)'!='' and '%(ManifestNonResxWithNoCultureOnDisk.EmittedForCompatibilityOnly)'==''"
-      ResouceName="CommonTarget.ManifestResourceWithNoCultureWarning"
-      Severity="warning"
+      ResouceName="CommonSdk.ManifestResourceWithNoCultureWarning"
+      Severity="Warning"
       FormatArguments="MSB9005;ManifestNonResxWithNoCultureOnDisk;false;Non-Resx" />
 
     <ItemGroup>
@@ -4010,14 +4007,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <MSBuildInternalMessage
       Condition="'@(ManifestResourceWithCulture)'!='' and '%(ManifestResourceWithCulture.EmittedForCompatibilityOnly)'==''"
-      ResouceName="CommonTarget.ManifestResourceWithNoCultureWarning"
-      Severity="warning"
+      ResouceName="CommonSdk.ManifestResourceWithNoCultureWarning"
+      Severity="Warning"
       FormatArguments="MSB9006;ManifestResourceWithNoCulture;true;Resx" />
     <MSBuildInternalMessage
-      Condition="'@(ManifestResourceWithCulture)'!='' and '%(ManifestResourceWithCulture.EmittedForCompatibilityOnly)'==''"
-      ResouceName="CommonTarget.ManifestResourceWithNoCultureWarning"
-      Severity="warning"
-      FormatArguments="MSB9007;ManifestResourceWithNoCulture;true;Non-Resx" />
+      Condition="'@(ManifestNonResxWithCultureOnDisk)'!='' and '%(ManifestNonResxWithCultureOnDisk.EmittedForCompatibilityOnly)'==''"
+      ResouceName="CommonSdk.ManifestResourceWithNoCultureWarning"
+      Severity="Warning"
+      FormatArguments="MSB9007;ManifestNonResxWithCultureOnDisk;true;Non-Resx" />
 
     <ItemGroup>
       <!-- _SatelliteAssemblyResourceInputs is the list of TLDA inputs that should trigger CreateSatelliteAssemblies, so listed as inputs to that target -->
@@ -6011,7 +6008,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="_DeploymentUnpublishable">
 
-    <MSBuildInternalMessage ResouceName="CommonTarget.DeploymentUnpublishable" Severity="Message"/>
+    <MSBuildInternalMessage ResouceName="CommonSdk.DeploymentUnpublishable" Severity="Message"/>
 
   </Target>
 
@@ -6025,8 +6022,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="SetGenerateManifests">
 
-    <MSBuildInternalMessage Condition="'$(OutputType)'!='winexe' and '$(OutputType)'!='exe' and '$(OutputType)'!='appcontainerexe'" ResouceName="CommonTarget.GenerateManifestsOnlyForExe" Severity="Error"/>
-    <MSBuildInternalMessage Condition="'$(_DeploymentSignClickOnceManifests)'=='true' and '$(ManifestCertificateThumbprint)'=='' and '$(ManifestKeyFile)'==''" ResouceName="CommonTarget.SigningKeyRequired" Severity="Error"/>
+    <MSBuildInternalMessage Condition="'$(OutputType)'!='winexe' and '$(OutputType)'!='exe' and '$(OutputType)'!='appcontainerexe'" ResouceName="CommonSdk.GenerateManifestsOnlyForExe" Severity="Error"/>
+    <MSBuildInternalMessage Condition="'$(_DeploymentSignClickOnceManifests)'=='true' and '$(ManifestCertificateThumbprint)'=='' and '$(ManifestKeyFile)'==''" ResouceName="CommonSdk.SigningKeyRequired" Severity="Error"/>
 
     <PropertyGroup>
       <GenerateClickOnceManifests>true</GenerateClickOnceManifests>
