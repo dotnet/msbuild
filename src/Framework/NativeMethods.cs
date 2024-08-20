@@ -54,6 +54,9 @@ internal static class NativeMethods
     private const string WINDOWS_FILE_SYSTEM_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\FileSystem";
     private const string WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME = "LongPathsEnabled";
 
+    private const string WINDOWS_SAC_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\CI\Policy";
+    private const string WINDOWS_SAC_VALUE_NAME = "VerifiedAndReputablePolicyState";
+
     internal static DateTime MinFileDate { get; } = DateTime.FromFileTimeUtc(0);
 
     internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
@@ -659,6 +662,72 @@ internal static class NativeMethods
                 return LongPathsStatus.Disabled;
             }
         }
+    }
+
+    internal static SAC_State GetSACState()
+    {
+        if (IsWindows)
+        {
+            try
+            {
+                return GetSACStateRegistry();
+            }
+            catch
+            {
+                return SAC_State.Missing;
+            }
+        }
+
+        return SAC_State.NotApplicable;
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static SAC_State GetSACStateRegistry()
+    {
+        SAC_State SACState = SAC_State.Missing;
+
+        using (RegistryKey policyKey = Registry.LocalMachine.OpenSubKey(WINDOWS_SAC_REGISTRY_KEY))
+        {
+            object sacValue = policyKey?.GetValue(WINDOWS_SAC_VALUE_NAME, 0);
+            if (policyKey != null)
+            {
+                SACState = Convert.ToInt32(sacValue) switch
+                {
+                    0 => SAC_State.Off,
+                    1 => SAC_State.Enforcement,
+                    2 => SAC_State.Evaluation,
+                    _ => SAC_State.Missing,
+                };
+            }
+        }
+        return SACState;
+    }
+
+    /// <summary>
+    /// State of Smart App Control (SAC) on the system.
+    /// </summary>
+    internal enum SAC_State
+    {
+        /// <summary>
+        /// 0: SAC is off.
+        /// </summary>
+        Off,
+        /// <summary>
+        /// 1: SAC is on and enforcing.
+        /// </summary>
+        Enforcement,
+        /// <summary>
+        /// 2: SAC is on and in evaluation mode.
+        /// </summary>
+        Evaluation,
+        /// <summary>
+        /// The registry key is missing.
+        /// </summary>
+        Missing,
+        /// <summary>
+        /// Not on Windows.
+        /// </summary>
+        NotApplicable 
     }
 
     /// <summary>
