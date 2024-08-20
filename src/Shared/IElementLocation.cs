@@ -18,7 +18,7 @@ namespace Microsoft.Build.Shared
     /// </summary>
     /// <remarks>
     /// This is currently internal - but it is prepared to be made public once it will be needed by other public BuildCheck OM
-    /// (e.g. by property read/write OM)
+    /// (e.g. by property read/write OM).
     /// </remarks>
     public interface IMSBuildElementLocation
     {

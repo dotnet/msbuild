@@ -4,27 +4,29 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BuildCheck.Infrastructure;
-using Microsoft.Build.Construction;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
 internal sealed class NoEnvironmentVariablePropertyCheck : Check
 {
     public static CheckRule SupportedRule = new CheckRule(
-                "BC0103",
-                "NoEnvironmentVariablePropertyCheck",
-                "No implicit property derived from an environment variable should be used during the build",
-                "Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.",
-                new CheckConfiguration() { Severity = CheckResultSeverity.Suggestion });
+        "BC0103",
+        "NoEnvironmentVariablePropertyCheck",
+        "No implicit property derived from an environment variable should be used during the build",
+        "Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.",
+        new CheckConfiguration() { Severity = CheckResultSeverity.Suggestion });
 
     private const string RuleId = "BC0103";
 
     private const string VerboseEnvVariableOutputKey = "allow_displaying_environment_variable_value";
 
+    private readonly Queue<(string projectPath, BuildCheckDataContext<EnvironmentVariableCheckData>)> _buildCheckResults = new Queue<(string, BuildCheckDataContext<EnvironmentVariableCheckData>)>();
+
     /// <summary>
-    /// Contains the list of reported environment variables.
+    /// Contains the list of viewed environment variables.
     /// </summary>
-    private readonly HashSet<EnvironmentVariableIdentityKey> _environmentVariablesReported = new HashSet<EnvironmentVariableIdentityKey>();
+    private readonly HashSet<EnvironmentVariableIdentityKey> _environmentVariablesCache = new HashSet<EnvironmentVariableIdentityKey>();
 
     private bool _isVerboseEnvVarOutput;
     private EvaluationCheckScope _scope;
@@ -39,44 +41,33 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
         foreach (CustomConfigurationData customConfigurationData in configurationContext.CustomConfigurationData)
         {
             bool? isVerboseEnvVarOutput = GetVerboseEnvVarOutputConfig(customConfigurationData, RuleId);
-            _isVerboseEnvVarOutput = isVerboseEnvVarOutput.HasValue && isVerboseEnvVarOutput.Value;           
+            _isVerboseEnvVarOutput = isVerboseEnvVarOutput.HasValue && isVerboseEnvVarOutput.Value;
         }
+
+        CheckScopeClassifier.NotifyOnScopingReadiness += HandleScopeReadiness;
     }
 
-    public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEvaluatedPropertiesAction(ProcessEnvironmentVariableReadAction);
+    public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEnvironmentVariableReadAction(ProcessEnvironmentVariableReadAction);
 
-    private void ProcessEnvironmentVariableReadAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
+    private void ProcessEnvironmentVariableReadAction(BuildCheckDataContext<EnvironmentVariableCheckData> context)
     {
-        if (context.Data.EvaluatedEnvironmentVariables.Count != 0)
+        EnvironmentVariableIdentityKey identityKey = new(context.Data.EnvironmentVariableName, context.Data.EnvironmentVariableLocation);
+        if (!_environmentVariablesCache.Contains(identityKey))
         {
-            foreach (var envVariableData in context.Data.EvaluatedEnvironmentVariables)
+            // Scope information is available after evaluation of the project file. If it is not ready, we will report the check later.
+            if (!CheckScopeClassifier.IsScopingReady(_scope))
             {
-                if (!CheckScopeClassifier.IsActionInObservedScope(_scope, envVariableData.Value.File,
-                        context.Data.ProjectFilePath))
-                {
-                    continue;
-                }
-                EnvironmentVariableIdentityKey identityKey = new(envVariableData.Key, envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column);
-                if (!_environmentVariablesReported.Contains(identityKey))
-                {
-                    if (_isVerboseEnvVarOutput)
-                    {
-                        context.ReportResult(BuildCheckResult.Create(
-                            SupportedRule,
-                            ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
-                            $"'{envVariableData.Key}' with value: '{envVariableData.Value.EnvVarValue}'"));
-                    }
-                    else
-                    {
-                        context.ReportResult(BuildCheckResult.Create(
-                            SupportedRule,
-                            ElementLocation.Create(envVariableData.Value.File, envVariableData.Value.Line, envVariableData.Value.Column),
-                            $"'{envVariableData.Key}'"));
-                    }
-
-                    _environmentVariablesReported.Add(identityKey);
-                }
+                _buildCheckResults.Enqueue((context.Data.ProjectFilePath, context));
             }
+            else if (CheckScopeClassifier.IsActionInObservedScope(_scope, context.Data.EnvironmentVariableLocation.File, context.Data.ProjectFilePath))
+            {
+                context.ReportResult(BuildCheckResult.Create(
+                    SupportedRule,
+                    context.Data.EnvironmentVariableLocation,
+                    GetFormattedMessage(context.Data.EnvironmentVariableName, context.Data.EnvironmentVariableValue)));
+            }
+
+            _environmentVariablesCache.Add(identityKey);
         }
     }
 
@@ -85,31 +76,49 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
             ? bool.Parse(configVal)
             : null;
 
-    internal class EnvironmentVariableIdentityKey(string environmentVariableName, string file, int line, int column) : IEquatable<EnvironmentVariableIdentityKey>
+    private void HandleScopeReadiness()
+    {
+        while (_buildCheckResults.Count > 0)
+        {
+            (string projectPath, BuildCheckDataContext<EnvironmentVariableCheckData> context) = _buildCheckResults.Dequeue();
+            if (!CheckScopeClassifier.IsActionInObservedScope(_scope, context.Data.EnvironmentVariableLocation.File, projectPath))
+            {
+                continue;
+            }
+
+            context.ReportResult(BuildCheckResult.Create(
+                SupportedRule,
+                context.Data.EnvironmentVariableLocation,
+                GetFormattedMessage(context.Data.EnvironmentVariableName, context.Data.EnvironmentVariableValue)));
+        }
+
+        CheckScopeClassifier.NotifyOnScopingReadiness -= HandleScopeReadiness;
+    }
+
+    private string GetFormattedMessage(string envVariableName, string envVariableValue) => _isVerboseEnvVarOutput? $"'{envVariableName}' with value: '{envVariableValue}'" : $"'{envVariableName}'";
+
+    internal class EnvironmentVariableIdentityKey(string environmentVariableName, IMSBuildElementLocation location) : IEquatable<EnvironmentVariableIdentityKey>
     {
         public string EnvironmentVariableName { get; } = environmentVariableName;
 
-        public string File { get; } = file;
-
-        public int Line { get; } = line;
-
-        public int Column { get; } = column;
+        public IMSBuildElementLocation Location { get; } = location;
 
         public override bool Equals(object? obj) => Equals(obj as EnvironmentVariableIdentityKey);
 
         public bool Equals(EnvironmentVariableIdentityKey? other) =>
             other != null &&
             EnvironmentVariableName == other.EnvironmentVariableName &&
-            File == other.File &&
-            Line == other.Line &&
-            Column == other.Column;
+            Location.File == other.Location.File &&
+            Location.Line == other.Location.Line &&
+            Location.Column == other.Location.Column;
 
         public override int GetHashCode()
         {
             int hashCode = 17;
-            hashCode = hashCode * 31 + (File != null ? File.GetHashCode() : 0);
-            hashCode = hashCode * 31 + Line.GetHashCode();
-            hashCode = hashCode * 31 + Column.GetHashCode();
+            hashCode = hashCode * 31 + (Location.File != null ? Location.File.GetHashCode() : 0);
+            hashCode = hashCode * 31 + Location.Line.GetHashCode();
+            hashCode = hashCode * 31 + Location.Column.GetHashCode();
+
             return hashCode;
         }
     }

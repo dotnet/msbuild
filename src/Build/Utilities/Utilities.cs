@@ -660,6 +660,10 @@ namespace Microsoft.Build.Internal
                     {
                         callback(arg, kvp);
                     }
+                    else if (item is KeyValuePair<string, TimeSpan> keyTimeSpanValue)
+                    {
+                        callback(arg, new KeyValuePair<string, string>(keyTimeSpanValue.Key, keyTimeSpanValue.Value.Ticks.ToString()));
+                    }
                     else
                     {
                         if (item == null)

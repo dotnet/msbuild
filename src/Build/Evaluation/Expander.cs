@@ -1554,12 +1554,12 @@ namespace Microsoft.Build.Evaluation
 
                 object propertyValue;
 
-                bool isArtifical = property == null && ((endIndex - startIndex) >= 7) &&
+                bool isArtificial = property == null && ((endIndex - startIndex) >= 7) &&
                                    MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7);
 
-                propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, elementLocation, property == null, isArtifical);
+                propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, elementLocation, property == null, isArtificial);
 
-                if (isArtifical)
+                if (isArtificial)
                 {
                     // It could be one of the MSBuildThisFileXXXX properties,
                     // whose values vary according to the file they are in.

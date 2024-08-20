@@ -10,20 +10,17 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal sealed class CheckRegistrationContext(CheckWrapper checkWrapper, BuildCheckCentralContext buildCheckCentralContext) : IInternalCheckRegistrationContext
 {
-    public void RegisterEvaluatedPropertiesAction(Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction)
-    {
+    public void RegisterEnvironmentVariableReadAction(Action<BuildCheckDataContext<EnvironmentVariableCheckData>> environmentVariableAction) =>
+        buildCheckCentralContext.RegisterEnvironmentVariableReadAction(checkWrapper, environmentVariableAction);
+
+    public void RegisterEvaluatedPropertiesAction(Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction) =>
         buildCheckCentralContext.RegisterEvaluatedPropertiesAction(checkWrapper, evaluatedPropertiesAction);
-    }
 
-    public void RegisterParsedItemsAction(Action<BuildCheckDataContext<ParsedItemsCheckData>> parsedItemsAction)
-    {
+    public void RegisterParsedItemsAction(Action<BuildCheckDataContext<ParsedItemsCheckData>> parsedItemsAction) =>
         buildCheckCentralContext.RegisterParsedItemsAction(checkWrapper, parsedItemsAction);
-    }
 
-    public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction)
-    {
+    public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction) =>
         buildCheckCentralContext.RegisterTaskInvocationAction(checkWrapper, taskInvocationAction);
-    }
 
     public void RegisterPropertyReadAction(Action<BuildCheckDataContext<PropertyReadData>> propertyReadAction)
         => buildCheckCentralContext.RegisterPropertyReadAction(checkWrapper, propertyReadAction);
