@@ -4,12 +4,12 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 
 | Diagnostic&nbsp;Code | Default Severity | Reason |
 |:-----|-------|----------|
-| [BC0101](#BC0101) | Warning | Shared output path. |
-| [BC0102](#BC0102) | Warning | Double writes. |
-| [BC0103](#BC0103) | Suggestion | Used environment variable. |
-| [BC0201](#BC0201) | Warning | Usage of undefined property. |
-| [BC0202](#BC0202) | Warning | Property first declared after it was used. |
-| [BC0203](#BC0203) | None | Property declared but never used. |
+| [BC0101](#bc0101---shared-output-path) | Warning | Shared output path. |
+| [BC0102](#bc0102---double-writes) | Warning | Double writes. |
+| [BC0103](#bc0103---used-environment-variable) | Suggestion | Used environment variable. |
+| [BC0201](#bc0201---usage-of-undefined-property) | Warning | Usage of undefined property. |
+| [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Property first declared after it was used. |
+| [BC0203](#bc0203----property-declared-but-never-used) | None | Property declared but never used. |
 
 
 To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
@@ -19,7 +19,8 @@ _Cmd:_
 dotnet build -bl -check
 ```
 
-## <a name="BC0101"></a>BC0101 - Shared output path.
+<a name="BC0101"></a>
+## BC0101 - Shared output path.
 
 "Two projects should not share their OutputPath nor IntermediateOutputPath locations"
 
@@ -28,7 +29,8 @@ It is not recommended to share output path nor intermediate output path between 
 If you want to produce outputs in a consolidated output folder - consider using the [Artifacts output layout](https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output) and/or [Microsoft.Build.Artifacts SDK](https://github.com/microsoft/MSBuildSdks/tree/main/src/Artifacts).
 
 
-## <a name="BC0102"></a>BC0102 - Double writes.
+<a name="BC0102"></a>
+## BC0102 - Double writes.
 
 "Two tasks should not write the same file"
 
@@ -36,7 +38,8 @@ This is a similar problem as ['BC0101 - Shared output path'](#BC0101) - however 
 
 If you want multiple tasks to update file in a one-by-one pipeline fashion, it is recommended to give each intermediate output a distinct name - preventing silent mixups if any of the tasks in the chain are skipped or removed.
 
-## <a name="BC0103"></a>BC0103 - Used environment variable.
+<a name="BC0103"></a>
+## BC0103 - Used environment variable.
 
 "Environment variables should not be used as a value source for the properties"
 
@@ -45,7 +48,8 @@ Relying on environment variables introduces variability and unpredictability, as
 
 This practice can result in inconsistent build outcomes and makes debugging difficult, since environment variables are external to project files and build scripts. To ensure consistent and reproducible builds, avoid using environment variables. Instead, explicitly pass properties using the /p option, which offers better control and traceability.
 
-## <a name="BC0201"></a>BC0201 - Usage of undefined property.
+<a name="BC0201"></a>
+## BC0201 - Usage of undefined property.
 
 "A property that is accessed should be declared first."
 
@@ -69,7 +73,8 @@ There are couple cases which are allowed by the check:
 
   BC0201 and BC0202 must have same value for the optional switch - as both operate on top of same data and same filtering.
 
-## <a name="BC0202"></a>BC0202 - Property first declared after it was used.
+<a name="BC0202"></a>
+## BC0202 - Property first declared after it was used.
 
 "A property should be declared before it is first used."
 
@@ -79,7 +84,8 @@ This check indicates that a property was accessed before it was declared. The de
 
 If `BC0202` and [BC0201](#BC0201) are both enabled - then `BC0201` reports only the undefined reads that are not reported by this rule (so those that do not have late definitions).
 
-## <a name="BC0203"></a>BC0203 -  Property declared but never used.
+<a name="BC0203"></a>
+## BC0203 -  Property declared but never used.
 
 "A property that is not used should not be declared."
 
