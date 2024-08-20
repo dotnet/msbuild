@@ -1788,7 +1788,8 @@
     <comment>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</comment>
   </data>
   <data name="SAC_Evaluation" xml:space="preserve">
-    <value>2: in evaluation</value>
+    <value>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</value>
+    <comment>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</comment>
   </data>
   <data name="SAC_Enforcement" xml:space="preserve">
     <value>1: in enforcement</value>

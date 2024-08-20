@@ -709,10 +709,6 @@ internal static class NativeMethods
     internal enum SAC_State
     {
         /// <summary>
-        /// 0: SAC is off.
-        /// </summary>
-        Off,
-        /// <summary>
         /// 1: SAC is on and enforcing.
         /// </summary>
         Enforcement,
@@ -720,6 +716,10 @@ internal static class NativeMethods
         /// 2: SAC is on and in evaluation mode.
         /// </summary>
         Evaluation,
+        /// <summary>
+        /// 0: SAC is off.
+        /// </summary>
+        Off,
         /// <summary>
         /// The registry key is missing.
         /// </summary>

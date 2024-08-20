@@ -1816,9 +1816,9 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <note />
       </trans-unit>
       <trans-unit id="SAC_Evaluation">
-        <source>2: in evaluation</source>
-        <target state="new">2: in evaluation</target>
-        <note />
+        <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
+        <target state="new">2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</target>
+        <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Off">
         <source>0: turned off</source>
