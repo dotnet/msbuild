@@ -61,6 +61,8 @@ namespace Microsoft.Build.Logging
 
         byte[] IBinaryReader.ReadBytes(int count) => _binaryReader.ReadBytes(count);
 
+        byte[] IBinaryReader.ReadGuid() => _binaryReader.ReadBytes(16 /*sizeof(Guid) - to avoid unsafe context, Guid will never change in size */);
+
         bool IBinaryReader.ReadBoolean() => _binaryReader.ReadBoolean();
 
         long IBinaryReader.ReadInt64() => _binaryReader.ReadInt64();

@@ -22,6 +22,8 @@ namespace Microsoft.Build.Framework.Logging
 
         public byte[] ReadBytes(int count);
 
+        public byte[] ReadGuid();
+
         public bool ReadBoolean();
 
         public long ReadInt64();

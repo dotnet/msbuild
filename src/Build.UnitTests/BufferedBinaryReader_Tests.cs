@@ -347,5 +347,35 @@ namespace Microsoft.Build.Engine.UnitTests
 
             Assert.Equal(testString[2], reader.ReadString());
         }
+
+        /// <summary>
+        /// Test ReadGuid 
+        /// </summary>
+        [Fact]
+        public void Test_ReadGuid()
+        {
+            int testCount = 20;
+            List<Guid> testGuids = new List<Guid>(testCount);
+
+            for(int i = 0; i < testCount; i++)
+            {
+                testGuids.Add(Guid.NewGuid());
+            }
+
+            using var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream);
+            foreach (var guid in testGuids)
+            {
+                writer.WriteGuid(guid);
+            }
+
+            stream.Position = 0;
+
+            using var reader = new BufferedBinaryReader(stream, bufferCapacity: 20);
+            foreach (var guid in testGuids)
+            {
+                Assert.Equal(guid, new Guid(reader.ReadGuid()));
+            }
+        }
     }
 }

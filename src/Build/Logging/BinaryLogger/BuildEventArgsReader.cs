@@ -1740,7 +1740,7 @@ namespace Microsoft.Build.Logging
 
         private Guid ReadGuid()
         {
-            return new Guid(_binaryReader.ReadBytes(16 /*sizeof(Guid) - to avoid unsafe context, Guid will never change in size */));
+            return new Guid(_binaryReader.ReadGuid());
         }
 
         private DateTime ReadDateTime()

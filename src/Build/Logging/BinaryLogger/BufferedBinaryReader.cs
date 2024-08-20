@@ -40,6 +40,7 @@ namespace Microsoft.Build.Logging
             this.bufferCapacity = bufferCapacity;  // Note: bufferCapacity must be large enough for an BulkRead7BitEncodedInt operation.
             this.encoding = encoding ?? new UTF8Encoding();
             buffer = new byte[this.bufferCapacity];
+            charBuffer = new char[bufferCapacity + 1];
         }
 
         /// <summary>
@@ -94,7 +95,7 @@ namespace Microsoft.Build.Logging
         private StringBuilder? cachedBuilder;
 
         // Reusable char[] for ReadString().
-        private char[]? charBuffer;
+        private char[] charBuffer;
 
         /// <summary>
         /// Reads a string with a prefixed of the length.
@@ -113,12 +114,7 @@ namespace Microsoft.Build.Logging
 
             if (stringLength < 0)
             {
-                throw new Exception();
-            }
-
-            if (charBuffer == null)
-            {
-                charBuffer = new char[bufferCapacity + 1];
+                throw new FormatException();
             }
 
             int charRead = 0;
@@ -215,7 +211,7 @@ namespace Microsoft.Build.Logging
             // Avoid an allocation if the current buffer is large enough.
             // Except if the allocation is 16 byte because GUID requires exactly 16 byte array.
             byte[] result;
-            if (count != 16 && count < this.bufferCapacity)
+            if (count < this.bufferCapacity)
             {
                 if (this.bufferOffset > 0)
                 {
@@ -234,6 +230,23 @@ namespace Microsoft.Build.Logging
             bufferOffset += count;
             baseStreamPosition += count;
             return result;
+        }
+
+        private byte[] resultGuidBytes = new byte[16];
+
+        /// <summary>
+        /// Read a 16 bytes that represents a GUID.
+        /// </summary>
+        /// <returns>A byte array containing a GUID.</returns>
+        public byte[] ReadGuid()
+        {
+            const int guidCount = 16;
+            FillBuffer(16);
+            Array.Copy(buffer, bufferOffset, resultGuidBytes, 0, guidCount);
+            bufferOffset += guidCount;
+            baseStreamPosition += guidCount;
+
+            return resultGuidBytes;
         }
 
         /// <summary>
@@ -286,6 +299,11 @@ namespace Microsoft.Build.Logging
         /// <remarks>This will reuse the same array for results to avoid extra allocations.</remarks>
         public int[] BulkRead7BitEncodedInt(int numIntegers)
         {
+            if (numIntegers > MaxBulkRead7BitLength)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
             FillBuffer(5 * numIntegers, throwOnEOF: false);
             int count = 0;
             int shift = 0;
