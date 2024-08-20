@@ -658,12 +658,16 @@ internal static class NativeMethods
                 return LongPathsStatus.Enabled;
             }
             else
-            { 
+            {
                 return LongPathsStatus.Disabled;
             }
         }
     }
 
+    /// <summary>
+    /// Get from registry state of the Smart App Control (SAC) on the system.
+    /// </summary>
+    /// <returns>State of SAC</returns>
     internal static SAC_State GetSACState()
     {
         if (IsWindows)
@@ -688,9 +692,9 @@ internal static class NativeMethods
 
         using (RegistryKey policyKey = Registry.LocalMachine.OpenSubKey(WINDOWS_SAC_REGISTRY_KEY))
         {
-            object sacValue = policyKey?.GetValue(WINDOWS_SAC_VALUE_NAME, 0);
             if (policyKey != null)
             {
+                object sacValue = policyKey.GetValue(WINDOWS_SAC_VALUE_NAME, -1);
                 SACState = Convert.ToInt32(sacValue) switch
                 {
                     0 => SAC_State.Off,
@@ -700,6 +704,7 @@ internal static class NativeMethods
                 };
             }
         }
+
         return SACState;
     }
 
@@ -727,7 +732,7 @@ internal static class NativeMethods
         /// <summary>
         /// Not on Windows.
         /// </summary>
-        NotApplicable 
+        NotApplicable
     }
 
     /// <summary>

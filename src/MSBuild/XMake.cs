@@ -1762,7 +1762,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             NativeMethodsShared.SAC_State SAC_State = NativeMethodsShared.GetSACState();
-            if (SAC_State != NativeMethodsShared.SAC_State.NotApplicable || SAC_State != NativeMethodsShared.SAC_State.Missing)
+            if (SAC_State != NativeMethodsShared.SAC_State.NotApplicable && SAC_State != NativeMethodsShared.SAC_State.Missing)
             {
                 messages.Add(
                     new BuildManager.DeferredBuildMessage(
