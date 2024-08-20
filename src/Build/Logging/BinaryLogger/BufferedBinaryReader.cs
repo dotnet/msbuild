@@ -12,7 +12,7 @@ namespace Microsoft.Build.Logging
     /// Combines BufferedStream, BinaryReader, and TransparentReadStream into a single optimized class.
     /// </summary>
     /// <remarks>
-    /// This class combines BinaryReader and BufferedStream by pre-reading from the stream and inlining ReadBytes().
+    /// This class combines BinaryReader and BufferedStream by pre-reading and inlining ReadBytes().
     /// For example, BinaryReader.Read7BitEncodedInt() calls ReadByte() byte by byte with a high overhead
     /// while this class will prefill 5 bytes for quick access.  Unused bytes will remain the buffer for next read operation.
     /// This class assumes that it is the only reader of the stream and does not support concurrent reads from the stream.
@@ -37,7 +37,7 @@ namespace Microsoft.Build.Logging
             }
 
             baseStream = stream;
-            this.bufferCapacity = bufferCapacity;  // Note: bufferSize must be large enough for an Read operation.
+            this.bufferCapacity = bufferCapacity;  // Note: bufferCapacity must be large enough for an BulkRead7BitEncodedInt operation.
             this.encoding = encoding ?? new UTF8Encoding();
             buffer = new byte[this.bufferCapacity];
         }
@@ -79,6 +79,7 @@ namespace Microsoft.Build.Logging
         /// Reads a 32-bit signed integer.
         /// </summary>
         /// <returns>Return a integer.</returns>
+        /// <remarks>Logic copied from BCL BinaryReader.</remarks>
         public int ReadInt32()
         {
             FillBuffer(4);
@@ -165,6 +166,7 @@ namespace Microsoft.Build.Logging
         /// Reads an 8-byte signed integer.
         /// </summary>
         /// <returns></returns>
+        /// <remarks>Logic copied from BCL BinaryReader.</remarks>
         public long ReadInt64()
         {
             FillBuffer(8);
@@ -182,6 +184,7 @@ namespace Microsoft.Build.Logging
         /// Reads a Boolean value.
         /// </summary>
         /// <returns>true if the byte is nonzero; otherwise, false.</returns>
+        /// <remarks>Logic copied from BCL BinaryReader.</remarks>
         public bool ReadBoolean()
         {
             FillBuffer(1);
@@ -210,8 +213,9 @@ namespace Microsoft.Build.Logging
             }
 
             // Avoid an allocation if the current buffer is large enough.
+            // Except if the allocation is 16 byte because GUID requires exactly 16 byte array.
             byte[] result;
-            if (count < this.bufferCapacity)
+            if (count != 16 && count < this.bufferCapacity)
             {
                 if (this.bufferOffset > 0)
                 {
@@ -248,7 +252,7 @@ namespace Microsoft.Build.Logging
         /// <returns>A 32-bit integer.</returns>
         public int Read7BitEncodedInt()
         {
-            FillBuffer(5);
+            FillBuffer(5, throwOnEOF: false);
             // Read out an Int32 7 bits at a time.  The high bit
             // of the byte when on means to continue reading more bytes.
             int count = 0;
@@ -279,10 +283,10 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <param name="numIntegers">Number of 7BitEncodedInt to read up to <see cref="MaxBulkRead7BitLength"/>.</param>
         /// <returns>An array of Integers with the results.</returns>
-        /// <remarks>This will reuse the same result buffer so further calls will clear the results.</remarks>
+        /// <remarks>This will reuse the same array for results to avoid extra allocations.</remarks>
         public int[] BulkRead7BitEncodedInt(int numIntegers)
         {
-            FillBuffer(5 * numIntegers);
+            FillBuffer(5 * numIntegers, throwOnEOF: false);
             int count = 0;
             int shift = 0;
             byte b;
@@ -324,7 +328,7 @@ namespace Microsoft.Build.Logging
         {
             if (current != SeekOrigin.Current || count < 0)
             {
-                throw new NotSupportedException("Only seeking from SeekOrigin.Current and forward.");
+                throw new NotSupportedException("Seeking is forward only and from SeekOrigin.Current.");
             }
 
             if (count == 0)
@@ -332,10 +336,28 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            // TODO: optimized to avoid writing to the buffer.
-            FillBuffer(count);
-            bufferOffset += count;
+            // Check if count is within current buffer.
+            if (bufferLength - bufferOffset > count)
+            {
+                bufferOffset += count;
+                baseStreamPosition += count;
+                return;
+            }
+
+            var remainder = count - (bufferLength - bufferOffset);
+            bufferLength = 0;
+            bufferOffset = 0;
             baseStreamPosition += count;
+
+            var read = baseStream.Seek(remainder, current);
+            if (read != baseStreamPosition)
+            {
+                // EOF
+                baseStreamPosition = read;
+                return;
+            }
+
+            LoadBuffer();
         }
 
         /// <summary>
@@ -388,8 +410,9 @@ namespace Microsoft.Build.Logging
         /// Prefill the buffer.
         /// </summary>
         /// <param name="numBytes">Number of bytes to prefill.</param>
+        /// <param name="throwOnEOF">Throw if <paramref name="numBytes"/> exceed the number of bytes actually read.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void FillBuffer(int numBytes)
+        private void FillBuffer(int numBytes, bool throwOnEOF = true)
         {
             if (bufferLength - bufferOffset >= numBytes)
             {
@@ -397,6 +420,11 @@ namespace Microsoft.Build.Logging
             }
 
             LoadBuffer();
+
+            if (throwOnEOF && bufferLength < numBytes)
+            {
+                throw new EndOfStreamException();
+            }
         }
 
         private void LoadBuffer()
@@ -432,7 +460,8 @@ namespace Microsoft.Build.Logging
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private byte InternalReadByte()
         {
-            if (maxAllowedPosition < baseStreamPosition + 1)
+            if (maxAllowedPosition < baseStreamPosition + 1
+                || bufferOffset >= bufferLength)
             {
                 throw new EndOfStreamException();
             }

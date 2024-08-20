@@ -317,5 +317,35 @@ namespace Microsoft.Build.Engine.UnitTests
                 Assert.Equal(test, result);
             }
         }
+
+        /// <summary>
+        /// Test Seek function to correctly seek stream with correct position.
+        /// </summary>
+        [Theory]
+        [InlineData(10)]
+        [InlineData(100)]
+
+        public void Test_Seek(int bufferCapacity)
+        {
+            var testString = new string[] { "foobar", "catbar", "dogbar" };
+            using var stream = new MemoryStream();
+
+            using var writer = new BinaryWriter(stream);
+            writer.Write(testString[0]);
+            var offset1 = stream.Position;
+            writer.Write(testString[1]);
+            var offset2 = stream.Position;
+            writer.Write(testString[2]);
+
+            stream.Position = 0;
+
+            using var reader = new BufferedBinaryReader(stream, bufferCapacity: bufferCapacity);
+            Assert.Equal(testString[0], reader.ReadString());
+
+            // Seek to skip a string.
+            reader.Seek((int)(offset2 - offset1), SeekOrigin.Current);
+
+            Assert.Equal(testString[2], reader.ReadString());
+        }
     }
 }

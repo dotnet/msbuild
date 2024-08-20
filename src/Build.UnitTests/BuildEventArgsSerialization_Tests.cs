@@ -917,7 +917,7 @@ namespace Microsoft.Build.UnitTests
             {
                 memoryStream.SetLength(i); // pretend that the stream abruptly ends
                 memoryStream.Position = 0;
-
+                Console.WriteLine("i = {i}");
 #pragma warning disable CA2000 // The memory stream needs to keep the binary reader open.
                 var binaryReader = new BinaryReader(memoryStream);
                 var buildEventArgsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);

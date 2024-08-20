@@ -72,11 +72,14 @@ namespace Microsoft.Build.Logging
         /// <param name="fileFormatVersion">The file format version of the log file being read.</param>
         public BuildEventArgsReader(BinaryReader binaryReader, int fileFormatVersion)
         {
-#if FALSE
-            this._binaryReader = new BufferedBinaryReader(binaryReader.BaseStream);
-#else
-            this._binaryReader = new BinaryReaderWrapper(binaryReader);
-#endif
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+            {
+                this._binaryReader = new BufferedBinaryReader(binaryReader.BaseStream);
+            }
+            else
+            { 
+                this._binaryReader = new BinaryReaderWrapper(binaryReader);
+            }
 
             this._fileFormatVersion = fileFormatVersion;
             this._baseBinaryReader = binaryReader;
