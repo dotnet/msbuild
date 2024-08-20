@@ -308,6 +308,11 @@
         <target state="translated">MSB4259: Unerwartetes Leerzeichen an Position "{1}" der Bedingung "{0}". Haben Sie vergessen, ein Leerzeichen zu entfernen?</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
+      <trans-unit id="IllegalCharactersInFileOrDirectory">
+        <source>There are illegal characters in '{0}' in the {1} item.</source>
+        <target state="new">There are illegal characters in '{0}' in the {1} item.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
         <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
         <target state="translated">MSB4278: Die importierte Datei „{0}“ ist nicht vorhanden und scheint Teil einer Visual Studio Komponente zu sein. Diese Datei erfordert möglicherweise „MSBuild.exe“, um erfolgreich importiert zu werden, und kann daher möglicherweise nicht in der dotnet-CLI erstellt werden. </target>
@@ -316,11 +321,6 @@
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="translated">MSB4255: Die folgenden Cachedateien für Eingabeergebnisse sind nicht vorhanden: "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidPath">
-        <source>Illegal characters in path '{0}'.</source>
-        <target state="new">Illegal characters in path '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidVersionFormat">

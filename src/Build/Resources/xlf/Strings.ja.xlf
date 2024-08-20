@@ -308,6 +308,11 @@
         <target state="translated">MSB4259: 条件 "{0}" の位置 "{1}" に予期しないスペースがあります。スペースを削除したか確認してください。</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
+      <trans-unit id="IllegalCharactersInFileOrDirectory">
+        <source>There are illegal characters in '{0}' in the {1} item.</source>
+        <target state="new">There are illegal characters in '{0}' in the {1} item.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
         <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
         <target state="translated">MSB4278: インポートされたファイル "{0}" は存在せず、Visual Studio コンポーネントの一部である可能性があります。このファイルを正常にインポートするには MSBuild.exe が必要な場合があるため、dotnet CLI でビルドできない可能性があります。 </target>
@@ -316,11 +321,6 @@
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
         <target state="translated">MSB4255: 以下の入力結果キャッシュ ファイルが存在しません: "{0}"</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="InvalidPath">
-        <source>Illegal characters in path '{0}'.</source>
-        <target state="new">Illegal characters in path '{0}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidVersionFormat">

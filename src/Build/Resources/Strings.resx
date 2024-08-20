@@ -2139,8 +2139,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="CustomCheckRegistered" xml:space="preserve">
     <value>The custom check: '{0}' is registered for the build from the location: '{1}'.</value>
   </data>
-  <data name="InvalidPath" xml:space="preserve">
-    <value>Illegal characters in path '{0}'.</value>
+  <data name="IllegalCharactersInFileOrDirectory" xml:space="preserve">
+    <value>There are illegal characters in '{0}' in the {1} item.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

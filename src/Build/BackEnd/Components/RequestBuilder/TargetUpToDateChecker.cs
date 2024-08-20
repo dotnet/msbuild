@@ -1129,6 +1129,8 @@ namespace Microsoft.Build.BackEnd
         {
             input = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(input));
             output = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(output));
+            ProjectErrorUtilities.VerifyThrowInvalidProject(input.IndexOfAny(Path.GetInvalidPathChars()) == -1, _project.ProjectFileLocation, "IllegalCharactersInFileOrDirectory", input, inputItemName);
+            ProjectErrorUtilities.VerifyThrowInvalidProject(output.IndexOfAny(Path.GetInvalidPathChars()) == -1, _project.ProjectFileLocation, "IllegalCharactersInFileOrDirectory", output, outputItemName);
             bool outOfDate = (CompareLastWriteTimes(input, output, out bool inputDoesNotExist, out bool outputDoesNotExist) == 1) || inputDoesNotExist;
 
             // Only if we are not logging just critical events should we be gathering full details
@@ -1196,8 +1198,6 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(path1) && !string.IsNullOrEmpty(path2),
                 "Need to specify paths to compare.");
-            ProjectErrorUtilities.VerifyThrowInvalidProject(path1.IndexOfAny(Path.GetInvalidPathChars()) == -1, _project.ProjectFileLocation, "InvalidPath", path1);
-            ProjectErrorUtilities.VerifyThrowInvalidProject(path2.IndexOfAny(Path.GetInvalidPathChars()) == -1, _project.ProjectFileLocation, "InvalidPath", path2);
 
             path1 = Path.Combine(_project.Directory, path1);
             var path1WriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(path1);
