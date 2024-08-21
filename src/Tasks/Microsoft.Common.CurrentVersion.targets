@@ -834,12 +834,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="_CheckForInvalidConfigurationAndPlatform"
       BeforeTargets="$(BuildDependsOn);Build;$(RebuildDependsOn);Rebuild;$(CleanDependsOn);Clean">
+
     <PropertyGroup>
       <_InvalidConfigurationMessageResourceName Condition=" '$(BuildingInsideVisualStudio)' == 'true' ">CommonSdk.InvalidConfigurationTextWhenBuildingInsideVisualStudio</_InvalidConfigurationMessageResourceName>
       <_InvalidConfigurationMessageResourceName Condition=" '$(BuildingInsideVisualStudio)' != 'true' ">CommonSdk.InvalidConfigurationTextWhenBuildingOutsideVisualStudio</_InvalidConfigurationMessageResourceName>
     </PropertyGroup>
 
     <MSBuildInternalMessage Condition="'$(_InvalidConfigurationMessageSeverity)' != ''" ResourceName="$(_InvalidConfigurationMessageResourceName)" Severity="$(_InvalidConfigurationMessageSeverity)" FormatArguments="$(MSBuildProjectFile);$(_OriginalConfiguration);$(_OriginalPlatform)"/>
+
     <Message Condition="'$(DesignTimeBuild)' != 'true'" Text="Configuration=$(Configuration)" Importance="Low" />
     <Message Condition="'$(DesignTimeBuild)' != 'true'" Text="Platform=$(Platform)" Importance="Low" />
 
