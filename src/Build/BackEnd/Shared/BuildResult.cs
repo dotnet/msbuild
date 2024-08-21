@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -33,6 +34,9 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// Contains the current results for all of the targets which have produced results for a particular configuration.
     /// </summary>
+    /// <remarks>
+    /// When modifying serialization/deserialization, bump the version and support previous versions in order to keep <see cref="ResultsCache"/> backwards compatible.
+    /// </remarks>
     public class BuildResult : INodePacket, IBuildResults
     {
         /// <summary>
@@ -78,6 +82,14 @@ namespace Microsoft.Build.Execution
         private ConcurrentDictionary<string, TargetResult> _resultsByTarget;
 
         /// <summary>
+        /// Version of the build result.
+        /// </summary>
+        /// <remarks>
+        /// Allows to serialize and deserialize different versions of the build result.
+        /// </remarks>
+        private int _version = Traits.Instance.EscapeHatches.DoNotVersionBuildResult ? 0 : 1;
+
+        /// <summary>
         /// The request caused a circular dependency in scheduling.
         /// </summary>
         private bool _circularDependency;
@@ -101,6 +113,16 @@ namespace Microsoft.Build.Execution
         private Dictionary<string, string> _savedEnvironmentVariables;
 
         /// <summary>
+        /// When this key is in the dictionary <see cref="_savedEnvironmentVariables"/>, serialize the build result version.
+        /// </summary>
+        private const string SpecialKeyForVersion = "=MSBUILDFEATUREBUILDRESULTHASVERSION=";
+
+        /// <summary>
+        /// Set of additional keys tat might be added to the dictionary <see cref="_savedEnvironmentVariables"/>.
+        /// </summary>
+        private static readonly HashSet<string> s_additionalEntriesKeys = new HashSet<string> { SpecialKeyForVersion };
+
+        /// <summary>
         /// Snapshot of the current directory from the configuration this result comes from.
         /// This should only be populated when the configuration for this result is moved between nodes.
         /// </summary>
@@ -119,6 +141,9 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The flags provide additional control over the build results and may affect the cached value.
         /// </summary>
+        /// <remarks>
+        /// Is optional, the field is expected to be present starting <see cref="_version"/> 1.
+        /// </remarks>
         private BuildRequestDataFlags _buildRequestDataFlags;
 
         private string _schedulerInducedError;
@@ -396,7 +421,10 @@ namespace Microsoft.Build.Execution
         /// Gets the flags that were used in the build request to which these results are associated.
         /// See <see cref="Execution.BuildRequestDataFlags"/> for examples of the available flags.
         /// </summary>
-        public BuildRequestDataFlags BuildRequestDataFlags => _buildRequestDataFlags;
+        /// <remarks>
+        /// Is optional, this property exists starting <see cref="_version"/> 1.
+        /// </remarks>
+        public BuildRequestDataFlags? BuildRequestDataFlags => (_version > 0) ? _buildRequestDataFlags : null;
 
         /// <summary>
         /// Returns the node packet type.
@@ -598,8 +626,62 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _projectStateAfterBuild, ProjectInstance.FactoryForDeserialization);
             translator.Translate(ref _savedCurrentDirectory);
             translator.Translate(ref _schedulerInducedError);
-            translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
-            translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
+
+            // This is a work-around for the bug https://github.com/dotnet/msbuild/issues/10208
+            // We are adding a version field to this class to make the ResultsCache backwards compatible with at least 2 previous releases.
+            // The adding of a version field is done without a breaking change in 3 steps, each separated with at least 1 intermediate release.
+            //
+            // 1st step (done): Add a special key to the _savedEnvironmentVariables dictionary during the serialization. A workaround overload of the TranslateDictionary function is created to achieve it.
+            // The presence of this key will indicate that the version is serialized next.
+            // When serializing, add a key to the dictionary and serialize a version field.
+            // Do not actually save the special key to dictionary during the deserialization, but read a version as a next field if it presents.
+            //
+            // 2nd step: Stop serialize a special key with the dictionary _savedEnvironmentVariables using the TranslateDictionary function workaround overload. Always serialize and de-serialize the version field.
+            // Continue to deserialize _savedEnvironmentVariables with the TranslateDictionary function workaround overload in order not to deserialize dictionary with the special keys.
+            //
+            // 3rd step: Stop using the TranslateDictionary function workaround overload during _savedEnvironmentVariables deserialization.
+            if (_version == 0)
+            {
+                // Escape hatch: serialize/deserialize without version field.
+                translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
+            }
+            else
+            {
+                Dictionary<string, string> additionalEntries = new();
+
+                if (translator.Mode == TranslationDirection.WriteToStream)
+                {
+                    // Add the special key SpecialKeyForVersion to additional entries indicating the presence of a version to the _savedEnvironmentVariables dictionary.
+                    additionalEntries.Add(SpecialKeyForVersion, String.Empty);
+
+                    // Serialize the special key together with _savedEnvironmentVariables dictionary using the workaround overload of TranslateDictionary:
+                    translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
+
+                    // Serialize version
+                    translator.Translate(ref _version);
+                }
+                else if (translator.Mode == TranslationDirection.ReadFromStream)
+                {
+                    // Read the dictionary using the workaround overload of TranslateDictionary: special keys (additionalEntriesKeys) would be read to additionalEntries instead of the _savedEnvironmentVariables dictionary.
+                    translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
+
+                    // If the special key SpecialKeyForVersion present in additionalEntries, also read a version, otherwise set it to 0.
+                    if (additionalEntries is not null && additionalEntries.ContainsKey(SpecialKeyForVersion))
+                    {
+                        translator.Translate(ref _version);
+                    }
+                    else
+                    {
+                        _version = 0;
+                    }
+                }
+            }
+
+            // Starting version 1 this _buildRequestDataFlags field is present.
+            if (_version > 0)
+            {
+                translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
+            }
         }
 
         /// <summary>
