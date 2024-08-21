@@ -1731,7 +1731,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4})</target>
+        <target state="translated">{0}{1} {2} {3} ({4} 秒)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
