@@ -141,6 +141,11 @@
         <target state="translated">MSB3992: 未设置 "{0}"。如果 {1} 为 true，请确保为 "{0}" 设置值。</target>
         <note>{StrBegin="MSB3992: "}</note>
       </trans-unit>
+      <trans-unit id="CommonSdk.BaseIntermediateOutputPathMismatchWarning">
+        <source>MSB3539: The value of the property "BaseIntermediateOutputPath" was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the "MSBuildProjectExtensionsPath" instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</source>
+        <target state="new">MSB3539: The value of the property "BaseIntermediateOutputPath" was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the "MSBuildProjectExtensionsPath" instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</target>
+        <note>{StrBegin="MSB3539: "} </note>
+      </trans-unit>
       <trans-unit id="CommonSdk.CrossTargetingGetTargetFrameworks">
         <source>Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build</source>
         <target state="new">Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build</target>
@@ -166,15 +171,35 @@
         <target state="new">The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. You may be seeing this message because you are trying to build a project without a solution file, and have specified a non-default Configuration or Platform that doesn't exist for this project.</target>
         <note>LOCALIZATION:  Do not localize the words "BaseOutputPath/OutputPath", "Configuration" and "Platform"</note>
       </trans-unit>
+      <trans-unit id="CommonSdk.MSBuildProjectExtensionsPathModifiedAfterUse">
+        <source>MSB3540: The value of the property "MSBuildProjectExtensionsPath" was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</source>
+        <target state="new">MSB3540: The value of the property "MSBuildProjectExtensionsPath" was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</target>
+        <note>{StrBegin="MSB3540: "}</note>
+      </trans-unit>
       <trans-unit id="CommonSdk.ManifestResourceWithNoCultureWarning">
         <source>{0}: {1} item type is deprecated. Emit EmbeddedResource items instead, with metadata WithCulture='{2}', Type='{3}', and optional LogicalName.</source>
         <target state="new">{0}: {1} item type is deprecated. Emit EmbeddedResource items instead, with metadata WithCulture='{2}', Type='{3}', and optional LogicalName.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommonSdk.NoWin32ManifestAndPreferNativeArm64Enabled">
+        <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
+        <target state="new">MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</target>
+        <note>{StrBegin="MSB9903: "}</note>
+      </trans-unit>
       <trans-unit id="CommonSdk.NonExistentProjectReference">
         <source>MSB9008: The referenced project {0} does not exist.</source>
         <target state="new">MSB9008: The referenced project {0} does not exist.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
+        <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
+        <target state="new">MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</target>
+        <note>{StrBegin="MSB9904: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.Prefer32BitAndPreferNativeArm64Enabled">
+        <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
+        <target state="new">MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</target>
+        <note>{StrBegin="MSB9902: "}</note>
       </trans-unit>
       <trans-unit id="CommonSdk.PropertyWithTrailingSlash">
         <source>The {0} must end with a trailing slash.</source>
@@ -191,40 +216,15 @@
         <target state="new">A signing key is required in order to publish this project. Please specify a ManifestKeyFile or ManifestCertificateThumbprint value. Publishing from Visual Studio will automatically configure a signing key for this project.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CommonSdk.SpecifiedSeverityDoesNotExist">
+        <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
+        <target state="new">MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</target>
+        <note>{StrBegin="MSB9901: "}</note>
+      </trans-unit>
       <trans-unit id="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage">
         <source>{0}: {1} item type is deprecated. Use EmbeddedResource items instead.</source>
         <target state="new">{0}: {1} item type is deprecated. Use EmbeddedResource items instead.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="CommonTarget.BaseIntermediateOutputPathMismatchWarning">
-        <source>MSB3539: The value of the property "BaseIntermediateOutputPath" was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the "MSBuildProjectExtensionsPath" instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</source>
-        <target state="new">MSB3539: The value of the property "BaseIntermediateOutputPath" was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the "MSBuildProjectExtensionsPath" instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</target>
-        <note>{StrBegin="MSB3539: "} </note>
-      </trans-unit>
-      <trans-unit id="CommonTarget.MSBuildProjectExtensionsPathModifiedAfterUse">
-        <source>MSB3540: The value of the property "MSBuildProjectExtensionsPath" was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</source>
-        <target state="new">MSB3540: The value of the property "MSBuildProjectExtensionsPath" was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</target>
-        <note>{StrBegin="MSB3540: "}</note>
-      </trans-unit>
-      <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
-        <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
-        <target state="translated">MSB9903: PreferNativeArm64 需要 Win32 应用程序清单，并且与 NoWin32Manifest 互斥。</target>
-        <note>{StrBegin="MSB9903: "}</note>
-      </trans-unit>
-      <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
-        <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
-        <target state="translated">MSB9904: 启用 PreferNativeArm64 时，请确保平台设置为 AnyCPU。当前平台: {0}。</target>
-        <note>{StrBegin="MSB9904: "}</note>
-      </trans-unit>
-      <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
-        <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
-        <target state="translated">MSB9902: Prefer32Bit 和 PreferNativeArm64 选项互斥。请仅启用一个。</target>
-        <note>{StrBegin="MSB9902: "}</note>
-      </trans-unit>
-      <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
-        <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
-        <target state="translated">MSB9901: 指定的严重性不相关: 消息“{1}”的“{0}”。</target>
-        <note>{StrBegin="MSB9901: "}</note>
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>

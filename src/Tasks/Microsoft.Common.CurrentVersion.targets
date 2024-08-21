@@ -2181,13 +2181,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Issue a warning for each non-existent project. -->
     <PropertyGroup>
-      <_NonExistentProjectReferenceSecuity  Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' != 'True'">Warning</_NonExistentProjectReferenceSecuity>
-      <_NonExistentProjectReferenceSecuity  Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' == 'True'">Error</_NonExistentProjectReferenceSecuity>
+      <_NonExistentProjectReferenceSeverity  Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' != 'True'">Warning</_NonExistentProjectReferenceSeverity>
+      <_NonExistentProjectReferenceSeverity  Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' == 'True'">Error</_NonExistentProjectReferenceSeverity>
     </PropertyGroup>
     <MSBuildInternalMessage
-      Condition="'$(_NonExistentProjectReferenceSecuity)' != ''"
+      Condition="'$(_NonExistentProjectReferenceSeverity)' != ''"
       ResourceName="CommonSdk.NonExistentProjectReference"
-      Severity="$(_NonExistentProjectReferenceSecuity)"
+      Severity="$(_NonExistentProjectReferenceSeverity)"
       FormatArguments="@(_MSBuildProjectReferenceNonexistent->'%(Identity)')"
     />
 

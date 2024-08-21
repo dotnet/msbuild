@@ -3034,29 +3034,29 @@
   <!--
         MSB9901 - MSB9990   MSBuild common targets messages
   -->
-  <data name="CommonTarget.SpecifiedSeverityDoesNotExist">
+  <data name="CommonSdk.SpecifiedSeverityDoesNotExist">
     <value>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</value>
     <comment>{StrBegin="MSB9901: "}</comment>
   </data>
-  <data name="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
+  <data name="CommonSdk.Prefer32BitAndPreferNativeArm64Enabled">
     <value>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</value>
     <comment>{StrBegin="MSB9902: "}</comment>
   </data>
-  <data name="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
+  <data name="CommonSdk.NoWin32ManifestAndPreferNativeArm64Enabled">
     <value>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</value>
     <comment>{StrBegin="MSB9903: "}</comment>
   </data>
-  <data name="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
+  <data name="CommonSdk.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
     <value>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</value>
     <comment>{StrBegin="MSB9904: "}</comment>
   </data>
 
-  <data name="CommonTarget.BaseIntermediateOutputPathMismatchWarning">
+  <data name="CommonSdk.BaseIntermediateOutputPathMismatchWarning">
     <value>MSB3539: The value of the property &quot;BaseIntermediateOutputPath&quot; was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the &quot;MSBuildProjectExtensionsPath&quot; instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</value>
     <comment>{StrBegin="MSB3539: "} </comment>
   </data>
 
-  <data name="CommonTarget.MSBuildProjectExtensionsPathModifiedAfterUse">
+  <data name="CommonSdk.MSBuildProjectExtensionsPathModifiedAfterUse">
     <value>MSB3540: The value of the property &quot;MSBuildProjectExtensionsPath&quot; was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</value>
     <comment>{StrBegin="MSB3540: "}</comment>
   </data>
