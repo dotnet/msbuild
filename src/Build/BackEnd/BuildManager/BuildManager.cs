@@ -1375,10 +1375,24 @@ namespace Microsoft.Build.Execution
             where TRequestData : BuildRequestDataBase
             where TResultData : BuildResultBase
         {
-            // TODO: here we should add BuildRequestStarted https://github.com/dotnet/msbuild/issues/10145
-            // BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-            // ((IBuildComponentHost)this).LoggingService.LogBuildEvent()
+            // For the current submission we only know the SubmissionId and that it happened on scheduler node - all other BuildEventContext dimensions are unknown now.
+            BuildEventContext buildEventContext = new BuildEventContext(
+                submission.SubmissionId,
+                nodeId: 1,
+                BuildEventContext.InvalidProjectInstanceId,
+                BuildEventContext.InvalidProjectContextId,
+                BuildEventContext.InvalidTargetId,
+                BuildEventContext.InvalidTaskId);
 
+            BuildSubmissionStartedEventArgs submissionStartedEvent = new(
+                submission.BuildRequestDataBase.GlobalPropertiesLookup,
+                submission.BuildRequestDataBase.EntryProjectsFullPath,
+                submission.BuildRequestDataBase.TargetNames,
+                submission.BuildRequestDataBase.Flags,
+                submission.SubmissionId);
+            submissionStartedEvent.BuildEventContext = buildEventContext;
+
+            ((IBuildComponentHost)this).LoggingService.LogBuildEvent(submissionStartedEvent);
 
             if (submission is BuildSubmission buildSubmission)
             {
@@ -2757,7 +2771,8 @@ namespace Microsoft.Build.Execution
                 , new LoggingNodeConfiguration(
                     loggingService.IncludeEvaluationMetaprojects,
                     loggingService.IncludeEvaluationProfile,
-                    loggingService.IncludeEvaluationPropertiesAndItems,
+                    loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
+                    loggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent,
                     loggingService.IncludeTaskInputs));
             }
 
@@ -2920,7 +2935,7 @@ namespace Microsoft.Build.Execution
                     verbosity: LoggerVerbosity.Quiet);
 
                 ILogger buildCheckLogger =
-                    new BuildCheckConnectorLogger(new AnalysisLoggingContextFactory(loggingService),
+                    new BuildCheckConnectorLogger(new CheckLoggingContextFactory(loggingService),
                         buildCheckManagerProvider.Instance);
 
                 ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(buildCheckLogger, forwardingLoggerDescription) };
@@ -3265,25 +3280,19 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public void Initialize(IEventSource eventSource)
             {
-                // The concrete type we get should always be our internal
-                // implementation and up-to-date, but we need to meet the
-                // external contract so can't specify that for the
-                // argument.
-
-                IEventSource4 eventSource4 = (IEventSource4)eventSource;
-
                 // Most checks in LoggingService are "does any attached logger
                 // specifically opt into this new behavior?". As such, the
                 // NullLogger shouldn't opt into them explicitly and should
                 // let other loggers opt in.
 
-                // IncludeEvaluationPropertiesAndItems is different though,
-                // because its check is "do ALL attached loggers opt into
-                // the new behavior?", since the new behavior removes
-                // information from old loggers. So the NullLogger must
-                // opt in to ensure it doesn't accidentally veto the new
-                // behavior.
-                eventSource4.IncludeEvaluationPropertiesAndItems();
+                // IncludeEvaluationPropertiesAndItems was different,
+                // because it checked "do ALL attached loggers opt into
+                // the new behavior?".
+                // It was fixed and hence we need to be careful not to opt in
+                // the behavior as it was done before - but let the other loggers choose.
+                //
+                // For this reason NullLogger MUST NOT call
+                // ((IEventSource4)eventSource).IncludeEvaluationPropertiesAndItems();
             }
 
             /// <summary>

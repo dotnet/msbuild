@@ -17,8 +17,12 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     }
 
     public void ProcessEvaluationFinishedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checkContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
+    {
+    }
+
+    public void ProcessBuildFinished(ICheckContext analysisContext)
     {
     }
 
@@ -27,26 +31,26 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     }
 
     public void ProcessTaskStartedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checkContext,
         TaskStartedEventArgs taskStartedEventArgs)
     {
     }
 
     public void ProcessTaskFinishedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checkContext,
         TaskFinishedEventArgs taskFinishedEventArgs)
     {
     }
 
     public void ProcessTaskParameterEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checkContext,
         TaskParameterEventArgs taskParameterEventArgs)
     {
     }
 
-    public void ProcessAnalyzerAcquisition(
-        AnalyzerAcquisitionData acquisitionData,
-        IAnalysisContext analysisContext)
+    public void ProcessCheckAcquisition(
+        CheckAcquisitionData acquisitionData,
+        ICheckContext checkContext)
     {
     }
 
@@ -54,48 +58,35 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
-    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string fullPath)
-    {
-    }
-
-    public void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    {
-    }
-
-    public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath)
-    {
-    }
-
-    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext,
+    public void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, ICheckContext checkContext,
         string projectFullPath)
     {
     }
 
-    public void YieldProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void ProcessProjectEvaluationStarted(ICheckContext checkContext, string projectFullPath)
     {
     }
 
-    public void ResumeProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void EndProjectEvaluation(BuildEventContext buildEventContext)
     {
     }
 
-    public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats() => new Dictionary<string, TimeSpan>();
+    public void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath)
+    {
+    }
 
-    public void StartTaskInvocation(BuildCheckDataSource buildCheckDataSource, TaskStartedEventArgs eventArgs)
+    public void EndProjectRequest(ICheckContext checkContext, string projectFullPath)
+    {
+    }
+
+    public Dictionary<string, TimeSpan> CreateCheckTracingStats() => new Dictionary<string, TimeSpan>();
+
+    public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext buildEventContext)
     { }
 
-    public void EndTaskInvocation(BuildCheckDataSource buildCheckDataSource, TaskFinishedEventArgs eventArgs)
+    public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext buildEventContext)
     { }
 
-    public void ProcessTaskParameter(BuildCheckDataSource buildCheckDataSource, TaskParameterEventArgs eventArg)
-    { }
-
-    public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext buildEventContext)
-    { }
-
-    public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext buildEventContext)
-    { }
-	
-    public void ProcessEnvironmentVariableReadEventArgs(IAnalysisContext analysisContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
+    public void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
     { }
 }

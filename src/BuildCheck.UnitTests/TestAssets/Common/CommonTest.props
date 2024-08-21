@@ -5,7 +5,7 @@
     <IsPackable>true</IsPackable>
     <IsShipping>false</IsShipping>
     <PackageVersion>1.0.0</PackageVersion>
-    <ArtifactsNonShippingPackagesDir>$(ArtifactsBinDir)Microsoft.Build.BuildCheck.UnitTests\CustomAnalyzers</ArtifactsNonShippingPackagesDir>
+    <ArtifactsNonShippingPackagesDir>$(ArtifactsBinDir)Microsoft.Build.BuildCheck.UnitTests\CustomChecks</ArtifactsNonShippingPackagesDir>
     <NoWarn>NU5101;NU5128;MSB3277;NU1507;NU1701;NU1702;NU5104</NoWarn>
   </PropertyGroup>
 

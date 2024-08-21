@@ -108,7 +108,7 @@ public class ConfigurationProvider_Tests
 
         [*.csproj]
         build_check.rule_id.severity=error
-        build_check.rule_id.scope=project
+        build_check.rule_id.scope=project_file
         """);
 
         var configurationProvider = new ConfigurationProvider();
@@ -117,8 +117,8 @@ public class ConfigurationProvider_Tests
         buildConfig.ShouldNotBeNull();
 
         buildConfig.IsEnabled.ShouldBe(true);
-        buildConfig.Severity.ShouldBe(BuildAnalyzerResultSeverity.Error);
-        buildConfig.EvaluationAnalysisScope.ShouldBe(EvaluationAnalysisScope.ProjectOnly);
+        buildConfig.Severity.ShouldBe(CheckResultSeverity.Error);
+        buildConfig.EvaluationCheckScope.ShouldBe(EvaluationCheckScope.ProjectFileOnly);
     }
 
     [Fact]
@@ -216,27 +216,27 @@ public class ConfigurationProvider_Tests
     }
 
     [Theory]
-    [InlineData(BuildAnalyzerResultSeverity.Warning, BuildAnalyzerResultSeverity.Warning, true)]
-    [InlineData(BuildAnalyzerResultSeverity.Error, BuildAnalyzerResultSeverity.Error, true)]
-    [InlineData(BuildAnalyzerResultSeverity.Default, BuildAnalyzerResultSeverity.Warning, true)]
-    [InlineData(BuildAnalyzerResultSeverity.Suggestion, BuildAnalyzerResultSeverity.Suggestion, true)]
-    [InlineData(BuildAnalyzerResultSeverity.None, BuildAnalyzerResultSeverity.None, false)]
-    [InlineData(null, BuildAnalyzerResultSeverity.Warning, true)]
-    public void GetConfigurationProvider_MergesSeverity_Correctly(BuildAnalyzerResultSeverity? buildAnalyzerResultSeverity, BuildAnalyzerResultSeverity expectedSeverity, bool expectedEnablment)
+    [InlineData(CheckResultSeverity.Warning, CheckResultSeverity.Warning, true)]
+    [InlineData(CheckResultSeverity.Error, CheckResultSeverity.Error, true)]
+    [InlineData(CheckResultSeverity.Default, CheckResultSeverity.Warning, true)]
+    [InlineData(CheckResultSeverity.Suggestion, CheckResultSeverity.Suggestion, true)]
+    [InlineData(CheckResultSeverity.None, CheckResultSeverity.None, false)]
+    [InlineData(null, CheckResultSeverity.Warning, true)]
+    public void GetConfigurationProvider_MergesSeverity_Correctly(CheckResultSeverity? checkResultSeverity, CheckResultSeverity expectedSeverity, bool expectedEnablment)
     {
         var configurationProvider = new ConfigurationProvider();
-        BuildAnalyzerConfiguration buildAnalyzerConfiguration = new BuildAnalyzerConfiguration()
+        CheckConfiguration checkConfiguration = new CheckConfiguration()
         {
-            Severity = buildAnalyzerResultSeverity
+            Severity = checkResultSeverity
         };
 
-        BuildAnalyzerConfiguration defaultValue = new BuildAnalyzerConfiguration()
+        CheckConfiguration defaultValue = new CheckConfiguration()
         {
-            Severity = BuildAnalyzerResultSeverity.Warning
+            Severity = CheckResultSeverity.Warning
         };
 
-        var internalBuildAnalyzer = configurationProvider.MergeConfiguration("ruleId", defaultValue, buildAnalyzerConfiguration);
-        internalBuildAnalyzer.Severity.ShouldBe(expectedSeverity);
-        internalBuildAnalyzer.IsEnabled.ShouldBe(expectedEnablment);
+        var internalCheck = configurationProvider.MergeConfiguration("ruleId", defaultValue, checkConfiguration);
+        internalCheck.Severity.ShouldBe(expectedSeverity);
+        internalCheck.IsEnabled.ShouldBe(expectedEnablment);
     }
 }

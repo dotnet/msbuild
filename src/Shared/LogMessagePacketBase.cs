@@ -36,209 +36,214 @@ namespace Microsoft.Build.Shared
     internal enum LoggingEventType : int
     {
         /// <summary>
-        /// An invalid eventId, used during initialization of a LoggingEventType
+        /// An invalid eventId, used during initialization of a <see cref="LoggingEventType"/>.
         /// </summary>
         Invalid = -1,
 
         /// <summary>
-        /// Event is a CustomEventArgs
+        /// Event is a CustomEventArgs.
         /// </summary>
         CustomEvent = 0,
 
         /// <summary>
-        /// Event is a BuildErrorEventArgs
+        /// Event is a <see cref="BuildErrorEventArgs"/>.
         /// </summary>
         BuildErrorEvent = 1,
 
         /// <summary>
-        /// Event is a BuildFinishedEventArgs
+        /// Event is a <see cref="BuildFinishedEventArgs"/>.
         /// </summary>
         BuildFinishedEvent = 2,
 
         /// <summary>
-        /// Event is a BuildMessageEventArgs
+        /// Event is a <see cref="BuildMessageEventArgs"/>.
         /// </summary>
         BuildMessageEvent = 3,
 
         /// <summary>
-        /// Event is a BuildStartedEventArgs
+        /// Event is a <see cref="BuildStartedEventArgs"/>.
         /// </summary>
         BuildStartedEvent = 4,
 
         /// <summary>
-        /// Event is a BuildWarningEventArgs
+        /// Event is a <see cref="BuildWarningEventArgs"/>.
         /// </summary>
         BuildWarningEvent = 5,
 
         /// <summary>
-        /// Event is a ProjectFinishedEventArgs
+        /// Event is a <see cref="ProjectFinishedEventArgs"/>.
         /// </summary>
         ProjectFinishedEvent = 6,
 
         /// <summary>
-        /// Event is a ProjectStartedEventArgs
+        /// Event is a <see cref="ProjectStartedEventArgs"/>.
         /// </summary>
         ProjectStartedEvent = 7,
 
         /// <summary>
-        /// Event is a TargetStartedEventArgs
+        /// Event is a <see cref="TargetStartedEventArgs"/>.
         /// </summary>
         TargetStartedEvent = 8,
 
         /// <summary>
-        /// Event is a TargetFinishedEventArgs
+        /// Event is a <see cref="TargetFinishedEventArgs"/>.
         /// </summary>
         TargetFinishedEvent = 9,
 
         /// <summary>
-        /// Event is a TaskStartedEventArgs
+        /// Event is a <see cref="TaskStartedEventArgs"/>.
         /// </summary>
         TaskStartedEvent = 10,
 
         /// <summary>
-        /// Event is a TaskFinishedEventArgs
+        /// Event is a <see cref="TaskFinishedEventArgs"/>.
         /// </summary>
         TaskFinishedEvent = 11,
 
         /// <summary>
-        /// Event is a TaskCommandLineEventArgs
+        /// Event is a <see cref="TaskCommandLineEventArgs"/>.
         /// </summary>
         TaskCommandLineEvent = 12,
 
         /// <summary>
-        /// Event is a TaskParameterEventArgs
+        /// Event is a <see cref="TaskParameterEventArgs"/>.
         /// </summary>
         TaskParameterEvent = 13,
 
         /// <summary>
-        /// Event is a ProjectEvaluationStartedEventArgs
+        /// Event is a <see cref="ProjectEvaluationStartedEventArgs"/>.
         /// </summary>
         ProjectEvaluationStartedEvent = 14,
 
         /// <summary>
-        /// Event is a ProjectEvaluationFinishedEventArgs
+        /// Event is a <see cref="ProjectEvaluationFinishedEventArgs"/>.
         /// </summary>
         ProjectEvaluationFinishedEvent = 15,
 
         /// <summary>
-        /// Event is a ProjectImportedEventArgs
+        /// Event is a <see cref="ProjectImportedEventArgs"/>.
         /// </summary>
         ProjectImportedEvent = 16,
 
         /// <summary>
-        /// Event is a TargetSkippedEventArgs
+        /// Event is a <see cref="TargetSkippedEventArgs"/>.
         /// </summary>
         TargetSkipped = 17,
 
         /// <summary>
-        /// Event is a TelemetryEventArgs
+        /// Event is a <see cref="TelemetryEventArgs"/>.
         /// </summary>
         Telemetry = 18,
 
         /// <summary>
-        /// Event is an EnvironmentVariableReadEventArgs
+        /// Event is an <see cref="EnvironmentVariableReadEventArgs"/>.
         /// </summary>
         EnvironmentVariableReadEvent = 19,
 
         /// <summary>
-        /// Event is a ResponseFileUsedEventArgs
+        /// Event is a <see cref="ResponseFileUsedEventArgs"/>.
         /// </summary>
         ResponseFileUsedEvent = 20,
 
         /// <summary>
-        /// Event is an AssemblyLoadBuildEventArgs
+        /// Event is an <see cref="AssemblyLoadBuildEventArgs"/>.
         /// </summary>
         AssemblyLoadEvent = 21,
 
         /// <summary>
-        /// Event is <see cref="ExternalProjectStartedEventArgs"/>
+        /// Event is <see cref="ExternalProjectStartedEventArgs"/>.
         /// </summary>
         ExternalProjectStartedEvent = 22,
 
         /// <summary>
-        /// Event is <see cref="ExternalProjectFinishedEventArgs"/>
+        /// Event is <see cref="ExternalProjectFinishedEventArgs"/>.
         /// </summary>
         ExternalProjectFinishedEvent = 23,
 
         /// <summary>
-        /// Event is <see cref="ExtendedCustomBuildEventArgs"/>
+        /// Event is <see cref="ExtendedCustomBuildEventArgs"/>.
         /// </summary>
         ExtendedCustomEvent = 24,
 
         /// <summary>
-        /// Event is <see cref="ExtendedBuildErrorEventArgs"/>
+        /// Event is <see cref="ExtendedBuildErrorEventArgs"/>.
         /// </summary>
         ExtendedBuildErrorEvent = 25,
 
         /// <summary>
-        /// Event is <see cref="ExtendedBuildWarningEventArgs"/>
+        /// Event is <see cref="ExtendedBuildWarningEventArgs"/>.
         /// </summary>
         ExtendedBuildWarningEvent = 26,
 
         /// <summary>
-        /// Event is <see cref="ExtendedBuildMessageEventArgs"/>
+        /// Event is <see cref="ExtendedBuildMessageEventArgs"/>.
         /// </summary>
         ExtendedBuildMessageEvent = 27,
 
         /// <summary>
-        /// Event is <see cref="CriticalBuildMessageEventArgs"/>
+        /// Event is <see cref="CriticalBuildMessageEventArgs"/>.
         /// </summary>
         CriticalBuildMessage = 28,
 
         /// <summary>
-        /// Event is <see cref="MetaprojectGeneratedEventArgs"/>
+        /// Event is <see cref="MetaprojectGeneratedEventArgs"/>.
         /// </summary>
         MetaprojectGenerated = 29,
 
         /// <summary>
-        /// Event is <see cref="PropertyInitialValueSetEventArgs"/>
+        /// Event is <see cref="PropertyInitialValueSetEventArgs"/>.
         /// </summary>
         PropertyInitialValueSet = 30,
 
         /// <summary>
-        /// Event is <see cref="PropertyReassignmentEventArgs"/>
+        /// Event is <see cref="PropertyReassignmentEventArgs"/>.
         /// </summary>
         PropertyReassignment = 31,
 
         /// <summary>
-        /// Event is <see cref="UninitializedPropertyReadEventArgs"/>
+        /// Event is <see cref="UninitializedPropertyReadEventArgs"/>.
         /// </summary>
         UninitializedPropertyRead = 32,
 
         /// <summary>
-        /// Event is <see cref="ExtendedCriticalBuildMessageEventArgs"/>
+        /// Event is <see cref="ExtendedCriticalBuildMessageEventArgs"/>.
         /// </summary>
         ExtendedCriticalBuildMessageEvent = 33,
 
         /// <summary>
-        /// Event is a <see cref="GeneratedFileUsedEventArgs"/>
+        /// Event is a <see cref="GeneratedFileUsedEventArgs"/>.
         /// </summary>
         GeneratedFileUsedEvent = 34,
 
         /// <summary>
-        /// Event is <see cref="BuildCheckResultMessage"/>
+        /// Event is <see cref="BuildCheckResultMessage"/>.
         /// </summary>
         BuildCheckMessageEvent = 35,
 
         /// <summary>
-        /// Event is <see cref="BuildCheckResultWarning"/>
+        /// Event is <see cref="BuildCheckResultWarning"/>.
         /// </summary>
         BuildCheckWarningEvent = 36,
 
         /// <summary>
-        /// Event is <see cref="BuildCheckResultError"/>
+        /// Event is <see cref="BuildCheckResultError"/>.
         /// </summary>
         BuildCheckErrorEvent = 37,
 
         /// <summary>
-        /// Event is <see cref="BuildCheckTracingEventArgs"/>
+        /// Event is <see cref="BuildCheckTracingEventArgs"/>.
         /// </summary>
         BuildCheckTracingEvent = 38,
 
         /// <summary>
-        /// Event is <see cref="BuildCheckAcquisitionEventArgs"/>
+        /// Event is <see cref="BuildCheckAcquisitionEventArgs"/>.
         /// </summary>
         BuildCheckAcquisitionEvent = 39,
+
+        /// <summary>
+        /// Event is <see cref="BuildSubmissionStartedEventArgs"/>.
+        /// </summary>
+        BuildSubmissionStartedEvent = 40,
     }
     #endregion
 
@@ -650,6 +655,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildCheckAcquisitionEvent => new BuildCheckAcquisitionEventArgs(),
                 LoggingEventType.BuildCheckTracingEvent => new BuildCheckTracingEventArgs(),
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
+                LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -788,6 +794,10 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(EnvironmentVariableReadEventArgs))
             {
                 return LoggingEventType.EnvironmentVariableReadEvent;
+            }
+            else if (eventType == typeof(BuildSubmissionStartedEventArgs))
+            {
+                return LoggingEventType.BuildSubmissionStartedEvent;
             }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))
@@ -1345,7 +1355,6 @@ namespace Microsoft.Build.Shared
             translator.Translate(ref timestamp);
             buildEvent.RawTimestamp = timestamp;
 #endif
-
 
             return buildEvent;
         }

@@ -15,10 +15,10 @@ internal class PropertyReadData(
     string projectFilePath,
     int? projectConfigurationId,
     string propertyName,
-    IMsBuildElementLocation elementLocation,
+    IMSBuildElementLocation elementLocation,
     bool isUninitialized,
     PropertyReadContext propertyReadContext)
-    : AnalysisData(projectFilePath, projectConfigurationId)
+    : CheckData(projectFilePath, projectConfigurationId)
 {
     public PropertyReadData(
         string projectFilePath,
@@ -40,7 +40,7 @@ internal class PropertyReadData(
     /// <summary>
     /// Location of the property access.
     /// </summary>
-    public IMsBuildElementLocation ElementLocation { get; } = elementLocation;
+    public IMSBuildElementLocation ElementLocation { get; } = elementLocation;
 
     /// <summary>
     /// Indicates whether the property was accessed before being initialized.

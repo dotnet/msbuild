@@ -19,6 +19,6 @@ internal readonly record struct PropertyReadInfo(
     string PropertyName,
     int StartIndex,
     int EndIndex,
-    IMsBuildElementLocation ElementLocation,
+    IMSBuildElementLocation ElementLocation,
     bool IsUninitialized,
     PropertyReadContext PropertyReadContext);

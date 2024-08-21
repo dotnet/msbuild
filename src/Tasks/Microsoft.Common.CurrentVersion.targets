@@ -2737,7 +2737,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
      <FindInvalidProjectReferences
          TargetPlatformVersion="$(TargetPlatformVersion)"
          TargetPlatformIdentifier="$(TargetPlatformIdentifier)"
-         ProjectReferences="@(TargetPathWithTargetPlatformMoniker)">
+         ProjectReferences="@(_ProjectReferenceTargetPlatformMonikers)">
        <Output TaskParameter="InvalidReferences" ItemName="InvalidProjectReferences" />
      </FindInvalidProjectReferences>
 
@@ -2754,7 +2754,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       BuildInParallel="$(BuildInParallel)"
       ContinueOnError="!$(BuildingProject)"
       RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
-      <Output TaskParameter="TargetOutputs" ItemName="TargetPathWithTargetPlatformMoniker" />
+      <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetPlatformMonikers" />
     </MSBuild>
   </Target>
 
