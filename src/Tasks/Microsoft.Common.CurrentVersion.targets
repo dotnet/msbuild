@@ -839,8 +839,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_InvalidConfigurationMessageResourceName Condition=" '$(BuildingInsideVisualStudio)' != 'true' ">CommonSdk.InvalidConfigurationTextWhenBuildingOutsideVisualStudio</_InvalidConfigurationMessageResourceName>
     </PropertyGroup>
 
-    <MSBuildInternalMessage ResourceName="$(_InvalidConfigurationMessageResourceName)" Severity="$(_InvalidConfigurationMessageSeverity)" FormatArguments="$(MSBuildProjectFile);$(_OriginalConfiguration);$(_OriginalPlatform)"/>
-
+    <MSBuildInternalMessage Condition="'$(_InvalidConfigurationMessageSeverity)' != ''" ResourceName="$(_InvalidConfigurationMessageResourceName)" Severity="$(_InvalidConfigurationMessageSeverity)" FormatArguments="$(MSBuildProjectFile);$(_OriginalConfiguration);$(_OriginalPlatform)"/>
     <Message Condition="'$(DesignTimeBuild)' != 'true'" Text="Configuration=$(Configuration)" Importance="Low" />
     <Message Condition="'$(DesignTimeBuild)' != 'true'" Text="Platform=$(Platform)" Importance="Low" />
 
@@ -2182,12 +2181,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- Issue a warning for each non-existent project. -->
     <PropertyGroup>
-      <NonExistentProjectReferenceSecuity  Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' != 'True'">Warning</NonExistentProjectReferenceSecuity>
-      <NonExistentProjectReferenceSecuity  Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' == 'True'">Error</NonExistentProjectReferenceSecuity>
+      <_NonExistentProjectReferenceSecuity  Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' != 'True'">Warning </>
+      <_NonExistentProjectReferenceSecuity  Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' == 'True'">Error </>
     </PropertyGroup>
     <MSBuildInternalMessage
+      Condition="'$(_NonExistentProjectReferenceSecuity)' != ''"
       ResourceName="CommonSdk.NonExistentProjectReference"
-      Severity="$(NonExistentProjectReferenceSecuity)"
+      Severity="$(_NonExistentProjectReferenceSecuity)"
       FormatArguments="@(_MSBuildProjectReferenceNonexistent->'%(Identity)')"
     />
 
