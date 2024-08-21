@@ -1,6 +1,8 @@
 {
   "sdk": {
-    "allowPrerelease": true
+    "allowPrerelease": false,
+    "rollForward": "disable",
+    "version": "9.0.100-preview.6.24328.19"
   },
   "tools": {
     "dotnet": "9.0.100-preview.6.24328.19",
