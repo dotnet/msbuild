@@ -24,7 +24,7 @@ jobs:
         try {
             # Define the paths to your XML and JSON files
             $xmlFilePath = "eng/Versions.props"
-            $jsonFilePath = "template_feed/content/*/.template.config/template.json"
+            $jsonFilePath = "template_feed/content/Microsoft.CheckTemplate/.template.config/template.json"
 
             # Check if the XML file exists
             if (-Not (Test-Path -Path $xmlFilePath)) {
