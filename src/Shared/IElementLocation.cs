@@ -9,5 +9,4 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.Shared
 {
     internal interface IElementLocation : IMSBuildElementLocation, ITranslatable { }
-
 }

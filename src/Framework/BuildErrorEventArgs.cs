@@ -214,8 +214,7 @@ namespace Microsoft.Build.Framework
            string message,
            string file,
            int lineNumber,
-           int columnNumber
-           )
+           int columnNumber)
             : base(message, helpKeyword: null, senderName: null)
         {
             this.code = code;
