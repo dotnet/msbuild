@@ -25,9 +25,10 @@ namespace CustomCheck
             var customData = configurationContext.CustomConfigurationData[0].ConfigurationData;
             // configurationContext to be used only if check needs external configuration data.
             if (customData is not null &&
-                configurationContext.CustomConfigurationData[0].RuleId == "X01234")
+                configurationContext.CustomConfigurationData[0].RuleId == "X01234" &&
+                customData.TryGetValue("setmessage", out string? setMessage))
             {
-                message = infraData.Severity + customData["setmessage"];
+                message = infraData.Severity + setMessage;
             }
         }
 
