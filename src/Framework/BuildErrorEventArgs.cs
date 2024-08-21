@@ -202,6 +202,29 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// This constructor allows event data without ends to be initialized.
+        /// </summary>
+        /// <param name="code">event code</param>
+        /// <param name="file">file associated with the event</param>
+        /// <param name="lineNumber">line number (0 if not applicable)</param>
+        /// <param name="columnNumber">column number (0 if not applicable)</param>
+        /// <param name="message">text message</param>
+        protected BuildErrorEventArgs(
+           string code,
+           string message,
+           string file,
+           int lineNumber,
+           int columnNumber
+           )
+            : base(message, helpKeyword: null, senderName: null)
+        {
+            this.code = code;
+            this.file = file;
+            this.lineNumber = lineNumber;
+            this.columnNumber = columnNumber;
+        }
+
+        /// <summary>
         /// Default constructor
         /// </summary>
         protected BuildErrorEventArgs()

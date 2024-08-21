@@ -107,11 +107,11 @@ internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath, str
 internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
 {
     public BuildCheckResultWarning(IBuildCheckResult result, string code)
-        : base(subcategory: null, code: code, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: result.FormatMessage(), helpKeyword: null, senderName: null) =>
+        : base(code: code, file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, message: result.FormatMessage()) =>
         RawMessage = result.FormatMessage();
 
     internal BuildCheckResultWarning(string formattedMessage, string code)
-        : base(subcategory: null, code: code, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: formattedMessage, helpKeyword: null, senderName: null) =>
+        : base(code: code, file: null, lineNumber: 0, columnNumber: 0, message: formattedMessage) =>
         RawMessage = formattedMessage;
 
     internal BuildCheckResultWarning() { }
@@ -134,11 +134,11 @@ internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
 internal sealed class BuildCheckResultError : BuildErrorEventArgs
 {
     public BuildCheckResultError(IBuildCheckResult result, string code)
-        : base(subcategory: null, code: code, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: result.FormatMessage(), helpKeyword: null, senderName: null)
+        : base(code: code, file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, message: result.FormatMessage())
         => RawMessage = result.FormatMessage();
 
     internal BuildCheckResultError(string formattedMessage, string code)
-        : base(subcategory: null, code: code, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: formattedMessage, helpKeyword: null, senderName: null)
+        : base(code: code, file: null, lineNumber: 0, columnNumber: 0, message: formattedMessage)
         => RawMessage = formattedMessage;
 
     internal BuildCheckResultError() { }
@@ -160,7 +160,10 @@ internal sealed class BuildCheckResultError : BuildErrorEventArgs
 
 internal sealed class BuildCheckResultMessage : BuildMessageEventArgs
 {
-    public BuildCheckResultMessage(IBuildCheckResult result) => RawMessage = result.FormatMessage();
+    public BuildCheckResultMessage(IBuildCheckResult result)
+        : base(message: result.FormatMessage(), file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, MessageImportance.High)
+        => RawMessage = result.FormatMessage();
+    
 
     internal BuildCheckResultMessage(string formattedMessage) => RawMessage = formattedMessage;
 
