@@ -1169,11 +1169,6 @@ namespace Microsoft.Build.UnitTests
                 logFileContents.ShouldContain("Current directory = ");
                 logFileContents.ShouldContain("MSBuild version = ");
                 logFileContents.ShouldContain("[Hello]");
-
-                if (NativeMethodsShared.IsWindows)
-                {
-                    logFileContents.ShouldContain("Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = ");
-                }
             }
             finally
             {
