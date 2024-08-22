@@ -130,7 +130,7 @@
   The comparison ref/net.8 with ref/netstandard2.0 is not valid anymore.
   -->
   <Suppression>
-  <DiagnosticId>CP0008</DiagnosticId>
+    <DiagnosticId>CP0008</DiagnosticId>
     <Target>T:Microsoft.Build.Tasks.Deployment.Bootstrapper.BuildMessageSeverity</Target>
     <Left>ref/net8.0/Microsoft.Build.Tasks.Core.dll</Left>
     <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
