@@ -261,6 +261,8 @@ namespace Microsoft.Build.BuildEngine
                 }
                 try
                 {
+                    // codeql[cs/dangerous-binary-deserialization] BinaryFormatter is still present due to the skip-release deprecation requirement of Visual Studio. Removal has been scheduled for Oct 2024 in conjunction with VS 17.3 branching.
+                    object result = binaryFormatter.Deserialize(memoryStream);
                     e = (BuildEventArgs)binaryFormatter.Deserialize(reader.BaseStream);
                 }
                 finally
