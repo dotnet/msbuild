@@ -308,6 +308,11 @@
         <target state="translated">MSB4259: неожиданный пробел в позиции "{1}" условия "{0}". Вы забыли удалить пробел?</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
+      <trans-unit id="IllegalCharactersInFileOrDirectory">
+        <source>There are illegal characters in '{0}' in the {1} item.</source>
+        <target state="new">There are illegal characters in '{0}' in the {1} item.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
         <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
         <target state="translated">MSB4278: импортированный файл "{0}" не существует и, вероятно, является частью компонента Visual Studio. Для успешного импорта этого файла может потребоваться MSBuild.exe, и поэтому возможно, что сборка в CLI dotnet завершится сбоем. </target>
