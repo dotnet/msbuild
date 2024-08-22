@@ -308,6 +308,11 @@
         <target state="translated">MSB4259: Na pozici {1} podmínky {0} je neočekávaná mezera. Nezapomněli jste ji odebrat?</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
+      <trans-unit id="IllegalCharactersInFileOrDirectory">
+        <source>There are illegal characters in '{0}' in the {1} item.</source>
+        <target state="new">There are illegal characters in '{0}' in the {1} item.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
         <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
         <target state="translated">MSB4278: Importovaný soubor „{0}“ neexistuje a zdá se, že je součástí komponenty Visual Studia. Tento soubor může vyžadovat MSBuild.exe, aby se mohl úspěšně importovat, a proto se nemusí podařit sestavit v rozhraní příkazového řádku dotnet. </target>
