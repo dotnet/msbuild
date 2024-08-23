@@ -43,6 +43,11 @@ namespace Microsoft.Build.Logging
 
         int[] IBinaryReader.BulkRead7BitEncodedInt(int numIntegers)
         {
+            if (numIntegers > MaxBulkRead7BitLength)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
             for (int i = 0; i < numIntegers; i++)
             {
                 resultInt[i] = _binaryReader.Read7BitEncodedInt();

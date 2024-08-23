@@ -366,7 +366,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using var writer = new BinaryWriter(stream);
             foreach (var guid in testGuids)
             {
-                writer.WriteGuid(guid);
+                writer.Write(guid.ToByteArray());
             }
 
             stream.Position = 0;

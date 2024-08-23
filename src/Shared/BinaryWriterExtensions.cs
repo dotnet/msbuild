@@ -86,7 +86,6 @@ namespace Microsoft.Build.Shared
             }
 
             writer.Write((byte)v);
-            return;
         }
 
 #if !TASKHOST

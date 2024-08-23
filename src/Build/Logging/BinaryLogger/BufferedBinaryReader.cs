@@ -12,9 +12,9 @@ namespace Microsoft.Build.Logging
     /// Combines BufferedStream, BinaryReader, and TransparentReadStream into a single optimized class.
     /// </summary>
     /// <remarks>
-    /// This class combines BinaryReader and BufferedStream by pre-reading and inlining ReadBytes().
+    /// This class pre-read the stream into an internal buffer such that it could inline ReadBytes().
     /// For example, BinaryReader.Read7BitEncodedInt() calls ReadByte() byte by byte with a high overhead
-    /// while this class will prefill 5 bytes for quick access.  Unused bytes will remain the buffer for next read operation.
+    /// This class will pre-read 5 bytes for quick access.  Unused bytes will remain the buffer for next read operation.
     /// This class assumes that it is the only reader of the stream and does not support concurrent reads from the stream.
     /// Use the Slice() method to create a new stream.
     /// </remarks>
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
-        /// If <see cref="BytesCountAllowedToRead"/> is set, then this is the number of bytes remaining to read.  Otherwise, 0.
+        /// If <see cref="BytesCountAllowedToRead"/> is set, then this is the number of remaining bytes allowed to read.  Is 0 when not set.
         /// </summary>
         public int BytesCountAllowedToReadRemaining => maxAllowedPosition == long.MaxValue ? 0 : (int)(maxAllowedPosition - baseStreamPosition);
 
@@ -80,7 +80,7 @@ namespace Microsoft.Build.Logging
         /// Reads a 32-bit signed integer.
         /// </summary>
         /// <returns>Return a integer.</returns>
-        /// <remarks>Logic copied from BCL BinaryReader.</remarks>
+        /// <remarks>Logic copied from BCL <see href="https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/IO/BinaryReader.cs">BinaryReader.cs</see></remarks>
         public int ReadInt32()
         {
             FillBuffer(4);
@@ -101,6 +101,7 @@ namespace Microsoft.Build.Logging
         /// Reads a string with a prefixed of the length.
         /// </summary>
         /// <returns>A string.</returns>
+        /// <remarks>Logic refactored from BCL <see href="https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/IO/BinaryReader.cs">BinaryReader.cs</see></remarks>
         public string ReadString()
         {
             int stringLength = Read7BitEncodedInt();
@@ -162,7 +163,7 @@ namespace Microsoft.Build.Logging
         /// Reads an 8-byte signed integer.
         /// </summary>
         /// <returns></returns>
-        /// <remarks>Logic copied from BCL BinaryReader.</remarks>
+        /// <remarks>Logic copied from BCL <see href="https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/IO/BinaryReader.cs">BinaryReader.cs</see></remarks>
         public long ReadInt64()
         {
             FillBuffer(8);
@@ -180,11 +181,11 @@ namespace Microsoft.Build.Logging
         /// Reads a Boolean value.
         /// </summary>
         /// <returns>true if the byte is nonzero; otherwise, false.</returns>
-        /// <remarks>Logic copied from BCL BinaryReader.</remarks>
+        /// <remarks>Logic copied from BCL <see href="https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/IO/BinaryReader.cs">BinaryReader.cs</see></remarks>
         public bool ReadBoolean()
         {
             FillBuffer(1);
-            var result = (buffer[bufferOffset] != 0);
+            var result = buffer[bufferOffset] != 0;
             bufferOffset++;
             baseStreamPosition++;
             return result;
@@ -209,7 +210,6 @@ namespace Microsoft.Build.Logging
             }
 
             // Avoid an allocation if the current buffer is large enough.
-            // Except if the allocation is 16 byte because GUID requires exactly 16 byte array.
             byte[] result;
             if (count < this.bufferCapacity)
             {
@@ -238,6 +238,7 @@ namespace Microsoft.Build.Logging
         /// Read a 16 bytes that represents a GUID.
         /// </summary>
         /// <returns>A byte array containing a GUID.</returns>
+        /// <remarks><see cref="Guid"/> constructor requires exactly a 16 byte array.  Use this instead of <see cref="ReadBytes"/> to guarantee returning an acceptable array size.</remarks>
         public byte[] ReadGuid()
         {
             const int guidCount = 16;
@@ -260,14 +261,14 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
-        /// Reads in a 32-bit integer in compressed format.
+        /// Reads in a 32-bit integer with a 7bit encoding.
         /// </summary>
         /// <returns>A 32-bit integer.</returns>
         public int Read7BitEncodedInt()
         {
+            // Prefill up to 5 bytes per Int32.
             FillBuffer(5, throwOnEOF: false);
-            // Read out an Int32 7 bits at a time.  The high bit
-            // of the byte when on means to continue reading more bytes.
+
             int count = 0;
             int shift = 0;
             byte b;
@@ -283,13 +284,15 @@ namespace Microsoft.Build.Logging
                 b = InternalReadByte();
                 count |= (b & 0x7F) << shift;
                 shift += 7;
+
+                // Continue reading more bytes when the high bit of the byte is set.
             } while ((b & 0x80) != 0);
 
             return count;
         }
 
         public const int MaxBulkRead7BitLength = 10;
-        private int[] resultInt = new int[MaxBulkRead7BitLength];
+        private int[] resultIntArray = new int[MaxBulkRead7BitLength];
 
         /// <summary>
         /// An optimized bulk read of many continuous 7BitEncodedInt.
@@ -304,6 +307,7 @@ namespace Microsoft.Build.Logging
                 throw new ArgumentOutOfRangeException();
             }
 
+            // Prefill up to 5 bytes per integer.
             FillBuffer(5 * numIntegers, throwOnEOF: false);
             int count = 0;
             int shift = 0;
@@ -311,8 +315,6 @@ namespace Microsoft.Build.Logging
 
             for (int i = 0; i < numIntegers; i++)
             {
-                // Read out an Int32 7 bits at a time.  The high bit
-                // of the byte when on means to continue reading more bytes.
                 count = 0;
                 shift = 0;
                 b = 0;
@@ -329,16 +331,18 @@ namespace Microsoft.Build.Logging
                     b = InternalReadByte();
                     count |= (b & 0x7F) << shift;
                     shift += 7;
+
+                    // Continue reading more bytes when the high bit of the byte is set.
                 } while ((b & 0x80) != 0);
 
-                resultInt[i] = count;
+                resultIntArray[i] = count;
             }
 
-            return resultInt;
+            return resultIntArray;
         }
 
         /// <summary>
-        /// See forward by a number of bytes.
+        /// Seek forward by a number of bytes.
         /// </summary>
         /// <param name="count">Number of bytes to advance forward.</param>
         /// <param name="current">Must be <see cref="SeekOrigin.Current"/>.</param>
@@ -367,11 +371,11 @@ namespace Microsoft.Build.Logging
             bufferOffset = 0;
             baseStreamPosition += count;
 
-            var read = baseStream.Seek(remainder, current);
-            if (read != baseStreamPosition)
+            var newPosition = baseStream.Seek(remainder, current);
+            if (newPosition != baseStreamPosition)
             {
                 // EOF
-                baseStreamPosition = read;
+                baseStreamPosition = newPosition;
                 return;
             }
 
@@ -419,6 +423,9 @@ namespace Microsoft.Build.Logging
             return resultStream;
         }
 
+        /// <summary>
+        /// <inheritdoc/>
+        /// </summary>
         public void Dispose()
         {
             ((IDisposable)baseStream).Dispose();
@@ -445,6 +452,9 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        /// <summary>
+        /// Read from the stream to fill the internal buffer with size of set by <see cref="bufferCapacity"/>.
+        /// </summary>
         private void LoadBuffer()
         {
             int numBytes = bufferCapacity;  // fill as much of the buffer as possible.

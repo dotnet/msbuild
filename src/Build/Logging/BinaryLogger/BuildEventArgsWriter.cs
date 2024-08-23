@@ -1077,10 +1077,12 @@ namespace Microsoft.Build.Logging
             nameValueListBuffer.Clear();
         }
 
+        // Special buffer used to write BuildEventContext.
         private byte[] buildEventContextBuffer = new byte[5 * 7];
 
         private void Write(BuildEventContext buildEventContext)
         {
+            // Place these 7 integers a byte buffer before writing to the stream.
             int index = 0;
             Span<int> ints =
             [
@@ -1104,6 +1106,7 @@ namespace Microsoft.Build.Logging
 
                 buildEventContextBuffer[index++] = (byte)v;
             }
+
             this.binaryWriter.Write(buildEventContextBuffer, 0, index);
         }
 
