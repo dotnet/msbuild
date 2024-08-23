@@ -17,7 +17,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">在 {1} 秒内生成 {0}</target>
+        <target state="translated">在 {1} 中生成 {0}</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -162,22 +162,22 @@
       </trans-unit>
       <trans-unit id="LongPaths">
         <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
-        <target state="new">Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</target>
+        <target state="translated">基于 Windows 注册表项 LongPathsEnabled，LongPaths 功能为 {0}。</target>
         <note>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</note>
       </trans-unit>
       <trans-unit id="LongPaths_Disabled">
         <source>disabled</source>
-        <target state="new">disabled</target>
+        <target state="translated">已禁用</target>
         <note />
       </trans-unit>
       <trans-unit id="LongPaths_Enabled">
         <source>enabled</source>
-        <target state="new">enabled</target>
+        <target state="translated">已启用</target>
         <note />
       </trans-unit>
       <trans-unit id="LongPaths_Missing">
         <source>not set</source>
-        <target state="new">not set</target>
+        <target state="translated">未设置</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
@@ -1530,7 +1530,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3} 秒)</target>
+        <target state="translated">{0}{1} {2} ({3})</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1608,14 +1608,14 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="translated">还原完成({0} 秒)</target>
+        <target state="translated">还原完成({0})</target>
         <note>
       {0}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="translated">在 {1} 秒内还原 {0}</target>
+        <target state="translated">在 {1} 中还原 {0}</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
