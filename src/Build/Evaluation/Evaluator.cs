@@ -2579,7 +2579,8 @@ namespace Microsoft.Build.Evaluation
         private void VerifyVSDistributionPath(string path, ElementLocation importLocationInProject)
         {
             if (path.IndexOf("Microsoft\\VisualStudio", StringComparison.OrdinalIgnoreCase) >= 0
-                || path.IndexOf("Microsoft/VisualStudio", StringComparison.OrdinalIgnoreCase) >= 0)
+                || path.IndexOf("Microsoft/VisualStudio", StringComparison.OrdinalIgnoreCase) >= 0
+                || path.IndexOf("$(VCTargetsPath)", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectFromVSDistribution", path);
             }
