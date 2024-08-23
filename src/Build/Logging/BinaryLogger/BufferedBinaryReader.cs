@@ -59,7 +59,7 @@ namespace Microsoft.Build.Logging
                 {
                     if (value.Value < 0)
                     {
-                        throw new Exception();
+                        throw new ArgumentException(nameof(value), "non-negative value expected.");
                     }
 
                     maxAllowedPosition = baseStreamPosition + value.Value;

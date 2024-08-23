@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Framework.Logging
 {
-    public interface IBinaryReader : IDisposable
+    internal interface IBinaryReader : IDisposable
     {
         public int BytesCountAllowedToReadRemaining { get; }
 
