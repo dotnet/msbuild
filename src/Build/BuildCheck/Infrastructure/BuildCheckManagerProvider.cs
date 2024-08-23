@@ -191,16 +191,19 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 foreach (var factory in factories)
                 {
                     var instance = factory();
-                    var checkFactoryContext = new CheckFactoryContext(
-                        factory,
-                        instance.SupportedRules.Select(r => r.Id).ToArray(),
-                        instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true));
-
-                    if (checkFactoryContext != null)
+                    if (instance != null && instance.SupportedRules.Any())
                     {
-                        _checkRegistry.Add(checkFactoryContext);
-                        SetupSingleCheck(checkFactoryContext, projectPath);
-                        checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckSuccessfulAcquisition", instance.FriendlyName);
+                        var checkFactoryContext = new CheckFactoryContext(
+                            factory,
+                            instance.SupportedRules.Select(r => r.Id).ToArray(),
+                            instance.SupportedRules.Any(r => r.DefaultConfiguration.IsEnabled == true));
+
+                        if (checkFactoryContext != null)
+                        {
+                            _checkRegistry.Add(checkFactoryContext);
+                            SetupSingleCheck(checkFactoryContext, projectPath);
+                            checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckSuccessfulAcquisition", instance.FriendlyName);
+                        }
                     }
                 }
             }
