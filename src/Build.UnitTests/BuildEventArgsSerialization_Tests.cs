@@ -896,6 +896,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.HelpKeyword,
                 e => e.SenderName);
         }
+
         [Fact]
         public void ReadingCorruptedStreamThrows()
         {

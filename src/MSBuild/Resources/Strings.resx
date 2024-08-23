@@ -1783,6 +1783,20 @@
   <data name="LongPaths_Missing" xml:space="preserve">
     <value>not set</value>
   </data>
+  <data name="SAC" xml:space="preserve">
+    <value>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</value>
+    <comment>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</comment>
+  </data>
+  <data name="SAC_Evaluation" xml:space="preserve">
+    <value>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</value>
+    <comment>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</comment>
+  </data>
+  <data name="SAC_Enforcement" xml:space="preserve">
+    <value>1: in enforcement</value>
+  </data>
+  <data name="SAC_Off" xml:space="preserve">
+    <value>0: turned off</value>
+  </data>
   <!-- **** TerminalLogger strings end **** -->
     <!--
         The command line message bucket is: MSB1001 - MSB1999

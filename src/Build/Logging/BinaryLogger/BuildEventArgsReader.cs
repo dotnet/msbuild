@@ -13,6 +13,7 @@ using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
@@ -319,6 +320,11 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.UninitializedPropertyRead => ReadUninitializedPropertyReadEventArgs(),
                 BinaryLogRecordKind.PropertyInitialValueSet => ReadPropertyInitialValueSetEventArgs(),
                 BinaryLogRecordKind.AssemblyLoad => ReadAssemblyLoadEventArgs(),
+                BinaryLogRecordKind.BuildCheckMessage => ReadBuildCheckMessageEventArgs(),
+                BinaryLogRecordKind.BuildCheckWarning => ReadBuildCheckWarningEventArgs(),
+                BinaryLogRecordKind.BuildCheckError => ReadBuildCheckErrorEventArgs(),
+                BinaryLogRecordKind.BuildCheckTracing => ReadBuildCheckTracingEventArgs(),
+                BinaryLogRecordKind.BuildCheckAcquisition => ReadBuildCheckAcquisitionEventArgs(),
                 _ => null
             };
 
@@ -500,6 +506,7 @@ namespace Microsoft.Build.Logging
         }
 
         private readonly StringReadEventArgs stringReadEventArgs = new StringReadEventArgs(string.Empty);
+
         private void ReadStringRecord()
         {
             string text = ReadString();
@@ -1231,6 +1238,46 @@ namespace Microsoft.Build.Logging
                 appDomainName);
             SetCommonFields(e, fields);
             e.ProjectFile = fields.ProjectFile;
+
+            return e;
+        }
+
+        private BuildEventArgs ReadBuildCheckEventArgs<T>(Func<BuildEventArgsFields, string, T> createEvent)
+            where T : BuildEventArgs
+        {
+            var fields = ReadBuildEventArgsFields();
+            var e = createEvent(fields, fields.Message);
+            SetCommonFields(e, fields);
+
+            return e;
+        }
+
+        private BuildEventArgs ReadBuildCheckMessageEventArgs() => ReadBuildCheckEventArgs((_, rawMessage) => new BuildCheckResultMessage(rawMessage));
+
+        private BuildEventArgs ReadBuildCheckWarningEventArgs() => ReadBuildCheckEventArgs((fields, rawMessage) => new BuildCheckResultWarning(rawMessage, fields.Code));
+
+        private BuildEventArgs ReadBuildCheckErrorEventArgs() => ReadBuildCheckEventArgs((fields, rawMessage) => new BuildCheckResultError(rawMessage, fields.Code));
+
+        private BuildEventArgs ReadBuildCheckTracingEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            var rawTracingData = ReadStringDictionary() ?? new Dictionary<string, string>();
+
+            var e = new BuildCheckTracingEventArgs(rawTracingData.ToDictionary(
+                kvp => kvp.Key,
+                kvp => TimeSpan.FromTicks(long.Parse(kvp.Value))));
+            SetCommonFields(e, fields);
+
+            return e;
+        }
+
+        private BuildEventArgs ReadBuildCheckAcquisitionEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            var acquisitionPath = ReadString();
+            var projectPath = ReadString();
+            var e = new BuildCheckAcquisitionEventArgs(acquisitionPath, projectPath);
+            SetCommonFields(e, fields);
 
             return e;
         }

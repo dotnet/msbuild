@@ -38,7 +38,6 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
     private readonly SimpleProjectRootElementCache _cache = new SimpleProjectRootElementCache();
     private readonly BuildCheckCentralContext _buildCheckCentralContext = buildCheckCentralContext;
-    private Dictionary<string, (string EnvVarValue, string File, int Line, int Column)> _evaluatedEnvironmentVariables = new Dictionary<string, (string EnvVarValue, string File, int Line, int Column)>();
 
     /// <summary>
     /// Keeps track of in-flight tasks. Keyed by task ID as passed in <see cref="BuildEventContext.TaskId"/>.
@@ -67,8 +66,7 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             EvaluatedPropertiesCheckData checkData =
                 new(evaluationFinishedEventArgs.ProjectFile!,
                     evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
-                    propertiesLookup!,
-                    _evaluatedEnvironmentVariables);
+                    propertiesLookup!);
 
             _buildCheckCentralContext.RunEvaluatedPropertiesActions(checkData, checkContext, ReportResult);
         }
@@ -91,12 +89,11 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     /// <summary>
     /// The method collects events associated with the used environment variables in projects.
     /// </summary>
-    internal void ProcessEnvironmentVariableReadEventArgs(string envVarName, string envVarValue, string file, int line, int column)
+    internal void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, string projectPath, string envVarKey, string envVarValue, IElementLocation elementLocation)
     {
-        if (!_evaluatedEnvironmentVariables.ContainsKey(envVarName))
-        {
-            _evaluatedEnvironmentVariables.Add(envVarName, (envVarValue, file, line, column));
-        }
+        EnvironmentVariableCheckData checkData = new(projectPath, checkContext.BuildEventContext?.ProjectInstanceId, envVarKey, envVarValue, elementLocation);
+
+        _buildCheckCentralContext.RunEnvironmentVariableActions(checkData, checkContext, ReportResult);
     }
 
     internal void ProcessBuildDone(ICheckContext checkContext)

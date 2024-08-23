@@ -219,32 +219,32 @@
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
-        <target state="new">Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</target>
+        <target state="translated">Impossible de trouver l’assembly de vérification personnalisé spécifié : «{0}». Veuillez vérifier s’il existe.</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="new">Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">Échec du chargement du type de vérification personnalisé «{0}» à partir de l’assembly : «{1}». Assurez-vous qu’il hérite de la classe de base Microsoft.Build.Experimental.BuildCheck.Check. S’il ne s’agit pas d’une vérification personnalisée, elle ne doit pas être exposée. Plus d’informations : https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
         <source>Failed to register the custom check: '{0}'.</source>
-        <target state="new">Failed to register the custom check: '{0}'.</target>
+        <target state="translated">Échec de l’inscription de la vérification personnalisée : «{0}».</target>
         <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedRuleLoading">
         <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
-        <target state="new">Failed to instantiate the custom check rule with the following exception: '{0}'.</target>
+        <target state="translated">Échec de l’instanciation de la règle de vérification personnalisée avec l’exception suivante : «{0}».</target>
         <note>The message is emitted on failed loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckRegistered">
         <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="new">The custom check: '{0}' is registered for the build from the location: '{1}'.</target>
+        <target state="translated">La vérification personnalisée «{0}» est inscrite pour la build à partir de l’emplacement : «{1}».</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckSuccessfulAcquisition">
         <source>Custom check rule: '{0}' has been registered successfully.</source>
-        <target state="new">Custom check rule: '{0}' has been registered successfully.</target>
+        <target state="translated">Règle de vérification personnalisée : «{0}» a été correctement inscrite.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -307,6 +307,11 @@
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: espace inattendu à la position "{1}" de la condition "{0}". Avez-vous oublié de supprimer un espace ?</target>
         <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
+      <trans-unit id="IllegalCharactersInFileOrDirectory">
+        <source>There are illegal characters in '{0}' in the {1} item.</source>
+        <target state="new">There are illegal characters in '{0}' in the {1} item.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
         <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
@@ -684,7 +689,7 @@ Erreurs : {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Il s’agit d’une exception non gérée dans MSBuild –– VOTEZ POUR UN PROBLÈME EXISTANT OU ENTREZ UN NOUVEAU FICHIER À https://aka.ms/msbuild/unhandled.
+        <target state="translated">Il s’agit d’une exception non prise en charge dans MSBuild –– VOTEZ POUR UN PROBLÈME EXISTANT OU CRÉEZ-EN UN SUR https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>

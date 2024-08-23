@@ -121,7 +121,7 @@
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
                      MSBuild が、構成されているプロジェクト キャッシュ プラグインへの
-                     ファイル アクセスを報告します。
+                     ファイル アクセスを報告するようにします。
 
                      このフラグは実験的なものであり、意図したとおりに動作しない可能性があります。
     </target>
@@ -325,7 +325,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: ターミナル ロガーの値が無効です。'auto'、'true'、または 'false' のいずれかである必要があります。 {0}</target>
+        <target state="translated">MSBUILD : error MSB1065: ターミナル ロガーの値が無効です。'auto'、'true'、または 'false' のいずれかである必要があります。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1804,6 +1804,26 @@
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
     </note>
+      </trans-unit>
+      <trans-unit id="SAC">
+        <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
+        <target state="new">Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</target>
+        <note>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="SAC_Enforcement">
+        <source>1: in enforcement</source>
+        <target state="new">1: in enforcement</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SAC_Evaluation">
+        <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
+        <target state="new">2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</target>
+        <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="SAC_Off">
+        <source>0: turned off</source>
+        <target state="new">0: turned off</target>
+        <note />
       </trans-unit>
       <trans-unit id="SchemaFileLocation">
         <source>Validating project using schema file "{0}".</source>

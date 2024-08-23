@@ -73,7 +73,6 @@ public class CheckConfiguration
         Severity = TryExtractSeverity(configDictionary),
     };
 
-
     private static EvaluationCheckScope? TryExtractEvaluationCheckScope(Dictionary<string, string>? config)
     {
 

@@ -1761,6 +1761,18 @@ namespace Microsoft.Build.CommandLine
                         MessageImportance.Low));
             }
 
+            NativeMethodsShared.SAC_State SAC_State = NativeMethodsShared.GetSACState();
+            if (SAC_State != NativeMethodsShared.SAC_State.NotApplicable && SAC_State != NativeMethodsShared.SAC_State.Missing)
+            {
+                messages.Add(
+                    new BuildManager.DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            "SAC",
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "SAC_" + SAC_State.ToString())),
+                        MessageImportance.Low));
+            }
+
             if (Traits.Instance.DebugEngine)
             {
                 messages.Add(

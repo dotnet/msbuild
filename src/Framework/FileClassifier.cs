@@ -36,6 +36,30 @@ namespace Microsoft.Build.Framework
     /// </remarks>
     internal class FileClassifier
     {
+        private bool _isImmutablePathsInitialized;
+
+        /// <summary>
+        /// This event notifies subscribers when the immutable paths have been initialized.
+        /// </summary>
+        public event Action? OnImmutablePathsInitialized;
+
+        /// <summary>
+        ///  Tracks whether the immutable paths have been initialized.
+        /// </summary>
+        public bool IsImmutablePathsInitialized
+        {
+            get => _isImmutablePathsInitialized;
+            private set
+            {
+                if (!_isImmutablePathsInitialized && value)
+                {
+                    OnImmutablePathsInitialized?.Invoke();
+                }
+
+                _isImmutablePathsInitialized = value;
+            }
+        }
+
         /// <summary>
         ///     StringComparison used for comparing paths on current OS.
         /// </summary>
@@ -215,6 +239,8 @@ namespace Microsoft.Build.Framework
             RegisterImmutableDirectory(getPropertyValue("NetCoreRoot")?.Trim());
             // example: C:\Users\<username>\.nuget\packages\
             RegisterImmutableDirectory(getPropertyValue("NuGetPackageFolders")?.Trim());
+
+            IsImmutablePathsInitialized = true;
         }
 
         private static string? GetExistingRootOrNull(string? path)

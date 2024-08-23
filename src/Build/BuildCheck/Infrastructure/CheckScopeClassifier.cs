@@ -7,8 +7,23 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
+
 internal static class CheckScopeClassifier
 {
+    static CheckScopeClassifier()
+    {
+        FileClassifier.Shared.OnImmutablePathsInitialized += SubscribeImmutablePathsInitialized;
+    }
+
+    internal static event Action? NotifyOnScopingReadiness;
+
+    internal static bool IsScopingInitialized => FileClassifier.Shared.IsImmutablePathsInitialized;
+
+    /// <summary>
+    /// Notifies the subscribers that the scoping is ready.
+    /// </summary>
+    internal static Func<EvaluationCheckScope, bool> IsScopingReady => (scope) => (scope is EvaluationCheckScope.ProjectFileOnly or EvaluationCheckScope.All) || IsScopingInitialized;
+
     /// <summary>
     /// Indicates whether given location is in the observed scope, based on currently built project path.
     /// </summary>
@@ -52,9 +67,14 @@ internal static class CheckScopeClassifier
         }
     }
 
-    private static bool IsGeneratedNugetImport(string file)
+    private static bool IsGeneratedNugetImport(string file) =>
+        file.EndsWith("nuget.g.props", StringComparison.OrdinalIgnoreCase)
+        || file.EndsWith("nuget.g.targets", StringComparison.OrdinalIgnoreCase);
+
+    private static void SubscribeImmutablePathsInitialized()
     {
-        return file.EndsWith("nuget.g.props", StringComparison.OrdinalIgnoreCase) ||
-               file.EndsWith("nuget.g.targets", StringComparison.OrdinalIgnoreCase);
+        NotifyOnScopingReadiness?.Invoke();
+
+        FileClassifier.Shared.OnImmutablePathsInitialized -= () => NotifyOnScopingReadiness?.Invoke();
     }
 }

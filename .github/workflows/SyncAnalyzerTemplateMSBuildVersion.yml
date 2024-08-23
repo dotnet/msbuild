@@ -24,7 +24,7 @@ jobs:
         try {
             # Define the paths to your XML and JSON files
             $xmlFilePath = "eng/Versions.props"
-            $jsonFilePath = "template_feed/content/Microsoft.AnalyzerTemplate/.template.config/template.json"
+            $jsonFilePath = "template_feed/content/Microsoft.CheckTemplate/.template.config/template.json"
 
             # Check if the XML file exists
             if (-Not (Test-Path -Path $xmlFilePath)) {
@@ -53,19 +53,19 @@ jobs:
             if ($versionPrefix -ne $jsonContent.symbols.MicrosoftBuildVersion.defaultValue) {
                 # Update the defaultValue of MicrosoftBuildVersion in the JSON template
                 $jsonContent.symbols.MicrosoftBuildVersion.defaultValue = $versionPrefix
-        
+
                 # Convert the JSON content back to a string
                 $jsonString = $jsonContent | ConvertTo-Json -Depth 10
-        
+
                 # Write the updated JSON back to the file
                 Set-Content -Path $jsonFilePath -Value $jsonString
                 Write-Output "Updated MicrosoftBuildVersion to $versionPrefix"
-        
+
                 # Set the updateNeeded output variable to true
                 $updateNeeded = "true"
             } else {
                 Write-Output "No update needed. MicrosoftBuildVersion is already $versionPrefix"
-        
+
                 # Set the updateNeeded output variable to false
                 $updateNeeded = "false"
             }
@@ -94,25 +94,25 @@ jobs:
           const commitMessage = `Update MicrosoftBuildVersion to ${versionPrefix}`;
           const prBody = '[Automated] Update the MicrosoftBuildVersion defaultValue in the template.json.';
           const prTitle = 'Update MicrosoftBuildVersion in analyzer template';
-          
+
           // Main execution
           (async () => {
             try {
               // Configure git
               await configureGit();
-          
+
               // Create and switch to the new branch
               await createAndSwitchBranch(newBranch);
-          
+
               // Check if the branch PR already exists on the remote
               const shouldOpenPullRequest = await checkBranchPRExists(newBranch,baseBranch);
-          
+
               // Stage and commit the changes
               await stageAndCommitChanges(filePath, commitMessage);
-          
+
               // Push the new branch to the repository
               await pushBranch(newBranch);
-          
+
               // Create the pull request if needed
               if (shouldOpenPullRequest) {
                 await createPullRequest(baseBranch, newBranch, prTitle, prBody);
@@ -123,16 +123,16 @@ jobs:
               core.setFailed(error);
             }
           })();
-          
+
           async function configureGit() {
             await exec.exec(`git config user.name "github-actions"`);
             await exec.exec(`git config user.email "github-actions@github.com"`);
           }
-          
+
           async function createAndSwitchBranch(branch) {
             await exec.exec('git', ['checkout', '-b', branch]);
           }
-          
+
           async function checkBranchPRExists(newBranch,baseBranch) {
             // Check if a pull request already exists
             const { data: pullRequests } = await github.rest.pulls.list({
@@ -142,23 +142,23 @@ jobs:
               base: baseBranch,
               state: 'open',
             });
-          
+
             if (pullRequests.length === 0) {
               return true;
             } else {
               return false;
             }
           }
-          
+
           async function stageAndCommitChanges(filePath, commitMessage) {
             await exec.exec(`git add ${filePath}`);
             await exec.exec(`git commit -m "${commitMessage}"`);
           }
-          
+
           async function pushBranch(branch) {
             await exec.exec(`git push --force --set-upstream origin HEAD:${branch}`);
           }
-          
+
           async function createPullRequest(baseBranch, newBranch, title, body) {
             await github.rest.pulls.create({
               owner: context.repo.owner,
