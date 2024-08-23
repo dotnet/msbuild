@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="Hello">
+                
+   <PropertyGroup>
+       <OutputType>Exe</OutputType>
+       <TargetFramework>net8.0</TargetFramework>
+       <ImplicitUsings>enable</ImplicitUsings>
+       <Nullable>enable</Nullable>
+   </PropertyGroup>
+
+   <Import Project="ImportedFile1.props" />
+
+   <PropertyGroup Condition="$(Test) == true">
+       <TestProperty>Test</TestProperty>
+   </PropertyGroup>
+
+    <PropertyGroup>
+        <ReadFromEnv>$(TestFromEvaluation)</ReadFromEnv>
+    </PropertyGroup>
+
+   <Target Name="Hello">
+       <Message Importance="High" Condition="$(Test2) == true" Text="XYZABC" />
+       <Copy SourceFiles="TestFilePath" DestinationFolder="WorkFolderPath" />
+       <MSBuild Projects=".\Project2.csproj" Targets="Hello" />
+
+       <PropertyGroup>
+         <ReadFromEnvVariable>$(TestFromTarget)</ReadFromEnvVariable>
+       </PropertyGroup>
+
+       <Message Importance="High" Text="$(ReadFromEnvVariable)" />
+
+   </Target>
+                
+</Project>

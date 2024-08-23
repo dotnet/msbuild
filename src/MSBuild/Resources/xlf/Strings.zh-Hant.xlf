@@ -130,6 +130,189 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_43_GetPropertySwitch">
+        <source>  -getProperty:propertyName,...
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
+                     the -targets option or the -getTargetResult option is
+                     used, write out the values after the build.
+    </source>
+        <target state="translated">  -getProperty:propertyName,...
+                    於評估後，寫出一或多個指定屬性的值，以及
+                    但不執行建置；如有使用
+                    -targets 選項或 -getTargetResult 選項，
+                    便於建置之後，再寫出這些值。
+   </target>
+        <note>
+      LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_44_GetItemSwitch">
+        <source>  -getItem:itemName,...
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
+                     the values after the build.
+    </source>
+        <target state="translated">  -getItem:itemName,...
+                    於評估後，寫出一或多個指定項目的值，以及
+                    其相關的中繼資料，但不
+                    執行建置；如有使用 -targets 選項
+                    或 -getTargetResult 選項，
+                    便於建置之後，再寫出這些值。
+   </target>
+        <note>
+      LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_45_GetTargetResultSwitch">
+        <source>  -getTargetResult:targetName,...
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
+    </source>
+        <target state="translated">  -getTargetResult:targetName,...
+                    寫出一或多個目標的輸出值，然後
+                    執行指定的目標。
+   </target>
+        <note>
+      LOCALIZATION: "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_46_FeatureAvailabilitySwitch">
+        <source>  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the
+                     strings "Undefined", "Available", "NotAvailable" and
+                     "Preview".
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
+                     (Short form: -fa)
+    </source>
+        <target state="translated">  -featureAvailability:featureName,...
+                    檢查功能可用性。結果會是下列其中一個字串:
+                    “Undefined”、“Available”、“NotAvailable” 和
+                    "Preview"。
+                    - Undefined - 功能的可用性未定義
+                    (功能可用性檢查程式不知道
+                    該功能名稱)
+                    - NotAvailable - 此功能無法使用 (不同於
+                    Undefined，功能可用性檢查程式知道該功能名稱，
+                    並知道功能目前的
+                    MSBuild 引擎不支援該功能)
+                    - Available - 此功能可以使用
+                    - Preview - 此功能目前為預覽狀態 (不穩定)
+                    (簡短形式: -fa)
+   </target>
+        <note>
+      LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_47_TerminalLoggerSwitch">
+        <source>  -terminalLogger[:auto,on,off]
+                     Enable or disable the terminal logger. Terminal logger
+                     provides enhanced build output on the console in real time,
+                     organized logically by project, and designed to highlight
+                     actionable information. Specify auto (or use the option
+                     without arguments) to use the terminal logger only if the
+                     standard output is not redirected. Don't parse the output
+                     or otherwise rely on it remaining unchanged in future
+                     versions. This option is available in MSBuild 17.8 and
+                     later.
+                     (Short form: -tl)
+    </source>
+        <target state="translated">  -terminalLogger[:auto,on,off]
+                    啟用或停用終端機記錄器。終端機記錄器
+                    會即時在主機上，提供更進一步的組建輸出，
+                    並依照專案的邏輯編排，並會醒目提示
+                    可採取動作的資訊。指定自動 (或只使用選項，
+                    不使用引數) 只在使用標準輸出
+                    未重新導向時，才使用終端機記錄器。不剖析輸出，
+                    或以其他方式據此在
+                    未來的版本中保持不變。此選項可在 MSBuild 17.8 和
+                    更新版本中使用。
+                    (簡短形式: -tl)
+   </target>
+        <note>
+      LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_48_TerminalLoggerParametersSwitch">
+        <source>  -terminalLoggerParameters: &lt;parameters&gt;
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
+                            stdout/stderr
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
+
+                      Example:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </source>
+        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
+                    終端機記錄器的參數。(簡短形式: -tlp)
+                    可用的參數。
+                       default -- 指定終端機記錄器的預設值。
+                       其需要下列其中一值: 
+。
+                          - 'on'、'true' 會強制使用 TerminalLogger，即使
+                           其之後可能會停用。
+                          - 'off'、'false' 會強制使用 TerminalLogger，即使
+                           其之後可能會啟用。
+                          - `auto` 會啟用 terminalLogger，但終端機必須能夠
+                           提供支援，且工作階段未經重新導向
+                           stdout/stderr
+                       verbosity -- 覆寫上記錄器的
+                       -verbosity
+                       showCommandLine -- 顯示 TaskCommandLineEvent 訊息
+
+                     範例: 
+                       -tlp:default=auto;verbosity=diag;shownCommandLine
+    </target>
+        <note>
+      LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
+        <source>  -getResultOutputFile:file
+                     Redirect output from get* into a file.
+
+                     Example:
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     This writes the value of property Bar into Biz.txt.
+    </source>
+        <target state="translated">  -getResultOutputFile:file
+                    將輸出從 get* 重新導向至檔案。
+
+                    範例: 
+                    -getProperty:Bar -getResultOutputFile:Biz.txt
+                    這會將屬性列的值寫入 Biz.txt。
+   </target>
+        <note>
+      LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: 低優先順序值無效。{0}</target>
@@ -1349,11 +1532,11 @@
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
-        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: 必須為功能可用性切換提供功能名稱。</target>
+        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
+        <target state="translated">MSBUILD : error MSB1067: 必須提供 featureAvailability 切換的功能名稱。</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
-      following the switch, as in "msbuild.exe -featureavailability:blah".
+      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
+      following the switch, as in "msbuild.exe -featureAvailability:blah".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1451,7 +1634,7 @@
         <target state="translated">MSBUILD : error MSB1066: 如果使用 -terminalLoggerParameters 參數，請為終端機記錄器指定一或多個參數</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
-      UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
+      UE: This happens if the user does something like "msbuild.exe -terminalLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -terminalLoggerParameters:default=auto".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
@@ -1621,6 +1804,26 @@
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
     </note>
+      </trans-unit>
+      <trans-unit id="SAC">
+        <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
+        <target state="new">Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</target>
+        <note>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="SAC_Enforcement">
+        <source>1: in enforcement</source>
+        <target state="new">1: in enforcement</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SAC_Evaluation">
+        <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
+        <target state="new">2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</target>
+        <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="SAC_Off">
+        <source>0: turned off</source>
+        <target state="new">0: turned off</target>
+        <note />
       </trans-unit>
       <trans-unit id="SchemaFileLocation">
         <source>Validating project using schema file "{0}".</source>
@@ -1810,11 +2013,6 @@
      This error is shown when a user specifies a node reuse value that is not equivilant to Boolean.TrueString or Boolean.FalseString.
      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
   </note>
-      </trans-unit>
-      <trans-unit id="AbortingBuild">
-        <source>Attempting to cancel the build...</source>
-        <target state="translated">正在嘗試取消建置...</target>
-        <note />
       </trans-unit>
       <trans-unit id="InvalidPreprocessPath">
         <source>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</source>

@@ -130,6 +130,189 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_43_GetPropertySwitch">
+        <source>  -getProperty:propertyName,...
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
+                     the -targets option or the -getTargetResult option is
+                     used, write out the values after the build.
+    </source>
+        <target state="translated">  -getProperty:propertyName,...
+                     빌드를 실행하지 않고 평가 후
+                     지정된 속성 중 하나 이상의 값을 작성하거나,
+                     -targets 옵션 또는 -getTargetResult 옵션을 사용하는 경우
+                     빌드 후 값을 작성합니다.
+    </target>
+        <note>
+      LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_44_GetItemSwitch">
+        <source>  -getItem:itemName,...
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
+                     the values after the build.
+    </source>
+        <target state="translated">  -getItem:itemName,...
+                     빌드를 실행하지 않고 평가 후
+                     지정된 항목 중 하나 이상의 값 및
+                     연결된 해당 메타데이터를 작성하거나,
+                     -targets 옵션 또는 -getTargetResult 옵션을 사용하는 경우
+                     빌드 후 값을 작성합니다.
+    </target>
+        <note>
+      LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_45_GetTargetResultSwitch">
+        <source>  -getTargetResult:targetName,...
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
+    </source>
+        <target state="translated">  -getTargetResult:targetName,...
+                     대상 하나 이상의 출력 값을 작성하면
+                     지정된 대상이 실행됩니다.
+    </target>
+        <note>
+      LOCALIZATION: "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_46_FeatureAvailabilitySwitch">
+        <source>  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the
+                     strings "Undefined", "Available", "NotAvailable" and
+                     "Preview".
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
+                     (Short form: -fa)
+    </source>
+        <target state="translated">  -featureAvailability:featureName,...
+                     기능 가용성을 확인합니다. 결과는
+                     문자열 "Undefined", "Available", "NotAvailable" 및
+                     "Preview" 중 하나입니다.
+                     - 정의되지 않음 - 기능의 가용성이 정의되지 않았습니다
+                     (기능 가용성 검사기에서 기능 이름을 인식할 수
+                     없음).
+                     - NotAvailable - 기능을 사용할 수 없습니다(
+                     정의되지 않음과는 달리, 기능 가용성 검사가에서 기능 이름을
+                     인식할 수 있으며 기능이 현재 MSBuild 엔진에서 지원되지
+                     않는 것으로 인식하고 있음).
+                     - Available - 기능을 사용할 수 있습니다.
+                     - Preview - 기능이 미리 보기 상태로 제공됩니다(안정적이지 않음).
+                     (약식: -fa)
+    </target>
+        <note>
+      LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_47_TerminalLoggerSwitch">
+        <source>  -terminalLogger[:auto,on,off]
+                     Enable or disable the terminal logger. Terminal logger
+                     provides enhanced build output on the console in real time,
+                     organized logically by project, and designed to highlight
+                     actionable information. Specify auto (or use the option
+                     without arguments) to use the terminal logger only if the
+                     standard output is not redirected. Don't parse the output
+                     or otherwise rely on it remaining unchanged in future
+                     versions. This option is available in MSBuild 17.8 and
+                     later.
+                     (Short form: -tl)
+    </source>
+        <target state="translated">  -terminalLogger[:auto,on,off]
+                     터미널 로거를 사용하거나 사용하지 않도록 설정합니다. 터미널 로거
+                     는 콘솔에서 향상된 빌드 출력을 실시간으로 제공합니다.
+                     이러한 출력은 프로젝트별로 논리적으로 구성되고 실행 가능한 정보를
+                     강조 표시하도록 설계되어 있습니다. 자동을 지정(또는 인수 없이 옵션
+                     사용)하여 터미널 로거를 사용합니다. 단, 이 경우
+                     표준 출력이 리디렉션되지 않아야 합니다. 출력을 구문 분석하지 않습니다.
+                     그렇지 않을 경우 이후 버전에서 변경되지 않은 상태로
+                     유지됩니다. 이 옵션은 MSBuild 17.8 이상 버전에서
+                     제공됩니다.
+                     (약식: -tl)
+    </target>
+        <note>
+      LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_48_TerminalLoggerParametersSwitch">
+        <source>  -terminalLoggerParameters: &lt;parameters&gt;
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
+                            stdout/stderr
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
+
+                      Example:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </source>
+        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
+                     터미널 로거에 대한 매개 변수입니다. (약식: -tlp)
+                     사용 가능한 매개 변수입니다.
+                        default--터미널의 기본 동작을 지정합니다.
+                        로거입니다. 다음 값 중 하나가 필요합니다.
+                           - 'on', 'true'는 terminalLogger를 사용하도록 강제하며,
+                            이는 사용하지 않도록 설정된 경우에도 마찬가지입니다.
+                           - 'off', 'false'는 terminalLogger를 사용하지 않도록 강제하며,
+                            이는 사용하도록 설정된 경우에도 마찬가지입니다.
+                           - 'auto'는 터미널이
+                            지원하고 세션이 리디렉션되지 않을 때 TerminalLogger를 사용하도록 설정합니다.
+                            stdout/stderr
+                        verbosity--이
+로거에 대한 -verbosity 설정을
+                        재정의합니다.
+                        showCommandLine--TaskCommandLineEvent 메시지를 표시합니다.
+
+                      예:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </target>
+        <note>
+      LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
+        <source>  -getResultOutputFile:file
+                     Redirect output from get* into a file.
+
+                     Example:
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     This writes the value of property Bar into Biz.txt.
+    </source>
+        <target state="translated">  -getResultOutputFile:file
+                     get*에서 파일로 출력을 리디렉션합니다.
+
+                     예:
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     그러면 속성 Bar의 값이 Biz.txt에 기록됩니다.
+    </target>
+        <note>
+      LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: 낮은 우선 순위 값이 유효하지 않습니다. {0}</target>
@@ -1349,11 +1532,11 @@
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
-        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: featureavailability 스위치에 대한 기능 이름을 제공해야 합니다.</target>
+        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
+        <target state="translated">MSBUILD : error MSB1067: featureAvailability 스위치에 대한 기능 이름을 제공해야 합니다.</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
-      following the switch, as in "msbuild.exe -featureavailability:blah".
+      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
+      following the switch, as in "msbuild.exe -featureAvailability:blah".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1451,7 +1634,7 @@
         <target state="translated">MSBUILD : error MSB1066: -terminalLoggerParameters 스위치를 사용하는 경우 터미널 로거에 대해 하나 이상의 매개 변수를 지정하세요.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
-      UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
+      UE: This happens if the user does something like "msbuild.exe -terminalLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -terminalLoggerParameters:default=auto".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
@@ -1621,6 +1804,26 @@
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
     </note>
+      </trans-unit>
+      <trans-unit id="SAC">
+        <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
+        <target state="new">Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</target>
+        <note>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="SAC_Enforcement">
+        <source>1: in enforcement</source>
+        <target state="new">1: in enforcement</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SAC_Evaluation">
+        <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
+        <target state="new">2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</target>
+        <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="SAC_Off">
+        <source>0: turned off</source>
+        <target state="new">0: turned off</target>
+        <note />
       </trans-unit>
       <trans-unit id="SchemaFileLocation">
         <source>Validating project using schema file "{0}".</source>
@@ -1810,11 +2013,6 @@
      This error is shown when a user specifies a node reuse value that is not equivilant to Boolean.TrueString or Boolean.FalseString.
      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
   </note>
-      </trans-unit>
-      <trans-unit id="AbortingBuild">
-        <source>Attempting to cancel the build...</source>
-        <target state="translated">빌드를 취소하는 중...</target>
-        <note />
       </trans-unit>
       <trans-unit id="InvalidPreprocessPath">
         <source>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</source>

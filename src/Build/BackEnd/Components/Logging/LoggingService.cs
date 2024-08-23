@@ -9,12 +9,13 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
-using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
+using Microsoft.Build.Experimental.BuildCheck;
 
 #nullable disable
 
@@ -69,7 +70,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// Logging services is used as a helper class to assist logging messages in getting to the correct loggers.
     /// </summary>
-    internal partial class LoggingService : ILoggingService, INodePacketHandler, IBuildComponent
+    internal partial class LoggingService : ILoggingService, INodePacketHandler
     {
         /// <summary>
         /// The default maximum size for the logging event queue.
@@ -199,12 +200,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Whether to include evaluation profiles in events.
         /// </summary>
         private bool? _includeEvaluationProfile;
-
-        /// <summary>
-        /// Whether properties and items should be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>.
-        /// </summary>
-        private bool? _includeEvaluationPropertiesAndItems;
 
         /// <summary>
         /// Whether to include task inputs in task events.
@@ -355,6 +350,11 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        public IBuildEngineDataRouter BuildEngineDataRouter => this;
 
         /// <summary>
         /// Properties we need to serialize from the child node
@@ -540,33 +540,77 @@ namespace Microsoft.Build.BackEnd.Logging
             set => _includeTaskInputs = value;
         }
 
-        /// <summary>
-        /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>?
-        /// </summary>
-        public bool IncludeEvaluationPropertiesAndItems
+        /// <inheritdoc cref="ILoggingService.SetIncludeEvaluationPropertiesAndItemsInEvents"/>
+        public void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent, bool inEvaluationFinishedEvent)
+        {
+            _evalDataBehaviorSet = true;
+            IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = inEvaluationFinishedEvent;
+            IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = inProjectStartedEvent;
+        }
+
+        private bool _evalDataBehaviorSet;
+        private bool _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
+        private bool _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
+        private void InferEvalDataBehavior()
+        {
+            if (_evalDataBehaviorSet)
+            {
+                return;
+            }
+            // Set this right away - to prevent SO exception in case of any future refactoring
+            //  that would refer to the IncludeEvaluation... properties here
+            _evalDataBehaviorSet = true;
+
+            bool? escapeHatch = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation;
+            if (escapeHatch.HasValue)
+            {
+                IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = escapeHatch.Value;
+                IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !escapeHatch.Value;
+            }
+            else
+            {
+                var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>().ToList();
+
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                {
+                    // If any logger requested the data - we need to emit them
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
+                        sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
+                    // If any logger didn't request the data - hence it's likely legacy logger
+                    //  - we need to populate the data in legacy way
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
+                        sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
+                }
+                else
+                {
+                    bool allSinksIncludeEvalData = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = allSinksIncludeEvalData;
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !allSinksIncludeEvalData;
+                }
+            }
+        }
+
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
         {
             get
             {
-                if (_includeEvaluationPropertiesAndItems == null)
-                {
-                    var escapeHatch = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation;
-                    if (escapeHatch.HasValue)
-                    {
-                        _includeEvaluationPropertiesAndItems = escapeHatch.Value;
-                    }
-                    else
-                    {
-                        var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>();
-                        // .All() on an empty list defaults to true, we want to default to false
-                        _includeEvaluationPropertiesAndItems = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
-                    }
-                }
-
-                return _includeEvaluationPropertiesAndItems ?? false;
+                InferEvalDataBehavior();
+                return _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
             }
+            private set => _includeEvaluationPropertiesAndItemsInProjectStartedEvent = value;
+        }
 
-            set => _includeEvaluationPropertiesAndItems = value;
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
+        {
+            get
+            {
+                InferEvalDataBehavior();
+                return _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
+            }
+            private set => _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = value;
         }
 
         /// <summary>
@@ -923,7 +967,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private void WarnOnDeprecatedCustomArgsSerialization(LogMessagePacket loggingPacket)
         {
             if (loggingPacket.EventType == LoggingEventType.CustomEvent
-                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8)
                 && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
             {
                 BuildEventArgs buildEvent = loggingPacket.NodeBuildEvent.Value.Value;
@@ -1283,8 +1326,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (loggingPacket?.NodeBuildEvent != null && _componentHost != null)
             {
-                var projectStartedEventArgs = loggingPacket.NodeBuildEvent.Value.Value as ProjectStartedEventArgs;
-                if (projectStartedEventArgs != null && _configCache.Value != null)
+                if (loggingPacket.NodeBuildEvent.Value.Value is ProjectStartedEventArgs projectStartedEventArgs && _configCache.Value != null)
                 {
                     ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(projectStartedEventArgs.ProjectId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
                     BuildRequestConfiguration buildRequestConfiguration = _configCache.Value[projectStartedEventArgs.ProjectId];
@@ -1295,6 +1337,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     s_projectStartedEventArgsGlobalProperties.Value.SetValue(projectStartedEventArgs, buildRequestConfiguration.GlobalProperties.ToDictionary(), index: null);
 
                     s_projectStartedEventArgsToolsVersion.Value.SetValue(projectStartedEventArgs, buildRequestConfiguration.ToolsVersion, null);
+
+                    // When logging happens out of process, we need to map the project context id to the project file on the receiving side.
+                    if (!_projectFileMap.ContainsKey(projectStartedEventArgs.BuildEventContext.ProjectContextId))
+                    {
+                        _projectFileMap[projectStartedEventArgs.BuildEventContext.ProjectContextId] = projectStartedEventArgs.ProjectFile;
+                    }
                 }
             }
         }
@@ -1590,6 +1638,12 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
+            }
+
+            if (buildEventArgs is BuildCheckResultError checkResultError)
+            {
+                // If the specified BuildCheckResultError was issued, an empty ISet<string> signifies that the specified build check warnings should be treated as errors.
+                AddWarningsAsErrors(checkResultError.BuildEventContext, new HashSet<string>());
             }
 
             if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)

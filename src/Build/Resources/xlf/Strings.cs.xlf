@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../Strings.resx">
     <body>
+      <trans-unit id="AbortingBuild">
+        <source>Attempting to cancel the build...</source>
+        <target state="translated">Pokus o zrušení sestavování...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: Úloha {0} má více než jeden parametr s názvem {1}.</target>
@@ -126,6 +131,11 @@
         <target state="translated">Zápis není podporován.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckEnabled">
+        <source>The BuildCheck is enabled for this build.</source>
+        <target state="translated">Pro tento build je povolena funkce BuildCheck.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">Vytvoření otázky SELHALO. Vytváření bylo předčasně ukončeno, protože se při něm narazilo na cíl nebo úlohu, které nebyly aktuální.</target>
@@ -207,30 +217,35 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerAssemblyNotExist">
-        <source>Failed to find the specified custom analyzer assembly: {0}. Please check if it exists.</source>
-        <target state="translated">Nepodařilo se najít zadané sestavení vlastního analyzátoru: {0}. Zkontrolujte prosím, jestli existuje.</target>
-        <note>The message is emitted when the custom analyzer assembly can not be found.</note>
+      <trans-unit id="CustomCheckAssemblyNotExist">
+        <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
+        <target state="translated">Nepodařilo se najít zadané sestavení vlastní kontroly: {0}. Zkontrolujte prosím, jestli existuje.</target>
+        <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
-        <source>Failed to load the custom analyzer type: {0} from the assembly: {1}. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Nepodařilo se načíst vlastní typ analyzátoru: {0} ze sestavení: {1}. Ujistěte se, že dědí základní třídu Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. Pokud se nemá jednat o vlastní analyzátor, neměl by být odkrytý. Další informace: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
-        <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
+      <trans-unit id="CustomCheckBaseTypeNotAssignable">
+        <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="translated">Nepodařilo se načíst typ vlastní kontroly: {0} ze sestavení: {1}. Ujistěte se, že dědí základní třídu Microsoft.Build.Experimental.BuildCheck.Check. Pokud se nemá jednat o vlastní kontrolu, neměl by být exponovaný. Další informace: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerFailedAcquisition">
-        <source>Failed to register the custom analyzer: {0}.</source>
-        <target state="translated">Nepodařilo se zaregistrovat vlastní analyzátor: {0}.</target>
-        <note>The message is emitted on failed loading of the custom analyzer in process.</note>
+      <trans-unit id="CustomCheckFailedAcquisition">
+        <source>Failed to register the custom check: '{0}'.</source>
+        <target state="translated">Nepodařilo se zaregistrovat vlastní kontrolu: {0}.</target>
+        <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerFailedRuleLoading">
-        <source>Failed to instantiate the custom analyzer rule with the following exception: {0}.</source>
-        <target state="translated">Nepovedlo se vytvořit instanci pravidla vlastního analyzátoru s následující výjimkou: {0}.</target>
-        <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
+      <trans-unit id="CustomCheckFailedRuleLoading">
+        <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
+        <target state="translated">Nepovedlo se vytvořit instanci pravidla vlastní kontroly s následující výjimkou: {0}.</target>
+        <note>The message is emitted on failed loading of the custom check rule in process.</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
-        <source>Custom analyzer rule: {0} has been registered successfully.</source>
-        <target state="translated">Pravidlo vlastního analyzátoru: {0} se úspěšně zaregistrovalo.</target>
-        <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
+      <trans-unit id="CustomCheckRegistered">
+        <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
+        <target state="translated">Vlastní kontrola {0} je pro build zaregistrován z umístění: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CustomCheckSuccessfulAcquisition">
+        <source>Custom check rule: '{0}' has been registered successfully.</source>
+        <target state="translated">Pravidlo vlastní kontroly: {0} se úspěšně zaregistrovalo.</target>
+        <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
@@ -292,6 +307,11 @@
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: Na pozici {1} podmínky {0} je neočekávaná mezera. Nezapomněli jste ji odebrat?</target>
         <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
+      <trans-unit id="IllegalCharactersInFileOrDirectory">
+        <source>There are illegal characters in '{0}' in the {1} item.</source>
+        <target state="new">There are illegal characters in '{0}' in the {1} item.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
         <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>

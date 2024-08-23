@@ -229,8 +229,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         Terminal = new Terminal();
     }
 
-    public TerminalLogger(LoggerVerbosity verbosity)
-        : this()
+    public TerminalLogger(LoggerVerbosity verbosity) : this()
     {
         Verbosity = verbosity;
     }
@@ -273,6 +272,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         eventSource.TargetStarted += TargetStarted;
         eventSource.TargetFinished += TargetFinished;
         eventSource.TaskStarted += TaskStarted;
+        eventSource.StatusEventRaised += StatusEventRaised;
 
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
@@ -283,6 +283,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             eventSource4.IncludeEvaluationPropertiesAndItems();
         }
     }
+
 
     /// <summary>
     /// Parses out the logger parameters from the Parameters string.
@@ -462,6 +463,14 @@ internal sealed partial class TerminalLogger : INodeLogger
         _testEndTime = null;
     }
 
+    private void StatusEventRaised(object sender, BuildStatusEventArgs e)
+    {
+        if (e is BuildCanceledEventArgs buildCanceledEventArgs)
+        {
+            RenderImmediateMessage(e.Message!);
+        }
+    }
+
     /// <summary>
     /// The <see cref="IEventSource.ProjectStarted"/> callback.
     /// </summary>
@@ -636,7 +645,9 @@ internal sealed partial class TerminalLogger : INodeLogger
                             string urlString = url.ToString();
                             if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
                             {
-                                urlString = uri.AbsoluteUri;
+                                // url.ToString() un-escapes the URL which is needed for our case file://
+                                // but not valid for http://
+                                urlString = uri.ToString();
                             }
 
                             // If the output path is under the initial working directory, make the console output relative to that to save space.
@@ -912,7 +923,8 @@ internal sealed partial class TerminalLogger : INodeLogger
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
             && Verbosity > LoggerVerbosity.Quiet)
         {
-            if (!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message!))
+            if ((!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message!)) ||
+                IsImmediateWarning(e.Code))
             {
                 RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             }
@@ -938,6 +950,9 @@ internal sealed partial class TerminalLogger : INodeLogger
 #else
         _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
 #endif
+
+
+    private bool IsImmediateWarning(string code) => code == "MSB3026";
 
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.

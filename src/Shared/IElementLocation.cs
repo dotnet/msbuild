@@ -7,15 +7,20 @@ using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Shared
 {
+    internal interface IElementLocation : IMSBuildElementLocation, ITranslatable { }
+
     /// <summary>
     /// Represents the location information for error reporting purposes.  This is normally used to
     /// associate a run-time error with the original XML.
     /// This is not used for arbitrary errors from tasks, which store location in a BuildXXXXEventArgs.
     /// All implementations should be IMMUTABLE.
-    /// This is not public because the current implementation only provides correct data for unedited projects.
-    /// DO NOT make it public without considering a solution to this problem.
+    /// Any editing of the project XML through the MSBuild API's will invalidate locations in that XML until the XML is reloaded.
     /// </summary>
-    internal interface IElementLocation : ITranslatable
+    /// <remarks>
+    /// This is currently internal - but it is prepared to be made public once it will be needed by other public BuildCheck OM
+    /// (e.g. by property read/write OM).
+    /// </remarks>
+    public interface IMSBuildElementLocation
     {
         /// <summary>
         /// The file from which this particular element originated.  It may

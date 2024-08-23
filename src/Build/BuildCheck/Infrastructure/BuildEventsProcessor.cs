@@ -3,21 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Diagnostics.Tracing;
-using System.IO;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Components.Caching;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Experimental.BuildCheck.Analyzers;
-using Microsoft.Build.Experimental.BuildCheck.Logging;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -29,13 +17,13 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     /// Represents a task currently being executed.
     /// </summary>
     /// <remarks>
-    /// <see cref="TaskParameters"/> is stored in its own field typed as a mutable dictionary because <see cref="AnalysisData"/>
+    /// <see cref="TaskParameters"/> is stored in its own field typed as a mutable dictionary because <see cref="CheckData"/>
     /// is immutable.
     /// </remarks>
     private struct ExecutingTaskData
     {
-        public TaskInvocationAnalysisData AnalysisData;
-        public Dictionary<string, TaskInvocationAnalysisData.TaskParameter> TaskParameters;
+        public TaskInvocationCheckData CheckData;
+        public Dictionary<string, TaskInvocationCheckData.TaskParameter> TaskParameters;
     }
 
     /// <summary>
@@ -56,19 +44,32 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     /// </summary>
     private readonly Dictionary<TaskKey, ExecutingTaskData> _tasksBeingExecuted = [];
 
-    // This requires MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION set to 1
-    internal void ProcessEvaluationFinishedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
-        ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
+    internal static Dictionary<string, string> ExtractPropertiesLookup(ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
     {
         Dictionary<string, string> propertiesLookup = new Dictionary<string, string>();
         Internal.Utilities.EnumerateProperties(evaluationFinishedEventArgs.Properties, propertiesLookup,
             static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
 
-        EvaluatedPropertiesAnalysisData analysisData =
-            new(evaluationFinishedEventArgs.ProjectFile!, propertiesLookup);
+        return propertiesLookup;
+    }
 
-        _buildCheckCentralContext.RunEvaluatedPropertiesActions(analysisData, buildAnalysisContext, ReportResult);
+    // This requires MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION set to 1
+    internal void ProcessEvaluationFinishedEventArgs(
+        ICheckContext checkContext,
+        ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs,
+        Dictionary<string, string>? propertiesLookup)
+    {
+        if (_buildCheckCentralContext.HasEvaluatedPropertiesActions)
+        {
+            propertiesLookup ??= ExtractPropertiesLookup(evaluationFinishedEventArgs);
+
+            EvaluatedPropertiesCheckData checkData =
+                new(evaluationFinishedEventArgs.ProjectFile!,
+                    evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
+                    propertiesLookup!);
+
+            _buildCheckCentralContext.RunEvaluatedPropertiesActions(checkData, checkContext, ReportResult);
+        }
 
         if (_buildCheckCentralContext.HasParsedItemsActions)
         {
@@ -76,20 +77,43 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 evaluationFinishedEventArgs.ProjectFile!, /*unused*/
                 null, /*unused*/null, _cache, false /*Not explicitly loaded - unused*/);
 
-            ParsedItemsAnalysisData itemsAnalysisData = new(evaluationFinishedEventArgs.ProjectFile!,
+            ParsedItemsCheckData itemsCheckData = new(
+                evaluationFinishedEventArgs.ProjectFile!,
+                evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
                 new ItemsHolder(xml.Items, xml.ItemGroups));
 
-            _buildCheckCentralContext.RunParsedItemsActions(itemsAnalysisData, buildAnalysisContext, ReportResult);
+            _buildCheckCentralContext.RunParsedItemsActions(itemsCheckData, checkContext, ReportResult);
         }
     }
 
+    /// <summary>
+    /// The method collects events associated with the used environment variables in projects.
+    /// </summary>
+    internal void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, string projectPath, string envVarKey, string envVarValue, IElementLocation elementLocation)
+    {
+        EnvironmentVariableCheckData checkData = new(projectPath, checkContext.BuildEventContext?.ProjectInstanceId, envVarKey, envVarValue, elementLocation);
+
+        _buildCheckCentralContext.RunEnvironmentVariableActions(checkData, checkContext, ReportResult);
+    }
+
+    internal void ProcessBuildDone(ICheckContext checkContext)
+    {
+        if (!_buildCheckCentralContext.HasBuildFinishedActions)
+        {
+            // No analyzer is interested in the event -> nothing to do.
+            return;
+        }
+
+        _buildCheckCentralContext.RunBuildFinishedActions(new BuildFinishedCheckData(), checkContext, ReportResult);
+    }
+
     internal void ProcessTaskStartedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        ICheckContext checkContext,
         TaskStartedEventArgs taskStartedEventArgs)
     {
         if (!_buildCheckCentralContext.HasTaskInvocationActions)
         {
-            // No analyzer is interested in task invocation actions -> nothing to do.
+            // No check is interested in task invocation actions -> nothing to do.
             return;
         }
 
@@ -102,13 +126,14 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
             // Add a new entry to _tasksBeingExecuted. TaskParameters are initialized empty and will be recorded
             // based on TaskParameterEventArgs we receive later.
-            Dictionary<string, TaskInvocationAnalysisData.TaskParameter> taskParameters = new();
+            Dictionary<string, TaskInvocationCheckData.TaskParameter> taskParameters = new();
 
             ExecutingTaskData taskData = new()
             {
                 TaskParameters = taskParameters,
-                AnalysisData = new(
+                CheckData = new(
                     projectFilePath: taskStartedEventArgs.ProjectFile!,
+                    projectConfigurationId: taskStartedEventArgs.BuildEventContext.ProjectInstanceId,
                     taskInvocationLocation: invocationLocation,
                     taskName: taskStartedEventArgs.TaskName,
                     taskAssemblyLocation: taskStartedEventArgs.TaskAssemblyLocation,
@@ -120,12 +145,12 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     }
 
     internal void ProcessTaskFinishedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        ICheckContext checkContext,
         TaskFinishedEventArgs taskFinishedEventArgs)
     {
         if (!_buildCheckCentralContext.HasTaskInvocationActions)
         {
-            // No analyzer is interested in task invocation actions -> nothing to do.
+            // No check is interested in task invocation actions -> nothing to do.
             return;
         }
 
@@ -136,18 +161,18 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             {
                 // All task parameters have been recorded by now so remove the task from the dictionary and fire the registered build check actions.
                 _tasksBeingExecuted.Remove(taskKey);
-                _buildCheckCentralContext.RunTaskInvocationActions(taskData.AnalysisData, buildAnalysisContext, ReportResult);
+                _buildCheckCentralContext.RunTaskInvocationActions(taskData.CheckData, checkContext, ReportResult);
             }
         }
     }
 
     internal void ProcessTaskParameterEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        ICheckContext checkContext,
         TaskParameterEventArgs taskParameterEventArgs)
     {
         if (!_buildCheckCentralContext.HasTaskInvocationActions)
         {
-            // No analyzer is interested in task invocation actions -> nothing to do.
+            // No check is interested in task invocation actions -> nothing to do.
             return;
         }
 
@@ -171,28 +196,46 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 _ => taskParameterEventArgs.Items,
             };
 
-            taskData.TaskParameters[parameterName] = new TaskInvocationAnalysisData.TaskParameter(parameterValue, isOutput);
+            taskData.TaskParameters[parameterName] = new TaskInvocationCheckData.TaskParameter(parameterValue, isOutput);
         }
     }
 
+    public void ProcessPropertyRead(PropertyReadData propertyReadData, CheckLoggingContext checkContext)
+        => _buildCheckCentralContext.RunPropertyReadActions(
+                propertyReadData,
+                checkContext,
+                ReportResult);
+
+    public void ProcessPropertyWrite(PropertyWriteData propertyWriteData, CheckLoggingContext checkContext)
+        => _buildCheckCentralContext.RunPropertyWriteActions(
+                propertyWriteData,
+                checkContext,
+                ReportResult);
+
+    public void ProcessProjectDone(ICheckContext checkContext, string projectFullPath)
+        => _buildCheckCentralContext.RunProjectProcessingDoneActions(
+                new ProjectRequestProcessingDoneData(projectFullPath, checkContext.BuildEventContext.ProjectInstanceId),
+                checkContext,
+                ReportResult);
+
     private static void ReportResult(
-        BuildAnalyzerWrapper analyzerWrapper,
-        LoggingContext loggingContext,
-        BuildAnalyzerConfigurationInternal[] configPerRule,
+        CheckWrapper checkWrapper,
+        ICheckContext checkContext,
+        CheckConfigurationEffective[] configPerRule,
         BuildCheckResult result)
     {
-        if (!analyzerWrapper.BuildAnalyzer.SupportedRules.Contains(result.BuildAnalyzerRule))
+        if (!checkWrapper.Check.SupportedRules.Contains(result.CheckRule))
         {
-            loggingContext.LogErrorFromText(null, null, null,
+            checkContext.DispatchAsErrorFromText(null, null, null,
                 BuildEventFileInfo.Empty,
-                $"The analyzer '{analyzerWrapper.BuildAnalyzer.FriendlyName}' reported a result for a rule '{result.BuildAnalyzerRule.Id}' that it does not support.");
+                $"The check '{checkWrapper.Check.FriendlyName}' reported a result for a rule '{result.CheckRule.Id}' that it does not support.");
             return;
         }
 
-        BuildAnalyzerConfigurationInternal config = configPerRule.Length == 1
+        CheckConfigurationEffective config = configPerRule.Length == 1
             ? configPerRule[0]
             : configPerRule.First(r =>
-                r.RuleId.Equals(result.BuildAnalyzerRule.Id, StringComparison.CurrentCultureIgnoreCase));
+                r.RuleId.Equals(result.CheckRule.Id, StringComparison.CurrentCultureIgnoreCase));
 
         if (!config.IsEnabled)
         {
@@ -201,10 +244,8 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
 
         BuildEventArgs eventArgs = result.ToEventArgs(config.Severity);
 
-        // TODO: This is a workaround for https://github.com/dotnet/msbuild/issues/10176
-        // eventArgs.BuildEventContext = loggingContext.BuildEventContext;
-        eventArgs.BuildEventContext = BuildEventContext.Invalid;
+        eventArgs.BuildEventContext = checkContext.BuildEventContext;
 
-        loggingContext.LogBuildEvent(eventArgs);
+        checkContext.DispatchBuildEvent(eventArgs);
     }
 }

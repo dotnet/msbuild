@@ -56,14 +56,11 @@ namespace Microsoft.Build.Shared
                 return null;
             }
 
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // respect plugin.dll.json with the AssemblyDependencyResolver
+            string? assemblyPath = _resolver?.ResolveAssemblyToPath(assemblyName);
+            if (assemblyPath != null)
             {
-                // respect plugin.dll.json with the AssemblyDependencyResolver
-                string? assemblyPath = _resolver?.ResolveAssemblyToPath(assemblyName);
-                if (assemblyPath != null)
-                {
-                    return LoadFromAssemblyPath(assemblyPath);
-                }
+                return LoadFromAssemblyPath(assemblyPath);
             }
 
             // Fall back to the older MSBuild-on-Core behavior to continue to support
@@ -113,13 +110,10 @@ namespace Microsoft.Build.Shared
 
         protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            string? libraryPath = _resolver?.ResolveUnmanagedDllToPath(unmanagedDllName);
+            if (libraryPath != null)
             {
-                string? libraryPath = _resolver?.ResolveUnmanagedDllToPath(unmanagedDllName);
-                if (libraryPath != null)
-                {
-                    return LoadUnmanagedDllFromPath(libraryPath);
-                }
+                return LoadUnmanagedDllFromPath(libraryPath);
             }
 
             return base.LoadUnmanagedDll(unmanagedDllName);
