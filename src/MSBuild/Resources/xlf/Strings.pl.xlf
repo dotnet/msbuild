@@ -120,10 +120,10 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Powoduje, że program MSBuild zgłasza dostępy do wszystkich skonfigurowanych plików
+                     Powoduje, że platforma MSBuild zgłasza dostępy do wszystkich skonfigurowanych
                      wtyczek pamięci podręcznej projektu.
 
-Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
+                     Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -784,17 +784,14 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania
-                         zdarzeń pochodzących z programu MSBuild. Aby określić
-                     wiele rejestratorów, określ każdy z nich osobno.
+        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania zdarzeń pochodzących
+                     z programu MSBuild. Aby określić wiele rejestratorów, określ każdy z nich osobno.
                      Składnia elementu &lt;rejestrator&gt;:
-                        [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt;
-                        [;&lt;parametry rejestratora&gt;]
+                      [&lt;klasa rejestratora&gt;,]&lt;assembly&gt; [;&lt;parametry rejestratora&gt;]
                      Składnia elementu &lt;klasa rejestratora&gt;:
-                        [&lt;częściowa lub pełna przestrzeń nazw&gt;.]
-                        &lt;nazwa klasy rejestratora&gt;
+                       [&lt;częściowa lub pełna przestrzeń nazw&gt;.] &lt;nazwa klasy rejestratora&gt;
                      Składnia elementu &lt;zestaw rejestratora&gt;:
-                        {&lt;nazwa zestawu&gt;[,&lt;strong name&gt;] | &lt;plik zestawu&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Wartości &lt;parametry rejestratora&gt; są opcjonalne i są
                      przekazywane do rejestratora dokładnie tak, jak zostały
                      wpisane. (Krótka wersja: -l)
@@ -1073,11 +1070,11 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      wiele rejestratorów, określ każdy z nich osobno.
                      (Krótka wersja: -dl)
                      Składnia elementu &lt;rejestrator&gt;:
-                       [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt;[;&lt;parametry rejestratora&gt;]
+                       [&lt;klasa rejestratora&gt;,]&lt;assembly&gt;[;&lt;parametry rejestratora&gt;]
                      Składnia elementu &lt;klasa rejestratora&gt;:
                        [&lt;częściowa lub pełna przestrzeń nazw&gt;.]&lt;nazwa klasy rejestratora&gt;
                      Składnia elementu &lt;zestaw rejestratora&gt;:
-                       {&lt;nazwa zestawu&gt;[,&lt;strong name&gt;] | &lt;plik zestawu&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Wartości &lt;parametry rejestratora&gt; są opcjonalne i są
                      przekazywane do rejestratora dokładnie tak, jak zostały
                      wpisane. (Krótka wersja: -l)
@@ -1189,13 +1186,11 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      create a log file for each node.
     </source>
         <target state="translated">  -distributedFileLogger
-                     Rejestruje dane wyjściowe kompilacji w wielu plikach
-                     dziennika, po jednym pliku na węzeł programu MSBuild.
-                     Początkową lokalizacją tych plików jest bieżący katalog.
-                     Domyślnie pliki mają nazwę
+                     Rejestruje dane wyjściowe kompilacji w wielu plikach dziennika,po jednym pliku
+                     na węzeł programu MSBuild. Początkową lokalizacją tych plików
+                     jest bieżący katalog. Domyślnie pliki mają nazwę
                      „MSBuild&lt;identyfikator węzła&gt;.log”. Lokalizację plików
                      i inne parametry rejestratora plików można określić
-
                      przez dodanie przełącznika „-fileLoggerParameters”.
 
                      Jeśli nazwa pliku zostanie ustawiona za pomocą przełącznika
