@@ -1100,9 +1100,9 @@
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
-        <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://aka.ms/msbuild/net8-binaryformatter</source>
-        <target state="translated">MSB3825: “{1}”类型的资源“{0}”在运行时通过 BinaryFormatter 进行反序列化。由于可能存在安全风险，BinaryFormatter 已被弃用，并将使用 .NET 9 移除它。如果要继续使用它，请将属性 "GenerateResourceWarnOnBinaryFormatterUse" 设置为 false。
+        <source>MSB3825: Resource "{0}" of type "{1}" may be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and will be removed from .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide</source>
+        <target state="needs-review-translation">MSB3825: “{1}”类型的资源“{0}”在运行时通过 BinaryFormatter 进行反序列化。由于可能存在安全风险，BinaryFormatter 已被弃用，并将使用 .NET 9 移除它。如果要继续使用它，请将属性 "GenerateResourceWarnOnBinaryFormatterUse" 设置为 false。
            详细信息: https://aka.ms/msbuild/net8-binaryformatter</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>

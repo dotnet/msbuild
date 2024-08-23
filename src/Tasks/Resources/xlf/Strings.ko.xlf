@@ -1100,9 +1100,9 @@
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
-        <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://aka.ms/msbuild/net8-binaryformatter</source>
-        <target state="translated">MSB3825: "{1}" 유형의 "{0}" 리소스가 런타임 시 BinaryFormatter를 통해 역직렬화됩니다. BinaryFormatter는 가능한 보안 위험으로 인해 사용되지 않으며 .NET 9에서 제거됩니다. 계속 사용하려면 "GenerateResourceWarnOnBinaryFormatterUse" 속성을 false로 설정하세요.
+        <source>MSB3825: Resource "{0}" of type "{1}" may be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and will be removed from .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide</source>
+        <target state="needs-review-translation">MSB3825: "{1}" 유형의 "{0}" 리소스가 런타임 시 BinaryFormatter를 통해 역직렬화됩니다. BinaryFormatter는 가능한 보안 위험으로 인해 사용되지 않으며 .NET 9에서 제거됩니다. 계속 사용하려면 "GenerateResourceWarnOnBinaryFormatterUse" 속성을 false로 설정하세요.
             추가 정보: https://aka.ms/msbuild/net8-binaryformatter</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
