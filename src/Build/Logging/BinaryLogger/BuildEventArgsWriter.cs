@@ -479,11 +479,6 @@ namespace Microsoft.Build.Logging
 
         private BinaryLogRecordKind Write(BuildErrorEventArgs e)
         {
-            if (e is BuildCheckResultError buildCheckError)
-            {
-                return Write(buildCheckError);
-            }
-
             WriteBuildEventArgsFields(e);
             WriteArguments(e.RawArguments);
             WriteDeduplicatedString(e.Subcategory);
@@ -500,11 +495,6 @@ namespace Microsoft.Build.Logging
 
         private BinaryLogRecordKind Write(BuildWarningEventArgs e)
         {
-            if (e is BuildCheckResultWarning buildCheckWarning)
-            {
-                return Write(buildCheckWarning);
-            }
-
             WriteBuildEventArgsFields(e);
             WriteArguments(e.RawArguments);
             WriteDeduplicatedString(e.Subcategory);

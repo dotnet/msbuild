@@ -321,8 +321,8 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.PropertyInitialValueSet => ReadPropertyInitialValueSetEventArgs(),
                 BinaryLogRecordKind.AssemblyLoad => ReadAssemblyLoadEventArgs(),
                 BinaryLogRecordKind.BuildCheckMessage => ReadBuildCheckMessageEventArgs(),
-                BinaryLogRecordKind.BuildCheckWarning => ReadBuildCheckWarningEventArgs(),
-                BinaryLogRecordKind.BuildCheckError => ReadBuildCheckErrorEventArgs(),
+                BinaryLogRecordKind.BuildCheckWarning => ReadBuildWarningEventArgs(),
+                BinaryLogRecordKind.BuildCheckError => ReadBuildErrorEventArgs(),
                 BinaryLogRecordKind.BuildCheckTracing => ReadBuildCheckTracingEventArgs(),
                 BinaryLogRecordKind.BuildCheckAcquisition => ReadBuildCheckAcquisitionEventArgs(),
                 _ => null
@@ -1218,6 +1218,15 @@ namespace Microsoft.Build.Logging
             return e;
         }
 
+        private BuildEventArgs ReadBuildCheckMessageEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            var e = new BuildCheckResultMessage(fields.Message);
+            SetCommonFields(e, fields);
+
+            return e;
+        }
+
         private AssemblyLoadBuildEventArgs ReadAssemblyLoadEventArgs()
         {
             var fields = ReadBuildEventArgsFields(readImportance: false);
@@ -1241,22 +1250,6 @@ namespace Microsoft.Build.Logging
 
             return e;
         }
-
-        private BuildEventArgs ReadBuildCheckEventArgs<T>(Func<BuildEventArgsFields, string, T> createEvent)
-            where T : BuildEventArgs
-        {
-            var fields = ReadBuildEventArgsFields();
-            var e = createEvent(fields, fields.Message);
-            SetCommonFields(e, fields);
-
-            return e;
-        }
-
-        private BuildEventArgs ReadBuildCheckMessageEventArgs() => ReadBuildCheckEventArgs((_, rawMessage) => new BuildCheckResultMessage(rawMessage));
-
-        private BuildEventArgs ReadBuildCheckWarningEventArgs() => ReadBuildCheckEventArgs((fields, rawMessage) => new BuildCheckResultWarning(rawMessage, fields.Code));
-
-        private BuildEventArgs ReadBuildCheckErrorEventArgs() => ReadBuildCheckEventArgs((fields, rawMessage) => new BuildCheckResultError(rawMessage, fields.Code));
 
         private BuildEventArgs ReadBuildCheckTracingEventArgs()
         {
