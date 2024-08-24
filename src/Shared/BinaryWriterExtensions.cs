@@ -60,7 +60,7 @@ namespace Microsoft.Build.Shared
             // Write out an int 7 bits at a time.  The high bit of the byte,
             // when on, tells reader to continue reading more bytes.
             int index = 0;
-            uint v = (uint)value;   // support negative numbers
+            uint v = (uint)value;   // treat as unsigned to support negative numbers
             while (v >= 0x80)
             {
                 buffer[index++] = (byte)(v | 0x80);
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Shared
         {
             // Write out an int 7 bits at a time.  The high bit of the byte,
             // when on, tells reader to continue reading more bytes.
-            uint v = (uint)value;   // support negative numbers
+            uint v = (uint)value;   // treat as unsigned to support negative numbers
             while (v >= 0x80)
             {
                 writer.Write((byte)(v | 0x80));

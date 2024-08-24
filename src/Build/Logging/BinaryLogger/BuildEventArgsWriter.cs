@@ -1082,9 +1082,10 @@ namespace Microsoft.Build.Logging
 
         private void Write(BuildEventContext buildEventContext)
         {
-            // Place these 7 integers a byte buffer before writing to the stream.
+            // Optimized writing these 7 7bit encoded integers
+            // into a byte buffer, then in one call, write to the stream.
             int index = 0;
-            Span<int> ints =
+            Span<int> intSpan =
             [
                 buildEventContext.NodeId,
                 buildEventContext.ProjectContextId,
@@ -1095,9 +1096,9 @@ namespace Microsoft.Build.Logging
                 buildEventContext.EvaluationId,
             ];
 
-            foreach(int num in ints)
+            foreach(int num in intSpan)
             {
-                uint v = (uint)num;   // support negative numbers
+                uint v = (uint)num;   // treat as unsigned to support negative numbers
                 while (v >= 0x80)
                 {
                     buildEventContextBuffer[index++] = (byte)(v | 0x80);
@@ -1107,7 +1108,7 @@ namespace Microsoft.Build.Logging
                 buildEventContextBuffer[index++] = (byte)v;
             }
 
-            this.binaryWriter.Write(buildEventContextBuffer, 0, index);
+            binaryWriter.Write(buildEventContextBuffer, 0, index);
         }
 
         private void Write(IEnumerable<KeyValuePair<string, string>> keyValuePairs)

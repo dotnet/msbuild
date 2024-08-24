@@ -288,6 +288,32 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
+        /// Test ReadString support unicode string that are larger than the internal buffer.
+        /// </summary>
+        [Fact]
+        public void Test_Unicode_ReadString()
+        {
+            var testString = new string[] { "가 각 갂 갃 간", "一 丁 丂 七 丄 丅", "豈 更 車 賈 滑", "ﻬ ﻭ ﻮ ﻯ ﻰ ﻱ" };
+            using var stream = new MemoryStream();
+
+            using var writer = new BinaryWriter(stream);
+            foreach (string test in testString)
+            {
+                writer.Write(test);
+            }
+
+            stream.Position = 0;
+
+            // Use a buffer size that is between code point.
+            using var reader = new BufferedBinaryReader(stream, bufferCapacity: 7);
+            foreach (string test in testString)
+            {
+                string result = reader.ReadString();
+                Assert.Equal(test, result);
+            }
+        }
+
+        /// <summary>
         /// Test Slice function to correctly stream with correct position.
         /// </summary>
         [Fact]

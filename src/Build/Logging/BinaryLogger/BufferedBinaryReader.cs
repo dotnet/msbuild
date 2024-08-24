@@ -28,6 +28,7 @@ namespace Microsoft.Build.Logging
         private int bufferOffset = 0;
         private int bufferLength = 0;
         private Encoding encoding;
+        private Decoder decoder;
 
         public BufferedBinaryReader(Stream stream, Encoding? encoding = null, int bufferCapacity = 32768)
         {
@@ -39,6 +40,7 @@ namespace Microsoft.Build.Logging
             baseStream = stream;
             this.bufferCapacity = bufferCapacity;  // Note: bufferCapacity must be large enough for an BulkRead7BitEncodedInt operation.
             this.encoding = encoding ?? new UTF8Encoding();
+            this.decoder = this.encoding.GetDecoder();  // Note: decode will remember partially decoded characters
             buffer = new byte[this.bufferCapacity];
             charBuffer = new char[bufferCapacity + 1];
         }
@@ -101,12 +103,14 @@ namespace Microsoft.Build.Logging
         /// Reads a string with a prefixed of the length.
         /// </summary>
         /// <returns>A string.</returns>
-        /// <remarks>Logic refactored from BCL <see href="https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/IO/BinaryReader.cs">BinaryReader.cs</see></remarks>
+        /// <remarks>Logic refactored from BCL <see href="https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/IO/BinaryReader.cs">BinaryReader.cs</see> to leverage local buffers as to avoid extra allocations.</remarks>
         public string ReadString()
         {
+            // Length of the string in bytes, not chars
             int stringLength = Read7BitEncodedInt();
             int stringOffsetPos = 0;
             int readChunk = 0;
+            int charRead = 0;
 
             if (stringLength == 0)
             {
@@ -118,36 +122,34 @@ namespace Microsoft.Build.Logging
                 throw new FormatException();
             }
 
-            int charRead = 0;
+            cachedBuilder ??= new StringBuilder();
 
+            // Read the content from the local buffer.
             if (bufferLength > 0)
             {
-                // Read content in the buffer.
                 readChunk = stringLength < (bufferLength - bufferOffset) ? stringLength : bufferLength - bufferOffset;
-                charRead = encoding.GetChars(buffer, bufferOffset, readChunk, charBuffer, 0);
+                charRead = decoder.GetChars(buffer, bufferOffset, readChunk, charBuffer, 0, flush: false);
                 bufferOffset += readChunk;
                 baseStreamPosition += readChunk;
+                stringOffsetPos += readChunk;
+
+                // If the string is fits in the buffer, then cast to string without using string builder.
                 if (stringLength == readChunk)
                 {
-                    // if the string is fits in the buffer, then cast to string without using string builder.
                     return new string(charBuffer, 0, charRead);
                 }
                 else
                 {
-                    cachedBuilder ??= new StringBuilder();
                     cachedBuilder.Append(charBuffer, 0, charRead);
                 }
             }
 
-            cachedBuilder ??= new StringBuilder();
-            stringOffsetPos += readChunk;
-
+            // Loop to read the stream multiple times, as the string could be larger then local buffer.
             do
             {
-                // Read up to bufferCapacity;
                 readChunk = Math.Min(stringLength - stringOffsetPos, bufferCapacity);
                 FillBuffer(readChunk);
-                charRead = encoding.GetChars(buffer, bufferOffset, readChunk, charBuffer, 0);
+                charRead = decoder.GetChars(buffer, bufferOffset, readChunk, charBuffer, 0, flush: false);
                 bufferOffset += readChunk;
                 baseStreamPosition += readChunk;
                 cachedBuilder.Append(charBuffer, 0, charRead);
