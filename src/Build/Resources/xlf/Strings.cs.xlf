@@ -310,7 +310,7 @@
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
-        <target state="new">There are illegal characters in '{0}' in the {1} item.</target>
+        <target state="translated">V položce {1} jsou v „{0}“ neplatné znaky.</target>
         <note />
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
