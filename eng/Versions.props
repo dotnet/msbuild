@@ -52,8 +52,8 @@
     <MicrosoftDotNetXUnitExtensionsVersion>8.0.0-beta.24413.2</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>7.0.0</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.11.0-3.24378.3</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.11.0-rc.122</NuGetBuildTasksVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.12.0-2.24425.4</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.12.0-preview.1.83</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
@@ -75,7 +75,6 @@
       <FileVersion>$(VersionPrefix).$(FileVersion.Split('.')[3])</FileVersion>
     </PropertyGroup>
   </Target>
-
   <!--  Freeze the version for the current upgrade of the sdk. 
         TODO:Delete the lines below once the Retargeting merged. 
   -->

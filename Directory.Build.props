@@ -58,6 +58,9 @@
     -->
 
     <NoWarn>$(NoWarn);NU1507;NU1603;NU5105;1701;1702;SYSLIB0011;SYSLIB0037;SYSLIB0044;RS0016;RS0017;</NoWarn>
+    <!-- Loading certificate data through the constructor or Import is obsolete. Use X509CertificateLoader instead to load certific
+ates https://learn.microsoft.com/en-gb/dotnet/fundamentals/syslib-diagnostics/syslib0057 -->
+    <NoWarn>$(NoWarn);SYSLIB0057;</NoWarn>
   </PropertyGroup>
 
   <!-- Configuration MSBuild for portable (xcopy-install) toolsets: works on WinNT and linux/mac via Mono, isolates from machine environment:

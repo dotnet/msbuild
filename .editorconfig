@@ -422,3 +422,6 @@ dotnet_diagnostic.IDE0100.severity = suggestion
 
 # File header should match the template, making it error since couple of files met in the code base without any header
 dotnet_diagnostic.IDE0073.severity = error
+
+Use 'System.Threading.Lock'
+dotnet_diagnostic.IDE0330.severity = suggestion
