@@ -172,6 +172,38 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    [Fact]
+    public void CheckHasAccessToAllConfigs()
+    {
+        using (var env = TestEnvironment.Create())
+        {
+            string checkCandidatePath = Path.Combine(TestAssetsRootPath, "CheckCandidate");
+            string message = ": An extra message for the analyzer";
+            string severity = "warning";
+
+            // Can't use Transitive environment due to the need to dogfood local nuget packages.
+            AddCustomDataSourceToNugetConfig(checkCandidatePath);
+            string editorConfigName = Path.Combine(checkCandidatePath, EditorConfigFileName);
+            File.WriteAllText(editorConfigName, ReadEditorConfig(
+                new List<(string, string)>() { ("X01234", severity) },
+                new List<(string, (string, string))>
+                {
+                    ("X01234",("setMessage", message))
+                },
+                checkCandidatePath));
+
+            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(checkCandidatePath, $"CheckCandidate.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool success, timeoutMilliseconds: 1200_0000);
+            success.ShouldBeTrue();
+
+            projectCheckBuildLog.ShouldContain("warning X01234");
+            projectCheckBuildLog.ShouldContain(severity + message);
+
+            // Cleanup
+            File.Delete(editorConfigName);
+        }
+    }
+
     [Theory]
     [InlineData(true, true)]
     [InlineData(false, true)]
