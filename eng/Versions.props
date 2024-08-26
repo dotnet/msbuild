@@ -53,7 +53,7 @@
     <MicrosoftExtensionsDependencyModelVersion>7.0.0</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
     <MicrosoftNetCompilersToolsetVersion>4.12.0-2.24425.4</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.12.0-preview.1.81</NuGetBuildTasksVersion>
+    <NuGetBuildTasksVersion>6.12.0-preview.1.83</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
