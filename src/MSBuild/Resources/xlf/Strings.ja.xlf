@@ -121,7 +121,7 @@
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
                      MSBuild が、構成されているプロジェクト キャッシュ プラグインへの
-                     ファイル アクセスを報告するようにします。
+                     ファイル アクセスを報告します。
 
                      このフラグは実験的なものであり、意図したとおりに動作しない可能性があります。
     </target>
@@ -325,7 +325,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: ターミナル ロガーの値が無効です。'auto'、'true'、または 'false' のいずれかである必要があります。{0}</target>
+        <target state="translated">MSBUILD : error MSB1065: ターミナル ロガーの値が無効です。'auto'、'true'、または 'false' のいずれかである必要があります。 {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
