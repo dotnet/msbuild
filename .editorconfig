@@ -415,3 +415,13 @@ dotnet_diagnostic.IDE0305.severity = suggestion
 
 # Temporarily disable SA1010 "Opening square brackets should not be preceded by a space" until https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3687 is fixed
 dotnet_diagnostic.SA1010.severity = none
+
+# Remove unnecessary equality operator  IDE0100 (https://learn.microsoft.com/en-gb/dotnet/fundamentals/code-analysis/style-rules/ide0100)
+# Making it a suggestion to have a flexibility for future
+dotnet_diagnostic.IDE0100.severity = suggestion
+
+# File header should match the template, making it error since couple of files met in the code base without any header
+dotnet_diagnostic.IDE0073.severity = error
+
+# Use 'System.Threading.Lock'
+dotnet_diagnostic.IDE0330.severity = suggestion

@@ -54,4 +54,57 @@
     <DiagnosticId>PKV004</DiagnosticId>
     <Target>Xamarin.XboxOne,Version=v0.0</Target>
   </Suppression>
+  <!--
+  Since we are dropping the .net 8 and retarrgetting to .net 9, we need to suppress the following errors. 
+  The comparison ref/net.8 with ref/netstandard2.0 is not valid anymore.
+  -->
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Utilities.DotNetFrameworkArchitecture</Target>
+    <Left>ref/net8.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Utilities.HostObjectInitializationStatus</Target>
+    <Left>ref/net8.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Utilities.MultipleVersionSupport</Target>
+    <Left>ref/net8.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Utilities.SDKType</Target>
+    <Left>ref/net8.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Utilities.TargetDotNetFrameworkVersion</Target>
+    <Left>ref/net8.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Utilities.VisualStudioVersion</Target>
+    <Left>ref/net8.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <!--
+    https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/diagnostic-ids
+    Suppress PKV006 for net8.0 (The target framework is dropped in the latest version.)  -->
+  <Suppression>
+    <DiagnosticId>PKV006</DiagnosticId>
+    <Target>net8.0</Target>
+  </Suppression>
 </Suppressions>
