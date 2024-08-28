@@ -32,9 +32,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// Contains the current results for all of the targets which have produced results for a particular configuration.
     /// </summary>
-    /// <remarks>
-    /// When modifying serialization/deserialization, bump the version and support previous versions in order to keep results cache backwards compatible.
-    /// </remarks>
+    /// When modifying serialization/deserialization, bump the version and support previous versions in order to keep <see cref="ResultsCache"/> backwards compatible.
     public class BuildResult : BuildResultBase, INodePacket, IBuildResults
     {
         /// <summary>
