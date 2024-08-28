@@ -1513,7 +1513,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.EndBuild();
         }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously: needs to be async for xunit's timeout system
         /// <summary>
         /// A canceled build
         /// </summary>
