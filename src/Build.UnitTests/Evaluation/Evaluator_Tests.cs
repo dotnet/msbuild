@@ -4400,7 +4400,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7623")]
-        public async void VerifyDTDProcessingIsDisabled2()
+        public async Task VerifyDTDProcessingIsDisabled2()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
                                 <!DOCTYPE Project [

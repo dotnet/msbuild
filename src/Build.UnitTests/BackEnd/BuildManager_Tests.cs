@@ -1513,11 +1513,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.EndBuild();
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         /// <summary>
         /// A canceled build
         /// </summary>
         [Fact(Timeout = 20_000)]
-        public void CancelledBuild()
+        public async System.Threading.Tasks.Task CancelledBuild()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             Console.WriteLine("Starting CancelledBuild test that is known to hang.");
             string contents = CleanupFileContents(@"
