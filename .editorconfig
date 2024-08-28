@@ -432,3 +432,5 @@ dotnet_diagnostic.xUnit2020.severity = none
 dotnet_diagnostic.xUnit1031.severity = none
 dotnet_diagnostic.xUnit1012.severity = none
 dotnet_diagnostic.xUnit2029.severity = none
+# Do not use equality check to check for collection size.
+dotnet_diagnostic.xUnit2013.severity = none
