@@ -122,7 +122,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// This constructor allows timestamp to be set
+        /// This constructor allows timestamp to be set.
         /// </summary>
         /// <param name="subcategory">event subcategory</param>
         /// <param name="code">event code</param>
@@ -164,7 +164,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// This constructor allows event data without ends to be initialized.
+        /// This constructor allows event data without endLineNumber and endColumnNumber to be initialized.
         /// </summary>
         /// <param name="code">event code</param>
         /// <param name="file">file associated with the event</param>
