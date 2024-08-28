@@ -32,9 +32,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// Contains the current results for all of the targets which have produced results for a particular configuration.
     /// </summary>
-    /// <remarks>
     /// When modifying serialization/deserialization, bump the version and support previous versions in order to keep <see cref="ResultsCache"/> backwards compatible.
-    /// </remarks>
     public class BuildResult : BuildResultBase, INodePacket, IBuildResults
     {
         /// <summary>
@@ -421,7 +419,7 @@ namespace Microsoft.Build.Execution
         /// See <see cref="Execution.BuildRequestDataFlags"/> for examples of the available flags.
         /// </summary>
         /// <remarks>
-        /// Is optional, this property exists starting <see cref="_version"/> 1.
+        /// Is optional, this property exists starting version 1.
         /// </remarks>
         public BuildRequestDataFlags? BuildRequestDataFlags => (_version > 0) ? _buildRequestDataFlags : null;
 

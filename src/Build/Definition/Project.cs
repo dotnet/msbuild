@@ -829,7 +829,7 @@ namespace Microsoft.Build.Evaluation
         /// their previously stored value to find out, and if so perhaps decide to update their own state.
         /// Note that the number may not increase monotonically.
         ///
-        /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationId"/> and can be used to connect
+        /// This number corresponds to the <see cref="BuildEventContext.EvaluationId"/> and can be used to connect
         /// evaluation logging events back to the Project instance.
         /// </summary>
         public int LastEvaluationId => implementation.LastEvaluationId;
@@ -1981,7 +1981,6 @@ namespace Microsoft.Build.Evaluation
             /// - <see cref="RemoveItems"/>
             /// - <see cref="AddItem(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
             /// - <see cref="AddItemFast(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
-            /// - <see cref="ProjectItem.ChangeItemType"/>
             /// - <see cref="ProjectItem.Rename"/>
             /// - <see cref="ProjectItem.RemoveMetadata"/>
             /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
