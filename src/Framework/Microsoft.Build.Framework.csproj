@@ -39,6 +39,9 @@
     <Compile Include="..\Shared\BinaryWriterExtensions.cs">
       <Link>Shared\BinaryWriterExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IMSBuildElementLocation.cs">
+      <Link>Shared\IMSBuildElementLocation.cs</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
