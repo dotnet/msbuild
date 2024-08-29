@@ -17,7 +17,7 @@ If there are no errors, then your build is up-to-date.
 If there are errors, then investigate the error.  See common errors below.  Keep both logs to help with your investigation.
 
 ## Custom Tasks
-Task author can implement the optional `IIncrementalTask` interface that will explose `FailIfNotIncremental`. `FailIfNotIncremental` is true when /question switch is used. The custom task will need to decide how it want to handle their behavior.  For example.  If there is already a message describing why the task cannot be skipped, then simply convert the message to a error. Remember to return false to stop the build.  For the best reproducibility, do not modify any files on disk.
+Task author can implement the optional `IIncrementalTask` interface that will expose `FailIfNotIncremental`. `FailIfNotIncremental` is true when /question switch is used. The custom task will need to decide how it want to handle their behavior.  For example.  If there is already a message describing why the task cannot be skipped, then simply convert the message to a error. Remember to return false to stop the build.  For the best reproducibility, do not modify any files on disk.
 
 ```C#
 if (FailIfNotIncremental)
