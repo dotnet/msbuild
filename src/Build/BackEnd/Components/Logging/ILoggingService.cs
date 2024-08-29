@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
@@ -27,7 +28,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// Interface representing logging services in the build system.
     /// Implementations should be thread-safe.
     /// </summary>
-    internal interface ILoggingService
+    internal interface ILoggingService : IBuildComponent, IBuildEngineDataRouter
     {
         #region Events
         /// <summary>
@@ -51,6 +52,11 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        IBuildEngineDataRouter BuildEngineDataRouter { get; }
 
         /// <summary>
         /// Provide the current state of the loggingService.
@@ -200,12 +206,24 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>?
+        /// or/and <see cref="ProjectStartedEventArgs"/>?
         /// </summary>
-        bool IncludeEvaluationPropertiesAndItems
+        void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent, bool inEvaluationFinishedEvent);
+
+        /// <summary>
+        /// Indicates whether properties and items should be logged on <see cref="ProjectStartedEventArgs"/>.
+        /// </summary>
+        bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
         {
             get;
-            set;
+        }
+
+        /// <summary>
+        /// Indicates whether properties and items should be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>.
+        /// </summary>
+        bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
+        {
+            get;
         }
 
         /// <summary>
@@ -463,6 +481,11 @@ namespace Microsoft.Build.BackEnd.Logging
         void LogBuildFinished(bool success);
 
         /// <summary>
+        /// Logs that the build has canceled
+        /// </summary>
+        void LogBuildCanceled();
+
+        /// <summary>
         /// Create an evaluation context, by generating a new evaluation id.
         /// </summary>
         /// <param name="nodeId">The node id</param>
@@ -570,7 +593,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="taskName">The name of the task</param>
         /// <param name="projectFile">The project file which is being built</param>
         /// <param name="projectFileOfTaskNode">The file in which the task is defined - typically a .targets file</param>
-        void LogTaskStarted(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode);
+        /// <param name="taskAssemblyLocation">>The location of the assembly containing the implementation of the task.</param>
+        void LogTaskStarted(BuildEventContext taskBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, string taskAssemblyLocation);
 
         /// <summary>
         /// Log that a task is about to start
@@ -581,8 +605,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="projectFileOfTaskNode">The file in which the task is defined - typically a .targets file</param>
         /// <param name="line">The line number in the file where the task invocation is located.</param>
         /// <param name="column">The column number in the file where the task invocation is located.</param>
+        /// <param name="taskAssemblyLocation">>The location of the assembly containing the implementation of the task.</param>
         /// <returns>The task build event context</returns>
-        BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column);
+        BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, string taskAssemblyLocation);
 
         /// <summary>
         /// Log that a task has just completed
@@ -648,6 +673,7 @@ namespace Microsoft.Build.BackEnd.Logging
             get;
             set;
         }
+
         #endregion
         /// <summary>
         /// Entry point for a sink to consume an event.

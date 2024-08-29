@@ -10,13 +10,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -1105,9 +1105,13 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
 
             // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
+            bool isRestoring = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring] is null;
 
-            var buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance;
-            buildCheckManager.SetDataSource(BuildCheckDataSource.BuildExecution);
+            var buildCheckManager = isRestoring
+                ? (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance
+                : null;
+
+            buildCheckManager?.SetDataSource(BuildCheckDataSource.BuildExecution);
 
             // Make sure it is null before loading the configuration into the request, because if there is a problem
             // we do not wand to have an invalid projectLoggingContext floating around. Also if this is null the error will be
@@ -1121,9 +1125,9 @@ namespace Microsoft.Build.BackEnd
                 // Load the project
                 if (!_requestEntry.RequestConfiguration.IsLoaded)
                 {
-                    buildCheckManager.StartProjectEvaluation(
+                    buildCheckManager?.ProjectFirstEncountered(
                         BuildCheckDataSource.BuildExecution,
-                        _requestEntry.Request.ParentBuildEventContext,
+                        new CheckLoggingContext(_nodeLoggingContext.LoggingService, _requestEntry.Request.BuildEventContext),
                         _requestEntry.RequestConfiguration.ProjectFullPath);
 
                     _requestEntry.RequestConfiguration.LoadProjectIntoConfiguration(
@@ -1146,15 +1150,14 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-                buildCheckManager.EndProjectEvaluation(
-                    BuildCheckDataSource.BuildExecution,
-                    _requestEntry.Request.ParentBuildEventContext);
+                buildCheckManager?.EndProjectEvaluation(
+                    _requestEntry.Request.BuildEventContext);
             }
 
             _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
-            buildCheckManager.StartProjectRequest(
-                BuildCheckDataSource.BuildExecution,
-                _requestEntry.Request.ParentBuildEventContext);
+            buildCheckManager?.StartProjectRequest(
+                _projectLoggingContext.BuildEventContext,
+                _requestEntry.RequestConfiguration.ProjectFullPath);
 
             try
             {
@@ -1177,7 +1180,7 @@ namespace Microsoft.Build.BackEnd
                 _requestEntry.Request.BuildEventContext = _projectLoggingContext.BuildEventContext;
 
                 // Determine the set of targets we need to build
-                string[] allTargets = _requestEntry.RequestConfiguration
+                (string name, TargetBuiltReason reason)[] allTargets = _requestEntry.RequestConfiguration
                     .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
 
                 ProjectErrorUtilities.VerifyThrowInvalidProject(allTargets.Length > 0,
@@ -1223,9 +1226,9 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-                buildCheckManager.EndProjectRequest(
-                    BuildCheckDataSource.BuildExecution,
-                    _requestEntry.Request.ParentBuildEventContext);
+                buildCheckManager?.EndProjectRequest(
+                    new CheckLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext),
+                    _requestEntry.RequestConfiguration.ProjectFullPath);
             }
 
             BuildResult CopyTargetResultsFromProxyTargetsToRealTargets(BuildResult resultFromTargetBuilder)
@@ -1402,10 +1405,7 @@ namespace Microsoft.Build.BackEnd
             ProjectInstance project = _requestEntry?.RequestConfiguration?.Project;
             if (project != null)
             {
-                // example: C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2
-                FileClassifier.Shared.RegisterImmutableDirectory(project.GetPropertyValue("FrameworkPathOverride")?.Trim());
-                // example: C:\Program Files\dotnet\
-                FileClassifier.Shared.RegisterImmutableDirectory(project.GetPropertyValue("NetCoreRoot")?.Trim());
+                FileClassifier.Shared.RegisterKnownImmutableLocations(project.GetPropertyValue);
             }
         }
 

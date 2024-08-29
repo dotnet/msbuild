@@ -2,6 +2,16 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../Strings.resx">
     <body>
+      <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
+        <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
+        <target state="translated">Die Manifestdatei ist entweder nicht vorhanden oder kann nicht gelesen werden. Stellen Sie sicher, dass sie vorhanden ist und relevante Inhalte enthält.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
+        <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
+        <target state="translated">Ausnahmefehler beim Öffnen der Manifestdatei: "{0}". Stellen Sie sicher, dass sie vorhanden ist und relevante Inhalte enthält.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
         <source>BindingRedirect is missing required field 'oldVersion'.</source>
         <target state="translated">Im BindingRedirect-Eintrag fehlt das Pflichtfeld "oldVersion".</target>
@@ -131,6 +141,26 @@
         <target state="translated">MSB3992: „{0}“ ist nicht festgelegt. Wenn {1} wahr ist, legen Sie auf jeden Fall einen Wert für „{0}“ fest.</target>
         <note>{StrBegin="MSB3992: "}</note>
       </trans-unit>
+      <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
+        <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
+        <target state="translated">MSB9903: "PreferNativeArm64" erfordert ein Win32-Anwendungsmanifest und schließt sich mit "NoWin32Manifest" gegenseitig aus.</target>
+        <note>{StrBegin="MSB9903: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
+        <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
+        <target state="translated">MSB9904: Wenn "PreferNativeArm64" aktiviert ist, stellen Sie sicher, dass die Plattform auf AnyCPU festgelegt ist. Aktuelle Plattform: {0}.</target>
+        <note>{StrBegin="MSB9904: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
+        <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
+        <target state="translated">MSB9902: Die Optionen "Prefer32Bit" und "PreferNativeArm64" schließen sich gegenseitig aus. Aktivieren Sie nur eine.</target>
+        <note>{StrBegin="MSB9902: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
+        <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
+        <target state="translated">MSB9901: Der angegebene Schweregrad ist nicht relevant: "{0}" für die Nachricht: "{1}".</target>
+        <note>{StrBegin="MSB9901: "}</note>
+      </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
         <target state="translated">MSB3881: Schwerwiegender Fehler: mehr als {0} Befehlszeilenargumente.</target>
@@ -244,12 +274,12 @@
       <trans-unit id="Copy.Retrying">
         <source>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4} {5}</source>
         <target state="translated">MSB3026: "{0}" konnte nicht in "{1}" kopiert werden. Wiederholung {2} wird in {3} ms gestartet. {4} {5}</target>
-        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
+        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.ExceededRetries">
         <source>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed. {3}</source>
         <target state="translated">MSB3027: "{0}" konnte nicht in "{1}" kopiert werden. Die zulässige Anzahl von Wiederholungen von {2} wurde überschritten. Fehler. {3}</target>
-        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
+        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.InvalidRetryCount">
         <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
@@ -327,8 +357,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Delete.Error">
-        <source>MSB3061: Unable to delete file "{0}". {1}</source>
-        <target state="translated">MSB3061: Die Datei "{0}" kann nicht gelöscht werden. {1}</target>
+        <source>MSB3061: Unable to delete file "{0}". {1} {2}</source>
+        <target state="translated">MSB3061: Die Datei „{0}“ kann nicht gelöscht werden. {1} {2}</target>
         <note>{StrBegin="MSB3061: "}</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
@@ -342,9 +372,9 @@
         <note>{StrBegin="MSB3029: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="Delete.Retrying">
-        <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</source>
-        <target state="translated">MSB3062: Die Datei "{0}" konnte nicht gelöscht werden. Wiederholungsversuch {1} wird in {2}ms gestartet. {3}</target>
-        <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</note>
+        <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</source>
+        <target state="translated">MSB3062: Die Datei „{0}“ konnte nicht gelöscht werden. Wiederholungsversuch {1} in {2} Mins. {3} {4}</target>
+        <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message, {4} is message from LockCheck.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
         <source>File "{0}" doesn't exist. Skipping.</source>
@@ -1070,9 +1100,9 @@
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
-        <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://aka.ms/msbuild/net8-binaryformatter</source>
-        <target state="translated">MSB3825: Die Ressource "{0}" vom Typ "{1}" wird zur Laufzeit über BinaryFormatter deserialisiert. BinaryFormatter ist aufgrund möglicher Sicherheitsrisiken veraltet und wird mit .NET 9 entfernt. Wenn Sie sie weiterhin verwenden möchten, legen Sie die Eigenschaft "GenerateResourceWarnOnBinaryFormatterUse" auf "false" fest.
+        <source>MSB3825: Resource "{0}" of type "{1}" may be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide</source>
+        <target state="needs-review-translation">MSB3825: Die Ressource "{0}" vom Typ "{1}" wird zur Laufzeit über BinaryFormatter deserialisiert. BinaryFormatter ist aufgrund möglicher Sicherheitsrisiken veraltet und wird mit .NET 9 entfernt. Wenn Sie sie weiterhin verwenden möchten, legen Sie die Eigenschaft "GenerateResourceWarnOnBinaryFormatterUse" auf "false" fest.
            Weitere Informationen: https://aka.ms/msbuild/net8-binaryformatter</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
@@ -1489,8 +1519,8 @@
         <note>{StrBegin="MSB3676: "}</note>
       </trans-unit>
       <trans-unit id="Move.Error">
-        <source>MSB3677: Unable to move file "{0}" to "{1}". {2}</source>
-        <target state="translated">MSB3677: Die Datei "{0}" kann nicht in "{1}" verschoben werden. {2}</target>
+        <source>MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</source>
+        <target state="translated">MSB3677: Die Datei „{0}“ kann nicht in „{1}“ verschoben werden. {2} {3}</target>
         <note>{StrBegin="MSB3677: "}</note>
       </trans-unit>
       <trans-unit id="Move.ExactlyOneTypeOfDestination">
@@ -1563,6 +1593,21 @@
         <source>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</source>
         <target state="translated">StopOnFirstFailure hat keine Auswirkungen, wenn die folgenden Bedingungen alle gelten: 1) Das System wird im Mehrprozessmodus ausgeführt. 2) Die BuildInParallel-Eigenschaft ist TRUE. 3) Die RunEachTargetSeparately-Eigenschaft ist FALSE.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
+        <source>The assembly element is missing from the application manifest.</source>
+        <target state="translated">Das Assemblyelement fehlt im Anwendungsmanifest.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
+        <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</source>
+        <target state="translated">MSB4300: Der angegebene Wert "{0}" für das supportedArchitectures-Element ist ungültig. Entfernen Sie ihn aus dem Manifest, oder legen Sie ihn auf "amd64 arm64" fest.</target>
+        <note>{StrBegin="MSB4300: "}</note>
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
+        <source>The application manifest file cannot be found. Please make sure it exists.</source>
+        <target state="translated">Die Anwendungsmanifestdatei wurde nicht gefunden. Stellen Sie sicher, dass sie vorhanden ist.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
@@ -2519,11 +2564,6 @@
         <target state="translated">MSB3353: Der für die verzögerte Signierung erforderliche öffentliche Schlüssel wurde nicht angegeben.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
-      <trans-unit id="Task.FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="translated">Die Datei wird durch "{0}" gesperrt.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: Die Aufgabe "{0}" wird für die .NET Core-Version von MSBuild nicht unterstützt. Verwenden Sie die .NET Framework-Version von MSBuild. Weitere Informationen finden Sie unter https://aka.ms/msbuild/MSB4803.</target>
@@ -2545,8 +2585,8 @@
         <note>{StrBegin="MSB3371: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotMakeFileWritable">
-        <source>MSB3372: The file "{0}" cannot be made writable. {1}</source>
-        <target state="translated">MSB3372: Der Schreibschutz für die Datei "{0}" kann nicht aufgehoben werden. {1}</target>
+        <source>MSB3372: The file "{0}" cannot be made writable. {1} {2}</source>
+        <target state="translated">MSB3372: Die Datei „{0}“ kann nicht beschreibbar gemacht werden. {1} {2}</target>
         <note>{StrBegin="MSB3372: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotRestoreAttributes">
@@ -2555,8 +2595,8 @@
         <note>{StrBegin="MSB3373: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotTouch">
-        <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1}</source>
-        <target state="translated">MSB3374: Die Zeit für den letzten Zugriff/Schreibzugriff auf die Datei "{0}" kann nicht festgelegt werden. {1}</target>
+        <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</source>
+        <target state="translated">MSB3374: Der letzte Zugriff/Zeitpunkt des letzten Schreibvorgangs für die Datei „{0}“ kann nicht festgelegt werden. {1} {2}</target>
         <note>{StrBegin="MSB3374: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CreatingFile">
@@ -2650,8 +2690,8 @@
         <note>{StrBegin="MSB3936: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
-        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
-        <target state="translated">MSB3935: Fehler beim Entzippen der Datei "{0}", weil die Zieldatei "{1}" schreibgeschützt ist und sie nicht in einen beschreibbaren Zustand umgewandelt werden konnte.  {2}</target>
+        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
+        <target state="translated">MSB3935: Fehler beim Entzippen der Datei „{0}“, da die Zieldatei „{1}“ schreibgeschützt ist und nicht beschreibbar gemacht werden konnte.  {2} {3}</target>
         <note>{StrBegin="MSB3935: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotOpenFile">
@@ -2735,8 +2775,8 @@
         <note>{StrBegin="MSB3715: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
-        <source>MSB3491: Could not write lines to file "{0}". {1}</source>
-        <target state="translated">MSB3491: In die Datei "{0}" konnten keine Zeilen geschrieben werden. {1}</target>
+        <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
+        <target state="translated">MSB3491: Zeilen konnten nicht in die Datei „{0}“ geschrieben werden. {1} {2}</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
@@ -3005,8 +3045,8 @@
         <note>{StrBegin="MSB3712: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotWriteOutput">
-        <source>MSB3713: The file "{0}" could not be created. {1}</source>
-        <target state="translated">MSB3713: Die Datei "{0}" konnte nicht erstellt werden. {1}</target>
+        <source>MSB3713: The file "{0}" could not be created. {1} {2}</source>
+        <target state="translated">MSB3713: Die Datei „{0}“ konnte nicht erstellt werden. {1} {2}</target>
         <note>{StrBegin="MSB3713: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.SkippedNumberedParameter">
@@ -3455,8 +3495,8 @@
         <note>{StrBegin="MSB3941: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFailed">
-        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
-        <target state="translated">MSB3943: Fehler beim Zippen des Verzeichnisses "{0}" in die Datei "{1}".  {2}</target>
+        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</source>
+        <target state="translated">MSB3943: Fehler beim Zippen des Verzeichnisses „{0}“ in die Datei „{1}“.  {2} {3}</target>
         <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFileExists">

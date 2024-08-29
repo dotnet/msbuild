@@ -68,7 +68,7 @@ namespace Microsoft.Build.Engine.UnitTests
         <ProcessIdTask>
             <Output PropertyName=""PID"" TaskParameter=""Pid"" />
         </ProcessIdTask>
-        <Message Text=""Server ID is $(PID)"" Importance=""High"" />
+        <Message Text=""[Work around Github issue #9667 with --interactive]Server ID is $(PID)"" Importance=""High"" />
     </Target>
 </Project>";
         private static string sleepingTaskContentsFormat = @$"
@@ -192,7 +192,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string? dir = Path.GetDirectoryName(markerFile.Path);
             using var watcher = new System.IO.FileSystemWatcher(dir!);
-            ManualResetEvent mre = new ManualResetEvent(false);
+            using ManualResetEvent mre = new ManualResetEvent(false);
             watcher.Created += (o, e) =>
             {
                 _output.WriteLine($"The marker file {markerFile.Path} was created. The build task has been started.");
@@ -313,8 +313,8 @@ namespace Microsoft.Build.Engine.UnitTests
         <ProcessIdTask>
             <Output PropertyName=""PID"" TaskParameter=""Pid"" />
         </ProcessIdTask>
-        <Message Text=""Server ID is $(PID)"" Importance=""High"" />
-		<Message Text="":MSBuildStartupDirectory:$(MSBuildStartupDirectory):"" Importance=""high"" />
+        <Message Text=""[Work around Github issue #9667 with --interactive]Server ID is $(PID)"" Importance=""High"" />
+		<Message Text=""[Work around Github issue #9667 with --interactive]:MSBuildStartupDirectory:$(MSBuildStartupDirectory):"" Importance=""high"" />
 	</Target>
 </Project>";
 

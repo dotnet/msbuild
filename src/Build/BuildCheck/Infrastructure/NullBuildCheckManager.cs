@@ -3,49 +3,90 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Acquisition;
-using Microsoft.Build.BuildCheck.Logging;
+using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-internal class NullBuildCheckManager : IBuildCheckManager
+internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRouter
 {
-    public void Shutdown() { }
+    public void Shutdown()
+    {
+    }
 
-    public void ProcessEvaluationFinishedEventArgs(AnalyzerLoggingContext buildAnalysisContext,
+    public void ProcessEvaluationFinishedEventArgs(
+        ICheckContext checkContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
-    { }
+    {
+    }
 
-    public void SetDataSource(BuildCheckDataSource buildCheckDataSource) { }
-    public void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData) { }
+    public void ProcessBuildFinished(ICheckContext analysisContext)
+    {
+    }
 
-    public Dictionary<string, TimeSpan> CreateTracingStats() => throw new NotImplementedException();
+    public void SetDataSource(BuildCheckDataSource buildCheckDataSource)
+    {
+    }
+
+    public void ProcessTaskStartedEventArgs(
+        ICheckContext checkContext,
+        TaskStartedEventArgs taskStartedEventArgs)
+    {
+    }
+
+    public void ProcessTaskFinishedEventArgs(
+        ICheckContext checkContext,
+        TaskFinishedEventArgs taskFinishedEventArgs)
+    {
+    }
+
+    public void ProcessTaskParameterEventArgs(
+        ICheckContext checkContext,
+        TaskParameterEventArgs taskParameterEventArgs)
+    {
+    }
+
+    public void ProcessCheckAcquisition(
+        CheckAcquisitionData acquisitionData,
+        ICheckContext checkContext)
+    {
+    }
 
     public void FinalizeProcessing(LoggingContext loggingContext)
+    {
+    }
+
+    public void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, ICheckContext checkContext,
+        string projectFullPath)
+    {
+    }
+
+    public void ProcessProjectEvaluationStarted(ICheckContext checkContext, string projectFullPath)
+    {
+    }
+
+    public void EndProjectEvaluation(BuildEventContext buildEventContext)
+    {
+    }
+
+    public void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath)
+    {
+    }
+
+    public void EndProjectRequest(ICheckContext checkContext, string projectFullPath)
+    {
+    }
+
+    public Dictionary<string, TimeSpan> CreateCheckTracingStats() => new Dictionary<string, TimeSpan>();
+
+    public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext buildEventContext)
     { }
 
-    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext,
-        string fullPath)
+    public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext buildEventContext)
     { }
 
-    public void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    { }
-
-    public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    { }
-
-    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    { }
-
-    public void YieldProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    { }
-
-    public void ResumeProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
     { }
 }

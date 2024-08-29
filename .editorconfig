@@ -1,4 +1,4 @@
-# editorconfig.org
+﻿# editorconfig.org
 
 # top-most EditorConfig file
 root = true
@@ -162,6 +162,9 @@ dotnet_code_quality.ca2208.api_surface = public
 
 # CA1852: Seal internal types
 dotnet_diagnostic.ca1852.severity = warning
+
+# CA2000: Dispose objects before losing scope
+dotnet_diagnostic.ca2000.severity = error
 
 # RS0037: Enable tracking of nullability of reference types in the declared API
 # Our API is not annotated but new classes get nullable enabled so disable this.
@@ -409,3 +412,25 @@ dotnet_diagnostic.IDE0290.severity = suggestion
 dotnet_diagnostic.IDE0300.severity = suggestion
 dotnet_diagnostic.IDE0301.severity = suggestion
 dotnet_diagnostic.IDE0305.severity = suggestion
+
+# Temporarily disable SA1010 "Opening square brackets should not be preceded by a space" until https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3687 is fixed
+dotnet_diagnostic.SA1010.severity = none
+
+# Remove unnecessary equality operator  IDE0100 (https://learn.microsoft.com/en-gb/dotnet/fundamentals/code-analysis/style-rules/ide0100)
+# Making it a suggestion to have a flexibility for future
+dotnet_diagnostic.IDE0100.severity = suggestion
+
+# File header should match the template, making it error since couple of files met in the code base without any header
+dotnet_diagnostic.IDE0073.severity = error
+
+# Use 'System.Threading.Lock'
+dotnet_diagnostic.IDE0330.severity = suggestion
+
+
+# xunit to supress temp
+dotnet_diagnostic.xUnit2020.severity = none
+dotnet_diagnostic.xUnit1031.severity = none
+dotnet_diagnostic.xUnit1012.severity = none
+dotnet_diagnostic.xUnit2029.severity = none
+# Do not use equality check to check for collection size.
+dotnet_diagnostic.xUnit2013.severity = none

@@ -4,9 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -25,8 +22,18 @@ internal abstract class BuildCheckEventArgs : BuildEventArgs
 /// <param name="tracingData"></param>
 internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tracingData) : BuildCheckEventArgs
 {
-    internal BuildCheckTracingEventArgs() : this(new Dictionary<string, TimeSpan>())
-    { }
+    internal BuildCheckTracingEventArgs()
+        : this([])
+    {
+    }
+
+    internal BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> data, bool isAggregatedGlobalReport) : this(data) => IsAggregatedGlobalReport = isAggregatedGlobalReport;
+
+    /// <summary>
+    /// When true, the tracing information is from the whole build for logging purposes
+    /// When false, the tracing is being used for communication between nodes and central process
+    /// </summary>
+    public bool IsAggregatedGlobalReport { get; private set; } = false;
 
     public Dictionary<string, TimeSpan> TracingData { get; private set; } = tracingData;
 
@@ -58,33 +65,54 @@ internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tr
     }
 }
 
-internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionData) : BuildCheckEventArgs
+internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath, string projectPath) : BuildCheckEventArgs
 {
-    internal BuildCheckAcquisitionEventArgs() : this(string.Empty)
-    { }
+    internal BuildCheckAcquisitionEventArgs()
+        : this(string.Empty, string.Empty)
+    {
+    }
 
-    public string AcquisitionData { get; private set; } = acquisitionData;
+    /// <summary>
+    /// Gets the path to the check assembly that needs to be loaded into the application context.
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="AcquisitionPath"/> property contains the file system path to the assembly
+    /// that is required to be loaded into the application context. This path is used for loading
+    /// the specified assembly dynamically during runtime.
+    /// </remarks>
+    /// <value>
+    /// A <see cref="System.String"/> representing the file system path to the assembly.
+    /// </value>
+    public string AcquisitionPath { get; private set; } = acquisitionPath;
+
+    public string ProjectPath { get; private set; } = projectPath;
 
     internal override void WriteToStream(BinaryWriter writer)
     {
         base.WriteToStream(writer);
 
-        writer.Write(AcquisitionData);
+        writer.Write(AcquisitionPath);
+        writer.Write(ProjectPath);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         base.CreateFromStream(reader, version);
 
-        AcquisitionData = reader.ReadString();
+        AcquisitionPath = reader.ReadString();
+        ProjectPath = reader.ReadString();
     }
 }
+
 internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
 {
-    public BuildCheckResultWarning(IBuildCheckResult result)
-    {
-        this.Message = result.FormatMessage();
-    }
+    public BuildCheckResultWarning(IBuildCheckResult result, string code)
+        : base(code: code, file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, message: result.FormatMessage()) =>
+        RawMessage = result.FormatMessage();
+
+    internal BuildCheckResultWarning(string formattedMessage, string code)
+        : base(code: code, file: null, lineNumber: 0, columnNumber: 0, message: formattedMessage) =>
+        RawMessage = formattedMessage;
 
     internal BuildCheckResultWarning() { }
 
@@ -92,25 +120,26 @@ internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
     {
         base.WriteToStream(writer);
 
-        writer.Write(Message!);
+        writer.Write(RawMessage!);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         base.CreateFromStream(reader, version);
 
-        Message = reader.ReadString();
+        RawMessage = reader.ReadString();
     }
-
-    public override string? Message { get; protected set; }
 }
 
 internal sealed class BuildCheckResultError : BuildErrorEventArgs
 {
-    public BuildCheckResultError(IBuildCheckResult result)
-    {
-        this.Message = result.FormatMessage();
-    }
+    public BuildCheckResultError(IBuildCheckResult result, string code)
+        : base(code: code, file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, message: result.FormatMessage())
+        => RawMessage = result.FormatMessage();
+
+    internal BuildCheckResultError(string formattedMessage, string code)
+        : base(code: code, file: null, lineNumber: 0, columnNumber: 0, message: formattedMessage)
+        => RawMessage = formattedMessage;
 
     internal BuildCheckResultError() { }
 
@@ -118,25 +147,25 @@ internal sealed class BuildCheckResultError : BuildErrorEventArgs
     {
         base.WriteToStream(writer);
 
-        writer.Write(Message!);
+        writer.Write(RawMessage!);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         base.CreateFromStream(reader, version);
 
-        Message = reader.ReadString();
+        RawMessage = reader.ReadString();
     }
-
-    public override string? Message { get; protected set; }
 }
 
 internal sealed class BuildCheckResultMessage : BuildMessageEventArgs
 {
     public BuildCheckResultMessage(IBuildCheckResult result)
-    {
-        this.Message = result.FormatMessage();
-    }
+        : base(message: result.FormatMessage(), file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, MessageImportance.High)
+        => RawMessage = result.FormatMessage();
+    
+
+    internal BuildCheckResultMessage(string formattedMessage) => RawMessage = formattedMessage;
 
     internal BuildCheckResultMessage() { }
 
@@ -144,15 +173,13 @@ internal sealed class BuildCheckResultMessage : BuildMessageEventArgs
     {
         base.WriteToStream(writer);
 
-        writer.Write(Message!);
+        writer.Write(RawMessage!);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         base.CreateFromStream(reader, version);
 
-        Message = reader.ReadString();
+        RawMessage = reader.ReadString();
     }
-
-    public override string? Message { get; protected set; }
 }

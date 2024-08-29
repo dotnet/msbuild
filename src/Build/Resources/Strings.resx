@@ -139,6 +139,9 @@
   <data name="NoBuildInProgress" xml:space="preserve">
     <value>The operation cannot be completed because BeginBuild has not yet been called.</value>
   </data>
+  <data name="AbortingBuild" xml:space="preserve">
+    <value>Attempting to cancel the build...</value>
+  </data>
   <data name="WaitingForEndOfBuild" xml:space="preserve">
     <value>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</value>
   </data>
@@ -1102,6 +1105,9 @@
   <data name="OutputItemParameterMessagePrefix" xml:space="preserve">
     <value>Output Item(s): </value>
   </data>
+  <data name="OutputPropertyLogMessagePrefix" xml:space="preserve">
+    <value>Output Property: </value>
+  </data>
   <data name="OutputPropertyLogMessage" xml:space="preserve">
     <value>Output Property: {0}={1}</value>
   </data>
@@ -1344,6 +1350,12 @@ Warnings: {2}
 Errors: {3}</value>
     <comment>
       LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </comment>
+  </data>
+  <data name="SDKResolverNullMessage" xml:space="preserve">
+    <value>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</value>
+    <comment>
+      LOCALIZATION: Do not localize the word SDK.
     </comment>
   </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
@@ -2000,7 +2012,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </comment>
   </data>
-   <data name="DefaultSDKResolverError" xml:space="preserve">
+  <data name="DefaultSDKResolverError" xml:space="preserve">
     <value>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</value>
   </data>
   <data name="SDKResolverReturnedNull" xml:space="preserve">
@@ -2094,6 +2106,41 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </comment>
+  </data>
+  <data name="CustomCheckSuccessfulAcquisition" xml:space="preserve">
+    <value>Custom check rule: '{0}' has been registered successfully.</value>
+    <comment>The message is emitted on successful loading of the custom check rule in process.</comment>
+  </data>
+  <data name="CustomCheckFailedAcquisition" xml:space="preserve">
+    <value>Failed to register the custom check: '{0}'.</value>
+    <comment>The message is emitted on failed loading of the custom check in process.</comment>
+  </data>
+  <data name="CustomCheckFailedRuleLoading" xml:space="preserve">
+    <value>Failed to instantiate the custom check rule with the following exception: '{0}'.</value>
+    <comment>The message is emitted on failed loading of the custom check rule in process.</comment>
+  </data>
+  <data name="CustomCheckAssemblyNotExist" xml:space="preserve">
+    <value>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</value>
+    <comment>The message is emitted when the custom check assembly can not be found.</comment>
+  </data>
+  <data name="CustomCheckBaseTypeNotAssignable" xml:space="preserve">
+    <value>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</value>
+    <comment>The message is emitted when the custom check assembly can not be successfully registered.</comment>
+  </data>
+  <data name="TaskAssemblyLocationMismatch" xml:space="preserve">
+    <value>Task assembly was loaded from '{0}' while the desired location was '{1}'.</value>
+  </data>
+  <data name="ProjectImportsCollectorFileIOFail" xml:space="preserve">
+    <value>An exception occurred when adding the file '{0}', Exception: '{1}'</value>
+  </data>
+  <data name="BuildCheckEnabled" xml:space="preserve">
+    <value>The BuildCheck is enabled for this build.</value>
+  </data>
+  <data name="CustomCheckRegistered" xml:space="preserve">
+    <value>The custom check: '{0}' is registered for the build from the location: '{1}'.</value>
+  </data>
+  <data name="IllegalCharactersInFileOrDirectory" xml:space="preserve">
+    <value>There are illegal characters in '{0}' in the {1} item.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

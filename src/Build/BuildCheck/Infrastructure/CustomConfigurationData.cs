@@ -13,25 +13,35 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <summary>
 /// Holder for the key-value pairs of unstructured data from .editorconfig file,
 ///  that were attribute to a particular rule, but were not recognized by the infrastructure.
-/// The configuration data that is recognized by the infrastructure is passed as <see cref="BuildAnalyzerConfiguration"/>.
+/// The configuration data that is recognized by the infrastructure is passed as <see cref="CheckConfiguration"/>.
 /// </summary>
-/// <param name="ruleId"></param>
-public class CustomConfigurationData(string ruleId)
+public sealed class CustomConfigurationData
 {
     public static CustomConfigurationData Null { get; } = new(string.Empty);
 
     public static bool NotNull(CustomConfigurationData data) => !Null.Equals(data);
 
+    public CustomConfigurationData(string ruleId)
+    {
+        RuleId = ruleId;
+    }
+
+    public CustomConfigurationData(string ruleId, Dictionary<string, string> properties)
+    {
+        RuleId = ruleId;
+        ConfigurationData = properties;
+    }
+
     /// <summary>
     /// Identifier of the rule that the configuration data is for.
     /// </summary>
-    public string RuleId { get; init; } = ruleId;
+    public string RuleId { get; init; }
 
     /// <summary>
     /// Key-value pairs of unstructured data from .editorconfig file.
     /// E.g. if in editorconfig file we'd have:
     /// [*.csrpoj]
-    /// build_analyzer.microsoft.BC0101.name_of_targets_to_restrict = "Build,CoreCompile,ResolveAssemblyReferences"
+    /// build_check.microsoft.BC0101.name_of_targets_to_restrict = "Build,CoreCompile,ResolveAssemblyReferences"
     ///
     /// the ConfigurationData would be:
     /// "name_of_targets_to_restrict" -> "Build,CoreCompile,ResolveAssemblyReferences"
@@ -50,15 +60,43 @@ public class CustomConfigurationData(string ruleId)
             return true;
         }
 
-        if (obj.GetType() != this.GetType())
+        if (obj is not CustomConfigurationData)
         {
             return false;
         }
 
-        return Equals((CustomConfigurationData)obj);
+        var customConfigObj = (CustomConfigurationData) obj;
+
+        if (customConfigObj.RuleId != RuleId)
+        {
+            return false;
+        }
+
+        // validate keys and values
+        if (customConfigObj.ConfigurationData != null && ConfigurationData != null && ConfigurationData.Count == customConfigObj.ConfigurationData.Count)
+        {
+            foreach (var keyVal in customConfigObj.ConfigurationData)
+            {
+                if (!ConfigurationData.TryGetValue(keyVal.Key, out var value) || value != keyVal.Value)
+                {
+                    return false;
+                }
+            }
+        }
+        else if (customConfigObj.ConfigurationData == null && ConfigurationData == null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+        return true;
     }
 
-    protected bool Equals(CustomConfigurationData other) => Equals(ConfigurationData, other.ConfigurationData);
-
-    public override int GetHashCode() => (ConfigurationData != null ? ConfigurationData.GetHashCode() : 0);
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException("CustomConfigurationData does not implement GetHashCode method");
+    }
 }

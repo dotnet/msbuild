@@ -56,7 +56,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
 
             Assert.Equal(0, Helpers.Count(target.Children));
@@ -339,19 +340,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Parse invalid property under target
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void ReadInvalidPropertyUnderTarget(bool enableNewBehavior)
+        [Fact]
+        public void ReadInvalidPropertyUnderTarget()
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                if (!enableNewBehavior)
-                {
-                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
-                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-                }
 
                 string projectFile = @"
                     <Project>
@@ -360,7 +354,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Target>
                     </Project>";
                 TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
-                ProjectCollection collection = new ProjectCollection();
+                using ProjectCollection collection = new ProjectCollection();
                 var error = Assert.Throws<InvalidProjectFileException>(() =>
                 {
                     collection.LoadProject(file.Path).Build().ShouldBeTrue();
@@ -368,14 +362,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 error.ErrorCode.ShouldMatch("MSB4067");
                 var expectedString = "<PropertyGroup>";
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
-                {
-                    error.Message.ShouldMatch(expectedString);
-                }
-                else
-                {
-                    error.Message.ShouldNotMatch(expectedString);
-                }
+                error.Message.ShouldMatch(expectedString);
             }
         }
 
@@ -393,7 +380,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
             return target;
         }

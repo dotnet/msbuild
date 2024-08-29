@@ -11,8 +11,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup Label="TestAssests">
+    <ProjectReference Include=".\TestAssets\CustomCheck\CustomCheck.csproj" />
+    <ProjectReference Include=".\TestAssets\CustomCheck2\CustomCheck2.csproj" />
+    <ProjectReference Include=".\TestAssets\InvalidCustomCheck\InvalidCustomCheck.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,5 +40,9 @@
     <None Include="..\Shared\UnitTests\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="TestAssets\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
+
 </Project>

@@ -7,15 +7,26 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Build.BuildCheck.Infrastructure;
+namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal sealed class BuildCheckConfigurationException : Exception
 {
     /// <summary>
     /// Exception to communicate issues with user specified configuration - unsupported scenarios, malformations, etc.
-    /// This exception usually leads to defuncting the particular analyzer for the rest of the build (even if issue occured with a single project).
+    /// This exception usually leads to defuncting the particular check for the rest of the build (even if issue occured with a single project).
     /// </summary>
-    public BuildCheckConfigurationException(string message) : base(message)
+    internal BuildCheckConfigurationErrorScope buildCheckConfigurationErrorScope;
+
+    public BuildCheckConfigurationException(string message, Exception innerException, BuildCheckConfigurationErrorScope buildCheckConfigurationErrorScope = BuildCheckConfigurationErrorScope.SingleRule) : base(message, innerException)
     {
+        this.buildCheckConfigurationErrorScope = buildCheckConfigurationErrorScope;
     }
+
+    public BuildCheckConfigurationException(string message, BuildCheckConfigurationErrorScope buildCheckConfigurationErrorScope = BuildCheckConfigurationErrorScope.SingleRule) : base(message)
+    {
+        this.buildCheckConfigurationErrorScope = buildCheckConfigurationErrorScope;
+    }
+
+    public BuildCheckConfigurationException(string message, Exception innerException) : base(message, innerException)
+    { }
 }

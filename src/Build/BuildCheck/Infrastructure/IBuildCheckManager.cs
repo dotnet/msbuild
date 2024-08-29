@@ -3,24 +3,31 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Acquisition;
-using Microsoft.Build.BuildCheck.Infrastructure;
-using Microsoft.Build.BuildCheck.Logging;
+using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
+/// <summary>
+/// Enumerates the different data sources used in build check operations.
+/// </summary>
 internal enum BuildCheckDataSource
 {
+    /// <summary>
+    /// The data source is based on event arguments.
+    /// </summary>
     EventArgs,
+
+    /// <summary>
+    /// The data source is based on build execution.
+    /// </summary>
     BuildExecution,
 
-    ValuesCount = BuildExecution + 1
+    /// <summary>
+    /// Represents the total number of values in the enum, used for indexing purposes.
+    /// </summary>
+    ValuesCount = BuildExecution + 1,
 }
 
 /// <summary>
@@ -29,26 +36,52 @@ internal enum BuildCheckDataSource
 internal interface IBuildCheckManager
 {
     void ProcessEvaluationFinishedEventArgs(
-        AnalyzerLoggingContext buildAnalysisContext,
+        ICheckContext checksContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs);
+
+    void ProcessEnvironmentVariableReadEventArgs(
+        ICheckContext checksContext,
+        EnvironmentVariableReadEventArgs envVariableReadEventArgs);
+
+    void ProcessTaskStartedEventArgs(
+        ICheckContext checksContext,
+        TaskStartedEventArgs taskStartedEventArgs);
+
+    void ProcessTaskFinishedEventArgs(
+        ICheckContext checksContext,
+        TaskFinishedEventArgs taskFinishedEventArgs);
+
+    void ProcessTaskParameterEventArgs(
+        ICheckContext checksContext,
+        TaskParameterEventArgs taskParameterEventArgs);
+
+    void ProcessBuildFinished(ICheckContext analysisContext);
 
     void SetDataSource(BuildCheckDataSource buildCheckDataSource);
 
-    void ProcessAnalyzerAcquisition(AnalyzerAcquisitionData acquisitionData);
+    void ProcessCheckAcquisition(CheckAcquisitionData acquisitionData, ICheckContext checksContext);
 
-    Dictionary<string, TimeSpan> CreateTracingStats();
+    Dictionary<string, TimeSpan> CreateCheckTracingStats();
 
     void FinalizeProcessing(LoggingContext loggingContext);
 
     // All those to be called from RequestBuilder,
     //  but as well from the ConnectorLogger - as even if interleaved, it gives the info
-    //  to manager about what analyzers need to be materialized and configuration fetched.
-    // No unloading of analyzers is yet considered - once loaded it stays for whole build.
+    //  to manager about what checks need to be materialized and configuration fetched.
+    // No unloading of checks is yet considered - once loaded it stays for whole build.
+    
+	
+    // Project might be encountered first time in some node, but be already evaluated in another - so StartProjectEvaluation won't happen
+    //  - but we still need to know about it, hence the dedicated event.
+    void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, ICheckContext analysisContext, string projectFullPath);
 
-    void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string fullPath);
-    void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
-    void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
-    void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext);
+    void ProcessProjectEvaluationStarted(ICheckContext checksContext, string projectFullPath);
+
+    void EndProjectEvaluation(BuildEventContext buildEventContext);
+
+    void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath);
+
+    void EndProjectRequest(ICheckContext checksContext, string projectFullPath);
 
     void Shutdown();
 }

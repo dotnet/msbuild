@@ -1863,14 +1863,15 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="IsAotCompatible" _locComment="" -->Indicates whether a class library is compatible with native AOT. Setting to true will enable analyzers for trimming, single file, and AOT.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="IsWebBootstrapper" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="IsWebBootstrapper" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="JCPA" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="Keyword" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="LangVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="VBRuntime" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="Prefer32Bit" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="HighEntropyVA" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="LinkIncremental" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="Prefer32Bit" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="PreferNativeArm64" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="HighEntropyVA" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="LinkIncremental" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestCertificateThumbprint" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestKeyFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="MapFileExtensions" type="msb:boolean" substitutionGroup="msb:Property">

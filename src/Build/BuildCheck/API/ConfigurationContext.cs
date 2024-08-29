@@ -4,37 +4,33 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
-/// Holder of an optional configuration from .editorconfig file (not recognized by the infrastructure)
+/// Holder of configuration from .editorconfig file (not recognized by the infrastructure)
 /// </summary>
 public class ConfigurationContext
 {
-    private ConfigurationContext(CustomConfigurationData[] customConfigurationData)
+    private ConfigurationContext(CustomConfigurationData[] customConfigurationData, CheckConfigurationEffective[] checkConfig)
     {
         CustomConfigurationData = customConfigurationData;
+        CheckConfig = checkConfig;
     }
 
-    internal static ConfigurationContext FromDataEnumeration(CustomConfigurationData[] customConfigurationData)
+    internal static ConfigurationContext FromDataEnumeration(CustomConfigurationData[] customConfigurationData, CheckConfigurationEffective[] checkConfig)
     {
-        if (!customConfigurationData.Any(BuildCheck.CustomConfigurationData.NotNull))
-        {
-            return Null;
-        }
-
-        return new ConfigurationContext(
-            customConfigurationData
-                .Where(BuildCheck.CustomConfigurationData.NotNull)
-                .ToArray());
+        return new ConfigurationContext(customConfigurationData, checkConfig);
     }
-
-    internal static ConfigurationContext Null { get; } = new(Array.Empty<CustomConfigurationData>());
 
     /// <summary>
     /// Custom configuration data - per each rule that has some specified.
     /// </summary>
     public IReadOnlyList<CustomConfigurationData> CustomConfigurationData { get; init; }
+
+    /// <summary>
+    /// Infrastructure configuration data
+    /// </summary>
+    public IReadOnlyList<CheckConfigurationEffective> CheckConfig { get; init; }
 }

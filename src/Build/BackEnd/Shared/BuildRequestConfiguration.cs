@@ -699,9 +699,21 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (IsCacheable)
                     {
-                        using ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream);
+                        string cacheFile = GetCacheFile();
+                        try
+                        {
+                            Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
+                            using Stream stream = File.Create(cacheFile);
+                            using ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream, stream);
 
-                        _project.Cache(translator);
+                            _project.Cache(translator);
+                        }
+                        catch (Exception e) when (e is DirectoryNotFoundException or UnauthorizedAccessException)
+                        {
+                            ErrorUtilities.ThrowInvalidOperation("CacheFileInaccessible", cacheFile, e);
+                            throw;
+                        }
+
                         _baseLookup = null;
 
                         IsCached = true;
@@ -727,9 +739,19 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                using ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream);
+                string cacheFile = GetCacheFile();
+                try
+                {
+                    using Stream stream = File.OpenRead(cacheFile);
+                    using ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream, stream);
 
-                _project.RetrieveFromCache(translator);
+                    _project.RetrieveFromCache(translator);
+                }
+                catch (Exception e) when (e is DirectoryNotFoundException or UnauthorizedAccessException)
+                {
+                    ErrorUtilities.ThrowInvalidOperation("CacheFileInaccessible", cacheFile, e);
+                    throw;
+                }
 
                 IsCached = false;
             }
@@ -740,7 +762,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="request">The request </param>
         /// <returns>An array of t</returns>
-        public List<string> GetTargetsUsedToBuildRequest(BuildRequest request)
+        public List<(string name, TargetBuiltReason reason)> GetTargetsUsedToBuildRequest(BuildRequest request)
         {
             ErrorUtilities.VerifyThrow(request.ConfigurationId == ConfigurationId, "Request does not match configuration.");
             ErrorUtilities.VerifyThrow(_projectInitialTargets != null, "Initial targets have not been set.");
@@ -753,13 +775,31 @@ namespace Microsoft.Build.BackEnd
                     "Targets must be same as proxy targets");
             }
 
-            List<string> initialTargets = _projectInitialTargets;
-            List<string> nonInitialTargets = (request.Targets.Count == 0) ? _projectDefaultTargets : request.Targets;
+            bool hasInitialTargets = request.Targets.Count == 0 ? false : true;
 
-            var allTargets = new List<string>(initialTargets.Count + nonInitialTargets.Count);
+            List<(string name, TargetBuiltReason reason)> allTargets = new(
+                _projectInitialTargets.Count +
+                (hasInitialTargets ? _projectDefaultTargets.Count : request.Targets.Count));
 
-            allTargets.AddRange(initialTargets);
-            allTargets.AddRange(nonInitialTargets);
+            foreach (var target in _projectInitialTargets)
+            {
+                allTargets.Add((target, TargetBuiltReason.InitialTargets));
+            }
+
+            if (hasInitialTargets)
+            {
+                foreach (var target in request.Targets)
+                {
+                    allTargets.Add((target, TargetBuiltReason.EntryTargets));
+                }
+            }
+            else
+            {
+                foreach (var target in _projectDefaultTargets)
+                {
+                    allTargets.Add((target, TargetBuiltReason.DefaultTargets));
+                }
+            }
 
             return allTargets;
         }
@@ -940,6 +980,7 @@ namespace Microsoft.Build.BackEnd
         internal string GetCacheFile()
         {
             string filename = Path.Combine(FileUtilities.GetCacheDirectory(), String.Format(CultureInfo.InvariantCulture, "Configuration{0}.cache", _configId));
+
             return filename;
         }
 
@@ -1025,27 +1066,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the translator for this configuration.
         /// </summary>
-        private ITranslator GetConfigurationTranslator(TranslationDirection direction)
-        {
-            string cacheFile = GetCacheFile();
-            try
-            {
-                if (direction == TranslationDirection.WriteToStream)
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
-                    return BinaryTranslator.GetWriteTranslator(File.Create(cacheFile));
-                }
-                else
-                {
+        private ITranslator GetConfigurationTranslator(TranslationDirection direction, Stream stream) =>
+            direction == TranslationDirection.WriteToStream
+                    ? BinaryTranslator.GetWriteTranslator(stream)
                     // Not using sharedReadBuffer because this is not a memory stream and so the buffer won't be used anyway.
-                    return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), InterningBinaryReader.PoolingBuffer);
-                }
-            }
-            catch (Exception e) when (e is DirectoryNotFoundException || e is UnauthorizedAccessException)
-            {
-                ErrorUtilities.ThrowInvalidOperation("CacheFileInaccessible", cacheFile, e);
-                throw;
-            }
-        }
+                    : BinaryTranslator.GetReadTranslator(stream, InterningBinaryReader.PoolingBuffer);
     }
 }

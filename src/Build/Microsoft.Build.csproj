@@ -30,11 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
-
-    <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
-    <PackageReference Include="System.Security.Principal.Windows" />
-    <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
 
@@ -49,7 +45,10 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System.IO.Compression" />
     <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
@@ -133,8 +132,11 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
+    <Compile Include="BackEnd\BuildManager\BuildRequestDataBase.cs" />
+    <Compile Include="BackEnd\BuildManager\BuildSubmissionBase.cs" />
     <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\BuildManager\GlobalPropertiesLookup.cs" />
     <Compile Include="BackEnd\BuildManager\ProjectIsolationMode.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientPacketPump.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientExitType.cs" />
@@ -152,50 +154,22 @@
     <Compile Include="BackEnd\Components\FileAccesses\FileAccessReport.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\OutOfProcNodeFileAccessManager.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\ProcessReport.cs" />
+    <Compile Include="BackEnd\Shared\EventsCreatorHelper.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\AssemblyLoadsTracker.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />
-    <Compile Include="BuildCheck\Acquisition\AnalyzerAcquisitionData.cs" />
-    <Compile Include="BuildCheck\Acquisition\BuildCheckAcquisitionModule.cs" />
-    <Compile Include="BuildCheck\Analyzers\SharedOutputPathAnalyzer.cs" />
-    <Compile Include="BuildCheck\Infrastructure\BuildCheckConfigurationException.cs" />
-    <Compile Include="BuildCheck\Infrastructure\BuildEventsProcessor.cs" />
-    <Compile Include="BuildCheck\Infrastructure\IBuildCheckManagerProvider.cs" />
-    <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManager.cs" />
-    <Compile Include="BuildCheck\Infrastructure\NullBuildCheckManagerProvider.cs" />
-    <Compile Include="BuildCheck\Infrastructure\TracingReporter.cs" />
-    <Compile Include="BuildCheck\OM\BuildCheckDataContext.cs" />
-    <Compile Include="BuildCheck\API\BuildAnalyzer.cs" />
-    <Compile Include="BuildCheck\API\BuildAnalyzerConfiguration.cs" />
-    <Compile Include="BuildCheck\API\BuildCheckResult.cs" />
-    <Compile Include="BuildCheck\API\BuildAnalyzerResultSeverity.cs" />
-    <Compile Include="BuildCheck\API\BuildAnalyzerRule.cs" />
-    <Compile Include="BuildCheck\API\ConfigurationContext.cs" />
-    <Compile Include="BuildCheck\API\EvaluationAnalysisScope.cs" />
-    <Compile Include="BuildCheck\Infrastructure\BuildAnalyzerConfigurationInternal.cs" />
-    <Compile Include="BuildCheck\Infrastructure\BuildAnalyzerWrapper.cs" />
-    <Compile Include="BuildCheck\Infrastructure\BuildCheckCentralContext.cs" />
-    <Compile Include="BuildCheck\Infrastructure\BuildCheckConnectorLogger.cs" />
-    <Compile Include="BuildCheck\Infrastructure\BuildCheckContext.cs" />
-    <Compile Include="BuildCheck\Infrastructure\BuildCheckManagerProvider.cs" />
-    <Compile Include="BuildCheck\Infrastructure\ConfigurationProvider.cs" />
-    <Compile Include="BuildCheck\Infrastructure\CustomConfigurationData.cs" />
-    <Compile Include="BuildCheck\API\IBuildCheckRegistrationContext.cs" />
-    <Compile Include="BuildCheck\Infrastructure\IBuildCheckManager.cs" />
-    <Compile Include="BuildCheck\Logging\IBuildAnalysisLoggingContextFactory.cs" />
-    <Compile Include="BuildCheck\OM\EvaluatedPropertiesAnalysisData.cs" />
-    <Compile Include="BuildCheck\OM\ParsedItemsAnalysisData.cs" />
-    <Compile Include="BuildCheck\Utilities\EnumerableExtensions.cs" />
+    <Compile Include="BackEnd\Shared\BuildResultBase.cs" />
+    <Compile Include="BuildCheck\**\*.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
+    <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />
     <Compile Include="FileAccess\FlagsAndAttributes.cs" />
     <Compile Include="FileAccess\ProcessData.cs" />
     <Compile Include="FileAccess\ReportedFileOperation.cs" />
     <Compile Include="FileAccess\RequestedAccess.cs" />
-    <Compile Include="BuildCheck\Logging\AnalyzerLoggingContext.cs" />
-    <Compile Include="BuildCheck\Logging\AnalyzerLoggingContextFactory.cs" />
+    <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
@@ -276,14 +250,6 @@
     <Compile Include="BackEnd\Components\SdkResolution\SdkResultFactory.cs" />
     <Compile Include="BackEnd\Node\LoggingNodeConfiguration.cs" />
     <Compile Include="BackEnd\Shared\ConfigurationMetadata.cs" />
-    <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
-    <Compile Include="Collections\ConcurrentStackExtensions.cs" />
-    <Compile Include="Collections\LookasideStringInterner.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\HashSet.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableEntryHashSet.cs" />
     <Compile Include="Construction\ImplicitImportLocation.cs" />
     <Compile Include="Construction\ProjectSdkElement.cs" />
     <Compile Include="Definition\ProjectOptions.cs" />
@@ -390,10 +356,12 @@
     <Compile Include="BackEnd\Components\Scheduler\ScheduleResponse.cs" />
     <Compile Include="BackEnd\Node\INode.cs" />
     <!-- ########################## -->
-    <Compile Include="BackEnd\TaskExecutionHost\AddInParts\ITaskExecutionHost.cs" />
     <Compile Include="BackEnd\TaskExecutionHost\TaskExecutionHost.cs" />
     <!-- #### COLLECTIONS ### -->
     <Compile Include="..\Shared\CollectionHelpers.cs" />
+    <Compile Include="Collections\ArrayDictionary.cs" />
+    <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
+    <Compile Include="Collections\ConcurrentStackExtensions.cs" />
     <Compile Include="Collections\ConvertingEnumerable.cs" />
     <Compile Include="Collections\CopyOnReadEnumerable.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
@@ -403,17 +371,25 @@
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
     <Compile Include="Collections\IConstrainableDictionary.cs" />
+    <Compile Include="Collections\ICopyOnWritePropertyDictionary.cs" />
     <Compile Include="Collections\IItemDictionary.cs" />
+    <Compile Include="Collections\IMultiDictionary.cs" />
     <Compile Include="Collections\ItemDictionary.cs" />
     <Compile Include="Collections\IImmutable.cs" />
     <Compile Include="Collections\MultiDictionary.cs" />
     <Compile Include="Collections\IValued.cs" />
+    <Compile Include="Collections\LookasideStringInterner.cs" />
     <Compile Include="Collections\PropertyDictionary.cs" />
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
     <Compile Include="Collections\ReadOnlyConvertingDictionary.cs" />
-    <!-- ######################## -->
+    <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableEntryHashSet.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableValuedEntryHashSet.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\RetrievableEntryHashSet.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\RetrievableValuedEntryHashSet.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
-    <Compile Include="Collections\ArrayDictionary.cs" />
     <!-- #### CONSTRUCTION MODEL ### -->
     <Compile Include="Construction\ProjectElement.cs" />
     <Compile Include="Construction\ProjectElementContainer.cs" />
@@ -511,7 +487,6 @@
     <Compile Include="Evaluation\ProjectRootElementCacheBase.cs" />
     <Compile Include="Evaluation\ProjectRootElementCache.cs" />
     <Compile Include="Evaluation\SimpleProjectRootElementCache.cs" />
-    <Compile Include="Evaluation\ProjectStringCache.cs" />
     <Compile Include="Evaluation\SemiColonTokenizer.cs" />
     <Compile Include="Evaluation\StringMetadataTable.cs" />
     <Compile Include="Evaluation\ExpressionShredder.cs" />
@@ -528,7 +503,13 @@
     <!-- #### INSTANCE MODEL ### -->
     <Compile Include="Instance\IImmutableInstanceProvider.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableElementCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableGlobalPropertiesCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDefinitionsListConverter.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDictionary.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableLinkedMultiDictionaryConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutablePropertyCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableStringValuedListConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableValuedElementCollectionConverter.cs" />
     <Compile Include="Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="Instance\HostServices.cs" />
     <Compile Include="Instance\ProjectTargetInstanceChild.cs" />
@@ -559,7 +540,7 @@
     <Compile Include="Logging\BinaryLogger\BinaryLogger.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogRecordKind.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogReplayEventSource.cs" />
-    <Compile Include="Logging\BinaryLogger\BuildEventArgsDispatcher.cs" />
+    <Compile Include="Logging\BinaryLogger\EventArgsDispatcher.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsFieldFlags.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsFields.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsReader.cs" />

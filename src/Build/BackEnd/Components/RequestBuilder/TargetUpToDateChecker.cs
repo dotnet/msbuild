@@ -368,6 +368,8 @@ namespace Microsoft.Build.BackEnd
             var args = ItemGroupLoggingHelper.CreateTaskParameterEventArgs(
                 _buildEventContext,
                 TaskParameterMessageKind.SkippedTargetInputs,
+                parameterName: null,
+                propertyName: null,
                 itemType: null,
                 _uniqueTargetInputs.Keys.ToArray(),
                 logItemMetadata: false,
@@ -377,6 +379,8 @@ namespace Microsoft.Build.BackEnd
             args = ItemGroupLoggingHelper.CreateTaskParameterEventArgs(
                 _buildEventContext,
                 TaskParameterMessageKind.SkippedTargetOutputs,
+                parameterName: null,
+                propertyName: null,
                 itemType: null,
                 _uniqueTargetOutputs.Keys.ToArray(),
                 logItemMetadata: false,
@@ -1125,6 +1129,8 @@ namespace Microsoft.Build.BackEnd
         {
             input = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(input));
             output = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(output));
+            ProjectErrorUtilities.VerifyThrowInvalidProject(input.IndexOfAny(Path.GetInvalidPathChars()) == -1, _project.ProjectFileLocation, "IllegalCharactersInFileOrDirectory", input, inputItemName);
+            ProjectErrorUtilities.VerifyThrowInvalidProject(output.IndexOfAny(Path.GetInvalidPathChars()) == -1, _project.ProjectFileLocation, "IllegalCharactersInFileOrDirectory", output, outputItemName);
             bool outOfDate = (CompareLastWriteTimes(input, output, out bool inputDoesNotExist, out bool outputDoesNotExist) == 1) || inputDoesNotExist;
 
             // Only if we are not logging just critical events should we be gathering full details

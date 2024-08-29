@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -255,6 +255,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     HaveLoggedBuildFinishedEvent = true;
                     RaiseBuildFinishedEvent(null, buildFinishedEvent);
                     break;
+                case BuildCanceledEventArgs buildCanceledEvent:
+                    RaiseStatusEvent(null, buildCanceledEvent);
+                    break;
                 case CustomBuildEventArgs customBuildEvent:
                     RaiseCustomEvent(null, customBuildEvent);
                     break;
@@ -311,6 +314,7 @@ namespace Microsoft.Build.BackEnd.Logging
             StatusEventRaised = null;
             AnyEventRaised = null;
             TelemetryLogged = null;
+            BuildCheckEventRaised = null;
         }
 
         #endregion

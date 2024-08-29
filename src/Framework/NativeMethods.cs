@@ -10,7 +10,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
@@ -53,6 +53,9 @@ internal static class NativeMethods
 
     private const string WINDOWS_FILE_SYSTEM_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\FileSystem";
     private const string WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME = "LongPathsEnabled";
+
+    private const string WINDOWS_SAC_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\CI\Policy";
+    private const string WINDOWS_SAC_VALUE_NAME = "VerifiedAndReputablePolicyState";
 
     internal static DateTime MinFileDate { get; } = DateTime.FromFileTimeUtc(0);
 
@@ -594,26 +597,142 @@ internal static class NativeMethods
         }
     }
 
-    internal static bool IsMaxPathLegacyWindows()
+    internal enum LongPathsStatus
     {
+        /// <summary>
+        ///  The registry key is set to 0 or does not exist.
+        /// </summary>
+        Disabled,
+
+        /// <summary>
+        /// The registry key does not exist.
+        /// </summary>
+        Missing,
+
+        /// <summary>
+        /// The registry key is set to 1.
+        /// </summary>
+        Enabled,
+
+        /// <summary>
+        /// Not on Windows.
+        /// </summary>
+        NotApplicable,
+    }
+
+    internal static LongPathsStatus IsLongPathsEnabled()
+    {
+        if (!IsWindows)
+        {
+            return LongPathsStatus.NotApplicable;
+        }
+
         try
         {
-            return IsWindows && !IsLongPathsEnabledRegistry();
+            return IsLongPathsEnabledRegistry();
         }
         catch
         {
-            return true;
+            return LongPathsStatus.Disabled;
         }
     }
 
+    internal static bool IsMaxPathLegacyWindows()
+    {
+        var longPathsStatus = IsLongPathsEnabled();
+        return longPathsStatus == LongPathsStatus.Disabled || longPathsStatus == LongPathsStatus.Missing;
+    }
+
     [SupportedOSPlatform("windows")]
-    private static bool IsLongPathsEnabledRegistry()
+    private static LongPathsStatus IsLongPathsEnabledRegistry()
     {
         using (RegistryKey fileSystemKey = Registry.LocalMachine.OpenSubKey(WINDOWS_FILE_SYSTEM_REGISTRY_KEY))
         {
-            object longPathsEnabledValue = fileSystemKey?.GetValue(WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME, 0);
-            return fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == 1;
+            object longPathsEnabledValue = fileSystemKey?.GetValue(WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME, -1);
+            if (fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == -1)
+            {
+                return LongPathsStatus.Missing;
+            }
+            else if (fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == 1)
+            {
+                return LongPathsStatus.Enabled;
+            }
+            else
+            {
+                return LongPathsStatus.Disabled;
+            }
         }
+    }
+
+    /// <summary>
+    /// Get from registry state of the Smart App Control (SAC) on the system.
+    /// </summary>
+    /// <returns>State of SAC</returns>
+    internal static SAC_State GetSACState()
+    {
+        if (IsWindows)
+        {
+            try
+            {
+                return GetSACStateRegistry();
+            }
+            catch
+            {
+                return SAC_State.Missing;
+            }
+        }
+
+        return SAC_State.NotApplicable;
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static SAC_State GetSACStateRegistry()
+    {
+        SAC_State SACState = SAC_State.Missing;
+
+        using (RegistryKey policyKey = Registry.LocalMachine.OpenSubKey(WINDOWS_SAC_REGISTRY_KEY))
+        {
+            if (policyKey != null)
+            {
+                object sacValue = policyKey.GetValue(WINDOWS_SAC_VALUE_NAME, -1);
+                SACState = Convert.ToInt32(sacValue) switch
+                {
+                    0 => SAC_State.Off,
+                    1 => SAC_State.Enforcement,
+                    2 => SAC_State.Evaluation,
+                    _ => SAC_State.Missing,
+                };
+            }
+        }
+
+        return SACState;
+    }
+
+    /// <summary>
+    /// State of Smart App Control (SAC) on the system.
+    /// </summary>
+    internal enum SAC_State
+    {
+        /// <summary>
+        /// 1: SAC is on and enforcing.
+        /// </summary>
+        Enforcement,
+        /// <summary>
+        /// 2: SAC is on and in evaluation mode.
+        /// </summary>
+        Evaluation,
+        /// <summary>
+        /// 0: SAC is off.
+        /// </summary>
+        Off,
+        /// <summary>
+        /// The registry key is missing.
+        /// </summary>
+        Missing,
+        /// <summary>
+        /// Not on Windows.
+        /// </summary>
+        NotApplicable
     }
 
     /// <summary>
@@ -1201,14 +1320,13 @@ internal static class NativeMethods
 
             // Grab the process handle.  We want to keep this open for the duration of the function so that
             // it cannot be reused while we are running.
-            SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processIdToKill);
-            if (hProcess.IsInvalid)
+            using (SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processIdToKill))
             {
-                return;
-            }
+                if (hProcess.IsInvalid)
+                {
+                    return;
+                }
 
-            try
-            {
                 try
                 {
                     // Kill this process, so that no further children can be created.
@@ -1238,11 +1356,6 @@ internal static class NativeMethods
                         childProcessInfo.Value.Dispose();
                     }
                 }
-            }
-            finally
-            {
-                // Release the handle.  After this point no more children of this process exist and this process has also exited.
-                hProcess.Dispose();
             }
         }
         finally
@@ -1296,11 +1409,9 @@ internal static class NativeMethods
         else
 #endif
         {
-            SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processId);
-
-            if (!hProcess.IsInvalid)
+            using SafeProcessHandle hProcess = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, processId);
             {
-                try
+                if (!hProcess.IsInvalid)
                 {
                     // UNDONE: NtQueryInformationProcess will fail if we are not elevated and other process is. Advice is to change to use ToolHelp32 API's
                     // For now just return zero and worst case we will not kill some children.
@@ -1311,10 +1422,6 @@ internal static class NativeMethods
                     {
                         ParentID = (int)pbi.InheritedFromUniqueProcessId;
                     }
-                }
-                finally
-                {
-                    hProcess.Dispose();
                 }
             }
         }
@@ -1337,34 +1444,38 @@ internal static class NativeMethods
             {
                 // Hold the child process handle open so that children cannot die and restart with a different parent after we've started looking at it.
                 // This way, any handle we pass back is guaranteed to be one of our actual children.
+#pragma warning disable CA2000 // Dispose objects before losing scope - caller must dispose returned handles
                 SafeProcessHandle childHandle = OpenProcess(eDesiredAccess.PROCESS_QUERY_INFORMATION, false, possibleChildProcess.Id);
-                if (childHandle.IsInvalid)
+#pragma warning restore CA2000 // Dispose objects before losing scope
                 {
-                    continue;
-                }
-
-                bool keepHandle = false;
-                try
-                {
-                    if (possibleChildProcess.StartTime > parentStartTime)
+                    if (childHandle.IsInvalid)
                     {
-                        int childParentProcessId = GetParentProcessId(possibleChildProcess.Id);
-                        if (childParentProcessId != 0)
+                        continue;
+                    }
+
+                    bool keepHandle = false;
+                    try
+                    {
+                        if (possibleChildProcess.StartTime > parentStartTime)
                         {
-                            if (parentProcessId == childParentProcessId)
+                            int childParentProcessId = GetParentProcessId(possibleChildProcess.Id);
+                            if (childParentProcessId != 0)
                             {
-                                // Add this one
-                                myChildren.Add(new KeyValuePair<int, SafeProcessHandle>(possibleChildProcess.Id, childHandle));
-                                keepHandle = true;
+                                if (parentProcessId == childParentProcessId)
+                                {
+                                    // Add this one
+                                    myChildren.Add(new KeyValuePair<int, SafeProcessHandle>(possibleChildProcess.Id, childHandle));
+                                    keepHandle = true;
+                                }
                             }
                         }
                     }
-                }
-                finally
-                {
-                    if (!keepHandle)
+                    finally
                     {
-                        childHandle.Dispose();
+                        if (!keepHandle)
+                        {
+                            childHandle.Dispose();
+                        }
                     }
                 }
             }
@@ -1501,8 +1612,8 @@ internal static class NativeMethods
         }
         else
         {
-            // On posix OSes we expect console always supports VT100 coloring unless it is explicitly marked as "dumb".
-            acceptAnsiColorCodes = Environment.GetEnvironmentVariable("TERM") != "dumb";
+            // On posix OSes detect whether the terminal supports VT100 from the value of the TERM environment variable.
+            acceptAnsiColorCodes = AnsiDetector.IsAnsiSupported(Environment.GetEnvironmentVariable("TERM"));
             // It wasn't redirected as tested above so we assume output is screen/console
             outputIsScreen = true;
         }

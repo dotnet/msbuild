@@ -202,8 +202,9 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 var context = EvaluationContext.Create(policy);
 
+                using var xmlReader = XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>"));
                 var project = Project.FromXmlReader(
-                    XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")),
+                    xmlReader,
                     new ProjectOptions
                     {
                         ProjectCollection = collection,
