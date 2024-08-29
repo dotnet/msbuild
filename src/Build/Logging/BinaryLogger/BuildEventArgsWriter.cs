@@ -321,20 +321,6 @@ namespace Microsoft.Build.Logging
             return BinaryLogRecordKind.BuildCheckMessage;
         }
 
-        private BinaryLogRecordKind Write(BuildCheckResultWarning e)
-        {
-            WriteBuildEventArgsFields(e, writeMessage: true);
-
-            return BinaryLogRecordKind.BuildCheckWarning;
-        }
-
-        private BinaryLogRecordKind Write(BuildCheckResultError e)
-        {
-            WriteBuildEventArgsFields(e, writeMessage: true);
-
-            return BinaryLogRecordKind.BuildCheckError;
-        }
-
         private BinaryLogRecordKind Write(BuildCheckTracingEventArgs e)
         {
             WriteBuildEventArgsFields(e, writeMessage: false);
