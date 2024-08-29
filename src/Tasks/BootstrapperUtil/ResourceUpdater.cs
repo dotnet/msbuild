@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -99,8 +100,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                             {
                                 fileLength = (int)fs.Length;
                                 fileContent = new byte[fileLength];
-
-                                fs.Read(fileContent, 0, fileLength);
+                                fs.ReadFromStream(fileContent, 0, fileLength);
                             }
 
                             // Update the resources to include this file's data

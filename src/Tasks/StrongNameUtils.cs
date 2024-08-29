@@ -46,8 +46,13 @@ namespace Microsoft.Build.Tasks
                 // Read the stuff from the file stream
                 using (FileStream fs = new FileStream(keyFile, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    keyFileContents = new byte[(int)fs.Length];
-                    fs.Read(keyFileContents, 0, (int)fs.Length);
+                    int fileLength = (int)fs.Length;
+                    keyFileContents = new byte[fileLength];
+
+#pragma warning disable CA2022 // Avoid inexact read with 'Stream.Read'
+                    // TODO: Read the count of read bytes and check if it matches the expected length, if not raise an exception
+                    fs.Read(keyFileContents, 0, fileLength);
+#pragma warning restore CA2022 // Avoid inexact read with 'Stream.Read'
                 }
             }
             catch (ArgumentException e)

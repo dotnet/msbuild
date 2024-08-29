@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
 
@@ -17,9 +20,19 @@ namespace CustomCheck
 
         public override IReadOnlyList<CheckRule> SupportedRules { get; } = new List<CheckRule>() { SupportedRule };
 
+        private string message = "Argument for the message format";
+
         public override void Initialize(ConfigurationContext configurationContext)
         {
+            var infraData = configurationContext.CheckConfig[0];
+            var customData = configurationContext.CustomConfigurationData[0].ConfigurationData;
             // configurationContext to be used only if check needs external configuration data.
+            if (customData is not null &&
+                configurationContext.CustomConfigurationData[0].RuleId == "X01234" &&
+                customData.TryGetValue("setmessage", out string? setMessage))
+            {
+                message = infraData.Severity + setMessage;
+            }
         }
 
         public override void RegisterActions(IBuildCheckRegistrationContext registrationContext)
@@ -32,7 +45,7 @@ namespace CustomCheck
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,
                 ElementLocation.EmptyLocation,
-                "Argument for the message format"));
+                message));
         }
     }
 }
