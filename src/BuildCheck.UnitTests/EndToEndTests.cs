@@ -37,10 +37,10 @@ public class EndToEndTests : IDisposable
 
     public void Dispose() => _env.Dispose();
 
-    [Theory]
+    [WindowsFullFrameworkOnlyTheory]
     [InlineData(true)]
     [InlineData(false)]
-    public void PropertiesUsageAnalyzerTest(bool buildInOutOfProcessNode)
+    public void PropertiesUsageAnalyzerTest_FullFramework(bool buildInOutOfProcessNode)
     {
         PrepareSampleProjectsAndConfig(
             buildInOutOfProcessNode,
@@ -60,6 +60,30 @@ public class EndToEndTests : IDisposable
         Regex.Matches(output, "BC0201: .* Property").Count.ShouldBe(2);
         Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
         Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(2);
+    }
+
+    [DotNetOnlyTheory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void PropertiesUsageAnalyzerTest_NetCore(bool buildInOutOfProcessNode)
+    {
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode,
+            out TransientTestFile projectFile,
+            "PropsCheckTest.csproj");
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+
+        output.ShouldMatch(@"BC0201: .* Property: \[MyProp11\]");
+        output.ShouldMatch(@"BC0202: .* Property: \[MyPropT2\]");
+        output.ShouldMatch(@"BC0203: .* Property: \[MyProp13\]");
+
+        Regex.Matches(output, "BC0201: .* Property").Count.ShouldBe(1);
+        Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(1);
+        Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(1);
     }
 
     [Theory]
