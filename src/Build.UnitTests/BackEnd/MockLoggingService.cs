@@ -222,14 +222,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set { }
         }
 
-        /// <summary>
-        /// Log properties and items on ProjectEvaluationFinishedEventArgs
-        /// instead of ProjectStartedEventArgs.
-        /// </summary>
-        public bool IncludeEvaluationPropertiesAndItems
+        /// <inheritdoc cref="ILoggingService.SetIncludeEvaluationPropertiesAndItemsInEvents"/>
+        public void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent,
+            bool inEvaluationFinishedEvent)
+        { }
+
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
         {
             get => false;
-            set { }
+        }
+
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
+        {
+            get => false;
         }
 
         /// <summary>
@@ -656,10 +663,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
-        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext analysisContext)
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext checkContext)
         { /* Ignore the data */ }
 
-        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext analysisContext)
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext checkContext)
+        { /* Ignore the data */ }
+
+        public void ProcessProjectEvaluationStarted(ICheckContext analysisContext, string projectFullPath)
         { /* Ignore the data */ }
     }
 }

@@ -2622,11 +2622,11 @@ EndGlobal
         [InlineData("/v:minimal /bl", MessageImportance.Low)] // v:minimal but with binary logger so everything must be logged
         [InlineData("/v:quiet /bl", MessageImportance.Low)] // v:quiet but with binary logger so everything must be logged
 
-        [InlineData("/v:diagnostic /analyze", MessageImportance.Low)]
-        [InlineData("/v:detailed /analyze", MessageImportance.Low)]
-        [InlineData("/v:normal /analyze", MessageImportance.Normal)]
-        [InlineData("/v:minimal /analyze", MessageImportance.High)]
-        [InlineData("/v:quiet /analyze", MessageImportance.High)]
+        [InlineData("/v:diagnostic /check", MessageImportance.Low)]
+        [InlineData("/v:detailed /check", MessageImportance.Low)]
+        [InlineData("/v:normal /check", MessageImportance.Normal)]
+        [InlineData("/v:minimal /check", MessageImportance.High)]
+        [InlineData("/v:quiet /check", MessageImportance.High)]
 
         [InlineData("/v:diagnostic /tl", MessageImportance.Low)]
         [InlineData("/v:detailed /tl", MessageImportance.Low)]

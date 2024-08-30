@@ -10,29 +10,33 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Experimental.BuildCheck.Utilities;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal class BuildCheckBuildEventHandler
 {
     private readonly IBuildCheckManager _buildCheckManager;
-    private readonly IAnalysisContextFactory _analyzerContextFactory;
+    private readonly ICheckContextFactory _checkContextFactory;
 
-    private readonly Dictionary<Type, Action<BuildEventArgs>> _eventHandlers;
+    private Dictionary<Type, Action<BuildEventArgs>> _eventHandlers;
+    private readonly Dictionary<Type, Action<BuildEventArgs>> _eventHandlersFull;
+    private readonly Dictionary<Type, Action<BuildEventArgs>> _eventHandlersRestore;
 
     internal BuildCheckBuildEventHandler(
-        IAnalysisContextFactory analyzerContextFactory,
+        ICheckContextFactory checkContextFactory,
         IBuildCheckManager buildCheckManager)
     {
         _buildCheckManager = buildCheckManager;
-        _analyzerContextFactory = analyzerContextFactory;
+        _checkContextFactory = checkContextFactory;
 
-        _eventHandlers = new()
+        _eventHandlersFull = new()
         {
+            { typeof(BuildSubmissionStartedEventArgs), (BuildEventArgs e) => HandleBuildSubmissionStartedEvent((BuildSubmissionStartedEventArgs)e) },
             { typeof(ProjectEvaluationFinishedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationFinishedEvent((ProjectEvaluationFinishedEventArgs)e) },
             { typeof(ProjectEvaluationStartedEventArgs), (BuildEventArgs e) => HandleProjectEvaluationStartedEvent((ProjectEvaluationStartedEventArgs)e) },
             { typeof(EnvironmentVariableReadEventArgs), (BuildEventArgs e) => HandleEnvironmentVariableReadEvent((EnvironmentVariableReadEventArgs)e) },
-            { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => _buildCheckManager.StartProjectRequest(BuildCheckDataSource.EventArgs, e.BuildEventContext!, ((ProjectStartedEventArgs)e).ProjectFile!) },
+            { typeof(ProjectStartedEventArgs), (BuildEventArgs e) => _buildCheckManager.StartProjectRequest(e.BuildEventContext!, ((ProjectStartedEventArgs)e).ProjectFile!) },
             { typeof(ProjectFinishedEventArgs), (BuildEventArgs e) => HandleProjectFinishedRequest((ProjectFinishedEventArgs)e) },
             { typeof(BuildCheckTracingEventArgs), (BuildEventArgs e) => HandleBuildCheckTracingEvent((BuildCheckTracingEventArgs)e) },
             { typeof(BuildCheckAcquisitionEventArgs), (BuildEventArgs e) => HandleBuildCheckAcquisitionEvent((BuildCheckAcquisitionEventArgs)e) },
@@ -41,6 +45,14 @@ internal class BuildCheckBuildEventHandler
             { typeof(TaskParameterEventArgs), (BuildEventArgs e) => HandleTaskParameterEvent((TaskParameterEventArgs)e) },
             { typeof(BuildFinishedEventArgs), (BuildEventArgs e) => HandleBuildFinishedEvent((BuildFinishedEventArgs)e) },
         };
+
+        // During restore we'll wait only for restore to be done.
+        _eventHandlersRestore = new()
+        {
+            { typeof(BuildSubmissionStartedEventArgs), (BuildEventArgs e) => HandleBuildSubmissionStartedEvent((BuildSubmissionStartedEventArgs)e) },
+        };
+
+        _eventHandlers = _eventHandlersFull;
     }
 
     public void HandleBuildEvent(BuildEventArgs e)
@@ -51,15 +63,23 @@ internal class BuildCheckBuildEventHandler
         }
     }
 
+    private void HandleBuildSubmissionStartedEvent(BuildSubmissionStartedEventArgs eventArgs)
+    {
+        eventArgs.GlobalProperties.TryGetValue(MSBuildConstants.MSBuildIsRestoring, out string? restoreProperty);
+        bool isRestoring = restoreProperty is not null && Convert.ToBoolean(restoreProperty);
+
+        _eventHandlers = isRestoring ? _eventHandlersRestore : _eventHandlersFull;
+    }
+
     private void HandleProjectEvaluationFinishedEvent(ProjectEvaluationFinishedEventArgs eventArgs)
     {
         if (!IsMetaProjFile(eventArgs.ProjectFile))
         {
             _buildCheckManager.ProcessEvaluationFinishedEventArgs(
-                _analyzerContextFactory.CreateAnalysisContext(eventArgs.BuildEventContext!),
+                _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!),
                 eventArgs);
 
-            _buildCheckManager.EndProjectEvaluation(BuildCheckDataSource.EventArgs, eventArgs.BuildEventContext!);
+            _buildCheckManager.EndProjectEvaluation(eventArgs.BuildEventContext!);
         }
     }
 
@@ -67,17 +87,20 @@ internal class BuildCheckBuildEventHandler
     {
         if (!IsMetaProjFile(eventArgs.ProjectFile))
         {
-            _buildCheckManager.StartProjectEvaluation(
+            var checkContext = _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!);
+            _buildCheckManager.ProjectFirstEncountered(
                 BuildCheckDataSource.EventArgs,
-                _analyzerContextFactory.CreateAnalysisContext(eventArgs.BuildEventContext!),
+                checkContext,
+                eventArgs.ProjectFile!);
+            _buildCheckManager.ProcessProjectEvaluationStarted(
+                checkContext,
                 eventArgs.ProjectFile!);
         }
     }
 
     private void HandleProjectFinishedRequest(ProjectFinishedEventArgs eventArgs)
         => _buildCheckManager.EndProjectRequest(
-                BuildCheckDataSource.EventArgs,
-                _analyzerContextFactory.CreateAnalysisContext(eventArgs.BuildEventContext!),
+                _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!),
                 eventArgs!.ProjectFile!);
 
     private void HandleBuildCheckTracingEvent(BuildCheckTracingEventArgs eventArgs)
@@ -90,27 +113,27 @@ internal class BuildCheckBuildEventHandler
 
     private void HandleTaskStartedEvent(TaskStartedEventArgs eventArgs)
         => _buildCheckManager.ProcessTaskStartedEventArgs(
-                _analyzerContextFactory.CreateAnalysisContext(eventArgs.BuildEventContext!),
+                _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!),
                 eventArgs);
 
     private void HandleTaskFinishedEvent(TaskFinishedEventArgs eventArgs)
         => _buildCheckManager.ProcessTaskFinishedEventArgs(
-                _analyzerContextFactory.CreateAnalysisContext(eventArgs.BuildEventContext!),
+                _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!),
                 eventArgs);
 
     private void HandleTaskParameterEvent(TaskParameterEventArgs eventArgs)
         => _buildCheckManager.ProcessTaskParameterEventArgs(
-                _analyzerContextFactory.CreateAnalysisContext(eventArgs.BuildEventContext!),
+                _checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!),
                 eventArgs);
 
     private void HandleBuildCheckAcquisitionEvent(BuildCheckAcquisitionEventArgs eventArgs)
-        => _buildCheckManager.ProcessAnalyzerAcquisition(
-                eventArgs.ToAnalyzerAcquisitionData(),
-                _analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)));
+        => _buildCheckManager.ProcessCheckAcquisition(
+                eventArgs.ToCheckAcquisitionData(),
+                _checkContextFactory.CreateCheckContext(GetBuildEventContext(eventArgs)));
 
     private void HandleEnvironmentVariableReadEvent(EnvironmentVariableReadEventArgs eventArgs)
         => _buildCheckManager.ProcessEnvironmentVariableReadEventArgs(
-                _analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)),
+                _checkContextFactory.CreateCheckContext(GetBuildEventContext(eventArgs)),
                 eventArgs);
 
     private bool IsMetaProjFile(string? projectFile) => projectFile?.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase) == true;
@@ -119,15 +142,17 @@ internal class BuildCheckBuildEventHandler
 
     private void HandleBuildFinishedEvent(BuildFinishedEventArgs eventArgs)
     {
-        _stats.Merge(_buildCheckManager.CreateAnalyzerTracingStats(), (span1, span2) => span1 + span2);
+        _buildCheckManager.ProcessBuildFinished(_checkContextFactory.CreateCheckContext(eventArgs.BuildEventContext!));
 
-        LogAnalyzerStats(_analyzerContextFactory.CreateAnalysisContext(GetBuildEventContext(eventArgs)));
+        _stats.Merge(_buildCheckManager.CreateCheckTracingStats(), (span1, span2) => span1 + span2);
+
+        LogCheckStats(_checkContextFactory.CreateCheckContext(GetBuildEventContext(eventArgs)));
     }
 
-    private void LogAnalyzerStats(IAnalysisContext analysisContext)
+    private void LogCheckStats(ICheckContext checkContext)
     {
         Dictionary<string, TimeSpan> infraStats = new Dictionary<string, TimeSpan>();
-        Dictionary<string, TimeSpan> analyzerStats = new Dictionary<string, TimeSpan>();
+        Dictionary<string, TimeSpan> checkStats = new Dictionary<string, TimeSpan>();
 
         foreach (var stat in _stats)
         {
@@ -138,20 +163,20 @@ internal class BuildCheckBuildEventHandler
             }
             else
             {
-                analyzerStats[stat.Key] = stat.Value;
+                checkStats[stat.Key] = stat.Value;
             }
         }
 
         BuildCheckTracingEventArgs statEvent = new BuildCheckTracingEventArgs(_stats, true)
-        { BuildEventContext = analysisContext.BuildEventContext };
+        { BuildEventContext = checkContext.BuildEventContext };
 
-        analysisContext.DispatchBuildEvent(statEvent);
+        checkContext.DispatchBuildEvent(statEvent);
 
-        analysisContext.DispatchAsCommentFromText(MessageImportance.Low, $"BuildCheck run times{Environment.NewLine}");
+        checkContext.DispatchAsCommentFromText(MessageImportance.Low, $"BuildCheck run times{Environment.NewLine}");
         string infraData = BuildCsvString("Infrastructure run times", infraStats);
-        analysisContext.DispatchAsCommentFromText(MessageImportance.Low, infraData);
-        string analyzerData = BuildCsvString("Analyzer run times", analyzerStats);
-        analysisContext.DispatchAsCommentFromText(MessageImportance.Low, analyzerData);
+        checkContext.DispatchAsCommentFromText(MessageImportance.Low, infraData);
+        string checkData = BuildCsvString("Checks run times", checkStats);
+        checkContext.DispatchAsCommentFromText(MessageImportance.Low, checkData);
     }
 
     private string BuildCsvString(string title, Dictionary<string, TimeSpan> rowData)

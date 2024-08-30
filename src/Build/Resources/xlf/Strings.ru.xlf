@@ -217,35 +217,35 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerAssemblyNotExist">
-        <source>Failed to find the specified custom analyzer assembly: '{0}'. Please check if it exists.</source>
-        <target state="translated">Не удалось найти указанную сборку настраиваемого анализатора "{0}". Убедитесь, что она существует.</target>
-        <note>The message is emitted when the custom analyzer assembly can not be found.</note>
+      <trans-unit id="CustomCheckAssemblyNotExist">
+        <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
+        <target state="translated">Не удалось найти указанную сборку настраиваемой проверки "{0}". Убедитесь, что она существует.</target>
+        <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerBaseTypeNotAssignable">
-        <source>Failed to load the custom analyzer type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer base class. If it is not intended to be a custom analyzer, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Не удалось загрузить тип настраиваемого анализатора "{0}" из сборки "{1}". Убедитесь, что он наследует базовый класс Microsoft.Build.Experimental.BuildCheck.BuildAnalyzer. Если он не предназначен для настраиваемого анализатора, его не следует предоставлять. Подробнее: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
-        <note>The message is emitted when the custom analyzer assembly can not be successfully registered.</note>
+      <trans-unit id="CustomCheckBaseTypeNotAssignable">
+        <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="translated">Не удалось загрузить тип настраиваемой проверки "{0}" из сборки "{1}". Убедитесь, что он наследует базовый класс Microsoft.Build.Experimental.BuildCheck.Check. Если он не предназначен для настраиваемой проверки, его не следует предоставлять. Подробнее: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerFailedAcquisition">
-        <source>Failed to register the custom analyzer: '{0}'.</source>
-        <target state="translated">Не удалось зарегистрировать настраиваемый анализатор "{0}".</target>
-        <note>The message is emitted on failed loading of the custom analyzer in process.</note>
+      <trans-unit id="CustomCheckFailedAcquisition">
+        <source>Failed to register the custom check: '{0}'.</source>
+        <target state="translated">Не удалось зарегистрировать настраиваемую проверку "{0}".</target>
+        <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerFailedRuleLoading">
-        <source>Failed to instantiate the custom analyzer rule with the following exception: '{0}'.</source>
-        <target state="translated">Не удалось создать экземпляр правила настраиваемого анализатора со следующим исключением: "{0}".</target>
-        <note>The message is emitted on failed loading of the custom analyzer rule in process.</note>
+      <trans-unit id="CustomCheckFailedRuleLoading">
+        <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
+        <target state="translated">Не удалось создать экземпляр правила настраиваемой проверки со следующим исключением: "{0}".</target>
+        <note>The message is emitted on failed loading of the custom check rule in process.</note>
       </trans-unit>
-      <trans-unit id="CustomAnalyzerRegistered">
-        <source>The custom analyzer: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">Настраиваемый анализатор "{0}" включен для сборки из расположения "{1}".</target>
+      <trans-unit id="CustomCheckRegistered">
+        <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
+        <target state="translated">Настраиваемая проверка "{0}" зарегистрирована для сборки из расположения "{1}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="CustomAnalyzerSuccessfulAcquisition">
-        <source>Custom analyzer rule: '{0}' has been registered successfully.</source>
-        <target state="translated">Правило настраиваемого анализатора "{0}" успешно зарегистрировано.</target>
-        <note>The message is emitted on successful loading of the custom analyzer rule in process.</note>
+      <trans-unit id="CustomCheckSuccessfulAcquisition">
+        <source>Custom check rule: '{0}' has been registered successfully.</source>
+        <target state="translated">Правило настраиваемой проверки "{0}" успешно зарегистрировано.</target>
+        <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
@@ -307,6 +307,11 @@
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: неожиданный пробел в позиции "{1}" условия "{0}". Вы забыли удалить пробел?</target>
         <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
+      <trans-unit id="IllegalCharactersInFileOrDirectory">
+        <source>There are illegal characters in '{0}' in the {1} item.</source>
+        <target state="new">There are illegal characters in '{0}' in the {1} item.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
         <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>

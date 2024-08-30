@@ -693,17 +693,17 @@ namespace Microsoft.Build.Evaluation
 
         public static bool IsRunningFromVisualStudio() => BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
 
-        public static bool RegisterBuildCheck(string pathToAssembly, LoggingContext loggingContext)
+        public static bool RegisterBuildCheck(string projectPath, string pathToAssembly, LoggingContext loggingContext)
         {
             pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
             if (File.Exists(pathToAssembly))
             {
-                loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly));
+                loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly, projectPath));
 
                 return true;
             }
 
-            loggingContext.LogComment(MessageImportance.Low, "CustomAnalyzerAssemblyNotExist", pathToAssembly);
+            loggingContext.LogComment(MessageImportance.Low, "CustomCheckAssemblyNotExist", pathToAssembly);
 
             return false;
         }

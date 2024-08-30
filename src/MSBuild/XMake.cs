@@ -1761,6 +1761,18 @@ namespace Microsoft.Build.CommandLine
                         MessageImportance.Low));
             }
 
+            NativeMethodsShared.SAC_State SAC_State = NativeMethodsShared.GetSACState();
+            if (SAC_State != NativeMethodsShared.SAC_State.NotApplicable && SAC_State != NativeMethodsShared.SAC_State.Missing)
+            {
+                messages.Add(
+                    new BuildManager.DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            "SAC",
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "SAC_" + SAC_State.ToString())),
+                        MessageImportance.Low));
+            }
+
             if (Traits.Instance.DebugEngine)
             {
                 messages.Add(
@@ -2784,8 +2796,8 @@ namespace Microsoft.Build.CommandLine
         private static bool IsBuildCheckEnabled(CommandLineSwitches commandLineSwitches)
         {
             // Opt-in behavior to be determined by: https://github.com/dotnet/msbuild/issues/9723
-            bool isAnalysisEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze);
-            return isAnalysisEnabled;
+            bool isBuildCheckEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Check);
+            return isBuildCheckEnabled;
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)

@@ -4,9 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -30,10 +27,7 @@ internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tr
     {
     }
 
-    internal BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> data, bool isAggregatedGlobalReport) : this(data)
-    {
-        IsAggregatedGlobalReport = isAggregatedGlobalReport;
-    }
+    internal BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> data, bool isAggregatedGlobalReport) : this(data) => IsAggregatedGlobalReport = isAggregatedGlobalReport;
 
     /// <summary>
     /// When true, the tracing information is from the whole build for logging purposes
@@ -71,15 +65,15 @@ internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tr
     }
 }
 
-internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath) : BuildCheckEventArgs
+internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath, string projectPath) : BuildCheckEventArgs
 {
     internal BuildCheckAcquisitionEventArgs()
-        : this(string.Empty)
+        : this(string.Empty, string.Empty)
     {
     }
 
     /// <summary>
-    /// Gets the path to the analyzer assembly that needs to be loaded into the application context.
+    /// Gets the path to the check assembly that needs to be loaded into the application context.
     /// </summary>
     /// <remarks>
     /// The <see cref="AcquisitionPath"/> property contains the file system path to the assembly
@@ -91,11 +85,14 @@ internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath) : B
     /// </value>
     public string AcquisitionPath { get; private set; } = acquisitionPath;
 
+    public string ProjectPath { get; private set; } = projectPath;
+
     internal override void WriteToStream(BinaryWriter writer)
     {
         base.WriteToStream(writer);
 
         writer.Write(AcquisitionPath);
+        writer.Write(ProjectPath);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
@@ -103,15 +100,19 @@ internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath) : B
         base.CreateFromStream(reader, version);
 
         AcquisitionPath = reader.ReadString();
+        ProjectPath = reader.ReadString();
     }
 }
+
 internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
 {
     public BuildCheckResultWarning(IBuildCheckResult result, string code)
-        : base(subcategory: null, code: code, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: result.FormatMessage(), helpKeyword: null, senderName: null)
-    {
+        : base(subcategory: null, code: code, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: result.FormatMessage(), helpKeyword: null, senderName: null) =>
         RawMessage = result.FormatMessage();
-    }
+
+    internal BuildCheckResultWarning(string formattedMessage, string code)
+        : base(subcategory: null, code: code, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: formattedMessage, helpKeyword: null, senderName: null) =>
+        RawMessage = formattedMessage;
 
     internal BuildCheckResultWarning() { }
 
@@ -134,9 +135,11 @@ internal sealed class BuildCheckResultError : BuildErrorEventArgs
 {
     public BuildCheckResultError(IBuildCheckResult result, string code)
         : base(subcategory: null, code: code, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: result.FormatMessage(), helpKeyword: null, senderName: null)
-    {
-        RawMessage = result.FormatMessage();
-    }
+        => RawMessage = result.FormatMessage();
+
+    internal BuildCheckResultError(string formattedMessage, string code)
+        : base(subcategory: null, code: code, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: formattedMessage, helpKeyword: null, senderName: null)
+        => RawMessage = formattedMessage;
 
     internal BuildCheckResultError() { }
 
@@ -157,10 +160,9 @@ internal sealed class BuildCheckResultError : BuildErrorEventArgs
 
 internal sealed class BuildCheckResultMessage : BuildMessageEventArgs
 {
-    public BuildCheckResultMessage(IBuildCheckResult result)
-    {
-        RawMessage = result.FormatMessage();
-    }
+    public BuildCheckResultMessage(IBuildCheckResult result) => RawMessage = result.FormatMessage();
+
+    internal BuildCheckResultMessage(string formattedMessage) => RawMessage = formattedMessage;
 
     internal BuildCheckResultMessage() { }
 

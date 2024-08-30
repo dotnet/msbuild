@@ -2,8 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
@@ -15,6 +19,8 @@ namespace Microsoft.Build.BuildCheck.UnitTests;
 
 public class EndToEndTests : IDisposable
 {
+    private const string EditorConfigFileName = ".editorconfig";
+
     private readonly TestEnvironment _env;
 
     public EndToEndTests(ITestOutputHelper output)
@@ -32,22 +38,47 @@ public class EndToEndTests : IDisposable
     public void Dispose() => _env.Dispose();
 
     [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void PropertiesUsageAnalyzerTest(bool buildInOutOfProcessNode)
+    {
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode,
+            out TransientTestFile projectFile,
+            "PropsCheckTest.csproj");
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+
+        output.ShouldMatch(@"BC0201: .* Property: \[MyProp11\]");
+        output.ShouldMatch(@"BC0202: .* Property: \[MyPropT2\]");
+        output.ShouldMatch(@"BC0203: .* Property: \[MyProp13\]");
+
+        // each finding should be found just once - but reported twice, due to summary
+        Regex.Matches(output, "BC0201: .* Property").Count.ShouldBe(2);
+        Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
+        Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(2);
+    }
+
+    [Theory]
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
-    public void SampleAnalyzerIntegrationTest_AnalyzeOnBuild(bool buildInOutOfProcessNode, bool analysisRequested)
+    public void SampleCheckIntegrationTest_CheckOnBuild(bool buildInOutOfProcessNode, bool checkRequested)
     {
-        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", "warning") });
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
-            (analysisRequested ? " -analyze" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+            (checkRequested ? " -check" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
         _env.Output.WriteLine(output);
 
         success.ShouldBeTrue();
 
-        // The analyzer warnings should appear - but only if analysis was requested.
-        if (analysisRequested)
+        // The check warnings should appear - but only if check was requested.
+        if (checkRequested)
         {
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
@@ -69,18 +100,21 @@ public class EndToEndTests : IDisposable
     [InlineData(false, true, "error")]
     [InlineData(false, true, "suggestion")]
     [InlineData(false, false, "warning")]
-    public void SampleAnalyzerIntegrationTest_ReplayBinaryLogOfAnalyzedBuild(bool buildInOutOfProcessNode, bool analysisRequested, string BC0101Severity)
+    public void SampleCheckIntegrationTest_ReplayBinaryLogOfCheckedBuild(bool buildInOutOfProcessNode, bool checkRequested, string BC0101Severity)
     {
-        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, BC0101Severity);
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", BC0101Severity) });
 
         var projectDirectory = Path.GetDirectoryName(projectFile.Path);
         string logFile = _env.ExpectFile(".binlog").Path;
 
         _ = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(analysisRequested ? "-analyze" : string.Empty)} -bl:{logFile}",
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(checkRequested ? "-check" : string.Empty)} -bl:{logFile}",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
-        success.ShouldBeTrue();
+        if (BC0101Severity != "error")
+        {
+            success.ShouldBeTrue();
+        }
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
          $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic",
@@ -88,10 +122,13 @@ public class EndToEndTests : IDisposable
 
         _env.Output.WriteLine(output);
 
-        success.ShouldBeTrue();
+        if (BC0101Severity != "error")
+        {
+            success.ShouldBeTrue();
+        }
 
-        // The conflicting outputs warning appears - but only if analysis was requested
-        if (analysisRequested)
+        // The conflicting outputs warning appears - but only if check was requested
+        if (checkRequested)
         {
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
@@ -110,16 +147,19 @@ public class EndToEndTests : IDisposable
     [InlineData("error", "error BC0101", new string[] { "warning BC0101" })]
     [InlineData("suggestion", "BC0101", new string[] { "error BC0101", "warning BC0101" })]
     [InlineData("default", "warning BC0101", new string[] { "error BC0101" })]
-    [InlineData("none", null, new string[] { "BC0101"})]
+    [InlineData("none", null, new string[] { "BC0101" })]
     public void EditorConfig_SeverityAppliedCorrectly(string BC0101Severity, string expectedOutputValues, string[] unexpectedOutputValues)
     {
-        PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, BC0101Severity);
+        PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", BC0101Severity) });
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -analyze",
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check",
             out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
 
-        success.ShouldBeTrue();
+        if (BC0101Severity != "error")
+        {
+            success.ShouldBeTrue();
+        }
 
         if (!string.IsNullOrEmpty(expectedOutputValues))
         {
@@ -132,13 +172,45 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    [Fact]
+    public void CheckHasAccessToAllConfigs()
+    {
+        using (var env = TestEnvironment.Create())
+        {
+            string checkCandidatePath = Path.Combine(TestAssetsRootPath, "CheckCandidate");
+            string message = ": An extra message for the analyzer";
+            string severity = "warning";
+
+            // Can't use Transitive environment due to the need to dogfood local nuget packages.
+            AddCustomDataSourceToNugetConfig(checkCandidatePath);
+            string editorConfigName = Path.Combine(checkCandidatePath, EditorConfigFileName);
+            File.WriteAllText(editorConfigName, ReadEditorConfig(
+                new List<(string, string)>() { ("X01234", severity) },
+                new List<(string, (string, string))>
+                {
+                    ("X01234",("setMessage", message))
+                },
+                checkCandidatePath));
+
+            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(checkCandidatePath, $"CheckCandidate.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool success, timeoutMilliseconds: 1200_0000);
+            success.ShouldBeTrue();
+
+            projectCheckBuildLog.ShouldContain("warning X01234");
+            projectCheckBuildLog.ShouldContain(severity + message);
+
+            // Cleanup
+            File.Delete(editorConfigName);
+        }
+    }
+
     [Theory]
     [InlineData(true, true)]
     [InlineData(false, true)]
     [InlineData(false, false)]
-    public void SampleAnalyzerIntegrationTest_AnalyzeOnBinaryLogReplay(bool buildInOutOfProcessNode, bool analysisRequested)
+    public void SampleCheckIntegrationTest_CheckOnBinaryLogReplay(bool buildInOutOfProcessNode, bool checkRequested)
     {
-        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile);
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", "warning") });
 
         string? projectDirectory = Path.GetDirectoryName(projectFile.Path);
         string logFile = _env.ExpectFile(".binlog").Path;
@@ -150,15 +222,15 @@ public class EndToEndTests : IDisposable
         success.ShouldBeTrue();
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-         $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(analysisRequested ? "-analyze" : string.Empty)}",
+         $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(checkRequested ? "-check" : string.Empty)}",
          out success, false, _env.Output, timeoutMilliseconds: 120_000);
 
         _env.Output.WriteLine(output);
 
         success.ShouldBeTrue();
 
-        // The conflicting outputs warning appears - but only if analysis was requested
-        if (analysisRequested)
+        // The conflicting outputs warning appears - but only if check was requested
+        if (checkRequested)
         {
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
@@ -173,35 +245,156 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("AnalysisCandidate", new[] { "CustomRule1", "CustomRule2" })]
-    [InlineData("AnalysisCandidateWithMultipleAnalyzersInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
-    public void CustomAnalyzerTest(string analysisCandidate, string[] expectedRegisteredRules, bool expectedRejectedAnalyzers = false)
+    [InlineData(null, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." } )]
+    [InlineData(true, new[] { "Property is derived from environment variable: 'TestFromTarget' with value: 'FromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation' with value: 'FromEvaluation'." })]
+    [InlineData(false, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." } )]
+    public void NoEnvironmentVariableProperty_Test(bool? customConfigEnabled, string[] expectedMessages)
+    {
+        List<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? customConfigData = null;
+
+        if (customConfigEnabled.HasValue)
+        {
+            customConfigData = new List<(string, (string, string))>()
+            {
+                ("BC0103", ("allow_displaying_environment_variable_value", customConfigEnabled.Value ? "true" : "false")),
+            };
+        }
+
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode: true,
+            out TransientTestFile projectFile,
+            new List<(string, string)>() { ("BC0103", "error") },
+            customConfigData);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output);
+
+        foreach (string expectedMessage in expectedMessages)
+        {
+            output.ShouldContain(expectedMessage);
+        }
+    }
+
+    [Theory]
+    [InlineData(EvaluationCheckScope.ProjectFileOnly)]
+    [InlineData(EvaluationCheckScope.WorkTreeImports)]
+    [InlineData(EvaluationCheckScope.All)]
+    public void NoEnvironmentVariableProperty_Scoping(EvaluationCheckScope scope)
+    {
+        List<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? customConfigData = null;
+
+        string editorconfigScope = scope switch
+        {
+            EvaluationCheckScope.ProjectFileOnly => "project_file",
+            EvaluationCheckScope.WorkTreeImports => "work_tree_imports",
+            EvaluationCheckScope.All => "all",
+            _ => throw new ArgumentOutOfRangeException(nameof(scope), scope, null),
+        };
+
+        customConfigData = new List<(string, (string, string))>()
+        {
+            ("BC0103", ("scope", editorconfigScope)),
+        };
+
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode: true,
+            out TransientTestFile projectFile,
+            new List<(string, string)>() { ("BC0103", "error") },
+            customConfigData);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output);
+
+        if(scope == EvaluationCheckScope.ProjectFileOnly)
+        {
+            output.ShouldNotContain("Property is derived from environment variable: 'TestImported'. Properties should be passed explicitly using the /p option.");
+        }
+        else
+        {
+            output.ShouldContain("Property is derived from environment variable: 'TestImported'. Properties should be passed explicitly using the /p option.");
+        }
+    }
+
+    [Theory]
+    [InlineData("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
+    [InlineData("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
+    public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)
     {
         using (var env = TestEnvironment.Create())
         {
-            var analysisCandidatePath = Path.Combine(TestAssetsRootPath, analysisCandidate);
-            AddCustomDataSourceToNugetConfig(analysisCandidatePath);
+            var checkCandidatePath = Path.Combine(TestAssetsRootPath, checkCandidate);
+            AddCustomDataSourceToNugetConfig(checkCandidatePath);
 
-            string projectAnalysisBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{Path.Combine(analysisCandidatePath, $"{analysisCandidate}.csproj")} /m:1 -nr:False -restore /p:OutputPath={env.CreateFolder().Path} -analyze -verbosity:n",
+            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n",
                 out bool successBuild);
-            successBuild.ShouldBeTrue(projectAnalysisBuildLog);
 
             foreach (string registeredRule in expectedRegisteredRules)
             {
-                projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerSuccessfulAcquisition", registeredRule));
+                projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomCheckSuccessfulAcquisition", registeredRule));
             }
 
-            if (expectedRejectedAnalyzers)
+            if (!expectedRejectedChecks)
             {
-                projectAnalysisBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomAnalyzerBaseTypeNotAssignable", "InvalidAnalyzer", "InvalidCustomAnalyzer, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
+                successBuild.ShouldBeTrue(projectCheckBuildLog);
+            }
+            else
+            {
+                projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    "CustomCheckBaseTypeNotAssignable",
+                    "InvalidCheck",
+                    "InvalidCustomCheck, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
             }
         }
     }
 
-    private void AddCustomDataSourceToNugetConfig(string analysisCandidatePath)
+    [Theory]
+    [InlineData("CheckCandidate", "X01234", "error", "error X01234")]
+    [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234")]
+    public void CustomCheckTest_WithEditorConfig(string checkCandidate, string ruleId, string severity, string expectedMessage)
     {
-        var nugetTemplatePath = Path.Combine(analysisCandidatePath, "nugetTemplate.config");
+        using (var env = TestEnvironment.Create())
+        {
+            string checkCandidatePath = Path.Combine(TestAssetsRootPath, checkCandidate);
+
+            // Can't use Transitive environment due to the need to dogfood local nuget packages.
+            AddCustomDataSourceToNugetConfig(checkCandidatePath);
+            string editorConfigName = Path.Combine(checkCandidatePath, EditorConfigFileName);
+            File.WriteAllText(editorConfigName, ReadEditorConfig(
+                new List<(string, string)>() { (ruleId, severity) },
+                ruleToCustomConfig: null,
+                checkCandidatePath));
+
+            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool _);
+
+            projectCheckBuildLog.ShouldContain(expectedMessage);
+
+            // Cleanup
+            File.Delete(editorConfigName);
+        }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void DoesNotRunOnRestore(bool buildInOutOfProcessNode)
+    {
+        PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", "warning") });
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -t:restore -check",
+            out bool success);
+
+        success.ShouldBeTrue();
+        output.ShouldNotContain("BC0101");
+        output.ShouldNotContain("BC0102");
+        output.ShouldNotContain("BC0103");
+    }
+
+    private void AddCustomDataSourceToNugetConfig(string checkCandidatePath)
+    {
+        var nugetTemplatePath = Path.Combine(checkCandidatePath, "nugetTemplate.config");
 
         var doc = new XmlDocument();
         doc.LoadXml(File.ReadAllText(nugetTemplatePath));
@@ -209,11 +402,11 @@ public class EndToEndTests : IDisposable
         {
             XmlNode? packageSourcesNode = doc.SelectSingleNode("//packageSources");
 
-            // The test packages are generated during the test project build and saved in CustomAnalyzers folder.
-            string analyzersPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.Parent?.FullName ?? string.Empty, "CustomAnalyzers");
-            AddPackageSource(doc, packageSourcesNode, "Key", analyzersPackagesPath);
+            // The test packages are generated during the test project build and saved in CustomChecks folder.
+            string checksPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.Parent?.FullName ?? string.Empty, "CustomChecks");
+            AddPackageSource(doc, packageSourcesNode, "Key", checksPackagesPath);
 
-            doc.Save(Path.Combine(analysisCandidatePath, "nuget.config"));
+            doc.Save(Path.Combine(checkCandidatePath, "nuget.config"));
         }
     }
 
@@ -239,31 +432,40 @@ public class EndToEndTests : IDisposable
     }
 
     private void PrepareSampleProjectsAndConfig(
-    bool buildInOutOfProcessNode,
-    out TransientTestFile projectFile,
-    string? BC0101Severity = null)
+        bool buildInOutOfProcessNode,
+        out TransientTestFile projectFile,
+        string entryProjectAssetName,
+        IEnumerable<string>? supplementalAssetNames = null,
+        IEnumerable<(string RuleId, string Severity)>? ruleToSeverity = null,
+        IEnumerable<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? ruleToCustomConfig = null)
     {
-        string testAssetsFolderName = "SampleAnalyzerIntegrationTest";
+        string testAssetsFolderName = "SampleCheckIntegrationTest";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
         TransientTestFile testFile = _env.CreateFile(workFolder, "somefile");
 
-        string contents = ReadAndAdjustProjectContent("Project1");
-        string contents2 = ReadAndAdjustProjectContent("Project2");
+        string contents = ReadAndAdjustProjectContent(entryProjectAssetName);
+        projectFile = _env.CreateFile(workFolder, entryProjectAssetName, contents);
 
-        projectFile = _env.CreateFile(workFolder, "FooBar.csproj", contents);
-        TransientTestFile projectFile2 = _env.CreateFile(workFolder, "FooBar-Copy.csproj", contents2);
+        foreach (string supplementalAssetName in supplementalAssetNames ?? Enumerable.Empty<string>())
+        {
+            string supplementalContent = ReadAndAdjustProjectContent(supplementalAssetName);
+            TransientTestFile supplementalFile = _env.CreateFile(workFolder, supplementalAssetName, supplementalContent);
+        }
 
-        CreateEditorConfig(BC0101Severity, testAssetsFolderName, workFolder);
+        _env.CreateFile(workFolder, ".editorconfig", ReadEditorConfig(ruleToSeverity, ruleToCustomConfig, testAssetsFolderName));
 
         // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
-        // This discrepancy breaks path equality checks in analyzers if we pass to MSBuild full path to the initial project.
+        // This discrepancy breaks path equality checks in MSBuild checks if we pass to MSBuild full path to the initial project.
         // See if there is a way of fixing it in the engine - tracked: https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=55702688.
         _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
 
         _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
         _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
 
-        _env.SetEnvironmentVariable("TEST", "FromEnvVariable");
+        // Needed for testing check BC0103
+        _env.SetEnvironmentVariable("TestFromTarget", "FromTarget");
+        _env.SetEnvironmentVariable("TestFromEvaluation", "FromEvaluation");
+        _env.SetEnvironmentVariable("TestImported", "FromEnv");
 
         string ReadAndAdjustProjectContent(string fileName) =>
             File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, fileName))
@@ -271,12 +473,51 @@ public class EndToEndTests : IDisposable
                 .Replace("WorkFolderPath", workFolder.Path);
     }
 
-    private void CreateEditorConfig(string? BC0101Severity, string testAssetsFolderName, TransientTestFolder workFolder)
-    {
-        string configContent = string.IsNullOrEmpty(BC0101Severity)
-            ? File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, ".editorconfigbasic"))
-            : File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, ".editorconfigcustomised")).Replace("BC0101Severity", BC0101Severity);
+    private void PrepareSampleProjectsAndConfig(
+        bool buildInOutOfProcessNode,
+        out TransientTestFile projectFile,
+        IEnumerable<(string RuleId, string Severity)>? ruleToSeverity,
+        IEnumerable<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? ruleToCustomConfig = null)
+        => PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode,
+            out projectFile,
+            "Project1.csproj",
+            new[] { "Project2.csproj", "ImportedFile1.props" },
+            ruleToSeverity,
+            ruleToCustomConfig);
 
-        _ = _env.CreateFile(workFolder, ".editorconfig", configContent);
+    private string ReadEditorConfig(
+        IEnumerable<(string RuleId, string Severity)>? ruleToSeverity,
+        IEnumerable<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? ruleToCustomConfig,
+        string testAssetsFolderName)
+    {
+        string configContent = File.ReadAllText(Path.Combine(TestAssetsRootPath, testAssetsFolderName, $"{EditorConfigFileName}test"));
+
+        PopulateRuleToSeverity(ruleToSeverity, ref configContent);
+        PopulateRuleToCustomConfig(ruleToCustomConfig, ref configContent);
+
+        return configContent;
+    }
+
+    private void PopulateRuleToSeverity(IEnumerable<(string RuleId, string Severity)>? ruleToSeverity, ref string configContent)
+    {
+        if (ruleToSeverity != null && ruleToSeverity.Any())
+        {
+            foreach (var rule in ruleToSeverity)
+            {
+                configContent = configContent.Replace($"build_check.{rule.RuleId}.Severity={rule.RuleId}Severity", $"build_check.{rule.RuleId}.Severity={rule.Severity}");
+            }
+        }
+    }
+
+    private void PopulateRuleToCustomConfig(IEnumerable<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? ruleToCustomConfig, ref string configContent)
+    {
+        if (ruleToCustomConfig != null && ruleToCustomConfig.Any())
+        {
+            foreach (var rule in ruleToCustomConfig)
+            {
+                configContent = configContent.Replace($"build_check.{rule.RuleId}.CustomConfig=dummy", $"build_check.{rule.RuleId}.{rule.CustomConfig.ConfigKey}={rule.CustomConfig.Value}");
+            }
+        }
     }
 }

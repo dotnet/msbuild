@@ -7,7 +7,7 @@ using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Shared
 {
-    internal interface IElementLocation : IMsBuildElementLocation, ITranslatable { }
+    internal interface IElementLocation : IMSBuildElementLocation, ITranslatable { }
 
     /// <summary>
     /// Represents the location information for error reporting purposes.  This is normally used to
@@ -18,9 +18,9 @@ namespace Microsoft.Build.Shared
     /// </summary>
     /// <remarks>
     /// This is currently internal - but it is prepared to be made public once it will be needed by other public BuildCheck OM
-    /// (e.g. by property read/write OM)
+    /// (e.g. by property read/write OM).
     /// </remarks>
-    internal interface IMsBuildElementLocation
+    public interface IMSBuildElementLocation
     {
         /// <summary>
         /// The file from which this particular element originated.  It may

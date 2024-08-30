@@ -841,13 +841,13 @@ build_metadata.Compile.ToRetrieve = abc123
 build_metadata.Compile.ToRetrieve = def456
 ");
 
-        var set = AnalyzerConfigSet.Create(ImmutableArray.Create(config));
+        var set = CheckConfigSet.Create(ImmutableArray.Create(config));
 
         var sectionOptions = set.GetOptionsForSourcePath("/home/foo/src/{releaseid}.cs");
-        Assert.Equal("abc123", sectionOptions.AnalyzerOptions["build_metadata.compile.toretrieve"]);
+        Assert.Equal("abc123", sectionOptions.CheckOptions["build_metadata.compile.toretrieve"]);
 
         sectionOptions = set.GetOptionsForSourcePath("/home/foo/src/Pages/#foo/HomePage.cs");
-        Assert.Equal("def456", sectionOptions.AnalyzerOptions["build_metadata.compile.toretrieve"]);
+        Assert.Equal("def456", sectionOptions.CheckOptions["build_metadata.compile.toretrieve"]);
     }*/
 
     [Fact]
@@ -895,9 +895,9 @@ my_PROP = my_VAL");
     public void NonReservedKeyPreservedCaseVal()
     {
         var config = ParseConfigFile(string.Join(Environment.NewLine,
-            AnalyzerConfig.ReservedKeys.Select(k => "MY_" + k + " = MY_VAL")));
+            CheckConfig.ReservedKeys.Select(k => "MY_" + k + " = MY_VAL")));
         AssertEx.SetEqual(
-            AnalyzerConfig.ReservedKeys.Select(k => KeyValuePair.Create("my_" + k, "MY_VAL")).ToList(),
+            CheckConfig.ReservedKeys.Select(k => KeyValuePair.Create("my_" + k, "MY_VAL")).ToList(),
             config.GlobalSection.Properties);
     }*/
 
@@ -1055,10 +1055,10 @@ RoOt = TruE");
     {
         int index = 0;
         var config = ParseConfigFile(string.Join(Environment.NewLine,
-            AnalyzerConfig.ReservedValues.Select(v => "MY_KEY" + (index++) + " = " + v.ToUpperInvariant())));
+            CheckConfig.ReservedValues.Select(v => "MY_KEY" + (index++) + " = " + v.ToUpperInvariant())));
         index = 0;
         AssertEx.SetEqual(
-            AnalyzerConfig.ReservedValues.Select(v => KeyValuePair.Create("my_key" + (index++), v)).ToList(),
+            CheckConfig.ReservedValues.Select(v => KeyValuePair.Create("my_key" + (index++), v)).ToList(),
             config.GlobalSection.Properties);
     }
     */
@@ -1068,9 +1068,9 @@ RoOt = TruE");
     public void ReservedKeys()
     {
         var config = ParseConfigFile(string.Join(Environment.NewLine,
-            AnalyzerConfig.ReservedKeys.Select(k => k + " = MY_VAL")));
+            CheckConfig.ReservedKeys.Select(k => k + " = MY_VAL")));
         AssertEx.SetEqual(
-            AnalyzerConfig.ReservedKeys.Select(k => KeyValuePair.Create(k, "my_val")).ToList(),
+            CheckConfig.ReservedKeys.Select(k => KeyValuePair.Create(k, "my_val")).ToList(),
             config.GlobalSection.Properties);
     }
     */

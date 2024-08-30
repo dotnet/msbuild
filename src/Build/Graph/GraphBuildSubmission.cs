@@ -71,6 +71,11 @@ namespace Microsoft.Build.Graph
         protected internal override GraphBuildResult CreateFailedResult(Exception exception)
             => new(SubmissionId, exception);
 
+        /// <summary>
+        /// Whether the build has started.
+        /// </summary>
+        internal override bool IsStarted { get; set; }
+
         // WARNING!: Do not remove the below proxy properties.
         //  They are required to make the OM forward compatible
         //  (code built against this OM should run against binaries with previous version of OM).
