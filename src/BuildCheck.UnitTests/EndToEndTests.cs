@@ -148,7 +148,7 @@ public class EndToEndTests : IDisposable
     [InlineData("suggestion", "BC0101", new string[] { "error BC0101", "warning BC0101" })]
     [InlineData("default", "warning BC0101", new string[] { "error BC0101" })]
     [InlineData("none", null, new string[] { "BC0101" })]
-    public void EditorConfig_SeverityAppliedCorrectly(string BC0101Severity, string expectedOutputValues, string[] unexpectedOutputValues)
+    public void EditorConfig_SeverityAppliedCorrectly(string BC0101Severity, string? expectedOutputValues, string[] unexpectedOutputValues)
     {
         PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", BC0101Severity) });
 
@@ -163,7 +163,7 @@ public class EndToEndTests : IDisposable
 
         if (!string.IsNullOrEmpty(expectedOutputValues))
         {
-            output.ShouldContain(expectedOutputValues);
+            output.ShouldContain(expectedOutputValues!);
         }
 
         foreach (string unexpectedOutputValue in unexpectedOutputValues)
