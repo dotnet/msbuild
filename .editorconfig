@@ -432,8 +432,11 @@ dotnet_diagnostic.xUnit1012.severity = warning
 # Use Assert.Fail() instead of Assert.True(false) or Assert.False(true)
 dotnet_diagnostic.xUnit2020.severity = warning
 
+# Use Assert.DoesNotContain instead of Assert.Empty on filtered collections
+dotnet_diagnostic.xUnit2029.severity = warning
+
 # xunit to supress temp
 dotnet_diagnostic.xUnit1031.severity = none
-dotnet_diagnostic.xUnit2029.severity = none
+
 # Do not use equality check to check for collection size.
 dotnet_diagnostic.xUnit2013.severity = none
