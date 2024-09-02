@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
