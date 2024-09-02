@@ -1263,7 +1263,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 return;
             }
 
-            Assert.True(false);
+            Assert.Fail();
         }
 
         /// <summary>
@@ -1290,7 +1290,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 return;
             }
 
-            Assert.True(false);
+            Assert.Fail();
         }
         /// <summary>
         /// Creates a set of complicated item metadata and properties, and items to exercise
@@ -3586,7 +3586,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 expander.ExpandIntoStringLeaveEscaped(@"$([MSBuild]::DoesTaskHostExist('ASDF', 'CurrentArchitecture'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
                 // We should have failed before now
-                Assert.True(false);
+                Assert.Fail();
             });
         }
 
@@ -4250,7 +4250,7 @@ $(
                 {
                     string message = "FAILURE: " + validTests[i][0] + " expanded to '" + result + "' instead of '" + validTests[i][1] + "'";
                     Console.WriteLine(message);
-                    Assert.True(false, message);
+                    Assert.Fail(message);
                 }
                 else
                 {
