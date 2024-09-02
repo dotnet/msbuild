@@ -162,22 +162,22 @@
       </trans-unit>
       <trans-unit id="LongPaths">
         <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
-        <target state="new">Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</target>
+        <target state="translated">Windows 레지스트리 키 LongPathsEnabled에 따라 LongPaths 기능이 {0}입니다.</target>
         <note>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</note>
       </trans-unit>
       <trans-unit id="LongPaths_Disabled">
         <source>disabled</source>
-        <target state="new">disabled</target>
+        <target state="translated">사용 안 함</target>
         <note />
       </trans-unit>
       <trans-unit id="LongPaths_Enabled">
         <source>enabled</source>
-        <target state="new">enabled</target>
+        <target state="translated">사용</target>
         <note />
       </trans-unit>
       <trans-unit id="LongPaths_Missing">
         <source>not set</source>
-        <target state="new">not set</target>
+        <target state="translated">설정 안 함</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
@@ -600,11 +600,11 @@
         <target state="translated">  -logger:&lt;로거&gt;   이 로거를 사용하여 MSBuild의 이벤트를 기록합니다. 여러
                      로거를 지정하려면 각 로거를 개별적으로 지정합니다.
                      &lt;로거&gt; 구문은 다음과 같습니다.
-                       [&lt;클래스&gt;,]&lt;어셈블리&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
+                       [&lt;클래스&gt;,]&lt;assembly&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
                      &lt;로거 클래스&gt; 구문은 다음과 같습니다.
                        [&lt;부분 또는 전체 네임스페이스&gt;.]&lt;로거 클래스 이름&gt;
                      &lt;로거 어셈블리&gt; 구문은 다음과 같습니다.
-                       {&lt;어셈블리 이름&gt;[,&lt;strong name&gt;] | &lt;어셈블리 파일&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      로거 옵션은 MSBuild가 로거를 만드는 방법을 지정합니다.
                      &lt;로거 매개 변수&gt;는 선택 사항이고 입력한 대로 정확히
                      로거에 전달됩니다. (약식: -l)
@@ -882,11 +882,11 @@
                      로거를 지정하려면 각 로거를 개별적으로 지정합니다.
                      (약식 -dl)
                      &lt;로거&gt; 구문은 다음과 같습니다.
-                       [&lt;클래스&gt;,]&lt;어셈블리&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
+                       [&lt;클래스&gt;,]&lt;assembly&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
                      &lt;로거 클래스&gt; 구문은 다음과 같습니다.
                        [&lt;부분 또는 전체 네임스페이스&gt;.]&lt;로거 클래스 이름&gt;
                      &lt;로거 어셈블리&gt; 구문은 다음과 같습니다.
-                       {&lt;어셈블리 이름&gt;[,&lt;strong name&gt;] | &lt;어셈블리 파일&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      로거 옵션은 MSBuild가 로거를 만드는 방법을 지정합니다.
                       &lt;로거 매개 변수&gt;는 선택 사항이고
                      입력한 대로 정확히 로거에 전달됩니다. (약식: -l)

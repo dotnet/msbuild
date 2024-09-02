@@ -120,8 +120,9 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Faz com que o MSBuild relate acessos a arquivos para qualquer plug-in
-                     de cache de projeto configurado.
+                     Faz com que o MSBuild relate acessos a arquivos a qualquer
+ configurado
+                     plug-ins de cache do projeto.
 
                      Este sinalizador é experimental e pode não funcionar conforme o esperado.
     </target>
@@ -162,22 +163,22 @@
       </trans-unit>
       <trans-unit id="LongPaths">
         <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
-        <target state="new">Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</target>
+        <target state="translated">Com base na chave do Registro do Windows LongPathsEnabled, o recurso LongPaths é {0}.</target>
         <note>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</note>
       </trans-unit>
       <trans-unit id="LongPaths_Disabled">
         <source>disabled</source>
-        <target state="new">disabled</target>
+        <target state="translated">desabilitado</target>
         <note />
       </trans-unit>
       <trans-unit id="LongPaths_Enabled">
         <source>enabled</source>
-        <target state="new">enabled</target>
+        <target state="translated">habilitado</target>
         <note />
       </trans-unit>
       <trans-unit id="LongPaths_Missing">
         <source>not set</source>
-        <target state="new">not set</target>
+        <target state="translated">não definido</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
