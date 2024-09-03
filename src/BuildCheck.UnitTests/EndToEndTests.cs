@@ -344,6 +344,37 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
+    [InlineData("X01236", "Something went wrong initializing")]
+    [InlineData("X01237", "message")]
+    [InlineData("X01238", "message")]
+    public void CustomChecksFailGracefully(string ruleId, string expectedMessage)
+    {
+        using (var env = TestEnvironment.Create())
+        {
+            string checkCandidate = "CheckCandidateWithMultipleChecksInjected";
+            string checkCandidatePath = Path.Combine(TestAssetsRootPath, checkCandidate);
+
+            // Can't use Transitive environment due to the need to dogfood local nuget packages.
+            AddCustomDataSourceToNugetConfig(checkCandidatePath);
+            string editorConfigName = Path.Combine(checkCandidatePath, EditorConfigFileName);
+            File.WriteAllText(editorConfigName, ReadEditorConfig(
+                new List<(string, string)>() { (ruleId, "warning") },
+                ruleToCustomConfig: null,
+                checkCandidatePath));
+
+            string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool success);
+
+            success.ShouldBeTrue();
+            projectCheckBuildLog.ShouldContain(expectedMessage);
+            projectCheckBuildLog.ShouldNotContain("This check should have been disabled");
+
+            // Cleanup
+            File.Delete(editorConfigName);
+        }
+    }
+
+    [Theory]
     [InlineData(true)]
     [InlineData(false)]
     public void DoesNotRunOnRestore(bool buildInOutOfProcessNode)

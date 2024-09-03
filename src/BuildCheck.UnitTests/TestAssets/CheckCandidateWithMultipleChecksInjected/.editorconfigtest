@@ -2,3 +2,6 @@ root = true
 
 [*.csproj]
 build_check.X01234.Severity=X01234Severity
+
+build_check.X01235.Severity=warning
+build_check.X01236.Severity=warning
