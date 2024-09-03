@@ -8,6 +8,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
+using System.Diagnostics;
 
 #nullable disable
 

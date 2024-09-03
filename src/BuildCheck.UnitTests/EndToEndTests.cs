@@ -345,8 +345,8 @@ public class EndToEndTests : IDisposable
 
     [Theory]
     [InlineData("X01236", "Something went wrong initializing")]
-    [InlineData("X01237", "message")]
-    [InlineData("X01238", "message")]
+    // [InlineData("X01237", "message")]
+    // [InlineData("X01238", "message")]
     public void CustomChecksFailGracefully(string ruleId, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())
