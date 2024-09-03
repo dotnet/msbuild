@@ -426,13 +426,14 @@ dotnet_diagnostic.IDE0073.severity = error
 # Use 'System.Threading.Lock'
 dotnet_diagnostic.IDE0330.severity = suggestion
 
+# Value types are incompatible with null values. https://xunit.net/xunit.analyzers/rules/xUnit1012
+dotnet_diagnostic.xUnit1012.severity = warning
 
 # Use Assert.Fail() instead of Assert.True(false) or Assert.False(true)
 dotnet_diagnostic.xUnit2020.severity = warning
 
 # xunit to supress temp
 dotnet_diagnostic.xUnit1031.severity = none
-dotnet_diagnostic.xUnit1012.severity = none
 dotnet_diagnostic.xUnit2029.severity = none
 # Do not use equality check to check for collection size.
 dotnet_diagnostic.xUnit2013.severity = none
