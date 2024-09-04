@@ -46,8 +46,4 @@
     </None>
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="TestAssets\ErrorCustomCheck\ErrorWhenRegisteringActions.cs" />
-  </ItemGroup>
-
 </Project>
