@@ -345,6 +345,8 @@ public class EndToEndTests : IDisposable
 
     [Theory]
     [InlineData("X01236", "Something went wrong initializing")]
+    // These tests are for failure one different points, will be addressed in a different PR
+    // https://github.com/dotnet/msbuild/issues/10522
     // [InlineData("X01237", "message")]
     // [InlineData("X01238", "message")]
     public void CustomChecksFailGracefully(string ruleId, string expectedMessage)
