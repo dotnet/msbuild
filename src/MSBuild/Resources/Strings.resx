@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!--
-    Microsoft ResX Schema
-
+  <!-- 
+    Microsoft ResX Schema 
+    
     Version 2.0
-
-    The primary goals of this format is to allow a simple XML format
-    that is mostly human readable. The generation and parsing of the
-    various data types are done through the TypeConverter classes
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
     associated with the data types.
-
+    
     Example:
-
+    
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-
-    There are any number of "resheader" rows that contain simple
+                
+    There are any number of "resheader" rows that contain simple 
     name/value pairs.
-
-    Each data row contains a name, and value. The row also contains a
-    type or mimetype. Type corresponds to a .NET class that support
-    text/value conversion through the TypeConverter architecture.
-    Classes that don't support this are serialized and stored with the
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
     mimetype set.
-
-    The mimetype is used for serialized objects, and tells the
-    ResXResourceReader how to depersist the object. This is currently not
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
     extensible. For a given mimetype the value must be set accordingly:
-
-    Note - application/x-microsoft.net.object.binary.base64 is the format
-    that the ResXResourceWriter will generate, however the reader can
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
     read any of the formats listed below.
-
+    
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-
+    
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array
+    value   : The object must be serialized into a byte array 
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -929,7 +929,7 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
-  <data name="HelpMessage_43_GetPropertySwitch" Visibility="Public">
+  <data name="HelpMessage_43_GetPropertySwitch" xml:space="preserve">
     <value>  -getProperty:propertyName,...
                      Write out the value of one or more specified properties
                      after evaluation, without executing the build, or if either
@@ -941,7 +941,7 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
-  <data name="HelpMessage_44_GetItemSwitch" Visibility="Public">
+  <data name="HelpMessage_44_GetItemSwitch" xml:space="preserve">
     <value>  -getItem:itemName,...
                      Write out the value of one or more specified items and
                      their associated metadata after evaluation without
@@ -954,7 +954,7 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
-  <data name="HelpMessage_45_GetTargetResultSwitch" Visibility="Public">
+  <data name="HelpMessage_45_GetTargetResultSwitch" xml:space="preserve">
     <value>  -getTargetResult:targetName,...
                      Write out the output value of one or more targets and
                      the specified targets will be executed.
@@ -964,7 +964,7 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
-  <data name="HelpMessage_46_FeatureAvailabilitySwitch" Visibility="Public">
+  <data name="HelpMessage_46_FeatureAvailabilitySwitch" xml:space="preserve">
     <value>  -featureAvailability:featureName,...
                      Check feature availability. The result is one of the
                      strings "Undefined", "Available", "NotAvailable" and
@@ -985,7 +985,7 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
-  <data name="HelpMessage_47_TerminalLoggerSwitch" Visibility="Public">
+  <data name="HelpMessage_47_TerminalLoggerSwitch" xml:space="preserve">
     <value>  -terminalLogger[:auto,on,off]
                      Enable or disable the terminal logger. Terminal logger
                      provides enhanced build output on the console in real time,
@@ -1003,7 +1003,7 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
-  <data name="HelpMessage_51_GetResultOutputFileSwitch" Visibility="Public">
+  <data name="HelpMessage_51_GetResultOutputFileSwitch" xml:space="preserve">
     <value>  -getResultOutputFile:file
                      Redirect output from get* into a file.
 
@@ -1016,7 +1016,7 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
-  <data name="HelpMessage_48_TerminalLoggerParametersSwitch" Visibility="Public">
+  <data name="HelpMessage_48_TerminalLoggerParametersSwitch" xml:space="preserve">
     <value>  -terminalLoggerParameters: &lt;parameters&gt;
                      Parameters to terminal logger. (Short form: -tlp)
                      The available parameters.
@@ -1217,7 +1217,7 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
-  <data name="MissingFeatureAvailabilityError" UESanitized="true" Visibility="Public">
+  <data name="MissingFeatureAvailabilityError" xml:space="preserve">
     <value>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</value>
     <comment>
       {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
@@ -1225,7 +1225,7 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
-  <data name="MissingGetItemError" UESanitized="true" Visibility="Public">
+  <data name="MissingGetItemError" xml:space="preserve">
     <value>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</value>
     <comment>
       {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
@@ -1797,12 +1797,11 @@
   <data name="SAC_Off" xml:space="preserve">
     <value>0: turned off</value>
   </data>
-  <!-- **** TerminalLogger strings end **** -->
-    <!--
-        The command line message bucket is: MSB1001 - MSB1999
-
-        Next error code should be MSB1069.
-
-        Don't forget to update this comment after using the new code.
-  -->
+  <data name="HelpMessage_52_BuildCheckSwitch" xml:space="preserve">
+    <value>-check
+                     Enables BuildChecks during the build. BuildCheck is a series
+                     of checks to ensure code quality for build via rule violation reports.</value>
+    <comment>      LOCALIZATION: "-check", and "-BuildChecks" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.</comment>
+  </data>
 </root>
