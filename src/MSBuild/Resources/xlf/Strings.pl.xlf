@@ -313,10 +313,10 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_52_BuildCheckSwitch">
-        <source>-check
+        <source>  -check
                      Enables BuildChecks during the build. BuildCheck is a series
                      of checks to ensure code quality for build via rule violation reports.</source>
-        <target state="new">-check
+        <target state="new">  -check
                      Enables BuildChecks during the build. BuildCheck is a series
                      of checks to ensure code quality for build via rule violation reports.</target>
         <note>      LOCALIZATION: "-check", and "-BuildChecks" should not be localized.

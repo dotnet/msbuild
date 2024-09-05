@@ -1798,7 +1798,7 @@
     <value>0: turned off</value>
   </data>
   <data name="HelpMessage_52_BuildCheckSwitch" xml:space="preserve">
-    <value>-check
+    <value>  -check
                      Enables BuildChecks during the build. BuildCheck is a series
                      of checks to ensure code quality for build via rule violation reports.</value>
     <comment>      LOCALIZATION: "-check", and "-BuildChecks" should not be localized.
