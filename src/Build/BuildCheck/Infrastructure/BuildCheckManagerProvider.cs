@@ -188,7 +188,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
-                List<CheckFactoryContext> checksToRemove = new();
+                List<CheckFactoryContext> invalidChecksToRemove = new();
                 foreach (var factory in factories)
                 {
                     var instance = factory();
@@ -215,11 +215,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                                     null,
                                     new BuildEventFileInfo(projectPath),
                                     e.Message);
-                                checksToRemove.Add(checkFactoryContext);
+                                invalidChecksToRemove.Add(checkFactoryContext);
                             }
                         }
                     }
-                    RemoveChecks(checksToRemove, checkContext);
+                    RemoveChecks(invalidChecksToRemove, checkContext);
                 }
             }
         }
@@ -301,7 +301,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             // If it's already constructed - just control the custom settings do not differ
             Stopwatch stopwatch = Stopwatch.StartNew();
-            List<CheckFactoryContext> checksToRemove = new();
+            List<CheckFactoryContext> invalidChecksToRemove = new();
             foreach (CheckFactoryContext checkFactoryContext in _checkRegistry)
             {
                 try
@@ -316,11 +316,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         null,
                         new BuildEventFileInfo(projectFullPath),
                         e.Message);
-                    checksToRemove.Add(checkFactoryContext);
+                    invalidChecksToRemove.Add(checkFactoryContext);
                 }
             }
 
-            RemoveChecks(checksToRemove, checkContext);
+            RemoveChecks(invalidChecksToRemove, checkContext);
 
             stopwatch.Stop();
             _tracingReporter.AddNewProjectStats(stopwatch.Elapsed);
