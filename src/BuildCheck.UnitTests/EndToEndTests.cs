@@ -62,6 +62,30 @@ public class EndToEndTests : IDisposable
         Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(2);
     }
 
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WarningsCountExceedsLimitTest(bool buildInOutOfProcessNode)
+    {
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode,
+            out TransientTestFile projectFile,
+            "PropsCheckTestWithLimit.csproj");
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+
+        output.ShouldMatch(@"has exceeded the maximum number of results allowed for the rule");
+
+        // each finding should be found just once - but reported twice, due to summary
+        Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
+        Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(20);
+    }
+
+
     [Theory]
     [InlineData(true, true)]
     [InlineData(false, true)]

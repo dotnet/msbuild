@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -16,6 +17,16 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 internal sealed class CheckWrapper
 {
     private readonly Stopwatch _stopwatch = new Stopwatch();
+
+    /// <summary>
+    /// Maximum amount of messages that could be sent per check rule.
+    /// </summary>
+    public const int MaxMessageCountPerRule = 10;
+
+    /// <summary>
+    /// Keeps track of number of reports sent per rule.
+    /// </summary>
+    private Dictionary<string, int>? _reportsCountPerRule;
 
     public CheckWrapper(Check check)
     {
@@ -28,6 +39,11 @@ internal sealed class CheckWrapper
     // Let's optimize for the scenario where users have a single .editorconfig file that applies to the whole solution.
     // In such case - configuration will be same for all projects. So we do not need to store it per project in a collection.
     internal CheckConfigurationEffective? CommonConfig { get; private set; }
+
+    internal void Initialize()
+    {
+        _reportsCountPerRule = new Dictionary<string, int>();
+    }
 
     // start new project
     internal void StartNewProject(
@@ -50,6 +66,33 @@ internal sealed class CheckWrapper
         {
             CommonConfig = null;
         }
+    }
+
+    public void ReportResult(BuildCheckResult result, ICheckContext checkContext, CheckConfigurationEffective config)
+    {
+        if (_reportsCountPerRule is not null)
+        {
+            if (!_reportsCountPerRule.ContainsKey(result.CheckRule.Id))
+            {
+                _reportsCountPerRule[result.CheckRule.Id] = 0;
+            }
+            _reportsCountPerRule[result.CheckRule.Id]++;
+
+            if (_reportsCountPerRule[result.CheckRule.Id] == MaxMessageCountPerRule + 1)
+            {
+                checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"The check '{Check.FriendlyName}' has exceeded the maximum number of results allowed for the rule '{result.CheckRule.Id}'. Any additional results will not be displayed.");
+                return;
+            }
+
+            if (_reportsCountPerRule[result.CheckRule.Id] > MaxMessageCountPerRule + 1)
+            {
+                return;
+            }
+        }
+
+        BuildEventArgs eventArgs = result.ToEventArgs(config.Severity);
+        eventArgs.BuildEventContext = checkContext.BuildEventContext;
+        checkContext.DispatchBuildEvent(eventArgs);
     }
 
     // to be used on eval node (BuildCheckDataSource.check)

@@ -573,7 +573,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     throw new BuildCheckConfigurationException(
                         $"The Check '{ba.FriendlyName}' failed to initialize: {e.Message}", e);
                 }
-                return new CheckWrapper(ba);
+
+                CheckWrapper wrapper = new(ba);
+                wrapper.Initialize();
+                return wrapper;
             }
 
             public CheckWrapper? MaterializedCheck { get; set; }

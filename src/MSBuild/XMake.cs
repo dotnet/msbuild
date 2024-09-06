@@ -2721,6 +2721,13 @@ namespace Microsoft.Build.CommandLine
 
                     isBuildCheckEnabled = IsBuildCheckEnabled(commandLineSwitches);
 
+                    // BuildCheck is not compatible with node reusing, see #10317.
+                    // Disable node reuse when build check is on.
+                    if (isBuildCheckEnabled)
+                    {
+                        enableNodeReuse = false;
+                    }
+
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
                     outputResultsCache = ProcessOutputResultsCache(commandLineSwitches);
