@@ -188,6 +188,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
+                List<CheckFactoryContext> invalidChecksToRemove = new();
                 foreach (var factory in factories)
                 {
                     var instance = factory();
@@ -201,10 +202,24 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         if (checkFactoryContext != null)
                         {
                             _checkRegistry.Add(checkFactoryContext);
-                            SetupSingleCheck(checkFactoryContext, projectPath);
-                            checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckSuccessfulAcquisition", instance.FriendlyName);
+                            try
+                            {
+                                SetupSingleCheck(checkFactoryContext, projectPath);
+                                checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckSuccessfulAcquisition", instance.FriendlyName);
+                            }
+                            catch (BuildCheckConfigurationException e)
+                            {
+                                checkContext.DispatchAsWarningFromText(
+                                    null,
+                                    null,
+                                    null,
+                                    new BuildEventFileInfo(projectPath),
+                                    e.Message);
+                                invalidChecksToRemove.Add(checkFactoryContext);
+                            }
                         }
                     }
+                    RemoveChecks(invalidChecksToRemove, checkContext);
                 }
             }
         }
@@ -286,7 +301,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             // If it's already constructed - just control the custom settings do not differ
             Stopwatch stopwatch = Stopwatch.StartNew();
-            List<CheckFactoryContext> checksToRemove = new();
+            List<CheckFactoryContext> invalidChecksToRemove = new();
             foreach (CheckFactoryContext checkFactoryContext in _checkRegistry)
             {
                 try
@@ -295,16 +310,24 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
                 catch (BuildCheckConfigurationException e)
                 {
-                    checkContext.DispatchAsErrorFromText(
+                    checkContext.DispatchAsWarningFromText(
                         null,
                         null,
                         null,
                         new BuildEventFileInfo(projectFullPath),
                         e.Message);
-                    checksToRemove.Add(checkFactoryContext);
+                    invalidChecksToRemove.Add(checkFactoryContext);
                 }
             }
 
+            RemoveChecks(invalidChecksToRemove, checkContext);
+
+            stopwatch.Stop();
+            _tracingReporter.AddNewProjectStats(stopwatch.Elapsed);
+        }
+
+        private void RemoveChecks(List<CheckFactoryContext> checksToRemove, ICheckContext checkContext)
+        {
             checksToRemove.ForEach(c =>
             {
                 _checkRegistry.Remove(c);
@@ -316,9 +339,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 _tracingReporter.AddCheckStats(checkToRemove!.Check.FriendlyName, checkToRemove.Elapsed);
                 checkToRemove.Check.Dispose();
             }
-
-            stopwatch.Stop();
-            _tracingReporter.AddNewProjectStats(stopwatch.Elapsed);
         }
 
         public void ProcessEvaluationFinishedEventArgs(
