@@ -901,7 +901,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 foreach (ITaskItem output in e.TargetOutputs)
                 {
-                    project.OutputPath = output.ItemSpec.AsMemory();
+                    project.OutputPath = new(output.ItemSpec);
                     break;
                 }
             }
@@ -934,6 +934,28 @@ internal sealed partial class TerminalLogger : INodeLogger
                     project.SourceRoot = new(sourceControlSourceRoot.ItemSpec);
                 }
                 catch { } // ignore exceptions from trying to make the SourceRoot a DirectoryInfo, if this is invalid then we just won't use it.
+            }
+        }
+    }
+
+    private void TryReadNugetPackageAsProjectOutput(BuildEventContext? context, IEnumerable<ITaskItem>? nugetPackOutputs)
+    {
+        if (context is null || nugetPackOutputs is null)
+        {
+            return;
+        }
+
+        var projectContext = new ProjectContext(context);
+        if (_projects.TryGetValue(projectContext, out Project? project))
+        {
+            var nugetPackOutput = nugetPackOutputs.FirstOrDefault(output => Path.GetExtension(output.ItemSpec).Equals(".nupkg", StringComparison.OrdinalIgnoreCase));
+            if (nugetPackOutput is not null)
+            {
+                try
+                {
+                    project.OutputPath = new(nugetPackOutput.ItemSpec);
+                }
+                catch { } // ignore exceptions from trying to make the OutputPath a FileInfo, if this is invalid then we just won't use it.
             }
         }
     }
@@ -976,8 +998,13 @@ internal sealed partial class TerminalLogger : INodeLogger
                 {
                     TryReadSourceControlInformationForProject(taskArgs.BuildEventContext, taskArgs.Items as IList<ProjectItemInstance>);
                 }
+                if (taskArgs.ItemType.Equals("NuGetPackOutput", StringComparison.OrdinalIgnoreCase))
+                {
+                    TryReadNugetPackageAsProjectOutput(taskArgs.BuildEventContext, taskArgs.Items as IList<ProjectItemInstance>);
+                }
             }
         }
+
         if (message is not null && e.Importance == MessageImportance.High)
         {
             var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project);
@@ -989,7 +1016,8 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
                 if (!projectFileName.IsEmpty &&
-                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject)
+                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject
+                    && project!.OutputPath is null)
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
                     try
