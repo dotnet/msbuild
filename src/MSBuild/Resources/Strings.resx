@@ -1799,9 +1799,10 @@
   </data>
   <data name="HelpMessage_52_BuildCheckSwitch" xml:space="preserve">
     <value>  -check
-                     Enables BuildChecks during the build. BuildCheck is a series
-                     of checks to ensure code quality for build via rule violation reports.</value>
-    <comment>      LOCALIZATION: "-check", and "-BuildChecks" should not be localized.
-      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.</comment>
+                     Enables BuildCheck during the build. BuildCheck is a series
+                     of checks to ensure code quality of the build via rule 
+                     violation reports.
+</value>
+    <comment>      {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}{MaxLength=80}</comment>
   </data>
 </root>
