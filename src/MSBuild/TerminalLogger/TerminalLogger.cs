@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
@@ -217,7 +218,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     private bool _hasUsedCache = false;
 
     /// <summary>
-    /// Whether to show TaskCommandLineEventArgs high-priority messages. 
+    /// Whether to show TaskCommandLineEventArgs high-priority messages.
     /// </summary>
     private bool _showCommandLine = false;
 
@@ -277,6 +278,11 @@ internal sealed partial class TerminalLogger : INodeLogger
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
         eventSource.ErrorRaised += ErrorRaised;
+
+        if (eventSource is IEventSource3 eventSource3)
+        {
+            eventSource3.IncludeTaskInputs();
+        }
 
         if (eventSource is IEventSource4 eventSource4)
         {
@@ -789,6 +795,17 @@ internal sealed partial class TerminalLogger : INodeLogger
             return;
         }
 
+        if (e is TaskParameterEventArgs taskArgs)
+        {
+            if (taskArgs.Kind == TaskParameterMessageKind.AddItem)
+            {
+                if (taskArgs.ItemType.Equals("NuGetPackOutput", StringComparison.OrdinalIgnoreCase))
+                {
+                    TryReadNugetPackageAsProjectOutput(taskArgs.BuildEventContext, taskArgs.Items as IList<ProjectItemInstance>);
+                }
+            }
+        }
+
         string? message = e.Message;
         if (message is not null && e.Importance == MessageImportance.High)
         {
@@ -801,7 +818,9 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
                 if (!projectFileName.IsEmpty &&
-                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject)
+                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName))
+                    && hasProject
+                    && project!.OutputPath is null)
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
                     project!.OutputPath = outputPath;
@@ -1043,6 +1062,28 @@ internal sealed partial class TerminalLogger : INodeLogger
     #endregion
 
     #region Helpers
+
+    private void TryReadNugetPackageAsProjectOutput(BuildEventContext? context, IEnumerable<ITaskItem>? nugetPackOutputs)
+    {
+        if (context is null || nugetPackOutputs is null)
+        {
+            return;
+        }
+
+        var projectContext = new ProjectContext(context);
+        if (_projects.TryGetValue(projectContext, out Project? project))
+        {
+            var nugetPackOutput = nugetPackOutputs.FirstOrDefault(output => Path.GetExtension(output.ItemSpec).Equals(".nupkg", StringComparison.OrdinalIgnoreCase));
+            if (nugetPackOutput is not null)
+            {
+                try
+                {
+                    project.OutputPath = nugetPackOutput.ItemSpec.AsMemory();
+                }
+                catch { } // ignore exceptions from trying to make the OutputPath a FileInfo, if this is invalid then we just won't use it.
+            }
+        }
+    }
 
     /// <summary>
     /// Print a build result summary to the output.
