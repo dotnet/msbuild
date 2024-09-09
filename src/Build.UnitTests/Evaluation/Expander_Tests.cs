@@ -4092,6 +4092,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                    };
 
             var errorTests = new List<string> {
+            "$(a.Equals($(c)))",
+            "$(a.CompareTo($(c)))",
             "$(input[)",
             "$(input.ToString()])",
             "$(input.ToString()[)",
@@ -5074,7 +5076,7 @@ $(
         {
             using (var env = TestEnvironment.Create())
             {
-                // Setting this env variable allows to track if expander was using reflection for a function invocation. 
+                // Setting this env variable allows to track if expander was using reflection for a function invocation.
                 env.SetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection", "1");
 
                 var logger = new MockLogger();
