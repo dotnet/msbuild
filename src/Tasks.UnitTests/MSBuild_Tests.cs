@@ -35,8 +35,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// If we pass in an item spec that can be normalized down to something under the max path, it should still work and not
-        /// throw a path too long exception or file not found exception
+        /// If we pass in an item spec that is over the max path but it can be normalized down to something under the max path, we should still work and not
+        /// throw a path too long exception
         /// </summary>
         [Fact]
         public void ProjectItemSpecTooLong()
