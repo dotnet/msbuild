@@ -279,7 +279,7 @@ namespace Microsoft.Build.Tasks
             {
                 ITaskItem project = Projects[i];
 
-                string projectPath = FileUtilities.GetFullPathNoThrow(project.ItemSpec);
+                string projectPath = FileUtilities.AttemptToShortenPath(project.ItemSpec);
 
                 if (StopOnFirstFailure && !success)
                 {
@@ -506,7 +506,7 @@ namespace Microsoft.Build.Tasks
                 if (projects[i] != null)
                 {
                     // Retrieve projectDirectory only the first time.  It never changes anyway.
-                    string projectPath = FileUtilities.GetFullPathNoThrow(projects[i].ItemSpec);
+                    string projectPath = FileUtilities.AttemptToShortenPath(projects[i].ItemSpec);
                     projectDirectory[i] = Path.GetDirectoryName(projectPath);
                     projectNames[i] = projects[i].ItemSpec;
                     toolsVersions[i] = toolsVersion;

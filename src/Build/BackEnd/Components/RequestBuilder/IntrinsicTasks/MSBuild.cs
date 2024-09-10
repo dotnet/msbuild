@@ -314,7 +314,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ITaskItem project = Projects[i];
 
-                string projectPath = FileUtilities.GetFullPathNoThrow(project.ItemSpec);
+                string projectPath = FileUtilities.AttemptToShortenPath(project.ItemSpec);
 
                 if (StopOnFirstFailure && !success)
                 {

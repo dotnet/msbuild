@@ -44,8 +44,6 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(Path.GetTempPath());
 
-                string tempPath = Path.GetTempPath();
-
                 string tempProject = ObjectModelHelpers.CreateTempFileOnDisk(@"
                 <Project DefaultTargets=`TargetA; TargetB; TargetC` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
