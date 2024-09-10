@@ -116,6 +116,7 @@ namespace Microsoft.Build.Tasks
                         {
                             using (FileStream stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
                             {
+#pragma warning disable CA2000 // Dispose objects before losing scope because ZipArchive will dispose the stream when it is disposed.
                                 using (ZipArchive zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))
                                 {
                                     try
@@ -129,6 +130,7 @@ namespace Microsoft.Build.Tasks
                                         return false;
                                     }
                                 }
+#pragma warning restore CA2000 // Dispose objects before losing scope
                             }
                         }
                         catch (OperationCanceledException)
@@ -219,7 +221,8 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e)
                     {
-                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotMakeFileWriteable", zipArchiveEntry.FullName, destinationPath.FullName, e.Message);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(destinationPath.FullName);
+                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotMakeFileWriteable", zipArchiveEntry.FullName, destinationPath.FullName, e.Message, lockedFileMessage);
                         continue;
                     }
                 }
@@ -228,7 +231,33 @@ namespace Microsoft.Build.Tasks
                 {
                     Log.LogMessageFromResources(MessageImportance.Normal, "Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
 
+#if NET
+                    FileStreamOptions fileStreamOptions = new()
+                    {
+                        Access = FileAccess.Write,
+                        Mode = FileMode.Create,
+                        Share = FileShare.None,
+                        BufferSize = 0x1000
+                    };
+
+                    const UnixFileMode OwnershipPermissions =
+                        UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+                        UnixFileMode.GroupRead | UnixFileMode.GroupWrite | UnixFileMode.GroupExecute |
+                        UnixFileMode.OtherRead | UnixFileMode.OtherWrite | UnixFileMode.OtherExecute;
+
+                    // Restore Unix permissions.
+                    // For security, limit to ownership permissions, and respect umask (through UnixCreateMode).
+                    // We don't apply UnixFileMode.None because .zip files created on Windows and .zip files created
+                    // with previous versions of .NET don't include permissions.
+                    UnixFileMode mode = (UnixFileMode)(zipArchiveEntry.ExternalAttributes >> 16) & OwnershipPermissions;
+                    if (mode != UnixFileMode.None && !NativeMethodsShared.IsWindows)
+                    {
+                        fileStreamOptions.UnixCreateMode = mode;
+                    }
+                    using (FileStream destination = new FileStream(destinationPath.FullName, fileStreamOptions))
+#else
                     using (Stream destination = File.Open(destinationPath.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
+#endif
                     using (Stream stream = zipArchiveEntry.Open())
                     {
                         stream.CopyToAsync(destination, _DefaultCopyBufferSize, _cancellationToken.Token)

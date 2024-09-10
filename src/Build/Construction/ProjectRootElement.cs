@@ -1649,7 +1649,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Reload the existing project root element from the given <paramref name="reader"/>
         /// A reload operation completely replaces the state of this <see cref="ProjectRootElement"/> object. This operation marks the
-        /// object as dirty (see <see cref="ProjectRootElement.MarkDirty"/> for side effects).
+        /// object as dirty.
         ///
         /// If the new state has invalid XML or MSBuild syntax, then this method throws an <see cref="InvalidProjectFileException"/>.
         /// When this happens, the state of this object does not change.
@@ -1691,31 +1691,13 @@ namespace Microsoft.Build.Construction
 
             var oldDocument = XmlDocument;
             XmlDocumentWithLocation newDocument = documentProducer(preserveFormatting ?? PreserveFormatting);
-            try
-            {
-                // Reload should only mutate the state if there are no parse errors.
-                ThrowIfDocumentHasParsingErrors(newDocument);
 
-                RemoveAllChildren();
+            // Reload should only mutate the state if there are no parse errors.
+            ThrowIfDocumentHasParsingErrors(newDocument);
 
-                ProjectParser.Parse(newDocument, this);
-            }
-            finally
-            {
-                // Whichever document didn't become this element's document must be removed from the string cache.
-                // We do it after the fact based on the assumption that Projects are reloaded repeatedly from their
-                // file with small increments, and thus most strings would get reused avoiding unnecessary churn in
-                // the string cache.
-                var currentDocument = XmlDocument;
-                if (!object.ReferenceEquals(currentDocument, oldDocument))
-                {
-                    oldDocument.ClearAnyCachedStrings();
-                }
-                if (!object.ReferenceEquals(currentDocument, newDocument))
-                {
-                    newDocument.ClearAnyCachedStrings();
-                }
-            }
+            RemoveAllChildren();
+
+            ProjectParser.Parse(newDocument, this);
 
             MarkDirty("Project reloaded", null);
         }

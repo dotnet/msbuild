@@ -1458,7 +1458,7 @@ namespace Microsoft.Build.Shared
             while (lookInDirectory != null);
 
             // When we didn't find the location, then return an empty string
-            return String.Empty;
+            return string.Empty;
         }
 
         /// <summary>
@@ -1522,5 +1522,16 @@ namespace Microsoft.Build.Shared
             FileExistenceCache.Clear();
         }
 #endif
+
+        internal static void ReadFromStream(this Stream stream, byte[] content, int startIndex, int length)
+        {
+#if NET7_0_OR_GREATER
+            stream.ReadExactly(content, startIndex, length);
+#else
+#pragma warning disable CA2022 // Avoid inexact read with 'Stream.Read'
+            stream.Read(content, 0, length);
+#pragma warning restore CA2022 // Avoid inexact read with 'Stream.Read'
+#endif
+        }
     }
 }

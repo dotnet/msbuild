@@ -442,7 +442,7 @@ namespace Microsoft.Build.UnitTests
             // Log an error for any leftover items in the expectedItems collection.
             foreach (ITaskItem expectedItem in expectedItems)
             {
-                Assert.True(false, string.Format("Item '{0}' was expected but not returned.", expectedItem.ItemSpec));
+                Assert.Fail(string.Format("Item '{0}' was expected but not returned.", expectedItem.ItemSpec));
             }
 
             if (outOfOrder)
@@ -450,7 +450,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("ERROR:  Items were returned in the incorrect order...");
                 Console.WriteLine("Expected:  " + expectedItemSpecs);
                 Console.WriteLine("Actual:    " + actualItemSpecs);
-                Assert.True(false, "Items were returned in the incorrect order.  See 'Standard Out' tab for more details.");
+                Assert.Fail("Items were returned in the incorrect order.  See 'Standard Out' tab for more details.");
             }
         }
 
@@ -661,11 +661,12 @@ namespace Microsoft.Build.UnitTests
         public static ProjectRootElement CreateInMemoryProjectRootElement(string projectContents, ProjectCollection collection = null, bool preserveFormatting = true)
         {
             var cleanedProject = CleanupFileContents(projectContents);
-
+#pragma warning disable CA2000 // The return object depends on the created XML reader and project collection that should not be disposed in this scope.
             return ProjectRootElement.Create(
                 XmlReader.Create(new StringReader(cleanedProject)),
                 collection ?? new ProjectCollection(),
                 preserveFormatting);
+#pragma warning restore CA2000 // The return object depends on the created XML reader and project collection that should not be disposed in this scope.
         }
 
         /// <summary>
@@ -686,7 +687,9 @@ namespace Microsoft.Build.UnitTests
         /// <returns>Returns created <see cref="Project"/>.</returns>
         public static Project CreateInMemoryProject(string xml, params ILogger[] loggers)
         {
+#pragma warning disable CA2000 // The return object depends on the project collection that should not be disposed in this scope.
             return CreateInMemoryProject(new ProjectCollection(), xml, loggers);
+#pragma warning restore CA2000 // The return object depends on the project collection that should not be disposed in this scope.
         }
 
         /// <summary>
@@ -723,12 +726,13 @@ namespace Microsoft.Build.UnitTests
                     projectCollection.RegisterLogger(logger);
                 }
             }
-
+#pragma warning disable CA2000 // The return object depends on the created XML reader that should not be disposed in this scope.
             Project project = new Project(
                 XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
                 globalProperties: null,
                 toolsVersion,
                 projectCollection);
+#pragma warning restore CA2000 // The return object depends on the created XML reader that should not be disposed in this scope.
 
             Guid guid = Guid.NewGuid();
             project.FullPath = Path.Combine(TempProjectDir, "Temporary" + guid.ToString("N") + ".csproj");
@@ -975,8 +979,9 @@ namespace Microsoft.Build.UnitTests
         public static Project LoadProjectFileInTempProjectDirectory(string projectFileRelativePath, bool touchProject)
         {
             string projectFileFullPath = Path.Combine(TempProjectDir, projectFileRelativePath);
-
+#pragma warning disable CA2000 // The return object depends on the project collection that should not be disposed in this scope.
             ProjectCollection projectCollection = new ProjectCollection();
+#pragma warning restore CA2000 // The return object depends on the project collection that should not be disposed in this scope.
 
             Project project = new Project(projectFileFullPath, null, null, projectCollection);
 
@@ -1091,7 +1096,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static IList<ProjectItem> GetItems(string content, bool allItems = false, bool ignoreCondition = false)
         {
-            var projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(CleanupFileContents(content))));
+            using ProjectRootElementFromString projectRootElementFromString = new(CleanupFileContents(content));
+            ProjectRootElement projectXml = projectRootElementFromString.Project;
             Project project = new Project(projectXml);
             IList<ProjectItem> item = Helpers.MakeList(
                 ignoreCondition ?
@@ -1144,7 +1150,7 @@ namespace Microsoft.Build.UnitTests
             }
             else
             {
-                Assert.True(false, "unrecognized current platform");
+                Assert.Fail("unrecognized current platform");
             }
 
             return currentPlatformString;
@@ -1348,8 +1354,8 @@ namespace Microsoft.Build.UnitTests
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
-
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, toolsVersion: null);
+            using ProjectFromString projectFromString = new(content, globalProperties, toolsVersion: null);
+            Project project = projectFromString.Project;
             logger ??= new MockLogger
             {
                 AllowTaskCrashes = allowTaskCrash
@@ -1364,7 +1370,8 @@ namespace Microsoft.Build.UnitTests
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), null, toolsVersion: null);
+            using ProjectFromString projectFromString = new(content, null, toolsVersion: null);
+            Project project = projectFromString.Project;
 
             List<ILogger> loggers = new List<ILogger>() { binaryLogger };
 
@@ -1889,7 +1896,7 @@ namespace Microsoft.Build.UnitTests
 
             if (ex1 == null && ex2 == null)
             {
-                Assert.True(false, "Neither threw");
+                Assert.Fail("Neither threw");
             }
 
             Assert.NotNull(ex1); // "First method did not throw, second: {0}", ex2 == null ? "" : ex2.GetType() + ex2.Message);
@@ -1947,7 +1954,7 @@ namespace Microsoft.Build.UnitTests
                 string output = "\r\n#################################Expected#################################\n" + string.Join("\r\n", expectedLines);
                 output += "\r\n#################################Actual#################################\n" + string.Join("\r\n", actualLines);
 
-                Assert.True(false, output);
+                Assert.Fail(output);
             }
 
             if (actualLines.Length > expectedLines.Length)
@@ -1955,14 +1962,14 @@ namespace Microsoft.Build.UnitTests
                 LogLine("\n#################################Expected#################################\n" + string.Join("\n", expectedLines));
                 LogLine("#################################Actual#################################\n" + string.Join("\n", actualLines));
 
-                Assert.True(false, "Expected content was shorter, actual had this extra line: '" + actualLines[expectedLines.Length] + "'");
+                Assert.Fail("Expected content was shorter, actual had this extra line: '" + actualLines[expectedLines.Length] + "'");
             }
             else if (actualLines.Length < expectedLines.Length)
             {
                 LogLine("\n#################################Expected#################################\n" + string.Join("\n", expectedLines));
                 LogLine("#################################Actual#################################\n" + string.Join("\n", actualLines));
 
-                Assert.True(false, "Actual content was shorter, expected had this extra line: '" + expectedLines[actualLines.Length] + "'");
+                Assert.Fail("Actual content was shorter, expected had this extra line: '" + expectedLines[actualLines.Length] + "'");
             }
         }
 
@@ -1971,7 +1978,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static void ClearDirtyFlag(ProjectRootElement project)
         {
-            project.Save(new StringWriter());
+            using var sw = new StringWriter();
+            project.Save(sw);
             Assert.False(project.HasUnsavedChanges);
         }
 

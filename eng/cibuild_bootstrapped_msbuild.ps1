@@ -84,9 +84,10 @@ try {
   }
   else
   {
-    $buildToolPath = $dotnetExePath
-    $buildToolCommand = Join-Path $bootstrapRoot "net8.0\MSBuild\MSBuild.dll"
-    $buildToolFramework = "net8.0"
+    $buildToolPath = Join-Path $bootstrapRoot "core\dotnet.exe"
+    # The version must be consistent with BootstrapSdkVersion
+    $buildToolCommand = Join-Path $bootstrapRoot "core\sdk\9.0.100-preview.7.24407.12\MSBuild.dll"
+    $buildToolFramework = "net9.0"
   }
 
   # Use separate artifacts folder for stage 2
@@ -115,13 +116,12 @@ try {
 
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
-  # - Do run tests
-  # - Don't try to create a bootstrap deployment
+  # - Create bootstrap environment as it's required when also running tests
   if ($onlyDocChanged) {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties
   }
   else {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=false /nr:false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=true /nr:false @properties
   }
 
   exit $lastExitCode

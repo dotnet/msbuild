@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.BackEnd;
 
 #nullable disable
@@ -33,6 +34,94 @@ namespace Microsoft.Build.Execution
         {
             get => _itemFilters;
             set => _itemFilters = value;
+        }
+
+        /// <summary>
+        /// Creates a deep copy of this instance.
+        /// </summary>
+        internal RequestedProjectState DeepClone()
+        {
+            RequestedProjectState result = new RequestedProjectState();
+            if (PropertyFilters is not null)
+            {
+                result.PropertyFilters = new List<string>(PropertyFilters);
+            }
+            if (ItemFilters is not null)
+            {
+                result.ItemFilters = ItemFilters.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value == null ? null : new List<string>(kvp.Value));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns true if this instance contains all property and item filters present in another instance.
+        /// </summary>
+        /// <param name="another">The instance to compare against.</param>
+        /// <returns>True if this instance is equivalent or a strict subset of <paramref name="another"/>.</returns>
+        internal bool IsSubsetOf(RequestedProjectState another)
+        {
+            if (PropertyFilters is null)
+            {
+                if (another.PropertyFilters is not null)
+                {
+                    // The instance to compare against has filtered props and we need everything -> not a subset.
+                    return false;
+                }
+            }
+            else if (another.PropertyFilters is not null)
+            {
+                HashSet<string> anotherPropertyFilters = new HashSet<string>(another.PropertyFilters);
+                foreach (string propertyFilter in PropertyFilters)
+                {
+                    if (!anotherPropertyFilters.Contains(propertyFilter))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            if (ItemFilters is null)
+            {
+                if (another.ItemFilters is not null)
+                {
+                    // The instance to compare against has filtered items and we need everything -> not a subset.
+                    return false;
+                }
+            }
+            else if (another.ItemFilters is not null)
+            {
+                foreach (KeyValuePair<string, List<string>> kvp in ItemFilters)
+                {
+                    if (!another.ItemFilters.TryGetValue(kvp.Key, out List<string> metadata))
+                    {
+                        // The instance to compare against doesn't have this item -> not a subset.
+                        return false;
+                    }
+                    if (kvp.Value is null)
+                    {
+                        if (metadata is not null)
+                        {
+                            // The instance to compare against has filtered metadata for this item and we need everything - not a subset.
+                            return false;
+                        }
+                    }
+                    else if (metadata is not null)
+                    {
+                        HashSet<string> anotherMetadata = new HashSet<string>(metadata);
+                        foreach (string metadatum in kvp.Value)
+                        {
+                            if (!anotherMetadata.Contains(metadatum))
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return true;
         }
 
         void ITranslatable.Translate(ITranslator translator)

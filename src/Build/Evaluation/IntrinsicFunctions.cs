@@ -9,7 +9,8 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -17,6 +18,7 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
+using System.Linq;
 
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
@@ -27,7 +29,7 @@ namespace Microsoft.Build.Evaluation
 {
     /// <summary>
     /// The Intrinsic class provides static methods that can be accessed from MSBuild's
-    /// property functions using $([MSBuild]::Function(x,y))
+    /// property functions using $([MSBuild]::Function(x,y)).
     /// </summary>
     internal static class IntrinsicFunctions
     {
@@ -189,9 +191,8 @@ namespace Microsoft.Build.Evaluation
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
-            // on non-Windows (no registry), and with a changewave (in case someone
-            // had a registry property and it breaks when it lights up).
-            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
             {
                 return null;
             }
@@ -206,9 +207,8 @@ namespace Microsoft.Build.Evaluation
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
-            // on non-Windows (no registry), and with a changewave (in case someone
-            // had a registry property and it breaks when it lights up).
-            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
             {
                 return defaultValue;
             }
@@ -220,9 +220,8 @@ namespace Microsoft.Build.Evaluation
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
-            // on non-Windows (no registry), and with a changewave (in case someone
-            // had a registry property and it breaks when it lights up).
-            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
             {
                 return defaultValue;
             }
@@ -243,9 +242,8 @@ namespace Microsoft.Build.Evaluation
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
-            // on non-Windows (no registry), and with a changewave (in case someone
-            // had a registry property and it breaks when it lights up).
-            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
             {
                 return defaultValue;
             }
@@ -291,6 +289,7 @@ namespace Microsoft.Build.Evaluation
                         return string.Empty;
                     }
 
+#pragma warning disable CA2000 // Dispose objects before losing scope is false positive here.
                     using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out string subKeyName))
                     {
                         if (key != null)
@@ -311,6 +310,7 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+#pragma warning restore CA2000 // Dispose objects before losing scope
                 }
             }
 
@@ -446,12 +446,13 @@ namespace Microsoft.Build.Evaluation
 
         private static string CalculateSha256(string toHash)
         {
-            var sha = System.Security.Cryptography.SHA256.Create();
+            using var sha = System.Security.Cryptography.SHA256.Create();
             var hashResult = new StringBuilder();
             foreach (byte theByte in sha.ComputeHash(Encoding.UTF8.GetBytes(toHash)))
             {
                 hashResult.Append(theByte.ToString("x2"));
             }
+
             return hashResult.ToString();
         }
 
@@ -624,6 +625,32 @@ namespace Microsoft.Build.Evaluation
             return ChangeWaves.AreFeaturesEnabled(wave);
         }
 
+        internal static string SubstringByAsciiChars(string input, int start, int length)
+        {
+            if (start > input.Length)
+            {
+                return string.Empty;
+            }
+            if (start + length > input.Length)
+            {
+                length = input.Length - start;
+            }
+            StringBuilder sb = new StringBuilder();
+            for (int i = start; i < start + length; i++)
+            {
+                char c = input[i];
+                if (c >= 32 && c <= 126 && !FileUtilities.InvalidFileNameChars.Contains(c))
+                {
+                    sb.Append(c);
+                }
+                else
+                {
+                    sb.Append('_');
+                }
+            }
+            return sb.ToString();
+        }
+
         internal static string CheckFeatureAvailability(string featureName)
         {
             return Features.CheckFeatureAvailability(featureName).ToString();
@@ -664,9 +691,21 @@ namespace Microsoft.Build.Evaluation
             return BuildEnvironmentHelper.Instance.MSBuildExtensionsPath;
         }
 
-        public static bool IsRunningFromVisualStudio()
+        public static bool IsRunningFromVisualStudio() => BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
+
+        public static bool RegisterBuildCheck(string projectPath, string pathToAssembly, LoggingContext loggingContext)
         {
-            return BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
+            pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
+            if (File.Exists(pathToAssembly))
+            {
+                loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly, projectPath));
+
+                return true;
+            }
+
+            loggingContext.LogComment(MessageImportance.Low, "CustomCheckAssemblyNotExist", pathToAssembly);
+
+            return false;
         }
 
         #region Debug only intrinsics

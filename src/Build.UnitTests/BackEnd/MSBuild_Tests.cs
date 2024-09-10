@@ -1462,7 +1462,7 @@ namespace Microsoft.Build.UnitTests
                         </Project>";
 
                     MockLogger logger = new MockLogger();
-                    ProjectCollection pc = new ProjectCollection(null, new List<ILogger> { logger }, null, ToolsetDefinitionLocations.Default, 2, false);
+                    using ProjectCollection pc = new ProjectCollection(null, new List<ILogger> { logger }, null, ToolsetDefinitionLocations.Default, 2, false);
                     Project p = ObjectModelHelpers.CreateInMemoryProject(pc, parentProjectContents, logger);
                     bool success = p.Build();
                     switch (i)
@@ -1557,7 +1557,7 @@ namespace Microsoft.Build.UnitTests
                 </Project>";
 
                 MockLogger logger = new MockLogger();
-                ProjectCollection pc = new ProjectCollection(null, new List<ILogger> { logger }, null, ToolsetDefinitionLocations.Default, 2, false);
+                using ProjectCollection pc = new ProjectCollection(null, new List<ILogger> { logger }, null, ToolsetDefinitionLocations.Default, 2, false);
                 Project p = ObjectModelHelpers.CreateInMemoryProject(pc, parentProjectContents, logger);
                 bool success = p.Build();
 

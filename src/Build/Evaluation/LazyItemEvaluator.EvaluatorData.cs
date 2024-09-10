@@ -291,9 +291,9 @@ namespace Microsoft.Build.Evaluation
                 return _wrappedData.GetTarget(targetName);
             }
 
-            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext)
+            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext, LoggingContext loggingContext)
             {
-                _wrappedData.InitializeForEvaluation(toolsetProvider, evaluationContext);
+                _wrappedData.InitializeForEvaluation(toolsetProvider, evaluationContext, loggingContext);
             }
 
             public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult)
@@ -306,12 +306,12 @@ namespace Microsoft.Build.Evaluation
                 _wrappedData.RecordImportWithDuplicates(importElement, import, versionEvaluated);
             }
 
-            public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
+            public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, BackEnd.Logging.LoggingContext loggingContext)
             {
-                return _wrappedData.SetProperty(propertyElement, evaluatedValueEscaped);
+                return _wrappedData.SetProperty(propertyElement, evaluatedValueEscaped, loggingContext);
             }
 
-            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, LoggingContext loggingContext = null)
+            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false)
             {
                 return _wrappedData.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext: loggingContext);
             }

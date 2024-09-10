@@ -58,9 +58,10 @@ bootstrapRoot="$Stage1Dir/bin/bootstrap"
 
 if [ $host_type = "core" ]
 then
-  _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
-  _InitializeBuildToolCommand="$bootstrapRoot/net8.0/MSBuild/MSBuild.dll"
-  _InitializeBuildToolFramework="net8.0"
+  _InitializeBuildTool="$bootstrapRoot/core/dotnet"
+  # The version must be consistent with BootstrapSdkVersion
+  _InitializeBuildToolCommand="$bootstrapRoot/core/sdk/9.0.100-preview.7.24407.12/MSBuild.dll"
+  _InitializeBuildToolFramework="net9.0"
 else
   echo "Unsupported hostType ($host_type)"
   exit 1
@@ -80,11 +81,10 @@ export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 
 # When using bootstrapped MSBuild:
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
-# - Do run tests
-# - Don't try to create a bootstrap deployment
+# - Create bootstrap environment as it's required when also running tests
 if [ $onlyDocChanged = 0 ]
 then
-    . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
+    . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties
 
 else
     . "$ScriptRoot/common/build.sh" --restore --build --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties

@@ -10,10 +10,11 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using Microsoft.Build.Framework.Logging;
+using System.Globalization;
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 #endif
 #if NETFRAMEWORK
 using Microsoft.IO;
@@ -61,9 +62,18 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     internal const string Indentation = "  ";
 
+    internal const string DoubleIndentation = $"{Indentation}{Indentation}";
+
+    internal const string TripleIndentation = $"{Indentation}{Indentation}{Indentation}";
+
     internal const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
 
     internal Func<StopwatchAbstraction>? CreateStopwatch = null;
+
+    /// <summary>
+    /// Name of target that identifies the project cache plugin run has just started.
+    /// </summary>
+    private const string CachePluginStartTarget = "_CachePluginRunStart";
 
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
@@ -86,6 +96,10 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
     /// </summary>
+    /// <remarks>
+    /// There is no locking around access to this data structure despite it being accessed concurrently by multiple threads.
+    /// However, reads and writes to locations in an array is atomic, so locking is not required.
+    /// </remarks>
     private NodeStatus?[] _nodes = Array.Empty<NodeStatus>();
 
     /// <summary>
@@ -198,11 +212,26 @@ internal sealed partial class TerminalLogger : INodeLogger
     private DateTime? _testEndTime;
 
     /// <summary>
+    /// Demonstrates whether there exists at least one project which is a cache plugin project.
+    /// </summary>
+    private bool _hasUsedCache = false;
+
+    /// <summary>
+    /// Whether to show TaskCommandLineEventArgs high-priority messages. 
+    /// </summary>
+    private bool _showCommandLine = false;
+
+    /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
     /// </summary>
     public TerminalLogger()
     {
         Terminal = new Terminal();
+    }
+
+    public TerminalLogger(LoggerVerbosity verbosity) : this()
+    {
+        Verbosity = verbosity;
     }
 
     /// <summary>
@@ -217,13 +246,10 @@ internal sealed partial class TerminalLogger : INodeLogger
     #region INodeLogger implementation
 
     /// <inheritdoc/>
-    public LoggerVerbosity Verbosity { get => LoggerVerbosity.Minimal; set { } }
+    public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Minimal;
 
     /// <inheritdoc/>
-    public string? Parameters
-    {
-        get => ""; set { }
-    }
+    public string? Parameters { get; set; } = null;
 
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource, int nodeCount)
@@ -237,6 +263,8 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource)
     {
+        ParseParameters();
+
         eventSource.BuildStarted += BuildStarted;
         eventSource.BuildFinished += BuildFinished;
         eventSource.ProjectStarted += ProjectStarted;
@@ -244,6 +272,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         eventSource.TargetStarted += TargetStarted;
         eventSource.TargetFinished += TargetFinished;
         eventSource.TaskStarted += TaskStarted;
+        eventSource.StatusEventRaised += StatusEventRaised;
 
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
@@ -254,6 +283,77 @@ internal sealed partial class TerminalLogger : INodeLogger
             eventSource4.IncludeEvaluationPropertiesAndItems();
         }
     }
+
+
+    /// <summary>
+    /// Parses out the logger parameters from the Parameters string.
+    /// </summary>
+    public void ParseParameters()
+    {
+        foreach (var parameter in LoggerParametersHelper.ParseParameters(Parameters))
+        {
+            ApplyParameter(parameter.Item1, parameter.Item2);
+        }
+    }
+
+    /// <summary>
+    /// Apply a terminal logger parameter.
+    /// parameterValue may be null, if there is no parameter value.
+    /// </summary>
+    /// <remark>
+    /// If verbosity parameter value is not correct, throws an exception. Other incorrect parameter values are disregarded.
+    /// </remark>
+    private void ApplyParameter(string parameterName, string? parameterValue)
+    {
+        ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
+
+        switch (parameterName.ToUpperInvariant())
+        {
+            case "V":
+            case "VERBOSITY":
+                ApplyVerbosityParameter(parameterValue);
+                break;
+            case "SHOWCOMMANDLINE":
+                TryApplyShowCommandLineParameter(parameterValue);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Apply the verbosity value
+    /// </summary>
+    private void ApplyVerbosityParameter(string? parameterValue)
+    {
+        if (parameterValue is not null && LoggerParametersHelper.TryParseVerbosityParameter(parameterValue, out LoggerVerbosity? verbosity))
+        {
+            Verbosity = (LoggerVerbosity)verbosity;
+        }
+        else
+        {
+            string errorCode;
+            string helpKeyword;
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidVerbosity", parameterValue);
+            throw new LoggerException(message, null, errorCode, helpKeyword);
+        }
+    }
+
+    /// <summary>
+    /// Apply the show command Line value
+    /// </summary>
+    private bool TryApplyShowCommandLineParameter(string? parameterValue)
+    {
+        if (String.IsNullOrEmpty(parameterValue))
+        {
+            _showCommandLine = true;
+        }
+        else
+        {
+            return ConversionUtilities.TryConvertStringToBool(parameterValue, out _showCommandLine);
+        }
+
+        return true;
+    }
+
 
     /// <inheritdoc/>
     public void Shutdown()
@@ -300,42 +400,49 @@ internal sealed partial class TerminalLogger : INodeLogger
         Terminal.BeginUpdate();
         try
         {
-            string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
-            string buildResult = RenderBuildResult(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
-
-            Terminal.WriteLine("");
-            if (_restoreFailed)
+            if (Verbosity > LoggerVerbosity.Quiet)
             {
-                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
-                    buildResult,
-                    duration));
-            }
-            else
-            {
-                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
-                    buildResult,
-                    duration));
-            }
+                string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
+                string buildResult = RenderBuildResult(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
 
-            if (_testRunSummaries.Any())
-            {
-                var total = _testRunSummaries.Sum(t => t.Total);
-                var failed = _testRunSummaries.Sum(t => t.Failed);
-                var passed = _testRunSummaries.Sum(t => t.Passed);
-                var skipped = _testRunSummaries.Sum(t => t.Skipped);
-                var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
+                Terminal.WriteLine("");
+                if (_testRunSummaries.Any())
+                {
+                    var total = _testRunSummaries.Sum(t => t.Total);
+                    var failed = _testRunSummaries.Sum(t => t.Failed);
+                    var passed = _testRunSummaries.Sum(t => t.Passed);
+                    var skipped = _testRunSummaries.Sum(t => t.Skipped);
+                    var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
 
-                var colorizedResult = _testRunSummaries.Any(t => t.Failed > 0) || (_buildErrorsCount > 0)
-                    ? AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Failed"), TerminalColor.Red)
-                    : AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
+                    var colorizeFailed = failed > 0;
+                    var colorizePassed = passed > 0 && _buildErrorsCount == 0 && failed == 0;
+                    var colorizeSkipped = skipped > 0 && skipped == total && _buildErrorsCount == 0 && failed == 0;
 
-                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary",
-                    colorizedResult,
-                    total,
-                    failed,
-                    passed,
-                    skipped,
-                    testDuration));
+                    string summaryAndTotalText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_BannerAndTotal", total);
+                    string failedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Failed", failed);
+                    string passedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Succeeded", passed);
+                    string skippedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Skipped", skipped);
+                    string durationText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Duration", testDuration);
+
+                    failedText = colorizeFailed ? AnsiCodes.Colorize(failedText.ToString(), TerminalColor.Red) : failedText;
+                    passedText = colorizePassed ? AnsiCodes.Colorize(passedText.ToString(), TerminalColor.Green) : passedText;
+                    skippedText = colorizeSkipped ? AnsiCodes.Colorize(skippedText.ToString(), TerminalColor.Yellow) : skippedText;
+
+                    Terminal.WriteLine(string.Join(CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ", summaryAndTotalText, failedText, passedText, skippedText, durationText));
+                }
+
+                if (_restoreFailed)
+                {
+                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
+                        buildResult,
+                        duration));
+                }
+                else
+                {
+                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
+                        buildResult,
+                        duration));
+                }
             }
         }
         finally
@@ -354,6 +461,14 @@ internal sealed partial class TerminalLogger : INodeLogger
         _restoreFailed = false;
         _testStartTime = null;
         _testEndTime = null;
+    }
+
+    private void StatusEventRaised(object sender, BuildStatusEventArgs e)
+    {
+        if (e is BuildCanceledEventArgs buildCanceledEventArgs)
+        {
+            RenderImmediateMessage(e.Message!);
+        }
     }
 
     /// <summary>
@@ -402,6 +517,12 @@ internal sealed partial class TerminalLogger : INodeLogger
         if (_restoreContext is null)
         {
             UpdateNodeStatus(buildEventContext, null);
+        }
+
+        // Continue execution and add project summary to the static part of the Console only if verbosity is higher than Quiet.
+        if (Verbosity <= LoggerVerbosity.Quiet)
+        {
+            return;
         }
 
         ProjectContext c = new(buildEventContext);
@@ -524,7 +645,9 @@ internal sealed partial class TerminalLogger : INodeLogger
                             string urlString = url.ToString();
                             if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
                             {
-                                urlString = uri.AbsoluteUri;
+                                // url.ToString() un-escapes the URL which is needed for our case file://
+                                // but not valid for http://
+                                urlString = uri.ToString();
                             }
 
                             // If the output path is under the initial working directory, make the console output relative to that to save space.
@@ -552,7 +675,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                     {
                         foreach (BuildMessage buildMessage in project.BuildMessages)
                         {
-                            Terminal.WriteLine($"{Indentation}{Indentation}{buildMessage.Message}");
+                            Terminal.WriteLine($"{DoubleIndentation}{buildMessage.Message}");
                         }
                     }
 
@@ -581,12 +704,17 @@ internal sealed partial class TerminalLogger : INodeLogger
 
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
 
-
-            var isTestTarget = e.TargetName == _testStartTarget;
-
-            var targetName = isTestTarget ? "Testing" : e.TargetName;
-            if (isTestTarget)
+            string targetName = e.TargetName;
+            if (targetName == CachePluginStartTarget)
             {
+                project.IsCachePluginProject = true;
+                _hasUsedCache = true;
+            }
+
+            if (targetName == _testStartTarget)
+            {
+                targetName = "Testing";
+
                 // Use the minimal start time, so if we run tests in parallel, we can calculate duration
                 // as this start time, minus time when tests finished.
                 _testStartTime = _testStartTime == null
@@ -603,11 +731,8 @@ internal sealed partial class TerminalLogger : INodeLogger
 
     private void UpdateNodeStatus(BuildEventContext buildEventContext, NodeStatus? nodeStatus)
     {
-        lock (_lock)
-        {
-            int nodeIndex = NodeIndexForContext(buildEventContext);
-            _nodes[nodeIndex] = nodeStatus;
-        }
+        int nodeIndex = NodeIndexForContext(buildEventContext);
+        _nodes[nodeIndex] = nodeStatus;
     }
 
     /// <summary>
@@ -615,6 +740,24 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void TargetFinished(object sender, TargetFinishedEventArgs e)
     {
+        // For cache plugin projects which result in a cache hit, ensure the output path is set
+        // to the item spec corresponding to the GetTargetPath target upon completion.
+        var buildEventContext = e.BuildEventContext;
+        if (_restoreContext is null
+            && buildEventContext is not null
+            && _hasUsedCache
+            && e.TargetName == "GetTargetPath"
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        {
+            if (project.IsCachePluginProject)
+            {
+                foreach (ITaskItem output in e.TargetOutputs)
+                {
+                    project.OutputPath = output.ItemSpec.AsMemory();
+                    break;
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -650,6 +793,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         if (message is not null && e.Importance == MessageImportance.High)
         {
             var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project);
+
             // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
             // pattern used by the CopyFilesToOutputDirectory target.
             int index = message.IndexOf(FilePathPattern, StringComparison.Ordinal);
@@ -661,14 +805,31 @@ internal sealed partial class TerminalLogger : INodeLogger
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
                     project!.OutputPath = outputPath;
+                    return;
                 }
             }
 
-            if (IsImmediateMessage(message))
+            if (Verbosity > LoggerVerbosity.Quiet)
             {
-                RenderImmediateMessage(message);
+                // Show immediate messages to the user.
+                if (IsImmediateMessage(message))
+                {
+                    RenderImmediateMessage(message);
+                    return;
+                }
+                if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
+                {
+                    // The SDK will log the high-pri "not-a-warning" message NETSDK1057
+                    // when it's a preview version up to MaxCPUCount times, but that's
+                    // an implementation detail--the user cares about at most one.
+
+                    RenderImmediateMessage(message);
+                    _loggedPreviewMessage = true;
+                    return;
+                }
             }
-            else if (hasProject && project!.IsTestProject)
+
+            if (hasProject && project!.IsTestProject)
             {
                 var node = _nodes[NodeIndexForContext(buildEventContext)];
 
@@ -699,30 +860,54 @@ internal sealed partial class TerminalLogger : INodeLogger
 
                         case "TLTESTFINISH":
                             {
-                                _ = int.TryParse(extendedMessage.ExtendedMetadata!["total"]!, out int total);
-                                _ = int.TryParse(extendedMessage.ExtendedMetadata!["passed"]!, out int passed);
-                                _ = int.TryParse(extendedMessage.ExtendedMetadata!["skipped"]!, out int skipped);
-                                _ = int.TryParse(extendedMessage.ExtendedMetadata!["failed"]!, out int failed);
+                                // Collect test run summary.
+                                if (Verbosity > LoggerVerbosity.Quiet)
+                                {
+                                    _ = int.TryParse(extendedMessage.ExtendedMetadata!["total"]!, out int total);
+                                    _ = int.TryParse(extendedMessage.ExtendedMetadata!["passed"]!, out int passed);
+                                    _ = int.TryParse(extendedMessage.ExtendedMetadata!["skipped"]!, out int skipped);
+                                    _ = int.TryParse(extendedMessage.ExtendedMetadata!["failed"]!, out int failed);
 
-                                _testRunSummaries.Add(new TestSummary(total, passed, skipped, failed));
+                                    _testRunSummaries.Add(new TestSummary(total, passed, skipped, failed));
 
-                                _testEndTime = _testEndTime == null
-                                        ? e.Timestamp
-                                        : e.Timestamp > _testEndTime
-                                            ? e.Timestamp : _testEndTime;
+                                    _testEndTime = _testEndTime == null
+                                            ? e.Timestamp
+                                            : e.Timestamp > _testEndTime
+                                                ? e.Timestamp : _testEndTime;
+                                }
+
+                                break;
+                            }
+
+                        case "TLTESTOUTPUT":
+                            {
+                                if (e.Message != null && Verbosity > LoggerVerbosity.Quiet)
+                                {
+                                    RenderImmediateMessage(e.Message);
+                                }
                                 break;
                             }
                     }
+                    return;
                 }
             }
-            else if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
-            {
-                // The SDK will log the high-pri "not-a-warning" message NETSDK1057
-                // when it's a preview version up to MaxCPUCount times, but that's
-                // an implementation detail--the user cares about at most one.
 
-                RenderImmediateMessage(message);
-                _loggedPreviewMessage = true;
+            if (Verbosity > LoggerVerbosity.Normal)
+            {
+                if (e is TaskCommandLineEventArgs && !_showCommandLine)
+                {
+                    return;
+                }
+
+                if (hasProject)
+                {
+                    project!.AddBuildMessage(MessageSeverity.Message, message);
+                }
+                else
+                {
+                    // Display messages reported by MSBuild, even if it's not tracked in _projects collection.
+                    RenderImmediateMessage(message);
+                }
             }
         }
     }
@@ -733,30 +918,23 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void WarningRaised(object sender, BuildWarningEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
-        string message = FormatEventMessage(
-                category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
-                subcategory: e.Subcategory,
-                message: e.Message,
-                code: AnsiCodes.Colorize(e.Code, TerminalColor.Yellow),
-                file: HighlightFileName(e.File),
-                lineNumber: e.LineNumber,
-                endLineNumber: e.EndLineNumber,
-                columnNumber: e.ColumnNumber,
-                endColumnNumber: e.EndColumnNumber);
 
-        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (buildEventContext is not null
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
+            && Verbosity > LoggerVerbosity.Quiet)
         {
-            if (IsImmediateMessage(message))
+            if ((!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message!)) ||
+                IsImmediateWarning(e.Code))
             {
-                RenderImmediateMessage(message);
+                RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             }
 
-            project.AddBuildMessage(MessageSeverity.Warning, message);
+            project.AddBuildMessage(MessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
         }
         else
         {
-            // It is necessary to display warning messages reported by MSBuild, even if it's not tracked in _projects collection.
-            RenderImmediateMessage(message);
+            // It is necessary to display warning messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
+            RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             _buildWarningsCount++;
         }
     }
@@ -773,31 +951,26 @@ internal sealed partial class TerminalLogger : INodeLogger
         _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
 #endif
 
+
+    private bool IsImmediateWarning(string code) => code == "MSB3026";
+
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
     /// </summary>
     private void ErrorRaised(object sender, BuildErrorEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
-        string message = FormatEventMessage(
-                category: AnsiCodes.Colorize("error", TerminalColor.Red),
-                subcategory: e.Subcategory,
-                message: e.Message,
-                code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
-                file: HighlightFileName(e.File),
-                lineNumber: e.LineNumber,
-                endLineNumber: e.EndLineNumber,
-                columnNumber: e.ColumnNumber,
-                endColumnNumber: e.EndColumnNumber);
 
-        if (buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (buildEventContext is not null
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
+            && Verbosity > LoggerVerbosity.Quiet)
         {
-            project.AddBuildMessage(MessageSeverity.Error, message);
+            project.AddBuildMessage(MessageSeverity.Error, FormatErrorMessage(e, TripleIndentation));
         }
         else
         {
-            // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection.
-            RenderImmediateMessage(message);
+            // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
+            RenderImmediateMessage(FormatErrorMessage(e, Indentation));
             _buildErrorsCount++;
         }
     }
@@ -941,6 +1114,36 @@ internal sealed partial class TerminalLogger : INodeLogger
             : path;
     }
 
+    private string FormatWarningMessage(BuildWarningEventArgs e, string indent)
+    {
+        return FormatEventMessage(
+                category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
+                subcategory: e.Subcategory,
+                message: e.Message,
+                code: AnsiCodes.Colorize(e.Code, TerminalColor.Yellow),
+                file: HighlightFileName(e.File),
+                lineNumber: e.LineNumber,
+                endLineNumber: e.EndLineNumber,
+                columnNumber: e.ColumnNumber,
+                endColumnNumber: e.EndColumnNumber,
+                indent);
+    }
+
+    private string FormatErrorMessage(BuildErrorEventArgs e, string indent)
+    {
+        return FormatEventMessage(
+                category: AnsiCodes.Colorize("error", TerminalColor.Red),
+                subcategory: e.Subcategory,
+                message: e.Message,
+                code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
+                file: HighlightFileName(e.File),
+                lineNumber: e.LineNumber,
+                endLineNumber: e.EndLineNumber,
+                columnNumber: e.ColumnNumber,
+                endColumnNumber: e.EndColumnNumber,
+                indent);
+    }
+
     private string FormatEventMessage(
             string category,
             string subcategory,
@@ -950,7 +1153,8 @@ internal sealed partial class TerminalLogger : INodeLogger
             int lineNumber,
             int endLineNumber,
             int columnNumber,
-            int endColumnNumber)
+            int endColumnNumber,
+            string indent)
     {
         message ??= string.Empty;
         StringBuilder builder = new(128);
@@ -1004,7 +1208,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         // render multi-line message in a special way
         if (message.IndexOf('\n') >= 0)
         {
-            const string indent = $"{Indentation}{Indentation}{Indentation}";
+            // Place the multiline message under the project in case of minimal and higher verbosity.
             string[] lines = message.Split(newLineStrings, StringSplitOptions.None);
 
             foreach (string line in lines)

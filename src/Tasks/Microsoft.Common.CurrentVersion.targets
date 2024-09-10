@@ -385,11 +385,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup>
     <_GenerateBindingRedirectsIntermediateAppConfig>$(IntermediateOutputPath)$(TargetFileName).config</_GenerateBindingRedirectsIntermediateAppConfig>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(MSBuildCopyMarkerName)' == ''">
     <MSBuildCopyMarkerName>$(MSBuildProjectFile)</MSBuildCopyMarkerName>
-    <!-- For a long MSBuildProjectFile let's shorten this to 17 chars - using the first 8 chars of the filename and a filename hash. -->
-    <MSBuildCopyMarkerName Condition="'$(MSBuildCopyMarkerName.Length)' &gt; '17'">$(MSBuildProjectFile.Substring(0,8)).$([MSBuild]::StableStringHash($(MSBuildProjectFile)).ToString("X8"))</MSBuildCopyMarkerName>
+    <!-- For a long MSBuildProjectFile let's shorten this to 17 chars - using the first 8 codepoints of the filename and a filename hash. -->
+    <MSBuildCopyMarkerName Condition="'$(MSBuildCopyMarkerName.Length)' &gt; '17'">$([MSBuild]::SubstringByAsciiChars($(MSBuildProjectFile), 0, 8)).$([MSBuild]::StableStringHash($(MSBuildProjectFile)).ToString("X8"))</MSBuildCopyMarkerName>
     <MSBuildCopyMarkerName>$(MSBuildCopyMarkerName).Up2Date</MSBuildCopyMarkerName>
   </PropertyGroup>
 
@@ -425,6 +425,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <PropertyGroup Condition="'$(WinMDExpOutputWindowsMetadataFilename)' != ''">
     <_IntermediateWindowsMetadataPath>$(IntermediateOutputPath)$(WinMDExpOutputWindowsMetadataFilename)</_IntermediateWindowsMetadataPath>
     <_WindowsMetadataOutputPath>$(OutDir)$(WinMDExpOutputWindowsMetadataFilename)</_WindowsMetadataOutputPath>
+  </PropertyGroup>
+
+  <!-- ARM64-related properties -->
+  <PropertyGroup>
+    <_SupportedArchitectures>amd64 arm64</_SupportedArchitectures>
   </PropertyGroup>
 
   <ItemGroup>
@@ -853,6 +858,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <PropertyGroup Condition="'$(Prefer32Bit)' == 'true' and ('$(PlatformTarget)' == 'AnyCPU' or '$(PlatformTarget)' == '') and '$(PlatformTargetAsMSBuildArchitectureExplicitlySet)' != 'true'">
       <PlatformTargetAsMSBuildArchitecture>x86</PlatformTargetAsMSBuildArchitecture>
     </PropertyGroup>
+
+    <MSBuildInternalMessage Condition=" '$(Prefer32Bit)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled" Severity="Error"/>
+
+    <MSBuildInternalMessage Condition=" '$(NoWin32Manifest)' == 'true' and '$(PreferNativeArm64)' == 'true' " ResourceName="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled" Severity="Error"/>
+
+    <MSBuildInternalMessage Condition=" '$(PreferNativeArm64)' == 'true' and '$(Platform)' != 'AnyCPU' " ResourceName="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled" Severity="Warning" FormatArguments="$(Platform)" />
 
     <!--
       Log an error if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project
@@ -1540,8 +1551,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <Target Name="IgnoreJavaScriptOutputAssembly"
-    BeforeTargets="AssignProjectConfiguration"
-    Condition="$([MSBuild]::AreFeaturesEnabled('17.8'))">
+    BeforeTargets="AssignProjectConfiguration">
       <ItemGroup>
         <ProjectReference Condition="'%(ProjectReference.Extension)' == '.esproj' and '%(ProjectReference.ReferenceOutputAssembly)' == ''">
           <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -1729,7 +1739,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <SetPlatform>Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
       </ProjectsWithNearestPlatform>
 
-      <!-- When GetCompatiblePlatform fails to assign NearestPlatform, undefine Platform and let that project build "on its own" -->
+      <!-- When GetCompatiblePlatform fails to assign NearestPlatform (or determines it's identical to default for the referenced project), undefine Platform and let that project build "on its own" -->
       <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
         <UndefineProperties>%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
       </ProjectsWithNearestPlatform>
@@ -1974,7 +1984,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <IsRidAgnostic>@(_TargetFrameworkInfo->'%(IsRidAgnostic)')</IsRidAgnostic>
         <!-- Extract necessary information for SetPlatform negotiation -->
         <IsVcxOrNativeProj Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">true</IsVcxOrNativeProj>
-        <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
+        <Platform>$(Platform)</Platform>
         <Platforms>$(Platforms)</Platforms>
         <!-- .vcxproj and .nativeproj contain a `ProjectConfiguration` item that have `Platform` metadata within.
              Build the `Platforms` property from that. -->
@@ -2161,10 +2171,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_ResolvedProjectReferencePaths>
     </ItemGroup>
 
-    <!-- Issue a warning for each non-existent project. -->
+    <!-- Issue a warning or error for each non-existent project. -->
     <Warning
         Text="The referenced project '%(_MSBuildProjectReferenceNonexistent.Identity)' does not exist."
-        Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != ''"/>
+        Code="MSB9008"
+        Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' != 'True'"/>
+
+    <Error
+        Text="The referenced project '%(_MSBuildProjectReferenceNonexistent.Identity)' does not exist."
+        Code="MSB9008"
+        Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' == 'True'"/>
 
   </Target>
 
@@ -2196,10 +2212,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     metadata.
     ============================================================
     -->
-  <PropertyGroup>
-    <GetTargetPathDependsOn>$(GetTargetPathDependsOn)</GetTargetPathDependsOn>
-  </PropertyGroup>
-
   <Target
       Name="GetTargetPath"
       DependsOnTargets="$(GetTargetPathDependsOn)"
@@ -2566,7 +2578,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <SDKReferenceRegistryRoot Condition="'$(SDKReferenceRegistryRoot)' == ''">Software\Microsoft\Microsoft SDKs</SDKReferenceRegistryRoot>
     <SDKReferenceDirectoryRoot Condition="'$(SDKReferenceDirectoryRoot)' == ''">$(LocalAppData)\Microsoft SDKs;$(MSBuildProgramFiles32)\Microsoft SDKs</SDKReferenceDirectoryRoot>
     <!-- Manifest driven extension SDK locations -->
-    <SDKExtensionDirectoryRoot Condition="'$(SDKExtensionDirectoryRoot)' == '' and '$(SDKIdentifier)' != ''">$(MSBuildProgramFiles32)\Microsoft SDKs\Windows Kits\10;$(MSBuildProgramFiles32)\Windows Kits\10</SDKExtensionDirectoryRoot>
+    <SDKExtensionDirectoryRoot Condition="'$(SDKExtensionDirectoryRoot)' == '' and '$(SDKIdentifier)' != ''">$(MSBuildProgramFiles32)\Microsoft SDKs\Windows Kits\10;$(WindowsKitsRoot)</SDKExtensionDirectoryRoot>
 
     <!-- UAP projects by default should support Windows 8.1 SDKs -->
     <SupportWindows81SDKs Condition="'$(SupportWindows81SDKs)' == '' and '$(Support81SDKs)' != 'false' and '$(TargetPlatformIdentifier)' == 'UAP'">true</SupportWindows81SDKs>
@@ -2725,7 +2737,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
      <FindInvalidProjectReferences
          TargetPlatformVersion="$(TargetPlatformVersion)"
          TargetPlatformIdentifier="$(TargetPlatformIdentifier)"
-         ProjectReferences="@(TargetPathWithTargetPlatformMoniker)">
+         ProjectReferences="@(_ProjectReferenceTargetPlatformMonikers)">
        <Output TaskParameter="InvalidReferences" ItemName="InvalidProjectReferences" />
      </FindInvalidProjectReferences>
 
@@ -2742,7 +2754,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       BuildInParallel="$(BuildInParallel)"
       ContinueOnError="!$(BuildingProject)"
       RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
-      <Output TaskParameter="TargetOutputs" ItemName="TargetPathWithTargetPlatformMoniker" />
+      <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetPlatformMonikers" />
     </MSBuild>
   </Target>
 
@@ -3244,6 +3256,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="SplitResourcesByCulture"
       DependsOnTargets="AssignTargetPaths">
 
+    <PropertyGroup>
+      <RespectAlreadyAssignedItemCulture Condition="'$(RespectAlreadyAssignedItemCulture)' == ''">false</RespectAlreadyAssignedItemCulture>
+    </PropertyGroup>
+
     <Warning Condition="'@(ResxWithNoCulture)'!=''" Code="MSB9000" Text="ResxWithNoCulture item type is deprecated. Use EmbeddedResource items instead."/>
     <Warning Condition="'@(ResxWithCulture)'!=''" Code="MSB9001" Text="ResxWithCulture item type is deprecated. Use EmbeddedResource items instead."/>
     <Warning Condition="'@(NonResxWithCulture)'!=''" Code="MSB9002" Text="NonResxWithCulture item type is deprecated. Use EmbeddedResource items instead."/>
@@ -3261,7 +3277,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </EmbeddedResource>
     </ItemGroup>
 
-    <AssignCulture Files="@(EmbeddedResource)" Condition="'%(Extension)'!='.licx'">
+    <AssignCulture Files="@(EmbeddedResource)" Condition="'%(Extension)'!='.licx'"  RespectAlreadyAssignedItemCulture="$(RespectAlreadyAssignedItemCulture)">
       <!-- Create the list of culture resx and embedded resource files -->
       <Output TaskParameter="AssignedFilesWithCulture" ItemName="_MixedResourceWithCulture"/>
       <!-- Create the list of non-culture resx and embedded resource files -->
@@ -3596,6 +3612,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       ResolveReferences;
       ResolveKeySource;
       SetWin32ManifestProperties;
+      _SetPreferNativeArm64Win32ManifestProperties;
       FindReferenceAssembliesForReferences;
       _GenerateCompileInputs;
       BeforeCompile;
@@ -4135,12 +4152,40 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Win32Manifest>$(ApplicationManifest)</Win32Manifest>
     </PropertyGroup>
 
-    <GetFrameworkPath Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true'">
+    <!-- If PreferNativeArm64 is enabled, it searches for the same default.win32manifest  -->
+    <GetFrameworkPath Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true' and '$(PreferNativeArm64)' != 'true'">
       <Output TaskParameter="FrameworkVersion40Path"  PropertyName="_FrameworkVersion40Path" />
     </GetFrameworkPath>
 
     <PropertyGroup>
-      <EmbeddedWin32Manifest  Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true' and Exists('$(_FrameworkVersion40Path)\default.win32manifest')">$(_FrameworkVersion40Path)\default.win32manifest</EmbeddedWin32Manifest>
+      <EmbeddedWin32Manifest Condition="'$(ApplicationManifest)'=='' and '$(NoWin32Manifest)'!='true' and '$(PreferNativeArm64)' != 'true' and Exists('$(_FrameworkVersion40Path)\default.win32manifest')">$(_FrameworkVersion40Path)\default.win32manifest</EmbeddedWin32Manifest>
+    </PropertyGroup>
+
+  </Target>
+
+  <!--
+    ============================================================
+                                        _SetPreferNativeArm64Win32ManifestProperties
+
+    Populates Manifest with SupportedArchitectures and updates Win32Manifest property to be used later in the build.
+    ============================================================
+    -->
+
+  <Target
+      Name="_SetPreferNativeArm64Win32ManifestProperties"
+      Condition=" '$(PreferNativeArm64)'=='true' and '$(NoWin32Manifest)'!='true'"
+      DependsOnTargets="SetWin32ManifestProperties">
+
+    <AddToWin32Manifest
+      ApplicationManifest="$(Win32Manifest)"
+      OutputDirectory="$(IntermediateOutputPath)"
+      SupportedArchitectures="$(_SupportedArchitectures)">
+
+      <Output TaskParameter="ManifestPath" PropertyName="_Win32Manifest"/>
+    </AddToWin32Manifest>
+
+    <PropertyGroup>
+      <Win32Manifest Condition="'$(_Win32Manifest)' != ''">$(_Win32Manifest)</Win32Manifest>
     </PropertyGroup>
 
   </Target>
@@ -4289,6 +4334,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="OutputManifest" ItemName="FileWrites"/>
 
     </GenerateApplicationManifest>
+
+    <AddToWin32Manifest
+        Condition="'$(PreferNativeArm64)'=='true'"
+        ApplicationManifest="@(ApplicationManifest)"
+        OutputDirectory="$(IntermediateOutputPath)"
+        SupportedArchitectures="$(_SupportedArchitectures)">
+    </AddToWin32Manifest>
 
     <PropertyGroup>
       <_DeploymentCopyApplicationManifest>true</_DeploymentCopyApplicationManifest>
@@ -4500,7 +4552,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_ClickOnceTransitiveContentItemsTemp>
       <_ClickOnceTransitiveContentItems Include="@(_ClickOnceTransitiveContentItemsTemp->'%(SavedIdentity)')" Condition="'%(Identity)'=='@(PublishFile)' Or '%(Extension)'=='.exe' Or '%(Extension)'=='.dll'" />
 
-      <!-- 
+      <!--
         ClickOnce content items is union of transitive content items and content items from this project.
         We also exclude content items from this project that have set CopyToPublishDirectory to Never.
       -->
@@ -5894,7 +5946,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <DeploymentComputeClickOnceManifestInfoDependsOn>
       CleanPublishFolder;
       $(_RecursiveTargetForContentCopying);
-      _DeploymentGenerateTrustInfo
+      _DeploymentGenerateTrustInfo;
       $(DeploymentComputeClickOnceManifestInfoDependsOn)
     </DeploymentComputeClickOnceManifestInfoDependsOn>
   </PropertyGroup>
@@ -6819,7 +6871,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(MsTestToolsTargets)" Condition="Exists('$(MsTestToolsTargets)')" />
-  
+
   <PropertyGroup>
     <UseMSBuildTestInfrastructure Condition="'$(UseMSBuildTestInfrastructure)' == ''">false</UseMSBuildTestInfrastructure>
   </PropertyGroup>
@@ -6836,9 +6888,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup>
     <MsAppxPackageTargets Condition="'$(MsAppxPackageTargets)'==''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\AppxPackage\Microsoft.AppXPackage.Targets</MsAppxPackageTargets>
+
+    <!-- Opt-out switch to allow disabling importing the 'AppxPackage' targets for UWP class libraries using modern .NET -->
+    <EnableAppxPackageTargetsForUwpClassLibraries Condition="'$(EnableAppxPackageTargetsForUwpClassLibraries)' == ''">true</EnableAppxPackageTargetsForUwpClassLibraries>
   </PropertyGroup>
 
-  <Import Project="$(MsAppxPackageTargets)" Condition="'$(WindowsAppContainer)' == 'true' and Exists('$(MsAppxPackageTargets)')" />
+  <!--
+    We want to import the 'AppXPackage' .targets in two scenarios:
+      - For legacy UWP, in all cases (original behavior). These projects will always set 'WindowsAppContainer' by default.
+      - For UWP (XAML) apps and libraries on modern .NET, we only enable this for class libraries. This allows the existing
+        .appx tooling to take care of generating .pri resources without the need to pull in WinAppSDK or other external tools.
+        We cannot use this for applications, because the rest of that tooling is not capable of handling modern .NET projects.
+        In that case, we either leverage the tooling in WinAppSDK, or DesktopBridge (via a .wapproj project for packaging).
+  -->
+  <Import Project="$(MsAppxPackageTargets)" Condition="('$(WindowsAppContainer)' == 'true' or ('$(UseUwpTools)' == 'true' and '$(OutputType)' == 'Library' and '$(EnableAppxPackageTargetsForUwpClassLibraries)' != 'false')) and Exists('$(MsAppxPackageTargets)')" />
 
   <!-- This import is temporary and will be removed once it is moved into the silverlight targets -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.Data.Entity.targets" Condition="'$(TargetFrameworkIdentifier)' == 'Silverlight' and Exists('$(MSBuildToolsPath)\Microsoft.Data.Entity.targets')"/>
