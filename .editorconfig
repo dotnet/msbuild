@@ -435,7 +435,9 @@ dotnet_diagnostic.xUnit2020.severity = warning
 # Use Assert.DoesNotContain instead of Assert.Empty on filtered collections
 dotnet_diagnostic.xUnit2029.severity = warning
 
-# xunit to supress temp
+# Do not use blocking task operations in test method. https://xunit.net/xunit.analyzers/rules/xUnit1031
+# The parallelization is disabled in https://github.com/dotnet/msbuild/blob/371d00f5c10a15b0858c411aafa11aac74596b06/src/Shared/UnitTests/xunit.runner.json#L6-L7
+# Issue to consider enabling parallelization: https://github.com/dotnet/msbuild/issues/10640
 dotnet_diagnostic.xUnit1031.severity = none
 
 # Do not use equality check to check for collection size.
