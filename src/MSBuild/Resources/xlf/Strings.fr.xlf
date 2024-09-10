@@ -315,16 +315,18 @@ futures
       </trans-unit>
       <trans-unit id="HelpMessage_52_BuildCheckSwitch">
         <source>  -check
-                     Enables BuildCheck during the build. BuildCheck is a series
-                     of checks to ensure code quality of the build via rule 
-                     violation reports.
-</source>
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties 
+                     of the build.
+	</source>
         <target state="new">  -check
-                     Enables BuildCheck during the build. BuildCheck is a series
-                     of checks to ensure code quality of the build via rule 
-                     violation reports.
-</target>
-        <note>      {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}{MaxLength=80}</note>
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties 
+                     of the build.
+	</target>
+        <note>
+		{Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}{MaxLength=80}
+	</note>
       </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
