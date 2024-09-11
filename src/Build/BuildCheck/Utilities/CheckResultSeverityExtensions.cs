@@ -4,7 +4,7 @@
 using System;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
-internal static class CherResultSeverityExtensions
+internal static class CheckResultSeverityExtensions
 {
     public static DiagnosticSeverity? ToDiagnosticSeverity(this CheckResultSeverity? severity)
     {

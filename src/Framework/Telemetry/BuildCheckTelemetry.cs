@@ -11,7 +11,7 @@ namespace Microsoft.Build.Framework.Telemetry;
 
 internal class BuildCheckTelemetry
 {
-    private const string FailedAcquistionEventName = "buildcheck/acquisitionfailure";
+    private const string FailedAcquisitionEventName = "buildcheck/acquisitionfailure";
     private const string RunEventName = "buildcheck/run";
     private const string RuleStatsEventName = "buildcheck/rule";
     private Guid _submissionId = Guid.NewGuid();
@@ -35,7 +35,7 @@ internal class BuildCheckTelemetry
             properties["ExceptionMessage"] = exception.Message;
         }
 
-        return (FailedAcquistionEventName, properties);
+        return (FailedAcquisitionEventName, properties);
     }
 
     /// <summary>
