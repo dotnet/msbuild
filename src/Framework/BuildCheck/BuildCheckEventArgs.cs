@@ -61,9 +61,9 @@ internal sealed class BuildCheckTracingEventArgs(
             writer.Write(data.IsBuiltIn);
             writer.Write7BitEncodedInt((int)data.DefaultSeverity);
             writer.Write7BitEncodedInt(data.ExplicitSeverities.Count);
-            foreach (DiagnosticSeverity? severity in data.ExplicitSeverities)
+            foreach (DiagnosticSeverity severity in data.ExplicitSeverities)
             {
-                writer.WriteOptionalInt32(severity == null ? null : (int)severity);
+                writer.Write7BitEncodedInt((int)severity);
             }
             writer.Write7BitEncodedInt(data.ProjectNamesWhereEnabled.Count);
             foreach (string projectName in data.ProjectNamesWhereEnabled)
@@ -101,15 +101,15 @@ internal sealed class BuildCheckTracingEventArgs(
             bool isBuiltIn = reader.ReadBoolean();
             DiagnosticSeverity defaultSeverity = (DiagnosticSeverity)reader.Read7BitEncodedInt();
             int explicitSeveritiesCount = reader.Read7BitEncodedInt();
-            HashSet<DiagnosticSeverity?> explicitSeverities =
+            HashSet<DiagnosticSeverity> explicitSeverities =
 #if NETSTANDARD2_0
-                new HashSet<DiagnosticSeverity?>();
+                new HashSet<DiagnosticSeverity>();
 #else
-                new HashSet<DiagnosticSeverity?>(explicitSeveritiesCount);
+                new HashSet<DiagnosticSeverity>(explicitSeveritiesCount);
 #endif
             for (int j = 0; j < explicitSeveritiesCount; j++)
             {
-                explicitSeverities.Add(reader.ReadOptionalInt32() == null ? null : (DiagnosticSeverity)reader.ReadInt32());
+                explicitSeverities.Add((DiagnosticSeverity)reader.Read7BitEncodedInt());
             }
             int projectNamesWhereEnabledCount = reader.Read7BitEncodedInt();
             HashSet<string> projectNamesWhereEnabled =

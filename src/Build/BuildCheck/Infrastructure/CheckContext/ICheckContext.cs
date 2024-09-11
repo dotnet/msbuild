@@ -45,4 +45,14 @@ internal interface ICheckContext
     /// Dispatch the instance of <see cref="BuildEventContext"/> as a warning message.
     /// </summary>
     void DispatchAsWarningFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message);
+
+    /// <summary>
+    /// Dispatch the telemetry data for a failed acquisition.
+    /// </summary>
+    void DispatchFailedAcquisitionTelemetry(string assemblyName, Exception exception);
+
+    /// <summary>
+    /// If supported - dispatches the telemetry data.
+    /// </summary>
+    void DispatchTelemetry(BuildCheckTracingData data);
 }

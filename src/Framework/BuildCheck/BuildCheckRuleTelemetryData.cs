@@ -25,7 +25,7 @@ internal sealed class BuildCheckRuleTelemetryData(
         string checkFriendlyName,
         bool isBuiltIn,
         DiagnosticSeverity defaultSeverity,
-        HashSet<DiagnosticSeverity?> explicitSeverities,
+        HashSet<DiagnosticSeverity> explicitSeverities,
         HashSet<string> projectNamesWhereEnabled,
         int violationMessagesCount,
         int violationWarningsCount,
@@ -56,7 +56,7 @@ internal sealed class BuildCheckRuleTelemetryData(
             data1.CheckFriendlyName,
             data1.IsBuiltIn,
             data1.DefaultSeverity,
-            new HashSet<DiagnosticSeverity?>(data1.ExplicitSeverities.Union(data2.ExplicitSeverities)),
+            new HashSet<DiagnosticSeverity>(data1.ExplicitSeverities.Union(data2.ExplicitSeverities)),
             new HashSet<string>(data1.ProjectNamesWhereEnabled.Union(data2.ProjectNamesWhereEnabled)),
             data1.ViolationMessagesCount + data2.ViolationMessagesCount,
             data1.ViolationWarningsCount + data2.ViolationWarningsCount,
@@ -73,11 +73,12 @@ internal sealed class BuildCheckRuleTelemetryData(
     /// <summary>
     /// A set of explicitly set severities (through editorconfig(s)) for the rule. There can be multiple - as different projects can have different settings.
     /// </summary>
-    public HashSet<DiagnosticSeverity?> ExplicitSeverities { get; init; } = [];
+    public HashSet<DiagnosticSeverity> ExplicitSeverities { get; init; } = [];
     public HashSet<string> ProjectNamesWhereEnabled { get; init; } = [];
     public int ViolationMessagesCount { get; private set; }
     public int ViolationWarningsCount { get; private set; }
     public int ViolationErrorsCount { get; private set; }
+    public int ViolationsCount => ViolationMessagesCount + ViolationWarningsCount + ViolationErrorsCount;
     public bool IsThrottled { get; private set; }
     public TimeSpan TotalRuntime { get; set; }
 

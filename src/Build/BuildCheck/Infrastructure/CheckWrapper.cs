@@ -63,7 +63,10 @@ internal sealed class CheckWrapper
         foreach (BuildCheckRuleTelemetryData ruleTelemetryData in _ruleTelemetryData)
         {
             CheckConfigurationEffective effectiveConfig = effectiveConfigs[Math.Max(idx, effectiveConfigs.Count - 1)];
-            ruleTelemetryData.ExplicitSeverities.Add(editorConfigs[idx].Severity.ToDiagnosticSeverity());
+            if (editorConfigs[idx].Severity != null)
+            {
+                ruleTelemetryData.ExplicitSeverities.Add(editorConfigs[idx].Severity!.Value.ToDiagnosticSeverity());
+            }
 
             if (effectiveConfig.IsEnabled)
             {

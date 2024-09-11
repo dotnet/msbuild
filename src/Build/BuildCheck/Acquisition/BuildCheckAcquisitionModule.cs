@@ -56,9 +56,9 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
         }
         catch (ReflectionTypeLoadException ex) when (ex.LoaderExceptions.Length != 0)
         {
-            foreach (Exception? loaderException in ex.LoaderExceptions)
+            foreach (Exception? unrolledEx in ex.LoaderExceptions.Where(e => e != null).Prepend(ex))
             {
-                ReportLoadingError(loaderException);
+                ReportLoadingError(unrolledEx!);
             }
         }
         catch (Exception ex)
@@ -68,10 +68,10 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
 
         return checksFactories;
 
-        void ReportLoadingError(Exception? ex)
+        void ReportLoadingError(Exception ex)
         {
-            checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckFailedRuleLoading", ex?.Message);
-            KnownTelemetry.BuildCheckTelemetry.AddCustomCheckLoadingFailure();
+            checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckFailedRuleLoading", ex.Message);
+            checkContext.DispatchFailedAcquisitionTelemetry(System.IO.Path.GetFileName(checkAcquisitionData.AssemblyPath), ex);
         }
     }
 }

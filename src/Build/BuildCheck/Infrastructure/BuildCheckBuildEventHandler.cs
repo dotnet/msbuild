@@ -166,6 +166,7 @@ internal class BuildCheckBuildEventHandler
         checkContext.DispatchAsCommentFromText(MessageImportance.Low, infraData);
         string checkData = BuildCsvString("Checks run times", checkStats);
         checkContext.DispatchAsCommentFromText(MessageImportance.Low, checkData);
+        checkContext.DispatchTelemetry(_tracingData);
     }
 
     private string BuildCsvString(string title, Dictionary<string, TimeSpan> rowData)

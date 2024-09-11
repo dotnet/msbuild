@@ -2797,7 +2797,7 @@ namespace Microsoft.Build.CommandLine
         {
             // Opt-in behavior to be determined by: https://github.com/dotnet/msbuild/issues/9723
             bool isBuildCheckEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Check);
-            return isBuildCheckEnabled;
+            return KnownTelemetry.LoggingConfigurationTelemetry.BuildCheckEnabled = isBuildCheckEnabled;
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)

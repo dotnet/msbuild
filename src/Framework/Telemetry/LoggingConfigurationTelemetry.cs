@@ -17,6 +17,11 @@ internal class LoggingConfigurationTelemetry : TelemetryBase
     public bool TerminalLogger { get; set; }
 
     /// <summary>
+    /// True if buildcheck was used.
+    /// </summary>
+    public bool BuildCheckEnabled { get; set; }
+
+    /// <summary>
     /// What was user intent:
     ///   on | true -> user intent to enable logging
     ///   off | false -> user intent to disable logging
@@ -104,6 +109,7 @@ internal class LoggingConfigurationTelemetry : TelemetryBase
 
         // populate property values
         properties["TerminalLogger"] = TerminalLogger.ToString(CultureInfo.InvariantCulture);
+        properties["BuildCheckEnabled"] = BuildCheckEnabled.ToString(CultureInfo.InvariantCulture);
 
         if (TerminalLoggerUserIntent != null)
         {
