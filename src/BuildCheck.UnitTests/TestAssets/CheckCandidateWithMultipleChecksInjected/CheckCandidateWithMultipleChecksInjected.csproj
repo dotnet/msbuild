@@ -9,6 +9,7 @@
     <PackageReference Include="CustomCheck" Version="1.0.0"/>
     <PackageReference Include="CustomCheck2" Version="1.0.0"/>
     <PackageReference Include="InvalidCustomCheck" Version="1.0.0"/>
+    <PackageReference Include="ErrorCustomCheck" Version="1.0.0"/>
   </ItemGroup>
 
   <ItemGroup>
