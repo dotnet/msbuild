@@ -10,6 +10,11 @@
 - [ ]  Create darc channel for `VS {{NEXT_VERSION}}` if it doesn't already exist \
 `darc add-channel --name "VS {{NEXT_VERSION}}"`
 - [ ]  Ping internal "First Responders" Teams channel to get the new channel made available as a promotion target (e.g. dotnet/arcade#12150): {{URL_OF_CHANNEL_PROMOTION_PR}}
+- [ ] Create darc subscriptions for new channel from:
+  - [ ] Nuget client: https://github.com/nuget/nuget.client (VS version channel)
+  - [ ] Source Build Packages: https://github.com/dotnet/source-build-reference-packages (.NET version channel)
+  - [ ] Roslyn: https://github.com/dotnet/roslyn (VS version channel)
+  - [ ] Arcade: https://github.com/dotnet/arcade (.NET version channel)
 
 ## At release time
 
