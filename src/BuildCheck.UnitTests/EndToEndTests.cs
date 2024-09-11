@@ -74,6 +74,7 @@ public class EndToEndTests : IDisposable
         PrepareSampleProjectsAndConfig(
             buildInOutOfProcessNode,
             out TransientTestFile projectFile,
+            out _,
             "PropsCheckTestWithLimit.csproj");
 
         if (limitReportsCount)
