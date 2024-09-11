@@ -26,14 +26,13 @@ internal sealed class CheckWrapper
     /// <summary>
     /// Keeps track of number of reports sent per rule.
     /// </summary>
-    private Dictionary<string, int>? _reportsCountPerRule;
+    private Dictionary<string, int> _reportsCountPerRule = new();
 
-    private readonly bool _limitReportsNumber;
+    private readonly bool _limitReportsNumber = !Traits.Instance.EscapeHatches.DoNotLimitBuildCheckResultsNumber;
 
     public CheckWrapper(Check check)
     {
         Check = check;
-        _limitReportsNumber = !Traits.Instance.EscapeHatches.DoNotLimitBuildCheckResultsNumber;
     }
 
     internal Check Check { get; }
@@ -42,15 +41,6 @@ internal sealed class CheckWrapper
     // Let's optimize for the scenario where users have a single .editorconfig file that applies to the whole solution.
     // In such case - configuration will be same for all projects. So we do not need to store it per project in a collection.
     internal CheckConfigurationEffective? CommonConfig { get; private set; }
-
-    internal void Initialize()
-    {
-        if (_limitReportsNumber)
-        {
-            _reportsCountPerRule = new Dictionary<string, int>();
-        }
-        _areStatsInitialized = false;
-    }
 
     // start new project
     internal void StartNewProject(
@@ -77,22 +67,23 @@ internal sealed class CheckWrapper
 
     internal void ReportResult(BuildCheckResult result, ICheckContext checkContext, CheckConfigurationEffective config)
     {
-        if (_reportsCountPerRule is not null)
+        if (_limitReportsNumber)
         {
-            if (!_reportsCountPerRule.ContainsKey(result.CheckRule.Id))
+            if (!_reportsCountPerRule.TryGetValue(result.CheckRule.Id, out int currentCount))
             {
-                _reportsCountPerRule[result.CheckRule.Id] = 0;
+                currentCount = 0;
             }
-            _reportsCountPerRule[result.CheckRule.Id]++;
 
-            if (_reportsCountPerRule[result.CheckRule.Id] == MaxReportsNumberPerRule + 1)
+            if (currentCount > MaxReportsNumberPerRule)
             {
-                checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"The check '{Check.FriendlyName}' has exceeded the maximum number of results allowed for the rule '{result.CheckRule.Id}'. Any additional results will not be displayed.");
                 return;
             }
 
-            if (_reportsCountPerRule[result.CheckRule.Id] > MaxReportsNumberPerRule + 1)
+            _reportsCountPerRule[result.CheckRule.Id] = currentCount + 1;
+
+            if (currentCount == MaxReportsNumberPerRule)
             {
+                checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"The check '{Check.FriendlyName}' has exceeded the maximum number of results allowed for the rule '{result.CheckRule.Id}'. Any additional results will not be displayed.");
                 return;
             }
         }
