@@ -1020,7 +1020,7 @@
     <value>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties 
-                     of the build.
+                     of the build. For more info see aka.ms/buildcheck
 	</value>
 	<comment>
 		{Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}{MaxLength=80}
