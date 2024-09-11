@@ -28,13 +28,16 @@ internal sealed class CheckWrapper
     /// </summary>
     private Dictionary<string, int>? _reportsCountPerRule;
 
+    private readonly bool _limitReportsNumber;
+
     public CheckWrapper(Check check)
     {
         Check = check;
+        _limitReportsNumber = !Traits.Instance.EscapeHatches.DoNotLimitBuildCheckResultsNumber;
     }
 
     internal Check Check { get; }
-    private bool _isInitialized = false;
+    private bool _areStatsInitialized = false;
 
     // Let's optimize for the scenario where users have a single .editorconfig file that applies to the whole solution.
     // In such case - configuration will be same for all projects. So we do not need to store it per project in a collection.
@@ -42,7 +45,11 @@ internal sealed class CheckWrapper
 
     internal void Initialize()
     {
-        _reportsCountPerRule = new Dictionary<string, int>();
+        if (_limitReportsNumber)
+        {
+            _reportsCountPerRule = new Dictionary<string, int>();
+        }
+        _areStatsInitialized = false;
     }
 
     // start new project
@@ -50,9 +57,9 @@ internal sealed class CheckWrapper
         string fullProjectPath,
         IReadOnlyList<CheckConfigurationEffective> userConfigs)
     {
-        if (!_isInitialized)
+        if (!_areStatsInitialized)
         {
-            _isInitialized = true;
+            _areStatsInitialized = true;
             CommonConfig = userConfigs[0];
 
             if (userConfigs.Count == 1)
@@ -68,7 +75,7 @@ internal sealed class CheckWrapper
         }
     }
 
-    public void ReportResult(BuildCheckResult result, ICheckContext checkContext, CheckConfigurationEffective config)
+    internal void ReportResult(BuildCheckResult result, ICheckContext checkContext, CheckConfigurationEffective config)
     {
         if (_reportsCountPerRule is not null)
         {
@@ -96,9 +103,9 @@ internal sealed class CheckWrapper
     }
 
     // to be used on eval node (BuildCheckDataSource.check)
-    internal void Uninitialize()
+    internal void UninitializeStats()
     {
-        _isInitialized = false;
+        _areStatsInitialized = false;
     }
 
     internal TimeSpan Elapsed => _stopwatch.Elapsed;
