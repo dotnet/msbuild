@@ -26,15 +26,11 @@ internal delegate CheckWrapper CheckWrapperFactory(ConfigurationContext configur
 /// </summary>
 internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 {
-    private static IBuildCheckManager? s_globalInstance;
+    private IBuildCheckManager? _instance;
 
-    internal static IBuildCheckManager GlobalInstance => s_globalInstance ?? throw new InvalidOperationException("BuildCheckManagerProvider not initialized");
+    public IBuildCheckManager Instance => _instance ?? new NullBuildCheckManager();
 
-    public IBuildCheckManager Instance => GlobalInstance;
-
-    public IBuildEngineDataRouter BuildEngineDataRouter => (IBuildEngineDataRouter)GlobalInstance;
-
-    public static IBuildEngineDataRouter? GlobalBuildEngineDataRouter => (IBuildEngineDataRouter?)s_globalInstance;
+    public IBuildEngineDataRouter BuildEngineDataRouter => (IBuildEngineDataRouter)Instance;
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
@@ -46,25 +42,24 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
     {
         ErrorUtilities.VerifyThrow(host != null, "BuildComponentHost was null");
 
-        if (s_globalInstance == null)
+        if (_instance == null)
         {
-            IBuildCheckManager instance;
             if (host!.BuildParameters.IsBuildCheckEnabled)
             {
-                instance = new BuildCheckManager();
+                _instance = new BuildCheckManager();
             }
             else
             {
-                instance = new NullBuildCheckManager();
+                _instance = new NullBuildCheckManager();
             }
-
-            // We are fine with the possibility of double creation here - as the construction is cheap
-            //  and without side effects and the actual backing field is effectively immutable after the first assignment.
-            Interlocked.CompareExchange(ref s_globalInstance, instance, null);
         }
     }
 
-    public void ShutdownComponent() => GlobalInstance.Shutdown();
+    public void ShutdownComponent()
+    {
+        _instance?.Shutdown();
+        _instance = null;
+    } 
 
     internal sealed class BuildCheckManager : IBuildCheckManager, IBuildEngineDataRouter
     {
