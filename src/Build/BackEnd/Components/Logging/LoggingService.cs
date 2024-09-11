@@ -854,6 +854,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 _onlyLogCriticalEvents = buildComponentHost.BuildParameters.OnlyLogCriticalEvents;
 
                 _serviceState = LoggingServiceState.Initialized;
+
+                _buildEngineDataRouter = (buildComponentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)?.BuildEngineDataRouter;
             }
         }
 
