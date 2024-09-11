@@ -21,7 +21,7 @@ internal sealed class CheckWrapper
     /// <summary>
     /// Maximum amount of messages that could be sent per check rule.
     /// </summary>
-    public const int MaxMessageCountPerRule = 10;
+    public const int MaxReportsNumberPerRule = 10;
 
     /// <summary>
     /// Keeps track of number of reports sent per rule.
@@ -85,13 +85,13 @@ internal sealed class CheckWrapper
             }
             _reportsCountPerRule[result.CheckRule.Id]++;
 
-            if (_reportsCountPerRule[result.CheckRule.Id] == MaxMessageCountPerRule + 1)
+            if (_reportsCountPerRule[result.CheckRule.Id] == MaxReportsNumberPerRule + 1)
             {
                 checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"The check '{Check.FriendlyName}' has exceeded the maximum number of results allowed for the rule '{result.CheckRule.Id}'. Any additional results will not be displayed.");
                 return;
             }
 
-            if (_reportsCountPerRule[result.CheckRule.Id] > MaxMessageCountPerRule + 1)
+            if (_reportsCountPerRule[result.CheckRule.Id] > MaxReportsNumberPerRule + 1)
             {
                 return;
             }
