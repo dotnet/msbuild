@@ -1070,6 +1070,8 @@ namespace Microsoft.Build.Execution
                             }
                             _buildTelemetry.Host = host;
 
+                            _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
+
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
