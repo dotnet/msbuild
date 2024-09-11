@@ -218,6 +218,9 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 checkContext,
                 ReportResult);
 
+    private const int MAX_REPORTS_PER_CHECK = 20;
+    private int _reportsCount;
+
     private static void ReportResult(
         CheckWrapper checkWrapper,
         ICheckContext checkContext,
@@ -240,6 +243,13 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         if (!config.IsEnabled)
         {
             return;
+        }
+
+        // Prepend a condition to something like Traits.Instance.DisableChecksThrottling
+        if (_reportsCount++ > MAX_REPORTS_PER_CHECK)
+        {
+            // Call `RemoveChecks` from BuildCheckManagerProvider (delegate needs to be propagated here)
+            // Append the informing string to the result
         }
 
         BuildEventArgs eventArgs = result.ToEventArgs(config.Severity);
