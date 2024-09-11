@@ -64,6 +64,7 @@ internal class BuildCheckTelemetry
             properties = new Dictionary<string, string>();
             properties["SubmissionId"] = _submissionId.ToString();
             properties["RuleId"] = buildCheckRuleTelemetryData.RuleId;
+            properties["CheckFriendlyName"] = buildCheckRuleTelemetryData.CheckFriendlyName;
             properties["IsBuiltIn"] = buildCheckRuleTelemetryData.IsBuiltIn.ToString(CultureInfo.InvariantCulture);
             properties["DefaultSeverityId"] = ((int)buildCheckRuleTelemetryData.DefaultSeverity).ToString(CultureInfo.InvariantCulture);
             properties["DefaultSeverity"] = buildCheckRuleTelemetryData.DefaultSeverity.ToString();
