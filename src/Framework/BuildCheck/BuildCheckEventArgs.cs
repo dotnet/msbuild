@@ -19,15 +19,20 @@ internal abstract class BuildCheckEventArgs : BuildEventArgs
 /// <summary>
 /// Transport mean for the BuildCheck tracing data from additional nodes.
 /// </summary>
-/// <param name="tracingData"></param>
-internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tracingData) : BuildCheckEventArgs
+internal sealed class BuildCheckTracingEventArgs(
+    BuildCheckTracingData tracingData) : BuildCheckEventArgs
 {
     internal BuildCheckTracingEventArgs()
-        : this([])
-    {
-    }
+        : this(new BuildCheckTracingData())
+    { }
 
-    internal BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> data, bool isAggregatedGlobalReport) : this(data) => IsAggregatedGlobalReport = isAggregatedGlobalReport;
+    internal BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> executionData)
+        : this(new BuildCheckTracingData(executionData))
+    { }
+
+    internal BuildCheckTracingEventArgs(
+        BuildCheckTracingData tracingData,
+        bool isAggregatedGlobalReport) : this(tracingData) => IsAggregatedGlobalReport = isAggregatedGlobalReport;
 
     /// <summary>
     /// When true, the tracing information is from the whole build for logging purposes
@@ -35,17 +40,41 @@ internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tr
     /// </summary>
     public bool IsAggregatedGlobalReport { get; private set; } = false;
 
-    public Dictionary<string, TimeSpan> TracingData { get; private set; } = tracingData;
+    public BuildCheckTracingData TracingData { get; private set; } = tracingData;
 
     internal override void WriteToStream(BinaryWriter writer)
     {
         base.WriteToStream(writer);
 
-        writer.Write7BitEncodedInt(TracingData.Count);
-        foreach (KeyValuePair<string, TimeSpan> kvp in TracingData)
+        writer.Write7BitEncodedInt(TracingData.InfrastructureTracingData.Count);
+        foreach (KeyValuePair<string, TimeSpan> kvp in TracingData.InfrastructureTracingData)
         {
             writer.Write(kvp.Key);
             writer.Write(kvp.Value.Ticks);
+        }
+
+        writer.Write7BitEncodedInt(TracingData.TelemetryData.Count);
+        foreach (BuildCheckRuleTelemetryData data in TracingData.TelemetryData.Values)
+        {
+            writer.Write(data.RuleId);
+            writer.Write(data.CheckFriendlyName);
+            writer.Write(data.IsBuiltIn);
+            writer.Write7BitEncodedInt((int)data.DefaultSeverity);
+            writer.Write7BitEncodedInt(data.ExplicitSeverities.Count);
+            foreach (DiagnosticSeverity? severity in data.ExplicitSeverities)
+            {
+                writer.WriteOptionalInt32(severity == null ? null : (int)severity);
+            }
+            writer.Write7BitEncodedInt(data.ProjectNamesWhereEnabled.Count);
+            foreach (string projectName in data.ProjectNamesWhereEnabled)
+            {
+                writer.Write(projectName);
+            }
+            writer.Write7BitEncodedInt(data.ViolationMessagesCount);
+            writer.Write7BitEncodedInt(data.ViolationWarningsCount);
+            writer.Write7BitEncodedInt(data.ViolationErrorsCount);
+            writer.Write(data.IsThrottled);
+            writer.Write(data.TotalRuntime.Ticks);
         }
     }
 
@@ -54,14 +83,59 @@ internal sealed class BuildCheckTracingEventArgs(Dictionary<string, TimeSpan> tr
         base.CreateFromStream(reader, version);
 
         int count = reader.Read7BitEncodedInt();
-        TracingData = new Dictionary<string, TimeSpan>(count);
+        var infrastructureTracingData = new Dictionary<string, TimeSpan>(count);
         for (int i = 0; i < count; i++)
         {
             string key = reader.ReadString();
             TimeSpan value = TimeSpan.FromTicks(reader.ReadInt64());
 
-            TracingData.Add(key, value);
+            infrastructureTracingData.Add(key, value);
         }
+
+        count = reader.Read7BitEncodedInt();
+        List<BuildCheckRuleTelemetryData> tracingData = new List<BuildCheckRuleTelemetryData>(count);
+        for (int i = 0; i < count; i++)
+        {
+            string ruleId = reader.ReadString();
+            string checkFriendlyName = reader.ReadString();
+            bool isBuiltIn = reader.ReadBoolean();
+            DiagnosticSeverity defaultSeverity = (DiagnosticSeverity)reader.Read7BitEncodedInt();
+            int explicitSeveritiesCount = reader.Read7BitEncodedInt();
+            HashSet<DiagnosticSeverity?> explicitSeverities =
+#if NETSTANDARD2_0
+                new HashSet<DiagnosticSeverity?>();
+#else
+                new HashSet<DiagnosticSeverity?>(explicitSeveritiesCount);
+#endif
+            for (int j = 0; j < explicitSeveritiesCount; j++)
+            {
+                explicitSeverities.Add(reader.ReadOptionalInt32() == null ? null : (DiagnosticSeverity)reader.ReadInt32());
+            }
+            int projectNamesWhereEnabledCount = reader.Read7BitEncodedInt();
+            HashSet<string> projectNamesWhereEnabled =
+#if NETSTANDARD2_0
+                new HashSet<string>();
+#else
+                new HashSet<string>(projectNamesWhereEnabledCount);
+#endif
+            for (int j = 0; j < projectNamesWhereEnabledCount; j++)
+            {
+                projectNamesWhereEnabled.Add(reader.ReadString());
+            }
+            int violationMessagesCount = reader.Read7BitEncodedInt();
+            int violationWarningsCount = reader.Read7BitEncodedInt();
+            int violationErrorsCount = reader.Read7BitEncodedInt();
+            bool isThrottled = reader.ReadBoolean();
+            TimeSpan totalRuntime = TimeSpan.FromTicks(reader.ReadInt64());
+
+            BuildCheckRuleTelemetryData data = new BuildCheckRuleTelemetryData(
+                ruleId, checkFriendlyName, isBuiltIn, defaultSeverity, explicitSeverities, projectNamesWhereEnabled,
+                violationMessagesCount, violationWarningsCount, violationErrorsCount, isThrottled, totalRuntime);
+
+            tracingData.Add(data);
+        }
+
+        TracingData = new BuildCheckTracingData(tracingData, infrastructureTracingData);
     }
 }
 

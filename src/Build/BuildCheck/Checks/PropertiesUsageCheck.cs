@@ -118,6 +118,8 @@ internal class PropertiesUsageCheck : InternalCheck
         }
     }
 
+    internal override bool IsBuiltIn => true;
+
     private Dictionary<string, IMSBuildElementLocation?> _writenProperties = new(MSBuildNameIgnoreCaseComparer.Default);
     private HashSet<string> _readProperties = new(MSBuildNameIgnoreCaseComparer.Default);
     // For the 'Property Initialized after used' check - we are interested in cases where:
