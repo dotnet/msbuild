@@ -95,7 +95,7 @@ public class EndToEndTests : IDisposable
         // each finding should be found just once - but reported twice, due to summary
         if (limitReportsCount)
         {
-            output.ShouldMatch(@"has exceeded the maximum number of results allowed for the rule");
+            output.ShouldMatch(@"has exceeded the maximum number of results allowed");
             Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
             Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(38);
         }
