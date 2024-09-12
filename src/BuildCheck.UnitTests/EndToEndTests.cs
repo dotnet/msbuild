@@ -97,12 +97,12 @@ public class EndToEndTests : IDisposable
         {
             output.ShouldMatch(@"has exceeded the maximum number of results allowed for the rule");
             Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
-            Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(20);
+            Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(38);
         }
         else
         {
             Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
-            Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(22);
+            Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(42);
         }
     }
 

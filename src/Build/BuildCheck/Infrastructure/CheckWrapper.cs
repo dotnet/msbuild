@@ -21,13 +21,16 @@ internal sealed class CheckWrapper
     /// <summary>
     /// Maximum amount of messages that could be sent per check rule.
     /// </summary>
-    public const int MaxReportsNumberPerRule = 10;
+    public const int MaxReportsNumberPerRule = 20;
 
     /// <summary>
     /// Keeps track of number of reports sent per rule.
     /// </summary>
-    private Dictionary<string, int> _reportsCountPerRule = new();
+    private int _reportsCount = 0;
 
+    /// <summary>
+    /// Whether to limit number of reports for the Check.
+    /// </summary>
     private readonly bool _limitReportsNumber = !Traits.Instance.EscapeHatches.DoNotLimitBuildCheckResultsNumber;
 
     public CheckWrapper(Check check)
@@ -69,25 +72,20 @@ internal sealed class CheckWrapper
     {
         if (_limitReportsNumber)
         {
-            if (!_reportsCountPerRule.TryGetValue(result.CheckRule.Id, out int currentCount))
-            {
-                currentCount = 0;
-            }
-
-            if (currentCount > MaxReportsNumberPerRule)
+            if (_reportsCount > MaxReportsNumberPerRule)
             {
                 return;
             }
 
-            _reportsCountPerRule[result.CheckRule.Id] = currentCount + 1;
-
-            if (currentCount == MaxReportsNumberPerRule)
+            if (_reportsCount == MaxReportsNumberPerRule)
             {
-                checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"The check '{Check.FriendlyName}' has exceeded the maximum number of results allowed for the rule '{result.CheckRule.Id}'. Any additional results will not be displayed.");
+                checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"The check '{Check.FriendlyName}' has exceeded the maximum number of results allowed. Any additional results will not be displayed.");
+                _reportsCount++;
                 return;
             }
         }
 
+        _reportsCount++;
         BuildEventArgs eventArgs = result.ToEventArgs(config.Severity);
         eventArgs.BuildEventContext = checkContext.BuildEventContext;
         checkContext.DispatchBuildEvent(eventArgs);
