@@ -313,6 +313,21 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_52_BuildCheckSwitch">
+        <source>  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties 
+                     of the build. For more info see aka.ms/buildcheck
+	</source>
+        <target state="new">  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties 
+                     of the build. For more info see aka.ms/buildcheck
+	</target>
+        <note>
+		{Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}{MaxLength=80}
+	</note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: Hodnota s nízkou prioritou není platná. {0}</target>
@@ -1819,22 +1834,22 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="SAC">
         <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
-        <target state="new">Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</target>
+        <target state="translated">Založeno na klíči registru Windows VerifiedAndReputablePolicyState, stav SAC = {0}.</target>
         <note>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Enforcement">
         <source>1: in enforcement</source>
-        <target state="new">1: in enforcement</target>
+        <target state="translated">1: Vynucuje se.</target>
         <note />
       </trans-unit>
       <trans-unit id="SAC_Evaluation">
         <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
-        <target state="new">2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</target>
+        <target state="translated">2: Vyhodnocuje se. Ve vývojovém prostředí se doporučuje vypnout funkci Inteligentní řízení aplikací, protože by mohla mít negativní dopad na výkon.</target>
         <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Off">
         <source>0: turned off</source>
-        <target state="new">0: turned off</target>
+        <target state="translated">0: Vypnuto.</target>
         <note />
       </trans-unit>
       <trans-unit id="SchemaFileLocation">

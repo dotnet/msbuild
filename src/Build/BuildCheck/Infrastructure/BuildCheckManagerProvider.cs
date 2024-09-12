@@ -26,15 +26,11 @@ internal delegate CheckWrapper CheckWrapperFactory(ConfigurationContext configur
 /// </summary>
 internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 {
-    private static IBuildCheckManager? s_globalInstance;
+    private IBuildCheckManager? _instance;
 
-    internal static IBuildCheckManager GlobalInstance => s_globalInstance ?? throw new InvalidOperationException("BuildCheckManagerProvider not initialized");
+    public IBuildCheckManager Instance => _instance ?? new NullBuildCheckManager();
 
-    public IBuildCheckManager Instance => GlobalInstance;
-
-    public IBuildEngineDataRouter BuildEngineDataRouter => (IBuildEngineDataRouter)GlobalInstance;
-
-    public static IBuildEngineDataRouter? GlobalBuildEngineDataRouter => (IBuildEngineDataRouter?)s_globalInstance;
+    public IBuildEngineDataRouter BuildEngineDataRouter => (IBuildEngineDataRouter)Instance;
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
@@ -46,25 +42,24 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
     {
         ErrorUtilities.VerifyThrow(host != null, "BuildComponentHost was null");
 
-        if (s_globalInstance == null)
+        if (_instance == null)
         {
-            IBuildCheckManager instance;
             if (host!.BuildParameters.IsBuildCheckEnabled)
             {
-                instance = new BuildCheckManager();
+                _instance = new BuildCheckManager();
             }
             else
             {
-                instance = new NullBuildCheckManager();
+                _instance = new NullBuildCheckManager();
             }
-
-            // We are fine with the possibility of double creation here - as the construction is cheap
-            //  and without side effects and the actual backing field is effectively immutable after the first assignment.
-            Interlocked.CompareExchange(ref s_globalInstance, instance, null);
         }
     }
 
-    public void ShutdownComponent() => GlobalInstance.Shutdown();
+    public void ShutdownComponent()
+    {
+        _instance?.Shutdown();
+        _instance = null;
+    } 
 
     internal sealed class BuildCheckManager : IBuildCheckManager, IBuildEngineDataRouter
     {
@@ -188,6 +183,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
             if (_enabledDataSources[(int)buildCheckDataSource])
             {
+                List<CheckFactoryContext> invalidChecksToRemove = new();
                 foreach (var factory in factories)
                 {
                     var instance = factory();
@@ -201,10 +197,24 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                         if (checkFactoryContext != null)
                         {
                             _checkRegistry.Add(checkFactoryContext);
-                            SetupSingleCheck(checkFactoryContext, projectPath);
-                            checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckSuccessfulAcquisition", instance.FriendlyName);
+                            try
+                            {
+                                SetupSingleCheck(checkFactoryContext, projectPath);
+                                checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckSuccessfulAcquisition", instance.FriendlyName);
+                            }
+                            catch (BuildCheckConfigurationException e)
+                            {
+                                checkContext.DispatchAsWarningFromText(
+                                    null,
+                                    null,
+                                    null,
+                                    new BuildEventFileInfo(projectPath),
+                                    e.Message);
+                                invalidChecksToRemove.Add(checkFactoryContext);
+                            }
                         }
                     }
+                    RemoveChecks(invalidChecksToRemove, checkContext);
                 }
             }
         }
@@ -286,7 +296,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             // If it's already constructed - just control the custom settings do not differ
             Stopwatch stopwatch = Stopwatch.StartNew();
-            List<CheckFactoryContext> checksToRemove = new();
+            List<CheckFactoryContext> invalidChecksToRemove = new();
             foreach (CheckFactoryContext checkFactoryContext in _checkRegistry)
             {
                 try
@@ -295,16 +305,24 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
                 catch (BuildCheckConfigurationException e)
                 {
-                    checkContext.DispatchAsErrorFromText(
+                    checkContext.DispatchAsWarningFromText(
                         null,
                         null,
                         null,
                         new BuildEventFileInfo(projectFullPath),
                         e.Message);
-                    checksToRemove.Add(checkFactoryContext);
+                    invalidChecksToRemove.Add(checkFactoryContext);
                 }
             }
 
+            RemoveChecks(invalidChecksToRemove, checkContext);
+
+            stopwatch.Stop();
+            _tracingReporter.AddNewProjectStats(stopwatch.Elapsed);
+        }
+
+        private void RemoveChecks(List<CheckFactoryContext> checksToRemove, ICheckContext checkContext)
+        {
             checksToRemove.ForEach(c =>
             {
                 _checkRegistry.Remove(c);
@@ -316,9 +334,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 _tracingReporter.AddCheckStats(checkToRemove!.Check.FriendlyName, checkToRemove.Elapsed);
                 checkToRemove.Check.Dispose();
             }
-
-            stopwatch.Stop();
-            _tracingReporter.AddNewProjectStats(stopwatch.Elapsed);
         }
 
         public void ProcessEvaluationFinishedEventArgs(

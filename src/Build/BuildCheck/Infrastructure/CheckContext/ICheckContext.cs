@@ -40,4 +40,9 @@ internal interface ICheckContext
     /// Dispatch the instance of <see cref="BuildEventContext"/> as a comment with provided text for the message.
     /// </summary>
     void DispatchAsCommentFromText(MessageImportance importance, string message);
+
+    /// <summary>
+    /// Dispatch the instance of <see cref="BuildEventContext"/> as a warning message.
+    /// </summary>
+    void DispatchAsWarningFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message);
 }

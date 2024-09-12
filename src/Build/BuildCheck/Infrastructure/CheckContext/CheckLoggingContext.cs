@@ -39,4 +39,8 @@ internal readonly struct CheckLoggingContext(ILoggingService loggingService, Bui
     public void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
         => loggingService
             .LogErrorFromText(eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
+
+    public void DispatchAsWarningFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
+        => loggingService
+            .LogWarningFromText(eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
 }

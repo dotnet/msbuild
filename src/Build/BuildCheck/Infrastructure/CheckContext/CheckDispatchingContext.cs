@@ -62,4 +62,11 @@ internal class CheckDispatchingContext : ICheckContext
 
         _eventDispatcher.Dispatch(buildEvent);
     }
+
+    public void DispatchAsWarningFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
+    {
+        BuildWarningEventArgs buildEvent = EventsCreatorHelper.CreateWarningEventFromText(_eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
+
+        _eventDispatcher.Dispatch(buildEvent);
+    }
 }

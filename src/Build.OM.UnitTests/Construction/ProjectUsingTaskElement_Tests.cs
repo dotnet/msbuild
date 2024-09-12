@@ -356,7 +356,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -376,7 +376,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -395,7 +395,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -444,7 +444,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Helpers.GetFirst(project.Children);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -465,7 +465,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Helpers.GetFirst(project.Children);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>

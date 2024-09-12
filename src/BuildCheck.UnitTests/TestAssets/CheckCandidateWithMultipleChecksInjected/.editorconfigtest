@@ -2,3 +2,7 @@ root = true
 
 [*.csproj]
 build_check.X01234.Severity=X01234Severity
+
+build_check.X01236.Severity=X01236Severity
+build_check.X01237.Severity=X01237Severity
+build_check.X01238.Severity=X01238Severity

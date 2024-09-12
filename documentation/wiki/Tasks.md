@@ -27,7 +27,7 @@ This uses the AssemblyTaskFactory to load the task from the .dll and create an i
 ```mermaid
 graph 
 
-I["Implement:\n extend ITask interface in .dll"] --> R["Register:\n &lt; UsingTask/&gt;"] --> U["Use in XML:\n &lt Target&gt &lt MyTask/&gt &lt Target/&gt"] --> In["Initialize:\n compile inline or load from assembly \n(TaskFactory)"] --> S["Setup:\n Set input properties\n (TaskExecutionHost)"] --> E["ITask.Execute()"] --> O["Gather outputs: \n (TaskExecutionHost)"]
+I["Implement:<br/>extend ITask interface in .dll"] --> R["Register:<br/>&lt;UsingTask /&gt;"] --> U["Use in XML:<br/>&lt;Target&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;MyTask /&gt;<br/>&lt;/Target&gt;"] --> In["Initialize:<br/> compile inline or load from assembly <br/>(TaskFactory)"] --> S["Setup:<br/> Set input properties<br/> (TaskExecutionHost)"] --> E["ITask.Execute()"] --> O["Gather outputs: <br/> (TaskExecutionHost)"]
 ```
 
 ## Task Factories

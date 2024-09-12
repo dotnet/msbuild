@@ -9,7 +9,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0103](#bc0103---used-environment-variable) | Suggestion | Used environment variable. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Property first declared after it was used. |
-| [BC0203](#bc0203----property-declared-but-never-used) | None | Property declared but never used. |
+| [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Property declared but never used. |
 
 
 To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
