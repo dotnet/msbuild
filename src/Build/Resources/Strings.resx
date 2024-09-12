@@ -2142,6 +2142,47 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="IllegalCharactersInFileOrDirectory" xml:space="preserve">
     <value>There are illegal characters in '{0}' in the {1} item.</value>
   </data>
+  <data name="BuildCheck_BC0101_Title" xml:space="preserve">
+    <value>Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</value>
+	<comment>'OutputPath' and 'IntermediateOutputPath' not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0101_MessageFmt" xml:space="preserve">
+    <value>Projects {0} and {1} have conflicting output paths: {2}.</value>
+  </data>
+  <data name="BuildCheck_BC0102_Title" xml:space="preserve">
+    <value>Two tasks should not write the same file.</value>
+  </data>
+  <data name="BuildCheck_BC0102_MessageFmt" xml:space="preserve">
+    <value>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</value>
+  </data>
+  <data name="BuildCheck_BC0103_Title" xml:space="preserve">
+    <value>No implicit property derived from an environment variable should be used during the build.</value>
+  </data>
+  <data name="BuildCheck_BC0103_MessageFmt" xml:space="preserve">
+    <value>Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</value>
+  </data>
+  <data name="BuildCheck_BC0103_MessageAddendum" xml:space="preserve">
+    <value>with value:</value>
+	<comment>Will be used as a parameter {0} in previous message.</comment>
+  </data>
+  <data name="BuildCheck_BC0201_Title" xml:space="preserve">
+    <value>A property that is accessed should be declared first.</value>
+  </data>
+  <data name="BuildCheck_BC0201_MessageFmt" xml:space="preserve">
+    <value>Property: '{0}' was accessed, but it was never initialized.</value>
+  </data>
+  <data name="BuildCheck_BC0202_Title" xml:space="preserve">
+    <value>A property should be declared before it is first used.</value>
+  </data>
+  <data name="BuildCheck_BC0202_MessageFmt" xml:space="preserve">
+    <value>Property: '{0}' first declared/initialized at {1} used before it was initialized.</value>
+  </data>
+  <data name="BuildCheck_BC0203_Title" xml:space="preserve">
+    <value>A property that is not used should not be declared.</value>
+  </data>
+  <data name="BuildCheck_BC0203_MessageFmt" xml:space="preserve">
+    <value>Property: '{0}' was declared/initialized, but it was never used.</value>
+  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 
