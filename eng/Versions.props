@@ -2,11 +2,10 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>17.11.8</VersionPrefix>
-    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
+    <VersionPrefix>17.11.9</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <PackageValidationBaselineVersion>17.10.4</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
@@ -39,7 +38,7 @@
     <SystemResourcesExtensionsVersion>8.0.0</SystemResourcesExtensionsVersion>
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
     <SystemTextEncodingCodePagesVersion>7.0.0</SystemTextEncodingCodePagesVersion>
-    <SystemTextJsonVersion>8.0.3</SystemTextJsonVersion>
+    <SystemTextJsonVersion>8.0.4</SystemTextJsonVersion>
     <SystemThreadingChannelsVersion>8.0.0</SystemThreadingChannelsVersion>
     <SystemThreadingTasksDataflowVersion>8.0.0</SystemThreadingTasksDataflowVersion>
     <SystemFormatsAsn1Version>8.0.1</SystemFormatsAsn1Version>
