@@ -10,8 +10,8 @@ using System.Linq;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
-using static Microsoft.Build.Experimental.BuildCheck.TaskInvocationCheckData;
 using Microsoft.Build.Shared;
+using static Microsoft.Build.Experimental.BuildCheck.TaskInvocationCheckData;
 
 #if FEATURE_MSIOREDIST
 using Path = Microsoft.IO.Path;
