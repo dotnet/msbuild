@@ -53,9 +53,9 @@ public class EndToEndTests : IDisposable
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
 
-        output.ShouldMatch(@"BC0201: .* Property: \[MyProp11\]");
-        output.ShouldMatch(@"BC0202: .* Property: \[MyPropT2\]");
-        output.ShouldMatch(@"BC0203: .* Property: \[MyProp13\]");
+        output.ShouldMatch(@"BC0201: .* Property: 'MyProp11'");
+        output.ShouldMatch(@"BC0202: .* Property: 'MyPropT2'");
+        output.ShouldMatch(@"BC0203: .* Property: 'MyProp13'");
 
         // each finding should be found just once - but reported twice, due to summary
         Regex.Matches(output, "BC0201: .* Property").Count.ShouldBe(2);
