@@ -29,6 +29,11 @@ internal sealed class CheckWrapper
     private int _reportsCount = 0;
 
     /// <summary>
+    /// Flags that this check should no more used and be deregistered.
+    /// </summary>
+    public bool IsThrottled = false;
+
+    /// <summary>
     /// Whether to limit number of reports for the Check.
     /// </summary>
     private readonly bool _limitReportsNumber = !Traits.Instance.EscapeHatches.DoNotLimitBuildCheckResultsNumber;
@@ -39,6 +44,7 @@ internal sealed class CheckWrapper
     }
 
     internal Check Check { get; }
+
     private bool _areStatsInitialized = false;
 
     // Let's optimize for the scenario where users have a single .editorconfig file that applies to the whole solution.
@@ -72,15 +78,9 @@ internal sealed class CheckWrapper
     {
         if (_limitReportsNumber)
         {
-            if (_reportsCount > MaxReportsNumberPerRule)
+            if (_reportsCount >= MaxReportsNumberPerRule)
             {
-                return;
-            }
-
-            if (_reportsCount == MaxReportsNumberPerRule)
-            {
-                checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"The check '{Check.FriendlyName}' has exceeded the maximum number of results allowed. Any additional results will not be displayed.");
-                _reportsCount++;
+                IsThrottled = true;
                 return;
             }
         }

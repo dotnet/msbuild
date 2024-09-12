@@ -15,8 +15,11 @@ internal sealed class BuildCheckCentralContext
 {
     private readonly IConfigurationProvider _configurationProvider;
 
-    internal BuildCheckCentralContext(IConfigurationProvider configurationProvider)
-        => _configurationProvider = configurationProvider;
+    public BuildCheckCentralContext(IConfigurationProvider configurationProvider, Action<ICheckContext> removeThrottledChecks)
+    {
+        _configurationProvider = configurationProvider;
+        _removeThrottledChecks = removeThrottledChecks;
+    }
 
     private record CallbackRegistry(
         List<(CheckWrapper, Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>>)> EvaluatedPropertiesActions,
@@ -46,6 +49,7 @@ internal sealed class BuildCheckCentralContext
 
     // In a future we can have callbacks per project as well
     private readonly CallbackRegistry _globalCallbacks = new();
+    private Action<ICheckContext> _removeThrottledChecks;
 
     // This we can potentially use to subscribe for receiving evaluated props in the
     //  build event args. However - this needs to be done early on, when checks might not be known yet
@@ -216,5 +220,7 @@ internal sealed class BuildCheckCentralContext
 
             checkCallback.Item2(context);
         }
+
+        _removeThrottledChecks(checkContext);
     }
 }
