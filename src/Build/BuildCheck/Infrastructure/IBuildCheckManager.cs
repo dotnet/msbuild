@@ -79,7 +79,7 @@ internal interface IBuildCheckManager
 
     void EndProjectEvaluation(BuildEventContext buildEventContext);
 
-    void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath);
+    void StartProjectRequest(ICheckContext checksContext, string projectFullPath);
 
     void EndProjectRequest(ICheckContext checksContext, string projectFullPath);
 

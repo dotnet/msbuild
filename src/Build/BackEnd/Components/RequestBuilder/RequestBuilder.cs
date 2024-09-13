@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -1156,7 +1157,7 @@ namespace Microsoft.Build.BackEnd
 
             _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
             buildCheckManager?.StartProjectRequest(
-                _projectLoggingContext.BuildEventContext,
+                new CheckLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext),
                 _requestEntry.RequestConfiguration.ProjectFullPath);
 
             try

@@ -15,6 +15,7 @@
 
     <PropertyGroup>
         <ReadFromEnv>$(TestFromEvaluation)</ReadFromEnv>
+        <MSBuildWarningsAsErrors>$(warn2err)</MSBuildWarningsAsErrors>
     </PropertyGroup>
 
    <Target Name="Hello">
