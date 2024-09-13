@@ -10,6 +10,7 @@ using System.Linq;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Shared;
 using static Microsoft.Build.Experimental.BuildCheck.TaskInvocationCheckData;
 
 #if FEATURE_MSIOREDIST
@@ -23,8 +24,8 @@ internal sealed class DoubleWritesCheck : Check
     public static CheckRule SupportedRule = new CheckRule(
         "BC0102",
         "DoubleWrites",
-        "Two tasks should not write the same file",
-        "Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.",
+        ResourceUtilities.GetResourceString("BuildCheck_BC0102_Title")!,
+        ResourceUtilities.GetResourceString("BuildCheck_BC0102_MessageFmt")!,
         new CheckConfiguration() { Severity = CheckResultSeverity.Warning });
 
     public override string FriendlyName => "MSBuild.DoubleWritesCheck";

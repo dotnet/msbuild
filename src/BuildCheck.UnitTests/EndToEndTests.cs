@@ -45,6 +45,7 @@ public class EndToEndTests : IDisposable
         PrepareSampleProjectsAndConfig(
             buildInOutOfProcessNode,
             out TransientTestFile projectFile,
+            out _,
             "PropsCheckTest.csproj");
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success);
@@ -52,15 +53,118 @@ public class EndToEndTests : IDisposable
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
 
-        output.ShouldMatch(@"BC0201: .* Property: \[MyProp11\]");
-        output.ShouldMatch(@"BC0202: .* Property: \[MyPropT2\]");
-        output.ShouldMatch(@"BC0203: .* Property: \[MyProp13\]");
+        output.ShouldMatch(@"BC0201: .* Property: 'MyProp11'");
+        output.ShouldMatch(@"BC0202: .* Property: 'MyPropT2'");
+        output.ShouldMatch(@"BC0203: .* Property: 'MyProp13'");
 
         // each finding should be found just once - but reported twice, due to summary
         Regex.Matches(output, "BC0201: .* Property").Count.ShouldBe(2);
         Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
         Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(2);
     }
+
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public void WarningsCountExceedsLimitTest(bool buildInOutOfProcessNode, bool limitReportsCount)
+    {
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode,
+            out TransientTestFile projectFile,
+            out _,
+            "PropsCheckTestWithLimit.csproj");
+
+        if (limitReportsCount)
+        {
+            _env.SetEnvironmentVariable("MSBUILDDONOTLIMITBUILDCHECKRESULTSNUMBER", "0");
+        }
+        else
+        {
+            _env.SetEnvironmentVariable("MSBUILDDONOTLIMITBUILDCHECKRESULTSNUMBER", "1");
+        }
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+
+        
+        // each finding should be found just once - but reported twice, due to summary
+        if (limitReportsCount)
+        {
+            output.ShouldMatch(@"has exceeded the maximum number of results allowed");
+            Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
+            Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(38);
+        }
+        else
+        {
+            Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
+            Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(42);
+        }
+    }
+
+
+    [Fact]
+    public void ConfigChangeReflectedOnReuse()
+    {
+        PrepareSampleProjectsAndConfig(
+            // we need out of proc build - to test node reuse
+            true,
+            out TransientTestFile projectFile,
+            out TransientTestFile editorconfigFile,
+            "PropsCheckTest.csproj");
+
+        // Build without BuildCheck - no findings should be reported
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path}", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+        output.ShouldNotContain("BC0201");
+        output.ShouldNotContain("BC0202");
+        output.ShouldNotContain("BC0203");
+
+        // Build with BuildCheck - findings should be reported
+        output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+        output.ShouldContain("warning BC0201");
+        output.ShouldContain("warning BC0202");
+        output.ShouldContain("warning BC0203");
+
+        // Flip config in editorconfig
+        string editorConfigChange = """
+                                    
+                                    build_check.BC0201.Severity=error
+                                    build_check.BC0202.Severity=error
+                                    build_check.BC0203.Severity=error
+                                    """;
+
+        File.AppendAllText(editorconfigFile.Path, editorConfigChange);
+
+        // Build with BuildCheck - findings with new severity should be reported
+        output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        // build should fail due to error checks
+        success.ShouldBeFalse(output);
+        output.ShouldContain("error BC0201");
+        output.ShouldContain("error BC0202");
+        output.ShouldContain("error BC0203");
+
+        // Build without BuildCheck - no findings should be reported
+        output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path}", out success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+        output.ShouldNotContain("BC0201");
+        output.ShouldNotContain("BC0202");
+        output.ShouldNotContain("BC0203");
+    }
+
 
     [Theory]
     [InlineData(true, true)]
@@ -467,6 +571,7 @@ public class EndToEndTests : IDisposable
     private void PrepareSampleProjectsAndConfig(
         bool buildInOutOfProcessNode,
         out TransientTestFile projectFile,
+        out TransientTestFile editorconfigFile,
         string entryProjectAssetName,
         IEnumerable<string>? supplementalAssetNames = null,
         IEnumerable<(string RuleId, string Severity)>? ruleToSeverity = null,
@@ -485,7 +590,7 @@ public class EndToEndTests : IDisposable
             TransientTestFile supplementalFile = _env.CreateFile(workFolder, supplementalAssetName, supplementalContent);
         }
 
-        _env.CreateFile(workFolder, ".editorconfig", ReadEditorConfig(ruleToSeverity, ruleToCustomConfig, testAssetsFolderName));
+        editorconfigFile = _env.CreateFile(workFolder, ".editorconfig", ReadEditorConfig(ruleToSeverity, ruleToCustomConfig, testAssetsFolderName));
 
         // OSX links /var into /private, which makes Path.GetTempPath() return "/var..." but Directory.GetCurrentDirectory return "/private/var...".
         // This discrepancy breaks path equality checks in MSBuild checks if we pass to MSBuild full path to the initial project.
@@ -514,6 +619,7 @@ public class EndToEndTests : IDisposable
         => PrepareSampleProjectsAndConfig(
             buildInOutOfProcessNode,
             out projectFile,
+            out _,
             "Project1.csproj",
             new[] { "Project2.csproj", "ImportedFile1.props" },
             ruleToSeverity,

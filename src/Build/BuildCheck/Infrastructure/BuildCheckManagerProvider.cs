@@ -26,15 +26,11 @@ internal delegate CheckWrapper CheckWrapperFactory(ConfigurationContext configur
 /// </summary>
 internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 {
-    private static IBuildCheckManager? s_globalInstance;
+    private IBuildCheckManager? _instance;
 
-    internal static IBuildCheckManager GlobalInstance => s_globalInstance ?? throw new InvalidOperationException("BuildCheckManagerProvider not initialized");
+    public IBuildCheckManager Instance => _instance ?? new NullBuildCheckManager();
 
-    public IBuildCheckManager Instance => GlobalInstance;
-
-    public IBuildEngineDataRouter BuildEngineDataRouter => (IBuildEngineDataRouter)GlobalInstance;
-
-    public static IBuildEngineDataRouter? GlobalBuildEngineDataRouter => (IBuildEngineDataRouter?)s_globalInstance;
+    public IBuildEngineDataRouter BuildEngineDataRouter => (IBuildEngineDataRouter)Instance;
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
@@ -46,25 +42,24 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
     {
         ErrorUtilities.VerifyThrow(host != null, "BuildComponentHost was null");
 
-        if (s_globalInstance == null)
+        if (_instance == null)
         {
-            IBuildCheckManager instance;
             if (host!.BuildParameters.IsBuildCheckEnabled)
             {
-                instance = new BuildCheckManager();
+                _instance = new BuildCheckManager();
             }
             else
             {
-                instance = new NullBuildCheckManager();
+                _instance = new NullBuildCheckManager();
             }
-
-            // We are fine with the possibility of double creation here - as the construction is cheap
-            //  and without side effects and the actual backing field is effectively immutable after the first assignment.
-            Interlocked.CompareExchange(ref s_globalInstance, instance, null);
         }
     }
 
-    public void ShutdownComponent() => GlobalInstance.Shutdown();
+    public void ShutdownComponent()
+    {
+        _instance?.Shutdown();
+        _instance = null;
+    } 
 
     internal sealed class BuildCheckManager : IBuildCheckManager, IBuildEngineDataRouter
     {
@@ -80,7 +75,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
             _checkRegistry = new List<CheckFactoryContext>();
             _acquisitionModule = new BuildCheckAcquisitionModule();
-            _buildCheckCentralContext = new(_configurationProvider);
+            _buildCheckCentralContext = new(_configurationProvider, RemoveThrottledChecks);
             _buildEventsProcessor = new(_buildCheckCentralContext);
         }
 
@@ -219,7 +214,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                             }
                         }
                     }
-                    RemoveChecks(invalidChecksToRemove, checkContext);
+                    RemoveInvalidChecks(invalidChecksToRemove, checkContext);
                 }
             }
         }
@@ -322,24 +317,39 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
             }
 
-            RemoveChecks(invalidChecksToRemove, checkContext);
+            RemoveInvalidChecks(invalidChecksToRemove, checkContext);
 
             stopwatch.Stop();
             _tracingReporter.AddNewProjectStats(stopwatch.Elapsed);
         }
 
-        private void RemoveChecks(List<CheckFactoryContext> checksToRemove, ICheckContext checkContext)
+        private void RemoveInvalidChecks(List<CheckFactoryContext> checksToRemove, ICheckContext checkContext)
         {
-            checksToRemove.ForEach(c =>
+            foreach (var checkToRemove in checksToRemove)
             {
-                _checkRegistry.Remove(c);
-                checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting check '{c.FriendlyName}'");
-            });
-            foreach (var checkToRemove in checksToRemove.Select(a => a.MaterializedCheck).Where(a => a != null))
+                checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting check '{checkToRemove.FriendlyName}'");
+                RemoveCheck(checkToRemove);
+            }
+        }
+
+        public void RemoveThrottledChecks(ICheckContext checkContext)
+        {
+            foreach (var checkToRemove in _checkRegistry.FindAll(c => c.MaterializedCheck?.IsThrottled ?? false))
             {
-                _buildCheckCentralContext.DeregisterCheck(checkToRemove!);
-                _ruleTelemetryData.AddRange(checkToRemove!.GetRuleTelemetryData());
-                checkToRemove.Check.Dispose();
+                checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"Dismounting check '{checkToRemove.FriendlyName}'. The check has exceeded the maximum number of results allowed. Any additional results will not be displayed.");
+                RemoveCheck(checkToRemove);
+            }
+        }
+
+        private void RemoveCheck(CheckFactoryContext checkToRemove)
+        {
+            _checkRegistry.Remove(checkToRemove);
+            
+            if (checkToRemove.MaterializedCheck is not null)
+            {
+                _buildCheckCentralContext.DeregisterCheck(checkToRemove.MaterializedCheck);
+				_ruleTelemetryData.AddRange(checkToRemove.MaterializedCheck.GetRuleTelemetryData());
+                checkToRemove.MaterializedCheck.Check.Dispose();
             }
         }
 
