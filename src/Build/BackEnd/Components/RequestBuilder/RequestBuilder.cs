@@ -1369,14 +1369,14 @@ namespace Microsoft.Build.BackEnd
             // Ensure everything that is required is available at this time
             if (project != null && buildEventContext != null && loggingService != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
-                if (String.Equals(project.GetPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(project.GetEngineRequiredPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
                 {
                     // If <MSBuildTreatWarningsAsErrors was specified then an empty ISet<string> signals the IEventSourceSink to treat all warnings as errors
                     loggingService.AddWarningsAsErrors(buildEventContext, new HashSet<string>());
                 }
                 else
                 {
-                    ISet<string> warningsAsErrors = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsAsErrors));
+                    ISet<string> warningsAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsErrors));
 
                     if (warningsAsErrors?.Count > 0)
                     {
@@ -1384,14 +1384,14 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                ISet<string> warningsNotAsErrors = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsNotAsErrors));
+                ISet<string> warningsNotAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsNotAsErrors));
 
                 if (warningsNotAsErrors?.Count > 0)
                 {
                     loggingService.AddWarningsNotAsErrors(buildEventContext, warningsNotAsErrors);
                 }
 
-                ISet<string> warningsAsMessages = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsAsMessages));
+                ISet<string> warningsAsMessages = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsMessages));
 
                 if (warningsAsMessages?.Count > 0)
                 {

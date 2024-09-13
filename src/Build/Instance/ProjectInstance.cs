@@ -1895,6 +1895,16 @@ namespace Microsoft.Build.Execution
             {
                 unescapedValue = String.Empty;
             }
+
+            return unescapedValue;
+        }
+
+        internal string GetEngineRequiredPropertyValue(string name)
+        {
+            if (!_properties.TryGetPropertyUnescapedValue(name, out string unescapedValue))
+            {
+                unescapedValue = String.Empty;
+            }
             else
             {
                 _loggingContext?.ProcessPropertyRead(
