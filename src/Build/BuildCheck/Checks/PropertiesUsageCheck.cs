@@ -17,18 +17,18 @@ namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 internal class PropertiesUsageCheck : InternalCheck
 {
     private static readonly CheckRule _usedBeforeInitializedRule = new CheckRule("BC0201", "PropertyUsedBeforeDeclared",
-        "A property that is accessed should be declared first.",
-        "Property: [{0}] was accessed, but it was never initialized.",
+        ResourceUtilities.GetResourceString("BuildCheck_BC0201_Title")!,
+        ResourceUtilities.GetResourceString("BuildCheck_BC0201_MessageFmt")!,
         new CheckConfiguration() { Severity = CheckResultSeverity.Warning, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
 
     private static readonly CheckRule _initializedAfterUsedRule = new CheckRule("BC0202", "PropertyDeclaredAfterUsed",
-        "A property should be declared before it is first used.",
-        "Property: [{0}] first declared/initialized at [{1}] used before it was initialized.",
+        ResourceUtilities.GetResourceString("BuildCheck_BC0202_Title")!,
+        ResourceUtilities.GetResourceString("BuildCheck_BC0202_MessageFmt")!,
         new CheckConfiguration() { Severity = CheckResultSeverity.Warning, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
 
     private static readonly CheckRule _unusedPropertyRule = new CheckRule("BC0203", "UnusedPropertyDeclared",
-        "A property that is not used should not be declared.",
-        "Property: [{0}] was declared/initialized, but it was never used.",
+        ResourceUtilities.GetResourceString("BuildCheck_BC0203_Title")!,
+        ResourceUtilities.GetResourceString("BuildCheck_BC0203_MessageFmt")!,
         new CheckConfiguration() { Severity = CheckResultSeverity.Suggestion, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
 
     internal static readonly IReadOnlyList<CheckRule> SupportedRulesList = [_usedBeforeInitializedRule, _initializedAfterUsedRule, _unusedPropertyRule];
