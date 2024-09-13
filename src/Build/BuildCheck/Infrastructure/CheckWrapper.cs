@@ -83,6 +83,9 @@ internal sealed class CheckWrapper
             eventArgs.BuildEventContext = checkContext.BuildEventContext;
             checkContext.DispatchBuildEvent(eventArgs);
 
+            // Big amount of build check messages may lead to build hang.
+            // See issue https://github.com/dotnet/msbuild/issues/10414
+            // As a temporary fix, we will limit the number of messages that could be reported by the check.
             if (_limitReportsNumber)
             {
                 if (_reportsCount >= MaxReportsNumberPerRule)
