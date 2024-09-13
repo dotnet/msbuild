@@ -63,6 +63,50 @@ public class EndToEndTests : IDisposable
         Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(2);
     }
 
+
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public void WarningsCountExceedsLimitTest(bool buildInOutOfProcessNode, bool limitReportsCount)
+    {
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode,
+            out TransientTestFile projectFile,
+            out _,
+            "PropsCheckTestWithLimit.csproj");
+
+        if (limitReportsCount)
+        {
+            _env.SetEnvironmentVariable("MSBUILDDONOTLIMITBUILDCHECKRESULTSNUMBER", "0");
+        }
+        else
+        {
+            _env.SetEnvironmentVariable("MSBUILDDONOTLIMITBUILDCHECKRESULTSNUMBER", "1");
+        }
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue(output);
+
+        
+        // each finding should be found just once - but reported twice, due to summary
+        if (limitReportsCount)
+        {
+            output.ShouldMatch(@"has exceeded the maximum number of results allowed");
+            Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
+            Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(38);
+        }
+        else
+        {
+            Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
+            Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(42);
+        }
+    }
+
+
     [Fact]
     public void ConfigChangeReflectedOnReuse()
     {

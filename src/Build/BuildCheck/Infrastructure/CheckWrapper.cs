@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -17,13 +18,34 @@ internal sealed class CheckWrapper
 {
     private readonly Stopwatch _stopwatch = new Stopwatch();
 
+    /// <summary>
+    /// Maximum amount of messages that could be sent per check rule.
+    /// </summary>
+    public const int MaxReportsNumberPerRule = 20;
+
+    /// <summary>
+    /// Keeps track of number of reports sent per rule.
+    /// </summary>
+    private int _reportsCount = 0;
+
+    /// <summary>
+    /// Flags that this check should no more used and be deregistered.
+    /// </summary>
+    public bool IsThrottled { get; private set; } = false;
+
+    /// <summary>
+    /// Whether to limit number of reports for the Check.
+    /// </summary>
+    private readonly bool _limitReportsNumber = !Traits.Instance.EscapeHatches.DoNotLimitBuildCheckResultsNumber;
+
     public CheckWrapper(Check check)
     {
         Check = check;
     }
 
     internal Check Check { get; }
-    private bool _isInitialized = false;
+
+    private bool _areStatsInitialized = false;
 
     // Let's optimize for the scenario where users have a single .editorconfig file that applies to the whole solution.
     // In such case - configuration will be same for all projects. So we do not need to store it per project in a collection.
@@ -34,9 +56,9 @@ internal sealed class CheckWrapper
         string fullProjectPath,
         IReadOnlyList<CheckConfigurationEffective> userConfigs)
     {
-        if (!_isInitialized)
+        if (!_areStatsInitialized)
         {
-            _isInitialized = true;
+            _areStatsInitialized = true;
             CommonConfig = userConfigs[0];
 
             if (userConfigs.Count == 1)
@@ -52,10 +74,32 @@ internal sealed class CheckWrapper
         }
     }
 
-    // to be used on eval node (BuildCheckDataSource.check)
-    internal void Uninitialize()
+    internal void ReportResult(BuildCheckResult result, ICheckContext checkContext, CheckConfigurationEffective config)
     {
-        _isInitialized = false;
+        if (!IsThrottled)
+        {
+            _reportsCount++;
+            BuildEventArgs eventArgs = result.ToEventArgs(config.Severity);
+            eventArgs.BuildEventContext = checkContext.BuildEventContext;
+            checkContext.DispatchBuildEvent(eventArgs);
+
+            // Big amount of build check messages may lead to build hang.
+            // See issue https://github.com/dotnet/msbuild/issues/10414
+            // As a temporary fix, we will limit the number of messages that could be reported by the check.
+            if (_limitReportsNumber)
+            {
+                if (_reportsCount >= MaxReportsNumberPerRule)
+                {
+                    IsThrottled = true;
+                }
+            }
+        }
+    }
+
+    // to be used on eval node (BuildCheckDataSource.check)
+    internal void UninitializeStats()
+    {
+        _areStatsInitialized = false;
     }
 
     internal TimeSpan Elapsed => _stopwatch.Elapsed;

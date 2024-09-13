@@ -75,7 +75,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
             _checkRegistry = new List<CheckFactoryContext>();
             _acquisitionModule = new BuildCheckAcquisitionModule();
-            _buildCheckCentralContext = new(_configurationProvider);
+            _buildCheckCentralContext = new(_configurationProvider, RemoveThrottledChecks);
             _buildEventsProcessor = new(_buildCheckCentralContext);
         }
 
@@ -214,7 +214,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                             }
                         }
                     }
-                    RemoveChecks(invalidChecksToRemove, checkContext);
+                    RemoveInvalidChecks(invalidChecksToRemove, checkContext);
                 }
             }
         }
@@ -315,24 +315,39 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
             }
 
-            RemoveChecks(invalidChecksToRemove, checkContext);
+            RemoveInvalidChecks(invalidChecksToRemove, checkContext);
 
             stopwatch.Stop();
             _tracingReporter.AddNewProjectStats(stopwatch.Elapsed);
         }
 
-        private void RemoveChecks(List<CheckFactoryContext> checksToRemove, ICheckContext checkContext)
+        private void RemoveInvalidChecks(List<CheckFactoryContext> checksToRemove, ICheckContext checkContext)
         {
-            checksToRemove.ForEach(c =>
+            foreach (var checkToRemove in checksToRemove)
             {
-                _checkRegistry.Remove(c);
-                checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting check '{c.FriendlyName}'");
-            });
-            foreach (var checkToRemove in checksToRemove.Select(a => a.MaterializedCheck).Where(a => a != null))
+                checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting check '{checkToRemove.FriendlyName}'");
+                RemoveCheck(checkToRemove);
+            }
+        }
+
+        public void RemoveThrottledChecks(ICheckContext checkContext)
+        {
+            foreach (var checkToRemove in _checkRegistry.FindAll(c => c.MaterializedCheck?.IsThrottled ?? false))
             {
-                _buildCheckCentralContext.DeregisterCheck(checkToRemove!);
-                _tracingReporter.AddCheckStats(checkToRemove!.Check.FriendlyName, checkToRemove.Elapsed);
-                checkToRemove.Check.Dispose();
+                checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"Dismounting check '{checkToRemove.FriendlyName}'. The check has exceeded the maximum number of results allowed. Any additional results will not be displayed.");
+                RemoveCheck(checkToRemove);
+            }
+        }
+
+        private void RemoveCheck(CheckFactoryContext checkToRemove)
+        {
+            _checkRegistry.Remove(checkToRemove);
+            
+            if (checkToRemove.MaterializedCheck is not null)
+            {
+                _buildCheckCentralContext.DeregisterCheck(checkToRemove.MaterializedCheck);
+                _tracingReporter.AddCheckStats(checkToRemove.MaterializedCheck.Check.FriendlyName, checkToRemove.MaterializedCheck.Elapsed);
+                checkToRemove.MaterializedCheck.Check.Dispose();
             }
         }
 
