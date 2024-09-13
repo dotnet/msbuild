@@ -2162,7 +2162,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</value>
   </data>
   <data name="BuildCheck_BC0103_MessageAddendum" xml:space="preserve">
-    <value>with value:</value>
+    <value>'{0}' with value: '{1}'</value>
 	<comment>Will be used as a parameter {0} in previous message.</comment>
   </data>
   <data name="BuildCheck_BC0201_Title" xml:space="preserve">

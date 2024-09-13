@@ -95,7 +95,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
         CheckScopeClassifier.NotifyOnScopingReadiness -= HandleScopeReadiness;
     }
 
-    private string GetFormattedMessage(string envVariableName, string envVariableValue) => _isVerboseEnvVarOutput? $"'{envVariableName}' {ResourceUtilities.GetResourceString("BuildCheck_BC0103_MessageAddendum")} '{envVariableValue}'" : $"'{envVariableName}'";
+    private string GetFormattedMessage(string envVariableName, string envVariableValue) => _isVerboseEnvVarOutput ? string.Format(ResourceUtilities.GetResourceString("BuildCheck_BC0103_MessageAddendum")!, envVariableName, envVariableValue) : $"'{envVariableName}'";
 
     internal class EnvironmentVariableIdentityKey(string environmentVariableName, IMSBuildElementLocation location) : IEquatable<EnvironmentVariableIdentityKey>
     {

@@ -157,8 +157,8 @@
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageAddendum">
-        <source>with value:</source>
-        <target state="new">with value:</target>
+        <source>'{0}' with value: '{1}'</source>
+        <target state="new">'{0}' with value: '{1}'</target>
         <note>Will be used as a parameter {0} in previous message.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageFmt">
