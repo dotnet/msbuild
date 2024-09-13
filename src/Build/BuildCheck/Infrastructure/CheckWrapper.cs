@@ -116,7 +116,7 @@ internal sealed class CheckWrapper
         }
     }
 
-    internal void AddDiagnostic(CheckConfigurationEffective configurationEffective)
+    private void AddDiagnostic(CheckConfigurationEffective configurationEffective)
     {
         BuildCheckRuleTelemetryData? telemetryData =
             _ruleTelemetryData.FirstOrDefault(td => td.RuleId.Equals(configurationEffective.RuleId));
@@ -144,7 +144,10 @@ internal sealed class CheckWrapper
                 break;
         }
 
-        // TODO: add throttling info - once it's merged
+        if (IsThrottled)
+        {
+            telemetryData.SetThrottled();
+        }
     }
 
     internal void ReportResult(BuildCheckResult result, ICheckContext checkContext, CheckConfigurationEffective config)
@@ -166,6 +169,9 @@ internal sealed class CheckWrapper
                     IsThrottled = true;
                 }
             }
+
+            // Add the diagnostic to the check wrapper for telemetry purposes.
+            AddDiagnostic(config);
         }
     }
 
@@ -184,8 +190,6 @@ internal sealed class CheckWrapper
 
         return _ruleTelemetryData;
     }
-
-    internal TimeSpan Elapsed => _stopwatch.Elapsed;
 
     internal CleanupScope StartSpan()
     {

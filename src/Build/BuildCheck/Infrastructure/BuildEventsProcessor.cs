@@ -242,8 +242,6 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
             return;
         }
 
-		// Add the diagnostic to the check wrapper for telemetry purposes.
-        checkWrapper.AddDiagnostic(config);
         checkWrapper.ReportResult(result, checkContext, config);
     }
 }
