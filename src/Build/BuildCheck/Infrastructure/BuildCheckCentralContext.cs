@@ -49,7 +49,7 @@ internal sealed class BuildCheckCentralContext
 
     // In a future we can have callbacks per project as well
     private readonly CallbackRegistry _globalCallbacks = new();
-    private Action<ICheckContext> _removeThrottledChecks;
+    private readonly Action<ICheckContext> _removeThrottledChecks;
 
     // This we can potentially use to subscribe for receiving evaluated props in the
     //  build event args. However - this needs to be done early on, when checks might not be known yet

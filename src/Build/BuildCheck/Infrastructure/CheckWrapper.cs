@@ -31,7 +31,7 @@ internal sealed class CheckWrapper
     /// <summary>
     /// Flags that this check should no more used and be deregistered.
     /// </summary>
-    public bool IsThrottled = false;
+    public bool IsThrottled { get; private set; } = false;
 
     /// <summary>
     /// Whether to limit number of reports for the Check.
@@ -76,19 +76,21 @@ internal sealed class CheckWrapper
 
     internal void ReportResult(BuildCheckResult result, ICheckContext checkContext, CheckConfigurationEffective config)
     {
-        if (_limitReportsNumber)
+        if (!IsThrottled)
         {
-            if (_reportsCount >= MaxReportsNumberPerRule)
+            _reportsCount++;
+            BuildEventArgs eventArgs = result.ToEventArgs(config.Severity);
+            eventArgs.BuildEventContext = checkContext.BuildEventContext;
+            checkContext.DispatchBuildEvent(eventArgs);
+
+            if (_limitReportsNumber)
             {
-                IsThrottled = true;
-                return;
+                if (_reportsCount >= MaxReportsNumberPerRule)
+                {
+                    IsThrottled = true;
+                }
             }
         }
-
-        _reportsCount++;
-        BuildEventArgs eventArgs = result.ToEventArgs(config.Severity);
-        eventArgs.BuildEventContext = checkContext.BuildEventContext;
-        checkContext.DispatchBuildEvent(eventArgs);
     }
 
     // to be used on eval node (BuildCheckDataSource.check)
