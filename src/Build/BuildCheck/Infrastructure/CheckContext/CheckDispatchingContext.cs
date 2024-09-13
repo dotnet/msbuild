@@ -69,4 +69,12 @@ internal class CheckDispatchingContext : ICheckContext
 
         _eventDispatcher.Dispatch(buildEvent);
     }
+
+    public void DispatchFailedAcquisitionTelemetry(string assemblyName, Exception exception)
+    // This is it - no action for replay mode.
+    { }
+
+    public void DispatchTelemetry(BuildCheckTracingData data)
+    // This is it - no action for replay mode.
+    { }
 }

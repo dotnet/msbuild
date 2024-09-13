@@ -61,7 +61,7 @@ internal interface IBuildCheckManager
 
     void ProcessCheckAcquisition(CheckAcquisitionData acquisitionData, ICheckContext checksContext);
 
-    Dictionary<string, TimeSpan> CreateCheckTracingStats();
+    BuildCheckTracingData CreateCheckTracingStats();
 
     void FinalizeProcessing(LoggingContext loggingContext);
 

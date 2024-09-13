@@ -338,7 +338,11 @@ namespace Microsoft.Build.Logging
         private BinaryLogRecordKind Write(BuildCheckTracingEventArgs e)
         {
             WriteBuildEventArgsFields(e, writeMessage: false);
-            WriteProperties(e.TracingData);
+
+            Dictionary<string, TimeSpan> stats = e.TracingData.ExtractCheckStats();
+            stats.Merge(e.TracingData.InfrastructureTracingData, (span1, span2) => span1 + span2);
+
+            WriteProperties(stats);
 
             return BinaryLogRecordKind.BuildCheckTracing;
         }

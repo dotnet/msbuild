@@ -229,10 +229,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             CheckConfigurationEffective[] configurations;
             if (checkFactoryContext.MaterializedCheck == null)
             {
-                CheckConfiguration[] userConfigs =
+                CheckConfiguration[] userEditorConfigs =
                     _configurationProvider.GetUserConfigurations(projectFullPath, checkFactoryContext.RuleIds);
 
-                if (userConfigs.All(c => !(c.IsEnabled ?? checkFactoryContext.IsEnabledByDefault)))
+                if (userEditorConfigs.All(c => !(c.IsEnabled ?? checkFactoryContext.IsEnabledByDefault)))
                 {
                     // the check was not yet instantiated nor mounted - so nothing to do here now.
                     return;
@@ -242,7 +242,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     _configurationProvider.GetCustomConfigurations(projectFullPath, checkFactoryContext.RuleIds);
 
                 Check uninitializedCheck = checkFactoryContext.Factory();
-                configurations = _configurationProvider.GetMergedConfigurations(userConfigs, uninitializedCheck);
+                configurations = _configurationProvider.GetMergedConfigurations(userEditorConfigs, uninitializedCheck);
 
                 ConfigurationContext configurationContext = ConfigurationContext.FromDataEnumeration(customConfigData, configurations);
 
@@ -271,7 +271,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 // price to be paid in that case is slight performance cost.
 
                 // Create the wrapper and register to central context
-                wrapper.StartNewProject(projectFullPath, configurations);
+                wrapper.StartNewProject(projectFullPath, configurations, userEditorConfigs);
                 var wrappedContext = new CheckRegistrationContext(wrapper, _buildCheckCentralContext);
                 check.RegisterActions(wrappedContext);
             }
@@ -279,13 +279,15 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 wrapper = checkFactoryContext.MaterializedCheck;
 
-                configurations = _configurationProvider.GetMergedConfigurations(projectFullPath, wrapper.Check);
+                CheckConfiguration[] userEditorConfigs =
+                    _configurationProvider.GetUserConfigurations(projectFullPath, checkFactoryContext.RuleIds);
+                configurations = _configurationProvider.GetMergedConfigurations(userEditorConfigs, wrapper.Check);
 
                 _configurationProvider.CheckCustomConfigurationDataValidity(projectFullPath,
                     checkFactoryContext.RuleIds[0]);
 
                 // Update the wrapper
-                wrapper.StartNewProject(projectFullPath, configurations);
+                wrapper.StartNewProject(projectFullPath, configurations, userEditorConfigs);
             }
         }
 
@@ -346,7 +348,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             if (checkToRemove.MaterializedCheck is not null)
             {
                 _buildCheckCentralContext.DeregisterCheck(checkToRemove.MaterializedCheck);
-                _tracingReporter.AddCheckStats(checkToRemove.MaterializedCheck.Check.FriendlyName, checkToRemove.MaterializedCheck.Elapsed);
+				_ruleTelemetryData.AddRange(checkToRemove.MaterializedCheck.GetRuleTelemetryData());
                 checkToRemove.MaterializedCheck.Check.Dispose();
             }
         }
@@ -411,19 +413,18 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             => _buildEventsProcessor
                 .ProcessTaskParameterEventArgs(checkContext, taskParameterEventArgs);
 
-        public Dictionary<string, TimeSpan> CreateCheckTracingStats()
+        private readonly List<BuildCheckRuleTelemetryData> _ruleTelemetryData = [];
+        public BuildCheckTracingData CreateCheckTracingStats()
         {
             foreach (CheckFactoryContext checkFactoryContext in _checkRegistry)
             {
                 if (checkFactoryContext.MaterializedCheck != null)
                 {
-                    _tracingReporter.AddCheckStats(checkFactoryContext.FriendlyName, checkFactoryContext.MaterializedCheck.Elapsed);
-                    checkFactoryContext.MaterializedCheck.ClearStats();
+                    _ruleTelemetryData.AddRange(checkFactoryContext.MaterializedCheck.GetRuleTelemetryData());
                 }
             }
 
-            _tracingReporter.AddCheckInfraStats();
-            return _tracingReporter.TracingStats;
+            return new BuildCheckTracingData(_ruleTelemetryData, _tracingReporter.GetInfrastructureTracingStats());
         }
 
         public void FinalizeProcessing(LoggingContext loggingContext)

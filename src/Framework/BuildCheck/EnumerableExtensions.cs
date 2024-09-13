@@ -66,4 +66,33 @@ internal static class EnumerableExtensions
             }
         }
     }
+
+    /// <summary>
+    /// Adds a content of given list to current dictionary.
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
+    /// <param name="dict">Dictionary to receive another values.</param>
+    /// <param name="another">List to be merged into current.</param>
+    /// <param name="extractKey">Way of getting a key of an incoming value.</param>
+    /// <param name="mergeValues">Way of resolving keys conflicts.</param>
+    public static void Merge<TKey, TValue>(
+        this IDictionary<TKey, TValue> dict,
+        IReadOnlyList<TValue> another,
+        Func<TValue, TKey> extractKey,
+        Func<TValue, TValue, TValue> mergeValues)
+    {
+        foreach (var mergeValue in another)
+        {
+            TKey key = extractKey(mergeValue);
+            if (!dict.TryGetValue(key, out TValue? value))
+            {
+                dict[key] = mergeValue;
+            }
+            else
+            {
+                dict[key] = mergeValues(value, mergeValue);
+            }
+        }
+    }
 }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Acquisition;
@@ -53,21 +54,24 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
                     .ForEach(t => checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckBaseTypeNotAssignable", t.Name, t.Assembly));
             }
         }
-        catch (ReflectionTypeLoadException ex)
+        catch (ReflectionTypeLoadException ex) when (ex.LoaderExceptions.Length != 0)
         {
-            if (ex.LoaderExceptions.Length != 0)
+            foreach (Exception? unrolledEx in ex.LoaderExceptions.Where(e => e != null).Prepend(ex))
             {
-                foreach (Exception? loaderException in ex.LoaderExceptions)
-                {
-                    checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckFailedRuleLoading", loaderException?.Message);
-                }
+                ReportLoadingError(unrolledEx!);
             }
         }
         catch (Exception ex)
         {
-            checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckFailedRuleLoading", ex?.Message);
+            ReportLoadingError(ex);
         }
 
         return checksFactories;
+
+        void ReportLoadingError(Exception ex)
+        {
+            checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckFailedRuleLoading", ex.Message);
+            checkContext.DispatchFailedAcquisitionTelemetry(System.IO.Path.GetFileName(checkAcquisitionData.AssemblyPath), ex);
+        }
     }
 }

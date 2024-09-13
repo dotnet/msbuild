@@ -42,6 +42,8 @@ internal sealed class DoubleWritesCheck : Check
         registrationContext.RegisterTaskInvocationAction(TaskInvocationAction);
     }
 
+    internal override bool IsBuiltIn => true;
+
     /// <summary>
     /// Contains the first project file + task that wrote the given file during the build.
     /// </summary>
@@ -126,5 +128,5 @@ internal sealed class DoubleWritesCheck : Check
                 _filesWritten.Add(fileBeingWritten, (context.Data.ProjectFilePath, context.Data.TaskName));
             }
         }
-   }
+    }
 }
