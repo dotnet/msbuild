@@ -212,6 +212,11 @@ namespace Microsoft.Build.BackEnd.Logging
         private readonly ISet<int> _buildSubmissionIdsThatHaveLoggedErrors = new HashSet<int>();
 
         /// <summary>
+        /// A list of build submission IDs that have logged errors through buildcheck.  If an error is logged outside of a submission, the submission ID is <see cref="BuildEventContext.InvalidSubmissionId"/>.
+        /// </summary>
+        private readonly ISet<int> _buildSubmissionIdsThatHaveLoggedBuildcheckErrors = new HashSet<int>();
+
+        /// <summary>
         /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext"/>.  If an empty set, all warnings are treated as errors.
         /// </summary>
         private IDictionary<WarningsConfigKey, ISet<string>> _warningsAsErrorsByProject;
@@ -620,8 +625,16 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns><code>true</code> if the build submission logged an errors, otherwise <code>false</code>.</returns>
         public bool HasBuildSubmissionLoggedErrors(int submissionId)
         {
-            // Do not condition this based on warnAsErrors - as for buildcheck errors those do happen only in main node
-            // and hence the build result from remote node is returned as succeeded
+            if (_buildSubmissionIdsThatHaveLoggedBuildcheckErrors.Contains(submissionId))
+            {
+                return true;
+            }
+
+            // Warnings as errors are not tracked if the user did not specify to do so
+            if (WarningsAsErrors == null && _warningsAsErrorsByProject == null)
+            {
+                return false;
+            }
 
             // Determine if any of the event sinks have logged an error with this submission ID
             return _buildSubmissionIdsThatHaveLoggedErrors?.Contains(submissionId) == true;
@@ -1640,8 +1653,17 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (buildEventArgs is BuildErrorEventArgs errorEvent)
             {
-                // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
-                _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
+                int submissionId = errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId;
+
+                if (buildEventArgs is BuildCheckResultError)
+                {
+                    _buildSubmissionIdsThatHaveLoggedBuildcheckErrors.Add(submissionId);
+                }
+                else
+                {
+                    // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
+                    _buildSubmissionIdsThatHaveLoggedErrors.Add(submissionId);
+                }
             }
 
             // If this is BuildCheck-ed build - add the warnings promotability/demotability to the service
