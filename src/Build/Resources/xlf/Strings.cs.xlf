@@ -138,67 +138,67 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_MessageFmt">
         <source>Projects {0} and {1} have conflicting output paths: {2}.</source>
-        <target state="new">Projects {0} and {1} have conflicting output paths: {2}.</target>
+        <target state="translated">Projekty {0} a {1} mají konfliktní výstupní cesty: {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_Title">
         <source>Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</source>
-        <target state="new">Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</target>
+        <target state="translated">Dva projekty by neměly sdílet své umístění OutputPath ani IntermediateOutputPath.</target>
         <note>'OutputPath' and 'IntermediateOutputPath' not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_MessageFmt">
         <source>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</source>
-        <target state="new">Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</target>
+        <target state="translated">Úlohy {0} a {1} z projektů {2} a {3} zapisují do stejného souboru: {4}.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_Title">
         <source>Two tasks should not write the same file.</source>
-        <target state="new">Two tasks should not write the same file.</target>
+        <target state="translated">Dvě úlohy by neměly zapisovat do stejného souboru.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageAddendum">
         <source>'{0}' with value: '{1}'</source>
-        <target state="new">'{0}' with value: '{1}'</target>
+        <target state="translated">{0} s hodnotou {1}</target>
         <note>Will be used as a parameter {0} in previous message.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageFmt">
         <source>Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</source>
-        <target state="new">Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</target>
+        <target state="translated">Vlastnost je odvozena z proměnné prostředí: {0}. Vlastnosti by měly být předány explicitně pomocí parametru /p.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_Title">
         <source>No implicit property derived from an environment variable should be used during the build.</source>
-        <target state="new">No implicit property derived from an environment variable should be used during the build.</target>
+        <target state="translated">Během sestavování by se neměla používat žádná implicitní vlastnost odvozená z proměnné prostředí.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
-        <target state="new">Property: '{0}' was accessed, but it was never initialized.</target>
+        <target state="translated">K vlastnosti: {0} bylo přistupováno, ale nebyla nikdy inicializována.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_Title">
         <source>A property that is accessed should be declared first.</source>
-        <target state="new">A property that is accessed should be declared first.</target>
+        <target state="translated">Vlastnost, ke které se přistupuje, by se měla nejdříve deklarovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_MessageFmt">
         <source>Property: '{0}' first declared/initialized at {1} used before it was initialized.</source>
-        <target state="new">Property: '{0}' first declared/initialized at {1} used before it was initialized.</target>
+        <target state="translated">Vlastnost: {0} poprvé deklarována/inicializována v {1} byla použita dříve, než byla inicializována.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_Title">
         <source>A property should be declared before it is first used.</source>
-        <target state="new">A property should be declared before it is first used.</target>
+        <target state="translated">Vlastnost by měla být před prvním použitím deklarována.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_MessageFmt">
         <source>Property: '{0}' was declared/initialized, but it was never used.</source>
-        <target state="new">Property: '{0}' was declared/initialized, but it was never used.</target>
+        <target state="translated">Vlastnost: {0} byla deklarována nebo inicializována, ale nebyla nikdy použita.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_Title">
         <source>A property that is not used should not be declared.</source>
-        <target state="new">A property that is not used should not be declared.</target>
+        <target state="translated">Vlastnost, která se nepoužívá, by se neměla deklarovat.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">

@@ -138,67 +138,67 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_MessageFmt">
         <source>Projects {0} and {1} have conflicting output paths: {2}.</source>
-        <target state="new">Projects {0} and {1} have conflicting output paths: {2}.</target>
+        <target state="translated">Os projetos {0} e {1} têm caminhos de saída conflitantes: {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_Title">
         <source>Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</source>
-        <target state="new">Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</target>
+        <target state="translated">Dois projetos não devem compartilhar seus locais "OutputPath" nem "IntermediateOutputPath".</target>
         <note>'OutputPath' and 'IntermediateOutputPath' not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_MessageFmt">
         <source>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</source>
-        <target state="new">Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</target>
+        <target state="translated">As tarefas {0} e {1} dos projetos {2} e {3} gravam o mesmo arquivo: {4}.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_Title">
         <source>Two tasks should not write the same file.</source>
-        <target state="new">Two tasks should not write the same file.</target>
+        <target state="translated">Duas tarefas não devem gravar o mesmo arquivo.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageAddendum">
         <source>'{0}' with value: '{1}'</source>
-        <target state="new">'{0}' with value: '{1}'</target>
+        <target state="translated">"{0}" com valor: "{1}"</target>
         <note>Will be used as a parameter {0} in previous message.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageFmt">
         <source>Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</source>
-        <target state="new">Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</target>
+        <target state="translated">A propriedade é derivada da variável de ambiente: {0}. As propriedades devem ser passadas explicitamente usando a opção /p.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_Title">
         <source>No implicit property derived from an environment variable should be used during the build.</source>
-        <target state="new">No implicit property derived from an environment variable should be used during the build.</target>
+        <target state="translated">Nenhuma propriedade implícita derivada de uma variável de ambiente deve ser usada durante o build.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
-        <target state="new">Property: '{0}' was accessed, but it was never initialized.</target>
+        <target state="translated">Propriedade: "{0}" foi acessada, mas nunca foi inicializada.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_Title">
         <source>A property that is accessed should be declared first.</source>
-        <target state="new">A property that is accessed should be declared first.</target>
+        <target state="translated">Uma propriedade acessada deve ser declarada primeiro.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_MessageFmt">
         <source>Property: '{0}' first declared/initialized at {1} used before it was initialized.</source>
-        <target state="new">Property: '{0}' first declared/initialized at {1} used before it was initialized.</target>
+        <target state="translated">Propriedade: "{0}" primeiro declarada/inicializada em {1}, usada antes de ser inicializada.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_Title">
         <source>A property should be declared before it is first used.</source>
-        <target state="new">A property should be declared before it is first used.</target>
+        <target state="translated">Uma propriedade deve ser declarada antes de ser usada pela primeira vez.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_MessageFmt">
         <source>Property: '{0}' was declared/initialized, but it was never used.</source>
-        <target state="new">Property: '{0}' was declared/initialized, but it was never used.</target>
+        <target state="translated">Propriedade: "{0}" foi declarada/inicializada, mas nunca foi usada.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_Title">
         <source>A property that is not used should not be declared.</source>
-        <target state="new">A property that is not used should not be declared.</target>
+        <target state="translated">Uma propriedade que não é usada não deve ser declarada.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">

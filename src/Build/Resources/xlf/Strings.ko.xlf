@@ -138,67 +138,67 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_MessageFmt">
         <source>Projects {0} and {1} have conflicting output paths: {2}.</source>
-        <target state="new">Projects {0} and {1} have conflicting output paths: {2}.</target>
+        <target state="translated">프로젝트 {0} 및 {1} 출력 경로가 충돌합니다. {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_Title">
         <source>Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</source>
-        <target state="new">Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</target>
+        <target state="translated">두 프로젝트는 'OutputPath' 또는 'IntermediateOutputPath' 위치를 공유해서는 안 됩니다.</target>
         <note>'OutputPath' and 'IntermediateOutputPath' not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_MessageFmt">
         <source>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</source>
-        <target state="new">Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</target>
+        <target state="translated">{2} 및 {3} 프로젝트에서 작업 {0} 및 {1} 동일한 파일에 작성: {4}</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_Title">
         <source>Two tasks should not write the same file.</source>
-        <target state="new">Two tasks should not write the same file.</target>
+        <target state="translated">두 작업에서 같은 파일을 쓰면 안 됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageAddendum">
         <source>'{0}' with value: '{1}'</source>
-        <target state="new">'{0}' with value: '{1}'</target>
+        <target state="translated">값이 있는 '{0}': '{1}'</target>
         <note>Will be used as a parameter {0} in previous message.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageFmt">
         <source>Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</source>
-        <target state="new">Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</target>
+        <target state="translated">속성은 환경 변수 {0}에서 파생됩니다. /p 옵션을 사용하여 속성을 명시적으로 전달해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_Title">
         <source>No implicit property derived from an environment variable should be used during the build.</source>
-        <target state="new">No implicit property derived from an environment variable should be used during the build.</target>
+        <target state="translated">빌드하는 동안 환경 변수에서 파생된 암시적 속성을 사용하면 안 됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
-        <target state="new">Property: '{0}' was accessed, but it was never initialized.</target>
+        <target state="translated">속성: '{0}'에 액세스했지만 초기화되지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_Title">
         <source>A property that is accessed should be declared first.</source>
-        <target state="new">A property that is accessed should be declared first.</target>
+        <target state="translated">액세스하는 속성을 먼저 선언해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_MessageFmt">
         <source>Property: '{0}' first declared/initialized at {1} used before it was initialized.</source>
-        <target state="new">Property: '{0}' first declared/initialized at {1} used before it was initialized.</target>
+        <target state="translated">속성: '{0}'(이)가 초기화되기 전에 사용된 {1} 첫 번째 선언/초기화되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_Title">
         <source>A property should be declared before it is first used.</source>
-        <target state="new">A property should be declared before it is first used.</target>
+        <target state="translated">속성을 처음 사용하려면 먼저 선언해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_MessageFmt">
         <source>Property: '{0}' was declared/initialized, but it was never used.</source>
-        <target state="new">Property: '{0}' was declared/initialized, but it was never used.</target>
+        <target state="translated">속성: '{0}'이(가) 선언/초기화되었지만 사용되지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_Title">
         <source>A property that is not used should not be declared.</source>
-        <target state="new">A property that is not used should not be declared.</target>
+        <target state="translated">사용되지 않는 속성은 선언하면 안 됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
