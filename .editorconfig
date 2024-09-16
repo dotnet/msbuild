@@ -440,5 +440,9 @@ dotnet_diagnostic.xUnit2029.severity = warning
 # Issue to consider enabling parallelization: https://github.com/dotnet/msbuild/issues/10640
 dotnet_diagnostic.xUnit1031.severity = none
 
-# Do not use equality check to check for collection size.
+# Do not use equality check to check for collection size. https://xunit.net/xunit.analyzers/rules/xUnit2013
+# To fix the warning for empty collection we can use Assert.Empty() instead of Assert.Equal(0, collection.Count)
+# However to fix the warning for collections with 1 elements we should use Assert.Single() instead of Assert.Equal(1, collection.Count)
+# The latter brings incosistency in the codebase and some times in one test case.
+# So we are disabling this rule with respect to the above mentioned reasons.
 dotnet_diagnostic.xUnit2013.severity = none
