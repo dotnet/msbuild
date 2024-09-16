@@ -684,7 +684,7 @@
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildFromSource)' != 'true'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
