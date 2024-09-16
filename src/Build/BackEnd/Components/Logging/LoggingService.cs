@@ -620,11 +620,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns><code>true</code> if the build submission logged an errors, otherwise <code>false</code>.</returns>
         public bool HasBuildSubmissionLoggedErrors(int submissionId)
         {
-            // Warnings as errors are not tracked if the user did not specify to do so
-            if (WarningsAsErrors == null && _warningsAsErrorsByProject == null)
-            {
-                return false;
-            }
+            // Do not condition this based on warnAsErrors - as for buildcheck errors those do happen only in main node
+            // and hence the build result from remote node is returned as succeeded
 
             // Determine if any of the event sinks have logged an error with this submission ID
             return _buildSubmissionIdsThatHaveLoggedErrors?.Contains(submissionId) == true;
