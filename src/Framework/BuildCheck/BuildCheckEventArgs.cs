@@ -102,22 +102,14 @@ internal sealed class BuildCheckTracingEventArgs(
             DiagnosticSeverity defaultSeverity = (DiagnosticSeverity)reader.Read7BitEncodedInt();
             int explicitSeveritiesCount = reader.Read7BitEncodedInt();
             HashSet<DiagnosticSeverity> explicitSeverities =
-#if NETSTANDARD2_0
-                new HashSet<DiagnosticSeverity>();
-#else
-                new HashSet<DiagnosticSeverity>(explicitSeveritiesCount);
-#endif
+                EnumerableExtensions.NewHashSet<DiagnosticSeverity>(explicitSeveritiesCount);
             for (int j = 0; j < explicitSeveritiesCount; j++)
             {
                 explicitSeverities.Add((DiagnosticSeverity)reader.Read7BitEncodedInt());
             }
             int projectNamesWhereEnabledCount = reader.Read7BitEncodedInt();
             HashSet<string> projectNamesWhereEnabled =
-#if NETSTANDARD2_0
-                new HashSet<string>();
-#else
-                new HashSet<string>(projectNamesWhereEnabledCount);
-#endif
+                EnumerableExtensions.NewHashSet<string>(projectNamesWhereEnabledCount);
             for (int j = 0; j < projectNamesWhereEnabledCount; j++)
             {
                 projectNamesWhereEnabled.Add(reader.ReadString());

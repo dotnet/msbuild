@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -1105,11 +1106,11 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
 
             // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
-            bool isRestoring = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring] is null;
+            bool isRestoring = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring] is not null;
 
             var buildCheckManager = isRestoring
-                ? (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance
-                : null;
+                ? null
+                : (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance;
 
             buildCheckManager?.SetDataSource(BuildCheckDataSource.BuildExecution);
 
@@ -1154,15 +1155,10 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.Request.BuildEventContext);
             }
 
-            _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
-            buildCheckManager?.StartProjectRequest(
-                _projectLoggingContext.BuildEventContext,
-                _requestEntry.RequestConfiguration.ProjectFullPath);
-
+            
             try
             {
-                // Now that the project has started, parse a few known properties which indicate warning codes to treat as errors or messages
-                ConfigureWarningsAsErrorsAndMessages();
+                HandleProjectStarted(buildCheckManager);
 
                 // Make sure to extract known immutable folders from properties and register them for fast up-to-date check
                 ConfigureKnownImmutableFolders();
@@ -1271,6 +1267,31 @@ namespace Microsoft.Build.BackEnd
                 _requestEntry.RequestConfiguration.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
                 _requestEntry.RequestConfiguration.SavedEnvironmentVariables = CommunicationsUtilities.GetEnvironmentVariables();
             }
+        }
+
+        private void HandleProjectStarted(IBuildCheckManager buildCheckManager)
+        {
+            (ProjectStartedEventArgs args, ProjectLoggingContext ctx) = _nodeLoggingContext.CreateProjectLoggingContext(_requestEntry);
+
+            _projectLoggingContext = ctx;
+            ConfigureWarningsAsErrorsAndMessages();
+            ILoggingService loggingService = _projectLoggingContext?.LoggingService;
+            BuildEventContext projectBuildEventContext = _projectLoggingContext?.BuildEventContext;
+
+            // We can set the warning as errors and messages only after the project logging context has been created (as it creates the new ProjectContextId)
+            if (buildCheckManager != null && loggingService != null && projectBuildEventContext != null)
+            {
+                args.WarningsAsErrors = loggingService.GetWarningsAsErrors(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                args.WarningsAsMessages = loggingService.GetWarningsAsMessages(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                args.WarningsNotAsErrors = loggingService.GetWarningsNotAsErrors(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            }
+
+            // We can log the event only after the warning as errors and messages have been set and added
+            loggingService?.LogProjectStarted(args);
+
+            buildCheckManager?.StartProjectRequest(
+                new CheckLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext!.BuildEventContext),
+                _requestEntry.RequestConfiguration.ProjectFullPath);
         }
 
         /// <summary>
@@ -1409,7 +1430,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private ISet<string> ParseWarningCodes(string warnings)
+        private static ISet<string> ParseWarningCodes(string warnings)
         {
             if (String.IsNullOrWhiteSpace(warnings))
             {

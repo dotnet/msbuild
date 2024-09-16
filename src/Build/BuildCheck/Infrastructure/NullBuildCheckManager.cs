@@ -71,7 +71,7 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
-    public void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath)
+    public void StartProjectRequest(ICheckContext checksContext, string projectFullPath)
     {
     }
 

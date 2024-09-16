@@ -420,6 +420,41 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    public void NoEnvironmentVariableProperty_DeferredProcessing(bool warnAsError, bool warnAsMessage)
+    {
+        PrepareSampleProjectsAndConfig(
+            buildInOutOfProcessNode: true,
+            out TransientTestFile projectFile,
+            new List<(string, string)>() { ("BC0103", "warning") });
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild(
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check" +
+            (warnAsError ? " /p:warn2err=BC0103" : "") + (warnAsMessage ? " /p:warn2msg=BC0103" : ""), out bool success,
+            false, _env.Output);
+
+        success.ShouldBe(!warnAsError);
+
+        if (warnAsMessage)
+        {
+            output.ShouldNotContain("warning BC0103");
+            output.ShouldNotContain("error BC0103");
+        }
+        else if (warnAsError)
+        {
+            output.ShouldNotContain("warning BC0103");
+            output.ShouldContain("error BC0103");
+        }
+        else
+        {
+            output.ShouldContain("warning BC0103");
+            output.ShouldNotContain("error BC0103");
+        }
+    }
+
+    [Theory]
     [InlineData("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)

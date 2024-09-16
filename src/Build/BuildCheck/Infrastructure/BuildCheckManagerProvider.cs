@@ -61,7 +61,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         _instance = null;
     } 
 
-    internal sealed class BuildCheckManager : IBuildCheckManager, IBuildEngineDataRouter
+    internal sealed class BuildCheckManager : IBuildCheckManager, IBuildEngineDataRouter, IResultReporter
     {
         private readonly TracingReporter _tracingReporter = new TracingReporter();
         private readonly IConfigurationProvider _configurationProvider = new ConfigurationProvider();
@@ -246,7 +246,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
                 ConfigurationContext configurationContext = ConfigurationContext.FromDataEnumeration(customConfigData, configurations);
 
-                wrapper = checkFactoryContext.Initialize(uninitializedCheck, configurationContext);
+                wrapper = checkFactoryContext.Initialize(uninitializedCheck, this, configurationContext);
                 checkFactoryContext.MaterializedCheck = wrapper;
                 Check check = wrapper.Check;
 
@@ -528,10 +528,53 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
         }
 
-        public void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath)
+        public void StartProjectRequest(ICheckContext checkContext, string projectFullPath)
         {
+            BuildEventContext buildEventContext = checkContext.BuildEventContext;
+
             // There can be multiple ProjectStarted-ProjectFinished per single configuration project build (each request for different target)
             _projectsByInstanceId[buildEventContext.ProjectInstanceId] = projectFullPath;
+
+            if (_deferredEvalDiagnostics.TryGetValue(buildEventContext.EvaluationId, out var list))
+            {
+                foreach (BuildEventArgs deferredArgs in list)
+                {
+                    deferredArgs.BuildEventContext = deferredArgs.BuildEventContext!.WithInstanceIdAndContextId(buildEventContext);
+                    checkContext.DispatchBuildEvent(deferredArgs);
+                }
+                list.Clear();
+                _deferredEvalDiagnostics.Remove(buildEventContext.EvaluationId);
+            }
+        }
+
+        private readonly Dictionary<int, List<BuildEventArgs>> _deferredEvalDiagnostics = new();
+        void IResultReporter.ReportResult(BuildEventArgs eventArgs, ICheckContext checkContext)
+        {
+            // If we do not need to decide on promotability/demotability of warnings or we are ready to decide on those
+            //  - we can just dispatch the event.
+            if (
+                // no context - we cannot defer as we'd need eval id to queue it
+                eventArgs.BuildEventContext == null ||
+                // no eval id - we cannot defer as we'd need eval id to queue it
+                eventArgs.BuildEventContext.EvaluationId == BuildEventContext.InvalidEvaluationId ||
+                // instance id known - no need to defer
+                eventArgs.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId ||
+                // it's not a warning - no need to defer
+                eventArgs is not BuildWarningEventArgs)
+            {
+                checkContext.DispatchBuildEvent(eventArgs);
+                return;
+            }
+
+            // This is evaluation - so we need to defer it until we know the instance id and context id
+
+            if (!_deferredEvalDiagnostics.TryGetValue(eventArgs.BuildEventContext.EvaluationId, out var list))
+            {
+                list = [];
+                _deferredEvalDiagnostics[eventArgs.BuildEventContext.EvaluationId] = list;
+            }
+
+            list.Add(eventArgs);
         }
 
         public void EndProjectRequest(
@@ -589,7 +632,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return ba;
             }
 
-            public CheckWrapper Initialize(Check ba, ConfigurationContext configContext)
+            public CheckWrapper Initialize(Check ba, IResultReporter resultReporter, ConfigurationContext configContext)
             {
                 try
                 {
@@ -604,7 +647,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                     throw new BuildCheckConfigurationException(
                         $"The Check '{ba.FriendlyName}' failed to initialize: {e.Message}", e);
                 }
-                return new CheckWrapper(ba);
+                return new CheckWrapper(ba, resultReporter);
             }
 
             public CheckWrapper? MaterializedCheck { get; set; }
@@ -616,4 +659,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             public string FriendlyName => MaterializedCheck?.Check.FriendlyName ?? factory().FriendlyName;
         }
     }
+}
+
+internal interface IResultReporter
+{
+    void ReportResult(BuildEventArgs result, ICheckContext checkContext);
 }

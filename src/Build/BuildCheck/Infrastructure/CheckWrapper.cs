@@ -39,9 +39,12 @@ internal sealed class CheckWrapper
     /// </summary>
     private readonly bool _limitReportsNumber = !Traits.Instance.EscapeHatches.DoNotLimitBuildCheckResultsNumber;
 
-    public CheckWrapper(Check check)
+    private readonly IResultReporter _resultReporter;
+
+    public CheckWrapper(Check check, IResultReporter resultReporter)
     {
         Check = check;
+        _resultReporter = resultReporter;
         _ruleTelemetryData = new BuildCheckRuleTelemetryData[check.SupportedRules.Count];
 
         InitializeTelemetryData(_ruleTelemetryData, check);
@@ -157,7 +160,7 @@ internal sealed class CheckWrapper
             _reportsCount++;
             BuildEventArgs eventArgs = result.ToEventArgs(config.Severity);
             eventArgs.BuildEventContext = checkContext.BuildEventContext;
-            checkContext.DispatchBuildEvent(eventArgs);
+            _resultReporter.ReportResult(eventArgs, checkContext);
 
             // Big amount of build check messages may lead to build hang.
             // See issue https://github.com/dotnet/msbuild/issues/10414
