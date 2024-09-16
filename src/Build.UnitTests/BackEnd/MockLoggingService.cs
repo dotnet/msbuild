@@ -565,7 +565,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             int evaluationId = BuildEventContext.InvalidEvaluationId,
             int projectContextId = BuildEventContext.InvalidProjectContextId)
         {
-            var ctx = new BuildEventContext(0, 0, 0, 0);
             return new ProjectStartedEventArgs(
                 configurationId,
                 message: null,

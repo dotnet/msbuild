@@ -399,9 +399,9 @@ namespace Microsoft.Build.Framework
                 }
             }
 
-            WriteSet(writer, WarningsAsErrors);
-            WriteSet(writer, WarningsNotAsErrors);
-            WriteSet(writer, WarningsAsMessages);
+            WriteCollection(writer, WarningsAsErrors);
+            WriteCollection(writer, WarningsNotAsErrors);
+            WriteCollection(writer, WarningsAsMessages);
         }
 
         /// <summary>
@@ -471,29 +471,29 @@ namespace Microsoft.Build.Framework
                 properties = dictionaryList;
             }
 
-            WarningsAsErrors = ReadSet(reader);
-            WarningsNotAsErrors = ReadSet(reader);
-            WarningsAsMessages = ReadSet(reader);
+            WarningsAsErrors = ReadStringSet(reader);
+            WarningsNotAsErrors = ReadStringSet(reader);
+            WarningsAsMessages = ReadStringSet(reader);
         }
 
-        private static void WriteSet(BinaryWriter writer, ICollection<string>? set)
+        private static void WriteCollection(BinaryWriter writer, ICollection<string>? collection)
         {
-            if (set == null)
+            if (collection == null)
             {
                 writer.Write((byte)0);
             }
             else
             {
                 writer.Write((byte)1);
-                writer.Write(set.Count);
-                foreach (string item in set)
+                writer.Write(collection.Count);
+                foreach (string item in collection)
                 {
                     writer.Write(item);
                 }
             }
         }
 
-        private static ISet<string>? ReadSet(BinaryReader reader)
+        private static ISet<string>? ReadStringSet(BinaryReader reader)
         {
             if (reader.ReadByte() == 0)
             {
