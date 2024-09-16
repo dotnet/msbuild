@@ -534,13 +534,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
             // There can be multiple ProjectStarted-ProjectFinished per single configuration project build (each request for different target)
             _projectsByInstanceId[buildEventContext.ProjectInstanceId] = projectFullPath;
-            _evalIdToInstanceIdMap[buildEventContext.EvaluationId] = buildEventContext.ProjectInstanceId;
 
             if (_deferredEvalDiagnostics.TryGetValue(buildEventContext.EvaluationId, out var list))
             {
                 foreach (BuildEventArgs deferredArgs in list)
                 {
-                    deferredArgs.BuildEventContext = deferredArgs.BuildEventContext!.WithInstanceId(buildEventContext.ProjectInstanceId);
+                    deferredArgs.BuildEventContext = deferredArgs.BuildEventContext!.WithInstanceIdAndContextId(buildEventContext);
                     checkContext.DispatchBuildEvent(deferredArgs);
                 }
                 list.Clear();
@@ -548,7 +547,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
-        private readonly Dictionary<int, int> _evalIdToInstanceIdMap = new();
         private readonly Dictionary<int, List<BuildEventArgs>> _deferredEvalDiagnostics = new();
         void IResultReporter.ReportResult(BuildEventArgs eventArgs, ICheckContext checkContext)
         {
@@ -568,21 +566,13 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            // If we already know mapping - dispatch right away
-            if (_evalIdToInstanceIdMap.TryGetValue(eventArgs.BuildEventContext.EvaluationId, out int instanceId))
-            {
-                eventArgs.BuildEventContext = eventArgs.BuildEventContext.WithInstanceId(instanceId);
-                checkContext.DispatchBuildEvent(eventArgs);
-                return;
-            }
+            // This is evaluation - so we need to defer it until we know the instance id and context id
 
             if (!_deferredEvalDiagnostics.TryGetValue(eventArgs.BuildEventContext.EvaluationId, out var list))
             {
                 list = [];
                 _deferredEvalDiagnostics[eventArgs.BuildEventContext.EvaluationId] = list;
             }
-
-            Debugger.Launch();
 
             list.Add(eventArgs);
         }

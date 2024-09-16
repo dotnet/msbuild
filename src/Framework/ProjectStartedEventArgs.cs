@@ -8,6 +8,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
@@ -333,6 +334,14 @@ namespace Microsoft.Build.Framework
             }
         }
 
+        // Following 3 properties are intended only for internal transfer - to properly communicate the warn as error/msg
+        //  from the worker node, to the main node - that may be producing the buildcheck diagnostics.
+        // They are not going to be in a binlog (at least not as of now).
+
+        internal ISet<string>? WarningsAsErrors { get; set; }
+        internal ISet<string>? WarningsNotAsErrors { get; set; }
+        internal ISet<string>? WarningsAsMessages { get; set; }
+
         #region CustomSerializationToStream
 
         /// <summary>
@@ -389,6 +398,10 @@ namespace Microsoft.Build.Framework
                     writer.Write((string?)propertyPair.Value ?? "");
                 }
             }
+
+            WriteSet(writer, WarningsAsErrors);
+            WriteSet(writer, WarningsNotAsErrors);
+            WriteSet(writer, WarningsAsMessages);
         }
 
         /// <summary>
@@ -457,7 +470,48 @@ namespace Microsoft.Build.Framework
 
                 properties = dictionaryList;
             }
+
+            WarningsAsErrors = ReadSet(reader);
+            WarningsNotAsErrors = ReadSet(reader);
+            WarningsAsMessages = ReadSet(reader);
         }
+
+        private static void WriteSet(BinaryWriter writer, ICollection<string>? set)
+        {
+            if (set == null)
+            {
+                writer.Write((byte)0);
+            }
+            else
+            {
+                writer.Write((byte)1);
+                writer.Write(set.Count);
+                foreach (string item in set)
+                {
+                    writer.Write(item);
+                }
+            }
+        }
+
+        private static ISet<string>? ReadSet(BinaryReader reader)
+        {
+            if (reader.ReadByte() == 0)
+            {
+                return null;
+            }
+            else
+            {
+                int count = reader.ReadInt32();
+                HashSet<string> set = EnumerableExtensions.NewHashSet<string>(count, StringComparer.OrdinalIgnoreCase);
+                for (int i = 0; i < count; i++)
+                {
+                    set.Add(reader.ReadString());
+                }
+
+                return set;
+            }
+        }
+
         #endregion
 
         #region SerializationSection

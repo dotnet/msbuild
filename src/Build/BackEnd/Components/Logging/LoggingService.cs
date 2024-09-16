@@ -730,6 +730,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="codes">Codes to add</param>
         private void AddWarningsAsMessagesOrErrors(ref IDictionary<WarningsConfigKey, ISet<string>> warningsByProject, BuildEventContext buildEventContext, ISet<string> codes)
         {
+            if (codes == null)
+            {
+                return;
+            }
+
             lock (_lockObject)
             {
                 WarningsConfigKey key = GetWarningsConfigKey(buildEventContext);
@@ -1642,10 +1647,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
             }
 
-            if (buildEventArgs is BuildCheckResultError checkResultError)
+            // If this is BuildCheck-ed build - add the warnings promotability/demotability to the service
+            if (buildEventArgs is ProjectStartedEventArgs projectStartedEvent && this._componentHost.BuildParameters.IsBuildCheckEnabled)
             {
-                // If the specified BuildCheckResultError was issued, an empty ISet<string> signifies that the specified build check warnings should be treated as errors.
-                AddWarningsAsErrors(checkResultError.BuildEventContext, new HashSet<string>());
+                AddWarningsAsErrors(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsAsErrors);
+                AddWarningsAsMessages(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsAsMessages);
+                AddWarningsNotAsErrors(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsNotAsErrors);
             }
 
             if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)

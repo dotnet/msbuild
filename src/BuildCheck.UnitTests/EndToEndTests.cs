@@ -420,9 +420,10 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void NoEnvironmentVariableProperty_DeferredProcessing(bool warnAsError)
+    [InlineData(true, false)]
+    [InlineData(false, false)]
+    [InlineData(false, true)]
+    public void NoEnvironmentVariableProperty_DeferredProcessing(bool warnAsError, bool warnAsMessage)
     {
         PrepareSampleProjectsAndConfig(
             buildInOutOfProcessNode: true,
@@ -430,9 +431,18 @@ public class EndToEndTests : IDisposable
             new List<(string, string)>() { ("BC0103", "warning") });
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check" + (warnAsError ? " /p:warn2err=BC0103" : ""), out bool success, false, _env.Output);
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check" +
+            (warnAsError ? " /p:warn2err=BC0103" : "") + (warnAsMessage ? " /p:warn2msg=BC0103" : ""), out bool success,
+            false, _env.Output);
 
-        if (warnAsError)
+        success.ShouldBe(!warnAsError);
+
+        if (warnAsMessage)
+        {
+            output.ShouldNotContain("warning BC0103");
+            output.ShouldNotContain("error BC0103");
+        }
+        else if (warnAsError)
         {
             output.ShouldNotContain("warning BC0103");
             output.ShouldContain("error BC0103");

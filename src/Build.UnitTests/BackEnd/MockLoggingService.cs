@@ -550,6 +550,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return new BuildEventContext(0, 0, 0, 0);
         }
 
+        public void LogProjectStarted(ProjectStartedEventArgs args)
+        { }
+
+        public ProjectStartedEventArgs CreateProjectStarted(
+            BuildEventContext nodeBuildEventContext,
+            int submissionId,
+            int configurationId,
+            BuildEventContext parentBuildEventContext,
+            string projectFile,
+            string targetNames,
+            IEnumerable<DictionaryEntry> properties,
+            IEnumerable<DictionaryEntry> items,
+            int evaluationId = BuildEventContext.InvalidEvaluationId,
+            int projectContextId = BuildEventContext.InvalidProjectContextId)
+        {
+            var ctx = new BuildEventContext(0, 0, 0, 0);
+            return new ProjectStartedEventArgs(
+                configurationId,
+                message: null,
+                helpKeyword: null,
+                projectFile,
+                targetNames,
+                properties,
+                items,
+                parentBuildEventContext);
+        }
+
         /// <summary>
         /// Logs a project finished event
         /// </summary>

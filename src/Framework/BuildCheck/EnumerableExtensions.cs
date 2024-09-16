@@ -32,6 +32,36 @@ internal static class EnumerableExtensions
         yield return item;
     }
 
+    public static HashSet<T> NewHashSet<T>(int capacity)
+        => NewHashSet<T>(capacity, null);
+
+    public static HashSet<T> NewHashSet<T>(IEqualityComparer<T> equalityComparer)
+        => NewHashSet<T>(0, equalityComparer);
+
+    public static HashSet<T> NewHashSet<T>(int capacity, IEqualityComparer<T>? equalityComparer)
+    {
+#if NETSTANDARD2_0
+        return new HashSet<T>(equalityComparer);
+#else
+        return new HashSet<T>(capacity, equalityComparer);
+#endif
+    }
+
+    public static HashSet<T>? ToHashSet<T>(this ICollection<T>? source, IEqualityComparer<T>? equalityComparer = null)
+    {
+        if (source is null)
+        {
+            return null;
+        }
+
+        if (source is HashSet<T> set)
+        {
+            return set;
+        }
+
+        return new HashSet<T>(source, equalityComparer);
+    }
+
 #if !NET
     /// <summary>
     /// Returns a read-only <see cref="ReadOnlyDictionary{TKey, TValue}"/> wrapper
