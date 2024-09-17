@@ -449,6 +449,22 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// If child "element" is actually represented as an attribute, update the name in the corresponding Xml attribute
+        /// </summary>
+        /// <param name="child">A child element which might be represented as an attribute</param>
+        internal void UpdateElementName(ProjectElement child, string oldName)
+        {
+            ErrorUtilities.VerifyThrow(Link == null, "External project");
+
+            if (child.ExpressedAsAttribute)
+            {
+                // To rename an attribute, we have to fully remove the old one and add a new one.
+                XmlElement.RemoveAttribute(oldName);
+                SetElementAsAttributeValue(child);
+            }
+        }
+
+        /// <summary>
         /// If child "element" is actually represented as an attribute, update the value in the corresponding Xml attribute
         /// </summary>
         /// <param name="child">A child element which might be represented as an attribute</param>
