@@ -324,8 +324,9 @@
                      of the build. For more info see aka.ms/buildcheck
 	</target>
         <note>
-		{Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}{MaxLength=80}
-	</note>
+    {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
+    LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+  </note>
       </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
