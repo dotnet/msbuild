@@ -137,12 +137,12 @@
                      the -targets option or the -getTargetResult option is
                      used, write out the values after the build.
     </source>
-        <target state="translated">  -getProperty:propertyName,...
-                    於評估後，寫出一或多個指定屬性的值，以及
-                    但不執行建置；如有使用
-                    -targets 選項或 -getTargetResult 選項，
-                    便於建置之後，再寫出這些值。
-   </target>
+        <target state="new">  -getProperty:propertyName,...
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
+                     the -targets option or the -getTargetResult option is
+                     used, write out the values after the build.
+    </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -156,13 +156,13 @@
                      or the -getTargetResult option is used, write out
                      the values after the build.
     </source>
-        <target state="translated">  -getItem:itemName,...
-                    於評估後，寫出一或多個指定項目的值，以及
-                    其相關的中繼資料，但不
-                    執行建置；如有使用 -targets 選項
-                    或 -getTargetResult 選項，
-                    便於建置之後，再寫出這些值。
-   </target>
+        <target state="new">  -getItem:itemName,...
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
+                     the values after the build.
+    </target>
         <note>
       LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -173,10 +173,10 @@
                      Write out the output value of one or more targets and
                      the specified targets will be executed.
     </source>
-        <target state="translated">  -getTargetResult:targetName,...
-                    寫出一或多個目標的輸出值，然後
-                    執行指定的目標。
-   </target>
+        <target state="new">  -getTargetResult:targetName,...
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
+    </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -198,21 +198,21 @@
                      - Preview - the feature is in preview (not stable)
                      (Short form: -fa)
     </source>
-        <target state="translated">  -featureAvailability:featureName,...
-                    檢查功能可用性。結果會是下列其中一個字串:
-                    “Undefined”、“Available”、“NotAvailable” 和
-                    "Preview"。
-                    - Undefined - 功能的可用性未定義
-                    (功能可用性檢查程式不知道
-                    該功能名稱)
-                    - NotAvailable - 此功能無法使用 (不同於
-                    Undefined，功能可用性檢查程式知道該功能名稱，
-                    並知道功能目前的
-                    MSBuild 引擎不支援該功能)
-                    - Available - 此功能可以使用
-                    - Preview - 此功能目前為預覽狀態 (不穩定)
-                    (簡短形式: -fa)
-   </target>
+        <target state="new">  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the
+                     strings "Undefined", "Available", "NotAvailable" and
+                     "Preview".
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
+                     (Short form: -fa)
+    </target>
         <note>
       LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -231,18 +231,18 @@
                      later.
                      (Short form: -tl)
     </source>
-        <target state="translated">  -terminalLogger[:auto,on,off]
-                    啟用或停用終端機記錄器。終端機記錄器
-                    會即時在主機上，提供更進一步的組建輸出，
-                    並依照專案的邏輯編排，並會醒目提示
-                    可採取動作的資訊。指定自動 (或只使用選項，
-                    不使用引數) 只在使用標準輸出
-                    未重新導向時，才使用終端機記錄器。不剖析輸出，
-                    或以其他方式據此在
-                    未來的版本中保持不變。此選項可在 MSBuild 17.8 和
-                    更新版本中使用。
-                    (簡短形式: -tl)
-   </target>
+        <target state="new">  -terminalLogger[:auto,on,off]
+                     Enable or disable the terminal logger. Terminal logger
+                     provides enhanced build output on the console in real time,
+                     organized logically by project, and designed to highlight
+                     actionable information. Specify auto (or use the option
+                     without arguments) to use the terminal logger only if the
+                     standard output is not redirected. Don't parse the output
+                     or otherwise rely on it remaining unchanged in future
+                     versions. This option is available in MSBuild 17.8 and
+                     later.
+                     (Short form: -tl)
+    </target>
         <note>
       LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -268,25 +268,24 @@
                       Example:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
-        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                    終端機記錄器的參數。(簡短形式: -tlp)
-                    可用的參數。
-                       default -- 指定終端機記錄器的預設值。
-                       其需要下列其中一值: 
-。
-                          - 'on'、'true' 會強制使用 TerminalLogger，即使
-                           其之後可能會停用。
-                          - 'off'、'false' 會強制使用 TerminalLogger，即使
-                           其之後可能會啟用。
-                          - `auto` 會啟用 terminalLogger，但終端機必須能夠
-                           提供支援，且工作階段未經重新導向
-                           stdout/stderr
-                       verbosity -- 覆寫上記錄器的
-                       -verbosity
-                       showCommandLine -- 顯示 TaskCommandLineEvent 訊息
+        <target state="new">  -terminalLoggerParameters: &lt;parameters&gt;
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
+                            stdout/stderr
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
 
-                     範例: 
-                       -tlp:default=auto;verbosity=diag;shownCommandLine
+                      Example:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
       LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
@@ -301,13 +300,13 @@
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      This writes the value of property Bar into Biz.txt.
     </source>
-        <target state="translated">  -getResultOutputFile:file
-                    將輸出從 get* 重新導向至檔案。
+        <target state="new">  -getResultOutputFile:file
+                     Redirect output from get* into a file.
 
-                    範例: 
-                    -getProperty:Bar -getResultOutputFile:Biz.txt
-                    這會將屬性列的值寫入 Biz.txt。
-   </target>
+                     Example:
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     This writes the value of property Bar into Biz.txt.
+    </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -799,11 +798,11 @@
         <target state="translated">  -logger:&lt;記錄器&gt;   使用此記錄器可記錄 MSBuild 的事件。
                      若要指定多個記錄器，請各別指定每個記錄器。
                      &lt;記錄器&gt; 語法為:
-                       [&lt;類別&gt;,]&lt;組件&gt;[,&lt;選項&gt;][;&lt;參數&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      &lt;記錄器類別&gt; 語法為:
                        [&lt;一部分或完整的命名空間&gt;.]&lt;記錄器類別名稱&gt;
                      &lt;記錄器組件&gt; 語法為:
-                       {&lt;組件名稱&gt;[,&lt;strong name&gt;] | &lt;組件檔案&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      記錄器選項會指定 MSBuild 建立記錄器的方式。
                      &lt;記錄器參數&gt; 是選擇性參數，其會依您輸入的內容，
                      完全一樣地傳遞到記錄器。(簡短形式: -l)
@@ -1081,11 +1080,11 @@
                      若要指定多個記錄器，請各別指定每個記錄器。
                      (簡短形式 -dl)
                      &lt;記錄器&gt; 語法為:
-                       [&lt;類別&gt;,]&lt;組件&gt;[,&lt;選項&gt;][;&lt;參數&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      &lt;記錄器類別&gt; 語法為:
                        [&lt;一部分或完整的命名空間&gt;.]&lt;記錄器類別名稱&gt;
                      &lt;記錄器組件&gt; 語法為:
-                       {&lt;組件名稱&gt;[,&lt;strong name&gt;] | &lt;組件檔案&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      記錄器選項會指定 MSBuild 建立記錄器的方式。
                      &lt;記錄器參數&gt; 是選擇性參數，其會依您輸入的內容，
                      完全一樣地傳遞到記錄器。(簡短形式: -l)
@@ -1549,7 +1548,7 @@
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: 必須提供 featureAvailability 切換的功能名稱。</target>
+        <target state="new">MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
       following the switch, as in "msbuild.exe -featureAvailability:blah".
@@ -1823,22 +1822,22 @@
       </trans-unit>
       <trans-unit id="SAC">
         <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
-        <target state="translated">根據 Windows 登錄機碼 VerifiedAndReputablePolicyState，SAC 狀態 = {0}。</target>
+        <target state="new">Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</target>
         <note>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Enforcement">
         <source>1: in enforcement</source>
-        <target state="translated">1: 強制</target>
+        <target state="new">1: in enforcement</target>
         <note />
       </trans-unit>
       <trans-unit id="SAC_Evaluation">
         <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
-        <target state="translated">2: 評估中。建議關閉開發環境中的智慧型手機應用程式控制件，否則效能可能會受到影響</target>
+        <target state="new">2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</target>
         <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Off">
         <source>0: turned off</source>
-        <target state="translated">0: 關閉</target>
+        <target state="new">0: turned off</target>
         <note />
       </trans-unit>
       <trans-unit id="SchemaFileLocation">

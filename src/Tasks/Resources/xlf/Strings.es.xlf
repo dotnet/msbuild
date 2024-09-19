@@ -128,7 +128,7 @@
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3654: Delay signing requires that at least a public key be specified.  Please either supply a public key using the KeyFile or KeyContainer properties, or disable delay signing.</source>
-        <target state="translated">MSB3654: La firma retardada requiere que se especifique al menos una clave pública.  Proporcione una clave pública mediante las propiedades KeyFile o KeyContainer, o deshabilite la firma retardada.</target>
+        <target state="translated">MSB3654: La firma retrasada requiere que se especifique al menos una clave pública.  Proporcione una clave pública mediante las propiedades KeyFile o KeyContainer, o deshabilite la firma retrasada.</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
@@ -358,7 +358,7 @@
       </trans-unit>
       <trans-unit id="Delete.Error">
         <source>MSB3061: Unable to delete file "{0}". {1} {2}</source>
-        <target state="translated">MSB3061: No se puede eliminar el archivo "{0}". {1} {2}</target>
+        <target state="translated">MSB3061: no se puede eliminar el archivo "{0}". {1} {2}</target>
         <note>{StrBegin="MSB3061: "}</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
@@ -373,7 +373,7 @@
       </trans-unit>
       <trans-unit id="Delete.Retrying">
         <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</source>
-        <target state="translated">MSB3062: No se pudo eliminar el archivo "{0}". Iniciando reintento{1} en {2}ms. {3} {4}</target>
+        <target state="translated">MSB3062: no se pudo eliminar el archivo "{0}". Iniciando el reintento {1} en {2} ms. {3} {4}</target>
         <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message, {4} is message from LockCheck.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
@@ -1102,8 +1102,8 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" of type "{1}" may be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/binaryformatter-migration-guide</source>
-        <target state="translated">MSB3825: El recurso "{0}" del tipo "{1}" puede que se haya deserializado a través de BinaryFormatter en el tiempo de ejecución. BinaryFormatter está en desuso debido a riesgos de seguridad conocidos y se ha eliminado de .NET 9+. Si desea seguir usándolo, establezca la propiedad "GenerateResourceWarnOnBinaryFormatterUse" en false.
-           Más información: https://aka.ms/binaryformatter-migration-guide</target>
+        <target state="new">MSB3825: Resource "{0}" of type "{1}" may be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
@@ -1520,7 +1520,7 @@
       </trans-unit>
       <trans-unit id="Move.Error">
         <source>MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</source>
-        <target state="translated">MSB3677: No se puede mover el archivo "{0}" a "{1}". {2} {3}</target>
+        <target state="translated">MSB3677: no es posible mover el archivo "{0}" a "{1}". {2} {3}</target>
         <note>{StrBegin="MSB3677: "}</note>
       </trans-unit>
       <trans-unit id="Move.ExactlyOneTypeOfDestination">
@@ -2352,7 +2352,7 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.LoadingDelaySignedAssemblyWithStrongNameVerificationEnabled">
         <source>MSB3295: Failed to load an assembly. Please make sure you have disabled strong name verification for your public key if you want to generate delay signed wrappers. {0}</source>
-        <target state="translated">MSB3295: No se pudo cargar un ensamblado. Asegúrese de que deshabilitó la comprobación de nombres seguros para su clave pública si desea generar contenedores de firma retardada. {0}</target>
+        <target state="translated">MSB3295: No se pudo cargar un ensamblado. Asegúrese de que deshabilitó la comprobación de nombres seguros para su clave pública si desea generar contenedores de firma con retraso. {0}</target>
         <note>{StrBegin="MSB3295: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.MissingOrUnknownComReferenceAttribute">
@@ -2561,7 +2561,7 @@
       </trans-unit>
       <trans-unit id="StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3353: Public key necessary for delay signing was not specified.</source>
-        <target state="translated">MSB3353: No se especificó la clave pública necesaria para la firma retardada.</target>
+        <target state="translated">MSB3353: No se especificó la clave pública necesaria para la firma con retraso.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
@@ -2586,7 +2586,7 @@
       </trans-unit>
       <trans-unit id="Touch.CannotMakeFileWritable">
         <source>MSB3372: The file "{0}" cannot be made writable. {1} {2}</source>
-        <target state="translated">MSB3372: El archivo "{0}" no se puede escribir. {1} {2}</target>
+        <target state="translated">MSB3372: el archivo "{0}" no se puede hacer grabable. {1} {2}</target>
         <note>{StrBegin="MSB3372: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotRestoreAttributes">
@@ -2596,7 +2596,7 @@
       </trans-unit>
       <trans-unit id="Touch.CannotTouch">
         <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</source>
-        <target state="translated">MSB3374: No se puede establecer la hora de último acceso o última escritura en el archivo "{0}". {1} {2}</target>
+        <target state="translated">MSB3374: no se puede establecer la hora de último acceso o última escritura en el archivo "{0}". {1} {2}</target>
         <note>{StrBegin="MSB3374: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CreatingFile">
@@ -2691,7 +2691,7 @@
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
         <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
-        <target state="translated">MSB3935: No se pudo descomprimir el archivo "{0}" porque el archivo de destino "{1}" es de solo lectura y no se pudo escribir.  {2} {3}</target>
+        <target state="translated">MSB3935: no se pudo descomprimir el archivo "{0}" porque el archivo de destino "{1}" es de solo lectura y no se pudo hacer grabable.  {2} {3}</target>
         <note>{StrBegin="MSB3935: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotOpenFile">
@@ -2776,7 +2776,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
-        <target state="translated">MSB3491: No se pudieron escribir líneas en el archivo "{0}". {1} {2}</target>
+        <target state="translated">MSB3491: no se pudieron escribir líneas en el archivo "{0}". {1} {2}</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
@@ -3046,7 +3046,7 @@
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotWriteOutput">
         <source>MSB3713: The file "{0}" could not be created. {1} {2}</source>
-        <target state="translated">MSB3713: No se pudo crear el archivo "{0}". {1} {2}</target>
+        <target state="translated">MSB3713: no se pudo crear el archivo "{0}". {1} {2}</target>
         <note>{StrBegin="MSB3713: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.SkippedNumberedParameter">
@@ -3496,7 +3496,7 @@
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFailed">
         <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</source>
-        <target state="translated">MSB3943: No se pudo comprimir el directorio "{0}" en el archivo "{1}".  {2} {3}</target>
+        <target state="translated">MSB3943: no se pudo comprimir el directorio "{0}" en el archivo "{1}".  {2} {3}</target>
         <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFileExists">
