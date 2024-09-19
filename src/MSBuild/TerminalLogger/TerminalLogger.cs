@@ -224,9 +224,8 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
     /// </summary>
-    public TerminalLogger()
+    public TerminalLogger() : this(new Terminal())
     {
-        Terminal = new Terminal();
     }
 
     public TerminalLogger(LoggerVerbosity verbosity) : this()
@@ -239,6 +238,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     internal TerminalLogger(ITerminal terminal)
     {
+        NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
         Terminal = terminal;
         _manualRefresh = true;
     }
