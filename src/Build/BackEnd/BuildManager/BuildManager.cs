@@ -3115,48 +3115,51 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (disposing && !_disposed)
             {
-                if (disposing)
+                lock (_syncLock)
                 {
-                    lock (_syncLock)
+                    if (_disposed)
                     {
-                        // We should always have finished cleaning up before calling Dispose.
-                        RequireState(BuildManagerState.Idle, "ShouldNotDisposeWhenBuildManagerActive");
-
-                        _componentFactories?.ShutdownComponents();
-
-                        if (_workQueue != null)
-                        {
-                            _workQueue.Complete();
-                            _workQueue = null;
-                        }
-
-                        if (_executionCancellationTokenSource != null)
-                        {
-                            _executionCancellationTokenSource.Cancel();
-                            _executionCancellationTokenSource = null;
-                        }
-
-                        if (_noActiveSubmissionsEvent != null)
-                        {
-                            _noActiveSubmissionsEvent.Dispose();
-                            _noActiveSubmissionsEvent = null;
-                        }
-
-                        if (_noNodesActiveEvent != null)
-                        {
-                            _noNodesActiveEvent.Dispose();
-                            _noNodesActiveEvent = null;
-                        }
-
-                        if (ReferenceEquals(this, s_singletonInstance))
-                        {
-                            s_singletonInstance = null;
-                        }
-
-                        _disposed = true;
+                        // Multiple caller raced for enter into the lock
+                        return;
                     }
+
+                    // We should always have finished cleaning up before calling Dispose.
+                    RequireState(BuildManagerState.Idle, "ShouldNotDisposeWhenBuildManagerActive");
+
+                    _componentFactories?.ShutdownComponents();
+
+                    if (_workQueue != null)
+                    {
+                        _workQueue.Complete();
+                        _workQueue = null;
+                    }
+
+                    if (_executionCancellationTokenSource != null)
+                    {
+                        _executionCancellationTokenSource.Cancel();
+                        _executionCancellationTokenSource = null;
+                    }
+
+                    if (_noActiveSubmissionsEvent != null)
+                    {
+                        _noActiveSubmissionsEvent.Dispose();
+                        _noActiveSubmissionsEvent = null;
+                    }
+
+                    if (_noNodesActiveEvent != null)
+                    {
+                        _noNodesActiveEvent.Dispose();
+                        _noNodesActiveEvent = null;
+                    }
+
+                    if (ReferenceEquals(this, s_singletonInstance))
+                    {
+                        s_singletonInstance = null;
+                    }
+
+                    _disposed = true;
                 }
             }
         }
