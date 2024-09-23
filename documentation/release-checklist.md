@@ -60,6 +60,18 @@ _(This is for the case where we create the branch too early and want it to be ba
 Timing based on the [(Microsoft-internal) release schedule](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/10097/Dev17-Release).
 
 - [ ]  Push packages to nuget.org (not currently automated, contact dnceng - search "Publish MSBuild 17.6 to NuGet.org" email subject for template).
+
+  Following packages should be published (`THIS_RELEASE_EXACT_VERSION` is equal to `VersionPrefix` that comes form the eng\Version.props, that were part of the build we are trying to get published):
+    - Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
+    - Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
+    - Microsoft.Build.Framework.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
+    - Microsoft.Build.Runtime.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
+    - Microsoft.Build.Tasks.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
+    - Microsoft.NET.StringTools.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
+    - Microsoft.Build.Templates.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
+     
+  **Note:** Microsoft.Build.Conversion.Core and Microsoft.Build.Engine are **not** part of the list. Microsoft.Build.Templates **is** part of the list. Those 3 packages are a difference to the historic publishing list.
+
 - [ ]  Publish docs: submit reference request at https://aka.ms/publishondocs
   - Click on the link labeled *Request – Reference Publishing*
   - You can use existing [ticket](https://dev.azure.com/msft-skilling/Content/_workitems/edit/183613) as a reference
