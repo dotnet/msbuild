@@ -364,6 +364,11 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         public readonly bool DoNotVersionBuildResult = Environment.GetEnvironmentVariable("MSBUILDDONOTVERSIONBUILDRESULT") == "1";
 
+        /// <summary>
+        /// Escape hatch to ensure build check does not limit amount of results.
+        /// </summary>
+        public readonly bool DoNotLimitBuildCheckResultsNumber = Environment.GetEnvironmentVariable("MSBUILDDONOTLIMITBUILDCHECKRESULTSNUMBER") == "1";
+
         private bool _sdkReferencePropertyExpansionInitialized;
         private SdkReferencePropertyExpansionMode? _sdkReferencePropertyExpansionValue;
 

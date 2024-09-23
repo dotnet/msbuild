@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <Target Name="ConfigureInnerBuildArgs" BeforeTargets="GetSourceBuildCommandConfiguration"
-          Condition="'$(ArcadeBuildFromSource)' == 'true' or '$(DotNetBuildSourceOnly)' == 'true'">
+          Condition="'$(DotNetBuildSourceOnly)' == 'true'">
     <PropertyGroup>
       <!-- Filter down projects aggressively in source-only modes. -->
       <InnerBuildArgs>$(InnerBuildArgs) /p:Projects="$(InnerSourceBuildRepoRoot)MSBuild.SourceBuild.slnf"</InnerBuildArgs>

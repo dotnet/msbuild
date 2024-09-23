@@ -13,25 +13,9 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal class TracingReporter
 {
-    internal Dictionary<string, TimeSpan> TracingStats { get; } = new();
-
-    // Infrastructure time keepers
-    // TODO: add more timers throughout BuildCheck run
     private TimeSpan checkAcquisitionTime;
     private TimeSpan checkSetDataSourceTime;
     private TimeSpan newProjectChecksTime;
-
-    public void AddCheckStats(string name, TimeSpan subtotal)
-    {
-        if (TracingStats.TryGetValue(name, out TimeSpan existing))
-        {
-            TracingStats[name] = existing + subtotal;
-        }
-        else
-        {
-            TracingStats[name] = subtotal;
-        }
-    }
 
     public void AddAcquisitionStats(TimeSpan subtotal)
     {
@@ -48,14 +32,11 @@ internal class TracingReporter
         newProjectChecksTime += subtotal;
     }
 
-    public void AddCheckInfraStats()
-    {
-        var infraStats = new Dictionary<string, TimeSpan>() {
-                { $"{BuildCheckConstants.infraStatPrefix}checkAcquisitionTime", checkAcquisitionTime },
-                { $"{BuildCheckConstants.infraStatPrefix}checkSetDataSourceTime", checkSetDataSourceTime },
-                { $"{BuildCheckConstants.infraStatPrefix}newProjectChecksTime", newProjectChecksTime }
-            };
-
-        TracingStats.Merge(infraStats, (span1, span2) => span1 + span2);
-    }
+    public Dictionary<string, TimeSpan> GetInfrastructureTracingStats()
+        => new Dictionary<string, TimeSpan>()
+        {
+            { $"{BuildCheckConstants.infraStatPrefix}checkAcquisitionTime", checkAcquisitionTime },
+            { $"{BuildCheckConstants.infraStatPrefix}checkSetDataSourceTime", checkSetDataSourceTime },
+            { $"{BuildCheckConstants.infraStatPrefix}newProjectChecksTime", newProjectChecksTime }
+        };
 }

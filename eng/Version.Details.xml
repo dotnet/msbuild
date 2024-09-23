@@ -71,36 +71,36 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="9.0.0-beta.24453.1">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="9.0.0-beta.24466.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>dd332f2d4e21daa8b79f84251ab156af9a0b11b2</Sha>
+      <Sha>04b9022eba9c184a8036328af513c22e6949e8b6</Sha>
     </Dependency>
     <!-- Intermediate is necessary for source build. -->
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.arcade" Version="9.0.0-beta.24453.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.arcade" Version="9.0.0-beta.24466.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>dd332f2d4e21daa8b79f84251ab156af9a0b11b2</Sha>
+      <Sha>04b9022eba9c184a8036328af513c22e6949e8b6</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="9.0.0-beta.24453.1">
+    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="9.0.0-beta.24466.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>dd332f2d4e21daa8b79f84251ab156af9a0b11b2</Sha>
+      <Sha>04b9022eba9c184a8036328af513c22e6949e8b6</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.12.0-rc.94">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.12.0-rc.106">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>5d08fbd496ee2ce63b50dfe0803edbd9701e1b35</Sha>
+      <Sha>2982dbfc1bac22d71234d8498af6ad43e129a49c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.12.0-3.24458.2">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.12.0-3.24463.9">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>bd5c00e5e09de8564093f42d87fe49d4971f2e84</Sha>
+      <Sha>df4ae6b81013ac45367372176b9c3135a35a7e3c</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn" Version="4.12.0-3.24458.2">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn" Version="4.12.0-3.24463.9">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>bd5c00e5e09de8564093f42d87fe49d4971f2e84</Sha>
+      <Sha>df4ae6b81013ac45367372176b9c3135a35a7e3c</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="9.0.0-beta.24453.1">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="9.0.0-beta.24466.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>dd332f2d4e21daa8b79f84251ab156af9a0b11b2</Sha>
+      <Sha>04b9022eba9c184a8036328af513c22e6949e8b6</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

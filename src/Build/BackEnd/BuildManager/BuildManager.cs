@@ -1070,6 +1070,11 @@ namespace Microsoft.Build.Execution
                             }
                             _buildTelemetry.Host = host;
 
+                            _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
+                            var sacState = NativeMethodsShared.GetSACState();
+                            // The Enforcement would lead to build crash - but let's have the check for completeness sake.
+                            _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
+
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;

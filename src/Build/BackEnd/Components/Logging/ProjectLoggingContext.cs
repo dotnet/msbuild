@@ -72,6 +72,45 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Creates ProjectLoggingContext, without logging ProjectStartedEventArgs as a side effect.
+        /// The ProjectStartedEventArgs is returned as well - so that it can be later logged explicitly
+        /// </summary>
+        public static (ProjectStartedEventArgs, ProjectLoggingContext) CreateLoggingContext(
+            NodeLoggingContext nodeLoggingContext, BuildRequestEntry requestEntry)
+        {
+            ProjectStartedEventArgs args = CreateProjectStarted(
+                nodeLoggingContext,
+                requestEntry.Request.SubmissionId,
+                requestEntry.Request.ConfigurationId,
+                requestEntry.RequestConfiguration.ProjectFullPath,
+                requestEntry.Request.Targets,
+                requestEntry.RequestConfiguration.ToolsVersion,
+                requestEntry.RequestConfiguration.Project.PropertiesToBuildWith,
+                requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
+                requestEntry.Request.ParentBuildEventContext,
+                requestEntry.RequestConfiguration.Project.EvaluationId,
+                requestEntry.Request.ProjectContextId);
+
+            return (args, new ProjectLoggingContext(nodeLoggingContext, args));
+        }
+
+        private ProjectLoggingContext(
+            NodeLoggingContext nodeLoggingContext,
+            ProjectStartedEventArgs projectStarted)
+        : base(nodeLoggingContext, projectStarted.BuildEventContext)
+        {
+            _projectFullPath = projectStarted.ProjectFile;
+
+            // No need to log a redundant message in the common case
+            if (projectStarted.ToolsVersion != "Current")
+            {
+                LoggingService.LogComment(this.BuildEventContext, MessageImportance.Low, "ToolsVersionInEffectForBuild", projectStarted.ToolsVersion);
+            }
+
+            this.IsValid = true;
+        }
+
+        /// <summary>
         /// Constructs a project logging contexts.
         /// </summary>
         private ProjectLoggingContext(
@@ -111,6 +150,37 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         private static BuildEventContext CreateInitialContext(
+            NodeLoggingContext nodeLoggingContext,
+            int submissionId,
+            int configurationId,
+            string projectFullPath,
+            List<string> targets,
+            string toolsVersion,
+            PropertyDictionary<ProjectPropertyInstance> projectProperties,
+            IItemDictionary<ProjectItemInstance> projectItems,
+            BuildEventContext parentBuildEventContext,
+            int evaluationId,
+            int projectContextId)
+        {
+            ProjectStartedEventArgs args = CreateProjectStarted(
+                nodeLoggingContext,
+                submissionId,
+                configurationId,
+                projectFullPath,
+                targets,
+                toolsVersion,
+                projectProperties,
+                projectItems,
+                parentBuildEventContext,
+                evaluationId,
+                projectContextId);
+
+            nodeLoggingContext.LoggingService.LogProjectStarted(args);
+
+            return args.BuildEventContext;
+        }
+
+        private static ProjectStartedEventArgs CreateProjectStarted(
             NodeLoggingContext nodeLoggingContext,
             int submissionId,
             int configurationId,
@@ -171,7 +241,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 properties = projectPropertiesToSerialize.Select((ProjectPropertyInstance property) => new DictionaryEntry(property.Name, property.EvaluatedValue));
             }
 
-            return loggingService.LogProjectStarted(
+            return loggingService.CreateProjectStarted(
                 nodeLoggingContext.BuildEventContext,
                 submissionId,
                 configurationId,

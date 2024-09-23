@@ -13,8 +13,8 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
     public static CheckRule SupportedRule = new CheckRule(
         "BC0103",
         "NoEnvironmentVariablePropertyCheck",
-        "No implicit property derived from an environment variable should be used during the build",
-        "Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.",
+        ResourceUtilities.GetResourceString("BuildCheck_BC0103_Title")!,
+        ResourceUtilities.GetResourceString("BuildCheck_BC0103_MessageFmt")!,
         new CheckConfiguration() { Severity = CheckResultSeverity.Suggestion });
 
     private const string RuleId = "BC0103";
@@ -48,6 +48,8 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
     }
 
     public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEnvironmentVariableReadAction(ProcessEnvironmentVariableReadAction);
+
+    internal override bool IsBuiltIn => true;
 
     private void ProcessEnvironmentVariableReadAction(BuildCheckDataContext<EnvironmentVariableCheckData> context)
     {
@@ -95,7 +97,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
         CheckScopeClassifier.NotifyOnScopingReadiness -= HandleScopeReadiness;
     }
 
-    private string GetFormattedMessage(string envVariableName, string envVariableValue) => _isVerboseEnvVarOutput? $"'{envVariableName}' with value: '{envVariableValue}'" : $"'{envVariableName}'";
+    private string GetFormattedMessage(string envVariableName, string envVariableValue) => _isVerboseEnvVarOutput ? string.Format(ResourceUtilities.GetResourceString("BuildCheck_BC0103_MessageAddendum")!, envVariableName, envVariableValue) : $"'{envVariableName}'";
 
     internal class EnvironmentVariableIdentityKey(string environmentVariableName, IMSBuildElementLocation location) : IEquatable<EnvironmentVariableIdentityKey>
     {
