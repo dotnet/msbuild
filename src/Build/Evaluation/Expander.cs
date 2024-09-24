@@ -3525,10 +3525,13 @@ namespace Microsoft.Build.Evaluation
                     if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", _methodMethodName, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", _methodMethodName, StringComparison.OrdinalIgnoreCase)))
                     {
                         // Support comparison when the lhs is an integer
-                        if (IsFloatingPointRepresentation(args[0]) && !IsFloatingPointRepresentation(objectInstance))
+                        if (IsFloatingPointRepresentation(args[0]))
                         {
-                            objectInstance = Convert.ChangeType(objectInstance, typeof(double), CultureInfo.InvariantCulture);
-                            _receiverType = objectInstance.GetType();
+                            if (double.TryParse(objectInstance.ToString(), NumberStyles.Number | NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out double result))
+                            {
+                                objectInstance = result;
+                                _receiverType = objectInstance.GetType();
+                            }
                         }
 
                         // change the type of the final unescaped string into the destination
