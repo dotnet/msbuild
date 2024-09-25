@@ -40,6 +40,19 @@ _(This is for the case where we create the branch too early and want it to be ba
 - [ ]  Ensure that the current release channel `VS {{THIS_RELEASE_VERSION}}` is associated with the correct release branch\
 `darc get-default-channels --source-repo https://github.com/dotnet/msbuild --branch vs{{THIS_RELEASE_VERSION}}` \
 if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild`
+- [ ] Double check subscriptions from our repo `darc get-subscriptions --target-repo dotnet/msbuild` and update subscriptions to `VS{{THIS_RELEASE_VERSION}}` and `main` branches according to [supported versions of VS and SDK](https://learn.microsoft.com/en-us/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions):
+  - [ ] NuGet client
+    - Based on VS version channel
+    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/nuget/nuget.client`
+  - [ ] Source Build Packages
+    - Based on .NET version channel
+    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/source-build-reference-packages`
+  - [ ] Roslyn:
+    - Based on VS version channel
+    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/roslyn`
+  - [ ] Arcade:
+    - Based on .NET version channel
+    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`
 
 ### Adjust pipelines / releases
 - [ ]  Fix OptProf data flow for the new vs{{THIS_RELEASE_VERSION}} branch
