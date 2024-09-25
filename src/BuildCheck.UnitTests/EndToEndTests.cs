@@ -514,7 +514,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
+    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
     [InlineData("X01236", "Something went wrong initializing")]
     // These tests are for failure one different points, will be addressed in a different PR
     // https://github.com/dotnet/msbuild/issues/10522
