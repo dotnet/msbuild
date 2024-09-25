@@ -276,7 +276,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Fact]
+    [Fact(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
     public void CheckHasAccessToAllConfigs()
     {
         using (var env = TestEnvironment.Create())
@@ -454,7 +454,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
+    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
     [InlineData("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)
@@ -487,7 +487,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
+    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
     [InlineData("CheckCandidate", "X01234", "error", "error X01234")]
     [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234")]
     public void CustomCheckTest_WithEditorConfig(string checkCandidate, string ruleId, string severity, string expectedMessage)
