@@ -43,6 +43,17 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
 using TerminalLogger = Microsoft.Build.Logging.TerminalLogger.TerminalLogger;
 
+#if NETFRAMEWORK
+// Use I/O operations from Microsoft.IO.Redist which is generally higher perf
+// and also works around https://github.com/dotnet/msbuild/issues/10540.
+// Unnecessary on .NET 6+ because the perf improvements are in-box there.
+using Microsoft.IO;
+using Directory = Microsoft.IO.Directory;
+using File = Microsoft.IO.File;
+using FileInfo = Microsoft.IO.FileInfo;
+using Path = Microsoft.IO.Path;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.CommandLine
