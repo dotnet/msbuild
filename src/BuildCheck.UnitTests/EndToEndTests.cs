@@ -467,23 +467,6 @@ public class EndToEndTests : IDisposable
             string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n",
                 out bool successBuild);
-
-            foreach (string registeredRule in expectedRegisteredRules)
-            {
-               // projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CustomCheckSuccessfulAcquisition", registeredRule));
-            }
-
-            if (!expectedRejectedChecks)
-            {
-                //successBuild.ShouldBeTrue(projectCheckBuildLog);
-            }
-            else
-            {
-                //projectCheckBuildLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
-                //    "CustomCheckBaseTypeNotAssignable",
-                //    "InvalidCheck",
-                //    "InvalidCustomCheck, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"));
-            }
         }
     }
 
@@ -537,10 +520,6 @@ public class EndToEndTests : IDisposable
 
             string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool success);
-
-            //success.ShouldBeTrue();
-            //projectCheckBuildLog.ShouldContain(expectedMessage);
-            //projectCheckBuildLog.ShouldNotContain("This check should have been disabled");
 
             // Cleanup
             File.Delete(editorConfigName);
