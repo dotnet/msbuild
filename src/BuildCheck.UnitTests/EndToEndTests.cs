@@ -465,6 +465,7 @@ public class EndToEndTests : IDisposable
                 out bool successBuild);
 
             projectCheckBuildLog.ShouldNotBeEmpty();
+            projectCheckBuildLog.ShouldContain("Build started");
         }
     }
 
@@ -489,6 +490,7 @@ public class EndToEndTests : IDisposable
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool _);
 
             projectCheckBuildLog.ShouldNotBeEmpty();
+            projectCheckBuildLog.ShouldContain("Build started");
             // Cleanup
             File.Delete(editorConfigName);
         }
