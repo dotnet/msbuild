@@ -465,6 +465,8 @@ public class EndToEndTests : IDisposable
                 out bool successBuild,
                 outputHelper: env.Output);
 
+            _env.Output.WriteLine(projectCheckBuildLog);
+
             projectCheckBuildLog.ShouldNotBeEmpty();
             projectCheckBuildLog.ShouldContain("Build started");
         }
@@ -489,6 +491,8 @@ public class EndToEndTests : IDisposable
 
             string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool _, outputHelper: env.Output);
+
+            _env.Output.WriteLine(projectCheckBuildLog);
 
             projectCheckBuildLog.ShouldNotBeEmpty();
             projectCheckBuildLog.ShouldContain("Build started");
