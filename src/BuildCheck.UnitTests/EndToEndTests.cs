@@ -463,6 +463,8 @@ public class EndToEndTests : IDisposable
             string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n",
                 out bool successBuild);
+
+            projectCheckBuildLog.ShouldNotBeEmpty();
         }
     }
 
@@ -486,6 +488,7 @@ public class EndToEndTests : IDisposable
             string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool _);
 
+            projectCheckBuildLog.ShouldNotBeEmpty();
             // Cleanup
             File.Delete(editorConfigName);
         }
