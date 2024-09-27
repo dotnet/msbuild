@@ -40,7 +40,7 @@ jobs:
 #     displayName: "Check if patch version is bumped up"
 
 - job: IfOnlyDocumentionChanged
-  dependsOn: CheckVersionBumpOnReleaseBranches
+  # dependsOn: CheckVersionBumpOnReleaseBranches
   displayName: "Check whether Test Results need to be executed"
   steps:
   - powershell: |
