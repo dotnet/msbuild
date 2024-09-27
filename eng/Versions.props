@@ -54,7 +54,7 @@
     <MicrosoftNetCompilersToolsetVersion>4.8.0-3.23465.5</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.8.0-rc.112</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
-    <SystemTextJsonVersion>7.0.3</SystemTextJsonVersion>
+    <SystemTextJsonVersion>8.0.4</SystemTextJsonVersion>
     <SystemThreadingTasksDataflowVersion>7.0.0</SystemThreadingTasksDataflowVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
