@@ -455,9 +455,9 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
-    [InlineData("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
-    public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)
+    [InlineData("CheckCandidate")]
+    [InlineData("CheckCandidateWithMultipleChecksInjected")]
+    public void CustomCheckTest_NoEditorConfig(string checkCandidate)
     {
         using (var env = TestEnvironment.Create())
         {
@@ -498,12 +498,12 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("X01236", "Something went wrong initializing")]
+    [InlineData("X01236")]
     // These tests are for failure one different points, will be addressed in a different PR
     // https://github.com/dotnet/msbuild/issues/10522
     // [InlineData("X01237", "message")]
     // [InlineData("X01238", "message")]
-    public void CustomChecksFailGracefully(string ruleId, string expectedMessage)
+    public void CustomChecksFailGracefully(string ruleId)
     {
         using (var env = TestEnvironment.Create())
         {
