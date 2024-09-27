@@ -138,67 +138,67 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_MessageFmt">
         <source>Projects {0} and {1} have conflicting output paths: {2}.</source>
-        <target state="new">Projects {0} and {1} have conflicting output paths: {2}.</target>
+        <target state="translated">專案且 {0} 和 {1} 有衝突的輸出路徑: {2}。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_Title">
         <source>Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</source>
-        <target state="new">Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</target>
+        <target state="translated">兩個專案不應共用其 'OutputPath' 或 'IntermediateOutputPath' 位置。</target>
         <note>'OutputPath' and 'IntermediateOutputPath' not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_MessageFmt">
         <source>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</source>
-        <target state="new">Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</target>
+        <target state="translated">工作 {0} 和 {1} 來自專案 {2} 且 {3} 寫入相同的檔案: {4}。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_Title">
         <source>Two tasks should not write the same file.</source>
-        <target state="new">Two tasks should not write the same file.</target>
+        <target state="translated">兩個工作不應該寫入相同的檔案。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageAddendum">
         <source>'{0}' with value: '{1}'</source>
-        <target state="new">'{0}' with value: '{1}'</target>
+        <target state="translated">'{0}' 具有值: "{1}"</target>
         <note>Will be used as a parameter {0} in previous message.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageFmt">
         <source>Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</source>
-        <target state="new">Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</target>
+        <target state="translated">屬性衍生自環境變數: {0}。應該使用 /p 選項明確傳遞屬性。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_Title">
         <source>No implicit property derived from an environment variable should be used during the build.</source>
-        <target state="new">No implicit property derived from an environment variable should be used during the build.</target>
+        <target state="translated">組建期間不應使用衍生自環境變數的隱含屬性。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
-        <target state="new">Property: '{0}' was accessed, but it was never initialized.</target>
+        <target state="translated">已存取屬性: '{0}'，但從未初始化。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_Title">
         <source>A property that is accessed should be declared first.</source>
-        <target state="new">A property that is accessed should be declared first.</target>
+        <target state="translated">存取的屬性應先宣告。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_MessageFmt">
         <source>Property: '{0}' first declared/initialized at {1} used before it was initialized.</source>
-        <target state="new">Property: '{0}' first declared/initialized at {1} used before it was initialized.</target>
+        <target state="translated">屬性: '{0}' 在初始化之前先在 {1} 宣告/初始化。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_Title">
         <source>A property should be declared before it is first used.</source>
-        <target state="new">A property should be declared before it is first used.</target>
+        <target state="translated">屬性應在第一次使用之前宣告。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_MessageFmt">
         <source>Property: '{0}' was declared/initialized, but it was never used.</source>
-        <target state="new">Property: '{0}' was declared/initialized, but it was never used.</target>
+        <target state="translated">屬性: '{0}' 已宣告/初始化，但從未使用過。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_Title">
         <source>A property that is not used should not be declared.</source>
-        <target state="new">A property that is not used should not be declared.</target>
+        <target state="translated">不應宣告未使用的屬性。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">

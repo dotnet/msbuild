@@ -34,7 +34,7 @@ variables:
     - name: SourceBranch
       value: ''
   - name: EnableReleaseOneLocBuild
-    value: true # Enable loc for vs17.12
+    value: true # Enable loc for vs17.13
   - name: Codeql.Enabled
     value: true
   - group: DotNet-MSBuild-SDLValidation-Params

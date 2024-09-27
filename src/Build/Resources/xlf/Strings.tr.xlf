@@ -138,67 +138,67 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_MessageFmt">
         <source>Projects {0} and {1} have conflicting output paths: {2}.</source>
-        <target state="new">Projects {0} and {1} have conflicting output paths: {2}.</target>
+        <target state="translated">{0} ve {1} projelerinin çakışan çıkış yolları var: {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_Title">
         <source>Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</source>
-        <target state="new">Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</target>
+        <target state="translated">İki proje kendi 'OutputPath' veya 'IntermediateOutputPath' konumlarını paylaşmamalıdır.</target>
         <note>'OutputPath' and 'IntermediateOutputPath' not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_MessageFmt">
         <source>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</source>
-        <target state="new">Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</target>
+        <target state="translated">{2} ve {3} projelerindeki {0} ve {1} görevleri aynı dosyayı yazıyor: {4}.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_Title">
         <source>Two tasks should not write the same file.</source>
-        <target state="new">Two tasks should not write the same file.</target>
+        <target state="translated">İki görev aynı dosyayı yazmamalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageAddendum">
         <source>'{0}' with value: '{1}'</source>
-        <target state="new">'{0}' with value: '{1}'</target>
+        <target state="translated">'{1}' değerine sahip '{0}'</target>
         <note>Will be used as a parameter {0} in previous message.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageFmt">
         <source>Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</source>
-        <target state="new">Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</target>
+        <target state="translated">Özellik şu ortam değişkeninden türetilir: {0}. Özellikler, /p seçeneği kullanılarak açıkça geçirilmelidir.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_Title">
         <source>No implicit property derived from an environment variable should be used during the build.</source>
-        <target state="new">No implicit property derived from an environment variable should be used during the build.</target>
+        <target state="translated">Derleme sırasında bir ortam değişkeninden türetilen hiçbir örtük özellik kullanılmamalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
-        <target state="new">Property: '{0}' was accessed, but it was never initialized.</target>
+        <target state="translated">'{0}' özelliğine erişildi, ancak hiç başlatılmadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_Title">
         <source>A property that is accessed should be declared first.</source>
-        <target state="new">A property that is accessed should be declared first.</target>
+        <target state="translated">Erişilen bir özelliğin önce bildirilmesi gerekir.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_MessageFmt">
         <source>Property: '{0}' first declared/initialized at {1} used before it was initialized.</source>
-        <target state="new">Property: '{0}' first declared/initialized at {1} used before it was initialized.</target>
+        <target state="translated">İlk olarak {1} konumunda bildirilmiş/başlatılmış '{0}' özelliği başlatılmadan önce kullanıldı.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_Title">
         <source>A property should be declared before it is first used.</source>
-        <target state="new">A property should be declared before it is first used.</target>
+        <target state="translated">Özellik ilk olarak kullanılmadan önce bildirilmelidir.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_MessageFmt">
         <source>Property: '{0}' was declared/initialized, but it was never used.</source>
-        <target state="new">Property: '{0}' was declared/initialized, but it was never used.</target>
+        <target state="translated">'{0}' özelliği bildirildi/başlatıldı, ancak hiç kullanılmadı.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_Title">
         <source>A property that is not used should not be declared.</source>
-        <target state="new">A property that is not used should not be declared.</target>
+        <target state="translated">Kullanılmamış bir özellik bildirilmemelidir.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">

@@ -319,14 +319,15 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     Abilita BuildChecks durante la compilazione.
+                     BuildCheck consente di valutare le regole per garantire le proprietà 
+                     della compilazione. Per altre informazioni, vedere aka.ms/buildcheck
 	</target>
         <note>
-		{Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}{MaxLength=80}
-	</note>
+    {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
+    LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+  </note>
       </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
