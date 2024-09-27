@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security;
@@ -60,8 +61,12 @@ namespace Microsoft.Build.Utilities
         #region Constructors
 
         /// <summary>
-        /// Default constructor -- we need it so this type is COM-createable.
+        /// Default constructor -- do not use.
         /// </summary>
+        /// <remarks>
+        /// This constructor exists only so that the type is COM-creatable. Prefer <see cref="TaskItem(string)"/>.
+        /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public TaskItem()
         {
             _itemSpec = string.Empty;
