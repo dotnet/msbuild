@@ -137,11 +137,11 @@
                      the -targets option or the -getTargetResult option is
                      used, write out the values after the build.
     </source>
-        <target state="new">  -getProperty:propertyName,...
-                     Write out the value of one or more specified properties
-                     after evaluation, without executing the build, or if either
-                     the -targets option or the -getTargetResult option is
-                     used, write out the values after the build.
+        <target state="translated">  -getProperty:propertyName,...
+                     評価後にビルドを実行せずに、1 つ以上の
+                     指定されたプロパティの値を書き出します。
+                     または、-targets オプションまたは -getTargetResult オプションが
+                     使用されている場合は、ビルド後に値を書き出します。
     </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
@@ -156,12 +156,12 @@
                      or the -getTargetResult option is used, write out
                      the values after the build.
     </source>
-        <target state="new">  -getItem:itemName,...
-                     Write out the value of one or more specified items and
-                     their associated metadata after evaluation without
-                     executing the build, or if either the -targets option
-                     or the -getTargetResult option is used, write out
-                     the values after the build.
+        <target state="translated">  -getItem:itemName,...
+                     評価後にビルドを実行せずに、1 つ以上の指定された項目の値と
+                     関連付けられたメタデータを書き出します。
+                     または、-targets オプションまたは -getTargetResult オプションが
+                     使用されている場合は、ビルド後に
+                     値を書き出します。
     </target>
         <note>
       LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
@@ -173,9 +173,9 @@
                      Write out the output value of one or more targets and
                      the specified targets will be executed.
     </source>
-        <target state="new">  -getTargetResult:targetName,...
-                     Write out the output value of one or more targets and
-                     the specified targets will be executed.
+        <target state="translated">  -getTargetResult:targetName,...
+                     1 つ以上のターゲットの出力値を書き出し、
+                     指定したターゲットが実行されます。
     </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
@@ -198,20 +198,20 @@
                      - Preview - the feature is in preview (not stable)
                      (Short form: -fa)
     </source>
-        <target state="new">  -featureAvailability:featureName,...
-                     Check feature availability. The result is one of the
-                     strings "Undefined", "Available", "NotAvailable" and
-                     "Preview".
-                     - Undefined - the availability of the feature is undefined
-                     (the feature name is unknown to the feature availability
-                     checker)
-                     - NotAvailable - the feature is not available (unlike
-                     Undefined, the feature name is known to the feature
-                     availability checker and it knows the feature is not
-                     supported by current MSBuild engine)
-                     - Available - the feature is available
-                     - Preview - the feature is in preview (not stable)
-                     (Short form: -fa)
+        <target state="translated">  -featureAvailability:featureName,...
+                     機能の可用性を確認します。結果は、文字列 "Undefined"、
+                     "Available"、"NotAvailable"、"Preview" の
+                     いずれかになります。
+                     - Undefined - 機能の可用性は未定義です
+                     (機能名は機能の可用性チェッカーに対して
+                     不明です)
+                     - NotAvailable - この機能は使用できません
+                     Undefined とは異なり、機能名は機能の可用性チェッカーが
+                     認識しており、このチェッカーは、この機能が現在の MSBuild エンジンで
+                     サポートされていないことを理解しています)
+                     - Available - この機能は使用可能です
+                     - Preview - 機能はプレビュー段階です (安定していません)
+                     (短い形式: -fa)
     </target>
         <note>
       LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
@@ -231,17 +231,17 @@
                      later.
                      (Short form: -tl)
     </source>
-        <target state="new">  -terminalLogger[:auto,on,off]
-                     Enable or disable the terminal logger. Terminal logger
-                     provides enhanced build output on the console in real time,
-                     organized logically by project, and designed to highlight
-                     actionable information. Specify auto (or use the option
-                     without arguments) to use the terminal logger only if the
-                     standard output is not redirected. Don't parse the output
-                     or otherwise rely on it remaining unchanged in future
-                     versions. This option is available in MSBuild 17.8 and
-                     later.
-                     (Short form: -tl)
+        <target state="translated">  -terminalLogger[:auto,on,off]
+                     ターミナル ロガーを有効または無効にします。ターミナル ロガーは、
+                     本体で強化されたビルド出力をリアルタイムに提供します。
+                     この出力は、プロジェクトごとに論理的に整理されており、アクション可能な情報を
+                     強調表示するように設計されています。標準出力がリダイレクトされない場合のみ、
+                     auto を指定 (または引数を指定せずにオプションを使用) して、
+                     ターミナル ロガーを使用します。出力を解析しないでください。
+                     別の方法で出力を利用してください。残りの部分は将来のバージョンで
+                     変更されずに残ります。このオプションは、MSBuild 17.8 以降で
+                     利用可能です。
+                     (短い形式: -tl)
     </target>
         <note>
       LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
@@ -268,23 +268,23 @@
                       Example:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
-        <target state="new">  -terminalLoggerParameters: &lt;parameters&gt;
-                     Parameters to terminal logger. (Short form: -tlp)
-                     The available parameters.
-                        default--Specifies the default behavior of the terminal
-                        logger. It requires one of the following values:
-                           - `on`, `true`  forces TerminalLogger to be used even
-                            when it would be disabled.
-                           - `off`, `false` forces TerminalLogger to not be used
-                            even when it would be enabled.
-                           - `auto` enables TerminalLogger when the terminal
-                            supports it and the session doesn't have redirected
-                            stdout/stderr
-                        verbosity--Override the -verbosity setting for this
-                        logger
-                        showCommandLine--Show TaskCommandLineEvent messages
+        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
+                     ターミナル ロガーへのパラメーター。(短い形式: -tlp) 
+                     使用可能なパラメーター。
+                        default -- ターミナル ロガーの既定の動作を
+                        指定します。次のいずれかの値が必要です。
+                           - `on`、`true` の場合、TerminalLogger が無効である場合も
+                            TerminalLogger を強制的に使用します。
+                           - `off`、`false` の場合、TerminalLogger が有効である場合も
+                            TerminalLogger を使用しないように強制します。
+                           - `auto` の場合、ターミナルで TerminalLogger がサポートされており、
+                            セッションが stdout/stderr をリダイレクトしていない場合、
+                            TerminalLogger を有効にします
+                        verbosity-- このロガーの -verbosity 設定を
+                        オーバーライドします
+                        showCommandLine -- TaskCommandLineEvent メッセージを表示します
 
-                      Example:
+                      例: 
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
@@ -300,12 +300,12 @@
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      This writes the value of property Bar into Biz.txt.
     </source>
-        <target state="new">  -getResultOutputFile:file
-                     Redirect output from get* into a file.
+        <target state="translated">  -getResultOutputFile:file
+                     get* からの出力をファイルにリダイレクトします。
 
-                     Example:
+                     例: 
                      -getProperty:Bar -getResultOutputFile:Biz.txt
-                     This writes the value of property Bar into Biz.txt.
+                     これにより、プロパティ Bar の値が Biz.txt に書き込まれます。
     </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
@@ -318,10 +318,11 @@
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     ビルド中に BuildChecks を有効にします。
+                     BuildCheck を使用すると、ビルドのプロパティ 
+ を保証するための
+                     ルールを評価できます。詳細については、aka.ms/buildcheck を参照してください
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -1548,7 +1549,7 @@
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
-        <target state="new">MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</target>
+        <target state="translated">MSBUILD : error MSB1067: featureAvailability スイッチの機能名を指定する必要があります。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
       following the switch, as in "msbuild.exe -featureAvailability:blah".
@@ -1822,22 +1823,22 @@
       </trans-unit>
       <trans-unit id="SAC">
         <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
-        <target state="new">Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</target>
+        <target state="translated">Windows レジストリ キー VerifiedAndReputablePolicyState に基づいており、SAC 状態 = {0} です。</target>
         <note>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Enforcement">
         <source>1: in enforcement</source>
-        <target state="new">1: in enforcement</target>
+        <target state="translated">1: 実施中</target>
         <note />
       </trans-unit>
       <trans-unit id="SAC_Evaluation">
         <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
-        <target state="new">2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</target>
+        <target state="translated">2: 評価中。開発環境では、パフォーマンスに影響が出る可能性があるため、スマート アプリ コントロールをオフにすることをお勧めします。</target>
         <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Off">
         <source>0: turned off</source>
-        <target state="new">0: turned off</target>
+        <target state="translated">0: オフ</target>
         <note />
       </trans-unit>
       <trans-unit id="SchemaFileLocation">
