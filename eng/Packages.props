@@ -18,6 +18,7 @@
     <PackageReference Update="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="System.Collections.Immutable" Version="6.0.0" />
     <PackageReference Update="System.Configuration.ConfigurationManager" Version="6.0.0" />
+    <PackageReference Update="System.Formats.Asn1" Version="$(SystemFormatsAsn1Version)" />
     <PackageReference Update="System.Net.Http" Version="4.3.4" />
     <PackageReference Update="System.Memory" Version="4.5.5" />
     <PackageReference Update="System.Reflection.Metadata" Version="6.0.0" />

@@ -26,6 +26,7 @@
   <!-- Production Dependencies -->
   <PropertyGroup>
     <SystemResourcesExtensionsPackageVersion>6.0.0</SystemResourcesExtensionsPackageVersion>
+    <SystemFormatsAsn1Version>8.0.1</SystemFormatsAsn1Version>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
