@@ -4,6 +4,7 @@
 <UsageData>
   <IgnorePatterns>
     <UsagePattern IdentityGlob="Microsoft.SourceBuild.Intermediate.*/*" />
+    <UsagePattern IdentityGlob="System.Formats.Asn1/*8.0.1*" />
 
     <!-- Baseline 7.0 dependencies until msbuild targets net8 and uses a net8 arcade, SBRP, etc.
          These cannot be added to 7.0 SBRP, because they would are produced in the 7.0 build. -->
