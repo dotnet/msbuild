@@ -15,6 +15,10 @@
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <ArtifactsNonShippingPackagesDir>$(ArtifactsBinDir)Microsoft.Build.BuildCheck.UnitTests\CustomChecks</ArtifactsNonShippingPackagesDir>
+  </PropertyGroup>
   
   <ItemGroup Label="TestAssests">
     <ProjectReference Include=".\TestAssets\CustomCheck\CustomCheck.csproj" />
@@ -45,5 +49,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <Target Name="MSBuildPackagesForTests" AfterTargets="Build">
+    <Exec Command="dotnet pack &quot;..\Build\Microsoft.Build.csproj&quot; -o &quot;$(ArtifactsNonShippingPackagesDir)&quot;" />
+    <Exec Command="dotnet pack &quot;..\Framework\Microsoft.Build.Framework.csproj&quot; -o &quot;$(ArtifactsNonShippingPackagesDir)&quot;"/>
+    <Exec Command="dotnet pack &quot;..\StringTools\StringTools.csproj&quot; -o &quot;$(ArtifactsNonShippingPackagesDir)&quot;"/>
+  </Target>
 
 </Project>
