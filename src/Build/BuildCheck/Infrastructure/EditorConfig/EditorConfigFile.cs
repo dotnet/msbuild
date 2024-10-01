@@ -81,48 +81,45 @@ private static partial Regex GetPropertyMatcherRegex();
         // dictionary, but we also use a case-insensitive key comparer when doing lookups
         var activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>(StringComparer.OrdinalIgnoreCase);
         string activeSectionName = "";
-        var lines = string.IsNullOrEmpty(text) ? Array.Empty<string>() : text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-
-        foreach(var line in lines)
+        
+        using (var reader = new StringReader(text))
         {
-            if (string.IsNullOrWhiteSpace(line))
+            string? line;
+            while ((line = reader.ReadLine()) != null)
             {
-                continue;
-            }
+                if (string.IsNullOrWhiteSpace(line) || IsComment(line))
+                {
+                    continue;
+                }
 
-            if (IsComment(line))
-            {
-                continue;
-            }
+                var sectionMatches = GetSectionMatcherRegex().Matches(line);
+                if (sectionMatches.Count > 0 && sectionMatches[0].Groups.Count > 0)
+                {
+                    addNewSection();
 
-            var sectionMatches = GetSectionMatcherRegex().Matches(line);
-            if (sectionMatches.Count > 0 && sectionMatches[0].Groups.Count > 0)
-            {
-                addNewSection();
+                    var sectionName = sectionMatches[0].Groups[1].Value;
+                    Debug.Assert(!string.IsNullOrEmpty(sectionName));
 
-                var sectionName = sectionMatches[0].Groups[1].Value;
-                Debug.Assert(!string.IsNullOrEmpty(sectionName));
+                    activeSectionName = sectionName;
+                    activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>();
+                    continue;
+                }
 
-                activeSectionName = sectionName;
-                activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>();
-                continue;
-            }
+                var propMatches = GetPropertyMatcherRegex().Matches(line);
+                if (propMatches.Count > 0 && propMatches[0].Groups.Count > 1)
+                {
+                    var key = propMatches[0].Groups[1].Value.ToLower();
+                    var value = propMatches[0].Groups[2].Value;
 
-            var propMatches = GetPropertyMatcherRegex().Matches(line);
-            if (propMatches.Count > 0 && propMatches[0].Groups.Count > 1)
-            {
-                var key = propMatches[0].Groups[1].Value.ToLower();
-                var value = propMatches[0].Groups[2].Value;
+                    Debug.Assert(!string.IsNullOrEmpty(key));
+                    Debug.Assert(key == key.Trim());
+                    Debug.Assert(value == value?.Trim());
 
-                Debug.Assert(!string.IsNullOrEmpty(key));
-                Debug.Assert(key == key.Trim());
-                Debug.Assert(value == value?.Trim());
-
-                activeSectionProperties[key] = value ?? "";
-                continue;
+                    activeSectionProperties[key] = value ?? "";
+                    continue;
+                }
             }
         }
-
         // Add the last section
         addNewSection();
 

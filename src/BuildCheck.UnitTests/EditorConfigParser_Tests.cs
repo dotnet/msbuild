@@ -81,7 +81,7 @@ public class EditorConfigParser_Tests
         """);
 
         var parser = new EditorConfigParser();
-        var listOfEditorConfigFile = parser.DiscoverEditorConfigFiles(Path.Combine(workFolder1.Path, "subfolder", "projectfile.proj") ).ToList();
+        var listOfEditorConfigFile = parser.DiscoverEditorConfigFiles(Path.Combine(workFolder1.Path, "subfolder", "projectfile.proj")).ToList();
         // should be one because root=true so we do not need to go further
         listOfEditorConfigFile.Count.ShouldBe(1);
         listOfEditorConfigFile[0].IsRoot.ShouldBeTrue();
@@ -115,5 +115,32 @@ public class EditorConfigParser_Tests
         listOfEditorConfigFile.Count.ShouldBe(2);
         listOfEditorConfigFile[0].IsRoot.ShouldBeFalse();
         listOfEditorConfigFile[0].NamedSections[0].Name.ShouldBe("*.csproj");
+    }
+
+    [Fact]
+    public void Parse_HandlesDifferentLineEndings()
+    {
+        var mixedEndingsText = "root = true\r\n" +
+                           "[*.cs]\n" +
+                           "indent_style = space\r" +
+                           "indent_size = 4\n" +
+                           "[*.md]\r\n" +
+                           "trim_trailing_whitespace = true";
+
+        var result = EditorConfigFile.Parse(mixedEndingsText);
+
+        Assert.True(result.IsRoot, "Root property should be true");
+        Assert.Equal(2, result.NamedSections.Length);
+
+        var csSection = result.NamedSections.FirstOrDefault(s => s.Name == "*.cs");
+        Assert.NotNull(csSection);
+        Assert.Equal(2, csSection.Properties.Count);
+        Assert.Equal("space", csSection.Properties["indent_style"]);
+        Assert.Equal("4", csSection.Properties["indent_size"]);
+
+        var mdSection = result.NamedSections.FirstOrDefault(s => s.Name == "*.md");
+        Assert.NotNull(mdSection);
+        Assert.Single(mdSection.Properties);
+        Assert.Equal("true", mdSection.Properties["trim_trailing_whitespace"]);
     }
 }
