@@ -46,6 +46,6 @@ Set the environment variable `MSBUILDDEBUGONSTART` to `2`, then attach a debugge
 
 To build projects using the MSBuild binaries from the repository, you first need to execute the build command (`build.cmd`). This generates a bootstrap directory that emulates either a Visual Studio environment (full framework version) in the `net472` folder or a .NET Core environment in the `core` folder.
 
-Next, navigate to the `core` folder and run the dotnet executable from this location using the following syntax: `artifacts/bin/bootstrap/core/dotnet.exe <Command> <Project File>`. Replace <Command> with any valid dotnet command (such as `build`, `restore`, `test`, etc.) and `<Project File>` with the path to your project file.
+Next, navigate to the `core` folder and run the dotnet executable from this location using the following syntax: `artifacts/bin/bootstrap/core/dotnet.exe <Command> <Project File>`. Replace `<Command>` with any valid dotnet command (such as `build`, `restore`, `test`, etc.) and `<Project File>` with the path to your project file.
 
 See other debugging options [here](./Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md#Debugging-MSBuild).
