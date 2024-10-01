@@ -384,7 +384,7 @@ using System.Reflection%3b
         <_ExplicitReference Include="$(FrameworkPathOverride)\mscorlib.dll" />
     </ItemGroup>
 
-    <Import Project="$([MSBuild]::GetToolsDirectory32())\..\..\..\Common7\IDE\CommonExtensions\Microsoft\ProjectServices\Microsoft.DesignTime.targets" Condition="'$(DesignTimeBuild)' == 'true' and exists('$([MSBuild]::GetToolsDirectory32())\..\..\..\Common7\IDE\CommonExtensions\Microsoft\ProjectServices\Microsoft.DesignTime.targets')"/>
+    <Import Project="$([MSBuild]::GetToolsDirectory32())\..\..\..\Common7\IDE\CommonExtensions\Microsoft\ProjectServices\Microsoft.DesignTime.targets" Condition="'$(MSBuildRuntimeType)' == 'Full' and exists('$([MSBuild]::GetToolsDirectory32())\..\..\..\Common7\IDE\CommonExtensions\Microsoft\ProjectServices\Microsoft.DesignTime.targets')"/>
 
     <Import Project="$(CustomAfterMicrosoftCSharpTargets)" Condition="'$(CustomAfterMicrosoftCSharpTargets)' != '' and Exists('$(CustomAfterMicrosoftCSharpTargets)')" />
 
