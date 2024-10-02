@@ -12,11 +12,23 @@
 - [ ]  Ping internal "First Responders" Teams channel to get the new channel made available as a promotion target (e.g. dotnet/arcade#12150): {{URL_OF_CHANNEL_PROMOTION_PR}}
 
 ## At release time
-
+Before starting the process:
 - [ ] If the release is being cut more than a few days before the VS-side snap, do these two steps. Otherwise check them off.
   - [ ]  Modify the VS insertion so that it flows from MSBuild `vs{{THIS_RELEASE_VERSION}}` to VS `main` [in the MSBuild-release-branch release definition](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=1319&view=mine&_a=releases). Alternatively, if the release being cut no more than couple of weeks, disable the scheduled releases and create releases from `vs{{THIS_RELEASE_VERSION}}` manually until the VS-side snap: Edit -> Schedule set under Artifacts -> disable toggle
 AND
   - [ ]  Disable automated run of [the MSBuild-main-branch release definition](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=2153&view=mine&_a=releases) (because our {{NEXT_VERSION}} builds don't have a place to go in VS yet)
+
+### Branching from main
+- [ ]  If the new version's branch was created before the Visual Studio fork: fast-forward merge the correct commit (the one that is currently inserted to VS main) to the `vs{{THIS_RELEASE_VERSION}}` branch \
+e.g.: `git push upstream 2e6f2ff7ea311214255b6b2ca5cc0554fba1b345:refs/heads/vs17.10` \
+_(This is for the case where we create the branch too early and want it to be based actually on a different commit. If you waited until a good point in time with `main` in a clean state, just branch off and you are done. The branch should point to a good, recent spot, so the final-branding PR goes in on top of the right set of commits.)_
+- [ ]  Update the branch merge flow in `.config/git-merge-flow-config.jsonc` file to have the currently-in-servicing branches.
+- [ ]  Create {{NEXT_VERSION}} branding PR (in main) including public API baseline package version change: {{URL_OF_NEXT_VERSION_BRANDING_PR}}. 
+  - In the file `eng/Versions.props` Update the `VersionPrefix` to `{{NEXT_VERSION}}` and `PackageValidationBaselineVersion` set to a latest internally available {{THIS_RELEASE_VERSION}} preview version in the [internal dnceng dotnet-tools feed](https://dev.azure.com/dnceng/internal/_artifacts/feed/dotnet-tools-internal). It might be needed to update `CompatibilitySuppressions.xml` files. See [this documentation](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/overview) for more details. You can update `CompatibilitySuppressions.xml` files by running
+`dotnet pack MSBuild.Dev.slnf /p:ApiCompatGenerateSuppressionFile=true`. 
+- [ ]  Merge {{NEXT_VERSION}} branding PR
+
+### Adjust DARC channels and subscriptions
 - [ ]  Remove the `main` to old release channel ({{THIS_RELEASE_VERSION}}) default channel \
 `darc delete-default-channel --repo https://github.com/dotnet/msbuild --branch main --channel "VS {{THIS_RELEASE_VERSION}}"`
 - [ ]  Associate the `main` branch with the next release channel \
@@ -28,24 +40,36 @@ AND
 - [ ]  Ensure that the current release channel `VS {{THIS_RELEASE_VERSION}}` is associated with the correct release branch\
 `darc get-default-channels --source-repo https://github.com/dotnet/msbuild --branch vs{{THIS_RELEASE_VERSION}}` \
 if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild`
-- [ ]  If the branch was created before the fork: fast-forward merge the correct commit (the one that is currently inserted to VS main) to the `vs{{THIS_RELEASE_VERSION}}` branch \
-e.g.: `git push upstream 2e6f2ff7ea311214255b6b2ca5cc0554fba1b345:refs/heads/vs17.10` \
-_(This is for the case where we create the branch too early and want it to be based actually on a different commit. If you waited until a good point in time with `main` in a clean state, just branch off and you are done. The branch should point to a good, recent spot, so the final-branding PR goes in on top of the right set of commits.)_
-- [ ]  Update the branch merge flow in `.config/git-merge-flow-config.jsonc` file to have the currently-in-servicing branches.
+- [ ] Double check subscriptions from our repo `darc get-subscriptions --target-repo dotnet/msbuild` and update subscriptions to `VS{{THIS_RELEASE_VERSION}}` and `main` branches according to [supported versions of VS and SDK](https://learn.microsoft.com/en-us/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions):
+  - [ ] NuGet client
+    - Based on VS version channel
+    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/nuget/nuget.client`
+  - [ ] Source Build Packages
+    - Based on .NET version channel
+    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/source-build-reference-packages`
+  - [ ] Roslyn:
+    - Based on VS version channel
+    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/roslyn`
+  - [ ] Arcade:
+    - Based on .NET version channel--does not change every MSBuild release
+    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`
+
+### Adjust pipelines / releases
 - [ ]  Fix OptProf data flow for the new vs{{THIS_RELEASE_VERSION}} branch
   - [ ] Run the [official build](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) for vs{{THIS_RELEASE_VERSION}} without OptProf (set `SkipApplyOptimizationData` variable in 'Advanced options' section of the 'Run pipeline' menu to `true`) or alternatively with the latest Opt-Prof collected for the main branch (set `Optional OptProfDrop Override` to the drop path of the collected data, which could be found in the logs of the pipeline: Windows_NT -> Build -> search for `OptimizationData`). 
   - [ ] Check that the [OptProf data collection](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=17389) pipeline run is triggered for vs{{THIS_RELEASE_VERSION}}. If not, run manually ('Run pipeline' in upper right)
   - [ ] Run the [official build](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) for vs{{THIS_RELEASE_VERSION}} with no extra customization - OptProf should succeed now
-- [ ]  Create {{NEXT_VERSION}} branding PR (in main) including public API baseline package version change: {{URL_OF_NEXT_VERSION_BRANDING_PR}}. In the file `eng/Versions.props` Update the `VersionPrefix` to `{{NEXT_VERSION}}` and `PackageValidationBaselineVersion` set to a latest internally available {{THIS_RELEASE_VERSION}} preview version in the internal dnceng dotnet-tools feed. It might be needed to update `CompatibilitySuppressions.xml` files. See [this documentation](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/overview) for more details. You can update `CompatibilitySuppressions.xml` files by running
-`dotnet pack MSBuild.Dev.slnf /p:ApiCompatGenerateSuppressionFile=true`. 
+- [ ]  When VS main snaps to {{THIS_RELEASE_VERSION}} and updates its version to {{NEXT_VERSION}}, turn on / modify the VS insertion so that it flows from MSBuild main to VS main.
+  - [ ]  Update the [release-branch insertion release definition](https://dev.azure.com/devdiv/DevDiv/_releaseDefinition?definitionId=2153&_a=definition-variables) to have `InsertTargetBranch` `rel/d{{THIS_RELEASE_VERSION}}`.
+- [ ]  Turn [the release pipeline](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=2153&view=mine&_a=releases) back on.
+
+### Configure localization
 - [ ]  Create {{THIS_RELEASE_VERSION}} localization ticket: https://aka.ms/ceChangeLocConfig (requesting to switch localization from {{PREVIOUS_RELEASE_VERSION}} to {{THIS_RELEASE_VERSION}}): {{URL_OF_LOCALIZATION_TICKET}}
 - [ ]  Enable {{THIS_RELEASE_VERSION}} localization - by setting [`EnableReleaseOneLocBuild`](https://github.com/dotnet/msbuild/blob/vs{{THIS_RELEASE_VERSION}}/.vsts-dotnet.yml) to `true`
 - [ ]  Disable {{PREVIOUS_RELEASE_VERSION}} localization -  by setting [`EnableReleaseOneLocBuild`](https://github.com/dotnet/msbuild/blob/vs{{PREVIOUS_RELEASE_VERSION}}/.vsts-dotnet.yml) to `false`. Update the comment on the same line.
-- [ ]  Merge {{NEXT_VERSION}} branding PR
 - [ ]  Create and merge a PR in main to update a localization version comment in setting [`EnableReleaseOneLocBuild`](https://github.com/dotnet/msbuild/blob/main/.vsts-dotnet.yml) to set up the merge conflict when this line will be updated in the release branch.
-- [ ]  When VS main snaps to {{THIS_RELEASE_VERSION}} and updates its version to {{NEXT_VERSION}}, turn on / modify the VS insertion so that it flows from MSBuild main to VS main.
-- [ ]  Update the [release-branch insertion release definition](https://dev.azure.com/devdiv/DevDiv/_releaseDefinition?definitionId=2153&_a=definition-variables) to have `InsertTargetBranch` `rel/d{{THIS_RELEASE_VERSION}}`.
-- [ ]  Turn [the release pipeline](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=2153&view=mine&_a=releases) back on.
+
+### Final branding
 - [ ]  Prepare final branding PR for `vs{{THIS_RELEASE_VERSION}}`: {{URL_OF_FINAL_BRANDING_PR}}
 - [ ]  Merge final branding to `vs{{THIS_RELEASE_VERSION}}` branch
 - [ ]  Update perfstar MSBuild insertions configuration: [example PR](https://dev.azure.com/devdiv/DevDiv/_git/dotnet-perfstar/pullrequest/522843): {{URL_OF_PERFSTAR_PR}}
