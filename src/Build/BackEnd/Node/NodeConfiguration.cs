@@ -162,27 +162,20 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _buildParameters, BuildParameters.FactoryForDeserialization);
             translator.TranslateArray(ref _forwardingLoggers, LoggerDescription.FactoryForTranslation);
 #if FEATURE_APPDOMAIN
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            byte[] appDomainConfigBytes = null;
+
+            // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
+            if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                byte[] appDomainConfigBytes = null;
-
-                // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
-                if (translator.Mode == TranslationDirection.WriteToStream)
-                {
-                    appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
-                }
-
-                translator.Translate(ref appDomainConfigBytes);
-
-                if (translator.Mode == TranslationDirection.ReadFromStream)
-                {
-                    _appDomainSetup = new AppDomainSetup();
-                    _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
-                }
+                appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
             }
-            else
+
+            translator.Translate(ref appDomainConfigBytes);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
             {
-                translator.TranslateDotNet(ref _appDomainSetup);
+                _appDomainSetup = new AppDomainSetup();
+                _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
             }
 #endif
             translator.Translate(ref _loggingNodeConfiguration);
