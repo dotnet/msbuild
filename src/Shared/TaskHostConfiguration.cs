@@ -417,7 +417,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
 #if FEATURE_APPDOMAIN
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
             {
                 byte[] appDomainConfigBytes = null;
 

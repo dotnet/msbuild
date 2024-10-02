@@ -162,7 +162,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _buildParameters, BuildParameters.FactoryForDeserialization);
             translator.TranslateArray(ref _forwardingLoggers, LoggerDescription.FactoryForTranslation);
 #if FEATURE_APPDOMAIN
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
             {
                 byte[] appDomainConfigBytes = null;
 
