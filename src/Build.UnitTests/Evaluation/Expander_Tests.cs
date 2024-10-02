@@ -4088,7 +4088,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new string[] {"A$(Reg:AA)", "A"},
                 new string[] {"$(Reg:AA)", ""},
                 new string[] {"$(Reg:AAAA)", ""},
-                new string[] {"$(Reg:AAA)", ""}
+                new string[] {"$(Reg:AAA)", ""},
+                // Following two are comparison between non-numeric and numeric properties. More details: #10583
+                new string[] {"$(a.Equals($(c)))","False"},
+                new string[] {"$(a.CompareTo($(c)))","1"},
                                    };
 
             var errorTests = new List<string> {
@@ -5074,7 +5077,7 @@ $(
         {
             using (var env = TestEnvironment.Create())
             {
-                // Setting this env variable allows to track if expander was using reflection for a function invocation. 
+                // Setting this env variable allows to track if expander was using reflection for a function invocation.
                 env.SetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection", "1");
 
                 var logger = new MockLogger();
