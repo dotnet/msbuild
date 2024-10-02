@@ -51,7 +51,7 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
     - Based on VS version channel
     - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/roslyn`
   - [ ] Arcade:
-    - Based on .NET version channel
+    - Based on .NET version channel--does not change every MSBuild release
     - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`
 
 ### Adjust pipelines / releases
