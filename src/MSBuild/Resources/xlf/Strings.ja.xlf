@@ -121,7 +121,7 @@
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
                      MSBuild が、構成されているプロジェクト キャッシュ プラグインへの
-                     ファイル アクセスを報告します。
+                     ファイル アクセスを報告するようにします。
 
                      このフラグは実験的なものであり、意図したとおりに動作しない可能性があります。
     </target>
@@ -138,11 +138,11 @@
                      used, write out the values after the build.
     </source>
         <target state="translated">  -getProperty:propertyName,...
-                    1 つ以上の指定されたプロパティの値を書き出し
-                    評価後、ビルドを実行せずに、または
-                    -targets オプションまたは -getTargetResult オプションが
-                    使用して、ビルド後に値を書き出します。
-   </target>
+                     評価後にビルドを実行せずに、1 つ以上の
+                     指定されたプロパティの値を書き出します。
+                     または、-targets オプションまたは -getTargetResult オプションが
+                     使用されている場合は、ビルド後に値を書き出します。
+    </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -157,12 +157,12 @@
                      the values after the build.
     </source>
         <target state="translated">  -getItem:itemName,...
-                    1 つ以上の指定された項目の値を書き出し、
-                    評価後に関連付けられたメタデータを
-                    ビルドを実行せずに、または -targets オプション
-                    または -getTargetResult オプションが使用されている場合は、書き込み
-                    ビルド後の値。
-   </target>
+                     評価後にビルドを実行せずに、1 つ以上の指定された項目の値と
+                     関連付けられたメタデータを書き出します。
+                     または、-targets オプションまたは -getTargetResult オプションが
+                     使用されている場合は、ビルド後に
+                     値を書き出します。
+    </target>
         <note>
       LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -174,9 +174,9 @@
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                    1 つ以上のターゲットの出力値を書き出し、
-                    指定したターゲットが実行されます。
-   </target>
+                     1 つ以上のターゲットの出力値を書き出し、
+                     指定したターゲットが実行されます。
+    </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -199,20 +199,20 @@
                      (Short form: -fa)
     </source>
         <target state="translated">  -featureAvailability:featureName,...
-                    機能の可用性を確認します。結果は、次のいずれかになります。
-                    文字列 "Undefined"、"Available"、"NotAvailable"、および
-                    "Preview" です。
-                    - Undefined - 機能の可用性は未定義です
-                    (機能名が機能の可用性に関して不明です
-                    チェッカー)
-                    - NotAvailable - この機能は使用できません
-                    Undefined とは異なり、機能名は機能に認識されています
-                    可用性チェッカーは、この機能が
-                    現在の MSBuild エンジンでサポートされていないことを理解しています)
-                    - Available - この機能は使用可能です
-                    - Preview - 機能はプレビュー段階です (安定していません)
-                    (短い形式: -fa)
-   </target>
+                     機能の可用性を確認します。結果は、文字列 "Undefined"、
+                     "Available"、"NotAvailable"、"Preview" の
+                     いずれかになります。
+                     - Undefined - 機能の可用性は未定義です
+                     (機能名は機能の可用性チェッカーに対して
+                     不明です)
+                     - NotAvailable - この機能は使用できません
+                     Undefined とは異なり、機能名は機能の可用性チェッカーが
+                     認識しており、このチェッカーは、この機能が現在の MSBuild エンジンで
+                     サポートされていないことを理解しています)
+                     - Available - この機能は使用可能です
+                     - Preview - 機能はプレビュー段階です (安定していません)
+                     (短い形式: -fa)
+    </target>
         <note>
       LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -232,17 +232,17 @@
                      (Short form: -tl)
     </source>
         <target state="translated">  -terminalLogger[:auto,on,off]
-                    ターミナル ロガーを有効または無効にします。ターミナル ロガーは
-                    本体のビルド出力がリアルタイムで強化され、
-                    プロジェクトごとに論理的に整理され、強調表示するように設計されています
-                    アクション可能な情報です。auto を指定する (またはオプションを使用する)
-                    引数を指定せずに) ターミナル ロガーを使用する場合は、
-                    標準出力はリダイレクトされません。出力を解析しないでください
-                    それ以外の場合は、将来変更されずに残っている
-                    バージョン。このオプションは、MSBuild 17.8 以降で利用可能です
-                    以降で。
-                    (短い形式: -tl)
-   </target>
+                     ターミナル ロガーを有効または無効にします。ターミナル ロガーは、
+                     本体で強化されたビルド出力をリアルタイムに提供します。
+                     この出力は、プロジェクトごとに論理的に整理されており、アクション可能な情報を
+                     強調表示するように設計されています。標準出力がリダイレクトされない場合のみ、
+                     auto を指定 (または引数を指定せずにオプションを使用) して、
+                     ターミナル ロガーを使用します。出力を解析しないでください。
+                     別の方法で出力を利用してください。残りの部分は将来のバージョンで
+                     変更されずに残ります。このオプションは、MSBuild 17.8 以降で
+                     利用可能です。
+                     (短い形式: -tl)
+    </target>
         <note>
       LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -269,25 +269,24 @@
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                    ターミナル ロガーへのパラメーター。(短い形式: -tlp) 
-                    使用可能なパラメーター。
-                       default -- ターミナル 
- の既定の動作を指定します
-                       ロガー。次のいずれかの値が必要です:
-                          - `on`、`true` は TerminalLogger を強制的に使用します
-                           無効である場合も同様です。
-                          - `off`、`false` は TerminalLogger を使用しないように強制します
-                           有効である場合も同様です。
-                          - `auto` は、次の場合にターミナルで TerminalLogger を有効にします
-                           サポートされており、セッションがリダイレクトされていない場合です
-                           stdout/stderr
-                       verbosity-- 下記の verbosity 設定をオーバーライドします
-                       logger
-                       showCommandLine -- TaskCommandLineEvent メッセージを表示します
+                     ターミナル ロガーへのパラメーター。(短い形式: -tlp) 
+                     使用可能なパラメーター。
+                        default -- ターミナル ロガーの既定の動作を
+                        指定します。次のいずれかの値が必要です。
+                           - `on`、`true` の場合、TerminalLogger が無効である場合も
+                            TerminalLogger を強制的に使用します。
+                           - `off`、`false` の場合、TerminalLogger が有効である場合も
+                            TerminalLogger を使用しないように強制します。
+                           - `auto` の場合、ターミナルで TerminalLogger がサポートされており、
+                            セッションが stdout/stderr をリダイレクトしていない場合、
+                            TerminalLogger を有効にします
+                        verbosity-- このロガーの -verbosity 設定を
+                        オーバーライドします
+                        showCommandLine -- TaskCommandLineEvent メッセージを表示します
 
-                     例: 
-                       -tlp:default=auto;verbosity=diag;shownCommandLine
-   </target>
+                      例: 
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </target>
         <note>
       LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -302,12 +301,12 @@
                      This writes the value of property Bar into Biz.txt.
     </source>
         <target state="translated">  -getResultOutputFile:file
-                    get* からの出力をファイルにリダイレクトします。
+                     get* からの出力をファイルにリダイレクトします。
 
-                    例: 
-                    -getProperty:Bar -getResultOutputFile:Biz.txt
-                    これにより、プロパティ Bar の値が Biz.txt に書き込まれます。
-   </target>
+                     例: 
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     これにより、プロパティ Bar の値が Biz.txt に書き込まれます。
+    </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -319,10 +318,11 @@
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     ビルド中に BuildChecks を有効にします。
+                     BuildCheck を使用すると、ビルドのプロパティ 
+ を保証するための
+                     ルールを評価できます。詳細については、aka.ms/buildcheck を参照してください
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -341,7 +341,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: ターミナル ロガーの値が無効です。'auto'、'true'、または 'false' のいずれかである必要があります。 {0}</target>
+        <target state="translated">MSBUILD : error MSB1065: ターミナル ロガーの値が無効です。'auto'、'true'、または 'false' のいずれかである必要があります。{0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1823,7 +1823,7 @@
       </trans-unit>
       <trans-unit id="SAC">
         <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
-        <target state="translated">Windows レジストリ キー VerifiedAndReputablePolicyState に基づいて、SAC 状態 = {0}。</target>
+        <target state="translated">Windows レジストリ キー VerifiedAndReputablePolicyState に基づいており、SAC 状態 = {0} です。</target>
         <note>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Enforcement">
