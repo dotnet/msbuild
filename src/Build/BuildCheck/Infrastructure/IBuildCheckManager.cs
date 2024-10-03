@@ -61,6 +61,8 @@ internal interface IBuildCheckManager
 
     void ProcessCheckAcquisition(CheckAcquisitionData acquisitionData, ICheckContext checksContext);
 
+    void ProcessProjectImportedEventArgs(ICheckContext checkContext, ProjectImportedEventArgs projectImportedEventArgs);
+
     BuildCheckTracingData CreateCheckTracingStats();
 
     void FinalizeProcessing(LoggingContext loggingContext);
@@ -69,8 +71,7 @@ internal interface IBuildCheckManager
     //  but as well from the ConnectorLogger - as even if interleaved, it gives the info
     //  to manager about what checks need to be materialized and configuration fetched.
     // No unloading of checks is yet considered - once loaded it stays for whole build.
-    
-	
+
     // Project might be encountered first time in some node, but be already evaluated in another - so StartProjectEvaluation won't happen
     //  - but we still need to know about it, hence the dedicated event.
     void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, ICheckContext analysisContext, string projectFullPath);

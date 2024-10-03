@@ -392,6 +392,14 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
+        public void ProcessProjectImportedEventArgs(ICheckContext checkContext, ProjectImportedEventArgs projectImportedEventArgs)
+        {
+            if (TryGetProjectFullPath(checkContext.BuildEventContext, out string projectPath))
+            {
+                _buildEventsProcessor.ProcessProjectImportedEventArgs(checkContext, projectPath);
+            }
+        }
+
         public void ProcessTaskStartedEventArgs(
             ICheckContext checkContext,
             TaskStartedEventArgs taskStartedEventArgs)

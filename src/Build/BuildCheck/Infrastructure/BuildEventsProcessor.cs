@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.BuildCheck.OM;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -94,6 +95,16 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         EnvironmentVariableCheckData checkData = new(projectPath, checkContext.BuildEventContext?.ProjectInstanceId, envVarKey, envVarValue, elementLocation);
 
         _buildCheckCentralContext.RunEnvironmentVariableActions(checkData, checkContext, ReportResult);
+    }
+
+    /// <summary>
+    /// The method handles events associated with the ProjectImportedEventArgs.
+    /// </summary>
+    internal void ProcessProjectImportedEventArgs(ICheckContext checkContext, string projectPath)
+    {
+        ProjectImportedCheckData checkData = new(projectPath, checkContext.BuildEventContext?.ProjectInstanceId);
+
+        _buildCheckCentralContext.RunProjectImportedActions(checkData, checkContext, ReportResult);
     }
 
     internal void ProcessBuildDone(ICheckContext checkContext)
