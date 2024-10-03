@@ -4,9 +4,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
@@ -249,7 +251,9 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                return globalProperties;
+                return globalProperties ?? (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
+                    ? ImmutableDictionary<string, string>.Empty
+                    : null);
             }
 
             internal set
@@ -298,7 +302,9 @@ namespace Microsoft.Build.Framework
                 // up the live list of properties from the loaded project, which is stored in the configuration as well.
                 // By doing this, we no longer need to transmit properties using this message because they've already
                 // been transmitted as part of the BuildRequestConfiguration.
-                return properties;
+                return properties ?? (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
+                    ? Enumerable.Empty<DictionaryEntry>()
+                    : null);
             }
         }
 
@@ -322,9 +328,19 @@ namespace Microsoft.Build.Framework
                 // case, this access is to the live list.  For the central logger in the multi-proc case, the main node
                 // has likely not loaded this project, and therefore the live items would not be available to them, which is
                 // the same as the current functionality.
-                return items;
+                return items ?? (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
+                    ? Enumerable.Empty<DictionaryEntry>()
+                    : null);
             }
         }
+
+        // Following 3 properties are intended only for internal transfer - to properly communicate the warn as error/msg
+        //  from the worker node, to the main node - that may be producing the buildcheck diagnostics.
+        // They are not going to be in a binlog (at least not as of now).
+
+        internal ISet<string>? WarningsAsErrors { get; set; }
+        internal ISet<string>? WarningsNotAsErrors { get; set; }
+        internal ISet<string>? WarningsAsMessages { get; set; }
 
         #region CustomSerializationToStream
 
@@ -382,6 +398,10 @@ namespace Microsoft.Build.Framework
                     writer.Write((string?)propertyPair.Value ?? "");
                 }
             }
+
+            WriteCollection(writer, WarningsAsErrors);
+            WriteCollection(writer, WarningsNotAsErrors);
+            WriteCollection(writer, WarningsAsMessages);
         }
 
         /// <summary>
@@ -450,7 +470,48 @@ namespace Microsoft.Build.Framework
 
                 properties = dictionaryList;
             }
+
+            WarningsAsErrors = ReadStringSet(reader);
+            WarningsNotAsErrors = ReadStringSet(reader);
+            WarningsAsMessages = ReadStringSet(reader);
         }
+
+        private static void WriteCollection(BinaryWriter writer, ICollection<string>? collection)
+        {
+            if (collection == null)
+            {
+                writer.Write((byte)0);
+            }
+            else
+            {
+                writer.Write((byte)1);
+                writer.Write(collection.Count);
+                foreach (string item in collection)
+                {
+                    writer.Write(item);
+                }
+            }
+        }
+
+        private static ISet<string>? ReadStringSet(BinaryReader reader)
+        {
+            if (reader.ReadByte() == 0)
+            {
+                return null;
+            }
+            else
+            {
+                int count = reader.ReadInt32();
+                HashSet<string> set = EnumerableExtensions.NewHashSet<string>(count, StringComparer.OrdinalIgnoreCase);
+                for (int i = 0; i < count; i++)
+                {
+                    set.Add(reader.ReadString());
+                }
+
+                return set;
+            }
+        }
+
         #endregion
 
         #region SerializationSection

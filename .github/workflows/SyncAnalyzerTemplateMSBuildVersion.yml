@@ -1,0 +1,171 @@
+name: Sync Microsoft.Build version in analyzer template with Version.props
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'eng/Versions.props'
+
+jobs:
+  Sync-version:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set baseBranch variable
+      id: vars
+      run: echo "baseBranch=${{ github.ref_name }}" >> $GITHUB_ENV
+
+    - name: Update analyzer template version with version from Versions.props
+      shell: pwsh
+      run: |
+        try {
+            # Define the paths to your XML and JSON files
+            $xmlFilePath = "eng/Versions.props"
+            $jsonFilePath = "template_feed/content/Microsoft.CheckTemplate/.template.config/template.json"
+
+            # Check if the XML file exists
+            if (-Not (Test-Path -Path $xmlFilePath)) {
+                throw "Versions.props file not found: $xmlFilePath"
+            }
+
+            # Load and parse the XML content
+            [xml]$xmlContent = Get-Content -Path $xmlFilePath
+            $versionPrefix = [string]$xmlContent.Project.PropertyGroup.VersionPrefix
+            $versionPrefix = $versionPrefix.Trim()
+
+            # Validate the versionPrefix
+            if ([string]::IsNullOrWhiteSpace($versionPrefix)) {
+                throw "VersionPrefix is empty or null in the XML file: $xmlFilePath"
+            }
+
+            # Check if the JSON file exists
+            if (-Not (Test-Path -Path $jsonFilePath)) {
+                throw "Analyzer template file not found: $jsonFilePath"
+            }
+
+            # Load the JSON template
+            $jsonContent = Get-Content -Path $jsonFilePath -Raw | ConvertFrom-Json
+
+            # Check if the versionPrefix is different from the current defaultValue
+            if ($versionPrefix -ne $jsonContent.symbols.MicrosoftBuildVersion.defaultValue) {
+                # Update the defaultValue of MicrosoftBuildVersion in the JSON template
+                $jsonContent.symbols.MicrosoftBuildVersion.defaultValue = $versionPrefix
+
+                # Convert the JSON content back to a string
+                $jsonString = $jsonContent | ConvertTo-Json -Depth 10
+
+                # Write the updated JSON back to the file
+                Set-Content -Path $jsonFilePath -Value $jsonString
+                Write-Output "Updated MicrosoftBuildVersion to $versionPrefix"
+
+                # Set the updateNeeded output variable to true
+                $updateNeeded = "true"
+            } else {
+                Write-Output "No update needed. MicrosoftBuildVersion is already $versionPrefix"
+
+                # Set the updateNeeded output variable to false
+                $updateNeeded = "false"
+            }
+
+            # Set the versionPrefix and template filePath as an output
+            Add-Content -Path $env:GITHUB_ENV -Value "versionPrefix=$versionPrefix"
+            Add-Content -Path $env:GITHUB_ENV -Value "jsonFilePath=$jsonFilePath"
+            Add-Content -Path $env:GITHUB_ENV -Value "updateNeeded=$updateNeeded"
+            Write-Output "Extracted versionPrefix: $versionPrefix"
+            Write-Output "Extracted jsonFilePath: $jsonFilePath"
+            Write-Output "Update needed: $updateNeeded"
+        }
+        catch {
+            Write-Error "An error occurred: $_"
+        }
+
+    - name: Create Pull Request
+      if: env.updateNeeded == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const baseBranch = process.env.baseBranch;
+          const versionPrefix = process.env.versionPrefix;
+          const filePath = process.env.jsonFilePath;
+          const newBranch = `${baseBranch}-update-msbuild-version-for-analyzer-template`;
+          const commitMessage = `Update MicrosoftBuildVersion to ${versionPrefix}`;
+          const prBody = '[Automated] Update the MicrosoftBuildVersion defaultValue in the template.json.';
+          const prTitle = 'Update MicrosoftBuildVersion in analyzer template';
+
+          // Main execution
+          (async () => {
+            try {
+              // Configure git
+              await configureGit();
+
+              // Create and switch to the new branch
+              await createAndSwitchBranch(newBranch);
+
+              // Check if the branch PR already exists on the remote
+              const shouldOpenPullRequest = await checkBranchPRExists(newBranch,baseBranch);
+
+              // Stage and commit the changes
+              await stageAndCommitChanges(filePath, commitMessage);
+
+              // Push the new branch to the repository
+              await pushBranch(newBranch);
+
+              // Create the pull request if needed
+              if (shouldOpenPullRequest) {
+                await createPullRequest(baseBranch, newBranch, prTitle, prBody);
+              } else {
+                console.log("The PR already exists, skipping opening a new PR.");
+              }
+            } catch (error) {
+              core.setFailed(error);
+            }
+          })();
+
+          async function configureGit() {
+            await exec.exec(`git config user.name "github-actions"`);
+            await exec.exec(`git config user.email "github-actions@github.com"`);
+          }
+
+          async function createAndSwitchBranch(branch) {
+            await exec.exec('git', ['checkout', '-b', branch]);
+          }
+
+          async function checkBranchPRExists(newBranch,baseBranch) {
+            // Check if a pull request already exists
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: newBranch,
+              base: baseBranch,
+              state: 'open',
+            });
+
+            if (pullRequests.length === 0) {
+              return true;
+            } else {
+              return false;
+            }
+          }
+
+          async function stageAndCommitChanges(filePath, commitMessage) {
+            await exec.exec(`git add ${filePath}`);
+            await exec.exec(`git commit -m "${commitMessage}"`);
+          }
+
+          async function pushBranch(branch) {
+            await exec.exec(`git push --force --set-upstream origin HEAD:${branch}`);
+          }
+
+          async function createPullRequest(baseBranch, newBranch, title, body) {
+            await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              head: newBranch,
+              base: baseBranch
+            });
+          }

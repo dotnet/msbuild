@@ -1103,6 +1103,3 @@ dotnet_diagnostic.SA1643.severity = suggestion
 dotnet_diagnostic.SA1649.severity = suggestion
 
 dotnet_diagnostic.SA1652.severity = none
-
-# Do not use equality check to check for collection size.
-dotnet_diagnostic.xUnit2013.severity = none
