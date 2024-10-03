@@ -121,7 +121,7 @@
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
                      Entraîne le signalement par MSBuild des accès par fichiers aux plug-ins
-                     cache de projet configurés.
+                     de cache de projet configurés.
 
                      Cet indicateur est expérimental et peut ne pas fonctionner comme prévu.
     </target>
@@ -141,7 +141,7 @@
                      Notez la valeur d’une ou de plusieurs propriétés spécifiées
                      après l’évaluation, sans exécuter la build, ou si
                      l’option -targets ou l’option -getTargetResult est
-                     utilisé, écrivez les valeurs après la génération.
+                     utilisée, écrivez les valeurs après la build.
     </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
@@ -161,7 +161,7 @@
                      leurs métadonnées associées après l’évaluation sans
                      l’exécution de la build, ou si l’option -targets
                      ou l’option -getTargetResult est utilisée, écrivez
-                     les valeurs après la génération.
+                     les valeurs après la build.
     </target>
         <note>
       LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
@@ -200,14 +200,14 @@
     </source>
         <target state="translated">  -featureAvailability:featureName,...
                      Vérifiez la disponibilité des fonctionnalités. Le résultat est l’une des
-                     chaînes « Undefined », « Available », « NotAvailable » et
-                     « Aperçu ».
+                     chaînes « Non défini », « Disponible », « Indisponible » et
+                     « Préversion ».
                      - Non défini : la disponibilité de la fonctionnalité n’est pas définie
-                     (le nom de la fonctionnalité est inconnu de la disponibilité des fonctionnalités
-                     vérificateur)
-                     - NotAvailable : la fonctionnalité n’est pas disponible (contrairement à
-                     Non défini, le nom de la fonctionnalité est connu de la fonctionnalité
-                     et sait que la fonctionnalité n’est pas
+                     (le nom de la fonctionnalité est inconnu du vérificateur de la disponibilité
+                     des fonctionnalités)
+                     - Indisponible : la fonctionnalité n’est pas disponible (contrairement à
+                     Non défini, le nom de la fonctionnalité est connu du vérificateur de la fonctionnalité
+                     et il sait que la fonctionnalité n’est pas
                      prise en charge par le moteur MSBuild actuel)
                      - Disponible : la fonctionnalité est disponible
                      - Préversion : la fonctionnalité est en préversion (non stable)
@@ -234,14 +234,13 @@
         <target state="translated">  -terminalLogger[:auto,on,off]
                      Activez ou désactivez l’enregistreur d’événements du terminal. Enregistreur d’événements terminal
                      fournit une sortie de build améliorée sur la console en temps réel,
-                     organisé logiquement par projet et conçu pour mettre en évidence
+                     organisée logiquement par projet et conçu pour mettre en évidence
                      les informations exploitables. Spécifier automatiquement (ou utiliser l’option
-                     sans arguments) pour utiliser l’enregistreur d’événements de terminal uniquement si le
-                     la sortie standard n’est pas redirigée. N’analysez pas la sortie
-                     ou reposez-vous sur le fait qu’il reste inchangé dans les
-futures
+                     sans arguments) pour utiliser l’enregistreur d’événements de terminal uniquement si la
+                     sortie standard n’est pas redirigée. N’analysez pas la sortie
+                     et ne vous attendez pas à ce qu’elle reste inchangée dans les futures
                      versions. Cette option est disponible dans MSBuild 17.8 et
-                     ultérieures.
+                     versions ultérieures.
                      (Forme abrégée : -tl)
     </target>
         <note>
@@ -272,8 +271,8 @@ futures
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
                      Paramètres de l’enregistreur d’événements de terminal. (Forme abrégée : -tlp)
                      Paramètres disponibles.
-                        default --Spécifie le comportement par défaut du terminal
-                        enregistreur. Elle nécessite l’une des valeurs suivantes :
+                        default --Spécifie le comportement par défaut de l’enregistreur
+                        de terminal. Elle nécessite l’une des valeurs suivantes :
                            - 'on', 'true' force TerminalLogger à être utilisé même
                             quand il serait désactivé.
                            - 'off', 'false' force TerminalLogger à ne pas être utilisé
@@ -319,10 +318,10 @@ futures
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     Active BuildChecks pendant la build.
+                     BuildCheck permet d'évaluer les règles pour garantir les propriétés 
+                     de la build. Pour plus d'informations, consultez aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -803,7 +802,7 @@ Cet indicateur est expérimental et peut ne pas fonctionner comme prévu.
                      Syntaxe de &lt;classe de journalisation&gt; :
                        [&lt;espace de noms partiels ou complets&gt;.]&lt;nom de la classe de journalisation&gt;
                      Syntaxe de &lt;assembly de journalisation&gt; :
-                       {&lt;nom d'assembly&gt;[,&lt;strong name&gt;] | &lt;fichier d'assembly&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Les options de journalisation spécifient la façon dont MSBuild crée le journaliseur.
                      Les &lt;paramètres de journalisation&gt; sont facultatifs. Ils sont passés
                      au journaliseur tels que vous les avez tapés. (Forme abrégée : -l)
@@ -1085,7 +1084,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                      Syntaxe de &lt;classe de journalisation&gt; :
                        [&lt;espace de noms partiels ou complets&gt;.]&lt;nom de la classe de journalisation&gt;
                      Syntaxe de &lt;assembly de journalisation&gt; :
-                       {&lt;nom d'assembly&gt;[,&lt;strong name&gt;] | &lt;fichier d'assembly&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Les options de journalisation spécifient la façon dont MSBuild crée le journaliseur.
                      Les &lt;paramètres de journalisation&gt; sont facultatifs. Ils sont passés
                      au journaliseur tels que vous les avez tapés. (Forme abrégée : -l)
@@ -1558,7 +1557,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="MissingGetItemError">
         <source>MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</source>
-        <target state="new">MSBUILD : error MSB1014: Must provide an item name for the getItem switch.</target>
+        <target state="translated">MSBUILD : error MSB1014: Doit fournir un nom d'élément pour le commutateur getItem.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1014: "}UE: This happens if the user does something like "msbuild.exe -getItem". The user must pass in an actual item name
       following the switch, as in "msbuild.exe -getItem:blah".
@@ -1567,7 +1566,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="MissingGetPropertyError">
         <source>MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</source>
-        <target state="new">MSBUILD : error MSB1010: Must provide a property name for the getProperty switch.</target>
+        <target state="translated">MSBUILD : error MSB1010: Doit fournir un nom de propriété pour le commutateur getProperty.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
@@ -1585,7 +1584,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="MissingGetTargetResultError">
         <source>MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</source>
-        <target state="new">MSBUILD : error MSB1017: Must provide a target name for the getTargetResult switch.</target>
+        <target state="translated">MSBUILD : error MSB1017: Doit fournir un nom de cible pour le commutateur getTargetResult.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1017: "}UE: This happens if the user does something like "msbuild.exe -getTargetResult". The user must pass in an actual target name
       following the switch, as in "msbuild.exe -getTargetResult:blah".
@@ -1833,7 +1832,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="SAC_Evaluation">
         <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
-        <target state="translated">2 : en évaluation Il est recommandé de désactiver smart App Control dans l’environnement de développement, car les performances risquent d’être affectées dans le cas contraire</target>
+        <target state="translated">2 : en évaluation. Il est recommandé de désactiver smart App Control dans l’environnement de développement, car les performances risquent d’être affectées dans le cas contraire</target>
         <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Off">
@@ -1870,7 +1869,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="SolutionBuildInvalidForCommandLineEvaluation">
         <source>MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</source>
-        <target state="new">MSBUILD : error MSB1063: Cannot access properties or items when building solution files or solution filter files. This feature is only available when building individual projects.</target>
+        <target state="translated">MSBUILD : error MSB1063: Impossible d'accéder aux propriétés ou aux éléments lors de la création de fichiers de solution ou de fichiers de filtre de solution. Cette fonctionnalité est disponible uniquement lors de la génération de projets individuels.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1063: "}UE: This happens if the user passes in a solution file when trying to access individual properties or items. The user must pass in a project file.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
