@@ -1042,7 +1042,7 @@ namespace Microsoft.Build.Shared
         {
             if (!stepResult.ConsiderFiles)
             {
-                return Enumerable.Empty<string>();
+                return [];
             }
 
             // Back-compat hack: We don't use case-insensitive file enumeration I/O on Linux so the behavior is different depending

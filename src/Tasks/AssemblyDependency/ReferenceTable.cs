@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks
         private readonly Dictionary<string, AssemblyNameExtension> _externallyResolvedImmutableFiles = new Dictionary<string, AssemblyNameExtension>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>The table of remapped assemblies. Used for Unification.</summary>
-        private IEnumerable<DependentAssembly> _remappedAssemblies = Enumerable.Empty<DependentAssembly>();
+        private IEnumerable<DependentAssembly> _remappedAssemblies = [];
 
         /// <summary>If true, then search for dependencies.</summary>
         private readonly bool _findDependencies;

@@ -2627,7 +2627,7 @@ namespace Microsoft.Build.Evaluation
                 ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.TextFragment).ToImmutableArray();
                 var includeGlob = CompositeGlob.Create(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
 
-                IEnumerable<string> excludeFragmentStrings = Enumerable.Empty<string>();
+                IEnumerable<string> excludeFragmentStrings = [];
                 IMSBuildGlob excludeGlob = null;
 
                 if (!string.IsNullOrEmpty(itemElement.Exclude))
@@ -2638,7 +2638,7 @@ namespace Microsoft.Build.Evaluation
                     excludeGlob = excludeItemspec.ToMSBuildGlob();
                 }
 
-                IEnumerable<string> removeFragmentStrings = Enumerable.Empty<string>();
+                IEnumerable<string> removeFragmentStrings = [];
                 IMSBuildGlob removeGlob = null;
 
                 if (removeElementCache.TryGetValue(itemElement.ItemType, out CumulativeRemoveElementData removeItemElement))

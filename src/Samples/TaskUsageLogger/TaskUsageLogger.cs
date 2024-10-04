@@ -46,8 +46,8 @@ namespace TaskUsageLogger
     {
         private static readonly Regex s_msbuildPropertyRegex = new Regex(@"[\$][\(](?<name>.*?)[\)]", RegexOptions.ExplicitCapture);
         private static readonly char[] s_semicolonChar = { ';' };
-        private static readonly char[] s_disallowedCharactersForExpansion = ['@', '%'];
-        private static readonly char[] s_fullyQualifiedTaskNameSeperators = ['.', '+'];
+        private static readonly char[] s_disallowedCharactersForExpansion = new char[] { '@', '%' };
+        private static readonly char[] s_fullyQualifiedTaskNameSeperators = new char[] { '.', '+' };
 
         private Dictionary<int, string> _targetIdsToNames;
         private HashSet<TaskData> _tasks;
