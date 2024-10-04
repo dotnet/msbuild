@@ -34,7 +34,7 @@ namespace Microsoft.Build.Tasks
     {
         private const string TypeNameSuffix = "_TypeName";
         private const string IsLiteralSuffix = "_IsLiteral";
-        private static readonly IEnumerable<string> NamespaceImports = ["System", "System.Reflection"];
+        private static readonly string[] NamespaceImports = ["System", "System.Reflection"];
         private static readonly IReadOnlyDictionary<string, ParameterType> EmptyParameterTypes = new Dictionary<string, ParameterType>();
 
         /// <summary>
