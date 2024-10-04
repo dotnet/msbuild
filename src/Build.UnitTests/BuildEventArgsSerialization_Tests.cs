@@ -98,6 +98,18 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void RoundtripBuildCanceledEventArgs()
+        {
+            var args = new BuildCanceledEventArgs(
+                "Message",
+                eventTimestamp: DateTime.Parse("12/12/2015 06:11:56 PM"));
+
+            Roundtrip(args,
+                e => e.Message,
+                e => e.Timestamp.ToString());
+        }
+
+        [Fact]
         public void RoundtripBuildSubmissionStartedEventArgs()
         {
             var globalVariables = new Dictionary<string, string>
