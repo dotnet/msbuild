@@ -2962,7 +2962,7 @@ namespace Microsoft.Build.Execution
                 };
                 ProjectInstance instance = new(projectRootElement, globalProperties, toolsVersion, buildParameters, loggingService, projectBuildEventContext, sdkResolverService, submissionId);
 
-                return new[] { instance };
+                return [instance];
             }
         }
 

@@ -1477,7 +1477,7 @@ namespace Microsoft.Build.Conversion
                 // Add the new warnings specific to Dev10: 42353,42354,42355
                 // (if we don't have them already)
                 //
-                string[] newWarnings = new[] { "42353", "42354", "42355" };
+                string[] newWarnings = ["42353", "42354", "42355"];
 
                 foreach (var newWarn in newWarnings)
                 {

@@ -2351,7 +2351,7 @@ namespace Microsoft.Build.Shared
                     }
                 }
             }
-            return new[] { filespecUnescaped };
+            return [filespecUnescaped];
         }
 
         /// <summary>

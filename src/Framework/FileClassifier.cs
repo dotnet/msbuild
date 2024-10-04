@@ -103,7 +103,7 @@ namespace Microsoft.Build.Framework
         public FileClassifier()
         {
             // Register Microsoft "Reference Assemblies" as immutable
-            string[] programFilesEnvs = new[] { "ProgramFiles(x86)", "ProgramW6432", "ProgramFiles(Arm)" };
+            string[] programFilesEnvs = ["ProgramFiles(x86)", "ProgramW6432", "ProgramFiles(Arm)"];
             foreach (string programFilesEnv in programFilesEnvs)
             {
                 string? programFiles = Environment.GetEnvironmentVariable(programFilesEnv);

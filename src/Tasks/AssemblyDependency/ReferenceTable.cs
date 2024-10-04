@@ -817,7 +817,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
             position += component.Length + 1;
-            int nextDelimiter = fusionName.IndexOfAny(new[] { ',', ' ' }, position);
+            int nextDelimiter = fusionName.IndexOfAny([',', ' '], position);
             if (nextDelimiter == -1)
             {
                 value = fusionName.Substring(position);

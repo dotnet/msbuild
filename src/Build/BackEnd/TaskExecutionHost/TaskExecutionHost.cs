@@ -804,7 +804,7 @@ namespace Microsoft.Build.BackEnd
 
             if (!(outputs is ITaskItem[] taskItemOutputs))
             {
-                taskItemOutputs = new[] { (ITaskItem)outputs };
+                taskItemOutputs = [(ITaskItem)outputs];
             }
 
             return taskItemOutputs;

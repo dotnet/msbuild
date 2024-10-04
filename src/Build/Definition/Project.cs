@@ -1574,7 +1574,7 @@ namespace Microsoft.Build.Evaluation
         public bool Build(string target, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
             // targets may be null, but not an entry within it
-            string[] targets = (target == null) ? null : new[] { target };
+            string[] targets = (target == null) ? null : [target];
 
             return Build(targets, loggers, remoteLoggers);
         }
@@ -2763,7 +2763,7 @@ namespace Microsoft.Build.Evaluation
                         itemElement.RemoveLocation == null);
 
                 // add the include operation that created the project item element
-                return new[] { item.Xml }.Concat(relevantElementsAfterInclude);
+                return ((ProjectItemElement[])[item.Xml]).Concat(relevantElementsAfterInclude);
             }
 
             private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)

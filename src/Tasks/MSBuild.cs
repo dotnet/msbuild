@@ -460,7 +460,7 @@ namespace Microsoft.Build.Tasks
                 // Separate target invocations for each individual target.
                 foreach (string targetName in targets)
                 {
-                    targetLists.Add(new[] { targetName });
+                    targetLists.Add([targetName]);
                 }
             }
             else

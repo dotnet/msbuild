@@ -119,7 +119,7 @@ namespace Microsoft.Build.Shared
             // of the Microsoft.Build.* assembly.
             assemblyName.Version = _currentAssemblyVersion;
 
-            var searchPaths = new[] { Assembly.GetExecutingAssembly().Location };
+            string[] searchPaths = [Assembly.GetExecutingAssembly().Location];
             return TryResolveAssemblyFromPaths(context, assemblyName, searchPaths);
         }
 
@@ -148,11 +148,11 @@ namespace Microsoft.Build.Shared
             foreach (var cultureSubfolder in string.IsNullOrEmpty(assemblyName.CultureName)
                 // If no culture is specified, attempt to load directly from
                 // the known dependency paths.
-                ? new[] { string.Empty }
+                ? (string[])[string.Empty]
                 // Search for satellite assemblies in culture subdirectories
                 // of the assembly search directories, but fall back to the
                 // bare search directory if that fails.
-                : new[] { assemblyName.CultureName, string.Empty })
+                : [assemblyName.CultureName, string.Empty])
             {
                 foreach (var searchPath in searchPaths)
                 {

@@ -334,8 +334,8 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     patterns = pattern.Contains(';')
-                                   ? pattern.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(FileMatcher.Normalize).ToArray()
-                                   : new[] { pattern };
+                                   ? pattern.Split([';'], StringSplitOptions.RemoveEmptyEntries).Select(FileMatcher.Normalize).ToArray()
+                                   : [pattern];
                 }
             }
         }

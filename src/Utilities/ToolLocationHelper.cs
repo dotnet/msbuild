@@ -2479,7 +2479,7 @@ namespace Microsoft.Build.Utilities
                         GatherExtensionSDKListFromDirectory(extensionSdkDiskRoots, extensionSdk);
                         s_cachedExtensionSdks.Add(cachedExtensionSdksKey, extensionSdk);
                     }
-                    collection = collection.Concat(new[] { extensionSdk });
+                    collection = collection.Concat([extensionSdk]);
                 }
 
                 return collection;
