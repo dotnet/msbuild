@@ -562,11 +562,11 @@ namespace Microsoft.Build.Tasks
                     ? reference
                     : $"{reference}.dll";
 
-                string resolvedDir =
-                ((string[])[
+                string resolvedDir = new[]
+                {
                     Path.Combine(ThisAssemblyDirectoryLazy.Value, ReferenceAssemblyDirectoryName),
                     ThisAssemblyDirectoryLazy.Value,
-                ])
+                }
                 .FirstOrDefault(p => File.Exists(Path.Combine(p, assemblyFileName)));
 
                 if (resolvedDir != null)

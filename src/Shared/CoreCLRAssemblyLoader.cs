@@ -145,10 +145,10 @@ namespace Microsoft.Build.Shared
 
         private Assembly TryResolveAssemblyFromPaths(AssemblyLoadContext context, AssemblyName assemblyName, IEnumerable<string> searchPaths)
         {
-            foreach (var cultureSubfolder in string.IsNullOrEmpty(assemblyName.CultureName)
+            foreach (string cultureSubfolder in string.IsNullOrEmpty(assemblyName.CultureName)
                 // If no culture is specified, attempt to load directly from
                 // the known dependency paths.
-                ? (string[])[string.Empty]
+                ? new[] { string.Empty }
                 // Search for satellite assemblies in culture subdirectories
                 // of the assembly search directories, but fall back to the
                 // bare search directory if that fails.
