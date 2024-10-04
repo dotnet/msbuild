@@ -120,10 +120,10 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Powoduje, że program MSBuild zgłasza dostępy do wszystkich skonfigurowanych plików
+                     Powoduje, że platforma MSBuild zgłasza dostępy do wszystkich skonfigurowanych
                      wtyczek pamięci podręcznej projektu.
 
-Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
+                     Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -203,8 +203,8 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      ciągów „Undefined”, „Available”, „NotAvailable” i
                      „Preview”.
                      — Undefined — dostępność funkcji jest niezdefiniowana
-                     (nazwa funkcji jest nieznana dla dostępności funkcji
-                     kontroler)
+                     (nazwa funkcji jest nieznana dla kontrolera dostępności
+                     funkcji)
                      — NotAvailable — funkcja jest niedostępna (w przeciwieństwie do
                      Undefined, nazwa funkcji jest znana kontrolerowi
                      dostępności funkcji i wie on, że funkcja nie jest
@@ -235,12 +235,12 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      Włącz lub wyłącz rejestrator terminali. Rejestrator terminali
                      udostępnia ulepszone dane wyjściowe kompilacji na konsoli w czasie rzeczywistym,
                      uporządkowane logicznie według projektu i zaprojektowane do wyróżniania
-                     informacji umożliwiających podejmowanie działań. Określ auto (lub użyj opcji
+                     informacji umożliwiających podejmowanie działań. Określ automatycznie (lub użyj opcji
                      bez argumentów), aby używać rejestratora terminali tylko wtedy, gdy
-                     standardowe dane wyjściowe nie są przekierowywane. Nie analizowanie danych wyjściowych
-                     lub inaczej – poleganie na nich pozostanie niezmienione w przyszłych
+                     standardowe dane wyjściowe nie są przekierowywane. Nie analizuj danych wyjściowych
+                     albo w przeciwnym razie poleganie na nich pozostanie niezmienione w przyszłych
                      wersjach. Ta opcja jest dostępna w wersji MSBuild 17.8 i
-                     późniejszych.
+                     nowszych.
                      (Krótka forma: -tl)
     </target>
         <note>
@@ -272,17 +272,17 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      Parametry rejestratora terminali. (Krótka forma: -tlp)
                      Dostępne parametry.
                         default-- określa domyślne zachowanie rejestratora
-                        terminalu. Wymaga jednej z następujących wartości:
-                           — „on”, „true” wymusza użycie elementu TerminalLogger nawet
+                        terminali. Wymaga jednej z następujących wartości:
+                           — „on”, „true” wymusza użycie elementu TerminalLogger, nawet
                             kiedy zostanie on wyłączony.
                            — „off”, „false” wymusza nieużywanie elementu TerminalLogger
                             nawet wtedy, gdy zostanie on włączony.
                            — „auto” włącza element TerminalLogger, gdy terminal
                             go obsługuje, a sesja nie została przekierowana
                             stdout/stderr
-                        verbosity-- zastąp ustawienie -verbosity dla tego
+                        verbosity-- zastępuje ustawienie -verbosity dla tego
                         rejestratora
-                        showCommandLine-- pokaż komunikaty TaskCommandLineEvent
+                        showCommandLine-- pokazuje komunikaty TaskCommandLineEvent
 
                       Przykład:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
@@ -800,17 +800,14 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania
-                         zdarzeń pochodzących z programu MSBuild. Aby określić
-                     wiele rejestratorów, określ każdy z nich osobno.
+        <target state="translated">  -logger:&lt;rejestrator&gt;  Umożliwia użycie podanego rejestratora do rejestrowania zdarzeń pochodzących
+                     z programu MSBuild. Aby określić wiele rejestratorów, określ każdy z nich osobno.
                      Składnia elementu &lt;rejestrator&gt;:
-                        [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt;
-                        [;&lt;parametry rejestratora&gt;]
+                      [&lt;klasa rejestratora&gt;,]&lt;assembly&gt; [;&lt;parametry rejestratora&gt;]
                      Składnia elementu &lt;klasa rejestratora&gt;:
-                        [&lt;częściowa lub pełna przestrzeń nazw&gt;.]
-                        &lt;nazwa klasy rejestratora&gt;
+                       [&lt;częściowa lub pełna przestrzeń nazw&gt;.] &lt;nazwa klasy rejestratora&gt;
                      Składnia elementu &lt;zestaw rejestratora&gt;:
-                        {&lt;nazwa zestawu&gt;[,&lt;strong name&gt;] | &lt;plik zestawu&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Wartości &lt;parametry rejestratora&gt; są opcjonalne i są
                      przekazywane do rejestratora dokładnie tak, jak zostały
                      wpisane. (Krótka wersja: -l)
@@ -1089,11 +1086,11 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      wiele rejestratorów, określ każdy z nich osobno.
                      (Krótka wersja: -dl)
                      Składnia elementu &lt;rejestrator&gt;:
-                       [&lt;klasa rejestratora&gt;,]&lt;zestaw rejestratora&gt;[;&lt;parametry rejestratora&gt;]
+                       [&lt;klasa rejestratora&gt;,]&lt;assembly&gt;[;&lt;parametry rejestratora&gt;]
                      Składnia elementu &lt;klasa rejestratora&gt;:
                        [&lt;częściowa lub pełna przestrzeń nazw&gt;.]&lt;nazwa klasy rejestratora&gt;
                      Składnia elementu &lt;zestaw rejestratora&gt;:
-                       {&lt;nazwa zestawu&gt;[,&lt;strong name&gt;] | &lt;plik zestawu&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Wartości &lt;parametry rejestratora&gt; są opcjonalne i są
                      przekazywane do rejestratora dokładnie tak, jak zostały
                      wpisane. (Krótka wersja: -l)
@@ -1205,13 +1202,11 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      create a log file for each node.
     </source>
         <target state="translated">  -distributedFileLogger
-                     Rejestruje dane wyjściowe kompilacji w wielu plikach
-                     dziennika, po jednym pliku na węzeł programu MSBuild.
-                     Początkową lokalizacją tych plików jest bieżący katalog.
-                     Domyślnie pliki mają nazwę
+                     Rejestruje dane wyjściowe kompilacji w wielu plikach dziennika,po jednym pliku
+                     na węzeł programu MSBuild. Początkową lokalizacją tych plików
+                     jest bieżący katalog. Domyślnie pliki mają nazwę
                      „MSBuild&lt;identyfikator węzła&gt;.log”. Lokalizację plików
                      i inne parametry rejestratora plików można określić
-
                      przez dodanie przełącznika „-fileLoggerParameters”.
 
                      Jeśli nazwa pliku zostanie ustawiona za pomocą przełącznika

@@ -789,15 +789,10 @@ namespace Microsoft.Build.Execution
             {
                 lock (_syncLock)
                 {
-                    if (_shuttingDown)
-                    {
-                        return;
-                    }
-
-                    // If we are Idle, obviously there is nothing to cancel.  If we are waiting for the build to end, then presumably all requests have already completed
-                    // and there is nothing left to cancel.  Putting this here eliminates the possibility of us racing with EndBuild to access the nodeManager before
-                    // EndBuild sets it to null.
-                    if (_buildManagerState != BuildManagerState.Building)
+                    // If the state is Idle - then there is yet or already nothing to cancel
+                    // If state is WaitingForBuildToComplete - we might be already waiting gracefully - but CancelAllSubmissions
+                    //  is a request for quick abort - so it's fine to resubmit the request
+                    if (_buildManagerState == BuildManagerState.Idle)
                     {
                         return;
                     }
@@ -2078,17 +2073,17 @@ namespace Microsoft.Build.Execution
             lock (_syncLock)
             {
                 _shuttingDown = true;
-                _executionCancellationTokenSource!.Cancel();
+                _executionCancellationTokenSource?.Cancel();
 
                 // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
-                _nodeManager!.ShutdownConnectedNodes(!abort && _buildParameters!.EnableNodeReuse);
+                _nodeManager?.ShutdownConnectedNodes(!abort && _buildParameters!.EnableNodeReuse);
 
                 // if we are aborting, the task host will hear about it in time through the task building infrastructure;
                 // so only shut down the task host nodes if we're shutting down tidily (in which case, it is assumed that all
                 // tasks are finished building and thus that there's no risk of a race between the two shutdown pathways).
                 if (!abort)
                 {
-                    _taskHostNodeManager!.ShutdownConnectedNodes(_buildParameters!.EnableNodeReuse);
+                    _taskHostNodeManager?.ShutdownConnectedNodes(_buildParameters!.EnableNodeReuse);
                 }
             }
         }

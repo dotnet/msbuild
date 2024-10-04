@@ -119,12 +119,11 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -reportFileAccesses[:True|Falsch]
-                     Führt dazu, dass MSBuild Dateizugriffe an alle konfigurierten
- meldet
-                     Projektcache-Plug-Ins.
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     Führt dazu, dass MSBuild Dateizugriffe auf ein beliebiges konfiguriertes
+                     Projektcache-Plug-In meldet.
 
-                     Dieses Kennzeichen ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
+                     Dieses Flag ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -175,7 +174,7 @@
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                     Schreiben Sie den Ausgabewert eines oder mehrerer Ziele aus und
+                     Schreiben Sie den Ausgabewert eines oder mehrerer Ziele aus, und
                      die angegebenen Ziele werden ausgeführt.
     </target>
         <note>
@@ -203,15 +202,15 @@
                      Überprüft die Verfügbarkeit von Features. Das Ergebnis ist eine der
                      Zeichenfolgen "Undefined", "Available", "NotAvailable" und
                      "Preview".
-                     –Undefinied: Die Verfügbarkeit des Features ist nicht definiert
+                     – Undefinied: Die Verfügbarkeit des Features ist nicht definiert
                      (der Featurename ist für den Prüfer der Featureverfügbarkeit
                      unbekannt)
-                     -NotAvailable: Das Feature ist nicht verfügbar (im Gegensatz zu
+                     – NotAvailable: Das Feature ist nicht verfügbar (im Gegensatz zu
                      "Undefined", wo der Featurename für den Prüfer der Featureverfügbarkeit
                      bekannt ist und er weiß, dass das Feature von der
                      aktuellen MSBuild-Engine nicht unterstützt wird)
-                     -Available: Das Feature ist verfügbar
-                     -Preview: Das Feature befindet sich in der Vorschau (nicht stabil)
+                     – Available: Das Feature ist verfügbar
+                     – Preview: Das Feature befindet sich in der Vorschau (nicht stabil)
                      (Kurzform: -fa)
     </target>
         <note>
@@ -233,15 +232,15 @@
                      (Short form: -tl)
     </source>
         <target state="translated">  -terminalLogger[:auto,on,off]
-                     Aktiviert oder deaktiviert die Terminalprotokollierung. Terminal-Logger
+                     Aktiviert oder deaktiviert die Terminalprotokollierung. Terminalprotokollierung
                      bietet verbesserte Buildausgabe auf der Konsole in Echtzeit,
                      logisch nach Projekt organisiert und entwickelt, um
                      verwertbare Informationen hervorzuheben. Geben Sie "auto" an (oder verwenden Sie die Option
-                     ohne Argumente), um den Terminal-Logger nur zu verwenden, wenn die
-                     Standardausgabe nicht umgeleitet wird. Analysieren Sie die Ausgabe nicht
+                     ohne Argumente), um die Terminalprotokollierung nur zu verwenden, wenn die
+                     Standardausgabe nicht umgeleitet wird. Analysieren Sie die Ausgabe nicht,
                      oder vertrauen Sie darauf, dass sie in zukünftigen
                      Versionen unverändert bleibt. Diese Option ist in MSBuild 17.8 und
-                     später verfügbar.
+                     höher verfügbar.
                      (Kurzform: -tl)
     </target>
         <note>
@@ -270,19 +269,19 @@
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                     Parameter für Terminal-Logger. (Kurzform: -tlp)
+                     Parameter für die Terminalprotokollierung. (Kurzform: -tlp)
                      Die verfügbaren Parameter.
-                        default: Gibt das Standardverhalten des Terminal-
-                        Loggers an. Erfordert einen der folgenden Werte:
+                        default: Gibt das Standardverhalten der
+                        Terminalprotokollierung an. Erfordert einen der folgenden Werte:
                            – "on", "true" erzwingt die Verwendung von TerminalLogger, auch
-                            wenn er deaktiviert werden sollte.
+                            bei einer Deaktivierung.
                            – "off", "true" erzwingt die Nichtverwendung von TerminalLogger, auch
-                            wenn er aktiviert werden sollte.
+                            bei einer Aktivierung.
                            – "auto" aktiviert TerminalLogger, wenn das Terminal
                             dies unterstützt, und die Sitzung nicht umgeleitet wurde
                             stdout/stderr
-                        verbosity: Überschreiben Sie die Einstellung "-verbosity" für diesen
-                        Logger
+                        verbosity: Überschreiben Sie die Einstellung "-verbosity" für diese
+                        Protokollierung
                         showCommandLine: TaskCommandLineEvent-Meldungen anzeigen
 
                       Beispiel: 
@@ -799,11 +798,11 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
         <target state="translated">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben, 
                      wird jede Protokollierung gesondert angegeben.
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
-                       {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
                      Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
@@ -1081,11 +1080,11 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                      gesondert angegeben.
                      (Kurzform -dl)
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
-                       {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
                      Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
@@ -1828,12 +1827,12 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="SAC_Enforcement">
         <source>1: in enforcement</source>
-        <target state="translated">1: bei der Erzwingung</target>
+        <target state="translated">1: bei der Durchsetzung</target>
         <note />
       </trans-unit>
       <trans-unit id="SAC_Evaluation">
         <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
-        <target state="translated">2: in Auswertung. Es wird empfohlen, Smart App Control in der Entwicklungsumgebung zu deaktivieren, da andernfalls die Leistung beeinträchtigt werden könnte.</target>
+        <target state="translated">2: in Auswertung. Es wird empfohlen, Smart App Control in der Entwicklungsumgebung zu deaktivieren, da andernfalls die Leistung beeinträchtigt werden könnte</target>
         <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Off">
