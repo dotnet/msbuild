@@ -289,7 +289,7 @@
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Fehler beim Laden des benutzerdefinierten Prüftyps „{0}“ aus der Assembly: {1}. Stellen Sie sicher, dass sie die Basisklasse „Microsoft.Build.Experimental.BuildCheck.Check“ erbt. Wenn es sich nicht um eine benutzerdefinierte Überprüfung handelt, sollte sie nicht verfügbar gemacht werden. Weitere Informationen: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">Fehler beim Laden des benutzerdefinierten Prüftyps „{0}“ aus der Assembly: {1}. Stellen Sie sicher, dass es die Basisklasse „Microsoft.Build.Experimental.BuildCheck.Check“ erbt. Wenn es sich nicht um eine benutzerdefinierte Überprüfung handelt, sollte es nicht verfügbar gemacht werden. Weitere Informationen: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
@@ -304,7 +304,7 @@
       </trans-unit>
       <trans-unit id="CustomCheckRegistered">
         <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">Dies benutzerdefinierte Überprüfung „{0}“ ist für den Build von folgendem Speicherort aus registriert: „{1}”.</target>
+        <target state="translated">Dies benutzerdefinierte Überprüfung „{0}“ ist für den Build vom Folgenden aus registriert: „{1}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckSuccessfulAcquisition">
@@ -375,7 +375,7 @@
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
-        <target state="translated">Unzulässige Zeichen in „{0}“ im Element {1}.</target>
+        <target state="translated">Unzulässige Zeichen in „{0}“ im {1}-Element.</target>
         <note />
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
@@ -628,7 +628,7 @@
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
 Errors: {3}</source>
-        <target state="translated">Der Konfliktlöser "{0}" hat versucht, das SDK "{1}" aufzulösen.
+        <target state="translated">Der Konfliktlöser „{0}“ hat versucht, das SDK „{1}“ aufzulösen.
 Warnungen: {2}
 Fehler: {3}</target>
         <note>
@@ -754,7 +754,7 @@ Fehler: {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Dies ist ein Ausnahmefehler in MSBuild. STIMMEN SIE EINEM VORHANDENEN ISSUE ZU, ODER ERSTELLEN SIE EIN NEUES ISSUE UNTER https://aka.ms/msbuild/unhandled
+        <target state="translated">Dies ist eine nicht behandelte Ausnahme in MSBuild. RUFEN SIE EIN VORHANDENES PROBLEM AUF, ODER ERSTELLEN SIE EIN NEUES UNTER https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>

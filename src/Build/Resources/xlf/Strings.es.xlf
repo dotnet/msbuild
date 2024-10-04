@@ -289,7 +289,7 @@
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">No se pudo cargar el tipo de comprobación personalizada: "{0}" desde el ensamblado: "{1}". Asegúrese de que hereda la clase base Microsoft.Build.Experimental.BuildCheck.Check. Si no se pretende que sea una comprobación personalizada, no debe exponerse. Más información: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">No se pudo cargar el tipo de comprobación personalizado: "{0}" desde el ensamblado: "{1}". Asegúrese de que hereda la clase base Microsoft.Build.Experimental.BuildCheck.Check. Si no está pensado para ser una comprobación personalizada, no debe exponerse. Más información: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
@@ -375,7 +375,7 @@
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
-        <target state="translated">Hay caracteres no válidos en "{0}" en el elemento {1}.</target>
+        <target state="translated">Hay caracteres no válidos en '{0}' en el elemento {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
@@ -628,7 +628,7 @@
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
 Errors: {3}</source>
-        <target state="translated">El solucionador "{0}" intentó resolver el SDK "{1}".
+        <target state="translated">El resolvedor "{0}" intentó resolver el SDK "{1}".
 Advertencias: {2}
 Errores: {3}</target>
         <note>

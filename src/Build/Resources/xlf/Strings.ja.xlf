@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AbortingBuild">
         <source>Attempting to cancel the build...</source>
-        <target state="translated">ビルドの取り消を試みています...</target>
+        <target state="translated">ビルドを取り消そうとしています...</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
@@ -138,17 +138,17 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_MessageFmt">
         <source>Projects {0} and {1} have conflicting output paths: {2}.</source>
-        <target state="translated">プロジェクト {0} と {1} で、出力パス: {2} が競合しています。</target>
+        <target state="translated">プロジェクト {0} と {1} の出力パスが競合しています: {2}。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_Title">
         <source>Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</source>
-        <target state="translated">2 つのプロジェクトで、'OutputPath' と 'IntermediateOutputPath' の場所の、どちらも共有することはできません。</target>
+        <target state="translated">2 つのプロジェクトで 'OutputPath' と 'IntermediateOutputPath' の場所を共有することはできません。</target>
         <note>'OutputPath' and 'IntermediateOutputPath' not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_MessageFmt">
         <source>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</source>
-        <target state="translated">プロジェクト {2} と {3} のタスク {0} と {1} が、同じファイル: {4} に書き込んでいます。</target>
+        <target state="translated">プロジェクト {2} と {3} のタスク {0} と {1} は、同じファイルを書き込みます: {4}。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_Title">
@@ -158,32 +158,32 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageAddendum">
         <source>'{0}' with value: '{1}'</source>
-        <target state="translated">値が '{1}' の '{0}'</target>
+        <target state="translated">'{0}' (値 '{1}')</target>
         <note>Will be used as a parameter {0} in previous message.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageFmt">
         <source>Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</source>
-        <target state="translated">プロパティは環境変数: {0} から派生しています。プロパティは、/p オプションを使用して明示的に渡す必要があります。</target>
+        <target state="translated">プロパティは環境変数から派生しています: {0}。プロパティは、/p オプションを使用して明示的に渡す必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_Title">
         <source>No implicit property derived from an environment variable should be used during the build.</source>
-        <target state="translated">環境変数から派生した暗黙的なプロパティをビルド中に使用しないでください。</target>
+        <target state="translated">ビルド中に環境変数から派生した暗黙的なプロパティを使用しないでください。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
-        <target state="translated">プロパティ: '{0}' は、初期化されないままアクセスされました。</target>
+        <target state="translated">プロパティ: '{0}' にアクセスしましたが、初期化されませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_Title">
         <source>A property that is accessed should be declared first.</source>
-        <target state="translated">アクセスされるプロパティを、最初に宣言する必要があります。</target>
+        <target state="translated">アクセスされるプロパティを、まず宣言する必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_MessageFmt">
         <source>Property: '{0}' first declared/initialized at {1} used before it was initialized.</source>
-        <target state="translated">{1} で最初に宣言/初期化されたプロパティ: '{0}' が初期化前に使用されました。</target>
+        <target state="translated">{1} で最初に宣言/初期化されたプロパティ: '{0}' は初期化前に使用されました。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_Title">
@@ -193,12 +193,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_MessageFmt">
         <source>Property: '{0}' was declared/initialized, but it was never used.</source>
-        <target state="translated">プロパティ: '{0}' は宣言/初期化されましたが、使用されたことがありません。</target>
+        <target state="translated">プロパティ: '{0}' は宣言または初期化されましたが、使用されませんでした。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_Title">
         <source>A property that is not used should not be declared.</source>
-        <target state="translated">使用されないプロパティを宣言する必要はありません。</target>
+        <target state="translated">使用されていないプロパティは宣言しないでください。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
@@ -284,17 +284,17 @@
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
-        <target state="translated">指定されたカスタム チェック アセンブリ: '{0}' が見つかりませんでした。これが存在することを確認してください。</target>
+        <target state="translated">指定されたカスタム チェック アセンブリが見つかりませんでした: '{0}'。存在するかどうか確認してください。</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">アセンブリ: '{1}' から、カスタム チェックの種類: '{0}'を読み込めませんでした。Microsoft.Build.Experimental.BuildCheck.Check の基底クラスを継承していることを確認してください。カスタム チェックを意図していない場合は、公開しないでください。詳細情報: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">カスタム チェックの種類を読み込めませんでした: アセンブリ '{1}' の '{0}'。Microsoft.Build.Experimental.BuildCheck.Check 基底クラスを継承していることを確認してください。カスタム チェックを意図していない場合は、公開しないでください。詳細情報: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
         <source>Failed to register the custom check: '{0}'.</source>
-        <target state="translated">カスタム チェック: '{0}'を登録できませんでした。</target>
+        <target state="translated">カスタム チェックを登録できませんでした: '{0}'。</target>
         <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedRuleLoading">
@@ -304,7 +304,7 @@
       </trans-unit>
       <trans-unit id="CustomCheckRegistered">
         <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">カスタム チェック: '{0}' は、場所: '{1}' からビルドに登録されています。</target>
+        <target state="translated">カスタム チェック '{0}' は、場所 '{1}' からビルドに登録されています。</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckSuccessfulAcquisition">
@@ -375,7 +375,7 @@
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
-        <target state="translated">{1} 項目内の '{0}' が不正な文字を含んでいます。</target>
+        <target state="translated">{1} 項目内の '{0}' に不正な文字があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
