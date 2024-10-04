@@ -319,10 +319,11 @@
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     ビルド中に BuildChecks を有効にします。
+                     BuildCheck を使用すると、ビルドのプロパティ 
+ を保証するための
+                     ルールを評価できます。詳細については、aka.ms/buildcheck を参照してください
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}

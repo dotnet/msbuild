@@ -318,10 +318,10 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     Włącza funkcję BuildChecks podczas kompilacji.
+                     Funkcja BuildCheck umożliwia ocenę reguł w celu zapewnienia właściwości 
+                     kompilacji. Aby uzyskać więcej informacji, zobacz aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
