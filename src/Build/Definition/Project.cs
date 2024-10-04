@@ -2763,7 +2763,7 @@ namespace Microsoft.Build.Evaluation
                         itemElement.RemoveLocation == null);
 
                 // add the include operation that created the project item element
-                return ((ProjectItemElement[])[item.Xml]).Concat(relevantElementsAfterInclude);
+                return [item.Xml, ..relevantElementsAfterInclude];
             }
 
             private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)

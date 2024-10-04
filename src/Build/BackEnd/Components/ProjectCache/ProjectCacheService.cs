@@ -454,7 +454,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 BuildRequestData buildRequest = new BuildRequestData(
                     cacheRequest.Configuration.Project,
-                    cacheRequest.Submission.BuildRequestData?.TargetNames.ToArray() ?? Array.Empty<string>());
+                    cacheRequest.Submission.BuildRequestData?.TargetNames.ToArray() ?? []);
                 BuildEventContext buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(
                     cacheRequest.Submission.SubmissionId,
                     evaluationId: cacheRequest.Configuration.Project.EvaluationId,

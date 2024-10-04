@@ -1002,7 +1002,7 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Source that should be removed from the graph</param>
-        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source) => RemoveDependenciesFromEntryIfMissing(new ITaskItem[] { source }, null);
+        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source) => RemoveDependenciesFromEntryIfMissing([source], null);
 
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs

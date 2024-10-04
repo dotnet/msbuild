@@ -1522,7 +1522,7 @@ namespace Microsoft.Build.Execution
 
             if (existingConfiguration == null)
             {
-                existingConfiguration = new BuildRequestConfiguration(GetNewConfigurationId(), new BuildRequestData(newInstance, Array.Empty<string>()), null /* use the instance's tools version */);
+                existingConfiguration = new BuildRequestConfiguration(GetNewConfigurationId(), new BuildRequestData(newInstance, []), null /* use the instance's tools version */);
             }
             else
             {

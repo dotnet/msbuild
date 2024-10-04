@@ -1290,7 +1290,7 @@ namespace Microsoft.Build.Tasks
             // If a reference has the SDKName metadata on it then we will only search using a single resolver, that is the InstalledSDKResolver.
             if (reference.SDKName.Length > 0)
             {
-                jaggedResolvers.Add(new Resolver[] { new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion) });
+                jaggedResolvers.Add([new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion)]);
             }
             else
             {

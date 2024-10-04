@@ -2151,7 +2151,7 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         public bool Build(string target, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
-            string[] targets = (target == null) ? Array.Empty<string>() : new string[] { target };
+            string[] targets = (target == null) ? [] : [target];
 
             return Build(targets, loggers, remoteLoggers);
         }
@@ -2647,7 +2647,7 @@ namespace Microsoft.Build.Execution
 
             if (targets == null)
             {
-                targets = Array.Empty<string>();
+                targets = [];
             }
 
             BuildResult results;

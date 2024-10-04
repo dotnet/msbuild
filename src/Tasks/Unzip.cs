@@ -319,7 +319,7 @@ namespace Microsoft.Build.Tasks
 
         private void ParsePattern(string pattern, out string[] patterns)
         {
-            patterns = Array.Empty<string>();
+            patterns = [];
             if (!string.IsNullOrWhiteSpace(pattern))
             {
                 if (FileMatcher.HasPropertyOrItemReferences(pattern))
