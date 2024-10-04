@@ -256,8 +256,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public IEnumerator<KeyValuePair<K, V>> GetEnumerator()
         {
-            IEnumerable<KeyValuePair<K, V>> enumerable = [];
-            return enumerable.GetEnumerator();
+            return Enumerable.Empty<KeyValuePair<K, V>>().GetEnumerator();
         }
 
         /// <summary>
