@@ -43,7 +43,7 @@
       </trans-unit>
       <trans-unit id="Binlog_ArchiveFile_NotSetAfterAcquire">
         <source>ArchiveFile was obtained, but the final edited version was not set.</source>
-        <target state="translated">Uzyskano plik ArchiveFile, ale nie ustawiono ostatecznej edycji wersji.</target>
+        <target state="translated">Uzyskano plik ArchiveFile, ale nie ustawiono ostatecznej edytowanej wersji.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
@@ -77,7 +77,7 @@
       </trans-unit>
       <trans-unit id="Binlog_ReaderUnderRead">
         <source>BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</source>
-        <target state="translated">Oczekiwano, że numer rekordu BuildEvent {0} odczyta ze strumienia liczbę bajtów równą dokładnie {1}, ale zamiast tego odczyta {2}.</target>
+        <target state="translated">Oczekiwano, że numer rekordu BuildEvent {0} odczyta ze strumienia liczbę bajtów równą dokładnie {1}, ale zamiast tego odczytał {2}.</target>
         <note>
       LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an integer value indicating number of bytes.
     </note>
@@ -96,7 +96,7 @@
       </trans-unit>
       <trans-unit id="Binlog_Source_MultiSubscribeError">
         <source>Structured events and raw events cannot be replayed at the same time.</source>
-        <target state="translated">Nie można jednocześnie odtwarzać zdarzeń strukturalnych i nieprzetworzonych.</target>
+        <target state="translated">Nie można ponownie odtwarzać jednocześnie zdarzeń strukturalnych i zdarzeń pierwotnych.</target>
         <note />
       </trans-unit>
       <trans-unit id="Binlog_Source_VersionUninitialized">
@@ -121,7 +121,7 @@
       </trans-unit>
       <trans-unit id="Binlog_StreamUtils_UnsupportedSkipOffset">
         <source>Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</source>
-        <target state="translated">Próba pominięcia {0} bajtów, tylko przesunięcie nieujemne do liczby całkowitej. Wartość MaxValue jest dozwolona.</target>
+        <target state="translated">Próba pominięcia {0} bajtów, tylko przesunięcie nieujemne do wartości int.MaxValue jest dozwolone.</target>
         <note>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </note>
@@ -173,17 +173,17 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
-        <target state="translated">Właściwość: uzyskano dostęp do „{0}”, ale nigdy nie dokonano inicjacji.</target>
+        <target state="translated">Uzyskano dostęp do właściwości: „{0}”, ale nigdy nie zainicjowano jej.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_Title">
         <source>A property that is accessed should be declared first.</source>
-        <target state="translated">Właściwość, do których jest uzyskiwany dostęp, powinna być zadeklarowana jako pierwsza.</target>
+        <target state="translated">Właściwość, do której jest uzyskiwany dostęp, powinna być zadeklarowana jako pierwsza.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_MessageFmt">
         <source>Property: '{0}' first declared/initialized at {1} used before it was initialized.</source>
-        <target state="translated">Właściwość: „{0}” została najpierw zadeklarowana/zainicjowana {1} i była używania przed jej zainicjowaniem.</target>
+        <target state="translated">Właściwość: „{0}” została najpierw zadeklarowana/zainicjowana w {1} i była używania przed jej zainicjowaniem.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_Title">
@@ -193,7 +193,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_MessageFmt">
         <source>Property: '{0}' was declared/initialized, but it was never used.</source>
-        <target state="translated">Właściwość: uzyskano dostęp do „{0}”, ale nigdy nie dokonano inicjacji.</target>
+        <target state="translated">Zadeklarowano/zainicjowano właściwość: „{0}”, ale nigdy nie była używana.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_Title">
@@ -284,32 +284,32 @@
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
-        <target state="translated">Nie udało się znaleźć określonego niestandardowego zestawu kontrolnego: „{0}”. Sprawdź, czy istnieje.</target>
+        <target state="translated">Nie udało się znaleźć określonego niestandardowego zestawu kontroli: „{0}”. Sprawdź, czy istnieje.</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Nie udało się załadować niestandardowego typu kontrolnego: „{0}” z zestawu: „{1}”. Upewnij się, że dziedziczy po klasie bazowej Microsoft.Build.Experimental.BuildCheck.Check. Jeśli nie ma to być kontrola niestandardowa, to nie powinna być ona ujawniana. Więcej informacji: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">Nie udało się załadować niestandardowego typu kontroli: „{0}” z zestawu: „{1}”. Upewnij się, że dziedziczy klasę bazową Microsoft.Build.Experimental.BuildCheck.Check. Jeśli nie ma to być kontrola niestandardowa, to nie powinna być ona ujawniana. Więcej informacji: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
         <source>Failed to register the custom check: '{0}'.</source>
-        <target state="translated">Nie można zarejestrować niestandardowego kontrolera: „{0}”.</target>
+        <target state="translated">Nie można zarejestrować niestandardowej kontroli: „{0}”.</target>
         <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedRuleLoading">
         <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
-        <target state="translated">Nie udało się utworzyć niestandardowej reguły utworzenia wystąpienia z następującym wyjątkiem: „{0}”.</target>
+        <target state="translated">Nie udało się utworzyć wystąpienia niestandardowej reguły kontroli z następującym wyjątkiem: „{0}”.</target>
         <note>The message is emitted on failed loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckRegistered">
         <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">Kontroler niestandardowy „{0}” jest zarejestrowany dla kompilacji z lokalizacji: „{1}”.</target>
+        <target state="translated">Kontrola niestandardowa: „{0}” jest zarejestrowany dla kompilacji z lokalizacji: „{1}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckSuccessfulAcquisition">
         <source>Custom check rule: '{0}' has been registered successfully.</source>
-        <target state="translated">Niestandardowa reguła kontrolera: „{0}” została pomyślnie zarejestrowana.</target>
+        <target state="translated">Niestandardowa reguła kontroli: „{0}” została pomyślnie zarejestrowana.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -357,7 +357,7 @@
       <trans-unit id="FatalErrorWhileLoggingWithInnerException">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</source>
-        <target state="translated">MSB4017: Kompilacja została nieoczekiwanie zatrzymana z powodu nieoczekiwanego błędu rejestratora.
+        <target state="translated">MSB4017: kompilacja została nieoczekiwanie zatrzymana z powodu nieoczekiwanego błędu rejestratora.
     {0}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
@@ -375,7 +375,7 @@
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
-        <target state="translated">Element {0} zawiera niedozwolone znaki w „{1}”.</target>
+        <target state="translated">Element {1} zawiera niedozwolone znaki w „{0}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
@@ -705,7 +705,7 @@ Błędy: {3}</target>
       </trans-unit>
       <trans-unit id="SucceededToResolveSDK">
         <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
-        <target state="translated">Zestaw SDK „{0}” został pomyślnie rozpoznany przez narzędzie Resolver „{1}” do lokalizacji „{2}” i wersji „{3}”.</target>
+        <target state="translated">Zestaw SDK „{0}” został pomyślnie rozpoznany przez narzędzie Resolver „{1}” w lokalizacji „{2}” i w wersji „{3}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskAcquiredCores">
@@ -754,7 +754,7 @@ Błędy: {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Jest to nieobsługiwany wyjątek w aplikacji MSBuild -- ZAGŁOSUJ NA ISTNIEJĄCY PROBLEM LUB ZAGŁOSUJ NA NOWY NA https://aka.ms/msbuild/unhandled.
+        <target state="translated">Jest to nieobsługiwany wyjątek na platformie MSBuild -- ZAGŁOSUJ NA ISTNIEJĄCY PROBLEM LUB ZAREJESTRUJ NOWY W WITRYNIE https://aka.ms/msbuild/unhandled.
     {0}</target>
         <note />
       </trans-unit>
