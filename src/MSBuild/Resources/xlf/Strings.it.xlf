@@ -120,10 +120,10 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Fa in modo che MSBuild segnali gli accessi ai file a qualsiasi
+                     Fa in modo che MSBuild segnali gli accessi ai file a qualsiasi file configurato
                      plug-in della cache del progetto.
 
-                     Questo flag è sperimentale e potrebbe non funzionare come previsto.
+Questo flag è sperimentale e potrebbe non funzionare come previsto.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -138,10 +138,10 @@
                      used, write out the values after the build.
     </source>
         <target state="translated">  -getProperty:propertyName,...
-                     Scrive il valore di una o più proprietà specificate
-                     dopo la valutazione, senza eseguire la compilazione oppure, se
-                     usa l'opzione -targets o l’opzione -getTargetResult
-                     scrive i valori dopo la compilazione.
+                     Scrivere il valore di una o più proprietà specificate
+                     dopo la valutazione, senza eseguire la compilazione o se
+                     si usa sia l'opzione -targets che l’opzione -getTargetResult
+                     scrivere i valori dopo la compilazione.
     </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
@@ -157,10 +157,10 @@
                      the values after the build.
     </source>
         <target state="translated">  -getItem:itemName,...
-                     Scrive il valore di uno o più elementi specificati e
+                     Scrivere il valore di uno o più elementi specificati e
                      i metadati associati dopo la valutazione senza
-                     eseguire la compilazione oppure, se si usa l’opzione -targets
-                     o l'opzione -getTargetResult, scrive
+                     eseguire la compilazione o in caso si usi l’opzione -targets
+                     oppure l'opzione -getTargetResult, scrivere
                      i valori dopo la compilazione.
     </target>
         <note>
@@ -174,7 +174,7 @@
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                     Scrive il valore di output di una o più destinazioni
+                     Scrivere il valore di output di una o più destinazioni
                      per eseguire le destinazioni specificate.
     </target>
         <note>
@@ -199,18 +199,19 @@
                      (Short form: -fa)
     </source>
         <target state="translated">  -featureAvailability:featureName,...
-                     Verifica la disponibilità delle funzionalità. Il risultato è una delle
-                     stringhe "Undefined", "Available", "NotAvailable" e
-                     "Preview".
-                     - Undefined: la disponibilità della funzionalità non è definita
-                     (il nome della funzionalità non è noto al controllo
+                     Verificare la disponibilità delle funzionalità. Il risultato è uno delle
+                     stringhe "Non definito", "Disponibile", "Non disponibile" e
+                     "Anteprima".
+                     - Non definito: la disponibilità della funzionalità non è definita
+                     (Il nome della funzionalità non è noto al controllo
                      della disponibilità delle funzionalità)
-                     - NotAvailable: la funzionalità non è disponibile (a differenza di
-                     Undefined, il nome della funzionalità è noto al controllo
-                     della disponibilità della funzionalità, che sa che la funzionalità non è
+                     - Non disponibile: la funzionalità non è disponibile (a differenza di
+                     Non definito, dove il nome della funzionalità è noto al controllo della disponibilità della funzionalità
+,
+                     che sa che la funzionalità non è
                      supportata dal motore MSBuild corrente)
-                     - Available: la funzionalità è disponibile
-                     - Preview : la funzionalità è in anteprima (non stabile)
+                     - Disponibile: la funzionalità è disponibile
+                     - Anteprima : la funzionalità è in anteprima (non stabile)
                      (Forma breve: -fa)
     </target>
         <note>
@@ -231,17 +232,17 @@
                      later.
                      (Short form: -tl)
     </source>
-        <target state="translated">  -terminalLogger[:auto,on,off]
-                     Abilita o disabilita il logger del terminale. Il logger del terminale
-                     fornisce output di compilazione avanzato nella console in tempo reale,
-                     con dati organizzati in maniera logica in base al progetto ed evidenziando
-                     le informazioni che richiedono intervento. Specificare auto (o usare l'opzione
-                     senza argomenti) per usare il logger del terminale solo se
-                     l'output standard non viene reindirizzato. Non eseguire il parsing dell'output
-                     oppure fare affidamento sul fatto che rimarrà invariato nelle future
+        <target state="translated">  -terminalLogger[:automatico, attivato, disattivato]
+                     Abilitare o disabilitare il logger del terminale. Logger del terminale
+                     fornisce output di compilazione avanzati in tempo reale sulla console,
+                     organizzato in maniera logica in base al progetto e progettato per evidenziare
+                     dati analitici interattivi. Specificare automatico (o usare l'opzione
+                     senza argomenti) per usare il logger del terminale solo se l’
+                     output standard non viene reindirizzato. Non analizzare l'output
+                     oppure affidarsi al fatto che non verrà modificato nelle future
                      versioni. Questa opzione è disponibile in MSBuild 17.8 e
                      versioni successive.
-                     (Forma breve: -tl)
+                     Forma breve: -tl)
     </target>
         <note>
       LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
@@ -269,18 +270,18 @@
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                     Parametri per il logger del terminale. (Forma breve: -tlp)
+                     Parametri per il logger del terminale. Forma breve: -tlp)
                      Parametri disponibili.
-                        default- Specifica il comportamento predefinito del terminale
+                        impostazione predefinita- Specifica il comportamento predefinito del terminale
                         logger. Richiede uno dei valori seguenti:
-                           - 'on', 'true' impone l'uso di TerminalLogger anche
+                           - 'attivato', 'vero' forza l'uso di TerminalLogger anche
                             se venisse disabilitato.
-                           - 'off', 'false' impone l'uso di TerminalLogger anche
+                           - 'disattivato', 'falso' forza l'uso di TerminalLogger anche
                             se venisse abilitato.
-                           - 'auto' abilita TerminalLogger quando il terminale
+                           - 'automatico' abilita TerminalLogger quando il terminale
                             lo supporta e la sessione non ha reindirizzato il livello di dettaglio
                             stdout/stderr
-                        verbosity--Ignora l'impostazione -verbosity per questo
+                        -- Eseguire l'override dell'impostazione del livello di dettaglio per questo
                         logger
                         showCommandLine--Mostra i messaggi TaskCommandLineEvent
 
@@ -301,11 +302,11 @@
                      This writes the value of property Bar into Biz.txt.
     </source>
         <target state="translated">  -getResultOutputFile:file
-                     Reindirizza l'output di get* in un file.
+                     Reindirizza l'output da get* in un file.
 
                      Esempio:
-                     -getProperty:Bar -getResultOutputFile:Biz.txt
-                     Il valore della proprietà Bar viene scritto in Biz.txt.
+                     -getProperty:barra -getResultOutputFile:Biz.txt
+                     Il valore della barra delle proprietà viene scritto in Biz.txt.
     </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
@@ -808,8 +809,8 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                        [&lt;classe&gt;,]&lt;assembly&gt;[,&lt;opzioni&gt;][;&lt;parametri&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
                        [&lt;spazio dei nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
-                     La sintassi di &lt;logger assembly&gt; è la seguente:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     La sintassi di &lt;assembly logger&gt; è la seguente:
+                       {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file di assembly&gt;}
                      Le opzioni di logger consentono di specificare in che modo MSBuild crea il logger.
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
                      logger così come vengono digitati. Forma breve: -l.
@@ -1090,8 +1091,8 @@ Nota: livello di dettaglio dei logger di file
                        [&lt;classe&gt;,]&lt;assembly&gt;[,&lt;opzioni&gt;][;&lt;parametri&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
                        [&lt;spazio dei nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
-                     La sintassi di &lt;logger assembly&gt; è la seguente:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     La sintassi di &lt;assembly logger&gt; è la seguente:
+                       {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file di assembly&gt;}
                      Le opzioni di logger consentono di specificare in che modo MSBuild crea il logger.
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
                      logger così come vengono digitati. Forma breve: -l
@@ -1210,8 +1211,9 @@ Nota: livello di dettaglio dei logger di file
                      è la directory corrente. Per impostazione predefinita, ai
                      file viene assegnato il nome "MSBuild&lt;idnodo&gt;.log". Il
                      percorso dei file e altri parametri di fileLogger possono
-                     essere specificati aggiungendo l'opzione "-fileLoggerParameters".
+                     essere specificati aggiungendo l'opzione
 
+                     "-fileLoggerParameters".
                      Se il nome di un file di log viene impostato con l'opzione
                      fileLoggerParameters, il logger distribuito userà il nome
                      file come modello e aggiungerà l'ID del nodo per creare un
@@ -1558,7 +1560,7 @@ Nota: livello di dettaglio dei logger di file
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: È necessario fornire un nome di funzionalità per l’opzione featureAvailability.</target>
+        <target state="translated">MSBUILD : error MSB1067: È necessario fornire un nome funzionalità per l’opzione featureAvailability.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
       following the switch, as in "msbuild.exe -featureAvailability:blah".
@@ -2340,15 +2342,16 @@ Esegue la profilatura della valutazione di MSBuild e scrive
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     Imposta queste proprietà a livello di progetto o ne esegue
-                     l'override solo durante il ripristino e non usa le
-                     proprietà specificate con l'argomento -property.
-                     &lt;v&gt; rappresenta il nome della proprietà e &lt;v&gt; il
-                     valore della proprietà. Usare il punto e virgola o la
-                     virgola per delimitare più proprietà o specificare ogni proprietà separatamente.
-                     (Forma breve: -rp)
-                     Esempio:
-                       -restoreProperty:IsRestore=true;MyProperty=value
+                      Imposta queste proprietà a livello di progetto o ne esegue
+                      l'override solo durante il ripristino e non usa le
+                      proprietà specificate con l'argomento -property.
+                      &lt;v&gt; rappresenta il nome della proprietà e &lt;v&gt; il
+                      valore della proprietà. Usare il punto e virgola o la
+                      virgola per delimitare più proprietà o specificare ogni
+                      proprietà separatamente.
+                      Forma breve: -rp.
+                      Esempio:
+                        -restoreProperty:IsRestore=true;MyProperty=value
     </target>
         <note>
       LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.
