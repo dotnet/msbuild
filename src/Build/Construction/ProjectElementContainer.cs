@@ -388,7 +388,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrow(child.Parent == this, "Expected parent already set");
             ErrorUtilities.VerifyThrow(child.PreviousSibling == null && child.NextSibling == null, "Invalid structure");
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (LastChild == null)
             {
@@ -438,7 +438,7 @@ namespace Microsoft.Build.Construction
 
         private void SetElementAsAttributeValue(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             // Assumes that child.ExpressedAsAttribute is true
             Debug.Assert(child.ExpressedAsAttribute, nameof(SetElementAsAttributeValue) + " method requires that " +
@@ -455,7 +455,7 @@ namespace Microsoft.Build.Construction
         /// <param name="oldName">The old name for the child element</param>
         internal void UpdateElementName(ProjectElement child, string oldName)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (child.ExpressedAsAttribute)
             {
@@ -471,7 +471,7 @@ namespace Microsoft.Build.Construction
         /// <param name="child">A child element which might be represented as an attribute</param>
         internal void UpdateElementValue(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (child.ExpressedAsAttribute)
             {
@@ -491,7 +491,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void AddToXml(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (child.ExpressedAsAttribute)
             {
@@ -597,7 +597,7 @@ namespace Microsoft.Build.Construction
 
         internal void RemoveFromXml(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (child.ExpressedAsAttribute)
             {

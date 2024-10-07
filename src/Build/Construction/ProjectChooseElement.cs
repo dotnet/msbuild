@@ -92,7 +92,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ProjectChooseElement CreateDisconnected(ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrow(containingProject.Link == null, "External project");
+            ErrorUtilities.VerifyThrow(containingProject.Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.choose);
             return new ProjectChooseElement(element, containingProject);
