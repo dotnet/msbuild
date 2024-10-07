@@ -3,21 +3,21 @@
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
     <DiagnosticId>CP0006</DiagnosticId>
-    <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterProjectImportedAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.BuildCheck.OM.ProjectImportedCheckData}})</Target>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterProjectImportedAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.Experimental.BuildCheck.ProjectImportedCheckData}})</Target>
     <Left>lib/net472/Microsoft.Build.dll</Left>
     <Right>lib/net472/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0006</DiagnosticId>
-    <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterProjectImportedAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.BuildCheck.OM.ProjectImportedCheckData}})</Target>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterProjectImportedAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.Experimental.BuildCheck.ProjectImportedCheckData}})</Target>
     <Left>lib/net9.0/Microsoft.Build.dll</Left>
     <Right>lib/net9.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0006</DiagnosticId>
-    <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterProjectImportedAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.BuildCheck.OM.ProjectImportedCheckData}})</Target>
+    <Target>M:Microsoft.Build.Experimental.BuildCheck.IBuildCheckRegistrationContext.RegisterProjectImportedAction(System.Action{Microsoft.Build.Experimental.BuildCheck.BuildCheckDataContext{Microsoft.Build.Experimental.BuildCheck.ProjectImportedCheckData}})</Target>
     <Left>ref/net9.0/Microsoft.Build.dll</Left>
     <Right>ref/net9.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
