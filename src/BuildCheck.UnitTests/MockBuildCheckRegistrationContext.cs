@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.BuildCheck.OM;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
