@@ -65,7 +65,7 @@ try {
 
   if ($buildStage1)
   {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci -msbuildEngine $msbuildEngine @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci -msbuildEngine $msbuildEngine /p:CreateBootstrap=true @properties
   }
 
   KillProcessesFromRepo
@@ -118,10 +118,10 @@ try {
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Create bootstrap environment as it's required when also running tests
   if ($onlyDocChanged) {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /nr:false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties
   }
   else {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=true /nr:false @properties
   }
 
   exit $lastExitCode

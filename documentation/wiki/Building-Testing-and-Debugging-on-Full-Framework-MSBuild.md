@@ -63,7 +63,7 @@ Please see [Contributing Code](https://github.com/dotnet/msbuild/blob/main/docum
 To build projects using the MSBuild binaries from the repository, you first need to do a build which produces
 a "bootstrap" directory. The "bootstrap" directory mimics a Visual Studio installation by acquiring additional
 dependencies (Roslyn compilers, NuGet, etc.) from packages or from your local machine (e.g. props/targets
-from Visual Studio). This will happen by default when running `.\build.cmd`. 
+from Visual Studio). This will happen by default when running `.\build.cmd`. The bootstrap can be disabled by running `.\build.cmd /p:CreateBootstrap=false`.
 
 Now, just point `artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe` at a project file.
 
