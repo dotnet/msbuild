@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BuildCheck.Infrastructure;
@@ -59,7 +58,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
     {
         _instance?.Shutdown();
         _instance = null;
-    } 
+    }
 
     internal sealed class BuildCheckManager : IBuildCheckManager, IBuildEngineDataRouter, IResultReporter
     {
@@ -94,7 +93,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 _enabledDataSources[(int)buildCheckDataSource] = true;
                 RegisterBuiltInChecks(buildCheckDataSource);
-            } 
+            }
             stopwatch.Stop();
             _tracingReporter.AddSetDataSourceStats(stopwatch.Elapsed);
         }
@@ -344,11 +343,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private void RemoveCheck(CheckFactoryContext checkToRemove)
         {
             _checkRegistry.Remove(checkToRemove);
-            
+
             if (checkToRemove.MaterializedCheck is not null)
             {
                 _buildCheckCentralContext.DeregisterCheck(checkToRemove.MaterializedCheck);
-				_ruleTelemetryData.AddRange(checkToRemove.MaterializedCheck.GetRuleTelemetryData());
+                _ruleTelemetryData.AddRange(checkToRemove.MaterializedCheck.GetRuleTelemetryData());
                 checkToRemove.MaterializedCheck.Check.Dispose();
             }
         }
@@ -370,6 +369,18 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
                 FileClassifier.Shared.RegisterFrameworkLocations(getPropertyValue);
                 FileClassifier.Shared.RegisterKnownImmutableLocations(getPropertyValue);
+            }
+
+            // run it here to avoid the missed imports that can be reported before the checks registration
+            if (TryGetProjectFullPath(checkContext.BuildEventContext, out string projectPath))
+            {
+                if (_deferredProjectToImportedProjects.TryGetValue(projectPath, out HashSet<string>? importedProjects))
+                {
+                    foreach (string importedProject in importedProjects)
+                    {
+                        _buildEventsProcessor.ProcessProjectImportedEventArgs(checkContext, projectPath, importedProject);
+                    }
+                }
             }
 
             _buildEventsProcessor
@@ -394,10 +405,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         public void ProcessProjectImportedEventArgs(ICheckContext checkContext, ProjectImportedEventArgs projectImportedEventArgs)
         {
-            if (TryGetProjectFullPath(checkContext.BuildEventContext, out string projectPath))
+            if (string.IsNullOrEmpty(projectImportedEventArgs.ImportedProjectFile))
             {
-                _buildEventsProcessor.ProcessProjectImportedEventArgs(checkContext, projectPath);
+                return;
             }
+
+            PropagateImport(projectImportedEventArgs.ProjectFile, projectImportedEventArgs.ImportedProjectFile);
         }
 
         public void ProcessTaskStartedEventArgs(
@@ -422,6 +435,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 .ProcessTaskParameterEventArgs(checkContext, taskParameterEventArgs);
 
         private readonly List<BuildCheckRuleTelemetryData> _ruleTelemetryData = [];
+
         public BuildCheckTracingData CreateCheckTracingStats()
         {
             foreach (CheckFactoryContext checkFactoryContext in _checkRegistry)
@@ -452,6 +466,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private readonly ConcurrentDictionary<int, string> _projectsByInstanceId = new();
         private readonly ConcurrentDictionary<int, string> _projectsByEvaluationId = new();
+
+        private readonly ConcurrentDictionary<string, HashSet<string>> _deferredProjectToImportedProjects = new();
 
         /// <summary>
         /// This method fetches the project full path from the context id.
@@ -523,6 +539,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             string projectFullPath)
         {
             _projectsByEvaluationId[checkContext.BuildEventContext.EvaluationId] = projectFullPath;
+            if (!_deferredProjectToImportedProjects.ContainsKey(projectFullPath))
+            {
+                _deferredProjectToImportedProjects.TryAdd(projectFullPath, new HashSet<string>() { projectFullPath });
+            }
         }
 
         /*
@@ -530,7 +550,6 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
          * Following methods are for future use (should we decide to approach in-execution check)
          *
          */
-
 
         public void EndProjectEvaluation(BuildEventContext buildEventContext)
         {
@@ -556,6 +575,36 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         }
 
         private readonly Dictionary<int, List<BuildEventArgs>> _deferredEvalDiagnostics = new();
+
+        /// <summary>
+        /// Propagates a newly imported project file to all projects that import the original project file.
+        /// This method ensures that if Project A imports Project B, and Project B now imports Project C,
+        /// then Project A will also show Project C as an import.
+        /// </summary>
+        /// <param name="originalProjectFile">The path of the project file that is importing a new project.</param>
+        /// <param name="newImportedProjectFile">The path of the newly imported project file.</param>
+        private void PropagateImport(string originalProjectFile, string newImportedProjectFile)
+        {
+            foreach (var entry in _deferredProjectToImportedProjects)
+            {
+                if (entry.Value.Contains(originalProjectFile))
+                {
+                    _deferredProjectToImportedProjects.AddOrUpdate(
+                        entry.Key,
+                        _ => new HashSet<string> { newImportedProjectFile },
+                        (_, existingSet) =>
+                        {
+                            lock (existingSet)
+                            {
+                                existingSet.Add(newImportedProjectFile);
+                            }
+
+                            return existingSet;
+                        });
+                }
+            }
+        }
+
         void IResultReporter.ReportResult(BuildEventArgs eventArgs, ICheckContext checkContext)
         {
             // If we do not need to decide on promotability/demotability of warnings or we are ready to decide on those

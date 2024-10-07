@@ -89,6 +89,7 @@ internal class BuildCheckBuildEventHandler
                 BuildCheckDataSource.EventArgs,
                 checkContext,
                 eventArgs.ProjectFile!);
+
             _buildCheckManager.ProcessProjectEvaluationStarted(
                 checkContext,
                 eventArgs.ProjectFile!);

@@ -20,26 +20,24 @@
   </ItemGroup>
 
   <Target Name="AddNuGetDlls" BeforeTargets="_GetPackageFiles">
-    <!-- Merge the collection of PackageReference and Assemblies using the NuGetPackageId key.
-       This produces a new list containing the DLL path and the "IncludeInPackage" metadata-->
+    <!-- Merge the collection of PackageReference and Assemblies using the NuGetPackageId key. This produces a new list containing the DLL path and the "IncludeInPackage" metadata-->
     <JoinItems Left="@(ResolvedCompileFileDefinitions)" LeftKey="NuGetPackageId" LeftMetadata="*" Right="@(PackageReference)" RightKey="" RightMetadata="*" ItemSpecToUse="Left">
-    <Output TaskParameter="JoinResult" ItemName="_PackagesToPack" />
+      <Output TaskParameter="JoinResult" ItemName="_PackagesToPack" />
     </JoinItems>
 
     <ItemGroup>
-    <!-- Remove NETStandard DLLs -->
-    <_PackagesToPack Remove="@(_PackagesToPack)" Condition="%(NuGetPackageId) == 'NETStandard.Library'" />
-    <_PackagesToPack Remove="@(_PackagesToPack)" Condition="%(_PackagesToPack.IncludeInPackage) != 'true'" />
+      <!-- Remove packages, except those with IncludeInPackage=true -->
+      <_PackagesToPack Remove="@(_PackagesToPack)" Condition="'%(_PackagesToPack.IncludeInPackage)' != 'true'" />
     </ItemGroup>
 
     <Message Importance="High" Text="Adding DLLs from the following packages: @(_PackagesToPack->'%(NuGetPackageId)')" />
 
     <ItemGroup>
-    <!-- Update the collection of items to pack with the DLLs from the NuGet packages -->
-    <None Include="@(_PackagesToPack)" Pack="true" PackagePath="build" Visible="false" />
+      <!-- Update the collection of items to pack with the DLLs from the NuGet packages -->
+      <None Include="@(_PackagesToPack)" Pack="true" PackagePath="build" Visible="false" />
 
-    <!-- Add the DLL produced by the current project to the NuGet package -->
-    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="build" Visible="false" />
+      <!-- Add the DLL produced by the current project to the NuGet package -->
+      <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="build" Visible="false" />
     </ItemGroup>
   </Target>
 </Project>

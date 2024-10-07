@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BuildCheck.Infrastructure;
-using Microsoft.Build.BuildCheck.OM;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 

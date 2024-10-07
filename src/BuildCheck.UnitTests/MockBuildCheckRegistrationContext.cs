@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.BuildCheck.OM;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -55,5 +56,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             => Results.Add(result);
 
         public void RegisterEnvironmentVariableReadAction(Action<BuildCheckDataContext<EnvironmentVariableCheckData>> environmentVariableAction) => throw new NotImplementedException();
+
+        public void RegisterProjectImportedAction(Action<BuildCheckDataContext<ProjectImportedCheckData>> projectImportedAction) => throw new NotImplementedException();
     }
 }

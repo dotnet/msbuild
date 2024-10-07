@@ -3,12 +3,12 @@
 
 using Microsoft.Build.Experimental.BuildCheck;
 
-namespace Microsoft.Build.BuildCheck.OM;
+namespace Microsoft.Build.Experimental.BuildCheck;
 
 public class ProjectImportedCheckData : CheckData
 {
-    public ProjectImportedCheckData(string projectFilePath, int? projectConfigurationId)
-        : base(projectFilePath, projectConfigurationId)
-    {
-    }
+    public ProjectImportedCheckData(string importedProjectFile, string projectFilePath, int? projectConfigurationId)
+        : base(projectFilePath, projectConfigurationId) => ImportedProjectFile = importedProjectFile;
+
+    public string ImportedProjectFile { get; }
 }

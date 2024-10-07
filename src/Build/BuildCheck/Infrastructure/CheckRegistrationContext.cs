@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.BuildCheck.OM;
 using Microsoft.Build.Experimental.BuildCheck.Checks;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
