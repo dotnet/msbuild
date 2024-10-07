@@ -301,7 +301,8 @@ namespace Microsoft.Build.Logging
                 DirectoryNotFoundException or
                 IOException or
                 UnauthorizedAccessException or
-                SecurityException)
+                SecurityException or
+                ArgumentException)
             {
                 Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
             }
