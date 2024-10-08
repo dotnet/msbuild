@@ -325,6 +325,7 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.BuildCheckError => ReadBuildErrorEventArgs(),
                 BinaryLogRecordKind.BuildCheckTracing => ReadBuildCheckTracingEventArgs(),
                 BinaryLogRecordKind.BuildCheckAcquisition => ReadBuildCheckAcquisitionEventArgs(),
+                BinaryLogRecordKind.BuildCanceled => ReadBuildCanceledEventArgs(),
                 _ => null
             };
 
@@ -634,8 +635,8 @@ namespace Microsoft.Build.Logging
             IDictionary<string, string>? globalProperties = null;
             globalProperties = ReadStringDictionary() ?? new Dictionary<string, string>();
 
-            var entryProjectsFullPath = ReadStringIEnumerable() ?? Enumerable.Empty<string>();
-            var targetNames = ReadStringIEnumerable() ?? Enumerable.Empty<string>();
+            var entryProjectsFullPath = ReadStringIEnumerable() ?? [];
+            var targetNames = ReadStringIEnumerable() ?? [];
             var flags = (BuildRequestDataFlags)ReadInt32();
             var submissionId = ReadInt32();
 
@@ -1270,6 +1271,15 @@ namespace Microsoft.Build.Logging
             var acquisitionPath = ReadString();
             var projectPath = ReadString();
             var e = new BuildCheckAcquisitionEventArgs(acquisitionPath, projectPath);
+            SetCommonFields(e, fields);
+
+            return e;
+        }
+
+        private BuildEventArgs ReadBuildCanceledEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            var e = new BuildCanceledEventArgs(fields.Message);
             SetCommonFields(e, fields);
 
             return e;

@@ -85,7 +85,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         ///     Copy on write snapshot of <see cref="_knownImmutableDirectories"/>.
         /// </summary>
-        private volatile IReadOnlyList<string> _knownImmutableDirectoriesSnapshot = Array.Empty<string>();
+        private volatile IReadOnlyList<string> _knownImmutableDirectoriesSnapshot = [];
 
         /// <summary>
         ///     Creates default FileClassifier which following immutable folders:
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Framework
         public FileClassifier()
         {
             // Register Microsoft "Reference Assemblies" as immutable
-            string[] programFilesEnvs = new[] { "ProgramFiles(x86)", "ProgramW6432", "ProgramFiles(Arm)" };
+            string[] programFilesEnvs = ["ProgramFiles(x86)", "ProgramW6432", "ProgramFiles(Arm)"];
             foreach (string programFilesEnv in programFilesEnvs)
             {
                 string? programFiles = Environment.GetEnvironmentVariable(programFilesEnv);

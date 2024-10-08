@@ -369,7 +369,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            return matches ?? Array.Empty<string>();
+            return matches ?? [];
         }
 
         /// <summary>

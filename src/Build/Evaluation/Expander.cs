@@ -2152,7 +2152,7 @@ namespace Microsoft.Build.Evaluation
                     if (functionName == null)
                     {
                         functionName = "ExpandQuotedExpressionFunction";
-                        arguments = new string[] { function };
+                        arguments = [function];
                     }
                     else if (argumentsExpression != null)
                     {
@@ -3283,7 +3283,7 @@ namespace Microsoft.Build.Evaluation
                 _methodMethodName = methodName;
                 if (arguments == null)
                 {
-                    _arguments = Array.Empty<string>();
+                    _arguments = [];
                 }
                 else
                 {
@@ -3548,11 +3548,7 @@ namespace Microsoft.Build.Evaluation
                             // include $(MSBuildThisFileDirectory) as a parameter.
                             string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
-                            args = new[]
-                            {
-                                args[0],
-                                startingDirectory,
-                            };
+                            args = [args[0], startingDirectory];
                         }
                     }
 
@@ -5157,7 +5153,7 @@ namespace Microsoft.Build.Evaluation
                 // If there are no arguments, then just create an empty array
                 if (String.IsNullOrEmpty(argumentsContent))
                 {
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = [];
                 }
                 else
                 {
@@ -5231,7 +5227,7 @@ namespace Microsoft.Build.Evaluation
                     // It may be that there are '()' but no actual arguments content
                     if (argumentStartIndex == expressionFunction.Length - 1)
                     {
-                        functionArguments = Array.Empty<string>();
+                        functionArguments = [];
                     }
                     else
                     {
@@ -5241,7 +5237,7 @@ namespace Microsoft.Build.Evaluation
                         // If there are no arguments, then just create an empty array
                         if (string.IsNullOrEmpty(argumentsContent))
                         {
-                            functionArguments = Array.Empty<string>();
+                            functionArguments = [];
                         }
                         else
                         {
@@ -5264,7 +5260,7 @@ namespace Microsoft.Build.Evaluation
                         nextMethodIndex = indexerIndex;
                     }
 
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = [];
 
                     if (nextMethodIndex > 0)
                     {

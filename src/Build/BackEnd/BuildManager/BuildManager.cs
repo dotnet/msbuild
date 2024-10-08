@@ -668,7 +668,7 @@ namespace Microsoft.Build.Execution
 
                 var logger = new BinaryLogger { Parameters = binlogPath };
 
-                return (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[] { logger });
+                return (loggers ?? [logger]);
             }
 
             void InitializeCaches()
@@ -1522,7 +1522,7 @@ namespace Microsoft.Build.Execution
 
             if (existingConfiguration == null)
             {
-                existingConfiguration = new BuildRequestConfiguration(GetNewConfigurationId(), new BuildRequestData(newInstance, Array.Empty<string>()), null /* use the instance's tools version */);
+                existingConfiguration = new BuildRequestConfiguration(GetNewConfigurationId(), new BuildRequestData(newInstance, []), null /* use the instance's tools version */);
             }
             else
             {
@@ -1830,7 +1830,7 @@ namespace Microsoft.Build.Execution
                             }
                         }
 
-                        BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] { submission.BuildRequest });
+                        BuildRequestBlocker blocker = new BuildRequestBlocker(-1, [], [submission.BuildRequest]);
 
                         HandleNewRequest(Scheduler.VirtualNode, blocker);
                     }
@@ -3110,48 +3110,51 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (disposing && !_disposed)
             {
-                if (disposing)
+                lock (_syncLock)
                 {
-                    lock (_syncLock)
+                    if (_disposed)
                     {
-                        // We should always have finished cleaning up before calling Dispose.
-                        RequireState(BuildManagerState.Idle, "ShouldNotDisposeWhenBuildManagerActive");
-
-                        _componentFactories?.ShutdownComponents();
-
-                        if (_workQueue != null)
-                        {
-                            _workQueue.Complete();
-                            _workQueue = null;
-                        }
-
-                        if (_executionCancellationTokenSource != null)
-                        {
-                            _executionCancellationTokenSource.Cancel();
-                            _executionCancellationTokenSource = null;
-                        }
-
-                        if (_noActiveSubmissionsEvent != null)
-                        {
-                            _noActiveSubmissionsEvent.Dispose();
-                            _noActiveSubmissionsEvent = null;
-                        }
-
-                        if (_noNodesActiveEvent != null)
-                        {
-                            _noNodesActiveEvent.Dispose();
-                            _noNodesActiveEvent = null;
-                        }
-
-                        if (ReferenceEquals(this, s_singletonInstance))
-                        {
-                            s_singletonInstance = null;
-                        }
-
-                        _disposed = true;
+                        // Multiple caller raced for enter into the lock
+                        return;
                     }
+
+                    // We should always have finished cleaning up before calling Dispose.
+                    RequireState(BuildManagerState.Idle, "ShouldNotDisposeWhenBuildManagerActive");
+
+                    _componentFactories?.ShutdownComponents();
+
+                    if (_workQueue != null)
+                    {
+                        _workQueue.Complete();
+                        _workQueue = null;
+                    }
+
+                    if (_executionCancellationTokenSource != null)
+                    {
+                        _executionCancellationTokenSource.Cancel();
+                        _executionCancellationTokenSource = null;
+                    }
+
+                    if (_noActiveSubmissionsEvent != null)
+                    {
+                        _noActiveSubmissionsEvent.Dispose();
+                        _noActiveSubmissionsEvent = null;
+                    }
+
+                    if (_noNodesActiveEvent != null)
+                    {
+                        _noNodesActiveEvent.Dispose();
+                        _noNodesActiveEvent = null;
+                    }
+
+                    if (ReferenceEquals(this, s_singletonInstance))
+                    {
+                        s_singletonInstance = null;
+                    }
+
+                    _disposed = true;
                 }
             }
         }

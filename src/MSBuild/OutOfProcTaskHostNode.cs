@@ -644,7 +644,7 @@ namespace Microsoft.Build.CommandLine
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 
-            WaitHandle[] waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent, _taskCompleteEvent, _taskCancelledEvent };
+            WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent, _taskCompleteEvent, _taskCancelledEvent];
 
             while (true)
             {

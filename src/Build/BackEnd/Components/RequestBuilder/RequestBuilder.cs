@@ -402,7 +402,7 @@ namespace Microsoft.Build.BackEnd
 
             RaiseOnBlockedRequest(blockingGlobalRequestId, blockingTarget, partialBuildResult);
 
-            WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueEvent };
+            WaitHandle[] handles = [_terminateEvent, _continueEvent];
 
             int handle;
             if (IsBuilderUsingLegacyThreadingSemantics(_componentHost, _requestEntry))
@@ -448,7 +448,7 @@ namespace Microsoft.Build.BackEnd
             VerifyIsNotZombie();
             RaiseOnBlockedRequest(_requestEntry.Request.GlobalRequestId, String.Empty);
 
-            WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueEvent };
+            WaitHandle[] handles = [_terminateEvent, _continueEvent];
 
             int handle = WaitHandle.WaitAny(handles);
 
@@ -506,7 +506,7 @@ namespace Microsoft.Build.BackEnd
             RaiseResourceRequest(ResourceRequest.CreateAcquireRequest(_requestEntry.Request.GlobalRequestId, requestedCores, waitForCores));
 
             // Wait for one of two events to be signaled: 1) The build was canceled, 2) The response to our request was received.
-            WaitHandle[] waitHandles = new WaitHandle[] { _terminateEvent, responseEvent };
+            WaitHandle[] waitHandles = [_terminateEvent, responseEvent];
             int waitResult;
 
             // Drop the lock so that the same task can call ReleaseCores from other threads to unblock itself.
@@ -957,7 +957,7 @@ namespace Microsoft.Build.BackEnd
             BuildResult[] results;
             if (waitForResults)
             {
-                WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueEvent };
+                WaitHandle[] handles = [_terminateEvent, _continueEvent];
 
                 int handle;
                 if (IsBuilderUsingLegacyThreadingSemantics(_componentHost, _requestEntry))

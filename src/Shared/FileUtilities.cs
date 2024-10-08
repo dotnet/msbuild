@@ -91,27 +91,27 @@ namespace Microsoft.Build.Shared
         /// Copied from https://github.com/dotnet/corefx/blob/056715ff70e14712419d82d51c8c50c54b9ea795/src/Common/src/System/IO/PathInternal.Windows.cs#L61
         /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/dotnet/msbuild/issues/781#issuecomment-243942514
         /// </summary>
-        internal static readonly char[] InvalidPathChars = new char[]
-        {
+        internal static readonly char[] InvalidPathChars =
+        [
             '|', '\0',
             (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10,
             (char)11, (char)12, (char)13, (char)14, (char)15, (char)16, (char)17, (char)18, (char)19, (char)20,
             (char)21, (char)22, (char)23, (char)24, (char)25, (char)26, (char)27, (char)28, (char)29, (char)30,
             (char)31
-        };
+        ];
 
         /// <summary>
         /// Copied from https://github.com/dotnet/corefx/blob/387cf98c410bdca8fd195b28cbe53af578698f94/src/System.Runtime.Extensions/src/System/IO/Path.Windows.cs#L18
         /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/dotnet/msbuild/issues/781#issuecomment-243942514
         /// </summary>
-        internal static readonly char[] InvalidFileNameChars = new char[]
-        {
+        internal static readonly char[] InvalidFileNameChars =
+        [
             '\"', '<', '>', '|', '\0',
             (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10,
             (char)11, (char)12, (char)13, (char)14, (char)15, (char)16, (char)17, (char)18, (char)19, (char)20,
             (char)21, (char)22, (char)23, (char)24, (char)25, (char)26, (char)27, (char)28, (char)29, (char)30,
             (char)31, ':', '*', '?', '\\', '/'
-        };
+        ];
 
         internal static readonly char[] Slashes = { '/', '\\' };
 
@@ -361,7 +361,7 @@ namespace Microsoft.Build.Shared
 
             // Trim returns the same string if trimming isn't needed
             path = path.Trim();
-            path = path.Trim(new char[] { '"' });
+            path = path.Trim(['"']);
 
             return path;
         }
