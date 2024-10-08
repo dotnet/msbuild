@@ -110,7 +110,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Provide a friendly name for the sink to make it easier to differentiate during
         /// debugging and display
         /// </summary>
-        public string Name
+        public string? Name
         {
             get;
             set;
@@ -334,7 +334,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Raises a message event to all registered loggers.
         /// </summary>
-        /// <param name="sender">sender of the event</param>
         /// <param name="buildEvent">event args</param>
         /// <param name="handler">argument handler that invokes the respective event</param>
         /// <param name="followUpHandler"> either anyEvent or statusEvent, it is invoked after the Event has been processed</param>
@@ -376,7 +375,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Raises a catch-all build event to all registered loggers.
         /// Keeping it separate since it also dumps the Exception to file as opposed to all other events.
         /// </summary>
-        /// <param name="sender">sender of the event</param>
         /// <param name="buildEvent">Build EventArgs</param>
         /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
         /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
