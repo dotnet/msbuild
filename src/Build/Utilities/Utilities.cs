@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -623,46 +624,45 @@ namespace Microsoft.Build.Internal
             return enumerator.ToEnumerable().ToArray();
         }
 
-        public static void EnumerateProperties<TArg>(IEnumerable properties, TArg arg, Action<TArg, KeyValuePair<string, string>> callback)
+        public static IEnumerable<(string propertyName, string propertyValue)> EnumerateProperties(IEnumerable properties)
         {
             if (properties == null)
             {
-                return;
+                return [];
             }
 
             if (properties is PropertyDictionary<ProjectPropertyInstance> propertyInstanceDictionary)
             {
-                propertyInstanceDictionary.Enumerate((key, value) =>
-                {
-                    callback(arg, new KeyValuePair<string, string>(key, value));
-                });
+                return propertyInstanceDictionary.Enumerate();
             }
             else if (properties is PropertyDictionary<ProjectProperty> propertyDictionary)
             {
-                propertyDictionary.Enumerate((key, value) =>
-                {
-                    callback(arg, new KeyValuePair<string, string>(key, value));
-                });
+                return propertyDictionary.Enumerate();
             }
             else
             {
-                foreach (var item in properties)
+                return CastOneByOne(properties);
+            }
+
+            IEnumerable<(string propertyName, string propertyValue)> CastOneByOne(IEnumerable props)
+            {
+                foreach (var item in props)
                 {
                     if (item is IProperty property && !string.IsNullOrEmpty(property.Name))
                     {
-                        callback(arg, new KeyValuePair<string, string>(property.Name, property.EvaluatedValue ?? string.Empty));
+                        yield return (property.Name, property.EvaluatedValue ?? string.Empty);
                     }
                     else if (item is DictionaryEntry dictionaryEntry && dictionaryEntry.Key is string key && !string.IsNullOrEmpty(key))
                     {
-                        callback(arg, new KeyValuePair<string, string>(key, dictionaryEntry.Value as string ?? string.Empty));
+                        yield return (key, dictionaryEntry.Value as string ?? string.Empty);
                     }
                     else if (item is KeyValuePair<string, string> kvp)
                     {
-                        callback(arg, kvp);
+                        yield return (kvp.Key, kvp.Value);
                     }
                     else if (item is KeyValuePair<string, TimeSpan> keyTimeSpanValue)
                     {
-                        callback(arg, new KeyValuePair<string, string>(keyTimeSpanValue.Key, keyTimeSpanValue.Value.Ticks.ToString()));
+                        yield return (keyTimeSpanValue.Key, keyTimeSpanValue.Value.Ticks.ToString());
                     }
                     else
                     {
@@ -679,31 +679,37 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        public static void EnumerateItems(IEnumerable items, Action<DictionaryEntry> callback)
+        public static void EnumerateProperties<TArg>(IEnumerable properties, TArg arg, Action<TArg, KeyValuePair<string, string>> callback)
         {
+            foreach (var tuple in EnumerateProperties(properties))
+            {
+                callback(arg, new KeyValuePair<string, string>(tuple.propertyName, tuple.propertyValue));
+            }
+        }
+
+        public static IEnumerable<(string itemType, object itemValue)> EnumerateItems(IEnumerable items)
+        {
+            if (items == null)
+            {
+                return [];
+            }
+
             if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
             {
-                projectItemInstanceDictionary.EnumerateItemsPerType((itemType, itemList) =>
-                {
-                    foreach (var item in itemList)
-                    {
-                        callback(new DictionaryEntry(itemType, item));
-                    }
-                });
+                return projectItemInstanceDictionary.EnumerateItemsPerType().Select(t => (t.itemType, (object) t.itemValue));
             }
             else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
             {
-                projectItemDictionary.EnumerateItemsPerType((itemType, itemList) =>
-                {
-                    foreach (var item in itemList)
-                    {
-                        callback(new DictionaryEntry(itemType, item));
-                    }
-                });
+                return projectItemDictionary.EnumerateItemsPerType().Select(t => (t.itemType, (object)t.itemValue));
             }
             else
             {
-                foreach (var item in items)
+                return CastOneByOne(items);
+            }
+
+            IEnumerable<(string itemType, object itemValue)> CastOneByOne(IEnumerable itms)
+            {
+                foreach (var item in itms)
                 {
                     string itemType = default;
                     object itemValue = null;
@@ -732,9 +738,17 @@ namespace Microsoft.Build.Internal
 
                     if (!String.IsNullOrEmpty(itemType))
                     {
-                        callback(new DictionaryEntry(itemType, itemValue));
+                        yield return (itemType, itemValue);
                     }
                 }
+            }
+        }
+
+        public static void EnumerateItems(IEnumerable items, Action<DictionaryEntry> callback)
+        {
+            foreach (var tuple in EnumerateItems(items))
+            {
+                callback(new DictionaryEntry(tuple.itemType, tuple.itemValue));
             }
         }
     }

@@ -529,14 +529,22 @@ namespace Microsoft.Build.Collections
             }
         }
 
-        internal void Enumerate(Action<string, string> keyValueCallback)
+        internal IEnumerable<(string propertyName, string propertyValue)> Enumerate()
         {
             lock (_properties)
             {
                 foreach (var kvp in (ICollection<T>)_properties)
                 {
-                    keyValueCallback(kvp.Key, EscapingUtilities.UnescapeAll(kvp.EscapedValue));
+                    yield return (kvp.Key, EscapingUtilities.UnescapeAll(kvp.EscapedValue));
                 }
+            }
+        }
+
+        internal void Enumerate(Action<string, string> keyValueCallback)
+        {
+            foreach (var tuple in Enumerate())
+            {
+                keyValueCallback(tuple.propertyName, tuple.propertyValue);
             }
         }
 
