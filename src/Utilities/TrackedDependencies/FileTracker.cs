@@ -284,14 +284,14 @@ namespace Microsoft.Build.Utilities
         /// Construct a rooting marker string from the ITaskItem array of primary sources.
         /// </summary>
         /// <param name="source">An <see cref="ITaskItem"/> containing information about the primary source.</param>
-        public static string FormatRootingMarker(ITaskItem source) => FormatRootingMarker(new[] { source }, null);
+        public static string FormatRootingMarker(ITaskItem source) => FormatRootingMarker([source], null);
 
         /// <summary>
         /// Construct a rooting marker string from the ITaskItem array of primary sources.
         /// </summary>
         /// <param name="source">An <see cref="ITaskItem"/> containing information about the primary source.</param>
         /// <param name="output">An <see cref="ITaskItem"/> containing information about the output.</param>
-        public static string FormatRootingMarker(ITaskItem source, ITaskItem output) => FormatRootingMarker(new[] { source }, new[] { output });
+        public static string FormatRootingMarker(ITaskItem source, ITaskItem output) => FormatRootingMarker([source], [output]);
 
         /// <summary>
         /// Construct a rooting marker string from the ITaskItem array of primary sources.

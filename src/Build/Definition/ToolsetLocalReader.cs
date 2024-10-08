@@ -46,7 +46,7 @@ namespace Microsoft.Build.Evaluation
 
         protected override IEnumerable<ToolsetPropertyDefinition> GetSubToolsetPropertyDefinitions(string toolsVersion, string subToolsetVersion)
         {
-            return Enumerable.Empty<ToolsetPropertyDefinition>();
+            return [];
         }
 
         protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os)
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Evaluation
 
         protected override IEnumerable<string> GetSubToolsetVersions(string toolsVersion)
         {
-            return Enumerable.Empty<string>();
+            return [];
         }
     }
 }

@@ -454,7 +454,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 BuildRequestData buildRequest = new BuildRequestData(
                     cacheRequest.Configuration.Project,
-                    cacheRequest.Submission.BuildRequestData?.TargetNames.ToArray() ?? Array.Empty<string>());
+                    cacheRequest.Submission.BuildRequestData?.TargetNames.ToArray() ?? []);
                 BuildEventContext buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(
                     cacheRequest.Submission.SubmissionId,
                     evaluationId: cacheRequest.Configuration.Project.EvaluationId,
@@ -650,7 +650,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             }
             else
             {
-                return new[] { new ProjectGraphEntryPoint(configuration.ProjectFullPath, globalProperties) };
+                return [new ProjectGraphEntryPoint(configuration.ProjectFullPath, globalProperties)];
             }
 
             static IReadOnlyCollection<ProjectGraphEntryPoint> GenerateGraphEntryPointsFromSolutionConfigurationXml(

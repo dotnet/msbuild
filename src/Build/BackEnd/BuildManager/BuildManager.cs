@@ -668,7 +668,7 @@ namespace Microsoft.Build.Execution
 
                 var logger = new BinaryLogger { Parameters = binlogPath };
 
-                return (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[] { logger });
+                return (loggers ?? [logger]);
             }
 
             void InitializeCaches()
@@ -1522,7 +1522,7 @@ namespace Microsoft.Build.Execution
 
             if (existingConfiguration == null)
             {
-                existingConfiguration = new BuildRequestConfiguration(GetNewConfigurationId(), new BuildRequestData(newInstance, Array.Empty<string>()), null /* use the instance's tools version */);
+                existingConfiguration = new BuildRequestConfiguration(GetNewConfigurationId(), new BuildRequestData(newInstance, []), null /* use the instance's tools version */);
             }
             else
             {
@@ -1830,7 +1830,7 @@ namespace Microsoft.Build.Execution
                             }
                         }
 
-                        BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] { submission.BuildRequest });
+                        BuildRequestBlocker blocker = new BuildRequestBlocker(-1, [], [submission.BuildRequest]);
 
                         HandleNewRequest(Scheduler.VirtualNode, blocker);
                     }

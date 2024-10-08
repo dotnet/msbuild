@@ -635,8 +635,8 @@ namespace Microsoft.Build.Logging
             IDictionary<string, string>? globalProperties = null;
             globalProperties = ReadStringDictionary() ?? new Dictionary<string, string>();
 
-            var entryProjectsFullPath = ReadStringIEnumerable() ?? Enumerable.Empty<string>();
-            var targetNames = ReadStringIEnumerable() ?? Enumerable.Empty<string>();
+            var entryProjectsFullPath = ReadStringIEnumerable() ?? [];
+            var targetNames = ReadStringIEnumerable() ?? [];
             var flags = (BuildRequestDataFlags)ReadInt32();
             var submissionId = ReadInt32();
 

@@ -303,7 +303,7 @@ namespace Microsoft.Build.Framework
                 // By doing this, we no longer need to transmit properties using this message because they've already
                 // been transmitted as part of the BuildRequestConfiguration.
                 return properties ?? (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
-                    ? Enumerable.Empty<DictionaryEntry>()
+                    ? (DictionaryEntry[])[]
                     : null);
             }
         }
@@ -329,7 +329,7 @@ namespace Microsoft.Build.Framework
                 // has likely not loaded this project, and therefore the live items would not be available to them, which is
                 // the same as the current functionality.
                 return items ?? (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
-                    ? Enumerable.Empty<DictionaryEntry>()
+                    ? (DictionaryEntry[])[]
                     : null);
             }
         }
