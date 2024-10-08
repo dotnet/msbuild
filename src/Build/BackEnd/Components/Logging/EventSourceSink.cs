@@ -8,7 +8,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
-using static Microsoft.Build.BackEnd.Logging.EventSourceSink;
 
 #nullable disable
 
