@@ -8,6 +8,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
+using static Microsoft.Build.BackEnd.Logging.EventSourceSink;
 
 #nullable disable
 
@@ -224,57 +225,59 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void Consume(BuildEventArgs buildEvent)
         {
+
             switch (buildEvent)
             {
                 case BuildMessageEventArgs buildMessageEvent:
-                    RaiseMessageEvent(null, buildMessageEvent);
+                    RaiseEvent(null, buildMessageEvent, (o, args) => MessageRaised?.Invoke(o, args), (o, args) => AnyEventRaised?.Invoke(o, args));
                     break;
                 case TaskStartedEventArgs taskStartedEvent:
-                    RaiseTaskStartedEvent(null, taskStartedEvent);
+                    RaiseEvent(null, taskStartedEvent, (o, args) => TaskStarted?.Invoke(o, args), (o, args) => StatusEventRaised?.Invoke(o, args));
                     break;
                 case TaskFinishedEventArgs taskFinishedEvent:
-                    RaiseTaskFinishedEvent(null, taskFinishedEvent);
+                    RaiseEvent(null, taskFinishedEvent, (o, args) => TaskFinished?.Invoke(o, args), (o, args) => StatusEventRaised?.Invoke(o, args));
                     break;
                 case TargetStartedEventArgs targetStartedEvent:
-                    RaiseTargetStartedEvent(null, targetStartedEvent);
+                    RaiseEvent(null, targetStartedEvent, (o, args) => TargetStarted?.Invoke(o, args), (o, args) => StatusEventRaised?.Invoke(o, args));
                     break;
                 case TargetFinishedEventArgs targetFinishedEvent:
-                    RaiseTargetFinishedEvent(null, targetFinishedEvent);
+                    RaiseEvent(null, targetFinishedEvent, (o, args) => TargetFinished?.Invoke(o, args), (o, args) => StatusEventRaised?.Invoke(o, args));
                     break;
                 case ProjectStartedEventArgs projectStartedEvent:
-                    RaiseProjectStartedEvent(null, projectStartedEvent);
+                    RaiseEvent(null, projectStartedEvent, (o, args) => ProjectStarted?.Invoke(o, args), (o, args) => StatusEventRaised?.Invoke(o, args));
                     break;
                 case ProjectFinishedEventArgs projectFinishedEvent:
-                    RaiseProjectFinishedEvent(null, projectFinishedEvent);
+                    RaiseEvent(null, projectFinishedEvent, (o, args) => ProjectFinished?.Invoke(o, args), (o, args) => StatusEventRaised?.Invoke(o, args));
                     break;
                 case BuildStartedEventArgs buildStartedEvent:
                     HaveLoggedBuildStartedEvent = true;
-                    RaiseBuildStartedEvent(null, buildStartedEvent);
+                    RaiseEvent(null, buildStartedEvent, (o, args) => BuildStarted?.Invoke(o, args), (o, args) => StatusEventRaised?.Invoke(o, args));
                     break;
                 case BuildFinishedEventArgs buildFinishedEvent:
                     HaveLoggedBuildFinishedEvent = true;
-                    RaiseBuildFinishedEvent(null, buildFinishedEvent);
+                    RaiseEvent(null, buildFinishedEvent, (o, args) => BuildFinished?.Invoke(o, args), (o, args) => StatusEventRaised?.Invoke(o, args));
                     break;
                 case BuildCanceledEventArgs buildCanceledEvent:
-                    RaiseStatusEvent(null, buildCanceledEvent);
+
+                    RaiseEvent(null, buildCanceledEvent, (o, args) => StatusEventRaised?.Invoke(o, args), (o, args) => AnyEventRaised?.Invoke(o, args));
                     break;
                 case CustomBuildEventArgs customBuildEvent:
-                    RaiseCustomEvent(null, customBuildEvent);
+                    RaiseEvent(null, customBuildEvent, (o, args) => CustomEventRaised?.Invoke(o, args), (o, args) => AnyEventRaised?.Invoke(o, args));
                     break;
                 case BuildStatusEventArgs buildStatusEvent:
-                    RaiseStatusEvent(null, buildStatusEvent);
+                    RaiseEvent(null, buildStatusEvent, (o, args) => StatusEventRaised?.Invoke(o, args), (o, args) => AnyEventRaised?.Invoke(o, args));
                     break;
                 case BuildWarningEventArgs buildWarningEvent:
-                    RaiseWarningEvent(null, buildWarningEvent);
+                    RaiseEvent(null, buildWarningEvent, (o, args) => WarningRaised?.Invoke(o, args), (o, args) => AnyEventRaised?.Invoke(o, args));
                     break;
                 case BuildErrorEventArgs buildErrorEvent:
-                    RaiseErrorEvent(null, buildErrorEvent);
+                    RaiseEvent(null, buildErrorEvent, (o, args) => ErrorRaised?.Invoke(o, args), (o, args) => AnyEventRaised?.Invoke(o, args));
                     break;
                 case TelemetryEventArgs telemetryEvent:
-                    RaiseTelemetryEvent(null, telemetryEvent);
+                    RaiseEvent(null, telemetryEvent, (o, args) => TelemetryLogged?.Invoke(o, args), null);
                     break;
                 case BuildCheckEventArgs buildCheckEvent:
-                    RaiseBuildCheckEvent(null, buildCheckEvent);
+                    RaiseEvent(null, buildCheckEvent, (o, args) => BuildCheckEventRaised?.Invoke(o, args), (o, args) => AnyEventRaised?.Invoke(o, args));
                     break;
 
                 default:
@@ -321,662 +324,48 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #region Private Methods
 
+        public delegate void ArgsHandler<in TArgs>(object sender, TArgs e) where TArgs : BuildEventArgs;
+
         /// <summary>
         /// Raises a message event to all registered loggers.
         /// </summary>
         /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">BuildMessageEventArgs</param>
+        /// <param name="buildEvent">event args</param>
+        /// <param name="handler">argument handler that invokes the respective event</param>
+        /// <param name="followUp"> either anyEvent, customEvent or statusEvent</param>
         /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
         /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
         /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseMessageEvent(object sender, BuildMessageEventArgs buildEvent)
+        private void RaiseEvent<TArgs>(object sender, TArgs buildEvent, ArgsHandler<TArgs> handler, ArgsHandler<TArgs> followUp)
+            where TArgs : BuildEventArgs
         {
-            if (MessageRaised != null)
+            try
             {
-                try
+                handler(sender, buildEvent);
+            }
+            catch (LoggerException)
+            {
+                // if a logger has failed politely, abort immediately
+                // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                // if a fellow logger is throwing in an event handler.
+                UnregisterAllEventHandlers();
+                throw;
+            }
+            catch (Exception exception)
+            {
+                // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                // if a fellow logger is throwing in an event handler.
+                UnregisterAllEventHandlers();
+
+                if (ExceptionHandling.IsCriticalException(exception))
                 {
-                    MessageRaised(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
                     throw;
                 }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
 
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
+                InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
             }
 
-            RaiseAnyEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises an error event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">BuildErrorEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseErrorEvent(object sender, BuildErrorEventArgs buildEvent)
-        {
-            if (ErrorRaised != null)
-            {
-                try
-                {
-                    ErrorRaised(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseAnyEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a warning event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">BuildWarningEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseWarningEvent(object sender, BuildWarningEventArgs buildEvent)
-        {
-            if (WarningRaised != null)
-            {
-                try
-                {
-                    WarningRaised(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseAnyEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a "build started" event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">BuildStartedEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseBuildStartedEvent(object sender, BuildStartedEventArgs buildEvent)
-        {
-            if (BuildStarted != null)
-            {
-                try
-                {
-                    BuildStarted(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseStatusEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a "build finished" event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">BuildFinishedEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseBuildFinishedEvent(object sender, BuildFinishedEventArgs buildEvent)
-        {
-            if (BuildFinished != null)
-            {
-                try
-                {
-                    BuildFinished(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseStatusEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a "project build started" event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">ProjectStartedEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseProjectStartedEvent(object sender, ProjectStartedEventArgs buildEvent)
-        {
-            if (ProjectStarted != null)
-            {
-                try
-                {
-                    ProjectStarted(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseStatusEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a "project build finished" event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">ProjectFinishedEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseProjectFinishedEvent(object sender, ProjectFinishedEventArgs buildEvent)
-        {
-            if (ProjectFinished != null)
-            {
-                try
-                {
-                    ProjectFinished(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseStatusEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a "target build started" event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">TargetStartedEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseTargetStartedEvent(object sender, TargetStartedEventArgs buildEvent)
-        {
-            if (TargetStarted != null)
-            {
-                try
-                {
-                    TargetStarted(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseStatusEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a "target build finished" event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">TargetFinishedEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseTargetFinishedEvent(object sender, TargetFinishedEventArgs buildEvent)
-        {
-            if (TargetFinished != null)
-            {
-                try
-                {
-                    TargetFinished(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseStatusEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a "task execution started" event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">TaskStartedEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseTaskStartedEvent(object sender, TaskStartedEventArgs buildEvent)
-        {
-            if (TaskStarted != null)
-            {
-                try
-                {
-                    TaskStarted(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseStatusEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a "task finished executing" event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">TaskFinishedEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseTaskFinishedEvent(object sender, TaskFinishedEventArgs buildEvent)
-        {
-            if (TaskFinished != null)
-            {
-                try
-                {
-                    TaskFinished(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseStatusEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a custom event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">CustomBuildEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseCustomEvent(object sender, CustomBuildEventArgs buildEvent)
-        {
-            if (CustomEventRaised != null)
-            {
-                try
-                {
-                    CustomEventRaised(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseAnyEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a catch-all build status event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">BuildStatusEventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseStatusEvent(object sender, BuildStatusEventArgs buildEvent)
-        {
-            if (StatusEventRaised != null)
-            {
-                try
-                {
-                    StatusEventRaised(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseAnyEvent(sender, buildEvent);
-        }
-
-        private void RaiseBuildCheckEvent(object sender, BuildCheckEventArgs buildEvent)
-        {
-            if (BuildCheckEventRaised != null)
-            {
-                try
-                {
-                    BuildCheckEventRaised(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-
-            RaiseAnyEvent(sender, buildEvent);
-        }
-
-        /// <summary>
-        /// Raises a catch-all build event to all registered loggers.
-        /// </summary>
-        /// <param name="sender">sender of the event</param>
-        /// <param name="buildEvent">Build EventArgs</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseAnyEvent(object sender, BuildEventArgs buildEvent)
-        {
-            if (AnyEventRaised != null)
-            {
-                try
-                {
-                    AnyEventRaised(sender, buildEvent);
-                }
-                catch (LoggerException exception)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    UnregisterAllEventHandlers();
-
-                    // We ought to dump this further up the stack, but if for example a task is logging an event within a
-                    // catch(Exception) block and not rethrowing it, there's the possibility that this exception could
-                    // just get silently eaten.  So better to have duplicates than to not log the problem at all. :)
-                    ExceptionHandling.DumpExceptionToFile(exception);
-
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // We ought to dump this further up the stack, but if for example a task is logging an event within a
-                    // catch(Exception) block and not rethrowing it, there's the possibility that this exception could
-                    // just get silently eaten.  So better to have duplicates than to not log the problem at all. :)
-                    ExceptionHandling.DumpExceptionToFile(exception);
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Raises the a telemetry event to all registered loggers.
-        /// </summary>
-        private void RaiseTelemetryEvent(object sender, TelemetryEventArgs buildEvent)
-        {
-            if (TelemetryLogged != null)
-            {
-                try
-                {
-                    TelemetryLogged(sender, buildEvent);
-                }
-                catch (LoggerException)
-                {
-                    // if a logger has failed politely, abort immediately
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-                    throw;
-                }
-                catch (Exception exception)
-                {
-                    // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                    // if a fellow logger is throwing in an event handler.
-                    this.UnregisterAllEventHandlers();
-
-                    if (ExceptionHandling.IsCriticalException(exception))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-                }
-            }
+            followUp?.Invoke(sender, buildEvent);
         }
 
         #endregion
