@@ -289,7 +289,7 @@
       </trans-unit>
       <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
         <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
-        <target state="translated">Plusieurs surcharges ont été trouvées pour la méthode « {0} » avec le(s) paramètre(s) {1}. Cela n’est actuellement pas pris en charge.</target>
+        <target state="new">Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
