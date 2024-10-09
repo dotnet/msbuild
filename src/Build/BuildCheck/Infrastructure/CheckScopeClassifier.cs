@@ -19,7 +19,7 @@ public static class CheckScopeClassifier
     /// <summary>
     /// Notifies the subscribers that the scoping is ready.
     /// </summary>
-    internal static Func<EvaluationCheckScope, bool> IsScopingReady => (scope) => (scope is EvaluationCheckScope.ProjectFileOnly or EvaluationCheckScope.All) || IsScopingInitialized;
+    public static Func<EvaluationCheckScope, bool> IsScopingReady => (scope) => (scope is EvaluationCheckScope.ProjectFileOnly or EvaluationCheckScope.All) || IsScopingInitialized;
 
     /// <summary>
     /// Indicates whether given location is in the observed scope, based on currently built project path.
