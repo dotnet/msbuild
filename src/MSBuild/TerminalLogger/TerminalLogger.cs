@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -12,6 +12,10 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using Microsoft.Build.Framework.Logging;
 using System.Globalization;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Utilities;
+using DictionaryEntry = System.Collections.DictionaryEntry;
+
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
@@ -58,6 +62,16 @@ internal sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <summary>
+    /// A wrapper over the eval context ID passed to us in <see cref="IEventSource"/> logger events.
+    /// </summary>
+    internal record struct EvalContext(int Id)
+    {
+        public EvalContext(BuildEventContext context)
+            : this(context.EvaluationId)
+        { }
+    }
+
+    /// <summary>
     /// The indentation to use for all build output.
     /// </summary>
     internal const string Indentation = "  ";
@@ -94,6 +108,14 @@ internal sealed partial class TerminalLogger : INodeLogger
     private readonly Dictionary<ProjectContext, Project> _projects = new();
 
     /// <summary>
+    /// Tracks the status of all relevant projects seen so far.
+    /// </summary>
+    /// <remarks>
+    /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding project.
+    /// </remarks>
+    private readonly Dictionary<EvalContext, EvaluationData> _evaluations = new();
+
+    /// <summary>
     /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
     /// </summary>
     /// <remarks>
@@ -110,7 +132,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// The working directory when the build starts, to trim relative output paths.
     /// </summary>
-    private readonly string _initialWorkingDirectory = Environment.CurrentDirectory;
+    private readonly DirectoryInfo _initialWorkingDirectory = new(Environment.CurrentDirectory);
 
     /// <summary>
     /// Number of build errors.
@@ -183,7 +205,8 @@ internal sealed partial class TerminalLogger : INodeLogger
             "TASKSTARTEDEVENT",
             "HIGHMESSAGEEVENT",
             "WARNINGEVENT",
-            "ERROREVENT"
+            "ERROREVENT",
+            "PROJECTEVALUATIONFINISHEDEVENT"
     };
 
     /// <summary>
@@ -217,7 +240,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     private bool _hasUsedCache = false;
 
     /// <summary>
-    /// Whether to show TaskCommandLineEventArgs high-priority messages. 
+    /// Whether to show TaskCommandLineEventArgs high-priority messages.
     /// </summary>
     private bool _showCommandLine = false;
 
@@ -281,6 +304,11 @@ internal sealed partial class TerminalLogger : INodeLogger
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
         eventSource.ErrorRaised += ErrorRaised;
+
+        if (eventSource is IEventSource3 eventSource3)
+        {
+            eventSource3.IncludeTaskInputs();
+        }
 
         if (eventSource is IEventSource4 eventSource4)
         {
@@ -358,6 +386,74 @@ internal sealed partial class TerminalLogger : INodeLogger
         return true;
     }
 
+    private string? TryGetValue(System.Collections.IEnumerable? source, string key)
+    {
+        if (source is null)
+        {
+            return null;
+        }
+        if (source is IEnumerable<ProjectPropertyInstance> properties)
+        {
+            return properties.FirstOrDefault(p => p.Name.Equals(key, StringComparison.OrdinalIgnoreCase))?.EvaluatedValue;
+        }
+        else if (source is IEnumerable<DictionaryEntry> dictionaryEntries)
+        {
+            var v = dictionaryEntries.FirstOrDefault(p => (string)p.Key == key);
+            return v.Value as string;
+        }
+        else if (source is IEnumerable<KeyValuePair<string, string>> kvps)
+        {
+            return kvps.FirstOrDefault(p => p.Key.Equals(key, StringComparison.OrdinalIgnoreCase)).Value;
+        }
+        else
+        {
+            throw new InvalidOperationException($"Unexpected type {source.GetType()} in properties");
+        }
+    }
+
+    private string? DetectTFM(System.Collections.IEnumerable? globalProperties, System.Collections.IEnumerable? properties)
+    {
+        if (TryGetValue(globalProperties, "TargetFramework") is string targetFramework)
+        {
+            return targetFramework;
+        }
+        else if (TryGetValue(properties, "TargetFramework") is string targetFrameworkString)
+        {
+            return targetFrameworkString;
+        }
+        return null;
+    }
+
+    private EvaluationData? CreateEvaluationData(BuildEventContext? context, System.Collections.IEnumerable? globalProperties, System.Collections.IEnumerable? properties)
+    {
+        if (context is not null)
+        {
+            var evalContext = new EvalContext(context);
+            if (!_evaluations.TryGetValue(evalContext, out EvaluationData? evalData))
+            {
+                string? tfm = DetectTFM(globalProperties, properties);
+                evalData = new(tfm);
+                _evaluations.Add(evalContext, evalData);
+            }
+            return evalData;
+        }
+        return null;
+    }
+
+    private Project? CreateProject(BuildEventContext? context)
+    {
+        if (context is not null)
+        {
+            var projectContext = new ProjectContext(context);
+            if (!_projects.TryGetValue(projectContext, out Project? project))
+            {
+                project = new(CreateStopwatch?.Invoke());
+                _projects.Add(projectContext, project);
+            }
+            return project;
+        }
+        return null;
+    }
 
     /// <inheritdoc/>
     public void Shutdown()
@@ -402,6 +498,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         _refresher?.Join();
 
         _projects.Clear();
+        _evaluations.Clear();
 
         Terminal.BeginUpdate();
         try
@@ -475,6 +572,11 @@ internal sealed partial class TerminalLogger : INodeLogger
         {
             RenderImmediateMessage(e.Message!);
         }
+        else if (e is ProjectEvaluationFinishedEventArgs evalFinished
+            && evalFinished.BuildEventContext is not null)
+        {
+            CreateEvaluationData(evalFinished.BuildEventContext, evalFinished.GlobalProperties, evalFinished.Properties);
+        }
     }
 
     /// <summary>
@@ -488,22 +590,16 @@ internal sealed partial class TerminalLogger : INodeLogger
             return;
         }
 
+        CreateProject(e.BuildEventContext);
         ProjectContext c = new ProjectContext(buildEventContext);
-
-        if (_restoreContext is null)
+        if (_restoreContext is null && _projects.TryGetValue(c, out var project))
         {
-            if (e.GlobalProperties?.TryGetValue("TargetFramework", out string? targetFramework) != true)
-            {
-                targetFramework = null;
-            }
-            _projects[c] = new(targetFramework, CreateStopwatch?.Invoke());
-
             // First ever restore in the build is starting.
             if (e.TargetNames == "Restore" && !_restoreFinished)
             {
                 _restoreContext = c;
                 int nodeIndex = NodeIndexForContext(buildEventContext);
-                _nodes[nodeIndex] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+                _nodes[nodeIndex] = new NodeStatus(e.ProjectFile!, null, "Restore", project.Stopwatch);
             }
         }
     }
@@ -532,8 +628,9 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
 
         ProjectContext c = new(buildEventContext);
+        EvalContext evalContext = new(buildEventContext);
 
-        if (_projects.TryGetValue(c, out Project? project))
+        if (_projects.TryGetValue(c, out Project? project) && _evaluations.TryGetValue(evalContext, out EvaluationData? evaluation))
         {
             lock (_lock)
             {
@@ -543,7 +640,6 @@ internal sealed partial class TerminalLogger : INodeLogger
                     EraseNodes();
 
                     string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
-                    ReadOnlyMemory<char>? outputPath = project.OutputPath;
 
                     string projectFile = e.ProjectFile is not null ?
                         Path.GetFileNameWithoutExtension(e.ProjectFile) :
@@ -593,7 +689,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                         // Show project build complete and its output
                         if (project.IsTestProject)
                         {
-                            if (string.IsNullOrEmpty(project.TargetFramework))
+                            if (string.IsNullOrEmpty(evaluation.TargetFramework))
                             {
                                 Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
                                     Indentation,
@@ -606,14 +702,14 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
                                     Indentation,
                                     projectFile,
-                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                    AnsiCodes.Colorize(evaluation.TargetFramework, TargetFrameworkColor),
                                     buildResult,
                                     duration));
                             }
                         }
                         else
                         {
-                            if (string.IsNullOrEmpty(project.TargetFramework))
+                            if (string.IsNullOrEmpty(evaluation.TargetFramework))
                             {
                                 Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
                                     Indentation,
@@ -626,21 +722,21 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
                                     Indentation,
                                     projectFile,
-                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                                    AnsiCodes.Colorize(evaluation.TargetFramework, TargetFrameworkColor),
                                     buildResult,
                                     duration));
                             }
                         }
 
                         // Print the output path as a link if we have it.
-                        if (outputPath is not null)
+                        if (project.OutputPath is FileInfo outputFile)
                         {
-                            ReadOnlySpan<char> outputPathSpan = outputPath.Value.Span;
+                            ReadOnlySpan<char> outputPathSpan = outputFile.FullName.AsSpan();
                             ReadOnlySpan<char> url = outputPathSpan;
                             try
                             {
                                 // If possible, make the link point to the containing directory of the output.
-                                url = Path.GetDirectoryName(url);
+                                url = outputFile.DirectoryName.AsSpan();
                             }
                             catch
                             {
@@ -656,19 +752,46 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 urlString = uri.ToString();
                             }
 
-                            // If the output path is under the initial working directory, make the console output relative to that to save space.
-                            if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison))
+                            string? resolvedPathToOutput = null;
+                            if (evaluation.GenerateFullPaths)
                             {
-                                if (outputPathSpan.Length > _initialWorkingDirectory.Length
-                                    && (outputPathSpan[_initialWorkingDirectory.Length] == Path.DirectorySeparatorChar
-                                        || outputPathSpan[_initialWorkingDirectory.Length] == Path.AltDirectorySeparatorChar))
+                                resolvedPathToOutput = outputPathSpan.ToString();
+                            }
+                            else
+                            {
+                                var outputPathString = outputPathSpan.ToString();
+                                var workingDirectory = _initialWorkingDirectory;
+
+                                // If the output path is under the initial working directory, make the console output relative to that to save space.
+                                if (IsChildOf(outputFile, workingDirectory))
                                 {
-                                    outputPathSpan = outputPathSpan.Slice(_initialWorkingDirectory.Length + 1);
+                                    resolvedPathToOutput = Path.GetRelativePath(workingDirectory.FullName, outputPathString);
+                                }
+
+                                // if the output path isn't under the working directory, but is under the source root, make the output relative to that to save space
+                                else if (project.SourceRoot is DirectoryInfo sourceRoot
+                                            && project.OutputPath is FileInfo outputFileInfo
+                                            && IsChildOf(outputFileInfo, sourceRoot))
+                                {
+                                    resolvedPathToOutput = Path.GetRelativePath(sourceRoot.FullName, outputPathString);
+                                }
+                                else if (project.SourceRoot is DirectoryInfo sourceRootDir)
+                                {
+                                    var relativePathFromOutputToRoot = Path.GetRelativePath(sourceRootDir.FullName, outputPathString);
+                                    // we have the portion from sourceRoot to outputPath, now we need to get the portion from workingDirectory to sourceRoot
+                                    var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectory.FullName, sourceRootDir.FullName);
+                                    resolvedPathToOutput = Path.Join(relativePathFromWorkingDirToSourceRoot, relativePathFromOutputToRoot);
+                                }
+                                else
+                                {
+                                    // in this case, with no reasonable working directory and no reasonable sourceroot,
+                                    // we just emit the full path.
+                                    resolvedPathToOutput = outputPathString;
                                 }
                             }
 
                             Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
+                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{resolvedPathToOutput}{AnsiCodes.LinkSuffix}"));
                         }
                         else
                         {
@@ -698,13 +821,38 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
     }
 
+    private static bool IsChildOf(FileInfo file, DirectoryInfo parent)
+    {
+        DirectoryInfo? current = file.Directory;
+        if (current is null)
+        {
+            return false;
+        }
+        if (current == parent)
+        {
+            return true;
+        }
+
+        while (current?.Parent is not null)
+        {
+            if (current == parent)
+            {
+                return true;
+            }
+            current = current.Parent;
+        }
+        return false;
+    }
+
     /// <summary>
     /// The <see cref="IEventSource.TargetStarted"/> callback.
     /// </summary>
     private void TargetStarted(object sender, TargetStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (_restoreContext is null && buildEventContext is not null
+            && _projects.TryGetValue(new(buildEventContext), out Project? project)
+            && _evaluations.TryGetValue(new(buildEventContext), out EvaluationData? evaluation))
         {
             project.Stopwatch.Start();
 
@@ -730,7 +878,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                 project.IsTestProject = true;
             }
 
-            NodeStatus nodeStatus = new(projectFile, project.TargetFramework, targetName, project.Stopwatch);
+            NodeStatus nodeStatus = new(projectFile, evaluation.TargetFramework, targetName, project.Stopwatch);
             UpdateNodeStatus(buildEventContext, nodeStatus);
         }
     }
@@ -759,9 +907,61 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 foreach (ITaskItem output in e.TargetOutputs)
                 {
-                    project.OutputPath = output.ItemSpec.AsMemory();
+                    project.OutputPath = new(output.ItemSpec);
                     break;
                 }
+            }
+        }
+    }
+
+    private void TryReadSourceControlInformationForProject(BuildEventContext? context, IEnumerable<ITaskItem>? sourceRoots)
+    {
+        if (context is null || sourceRoots is null)
+        {
+            return;
+        }
+
+        var projectContext = new ProjectContext(context);
+        if (_projects.TryGetValue(projectContext, out Project? project))
+        {
+            if (project.SourceRoot is not null)
+            {
+                return;
+            }
+            var sourceControlSourceRoot = sourceRoots.FirstOrDefault(root => !string.IsNullOrEmpty(root.GetMetadata("SourceControl")));
+            if (sourceControlSourceRoot is not null)
+            {
+                // This takes the first root from source control the first time it's added to the build.
+                // This seems to be the Target InitializeSourceControlInformationFromSourceControlManager.
+                // So far this has been acceptable, but if a SourceRoot would be modified by a task later on
+                // (e.g. TranslateGitHubUrlsInSourceControlInformation) we would lose that modification.
+                try
+                {
+                    project.SourceRoot = new(sourceControlSourceRoot.ItemSpec);
+                }
+                catch { } // ignore exceptions from trying to make the SourceRoot a DirectoryInfo, if this is invalid then we just won't use it.
+            }
+        }
+    }
+
+    private void TryReadNugetPackageAsProjectOutput(BuildEventContext? context, IEnumerable<ITaskItem>? nugetPackOutputs)
+    {
+        if (context is null || nugetPackOutputs is null)
+        {
+            return;
+        }
+
+        var projectContext = new ProjectContext(context);
+        if (_projects.TryGetValue(projectContext, out Project? project))
+        {
+            var nugetPackOutput = nugetPackOutputs.FirstOrDefault(output => Path.GetExtension(output.ItemSpec).Equals(".nupkg", StringComparison.OrdinalIgnoreCase));
+            if (nugetPackOutput is not null)
+            {
+                try
+                {
+                    project.OutputPath = new(nugetPackOutput.ItemSpec);
+                }
+                catch { } // ignore exceptions from trying to make the OutputPath a FileInfo, if this is invalid then we just won't use it.
             }
         }
     }
@@ -796,6 +996,21 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
 
         string? message = e.Message;
+        if (e is TaskParameterEventArgs taskArgs)
+        {
+            if (taskArgs.Kind == TaskParameterMessageKind.AddItem)
+            {
+                if (taskArgs.ItemType.Equals("SourceRoot", StringComparison.OrdinalIgnoreCase))
+                {
+                    TryReadSourceControlInformationForProject(taskArgs.BuildEventContext, taskArgs.Items as IList<ProjectItemInstance>);
+                }
+                if (taskArgs.ItemType.Equals("NuGetPackOutput", StringComparison.OrdinalIgnoreCase))
+                {
+                    TryReadNugetPackageAsProjectOutput(taskArgs.BuildEventContext, taskArgs.Items as IList<ProjectItemInstance>);
+                }
+            }
+        }
+
         if (message is not null && e.Importance == MessageImportance.High)
         {
             var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project);
@@ -807,11 +1022,15 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
                 if (!projectFileName.IsEmpty &&
-                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject)
+                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject
+                    && project!.OutputPath is null)
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
-                    project!.OutputPath = outputPath;
-                    return;
+                    try
+                    {
+                        project!.OutputPath = new(outputPath.ToString());
+                    }
+                    catch { } // ignore exceptions from trying to make the OutputPath a FileInfo, if this is invalid then we just won't use it.
                 }
             }
 
