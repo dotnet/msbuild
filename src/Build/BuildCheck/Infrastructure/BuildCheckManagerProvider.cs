@@ -372,9 +372,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
 
             // run it here to avoid the missed imports that can be reported before the checks registration
-            if (TryGetProjectFullPath(checkContext.BuildEventContext, out string projectPath))
+            if (_deferredProjectEvalIdToImportedProjects.TryGetValue(checkContext.BuildEventContext.EvaluationId, out HashSet<string>? importedProjects))
             {
-                if (_deferredProjectToImportedProjects.TryGetValue(projectPath, out HashSet<string>? importedProjects))
+                if (importedProjects != null && TryGetProjectFullPath(checkContext.BuildEventContext, out string projectPath))
                 {
                     foreach (string importedProject in importedProjects)
                     {
@@ -467,7 +467,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly ConcurrentDictionary<int, string> _projectsByInstanceId = new();
         private readonly ConcurrentDictionary<int, string> _projectsByEvaluationId = new();
 
-        private readonly ConcurrentDictionary<string, HashSet<string>> _deferredProjectToImportedProjects = new();
+        private readonly Dictionary<int, HashSet<string>> _deferredProjectEvalIdToImportedProjects = new();
 
         /// <summary>
         /// This method fetches the project full path from the context id.
@@ -539,9 +539,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             string projectFullPath)
         {
             _projectsByEvaluationId[checkContext.BuildEventContext.EvaluationId] = projectFullPath;
-            if (!_deferredProjectToImportedProjects.ContainsKey(projectFullPath))
+            if (!_deferredProjectEvalIdToImportedProjects.ContainsKey(checkContext.BuildEventContext.EvaluationId))
             {
-                _deferredProjectToImportedProjects.TryAdd(projectFullPath, new HashSet<string>() { projectFullPath });
+                _deferredProjectEvalIdToImportedProjects.Add(checkContext.BuildEventContext.EvaluationId, [projectFullPath]);
             }
         }
 
@@ -585,22 +585,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// <param name="newImportedProjectFile">The path of the newly imported project file.</param>
         private void PropagateImport(string originalProjectFile, string newImportedProjectFile)
         {
-            foreach (var entry in _deferredProjectToImportedProjects)
+            foreach (var entry in _deferredProjectEvalIdToImportedProjects)
             {
                 if (entry.Value.Contains(originalProjectFile))
                 {
-                    _deferredProjectToImportedProjects.AddOrUpdate(
-                        entry.Key,
-                        _ => new HashSet<string> { newImportedProjectFile },
-                        (_, existingSet) =>
-                        {
-                            lock (existingSet)
-                            {
-                                existingSet.Add(newImportedProjectFile);
-                            }
-
-                            return existingSet;
-                        });
+                    entry.Value.Add(newImportedProjectFile);
                 }
             }
         }
