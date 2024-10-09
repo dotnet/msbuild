@@ -54,6 +54,10 @@ extends:
       name: VSEngSS-MicroBuild2022-1ES
       os: windows
     sdl:
+      policheck:
+        enabled: true
+      tsa:
+        enabled: true
       # We generate SBOM ourselves, so don't need steps injected by 1ES.
       sbom:
         enabled: false
@@ -63,10 +67,6 @@ extends:
         additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
       credscan:
         suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
-
-    stages:
-    - stage: build
-      displayName: Build
 
       jobs:
       # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
