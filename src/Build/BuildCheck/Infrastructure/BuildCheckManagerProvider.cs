@@ -410,7 +410,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 return;
             }
 
-            PropagateImport(projectImportedEventArgs.ProjectFile, projectImportedEventArgs.ImportedProjectFile);
+            PropagateImport(checkContext.BuildEventContext.EvaluationId, projectImportedEventArgs.ProjectFile, projectImportedEventArgs.ImportedProjectFile);
         }
 
         public void ProcessTaskStartedEventArgs(
@@ -581,16 +581,15 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// This method ensures that if Project A imports Project B, and Project B now imports Project C,
         /// then Project A will also show Project C as an import.
         /// </summary>
+        /// <param name="evaluationId">The evaluation id is associated with the root project path.</param>
         /// <param name="originalProjectFile">The path of the project file that is importing a new project.</param>
         /// <param name="newImportedProjectFile">The path of the newly imported project file.</param>
-        private void PropagateImport(string originalProjectFile, string newImportedProjectFile)
+        private void PropagateImport(int evaluationId, string originalProjectFile, string newImportedProjectFile)
         {
-            foreach (var entry in _deferredProjectEvalIdToImportedProjects)
+            if (_deferredProjectEvalIdToImportedProjects.TryGetValue(evaluationId, out HashSet<string>? importedProjects)
+                && importedProjects.Contains(originalProjectFile))
             {
-                if (entry.Value.Contains(originalProjectFile))
-                {
-                    entry.Value.Add(newImportedProjectFile);
-                }
+                importedProjects.Add(newImportedProjectFile);
             }
         }
 
