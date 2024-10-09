@@ -126,7 +126,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             SendPacket(packet);
 
             // Wait for either the response or a shutdown event.  Either event means this thread should return
-            WaitHandle.WaitAny(new WaitHandle[] { _responseReceivedEvent, ShutdownEvent });
+            WaitHandle.WaitAny([_responseReceivedEvent, ShutdownEvent]);
 
             // Keep track of the element location of the reference
             _lastResponse.ElementLocation = sdkReferenceLocation;

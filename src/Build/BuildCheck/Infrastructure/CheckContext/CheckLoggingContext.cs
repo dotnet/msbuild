@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
@@ -39,4 +40,22 @@ internal readonly struct CheckLoggingContext(ILoggingService loggingService, Bui
     public void DispatchAsErrorFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
         => loggingService
             .LogErrorFromText(eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
+
+    public void DispatchAsWarningFromText(string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
+        => loggingService
+            .LogWarningFromText(eventContext, subcategoryResourceName, errorCode, helpKeyword, file, message);
+
+    public void DispatchFailedAcquisitionTelemetry(string assemblyName, Exception exception)
+    {
+        var telemetryTransportData = KnownTelemetry.BuildCheckTelemetry.ProcessCustomCheckLoadingFailure(assemblyName, exception);
+        loggingService.LogTelemetry(eventContext, telemetryTransportData.Item1, telemetryTransportData.Item2);
+    }
+
+    public void DispatchTelemetry(BuildCheckTracingData data)
+    {
+        foreach ((string, IDictionary<string, string>) telemetryTransportData in KnownTelemetry.BuildCheckTelemetry.ProcessBuildCheckTracingData(data))
+        {
+            loggingService.LogTelemetry(eventContext, telemetryTransportData.Item1, telemetryTransportData.Item2);
+        }
+    }
 }

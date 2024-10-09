@@ -342,7 +342,7 @@ namespace Microsoft.Build.Utilities
                         // If pnProcInfo == 0, then there is simply no locking process (found), in this case rgAffectedApps is "null".
                         if (pnProcInfo == 0)
                         {
-                            return Enumerable.Empty<ProcessInfo>();
+                            return [];
                         }
 
                         var lockInfos = new List<ProcessInfo>((int)pnProcInfo);
@@ -371,7 +371,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            return Enumerable.Empty<ProcessInfo>();
+            return [];
         }
 
         private static Exception GetException(int res, string apiName, string message)

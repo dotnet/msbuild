@@ -187,6 +187,7 @@ namespace Microsoft.Build.Logging
                     BuildSubmissionStarted
                     BuildStarted
                     BuildFinished
+                    BuildCanceled
                     ProjectEvaluationStarted
                     ProjectEvaluationFinished
                 BuildError
@@ -215,6 +216,7 @@ namespace Microsoft.Build.Logging
                 case BuildSubmissionStartedEventArgs buildSubmissionStarted: return Write(buildSubmissionStarted);
                 case BuildStartedEventArgs buildStarted: return Write(buildStarted);
                 case BuildFinishedEventArgs buildFinished: return Write(buildFinished);
+                case BuildCanceledEventArgs buildCanceled: return Write(buildCanceled);
                 case ProjectEvaluationStartedEventArgs projectEvaluationStarted: return Write(projectEvaluationStarted);
                 case ProjectEvaluationFinishedEventArgs projectEvaluationFinished: return Write(projectEvaluationFinished);
                 case BuildCheckTracingEventArgs buildCheckTracing: return Write(buildCheckTracing);
@@ -307,6 +309,13 @@ namespace Microsoft.Build.Logging
             return BinaryLogRecordKind.BuildFinished;
         }
 
+        private BinaryLogRecordKind Write(BuildCanceledEventArgs e)
+        {
+            WriteBuildEventArgsFields(e);
+
+            return BinaryLogRecordKind.BuildCanceled;
+        }
+
         private BinaryLogRecordKind Write(ProjectEvaluationStartedEventArgs e)
         {
             WriteBuildEventArgsFields(e, writeMessage: false);
@@ -338,7 +347,11 @@ namespace Microsoft.Build.Logging
         private BinaryLogRecordKind Write(BuildCheckTracingEventArgs e)
         {
             WriteBuildEventArgsFields(e, writeMessage: false);
-            WriteProperties(e.TracingData);
+
+            Dictionary<string, TimeSpan> stats = e.TracingData.ExtractCheckStats();
+            stats.Merge(e.TracingData.InfrastructureTracingData, (span1, span2) => span1 + span2);
+
+            WriteProperties(stats);
 
             return BinaryLogRecordKind.BuildCheckTracing;
         }

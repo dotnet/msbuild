@@ -313,6 +313,22 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_52_BuildCheckSwitch">
+        <source>  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties 
+                     of the build. For more info see aka.ms/buildcheck
+	</source>
+        <target state="translated">  -check
+                     Abilita BuildChecks durante la compilazione.
+                     BuildCheck consente di valutare le regole per garantire le proprietà 
+                     della compilazione. Per altre informazioni, vedere aka.ms/buildcheck
+	</target>
+        <note>
+    {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
+    LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+  </note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: il valore di priorità bassa non è valido. {0}</target>
@@ -1818,22 +1834,22 @@ Nota: livello di dettaglio dei logger di file
       </trans-unit>
       <trans-unit id="SAC">
         <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
-        <target state="new">Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</target>
+        <target state="translated">In base alla chiave del Registro di sistema di Windows VerifiedAndReputablePolicyState, stato SAC = {0}.</target>
         <note>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Enforcement">
         <source>1: in enforcement</source>
-        <target state="new">1: in enforcement</target>
+        <target state="translated">1: in imposizione</target>
         <note />
       </trans-unit>
       <trans-unit id="SAC_Evaluation">
         <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
-        <target state="new">2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</target>
+        <target state="translated">2: in valutazione. È consigliabile disattivare Il Controllo intelligente delle app nell'ambiente di sviluppo perché in caso contrario le prestazioni potrebbero essere compromesse</target>
         <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Off">
         <source>0: turned off</source>
-        <target state="new">0: turned off</target>
+        <target state="translated">0: disattivato</target>
         <note />
       </trans-unit>
       <trans-unit id="SchemaFileLocation">

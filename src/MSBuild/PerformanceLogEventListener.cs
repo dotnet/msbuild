@@ -22,15 +22,15 @@ namespace Microsoft.Build.CommandLine
             internal EventLevel Level { get; set; }
         }
 
-        private static ProviderConfiguration[] s_config = new ProviderConfiguration[]
-        {
+        private static ProviderConfiguration[] s_config =
+        [
             new ProviderConfiguration()
             {
                 Name = "Microsoft-Build",
                 Keywords = MSBuildEventSource.Keywords.PerformanceLog,
                 Level = EventLevel.Verbose
             }
-        };
+        ];
 
         private const string PerfLogDirEnvVar = "DOTNET_PERFLOG_DIR";
         private const char EventDelimiter = '\n';

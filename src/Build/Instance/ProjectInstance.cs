@@ -19,6 +19,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Instance;
@@ -1898,6 +1899,21 @@ namespace Microsoft.Build.Execution
             return unescapedValue;
         }
 
+        internal string GetEngineRequiredPropertyValue(string name)
+        {
+            if (!_properties.TryGetPropertyUnescapedValue(name, out string unescapedValue))
+            {
+                unescapedValue = String.Empty;
+            }
+            else
+            {
+                _loggingContext?.ProcessPropertyRead(
+                    new PropertyReadInfo(name, ElementLocation.EmptyLocation, false, PropertyReadContext.Other));
+            }
+
+            return unescapedValue;
+        }
+
         /// <summary>
         /// Add a property with the specified name and value.
         /// Overwrites any property with the same name already in the collection.
@@ -1912,6 +1928,8 @@ namespace Microsoft.Build.Execution
 
             ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValue, false /* may not be reserved */, _isImmutable);
             _properties.Set(property);
+
+            _loggingContext?.ProcessPropertyWrite(new PropertyWriteInfo(name, false, ElementLocation.EmptyLocation));
 
             return property;
         }
@@ -2133,7 +2151,7 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         public bool Build(string target, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
-            string[] targets = (target == null) ? Array.Empty<string>() : new string[] { target };
+            string[] targets = (target == null) ? [] : [target];
 
             return Build(targets, loggers, remoteLoggers);
         }
@@ -2629,7 +2647,7 @@ namespace Microsoft.Build.Execution
 
             if (targets == null)
             {
-                targets = Array.Empty<string>();
+                targets = [];
             }
 
             BuildResult results;
@@ -2944,7 +2962,7 @@ namespace Microsoft.Build.Execution
                 };
                 ProjectInstance instance = new(projectRootElement, globalProperties, toolsVersion, buildParameters, loggingService, projectBuildEventContext, sdkResolverService, submissionId);
 
-                return new[] { instance };
+                return [instance];
             }
         }
 

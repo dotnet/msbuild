@@ -32,6 +32,36 @@ internal static class EnumerableExtensions
         yield return item;
     }
 
+    public static HashSet<T> NewHashSet<T>(int capacity)
+        => NewHashSet<T>(capacity, null);
+
+    public static HashSet<T> NewHashSet<T>(IEqualityComparer<T> equalityComparer)
+        => NewHashSet<T>(0, equalityComparer);
+
+    public static HashSet<T> NewHashSet<T>(int capacity, IEqualityComparer<T>? equalityComparer)
+    {
+#if NETSTANDARD2_0
+        return new HashSet<T>(equalityComparer);
+#else
+        return new HashSet<T>(capacity, equalityComparer);
+#endif
+    }
+
+    public static HashSet<T>? ToHashSet<T>(this ICollection<T>? source, IEqualityComparer<T>? equalityComparer = null)
+    {
+        if (source is null)
+        {
+            return null;
+        }
+
+        if (source is HashSet<T> set)
+        {
+            return set;
+        }
+
+        return new HashSet<T>(source, equalityComparer);
+    }
+
 #if !NET
     /// <summary>
     /// Returns a read-only <see cref="ReadOnlyDictionary{TKey, TValue}"/> wrapper
@@ -63,6 +93,35 @@ internal static class EnumerableExtensions
             else
             {
                 dict[pair.Key] = mergeValues(value, pair.Value);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Adds a content of given list to current dictionary.
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
+    /// <param name="dict">Dictionary to receive another values.</param>
+    /// <param name="another">List to be merged into current.</param>
+    /// <param name="extractKey">Way of getting a key of an incoming value.</param>
+    /// <param name="mergeValues">Way of resolving keys conflicts.</param>
+    public static void Merge<TKey, TValue>(
+        this IDictionary<TKey, TValue> dict,
+        IReadOnlyList<TValue> another,
+        Func<TValue, TKey> extractKey,
+        Func<TValue, TValue, TValue> mergeValues)
+    {
+        foreach (var mergeValue in another)
+        {
+            TKey key = extractKey(mergeValue);
+            if (!dict.TryGetValue(key, out TValue? value))
+            {
+                dict[key] = mergeValue;
+            }
+            else
+            {
+                dict[key] = mergeValues(value, mergeValue);
             }
         }
     }

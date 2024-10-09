@@ -668,7 +668,7 @@ namespace Microsoft.Build.Execution
 
                 var logger = new BinaryLogger { Parameters = binlogPath };
 
-                return (loggers ?? Enumerable.Empty<ILogger>()).Concat(new[] { logger });
+                return (loggers ?? [logger]);
             }
 
             void InitializeCaches()
@@ -789,15 +789,10 @@ namespace Microsoft.Build.Execution
             {
                 lock (_syncLock)
                 {
-                    if (_shuttingDown)
-                    {
-                        return;
-                    }
-
-                    // If we are Idle, obviously there is nothing to cancel.  If we are waiting for the build to end, then presumably all requests have already completed
-                    // and there is nothing left to cancel.  Putting this here eliminates the possibility of us racing with EndBuild to access the nodeManager before
-                    // EndBuild sets it to null.
-                    if (_buildManagerState != BuildManagerState.Building)
+                    // If the state is Idle - then there is yet or already nothing to cancel
+                    // If state is WaitingForBuildToComplete - we might be already waiting gracefully - but CancelAllSubmissions
+                    //  is a request for quick abort - so it's fine to resubmit the request
+                    if (_buildManagerState == BuildManagerState.Idle)
                     {
                         return;
                     }
@@ -1069,6 +1064,11 @@ namespace Microsoft.Build.Execution
                                 host = "VSCode";
                             }
                             _buildTelemetry.Host = host;
+
+                            _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
+                            var sacState = NativeMethodsShared.GetSACState();
+                            // The Enforcement would lead to build crash - but let's have the check for completeness sake.
+                            _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
                             // Clean telemetry to make it ready for next build submission.
@@ -1522,7 +1522,7 @@ namespace Microsoft.Build.Execution
 
             if (existingConfiguration == null)
             {
-                existingConfiguration = new BuildRequestConfiguration(GetNewConfigurationId(), new BuildRequestData(newInstance, Array.Empty<string>()), null /* use the instance's tools version */);
+                existingConfiguration = new BuildRequestConfiguration(GetNewConfigurationId(), new BuildRequestData(newInstance, []), null /* use the instance's tools version */);
             }
             else
             {
@@ -1830,7 +1830,7 @@ namespace Microsoft.Build.Execution
                             }
                         }
 
-                        BuildRequestBlocker blocker = new BuildRequestBlocker(-1, Array.Empty<string>(), new[] { submission.BuildRequest });
+                        BuildRequestBlocker blocker = new BuildRequestBlocker(-1, [], [submission.BuildRequest]);
 
                         HandleNewRequest(Scheduler.VirtualNode, blocker);
                     }
@@ -2073,17 +2073,17 @@ namespace Microsoft.Build.Execution
             lock (_syncLock)
             {
                 _shuttingDown = true;
-                _executionCancellationTokenSource!.Cancel();
+                _executionCancellationTokenSource?.Cancel();
 
                 // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
-                _nodeManager!.ShutdownConnectedNodes(!abort && _buildParameters!.EnableNodeReuse);
+                _nodeManager?.ShutdownConnectedNodes(!abort && _buildParameters!.EnableNodeReuse);
 
                 // if we are aborting, the task host will hear about it in time through the task building infrastructure;
                 // so only shut down the task host nodes if we're shutting down tidily (in which case, it is assumed that all
                 // tasks are finished building and thus that there's no risk of a race between the two shutdown pathways).
                 if (!abort)
                 {
-                    _taskHostNodeManager!.ShutdownConnectedNodes(_buildParameters!.EnableNodeReuse);
+                    _taskHostNodeManager?.ShutdownConnectedNodes(_buildParameters!.EnableNodeReuse);
                 }
             }
         }
@@ -3110,48 +3110,51 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (disposing && !_disposed)
             {
-                if (disposing)
+                lock (_syncLock)
                 {
-                    lock (_syncLock)
+                    if (_disposed)
                     {
-                        // We should always have finished cleaning up before calling Dispose.
-                        RequireState(BuildManagerState.Idle, "ShouldNotDisposeWhenBuildManagerActive");
-
-                        _componentFactories?.ShutdownComponents();
-
-                        if (_workQueue != null)
-                        {
-                            _workQueue.Complete();
-                            _workQueue = null;
-                        }
-
-                        if (_executionCancellationTokenSource != null)
-                        {
-                            _executionCancellationTokenSource.Cancel();
-                            _executionCancellationTokenSource = null;
-                        }
-
-                        if (_noActiveSubmissionsEvent != null)
-                        {
-                            _noActiveSubmissionsEvent.Dispose();
-                            _noActiveSubmissionsEvent = null;
-                        }
-
-                        if (_noNodesActiveEvent != null)
-                        {
-                            _noNodesActiveEvent.Dispose();
-                            _noNodesActiveEvent = null;
-                        }
-
-                        if (ReferenceEquals(this, s_singletonInstance))
-                        {
-                            s_singletonInstance = null;
-                        }
-
-                        _disposed = true;
+                        // Multiple caller raced for enter into the lock
+                        return;
                     }
+
+                    // We should always have finished cleaning up before calling Dispose.
+                    RequireState(BuildManagerState.Idle, "ShouldNotDisposeWhenBuildManagerActive");
+
+                    _componentFactories?.ShutdownComponents();
+
+                    if (_workQueue != null)
+                    {
+                        _workQueue.Complete();
+                        _workQueue = null;
+                    }
+
+                    if (_executionCancellationTokenSource != null)
+                    {
+                        _executionCancellationTokenSource.Cancel();
+                        _executionCancellationTokenSource = null;
+                    }
+
+                    if (_noActiveSubmissionsEvent != null)
+                    {
+                        _noActiveSubmissionsEvent.Dispose();
+                        _noActiveSubmissionsEvent = null;
+                    }
+
+                    if (_noNodesActiveEvent != null)
+                    {
+                        _noNodesActiveEvent.Dispose();
+                        _noNodesActiveEvent = null;
+                    }
+
+                    if (ReferenceEquals(this, s_singletonInstance))
+                    {
+                        s_singletonInstance = null;
+                    }
+
+                    _disposed = true;
                 }
             }
         }

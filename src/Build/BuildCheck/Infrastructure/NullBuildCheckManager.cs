@@ -71,7 +71,7 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
-    public void StartProjectRequest(BuildEventContext buildEventContext, string projectFullPath)
+    public void StartProjectRequest(ICheckContext checksContext, string projectFullPath)
     {
     }
 
@@ -79,7 +79,7 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
-    public Dictionary<string, TimeSpan> CreateCheckTracingStats() => new Dictionary<string, TimeSpan>();
+    public BuildCheckTracingData CreateCheckTracingStats() => new BuildCheckTracingData();
 
     public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext buildEventContext)
     { }

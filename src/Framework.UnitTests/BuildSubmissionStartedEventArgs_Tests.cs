@@ -12,7 +12,7 @@ using Xunit;
 
 namespace Microsoft.Build.Framework.UnitTests
 {
-    public class BuildSubmissionStartedEventAgs_Tests
+    public class BuildSubmissionStartedEventArgs_Tests
     {
         [Fact]
         public void SerializationDeserializationTest()

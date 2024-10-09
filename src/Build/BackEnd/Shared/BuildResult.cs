@@ -380,7 +380,7 @@ namespace Microsoft.Build.Execution
                     return BuildResultCode.Failure;
                 }
 
-                foreach (KeyValuePair<string, TargetResult> result in _resultsByTarget ?? Enumerable.Empty<KeyValuePair<string, TargetResult>>())
+                foreach (KeyValuePair<string, TargetResult> result in _resultsByTarget ?? [])
                 {
                     if ((result.Value.ResultCode == TargetResultCode.Failure && !result.Value.TargetFailureDoesntCauseBuildFailure)
                         || result.Value.AfterTargetsHaveFailed)
@@ -549,7 +549,7 @@ namespace Microsoft.Build.Execution
                 targetsToKeep.Count > 0,
                 $"{nameof(targetsToKeep)} should contain at least one target.");
 
-            foreach (string target in _resultsByTarget?.Keys ?? Enumerable.Empty<string>())
+            foreach (string target in _resultsByTarget?.Keys ?? [])
             {
                 if (!targetsToKeep.Contains(target))
                 {
@@ -574,7 +574,7 @@ namespace Microsoft.Build.Execution
             }
 
             // Merge in the results
-            foreach (KeyValuePair<string, TargetResult> targetResult in results._resultsByTarget ?? Enumerable.Empty<KeyValuePair<string, TargetResult>>())
+            foreach (KeyValuePair<string, TargetResult> targetResult in results._resultsByTarget ?? [])
             {
                 // NOTE: I believe that because we only allow results for a given target to be produced and cached once for a given configuration,
                 // we can never receive conflicting results for that target, since the cache and build request manager would always return the
@@ -696,7 +696,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void CacheIfPossible()
         {
-            foreach (KeyValuePair<string, TargetResult> targetResultPair in _resultsByTarget ?? Enumerable.Empty<KeyValuePair<string, TargetResult>>())
+            foreach (KeyValuePair<string, TargetResult> targetResultPair in _resultsByTarget ?? [])
             {
                 targetResultPair.Value.CacheItems(ConfigurationId, targetResultPair.Key);
             }

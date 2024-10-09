@@ -2152,7 +2152,7 @@ namespace Microsoft.Build.Evaluation
                     if (functionName == null)
                     {
                         functionName = "ExpandQuotedExpressionFunction";
-                        arguments = new string[] { function };
+                        arguments = [function];
                     }
                     else if (argumentsExpression != null)
                     {
@@ -3283,7 +3283,7 @@ namespace Microsoft.Build.Evaluation
                 _methodMethodName = methodName;
                 if (arguments == null)
                 {
-                    _arguments = Array.Empty<string>();
+                    _arguments = [];
                 }
                 else
                 {
@@ -3525,10 +3525,13 @@ namespace Microsoft.Build.Evaluation
                     if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", _methodMethodName, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", _methodMethodName, StringComparison.OrdinalIgnoreCase)))
                     {
                         // Support comparison when the lhs is an integer
-                        if (IsFloatingPointRepresentation(args[0]) && !IsFloatingPointRepresentation(objectInstance))
+                        if (IsFloatingPointRepresentation(args[0]))
                         {
-                            objectInstance = Convert.ChangeType(objectInstance, typeof(double), CultureInfo.InvariantCulture);
-                            _receiverType = objectInstance.GetType();
+                            if (double.TryParse(objectInstance.ToString(), NumberStyles.Number | NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out double result))
+                            {
+                                objectInstance = result;
+                                _receiverType = objectInstance.GetType();
+                            }
                         }
 
                         // change the type of the final unescaped string into the destination
@@ -3545,11 +3548,7 @@ namespace Microsoft.Build.Evaluation
                             // include $(MSBuildThisFileDirectory) as a parameter.
                             string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
-                            args = new[]
-                            {
-                                args[0],
-                                startingDirectory,
-                            };
+                            args = [args[0], startingDirectory];
                         }
                     }
 
@@ -3597,8 +3596,17 @@ namespace Microsoft.Build.Evaluation
                             // otherwise there is the potential of running a function twice!
                             try
                             {
-                                // First use InvokeMember using the standard binder - this will match and coerce as needed
-                                functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                // If there are any out parameters, try to figure out their type and create defaults for them as appropriate before calling the method.
+                                if (args.Any(a => "out _".Equals(a)))
+                                {
+                                    IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
+                                    functionResult = GetMethodResult(objectInstance, methods, args, 0);
+                                }
+                                else
+                                {
+                                    // If there are no out parameters, use InvokeMember using the standard binder - this will match and coerce as needed
+                                    functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                }
                             }
                             // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
                             // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coercion is possible, so throw.
@@ -3692,6 +3700,48 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return false;
+            }
+
+            private object GetMethodResult(object objectInstance, IEnumerable<MethodInfo> methods, object[] args, int index)
+            {
+                for (int i = index; i < args.Length; i++)
+                {
+                    if (args[i].Equals("out _"))
+                    {
+                        object toReturn = null;
+                        foreach (MethodInfo method in methods)
+                        {
+                            Type t = method.GetParameters()[i].ParameterType;
+                            args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
+                            object currentReturnValue = GetMethodResult(objectInstance, methods, args, i + 1);
+                            if (currentReturnValue is not null)
+                            {
+                                if (toReturn is null)
+                                {
+                                    toReturn = currentReturnValue;
+                                }
+                                else if (!toReturn.Equals(currentReturnValue))
+                                {
+                                    // There were multiple methods that seemed viable and gave different results. We can't differentiate between them so throw.
+                                    ErrorUtilities.ThrowArgument("CouldNotDifferentiateBetweenCompatibleMethods", _methodMethodName, args.Length);
+                                    return null;
+                                }
+                            }
+                        }
+
+                        return toReturn;
+                    }
+                }
+
+                try
+                {
+                    return _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture) ?? "null";
+                }
+                catch (Exception)
+                {
+                    // This isn't a viable option, but perhaps another set of parameters will work.
+                    return null;
+                }
             }
 
             /// <summary>
@@ -5154,7 +5204,7 @@ namespace Microsoft.Build.Evaluation
                 // If there are no arguments, then just create an empty array
                 if (String.IsNullOrEmpty(argumentsContent))
                 {
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = [];
                 }
                 else
                 {
@@ -5228,7 +5278,7 @@ namespace Microsoft.Build.Evaluation
                     // It may be that there are '()' but no actual arguments content
                     if (argumentStartIndex == expressionFunction.Length - 1)
                     {
-                        functionArguments = Array.Empty<string>();
+                        functionArguments = [];
                     }
                     else
                     {
@@ -5238,7 +5288,7 @@ namespace Microsoft.Build.Evaluation
                         // If there are no arguments, then just create an empty array
                         if (string.IsNullOrEmpty(argumentsContent))
                         {
-                            functionArguments = Array.Empty<string>();
+                            functionArguments = [];
                         }
                         else
                         {
@@ -5261,7 +5311,7 @@ namespace Microsoft.Build.Evaluation
                         nextMethodIndex = indexerIndex;
                     }
 
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = [];
 
                     if (nextMethodIndex > 0)
                     {

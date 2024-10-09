@@ -4,11 +4,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using FluentAssertions;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
@@ -93,6 +95,18 @@ namespace Microsoft.Build.UnitTests
             Roundtrip(args,
                 e => ToString(e.BuildEventContext),
                 e => e.Succeeded.ToString());
+        }
+
+        [Fact]
+        public void RoundtripBuildCanceledEventArgs()
+        {
+            var args = new BuildCanceledEventArgs(
+                "Message",
+                eventTimestamp: DateTime.Parse("12/12/2015 06:11:56 PM"));
+
+            Roundtrip(args,
+                e => e.Message,
+                e => e.Timestamp.ToString());
         }
 
         [Fact]
@@ -528,6 +542,27 @@ namespace Microsoft.Build.UnitTests
                 e => e.MVID.ToString(),
                 e => e.AppDomainDescriptor,
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+        }
+
+        [Fact]
+        public void RoundtripBuildCheckTracingEventArgs()
+        {
+            string key1 = "AA";
+            TimeSpan span1 = TimeSpan.FromSeconds(5);
+            string key2 = "b";
+            TimeSpan span2 = TimeSpan.FromSeconds(15);
+            string key3 = "cCc";
+            TimeSpan span3 = TimeSpan.FromSeconds(50);
+
+            Dictionary<string, TimeSpan> stats = new() { { key1, span1 }, { key2, span2 }, { key3, span3 } };
+
+            BuildCheckTracingEventArgs args = new BuildCheckTracingEventArgs(stats);
+
+            Roundtrip(args,
+                e => e.TracingData.InfrastructureTracingData.Keys.Count.ToString(),
+                e => e.TracingData.InfrastructureTracingData.Keys.ToCsvString(false),
+                e => e.TracingData.InfrastructureTracingData.Values
+                    .Select(v => v.TotalSeconds.ToString(CultureInfo.InvariantCulture)).ToCsvString(false));
         }
 
         [Theory]

@@ -1016,6 +1016,17 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
+  <data name="HelpMessage_52_BuildCheckSwitch" Visibility="Public">
+    <value>  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties 
+                     of the build. For more info see aka.ms/buildcheck
+	</value>
+	<comment>
+    {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
+    LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+  </comment>
+  </data>
   <data name="HelpMessage_48_TerminalLoggerParametersSwitch" Visibility="Public">
     <value>  -terminalLoggerParameters: &lt;parameters&gt;
                      Parameters to terminal logger. (Short form: -tlp)

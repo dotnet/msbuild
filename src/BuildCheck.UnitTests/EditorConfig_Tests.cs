@@ -716,7 +716,7 @@ public class EditorConfig_Tests
             return;
         }
 
-        Assert.True(false, message);
+        Assert.Fail(message);
     }
 
     private static bool SequenceEqual<T>(IEnumerable<T> expected, IEnumerable<T> actual, IEqualityComparer<T> comparer = null)

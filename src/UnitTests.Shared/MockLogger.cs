@@ -538,7 +538,7 @@ namespace Microsoft.Build.UnitTests
                         PrintFullLog();
                     }
 
-                    Assert.True(false, $"Log was not expected to contain '{contains}', but did.");
+                    Assert.Fail($"Log was not expected to contain '{contains}', but did.");
                 }
             }
         }

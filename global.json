@@ -3,13 +3,13 @@
     "allowPrerelease": true
   },
   "tools": {
-    "dotnet": "9.0.100-preview.7.24407.12",
+    "dotnet": "9.0.100-rc.2.24474.11",
     "vs": {
-      "version": "17.8.0"
+      "version": "17.10.0"
     },
-    "xcopy-msbuild": "17.8.5"
+    "xcopy-msbuild": "17.10.0-pre.4.0"
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "9.0.0-beta.24426.3"
+    "Microsoft.DotNet.Arcade.Sdk": "9.0.0-beta.24503.2"
   }
 }

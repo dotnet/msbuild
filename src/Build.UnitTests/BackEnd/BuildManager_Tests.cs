@@ -1657,13 +1657,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
     <Message Text='[errormessage]'/>
  </Target>
 </Project>
 ");
             BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
+            Stopwatch sw = Stopwatch.StartNew();
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             asyncResult.ExecuteAsync(null, null);
 
@@ -1675,6 +1676,50 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
             _logger.AssertLogDoesntContain("[errormessage]");
+            // The build should bail out immediately after executing CancelAllSubmissions, build stalling for a longer time
+            //  is very unexpected.
+            sw.Elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(10));
+        }
+
+        /// <summary>
+        /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.. task, we should
+        /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly.
+        ///
+        /// This test also exercises the possibility of CancelAllSubmissions being executed after EndBuild -
+        /// which can happen even if they are synchronously executed in expected order - the CancelAllSubmissions is internally
+        /// asynchronous and hence part of the execution can happen after EndBuild.
+        /// </summary>
+        [Fact]
+        public void CancelledBuildWithDelay40_WithThreatSwap()
+        {
+            string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='test'>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
+    <Message Text='[errormessage]'/>
+ </Target>
+</Project>
+");
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
+            _buildManager.BeginBuild(_parameters);
+            Stopwatch sw = Stopwatch.StartNew();
+            BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
+            asyncResult.ExecuteAsync(null, null);
+
+            Thread.Sleep(500);
+            // Simulate the case where CancelAllSubmissions is called after EndBuild or its internal queued task is swapped
+            //  and executed after EndBuild starts execution.
+            System.Threading.Tasks.Task.Delay(500).ContinueWith(t => _buildManager.CancelAllSubmissions());
+            _buildManager.EndBuild();
+
+            asyncResult.WaitHandle.WaitOne();
+            BuildResult result = asyncResult.BuildResult;
+
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
+            _logger.AssertLogDoesntContain("[errormessage]");
+            // The build should bail out immediately after executing CancelAllSubmissions, build stalling for a longer time
+            //  is very unexpected.
+            sw.Elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(10));
         }
 
         /// <summary>

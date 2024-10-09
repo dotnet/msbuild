@@ -187,7 +187,7 @@ namespace Microsoft.Build.Execution
             ExecuteAsync(null, null, _legacyThreadingSemantics);
             if (_legacyThreadingSemantics)
             {
-                RequestBuilder.WaitWithBuilderThreadStart(new[] { WaitHandle }, false, legacyThreadingData, SubmissionId);
+                RequestBuilder.WaitWithBuilderThreadStart([WaitHandle], false, legacyThreadingData, SubmissionId);
             }
             else
             {
