@@ -287,6 +287,11 @@
         <target state="translated">Falha ao localizar o assembly de verificação personalizado especificado: '{0}'. Verifique se existe.</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
+      <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
+        <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
+        <target state="translated">Foram encontradas várias sobrecargas para o método "{0}" com parâmetros {1}. No momento, não há suporte para isso.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
         <target state="translated">Falha ao carregar o tipo de verificação personalizada: '{0}' do assembly: '{1}'. Certifique-se de que ele herda a classe base Microsoft.Build.Experimental.BuildCheck.Check. Se não for destinado a ser uma verificação personalizada, então não deve ser exposto. Mais informações: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
