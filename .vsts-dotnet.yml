@@ -68,6 +68,10 @@ extends:
       credscan:
         suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
 
+    stages:
+    - stage: build
+      displayName: Build
+
       jobs:
       # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
       # Used for vs17.2, vs17.4, vs17.6 etc. branches only.
