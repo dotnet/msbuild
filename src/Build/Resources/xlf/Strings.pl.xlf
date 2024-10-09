@@ -287,6 +287,11 @@
         <target state="translated">Nie udało się znaleźć określonego niestandardowego zestawu kontrolnego: „{0}”. Sprawdź, czy istnieje.</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
+      <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
+        <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
+        <target state="new">Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
         <target state="translated">Nie udało się załadować niestandardowego typu kontrolnego: „{0}” z zestawu: „{1}”. Upewnij się, że dziedziczy po klasie bazowej Microsoft.Build.Experimental.BuildCheck.Check. Jeśli nie ma to być kontrola niestandardowa, to nie powinna być ona ujawniana. Więcej informacji: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
