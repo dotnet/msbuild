@@ -3736,7 +3736,7 @@ namespace Microsoft.Build.Evaluation
 
                 try
                 {
-                    return _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                    return _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture) ?? "null";
                 }
                 catch (Exception)
                 {
