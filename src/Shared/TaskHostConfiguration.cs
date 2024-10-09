@@ -417,20 +417,27 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
 #if FEATURE_APPDOMAIN
-            byte[] appDomainConfigBytes = null;
-
-            // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
-            if (translator.Mode == TranslationDirection.WriteToStream)
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
             {
-                appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+                byte[] appDomainConfigBytes = null;
+
+                // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
+                if (translator.Mode == TranslationDirection.WriteToStream)
+                {
+                    appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+                }
+
+                translator.Translate(ref appDomainConfigBytes);
+
+                if (translator.Mode == TranslationDirection.ReadFromStream)
+                {
+                    _appDomainSetup = new AppDomainSetup();
+                    _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
+                }
             }
-
-            translator.Translate(ref appDomainConfigBytes);
-
-            if (translator.Mode == TranslationDirection.ReadFromStream)
+            else
             {
-                _appDomainSetup = new AppDomainSetup();
-                _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
+                translator.TranslateDotNet(ref _appDomainSetup);
             }
 #endif
             translator.Translate(ref _lineNumberOfTask);
