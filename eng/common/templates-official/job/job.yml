@@ -1,7 +1,6 @@
 parameters:
 # Sbom related params
   enableSbom: true
-  runAsPublic: false
   PackageVersion: 9.0.0
   BuildDropPath: '$(Build.SourcesDirectory)/artifacts'
 
