@@ -3,6 +3,8 @@
 
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
@@ -75,6 +77,11 @@ namespace Microsoft.Build.Logging
             _stream.Flush();
         }
 
+        public override Task FlushAsync(CancellationToken cancellationToken)
+        {
+            return _stream.FlushAsync(cancellationToken);
+        }
+
         public override int Read(byte[] buffer, int offset, int count)
         {
             if (_position + count > _maxAllowedPosition)
@@ -86,6 +93,61 @@ namespace Microsoft.Build.Logging
             _position += cnt;
             return cnt;
         }
+
+        public override int ReadByte()
+        {
+            if (_position + 1 <= _maxAllowedPosition)
+            {
+                int value = _stream.ReadByte();
+                if (value >= 0)
+                {
+                    _position++;
+                    return value;
+                }
+            }
+
+            return -1;
+        }
+
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            if (_position + count > _maxAllowedPosition)
+            {
+                count = (int)(_maxAllowedPosition - _position);
+            }
+
+#pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+            int cnt = await _stream.ReadAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+#pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+            _position += cnt;
+            return cnt;
+        }
+
+#if NET
+        public override int Read(Span<byte> buffer)
+        {
+            if (_position + buffer.Length > _maxAllowedPosition)
+            {
+                buffer = buffer.Slice(0, (int)(_maxAllowedPosition - _position));
+            }
+
+            int cnt = _stream.Read(buffer);
+            _position += cnt;
+            return cnt;
+        }
+
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            if (_position + buffer.Length > _maxAllowedPosition)
+            {
+                buffer = buffer.Slice(0, (int)(_maxAllowedPosition - _position));
+            }
+
+            int cnt = await _stream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+            _position += cnt;
+            return cnt;
+        }
+#endif
 
         public override long Seek(long offset, SeekOrigin origin)
         {
