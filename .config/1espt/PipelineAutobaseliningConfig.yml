@@ -12,6 +12,8 @@ pipelines:
           lastModifiedDate: 2024-03-14
         armory:
           lastModifiedDate: 2024-03-14
+        policheck:
+          lastModifiedDate: 2024-10-09
       binary:
         credscan:
           lastModifiedDate: 2024-03-14
