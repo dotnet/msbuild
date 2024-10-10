@@ -24,6 +24,8 @@
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
+    <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
+    <MicrosoftVisualStudioSolutionPersistenceVersion>1.0.9</MicrosoftVisualStudioSolutionPersistenceVersion>
     <SystemCollectionsImmutableVersion>8.0.0</SystemCollectionsImmutableVersion>
     <SystemConfigurationConfigurationManagerVersion>8.0.0</SystemConfigurationConfigurationManagerVersion>
     <SystemFormatsAsn1Version>8.0.1</SystemFormatsAsn1Version>
@@ -37,6 +39,7 @@
     <SystemReflectionMetadataLoadContextVersion>8.0.0</SystemReflectionMetadataLoadContextVersion>
     <SystemReflectionMetadataVersion>8.0.0</SystemReflectionMetadataVersion>
     <SystemResourcesExtensionsVersion>8.0.0</SystemResourcesExtensionsVersion>
+    <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
     <SystemTextEncodingCodePagesVersion>7.0.0</SystemTextEncodingCodePagesVersion>
     <SystemTextRegularExpressionsVersion>4.3.1</SystemTextRegularExpressionsVersion>
@@ -51,10 +54,8 @@
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.24516.2</MicrosoftDotNetXUnitExtensionsVersion>
-    <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
     <MicrosoftNetCompilersToolsetVersion>4.13.0-1.24524.1</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.12.0-rc.127</NuGetBuildTasksVersion>
-    <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
     <BootstrapSdkVersion>9.0.200-preview.0.24523.19</BootstrapSdkVersion>
@@ -75,8 +76,4 @@
       <FileVersion>$(VersionPrefix).$(FileVersion.Split('.')[3])</FileVersion>
     </PropertyGroup>
   </Target>
-  <!-- SolutionPersistence -->
-  <PropertyGroup>
-    <MicrosoftVisualStudioSolutionPersistenceVersion>1.0.9</MicrosoftVisualStudioSolutionPersistenceVersion>
-  </PropertyGroup>
 </Project>
