@@ -30,6 +30,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
+    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
 
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
@@ -39,6 +40,10 @@
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.VisualStudio.SolutionPersistence" Version="$(MicrosoftVisualStudioSolutionPersistenceVersion)" />
+  </ItemGroup>
+  
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>

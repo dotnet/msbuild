@@ -5,11 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
+using Microsoft.VisualStudio.SolutionPersistence.Model;
+using Microsoft.VisualStudio.SolutionPersistence.Serializer;
+using Microsoft.VisualStudio.SolutionPersistence;
 using Shouldly;
 using Xunit;
+using System.Linq;
 
 #nullable disable
 
@@ -59,11 +64,13 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test that a project with the C++ project guid and an arbitrary extension is seen as valid --
         /// we assume that all C++ projects except .vcproj are MSBuild format.
         /// </summary>
-        [Fact]
-        public void ParseSolution_VC2()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseSolution_VC2(bool convertToSlnx)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}') = 'Project name.myvctype', 'Relative path\to\Project name.myvctype', '{0ABED153-9451-483C-8140-9E8D7306B216}'
@@ -83,13 +90,18 @@ namespace Microsoft.Build.UnitTests.Construction
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
 
-            Assert.Equal("Project name.myvctype", solution.ProjectsInOrder[0].ProjectName);
+            string expectedProjectName = convertToSlnx ? "Project name" : "Project name.myvctype";
+            Assert.Equal(expectedProjectName, solution.ProjectsInOrder[0].ProjectName);
             Assert.Equal("Relative path\\to\\Project name.myvctype", solution.ProjectsInOrder[0].RelativePath);
-            Assert.Equal("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
+            if (!convertToSlnx)
+            {
+                // When converting to SLNX, the project GUID is not preserved.
+                Assert.Equal("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
+            }
         }
 
         /// <summary>
@@ -280,11 +292,13 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests the parsing of a very basic .SLN file with three independent projects.
         /// </summary>
-        [Fact]
-        public void BasicSolution()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BasicSolution(bool convertToSlnx)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{F184B08F-C81C-45F6-A57F-5ABD9991F28F}') = 'ConsoleApplication1', 'ConsoleApplication1\ConsoleApplication1.vbproj', '{AB3413A6-D689-486D-B7F0-A095371B3F13}'
@@ -316,34 +330,40 @@ namespace Microsoft.Build.UnitTests.Construction
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
 
             Assert.Equal(3, solution.ProjectsInOrder.Count);
 
-            Assert.Equal("ConsoleApplication1", solution.ProjectsInOrder[0].ProjectName);
-            Assert.Equal(@"ConsoleApplication1\ConsoleApplication1.vbproj", solution.ProjectsInOrder[0].RelativePath);
-            Assert.Equal("{AB3413A6-D689-486D-B7F0-A095371B3F13}", solution.ProjectsInOrder[0].ProjectGuid);
-            Assert.Empty(solution.ProjectsInOrder[0].Dependencies);
-            Assert.Null(solution.ProjectsInOrder[0].ParentProjectGuid);
+            // When converting to slnx, the order of the projects is not preserved.
+            ProjectInSolution consoleApplication1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ConsoleApplication1");
+            Assert.Equal(@"ConsoleApplication1\ConsoleApplication1.vbproj", consoleApplication1.RelativePath);
+            Assert.Empty(consoleApplication1.Dependencies);
+            Assert.Null(consoleApplication1.ParentProjectGuid);
 
-            Assert.Equal("vbClassLibrary", solution.ProjectsInOrder[1].ProjectName);
-            Assert.Equal(@"vbClassLibrary\vbClassLibrary.vbproj", solution.ProjectsInOrder[1].RelativePath);
-            Assert.Equal("{BA333A76-4511-47B8-8DF4-CA51C303AD0B}", solution.ProjectsInOrder[1].ProjectGuid);
-            Assert.Empty(solution.ProjectsInOrder[1].Dependencies);
-            Assert.Null(solution.ProjectsInOrder[1].ParentProjectGuid);
+            ProjectInSolution vbClassLibrary = solution.ProjectsInOrder.First(p => p.ProjectName == "vbClassLibrary");
+            Assert.Equal(@"vbClassLibrary\vbClassLibrary.vbproj", vbClassLibrary.RelativePath);
+            Assert.Empty(vbClassLibrary.Dependencies);
+            Assert.Null(vbClassLibrary.ParentProjectGuid);
 
-            Assert.Equal("ClassLibrary1", solution.ProjectsInOrder[2].ProjectName);
-            Assert.Equal(@"ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[2].RelativePath);
-            Assert.Equal("{DEBCE986-61B9-435E-8018-44B9EF751655}", solution.ProjectsInOrder[2].ProjectGuid);
-            Assert.Empty(solution.ProjectsInOrder[2].Dependencies);
-            Assert.Null(solution.ProjectsInOrder[2].ParentProjectGuid);
+            ProjectInSolution classLibrary1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
+            Assert.Equal(@"ClassLibrary1\ClassLibrary1.csproj", classLibrary1.RelativePath);
+            Assert.Empty(classLibrary1.Dependencies);
+            Assert.Null(classLibrary1.ParentProjectGuid);
+
+            if (!convertToSlnx)
+            {
+                Assert.Equal("{AB3413A6-D689-486D-B7F0-A095371B3F13}", consoleApplication1.ProjectGuid);
+                Assert.Equal("{BA333A76-4511-47B8-8DF4-CA51C303AD0B}", vbClassLibrary.ProjectGuid);
+                Assert.Equal("{DEBCE986-61B9-435E-8018-44B9EF751655}", classLibrary1.ProjectGuid);
+            }
         }
 
         /// <summary>
         /// Exercises solution folders, and makes sure that samely named projects in different
         /// solution folders will get correctly uniquified.
+        /// For the new parser, solution folders are not included to ProjectsInOrder or ProjectsByGuid.
         /// </summary>
         [Fact]
         public void SolutionFolders()
@@ -418,6 +438,78 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal("{6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}", solution.ProjectsInOrder[4].ProjectGuid);
             Assert.Empty(solution.ProjectsInOrder[4].Dependencies);
             Assert.Equal("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}", solution.ProjectsInOrder[4].ParentProjectGuid);
+        }
+
+        /// <summary>
+        /// Exercises solution folders, and makes sure that samely named projects in different
+        /// solution folders will get correctly uniquified.
+        /// For the new parser, solution folders are not included to ProjectsInOrder or ProjectsByGuid.
+        /// </summary>
+        [Fact]
+        public void SolutionFoldersSlnx()
+        {
+            string solutionFileContents =
+                """
+                Microsoft Visual Studio Solution File, Format Version 9.00
+                # Visual Studio 2005
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{34E0D07D-CF8F-459D-9449-C4188D8C5564}'
+                EndProject
+                Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'MySlnFolder', 'MySlnFolder', '{E0F97730-25D2-418A-A7BD-02CAFDC6E470}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'MyPhysicalFolder\ClassLibrary1\ClassLibrary1.csproj', '{A5EE8128-B08E-4533-86C5-E46714981680}'
+                EndProject
+                Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'MySubSlnFolder', 'MySubSlnFolder', '{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary2', 'ClassLibrary2\ClassLibrary2.csproj', '{6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}'
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {34E0D07D-CF8F-459D-9449-C4188D8C5564}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {34E0D07D-CF8F-459D-9449-C4188D8C5564}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {34E0D07D-CF8F-459D-9449-C4188D8C5564}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {34E0D07D-CF8F-459D-9449-C4188D8C5564}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                    GlobalSection(NestedProjects) = preSolution
+                        {A5EE8128-B08E-4533-86C5-E46714981680} = {E0F97730-25D2-418A-A7BD-02CAFDC6E470}
+                        {2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B} = {E0F97730-25D2-418A-A7BD-02CAFDC6E470}
+                        {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4} = {2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}
+                    EndGlobalSection
+                EndGlobal
+                """;
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, true);
+
+            Assert.Equal(3, solution.ProjectsInOrder.Count);
+
+            var classLibrary1 = solution.ProjectsInOrder.First(p => p.RelativePath == @"ClassLibrary1\ClassLibrary1.csproj");
+            Assert.Empty(classLibrary1.Dependencies);
+            Assert.Null(classLibrary1.ParentProjectGuid);
+
+            var myPhysicalFolderClassLibrary1 = solution.ProjectsInOrder.First(p => p.RelativePath == @"MyPhysicalFolder\ClassLibrary1\ClassLibrary1.csproj");
+            Assert.Empty(myPhysicalFolderClassLibrary1.Dependencies);
+
+            var classLibrary2 = solution.ProjectsInOrder.First(p => p.RelativePath == @"ClassLibrary2\ClassLibrary2.csproj");
+            Assert.Empty(classLibrary2.Dependencies);
+
+            // When converting to slnx, the guids are not preserved.
+            // try at list assert not null
+            Assert.NotNull(myPhysicalFolderClassLibrary1.ParentProjectGuid);
+            Assert.NotNull(classLibrary2.ParentProjectGuid);
         }
 
         /// <summary>
@@ -556,13 +648,15 @@ namespace Microsoft.Build.UnitTests.Construction
 
         /// <summary>
         /// Verifies that hand-coded project-to-project dependencies listed in the .SLN file
-        /// are correctly recognized by our solution parser.
+        /// are correctly recognized by the solution parser.
         /// </summary>
-        [Fact]
-        public void SolutionDependencies()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SolutionDependencies(bool convertToSlnx)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{05A5AD00-71B5-4612-AF2F-9EA9121C4111}'
@@ -601,27 +695,29 @@ namespace Microsoft.Build.UnitTests.Construction
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
 
             Assert.Equal(3, solution.ProjectsInOrder.Count);
 
-            Assert.Equal(@"ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[0].RelativePath);
-            Assert.Equal("{05A5AD00-71B5-4612-AF2F-9EA9121C4111}", solution.ProjectsInOrder[0].ProjectGuid);
-            Assert.Single(solution.ProjectsInOrder[0].Dependencies);
-            Assert.Equal("{FAB4EE06-6E01-495A-8926-5514599E3DD9}", (string)solution.ProjectsInOrder[0].Dependencies[0]);
+            var classLibrary1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
+            var classLibrary2 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary2");
+            var classLibrary3 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary3");
+
+            Assert.Equal(@"ClassLibrary1\ClassLibrary1.csproj", classLibrary1.RelativePath);
+            Assert.Single(classLibrary1.Dependencies);
+            Assert.Equal(classLibrary3.ProjectGuid, classLibrary1.Dependencies[0]);
             Assert.Null(solution.ProjectsInOrder[0].ParentProjectGuid);
 
-            Assert.Equal(@"ClassLibrary2\ClassLibrary2.csproj", solution.ProjectsInOrder[1].RelativePath);
-            Assert.Equal("{7F316407-AE3E-4F26-BE61-2C50D30DA158}", solution.ProjectsInOrder[1].ProjectGuid);
-            Assert.Equal(2, solution.ProjectsInOrder[1].Dependencies.Count);
-            Assert.Equal("{FAB4EE06-6E01-495A-8926-5514599E3DD9}", (string)solution.ProjectsInOrder[1].Dependencies[0]);
-            Assert.Equal("{05A5AD00-71B5-4612-AF2F-9EA9121C4111}", (string)solution.ProjectsInOrder[1].Dependencies[1]);
+            Assert.Equal(@"ClassLibrary2\ClassLibrary2.csproj", classLibrary2.RelativePath);
+            Assert.Equal(2, classLibrary2.Dependencies.Count);
+            // When converting to SLNX, the projects dependencies order is not preserved.
+            Assert.Contains(classLibrary3.ProjectGuid, classLibrary2.Dependencies);
+            Assert.Contains(classLibrary1.ProjectGuid, classLibrary2.Dependencies);
             Assert.Null(solution.ProjectsInOrder[1].ParentProjectGuid);
 
             Assert.Equal(@"ClassLibrary3\ClassLibrary3.csproj", solution.ProjectsInOrder[2].RelativePath);
-            Assert.Equal("{FAB4EE06-6E01-495A-8926-5514599E3DD9}", solution.ProjectsInOrder[2].ProjectGuid);
             Assert.Empty(solution.ProjectsInOrder[2].Dependencies);
             Assert.Null(solution.ProjectsInOrder[2].ParentProjectGuid);
         }
@@ -629,11 +725,13 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Make sure the solution configurations get parsed correctly for a simple mixed C#/VC solution
         /// </summary>
-        [Fact]
-        public void ParseSolutionConfigurations()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseSolutionConfigurations(bool convertToSlnx)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -678,9 +776,9 @@ namespace Microsoft.Build.UnitTests.Construction
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
 
             Assert.Equal(7, solution.SolutionConfigurations.Count);
 
@@ -704,11 +802,13 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Make sure the solution configurations get parsed correctly for a simple C# application
         /// </summary>
-        [Fact]
-        public void ParseSolutionConfigurationsNoMixedPlatform()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseSolutionConfigurationsNoMixedPlatform(bool convertToSlnx)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -733,14 +833,14 @@ namespace Microsoft.Build.UnitTests.Construction
                         {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|ARM.ActiveCfg = Release|Any CPU
                         {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|ARM.Build.0 = Release|Any CPU
                         {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|x86.ActiveCfg = Release|Any CPU
-                   EndGlobalSection
+                    EndGlobalSection
                     GlobalSection(SolutionProperties) = preSolution
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
 
             Assert.Equal(6, solution.SolutionConfigurations.Count);
 
@@ -839,15 +939,18 @@ namespace Microsoft.Build.UnitTests.Construction
                 ParseSolutionHelper(solutionFileContents);
             });
         }
+
         /// <summary>
         /// Make sure the project configurations in solution configurations get parsed correctly
         /// for a simple mixed C#/VC solution
         /// </summary>
-        [Fact]
-        public void ParseProjectConfigurationsInSolutionConfigurations1()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseProjectConfigurationsInSolutionConfigurations1(bool convertToSlnx)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -889,12 +992,12 @@ namespace Microsoft.Build.UnitTests.Construction
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
 
-            ProjectInSolution csharpProject = (ProjectInSolution)solution.ProjectsByGuid["{6185CC21-BE89-448A-B3C0-D1C27112E595}"];
-            ProjectInSolution vcProject = (ProjectInSolution)solution.ProjectsByGuid["{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}"];
+            ProjectInSolution csharpProject = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
+            ProjectInSolution vcProject = solution.ProjectsInOrder.First(p => p.ProjectName == "MainApp");
 
             Assert.Equal(6, csharpProject.ProjectConfigurations.Count);
 
@@ -998,6 +1101,65 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Equal(".NET", solution.GetDefaultPlatformName()); // "Default solution platform"
         }
 
+        [Fact]
+        public void ParseProjectConfigurationsInSolutionConfigurationsSlnx()
+        {
+            string solutionFileContents =
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 17
+                VisualStudioVersion = 17.11.35111.106
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""WinFormsApp1"", ""WinFormsApp1\WinFormsApp1.csproj"", ""{3B592A6A-6215-4675-9237-7FEB36BDB4F1}""
+                EndProject
+                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1\ClassLibrary1.csproj"", ""{C25056E0-405C-4476-9B22-839264A8530C}""
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Win32 = Debug|Win32
+                        Release|Win32 = Release|Win32
+                        Debug|Any CPU = Debug|Any CPU
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {3B592A6A-6215-4675-9237-7FEB36BDB4F1}.Debug|Win32.ActiveCfg = Debug|x86
+                        {3B592A6A-6215-4675-9237-7FEB36BDB4F1}.Debug|Win32.Build.0 = Debug|x86
+                        {3B592A6A-6215-4675-9237-7FEB36BDB4F1}.Release|Win32.ActiveCfg = Release|x86
+                        {3B592A6A-6215-4675-9237-7FEB36BDB4F1}.Release|Win32.Build.0 = Release|x86
+                        {C25056E0-405C-4476-9B22-839264A8530C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {C25056E0-405C-4476-9B22-839264A8530C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                    GlobalSection(ExtensibilityGlobals) = postSolution
+                        SolutionGuid = {AA62B7C4-C703-4DBC-A7AD-D183666ECC20}
+                    EndGlobalSection
+                EndGlobal
+                """;
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, true);
+
+            ProjectInSolution winFormsApp1 = solution.ProjectsInOrder.First(p => p.ProjectName == "WinFormsApp1");
+            ProjectInSolution classLibrary1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
+
+            Assert.Equal(2, winFormsApp1.ProjectConfigurations.Count);
+
+            Assert.Equal("Debug|x86", winFormsApp1.ProjectConfigurations["Debug|Win32"].FullName);
+            Assert.True(winFormsApp1.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
+
+            Assert.Equal("Release|x86", winFormsApp1.ProjectConfigurations["Release|Win32"].FullName);
+            Assert.True(winFormsApp1.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
+
+            Assert.Equal(2, classLibrary1.ProjectConfigurations.Count);
+
+            Assert.Equal("Debug|AnyCPU", classLibrary1.ProjectConfigurations["Debug|Any CPU"].FullName);
+            Assert.False(classLibrary1.ProjectConfigurations["Debug|Any CPU"].IncludeInBuild);
+
+            Assert.Equal("Release|AnyCPU", classLibrary1.ProjectConfigurations["Release|Any CPU"].FullName);
+            Assert.False(classLibrary1.ProjectConfigurations["Release|Any CPU"].IncludeInBuild);
+        }
+
         /// <summary>
         /// Parse solution file with comments
         /// </summary>
@@ -1053,22 +1215,37 @@ namespace Microsoft.Build.UnitTests.Construction
 
         /// <summary>
         /// Helper method to create a SolutionFile object, and call it to parse the SLN file
-        /// represented by the string contents passed in.
+        /// represented by the string contents passed in. Optionally can convert the SLN to SLNX and then parse the solution.
         /// </summary>
-        private static SolutionFile ParseSolutionHelper(string solutionFileContents)
+        private static SolutionFile ParseSolutionHelper(string solutionFileContents, bool convertToSlnx = false)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
             string solutionPath = FileUtilities.GetTemporaryFileName(".sln");
-
+            string slnxPath = solutionPath + "x";
             try
             {
                 File.WriteAllText(solutionPath, solutionFileContents);
-                SolutionFile sp = SolutionFile.Parse(solutionPath);
-                return sp;
+                if (convertToSlnx)
+                {
+                    ISolutionSerializer serializer = SolutionSerializers.GetSerializerByMoniker(solutionPath);
+                    SolutionModel solutionModel = serializer.OpenAsync(solutionPath, CancellationToken.None).Result;
+                    SolutionSerializers.SlnXml.SaveAsync(slnxPath, solutionModel, CancellationToken.None).Wait();
+
+                    SolutionFile slnx = SolutionFile.Parse(slnxPath);
+                    return slnx;
+                }
+
+                SolutionFile sln = SolutionFile.Parse(solutionPath);
+                return sln;
             }
             finally
             {
                 File.Delete(solutionPath);
+
+                if (convertToSlnx)
+                {
+                    File.Delete(slnxPath);
+                }
             }
         }
     }
