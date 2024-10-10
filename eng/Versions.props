@@ -76,4 +76,8 @@
       <FileVersion>$(VersionPrefix).$(FileVersion.Split('.')[3])</FileVersion>
     </PropertyGroup>
   </Target>
+   <!-- SolutionPersistence -->
+  <PropertyGroup>
+	  <MicrosoftVisualStudioSolutionPersistenceVersion>0.5.26-beta</MicrosoftVisualStudioSolutionPersistenceVersion>
+  </PropertyGroup>
 </Project>
