@@ -4,8 +4,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using static Microsoft.Build.Internal.Utilities;
 
 namespace Microsoft.Build.Logging;
 
@@ -31,25 +34,24 @@ public static class BuildEventArgsExtensions
 
     /// <summary>
     /// Lazy enumerates and partially strong types items from Items property.
-    /// The actual item value is of nongeneric <see cref="object"/> type.
-    /// The actual type need to be inferred during runtime based on the itemType.
+    /// The actual item value might be wrapped to be able to provide defined interface
     /// </summary>
-    public static IEnumerable<(string itemType, IItem itemValue)> EnumerateItems(
+    /// <returns></returns>
+    public static IEnumerable<(string itemType, IItemData itemValue)> EnumerateItems(
         this ProjectEvaluationFinishedEventArgs eventArgs)
         => EnumerateItems(eventArgs.Items);
 
     /// <summary>
-    /// Lazy enumerates and partially strong types items from Items property.
-    /// The actual item value is of nongeneric <see cref="object"/> type.
-    /// The actual type need to be inferred during runtime based on the itemType.
+    /// Lazy enumerates and strong types items from Items property.
+    /// The actual item value might be wrapped to be able to provide defined interface
     /// </summary>
-    public static IEnumerable<(string itemType, IItem itemValue)> EnumerateItems(
+    public static IEnumerable<(string itemType, IItemData itemValue)> EnumerateItems(
         this ProjectStartedEventArgs eventArgs)
         => EnumerateItems(eventArgs.Items);
 
     private static IEnumerable<(string propertyName, string propertyValue)> EnumerateProperties(IEnumerable? properties)
         => Internal.Utilities.EnumerateProperties(properties);
 
-    private static IEnumerable<(string itemType, IItem itemValue)> EnumerateItems(IEnumerable? items)
+    private static IEnumerable<(string itemType, IItemData itemValue)> EnumerateItems(IEnumerable? items)
         => Internal.Utilities.EnumerateItems(items);
 }

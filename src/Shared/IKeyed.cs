@@ -11,7 +11,7 @@ namespace Microsoft.Build.Collections
     /// <remarks>
     /// This can be internal as it is a constraint only on internal collections.
     /// </remarks>
-    public interface IKeyed
+    internal interface IKeyed
     {
         /// <summary>
         /// Returns some value useful for a key in a dictionary

@@ -13,6 +13,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
@@ -687,8 +689,21 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        public static IEnumerable<(string itemType, IItem itemValue)> EnumerateItems(IEnumerable items)
+        /// <summary>
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types
+        /// </summary>
+        public static IEnumerable<(string itemType, IItemData itemValue)> EnumerateItems(IEnumerable items)
         {
+            // The actual type of the item data can be of types:
+            //  * <see cref="ProjectItemInstance"/>
+            //  * <see cref="ProjectItem"/>
+            //  * <see cref="IItem"/>
+            //  * <see cref="ITaskItem"/>
+            //  * possibly others
+
+            // That's why we here wrap with ItemAccessor if needed
+
+
             if (items == null)
             {
                 return [];
@@ -698,14 +713,14 @@ namespace Microsoft.Build.Internal
             {
                 return projectItemInstanceDictionary
                     .EnumerateItemsPerType()
-                    .Select(t => t.itemValue.Select(itemValue => (t.itemType, (IItem)itemValue)))
+                    .Select(t => t.itemValue.Select(itemValue => (t.itemType, (IItemData)itemValue)))
                     .SelectMany(tpl => tpl);
             }
             else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
             {
                 return projectItemDictionary
                     .EnumerateItemsPerType()
-                    .Select(t => t.itemValue.Select(itemValue => (t.itemType, (IItem)itemValue)))
+                    .Select(t => t.itemValue.Select(itemValue => (t.itemType, (IItemData)itemValue)))
                     .SelectMany(tpl => tpl);
             }
             else
@@ -713,12 +728,12 @@ namespace Microsoft.Build.Internal
                 return CastOneByOne(items);
             }
 
-            IEnumerable<(string itemType, IItem itemValue)> CastOneByOne(IEnumerable itms)
+            IEnumerable<(string itemType, IItemData itemValue)> CastOneByOne(IEnumerable itms)
             {
                 foreach (var item in itms)
                 {
                     string itemType = default;
-                    IItem itemValue = null;
+                    object itemValue = null;
 
                     if (item is IItem iitem)
                     {
@@ -728,7 +743,7 @@ namespace Microsoft.Build.Internal
                     else if (item is DictionaryEntry dictionaryEntry)
                     {
                         itemType = dictionaryEntry.Key as string;
-                        itemValue = dictionaryEntry.Value as IItem;
+                        itemValue = dictionaryEntry.Value;
                     }
                     else
                     {
@@ -742,12 +757,32 @@ namespace Microsoft.Build.Internal
                         }
                     }
 
+                    IItemData data = null;
+
+                    if (itemValue != null)
+                    {
+                        if (itemValue is IItemData dt)
+                        {
+                            data = dt;
+                        }
+                        else if (itemValue is ITaskItem taskItem)
+                        {
+                            data = new ItemAccessor(taskItem);
+                        }
+                    }
+
                     if (!String.IsNullOrEmpty(itemType))
                     {
-                        yield return (itemType, itemValue);
+                        yield return (itemType, data);
                     }
                 }
             }
+        }
+
+        private class ItemAccessor(ITaskItem item) : IItemData
+        {
+            public string EvaluatedInclude => item.ItemSpec;
+            public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata() => item.EnumerateMetadata();
         }
 
         public static void EnumerateItems(IEnumerable items, Action<DictionaryEntry> callback)
