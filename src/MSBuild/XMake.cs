@@ -3552,8 +3552,8 @@ namespace Microsoft.Build.CommandLine
                     }
                 }
 
-                // Get all files in the current directory that have a sln extension
-                string[] potentialSolutionFiles = getFiles(projectDirectory ?? ".", "*.sln");
+                // Get all files in the current directory that have a sln or slnx extension
+                string[] potentialSolutionFiles = getFiles(projectDirectory ?? ".", "*.sln?");
                 List<string> actualSolutionFiles = new List<string>();
                 List<string> solutionFilterFiles = new List<string>();
                 if (potentialSolutionFiles != null)
