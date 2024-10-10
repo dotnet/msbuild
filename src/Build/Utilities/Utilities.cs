@@ -700,9 +700,7 @@ namespace Microsoft.Build.Internal
             //  * <see cref="IItem"/>
             //  * <see cref="ITaskItem"/>
             //  * possibly others
-
             // That's why we here wrap with ItemAccessor if needed
-
 
             if (items == null)
             {
