@@ -10,7 +10,7 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// This interface represents an item without exposing its type.
     /// </summary>
-    internal interface IItem : IKeyed
+    public interface IItem : IKeyed
     {
         /// <summary>
         /// Gets the evaluated include value for this item, unescaped.

@@ -687,7 +687,7 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        public static IEnumerable<(string itemType, object itemValue)> EnumerateItems(IEnumerable items)
+        public static IEnumerable<(string itemType, IItem itemValue)> EnumerateItems(IEnumerable items)
         {
             if (items == null)
             {
@@ -696,23 +696,29 @@ namespace Microsoft.Build.Internal
 
             if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
             {
-                return projectItemInstanceDictionary.EnumerateItemsPerType().Select(t => (t.itemType, (object) t.itemValue));
+                return projectItemInstanceDictionary
+                    .EnumerateItemsPerType()
+                    .Select(t => t.itemValue.Select(itemValue => (t.itemType, (IItem)itemValue)))
+                    .SelectMany(tpl => tpl);
             }
             else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
             {
-                return projectItemDictionary.EnumerateItemsPerType().Select(t => (t.itemType, (object)t.itemValue));
+                return projectItemDictionary
+                    .EnumerateItemsPerType()
+                    .Select(t => t.itemValue.Select(itemValue => (t.itemType, (IItem)itemValue)))
+                    .SelectMany(tpl => tpl);
             }
             else
             {
                 return CastOneByOne(items);
             }
 
-            IEnumerable<(string itemType, object itemValue)> CastOneByOne(IEnumerable itms)
+            IEnumerable<(string itemType, IItem itemValue)> CastOneByOne(IEnumerable itms)
             {
                 foreach (var item in itms)
                 {
                     string itemType = default;
-                    object itemValue = null;
+                    IItem itemValue = null;
 
                     if (item is IItem iitem)
                     {
@@ -722,7 +728,7 @@ namespace Microsoft.Build.Internal
                     else if (item is DictionaryEntry dictionaryEntry)
                     {
                         itemType = dictionaryEntry.Key as string;
-                        itemValue = dictionaryEntry.Value;
+                        itemValue = dictionaryEntry.Value as IItem;
                     }
                     else
                     {

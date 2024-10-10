@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging;
@@ -33,7 +34,7 @@ public static class BuildEventArgsExtensions
     /// The actual item value is of nongeneric <see cref="object"/> type.
     /// The actual type need to be inferred during runtime based on the itemType.
     /// </summary>
-    public static IEnumerable<(string itemType, object itemValue)> EnumerateItems(
+    public static IEnumerable<(string itemType, IItem itemValue)> EnumerateItems(
         this ProjectEvaluationFinishedEventArgs eventArgs)
         => EnumerateItems(eventArgs.Items);
 
@@ -42,13 +43,13 @@ public static class BuildEventArgsExtensions
     /// The actual item value is of nongeneric <see cref="object"/> type.
     /// The actual type need to be inferred during runtime based on the itemType.
     /// </summary>
-    public static IEnumerable<(string itemType, object itemValue)> EnumerateItems(
+    public static IEnumerable<(string itemType, IItem itemValue)> EnumerateItems(
         this ProjectStartedEventArgs eventArgs)
         => EnumerateItems(eventArgs.Items);
 
     private static IEnumerable<(string propertyName, string propertyValue)> EnumerateProperties(IEnumerable? properties)
         => Internal.Utilities.EnumerateProperties(properties);
 
-    private static IEnumerable<(string itemType, object itemValue)> EnumerateItems(IEnumerable? items)
+    private static IEnumerable<(string itemType, IItem itemValue)> EnumerateItems(IEnumerable? items)
         => Internal.Utilities.EnumerateItems(items);
 }
