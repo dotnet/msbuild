@@ -55,7 +55,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal ProjectItemDefinition(Project project, string itemType)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowInternalNull(project);
             ErrorUtilities.VerifyThrowArgumentLength(itemType);
 
             _project = project;

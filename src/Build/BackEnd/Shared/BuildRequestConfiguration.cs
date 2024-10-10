@@ -808,7 +808,7 @@ namespace Microsoft.Build.BackEnd
 
         public bool ShouldSkipIsolationConstraintsForReference(string referenceFullPath)
         {
-            ErrorUtilities.VerifyThrowInternalNull(Project, nameof(Project));
+            ErrorUtilities.VerifyThrowInternalNull(Project);
             ErrorUtilities.VerifyThrowInternalLength(referenceFullPath, nameof(referenceFullPath));
             ErrorUtilities.VerifyThrow(Path.IsPathRooted(referenceFullPath), "Method does not treat path normalization cases");
 

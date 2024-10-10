@@ -61,7 +61,7 @@ namespace Microsoft.Build.BackEnd
         public TaskFactoryLoggingHost(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             _activeProxy = true;
             _isRunningWithMultipleNodes = isRunningWithMultipleNodes;

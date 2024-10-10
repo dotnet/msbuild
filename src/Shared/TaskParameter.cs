@@ -754,7 +754,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public TaskParameterTaskItem(string escapedItemSpec, string escapedDefiningProject, Dictionary<string, string> escapedMetadata)
             {
-                ErrorUtilities.VerifyThrowInternalNull(escapedItemSpec, nameof(escapedItemSpec));
+                ErrorUtilities.VerifyThrowInternalNull(escapedItemSpec);
 
                 _escapedItemSpec = escapedItemSpec;
                 _escapedDefiningProject = escapedDefiningProject;

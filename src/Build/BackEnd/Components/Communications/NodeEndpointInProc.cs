@@ -162,7 +162,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">Unused</param>
         public void Listen(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrowInternalNull(factory, nameof(factory));
+            ErrorUtilities.VerifyThrowInternalNull(factory);
             _packetFactory = factory;
 
             // Initialize our thread in async mode so we are ready when the Node-side endpoint "connects".
@@ -180,7 +180,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">Unused</param>
         public void Connect(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrowInternalNull(factory, nameof(factory));
+            ErrorUtilities.VerifyThrowInternalNull(factory);
             _packetFactory = factory;
 
             // Set up asynchronous packet pump, if necessary.

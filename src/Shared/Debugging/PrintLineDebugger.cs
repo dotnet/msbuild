@@ -27,7 +27,7 @@ namespace Microsoft.Build.Shared.Debugging
 
                 var propertyInfo = commonWriterType.GetProperty("Writer", BindingFlags.Public | BindingFlags.Static);
 
-                ErrorUtilities.VerifyThrowInternalNull(propertyInfo, nameof(propertyInfo));
+                ErrorUtilities.VerifyThrowInternalNull(propertyInfo);
 
                 return propertyInfo;
             });
