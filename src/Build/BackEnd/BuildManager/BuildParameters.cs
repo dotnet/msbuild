@@ -265,7 +265,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal BuildParameters(BuildParameters other, bool resetEnvironment = false)
         {
-            ErrorUtilities.VerifyThrowInternalNull(other, nameof(other));
+            ErrorUtilities.VerifyThrowInternalNull(other);
 
             _buildId = other._buildId;
             _culture = other._culture;

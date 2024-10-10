@@ -344,7 +344,7 @@ namespace Microsoft.Build.BackEnd
 
             if (useTaskFactory)
             {
-                ErrorUtilities.VerifyThrowInternalNull(buildComponentHost, nameof(buildComponentHost));
+                ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
 
                 mergedParameters ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 

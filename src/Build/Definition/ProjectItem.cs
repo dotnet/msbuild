@@ -126,7 +126,7 @@ namespace Microsoft.Build.Evaluation
                              PropertyDictionary<ProjectMetadata> directMetadataCloned,
                              List<ProjectItemDefinition> inheritedItemDefinitionsCloned)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowInternalNull(project);
             ErrorUtilities.VerifyThrowArgumentNull(xml);
 
             // Orcas accidentally allowed empty includes if they resulted from expansion: we preserve that bug

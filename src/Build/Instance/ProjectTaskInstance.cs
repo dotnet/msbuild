@@ -98,8 +98,8 @@ namespace Microsoft.Build.Execution
             ProjectTaskElement element,
             IList<ProjectTaskInstanceChild> outputs)
         {
-            ErrorUtilities.VerifyThrowInternalNull(element, nameof(element));
-            ErrorUtilities.VerifyThrowInternalNull(outputs, nameof(outputs));
+            ErrorUtilities.VerifyThrowInternalNull(element);
+            ErrorUtilities.VerifyThrowInternalNull(outputs);
 
             // These are all immutable
             _name = element.Name;

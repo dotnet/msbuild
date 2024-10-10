@@ -349,8 +349,8 @@ namespace Microsoft.Build.Evaluation
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, ProjectCollection projectCollection, DirectoryGetFiles getFiles, LoadXmlFromPath loadXmlFromPath, string msbuildOverrideTasksPath, DirectoryExists directoryExists)
             : this(toolsVersion, toolsPath, buildProperties, projectCollection.EnvironmentProperties, projectCollection.GlobalPropertiesCollection, null, msbuildOverrideTasksPath, null)
         {
-            ErrorUtilities.VerifyThrowInternalNull(getFiles, nameof(getFiles));
-            ErrorUtilities.VerifyThrowInternalNull(loadXmlFromPath, nameof(loadXmlFromPath));
+            ErrorUtilities.VerifyThrowInternalNull(getFiles);
+            ErrorUtilities.VerifyThrowInternalNull(loadXmlFromPath);
 
             _directoryExists = directoryExists;
             _getFiles = getFiles;

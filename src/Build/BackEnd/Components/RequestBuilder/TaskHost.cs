@@ -116,7 +116,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(host);
             ErrorUtilities.VerifyThrowArgumentNull(requestEntry);
-            ErrorUtilities.VerifyThrowInternalNull(taskLocation, nameof(taskLocation));
+            ErrorUtilities.VerifyThrowInternalNull(taskLocation);
 
             _host = host;
             _requestEntry = requestEntry;

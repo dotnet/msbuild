@@ -368,7 +368,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public ProjectInstance(Project project, ProjectInstanceSettings settings)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowInternalNull(project);
 
             var projectPath = project.FullPath;
             _directory = Path.GetDirectoryName(projectPath);
@@ -425,7 +425,7 @@ namespace Microsoft.Build.Execution
         /// <param name="fastItemLookupNeeded">Whether the fast item lookup cache is required.</param>
         private ProjectInstance(Project linkedProject, bool fastItemLookupNeeded)
         {
-            ErrorUtilities.VerifyThrowInternalNull(linkedProject, nameof(linkedProject));
+            ErrorUtilities.VerifyThrowInternalNull(linkedProject);
 
             var projectPath = linkedProject.FullPath;
             _directory = Path.GetDirectoryName(projectPath);
@@ -640,7 +640,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectInstance(Evaluation.Project.Data data, string directory, string fullPath, HostServices hostServices, PropertyDictionary<ProjectPropertyInstance> environmentVariableProperties, ProjectInstanceSettings settings)
         {
-            ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
+            ErrorUtilities.VerifyThrowInternalNull(data);
             ErrorUtilities.VerifyThrowInternalLength(directory, nameof(directory));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(fullPath, nameof(fullPath));
 

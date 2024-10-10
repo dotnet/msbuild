@@ -2033,7 +2033,7 @@ namespace Microsoft.Build.BackEnd
                 SchedulableRequest parentRequest = _schedulingData.BlockedRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId)
                     ?? _schedulingData.ExecutingRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId);
 
-                ErrorUtilities.VerifyThrowInternalNull(parentRequest, nameof(parentRequest));
+                ErrorUtilities.VerifyThrowInternalNull(parentRequest);
                 ErrorUtilities.VerifyThrow(
                     configCache.HasConfiguration(parentRequest.BuildRequest.ConfigurationId),
                     "All non root requests should have a parent with a loaded configuration");
