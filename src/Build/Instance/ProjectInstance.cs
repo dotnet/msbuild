@@ -2574,45 +2574,82 @@ namespace Microsoft.Build.Execution
             // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution.
             else
             {
-                string solutionFile = projectFile;
-                if (FileUtilities.IsSolutionFilterFilename(projectFile))
-                {
-                    solutionFile = SolutionFile.ParseSolutionFromSolutionFilter(projectFile, out _);
-                }
-                SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(solutionFile, out int solutionVersion, out int visualStudioVersion);
+                projectInstances = CalculateToolsVersionAndGenerateSolutionWrapper(
+                    projectFile,
+                    buildParameters,
+                    loggingService,
+                    projectBuildEventContext,
+                    globalProperties,
+                    isExplicitlyLoaded,
+                    targetNames,
+                    sdkResolverService,
+                    submissionId);
+            }
 
-                // If we get to this point, it's because it's a valid version.  Map the solution version
-                // to the equivalent MSBuild ToolsVersion, and unless it's Dev10 or newer, spawn the old
-                // engine to generate the solution wrapper.
-                if (solutionVersion <= 9) /* Whidbey or before */
-                {
-                    loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedOldSolutionVersion", "2.0", solutionVersion);
-                    projectInstances = GenerateSolutionWrapperUsingOldOM(projectFile, globalProperties, "2.0", buildParameters.ProjectRootElementCache, buildParameters, loggingService, projectBuildEventContext, isExplicitlyLoaded, sdkResolverService, submissionId);
-                }
-                else if (solutionVersion == 10) /* Orcas */
-                {
-                    loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedOldSolutionVersion", "3.5", solutionVersion);
-                    projectInstances = GenerateSolutionWrapperUsingOldOM(projectFile, globalProperties, "3.5", buildParameters.ProjectRootElementCache, buildParameters, loggingService, projectBuildEventContext, isExplicitlyLoaded, sdkResolverService, submissionId);
-                }
-                else
-                {
-                    if ((solutionVersion == 11) || (solutionVersion == 12 && visualStudioVersion == 0)) /* Dev 10 and Dev 11 */
-                    {
-                        toolsVersion = "4.0";
-                    }
-                    else /* Dev 12 and above */
-                    {
-                        toolsVersion = visualStudioVersion.ToString(CultureInfo.InvariantCulture) + ".0";
-                    }
+            return projectInstances;
+        }
 
-                    string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
-                        explicitToolsVersion: null,
-                        toolsVersionFromProject: FileUtilities.IsSolutionFilterFilename(projectFile) ? "Current" : toolsVersion,
-                        getToolset: buildParameters.GetToolset,
-                        defaultToolsVersion: Constants.defaultSolutionWrapperProjectToolsVersion,
-                        usingDifferentToolsVersionFromProjectFile: out _);
-                    projectInstances = GenerateSolutionWrapper(projectFile, globalProperties, toolsVersionToUse, loggingService, projectBuildEventContext, targetNames, sdkResolverService, submissionId);
+        private static ProjectInstance[] CalculateToolsVersionAndGenerateSolutionWrapper(
+            string projectFile,
+            BuildParameters buildParameters,
+            ILoggingService loggingService,
+            BuildEventContext projectBuildEventContext,
+            Dictionary<string, string> globalProperties,
+            bool isExplicitlyLoaded,
+            IReadOnlyCollection<string> targetNames,
+            ISdkResolverService sdkResolverService,
+            int submissionId)
+        {
+            string solutionFileName = projectFile;
+
+            if (FileUtilities.IsSolutionFilterFilename(projectFile))
+            {
+                solutionFileName = SolutionFile.ParseSolutionFromSolutionFilter(projectFile, out _);
+            }
+
+            if (SolutionFile.ShouldUseNewParser(solutionFileName))
+            {
+                // For the new parser we use Current tools version.
+                return GenerateSolutionWrapper(projectFile, globalProperties, "Current", loggingService, projectBuildEventContext, targetNames, sdkResolverService, submissionId);
+            }
+
+            // For the old parser we try to make a best-effort guess based on the version of the solution.
+            string toolsVersion = null;
+            ProjectInstance[] projectInstances = null;
+
+            SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(solutionFileName, out int solutionVersion, out int visualStudioVersion);
+
+            // If we get to this point, it's because it's a valid version.  Map the solution version
+            // to the equivalent MSBuild ToolsVersion, and unless it's Dev10 or newer, spawn the old
+            // engine to generate the solution wrapper.
+            if (solutionVersion <= 9) /* Whidbey or before */
+            {
+                loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedOldSolutionVersion", "2.0", solutionVersion);
+                projectInstances = GenerateSolutionWrapperUsingOldOM(projectFile, globalProperties, "2.0", buildParameters.ProjectRootElementCache, buildParameters, loggingService, projectBuildEventContext, isExplicitlyLoaded, sdkResolverService, submissionId);
+            }
+            else if (solutionVersion == 10) /* Orcas */
+            {
+                loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedOldSolutionVersion", "3.5", solutionVersion);
+                projectInstances = GenerateSolutionWrapperUsingOldOM(projectFile, globalProperties, "3.5", buildParameters.ProjectRootElementCache, buildParameters, loggingService, projectBuildEventContext, isExplicitlyLoaded, sdkResolverService, submissionId);
+            }
+            else
+            {
+                if ((solutionVersion == 11) || (solutionVersion == 12 && visualStudioVersion == 0)) /* Dev 10 and Dev 11 */
+                {
+                    toolsVersion = "4.0";
                 }
+                else /* Dev 12 and above */
+                {
+                    toolsVersion = visualStudioVersion.ToString(CultureInfo.InvariantCulture) + ".0";
+                }
+
+                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
+                    explicitToolsVersion: null,
+                    toolsVersionFromProject: FileUtilities.IsSolutionFilterFilename(projectFile) ? "Current" : toolsVersion,
+                    getToolset: buildParameters.GetToolset,
+                    defaultToolsVersion: Constants.defaultSolutionWrapperProjectToolsVersion,
+                    usingDifferentToolsVersionFromProjectFile: out _);
+                projectInstances = GenerateSolutionWrapper(projectFile, globalProperties, toolsVersionToUse, loggingService, projectBuildEventContext, targetNames, sdkResolverService, submissionId);
             }
 
             return projectInstances;

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -13,6 +14,9 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.UnitTests;
+using Microsoft.VisualStudio.SolutionPersistence.Model;
+using Microsoft.VisualStudio.SolutionPersistence.Serializer;
+using Microsoft.VisualStudio.SolutionPersistence;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -215,8 +219,10 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
         /// <summary>
         /// Test that a solution filter file is parsed correctly, and it can accurately respond as to whether a project should be filtered out.
         /// </summary>
-        [Fact]
-        public void ParseSolutionFilter()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseSolutionFilter(bool convertToSlnx)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
@@ -229,35 +235,35 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                 // The important part of this .sln is that it has references to each of the four projects we just created.
                 TransientTestFile sln = testEnvironment.CreateFile(folder, "Microsoft.Build.Dev.sln",
                     @"
-                    Microsoft Visual Studio Solution File, Format Version 12.00
-                    # Visual Studio 15
-                    VisualStudioVersion = 15.0.27004.2009
-                    MinimumVisualStudioVersion = 10.0.40219.1
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Microsoft.Build"", """ + Path.Combine("src", Path.GetFileName(microsoftBuild.Path)) + @""", ""{69BE05E2-CBDA-4D27-9733-44E12B0F5627}""
-                    EndProject
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""MSBuild"", """ + Path.Combine("src", Path.GetFileName(msbuild.Path)) + @""", ""{6F92CA55-1D15-4F34-B1FE-56C0B7EB455E}""
-                    EndProject
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Microsoft.Build.CommandLine.UnitTests"", """ + Path.Combine("src", Path.GetFileName(commandLineUnitTests.Path)) + @""", ""{0ADDBC02-0076-4159-B351-2BF33FAA46B2}""
-                    EndProject
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Microsoft.Build.Tasks.UnitTests"", """ + Path.Combine("src", Path.GetFileName(tasksUnitTests.Path)) + @""", ""{CF999BDE-02B3-431B-95E6-E88D621D9CBF}""
-                    EndProject
-                    Global
-                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        EndGlobalSection
-                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                    EndGlobalSection
-                    GlobalSection(SolutionProperties) = preSolution
-                        HideSolutionNode = FALSE
-                    EndGlobalSection
-                    GlobalSection(ExtensibilityGlobals) = postSolution
-                    EndGlobalSection
-                    EndGlobal
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2009
+MinimumVisualStudioVersion = 10.0.40219.1
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Microsoft.Build"", """ + Path.Combine("src", Path.GetFileName(microsoftBuild.Path)) + @""", ""{69BE05E2-CBDA-4D27-9733-44E12B0F5627}""
+EndProject
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""MSBuild"", """ + Path.Combine("src", Path.GetFileName(msbuild.Path)) + @""", ""{6F92CA55-1D15-4F34-B1FE-56C0B7EB455E}""
+EndProject
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Microsoft.Build.CommandLine.UnitTests"", """ + Path.Combine("src", Path.GetFileName(commandLineUnitTests.Path)) + @""", ""{0ADDBC02-0076-4159-B351-2BF33FAA46B2}""
+EndProject
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Microsoft.Build.Tasks.UnitTests"", """ + Path.Combine("src", Path.GetFileName(tasksUnitTests.Path)) + @""", ""{CF999BDE-02B3-431B-95E6-E88D621D9CBF}""
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+EndGlobalSection
+GlobalSection(SolutionProperties) = preSolution
+    HideSolutionNode = FALSE
+EndGlobalSection
+GlobalSection(ExtensibilityGlobals) = postSolution
+EndGlobalSection
+EndGlobal
                     ");
                 TransientTestFile slnf = testEnvironment.CreateFile(folder, "Dev.slnf",
                     @"
                     {
                       ""solution"": {
-                        ""path"": """ + sln.Path.Replace("\\", "\\\\") + @""",
+                        ""path"": """ + (convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path).Replace("\\", "\\\\") + @""",
                         ""projects"": [
                           """ + Path.Combine("src", Path.GetFileName(microsoftBuild.Path)!).Replace("\\", "\\\\") + @""",
                           """ + Path.Combine("src", Path.GetFileName(tasksUnitTests.Path)!).Replace("\\", "\\\\") + @"""
@@ -274,6 +280,15 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                  || sp.ProjectShouldBuild(Path.Combine("src", "notAProject.csproj")))
                     .ShouldBeFalse();
             }
+        }
+
+        private static string ConvertToSlnx(string slnPath)
+        {
+            string slnxPath = slnPath + "x";
+            ISolutionSerializer serializer = SolutionSerializers.GetSerializerByMoniker(slnPath);
+            SolutionModel solutionModel = serializer!.OpenAsync(slnPath, CancellationToken.None).Result;
+            SolutionSerializers.SlnXml.SaveAsync(slnxPath, solutionModel, CancellationToken.None).Wait();
+            return slnxPath;
         }
 
         private ILoggingService CreateMockLoggingService()

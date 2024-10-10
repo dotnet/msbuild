@@ -691,12 +691,16 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectInstance[] Generate()
         {
-            // Validate against our minimum for upgradable projects
-            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                _solutionFile.Version >= SolutionFile.slnFileMinVersion,
-                "SubCategoryForSolutionParsingErrors",
-                new BuildEventFileInfo(_solutionFile.FullPath),
-                "SolutionParseUpgradeNeeded");
+            // The Version is not available in the new parser.
+            if (!_solutionFile.UseNewParser)
+            {
+                // Validate against our minimum for upgradable projects
+                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
+                    _solutionFile.Version >= SolutionFile.slnFileMinVersion,
+                    "SubCategoryForSolutionParsingErrors",
+                    new BuildEventFileInfo(_solutionFile.FullPath),
+                    "SolutionParseUpgradeNeeded");
+            }
 
             // This is needed in order to make decisions about tools versions such as whether to put a
             // ToolsVersion parameter on <MSBuild> task tags and what MSBuildToolsPath to use when
