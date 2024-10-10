@@ -78,6 +78,6 @@
   </Target>
    <!-- SolutionPersistence -->
   <PropertyGroup>
-	  <MicrosoftVisualStudioSolutionPersistenceVersion>0.5.26-beta</MicrosoftVisualStudioSolutionPersistenceVersion>
+	  <MicrosoftVisualStudioSolutionPersistenceVersion>1.0.4</MicrosoftVisualStudioSolutionPersistenceVersion>
   </PropertyGroup>
 </Project>
