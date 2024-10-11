@@ -62,13 +62,13 @@ namespace Microsoft.Build.Tasks
                     string referenceAssemblyPathNeutral = Path.Combine(sdkDirectory, "References", configuration, "Neutral");
                     string referenceAssemblyArchFilePathNeutral = Path.Combine(sdkDirectory, "References", "CommonConfiguration", "Neutral");
 
-                    string[] searchLocations = new string[]
-                    {
+                    string[] searchLocations =
+                    [
                         referenceAssemblyFilePath, // Config-Arch
                         referenceAssemblyPathNeutral, // Config-Neutral
                         referenceAssemblyCommonArchFilePath, // CommonArch-Config
                         referenceAssemblyArchFilePathNeutral // CommonArch-Neutral
-                    };
+                    ];
 
                     // Lets try and resovle from the windowsmetadata directory first
 

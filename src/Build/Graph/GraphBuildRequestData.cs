@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Graph
@@ -167,7 +168,7 @@ namespace Microsoft.Build.Graph
         private GraphBuildRequestData(ICollection<string> targetsToBuild, HostServices? hostServices, BuildRequestDataFlags flags, GraphBuildOptions? graphBuildOptions = null)
         : base(targetsToBuild, flags, hostServices)
         {
-            Flags = flags;
+            base.Flags = flags;
             GraphBuildOptions = graphBuildOptions ?? new GraphBuildOptions();
         }
 
@@ -235,5 +236,18 @@ namespace Microsoft.Build.Graph
         /// Options for how the graph should be built.
         /// </summary>
         public GraphBuildOptions GraphBuildOptions { get; }
+
+        // WARNING!: Do not remove the below proxy properties.
+        //  They are required to make the OM forward compatible
+        //  (code built against this OM should run against binaries with previous version of OM).
+
+        /// <inheritdoc cref="BuildRequestDataBase.TargetNames"/>
+        public new ICollection<string> TargetNames => base.TargetNames;
+
+        /// <inheritdoc cref="BuildRequestDataBase.Flags"/>
+        public new BuildRequestDataFlags Flags => base.Flags;
+
+        /// <inheritdoc cref="BuildRequestDataBase.HostServices"/>
+        public new HostServices? HostServices => base.HostServices;
     }
 }

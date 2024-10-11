@@ -100,7 +100,7 @@ namespace Microsoft.Build.CommandLine
             WarningsNotAsErrors,
             WarningsAsMessages,
             BinaryLogger,
-            Analyze,
+            Check,
             Restore,
             ProfileEvaluation,
             RestoreProperty,
@@ -213,24 +213,24 @@ namespace Microsoft.Build.CommandLine
             //----------------------------------------------------------------------------------------------------------------------------------------------------------
             //                                          Switch Names                        Switch Id                             Dup Error  Light up key    resourceId
             //----------------------------------------------------------------------------------------------------------------------------------------------------------
-            new ParameterlessSwitchInfo(  new string[] { "help", "h", "?" },                         ParameterlessSwitch.Help,                  null,       "HelpMessage_4_HelpSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "version", "ver" },                         ParameterlessSwitch.Version,               null,       "HelpMessage_6_VersionSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "nologo" },                                 ParameterlessSwitch.NoLogo,                null,       "HelpMessage_5_NoLogoSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "noautoresponse", "noautorsp" },            ParameterlessSwitch.NoAutoResponse,        null,       "HelpMessage_8_NoAutoResponseSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "noconsolelogger", "noconlog" },            ParameterlessSwitch.NoConsoleLogger,       null,       "HelpMessage_14_NoConsoleLoggerSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger", "fl" },                       ParameterlessSwitch.FileLogger,            null,       "HelpMessage_20_FileLoggerSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger1", "fl1" },                     ParameterlessSwitch.FileLogger1,           null,       "HelpMessage_20_FileLoggerSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger2", "fl2" },                     ParameterlessSwitch.FileLogger2,           null,       "HelpMessage_20_FileLoggerSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger3", "fl3" },                     ParameterlessSwitch.FileLogger3,           null,       "HelpMessage_20_FileLoggerSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger4", "fl4" },                     ParameterlessSwitch.FileLogger4,           null,       "HelpMessage_20_FileLoggerSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger5", "fl5" },                     ParameterlessSwitch.FileLogger5,           null,       "HelpMessage_20_FileLoggerSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger6", "fl6" },                     ParameterlessSwitch.FileLogger6,           null,       "HelpMessage_20_FileLoggerSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger7", "fl7" },                     ParameterlessSwitch.FileLogger7,           null,       "HelpMessage_20_FileLoggerSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger8", "fl8" },                     ParameterlessSwitch.FileLogger8,           null,       "HelpMessage_20_FileLoggerSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "filelogger9", "fl9" },                     ParameterlessSwitch.FileLogger9,           null,       "HelpMessage_20_FileLoggerSwitch"),
-            new ParameterlessSwitchInfo(  new string[] { "distributedfilelogger", "dfl" },           ParameterlessSwitch.DistributedFileLogger, null,       "HelpMessage_21_DistributedFileLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["help", "h", "?"],                         ParameterlessSwitch.Help,                  null,       "HelpMessage_4_HelpSwitch"),
+            new ParameterlessSwitchInfo(  ["version", "ver"],                         ParameterlessSwitch.Version,               null,       "HelpMessage_6_VersionSwitch"),
+            new ParameterlessSwitchInfo(  ["nologo"],                                 ParameterlessSwitch.NoLogo,                null,       "HelpMessage_5_NoLogoSwitch"),
+            new ParameterlessSwitchInfo(  ["noautoresponse", "noautorsp"],            ParameterlessSwitch.NoAutoResponse,        null,       "HelpMessage_8_NoAutoResponseSwitch"),
+            new ParameterlessSwitchInfo(  ["noconsolelogger", "noconlog"],            ParameterlessSwitch.NoConsoleLogger,       null,       "HelpMessage_14_NoConsoleLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["filelogger", "fl"],                       ParameterlessSwitch.FileLogger,            null,       "HelpMessage_20_FileLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["filelogger1", "fl1"],                     ParameterlessSwitch.FileLogger1,           null,       "HelpMessage_20_FileLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["filelogger2", "fl2"],                     ParameterlessSwitch.FileLogger2,           null,       "HelpMessage_20_FileLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["filelogger3", "fl3"],                     ParameterlessSwitch.FileLogger3,           null,       "HelpMessage_20_FileLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["filelogger4", "fl4"],                     ParameterlessSwitch.FileLogger4,           null,       "HelpMessage_20_FileLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["filelogger5", "fl5"],                     ParameterlessSwitch.FileLogger5,           null,       "HelpMessage_20_FileLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["filelogger6", "fl6"],                     ParameterlessSwitch.FileLogger6,           null,       "HelpMessage_20_FileLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["filelogger7", "fl7"],                     ParameterlessSwitch.FileLogger7,           null,       "HelpMessage_20_FileLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["filelogger8", "fl8"],                     ParameterlessSwitch.FileLogger8,           null,       "HelpMessage_20_FileLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["filelogger9", "fl9"],                     ParameterlessSwitch.FileLogger9,           null,       "HelpMessage_20_FileLoggerSwitch"),
+            new ParameterlessSwitchInfo(  ["distributedfilelogger", "dfl"],           ParameterlessSwitch.DistributedFileLogger, null,       "HelpMessage_21_DistributedFileLoggerSwitch"),
 #if DEBUG
-            new ParameterlessSwitchInfo(  new string[] { "waitfordebugger", "wfd" },                 ParameterlessSwitch.WaitForDebugger,       null,       null),
+            new ParameterlessSwitchInfo(  ["waitfordebugger", "wfd"],                 ParameterlessSwitch.WaitForDebugger,       null,       null),
 #endif
         };
 
@@ -241,62 +241,62 @@ namespace Microsoft.Build.CommandLine
             //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
             //                                          Switch Names                            Switch Id                                       Duplicate Switch Error          Multi Params?   Missing Parameters Error           Unquote?    Empty?   reosurceId
             //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-            new ParameterizedSwitchInfo(  new string[] { null },                                ParameterizedSwitch.Project,                    "DuplicateProjectSwitchError",  false,          null,                                  true,   false,   null),
-            new ParameterizedSwitchInfo(  new string[] { "target", "t"},                        ParameterizedSwitch.Target,                     null,                           true,           "MissingTargetError",                  true,   false,   "HelpMessage_9_TargetSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "property", "p" },                     ParameterizedSwitch.Property,                   null,                           true,           "MissingPropertyError",                true,   false,   "HelpMessage_10_PropertySwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "logger", "l" },                       ParameterizedSwitch.Logger,                     null,                           false,          "MissingLoggerError",                  false,  false,   "HelpMessage_11_LoggerSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "distributedlogger", "dl" },           ParameterizedSwitch.DistributedLogger,          null,                           false,          "MissingLoggerError",                  false,  false,   "HelpMessage_18_DistributedLoggerSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "verbosity", "v" },                    ParameterizedSwitch.Verbosity,                  null,                           false,          "MissingVerbosityError",               true,   false,   "HelpMessage_12_VerbositySwitch"),
+            new ParameterizedSwitchInfo(  [null],                                ParameterizedSwitch.Project,                    "DuplicateProjectSwitchError",  false,          null,                                  true,   false,   null),
+            new ParameterizedSwitchInfo(  ["target", "t"],                       ParameterizedSwitch.Target,                     null,                           true,           "MissingTargetError",                  true,   false,   "HelpMessage_9_TargetSwitch"),
+            new ParameterizedSwitchInfo(  ["property", "p"],                     ParameterizedSwitch.Property,                   null,                           true,           "MissingPropertyError",                true,   false,   "HelpMessage_10_PropertySwitch"),
+            new ParameterizedSwitchInfo(  ["logger", "l"],                       ParameterizedSwitch.Logger,                     null,                           false,          "MissingLoggerError",                  false,  false,   "HelpMessage_11_LoggerSwitch"),
+            new ParameterizedSwitchInfo(  ["distributedlogger", "dl"],           ParameterizedSwitch.DistributedLogger,          null,                           false,          "MissingLoggerError",                  false,  false,   "HelpMessage_18_DistributedLoggerSwitch"),
+            new ParameterizedSwitchInfo(  ["verbosity", "v"],                    ParameterizedSwitch.Verbosity,                  null,                           false,          "MissingVerbosityError",               true,   false,   "HelpMessage_12_VerbositySwitch"),
 #if FEATURE_XML_SCHEMA_VALIDATION
-            new ParameterizedSwitchInfo(  new string[] { "validate", "val" },                   ParameterizedSwitch.Validate,                   null,                           false,          null,                                  true,   false,   "HelpMessage_15_ValidateSwitch"),
+            new ParameterizedSwitchInfo(  ["validate", "val"],                   ParameterizedSwitch.Validate,                   null,                           false,          null,                                  true,   false,   "HelpMessage_15_ValidateSwitch"),
 #endif
-            new ParameterizedSwitchInfo(  new string[] { "consoleloggerparameters", "clp" },    ParameterizedSwitch.ConsoleLoggerParameters,    null,                           false,          "MissingConsoleLoggerParameterError",  true,   false,   "HelpMessage_13_ConsoleLoggerParametersSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "nodemode", "nmode" },                 ParameterizedSwitch.NodeMode,                   null,                           false,          null,                                  false,  false,   null),
-            new ParameterizedSwitchInfo(  new string[] { "maxcpucount", "m" },                  ParameterizedSwitch.MaxCPUCount,                null,                           false,          "MissingMaxCPUCountError",             true,   false,   "HelpMessage_17_MaximumCPUSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "ignoreprojectextensions", "ignore" }, ParameterizedSwitch.IgnoreProjectExtensions,    null,                           true,           "MissingIgnoreProjectExtensionsError", true,   false,   "HelpMessage_19_IgnoreProjectExtensionsSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "toolsversion","tv" },                 ParameterizedSwitch.ToolsVersion,               null,                           false,          "MissingToolsVersionError",            true,   false,   "HelpMessage_23_ToolsVersionSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters", "flp" },       ParameterizedSwitch.FileLoggerParameters,       null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters1", "flp1" },     ParameterizedSwitch.FileLoggerParameters1,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters2", "flp2" },     ParameterizedSwitch.FileLoggerParameters2,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters3", "flp3" },     ParameterizedSwitch.FileLoggerParameters3,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters4", "flp4" },     ParameterizedSwitch.FileLoggerParameters4,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters5", "flp5" },     ParameterizedSwitch.FileLoggerParameters5,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters6", "flp6" },     ParameterizedSwitch.FileLoggerParameters6,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters7", "flp7" },     ParameterizedSwitch.FileLoggerParameters7,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters8", "flp8" },     ParameterizedSwitch.FileLoggerParameters8,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "fileloggerparameters9", "flp9" },     ParameterizedSwitch.FileLoggerParameters9,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
+            new ParameterizedSwitchInfo(  ["consoleloggerparameters", "clp"],    ParameterizedSwitch.ConsoleLoggerParameters,    null,                           false,          "MissingConsoleLoggerParameterError",  true,   false,   "HelpMessage_13_ConsoleLoggerParametersSwitch"),
+            new ParameterizedSwitchInfo(  ["nodemode", "nmode"],                 ParameterizedSwitch.NodeMode,                   null,                           false,          null,                                  false,  false,   null),
+            new ParameterizedSwitchInfo(  ["maxcpucount", "m"],                  ParameterizedSwitch.MaxCPUCount,                null,                           false,          "MissingMaxCPUCountError",             true,   false,   "HelpMessage_17_MaximumCPUSwitch"),
+            new ParameterizedSwitchInfo(  ["ignoreprojectextensions", "ignore"], ParameterizedSwitch.IgnoreProjectExtensions,    null,                           true,           "MissingIgnoreProjectExtensionsError", true,   false,   "HelpMessage_19_IgnoreProjectExtensionsSwitch"),
+            new ParameterizedSwitchInfo(  ["toolsversion","tv"],                 ParameterizedSwitch.ToolsVersion,               null,                           false,          "MissingToolsVersionError",            true,   false,   "HelpMessage_23_ToolsVersionSwitch"),
+            new ParameterizedSwitchInfo(  ["fileloggerparameters", "flp"],       ParameterizedSwitch.FileLoggerParameters,       null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
+            new ParameterizedSwitchInfo(  ["fileloggerparameters1", "flp1"],     ParameterizedSwitch.FileLoggerParameters1,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
+            new ParameterizedSwitchInfo(  ["fileloggerparameters2", "flp2"],     ParameterizedSwitch.FileLoggerParameters2,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
+            new ParameterizedSwitchInfo(  ["fileloggerparameters3", "flp3"],     ParameterizedSwitch.FileLoggerParameters3,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
+            new ParameterizedSwitchInfo(  ["fileloggerparameters4", "flp4"],     ParameterizedSwitch.FileLoggerParameters4,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
+            new ParameterizedSwitchInfo(  ["fileloggerparameters5", "flp5"],     ParameterizedSwitch.FileLoggerParameters5,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
+            new ParameterizedSwitchInfo(  ["fileloggerparameters6", "flp6"],     ParameterizedSwitch.FileLoggerParameters6,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
+            new ParameterizedSwitchInfo(  ["fileloggerparameters7", "flp7"],     ParameterizedSwitch.FileLoggerParameters7,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
+            new ParameterizedSwitchInfo(  ["fileloggerparameters8", "flp8"],     ParameterizedSwitch.FileLoggerParameters8,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
+            new ParameterizedSwitchInfo(  ["fileloggerparameters9", "flp9"],     ParameterizedSwitch.FileLoggerParameters9,      null,                           false,          "MissingFileLoggerParameterError",     true,   false,   "HelpMessage_22_FileLoggerParametersSwitch"),
             // To not break existing use, keep supporting live logger switches
-            new ParameterizedSwitchInfo(  new string[] { "livelogger", "ll", "terminallogger", "tl" }, ParameterizedSwitch.TerminalLogger,      null,                           true,           null,                                  true,   true,    "HelpMessage_47_TerminalLoggerSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "terminalloggerparameters", "tlp" },   ParameterizedSwitch.TerminalLoggerParameters,   null,                           false,          "MissingTerminalLoggerParameterError", true,   false,   "HelpMessage_48_TerminalLoggerParametersSwitch"),
+            new ParameterizedSwitchInfo(  ["livelogger", "ll", "terminallogger", "tl"], ParameterizedSwitch.TerminalLogger,      null,                           true,           null,                                  true,   true,    "HelpMessage_47_TerminalLoggerSwitch"),
+            new ParameterizedSwitchInfo(  ["terminalloggerparameters", "tlp"],   ParameterizedSwitch.TerminalLoggerParameters,   null,                           false,          "MissingTerminalLoggerParameterError", true,   false,   "HelpMessage_48_TerminalLoggerParametersSwitch"),
 #if FEATURE_NODE_REUSE
-            new ParameterizedSwitchInfo(  new string[] { "nodereuse", "nr" },                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true,   false,   "HelpMessage_24_NodeReuse"),
+            new ParameterizedSwitchInfo(  ["nodereuse", "nr"],                   ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true,   false,   "HelpMessage_24_NodeReuse"),
 #endif
-            new ParameterizedSwitchInfo(  new string[] { "preprocess", "pp" },                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true,   false,   "HelpMessage_25_PreprocessSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "targets", "ts" },                     ParameterizedSwitch.Targets,                    null,                           false,          null,                                  true,   false,   "HelpMessage_38_TargetsSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "warnaserror", "err" },                ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true,    "HelpMessage_28_WarnAsErrorSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "warnnotaserror", "noerr" },           ParameterizedSwitch.WarningsNotAsErrors,        null,                           true,           "MissingWarnNotAsErrorParameterError", true,   false,   "HelpMessage_40_WarnNotAsErrorSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "warnasmessage", "nowarn" },           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false,   "HelpMessage_29_WarnAsMessageSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "binarylogger", "bl" },                ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false,   "HelpMessage_30_BinaryLoggerSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "analyze", },                          ParameterizedSwitch.Analyze,                    null,                           false,          null,                                  true,   false,   null),
-            new ParameterizedSwitchInfo(  new string[] { "restore", "r" },                      ParameterizedSwitch.Restore,                    null,                           false,          null,                                  true,   false,   "HelpMessage_31_RestoreSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "profileevaluation", "prof" },         ParameterizedSwitch.ProfileEvaluation,          null,                           false,          "MissingProfileParameterError",        true,   false,   "HelpMessage_32_ProfilerSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "restoreproperty", "rp" },             ParameterizedSwitch.RestoreProperty,            null,                           true,           "MissingPropertyError",                true,   false,   "HelpMessage_33_RestorePropertySwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "interactive" },                       ParameterizedSwitch.Interactive,                null,                           false,          null,                                  true,   false,   "HelpMessage_34_InteractiveSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "isolateprojects", "isolate" },        ParameterizedSwitch.IsolateProjects,            null,                           false,          null,                                  true,   false,   "HelpMessage_35_IsolateProjectsSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "graphbuild", "graph" },               ParameterizedSwitch.GraphBuild,                 null,                           true,           null,                                  true,   false,   "HelpMessage_36_GraphBuildSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "inputResultsCaches", "irc" },         ParameterizedSwitch.InputResultsCaches,         null,                           true,           null,                                  true,   true,    "HelpMessage_InputCachesFiles"),
-            new ParameterizedSwitchInfo(  new string[] { "outputResultsCache", "orc" },         ParameterizedSwitch.OutputResultsCache,         "DuplicateOutputResultsCache",  false,          null,                                  true,   true,    "HelpMessage_OutputCacheFile"),
+            new ParameterizedSwitchInfo(  ["preprocess", "pp"],                  ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true,   false,   "HelpMessage_25_PreprocessSwitch"),
+            new ParameterizedSwitchInfo(  ["targets", "ts"],                     ParameterizedSwitch.Targets,                    null,                           false,          null,                                  true,   false,   "HelpMessage_38_TargetsSwitch"),
+            new ParameterizedSwitchInfo(  ["warnaserror", "err"],                ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true,    "HelpMessage_28_WarnAsErrorSwitch"),
+            new ParameterizedSwitchInfo(  ["warnnotaserror", "noerr"],           ParameterizedSwitch.WarningsNotAsErrors,        null,                           true,           "MissingWarnNotAsErrorParameterError", true,   false,   "HelpMessage_40_WarnNotAsErrorSwitch"),
+            new ParameterizedSwitchInfo(  ["warnasmessage", "nowarn"],           ParameterizedSwitch.WarningsAsMessages,         null,                           true,           "MissingWarnAsMessageParameterError",  true,   false,   "HelpMessage_29_WarnAsMessageSwitch"),
+            new ParameterizedSwitchInfo(  ["binarylogger", "bl"],                ParameterizedSwitch.BinaryLogger,               null,                           false,          null,                                  true,   false,   "HelpMessage_30_BinaryLoggerSwitch"),
+            new ParameterizedSwitchInfo(  ["check"],                             ParameterizedSwitch.Check,                      null,                           false,          null,                                  true,   false,   "HelpMessage_52_BuildCheckSwitch"),
+            new ParameterizedSwitchInfo(  ["restore", "r"],                      ParameterizedSwitch.Restore,                    null,                           false,          null,                                  true,   false,   "HelpMessage_31_RestoreSwitch"),
+            new ParameterizedSwitchInfo(  ["profileevaluation", "prof"],         ParameterizedSwitch.ProfileEvaluation,          null,                           false,          "MissingProfileParameterError",        true,   false,   "HelpMessage_32_ProfilerSwitch"),
+            new ParameterizedSwitchInfo(  ["restoreproperty", "rp"],             ParameterizedSwitch.RestoreProperty,            null,                           true,           "MissingPropertyError",                true,   false,   "HelpMessage_33_RestorePropertySwitch"),
+            new ParameterizedSwitchInfo(  ["interactive"],                       ParameterizedSwitch.Interactive,                null,                           false,          null,                                  true,   false,   "HelpMessage_34_InteractiveSwitch"),
+            new ParameterizedSwitchInfo(  ["isolateprojects", "isolate"],        ParameterizedSwitch.IsolateProjects,            null,                           false,          null,                                  true,   false,   "HelpMessage_35_IsolateProjectsSwitch"),
+            new ParameterizedSwitchInfo(  ["graphbuild", "graph"],               ParameterizedSwitch.GraphBuild,                 null,                           true,           null,                                  true,   false,   "HelpMessage_36_GraphBuildSwitch"),
+            new ParameterizedSwitchInfo(  ["inputResultsCaches", "irc"],         ParameterizedSwitch.InputResultsCaches,         null,                           true,           null,                                  true,   true,    "HelpMessage_InputCachesFiles"),
+            new ParameterizedSwitchInfo(  ["outputResultsCache", "orc"],         ParameterizedSwitch.OutputResultsCache,         "DuplicateOutputResultsCache",  false,          null,                                  true,   true,    "HelpMessage_OutputCacheFile"),
 #if FEATURE_REPORTFILEACCESSES
-            new ParameterizedSwitchInfo(  new string[] { "reportfileaccesses" },                ParameterizedSwitch.ReportFileAccesses,         null,                           false,          null,                                  true,   false,   "HelpMessage_42_ReportFileAccessesSwitch"),
+            new ParameterizedSwitchInfo(  ["reportfileaccesses"],                ParameterizedSwitch.ReportFileAccesses,         null,                           false,          null,                                  true,   false,   "HelpMessage_42_ReportFileAccessesSwitch"),
 #endif
-            new ParameterizedSwitchInfo(  new string[] { "lowpriority", "low" },                ParameterizedSwitch.LowPriority,                null,                           false,          null,                                  true,   false,   "HelpMessage_39_LowPrioritySwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "question", "q" },                     ParameterizedSwitch.Question,                   null,                           false,          null,                                  true,   false,   "HelpMessage_41_QuestionSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "detailedsummary", "ds" },             ParameterizedSwitch.DetailedSummary,            null,                           false,          null,                                  true,   false,   "HelpMessage_26_DetailedSummarySwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "getProperty" },                       ParameterizedSwitch.GetProperty,                null,                           true,           "MissingGetPropertyError",             true,   false,   "HelpMessage_43_GetPropertySwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "getItem" },                           ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",                 true,   false,   "HelpMessage_44_GetItemSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "getTargetResult" },                   ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",         true,   false,   "HelpMessage_45_GetTargetResultSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "getResultOutputFile" },               ParameterizedSwitch.GetResultOutputFile,        null,                           true,           "MissingGetResultFileError",           true,   false,   "HelpMessage_51_GetResultOutputFileSwitch"),
-            new ParameterizedSwitchInfo(  new string[] { "featureAvailability", "fa" },         ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false,   "HelpMessage_46_FeatureAvailabilitySwitch")
+            new ParameterizedSwitchInfo(  ["lowpriority", "low"],                ParameterizedSwitch.LowPriority,                null,                           false,          null,                                  true,   false,   "HelpMessage_39_LowPrioritySwitch"),
+            new ParameterizedSwitchInfo(  ["question", "q"],                     ParameterizedSwitch.Question,                   null,                           false,          null,                                  true,   false,   "HelpMessage_41_QuestionSwitch"),
+            new ParameterizedSwitchInfo(  ["detailedsummary", "ds"],             ParameterizedSwitch.DetailedSummary,            null,                           false,          null,                                  true,   false,   "HelpMessage_26_DetailedSummarySwitch"),
+            new ParameterizedSwitchInfo(  ["getProperty"],                       ParameterizedSwitch.GetProperty,                null,                           true,           "MissingGetPropertyError",             true,   false,   "HelpMessage_43_GetPropertySwitch"),
+            new ParameterizedSwitchInfo(  ["getItem"],                           ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",                 true,   false,   "HelpMessage_44_GetItemSwitch"),
+            new ParameterizedSwitchInfo(  ["getTargetResult"],                   ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",         true,   false,   "HelpMessage_45_GetTargetResultSwitch"),
+            new ParameterizedSwitchInfo(  ["getResultOutputFile"],               ParameterizedSwitch.GetResultOutputFile,        null,                           true,           "MissingGetResultFileError",           true,   false,   "HelpMessage_51_GetResultOutputFileSwitch"),
+            new ParameterizedSwitchInfo(  ["featureAvailability", "fa"],         ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false,   "HelpMessage_46_FeatureAvailabilitySwitch")
         };
 
         /// <summary>
@@ -467,7 +467,7 @@ namespace Microsoft.Build.CommandLine
                 Debug.Assert(i == (int)(s_parameterizedSwitchesMap[i].parameterizedSwitch),
                     "The map of parameterized switches must be ordered the same way as the ParameterizedSwitch enumeration.");
                 if (s_parameterizedSwitchesMap[i].parameterizedSwitch is not ParameterizedSwitch.Project and
-                    not ParameterizedSwitch.NodeMode and not ParameterizedSwitch.Analyze)
+                    not ParameterizedSwitch.NodeMode and not ParameterizedSwitch.Check)
                 {
                     Debug.Assert(!string.IsNullOrEmpty(s_parameterizedSwitchesMap[i].resourceId), "All parameterized switches should be cross-checked against the help message strings except from project switch");
                 }
@@ -651,7 +651,7 @@ namespace Microsoft.Build.CommandLine
         }
 
         // used to indicate a null parameter list for a switch
-        private static readonly string[] s_noParameters = Array.Empty<string>();
+        private static readonly string[] s_noParameters = [];
 
         /// <summary>
         /// Gets the parameters (if any) detected on the command line for the given parameterized switch.
@@ -745,7 +745,7 @@ namespace Microsoft.Build.CommandLine
             }
             else if (IsParameterlessSwitchSet(parameterlessSwitch))
             {
-                result = Array.Empty<string>();
+                result = [];
             }
 
             return result;

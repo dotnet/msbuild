@@ -65,7 +65,7 @@ namespace Microsoft.Build.Evaluation
             var outerXml = description;
             outerXml = outerXml.Replace(@"xmlns=""http://schemas.microsoft.com/developer/msbuild/2003""", "");
 
-            var newLineIndex = outerXml.IndexOfAny(new[] { '\r', '\n' });
+            var newLineIndex = outerXml.IndexOfAny(['\r', '\n']);
             return newLineIndex == -1 ? outerXml : outerXml.Remove(newLineIndex);
         }
 
@@ -75,12 +75,8 @@ namespace Microsoft.Build.Evaluation
         protected void AppendDefaultHeaderWithSeparator(StringBuilder stringBuilder, string separator)
         {
             stringBuilder.AppendLine(
-                string.Join(separator,
-                    new[]
-                    {
-                        "Id", "ParentId", "Pass", "File", "Line #", "Expression", "Inc (ms)", "Inc (%)", "Exc (ms)",
-                        "Exc (%)", "#", "Kind", "Bug"
-                    }));
+                string.Join(separator, ["Id", "ParentId", "Pass", "File", "Line #", "Expression", "Inc (ms)", "Inc (%)", "Exc (ms)",
+                        "Exc (%)", "#", "Kind", "Bug"]));
         }
 
         /// <summary>

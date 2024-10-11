@@ -81,7 +81,7 @@ private static partial Regex GetPropertyMatcherRegex();
         // dictionary, but we also use a case-insensitive key comparer when doing lookups
         var activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>(StringComparer.OrdinalIgnoreCase);
         string activeSectionName = "";
-        var lines = string.IsNullOrEmpty(text) ? Array.Empty<string>() : text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+        var lines = string.IsNullOrEmpty(text) ? [] : text.Split(["\r\n", "\n"], StringSplitOptions.None);
 
         foreach(var line in lines)
         {

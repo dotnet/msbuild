@@ -39,7 +39,7 @@
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildFromSource)' != 'true'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -250,14 +250,6 @@
     <Compile Include="BackEnd\Components\SdkResolution\SdkResultFactory.cs" />
     <Compile Include="BackEnd\Node\LoggingNodeConfiguration.cs" />
     <Compile Include="BackEnd\Shared\ConfigurationMetadata.cs" />
-    <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
-    <Compile Include="Collections\ConcurrentStackExtensions.cs" />
-    <Compile Include="Collections\LookasideStringInterner.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\HashSet.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableEntryHashSet.cs" />
     <Compile Include="Construction\ImplicitImportLocation.cs" />
     <Compile Include="Construction\ProjectSdkElement.cs" />
     <Compile Include="Definition\ProjectOptions.cs" />
@@ -367,6 +359,9 @@
     <Compile Include="BackEnd\TaskExecutionHost\TaskExecutionHost.cs" />
     <!-- #### COLLECTIONS ### -->
     <Compile Include="..\Shared\CollectionHelpers.cs" />
+    <Compile Include="Collections\ArrayDictionary.cs" />
+    <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
+    <Compile Include="Collections\ConcurrentStackExtensions.cs" />
     <Compile Include="Collections\ConvertingEnumerable.cs" />
     <Compile Include="Collections\CopyOnReadEnumerable.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
@@ -376,17 +371,25 @@
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
     <Compile Include="Collections\IConstrainableDictionary.cs" />
+    <Compile Include="Collections\ICopyOnWritePropertyDictionary.cs" />
     <Compile Include="Collections\IItemDictionary.cs" />
+    <Compile Include="Collections\IMultiDictionary.cs" />
     <Compile Include="Collections\ItemDictionary.cs" />
     <Compile Include="Collections\IImmutable.cs" />
     <Compile Include="Collections\MultiDictionary.cs" />
     <Compile Include="Collections\IValued.cs" />
+    <Compile Include="Collections\LookasideStringInterner.cs" />
     <Compile Include="Collections\PropertyDictionary.cs" />
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
     <Compile Include="Collections\ReadOnlyConvertingDictionary.cs" />
-    <!-- ######################## -->
+    <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableEntryHashSet.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableValuedEntryHashSet.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\RetrievableEntryHashSet.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\RetrievableValuedEntryHashSet.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
-    <Compile Include="Collections\ArrayDictionary.cs" />
     <!-- #### CONSTRUCTION MODEL ### -->
     <Compile Include="Construction\ProjectElement.cs" />
     <Compile Include="Construction\ProjectElementContainer.cs" />
@@ -484,7 +487,6 @@
     <Compile Include="Evaluation\ProjectRootElementCacheBase.cs" />
     <Compile Include="Evaluation\ProjectRootElementCache.cs" />
     <Compile Include="Evaluation\SimpleProjectRootElementCache.cs" />
-    <Compile Include="Evaluation\ProjectStringCache.cs" />
     <Compile Include="Evaluation\SemiColonTokenizer.cs" />
     <Compile Include="Evaluation\StringMetadataTable.cs" />
     <Compile Include="Evaluation\ExpressionShredder.cs" />
@@ -501,7 +503,13 @@
     <!-- #### INSTANCE MODEL ### -->
     <Compile Include="Instance\IImmutableInstanceProvider.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableElementCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableGlobalPropertiesCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDefinitionsListConverter.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDictionary.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableLinkedMultiDictionaryConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutablePropertyCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableStringValuedListConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableValuedElementCollectionConverter.cs" />
     <Compile Include="Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="Instance\HostServices.cs" />
     <Compile Include="Instance\ProjectTargetInstanceChild.cs" />

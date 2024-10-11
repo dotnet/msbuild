@@ -128,7 +128,7 @@ namespace Microsoft.Build.Internal
         {
             try
             {
-                return Exists() ? WrappedKey.GetValueNames() : Array.Empty<string>();
+                return Exists() ? WrappedKey.GetValueNames() : [];
             }
             catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
             {
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Internal
         {
             try
             {
-                return Exists() ? WrappedKey.GetSubKeyNames() : Array.Empty<string>();
+                return Exists() ? WrappedKey.GetSubKeyNames() : [];
             }
             catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
             {

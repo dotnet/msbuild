@@ -13,49 +13,30 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 internal class TracingReporter
 {
-    internal Dictionary<string, TimeSpan> TracingStats { get; } = new();
-
-    // Infrastructure time keepers
-    // TODO: add more timers throughout BuildCheck run
-    private TimeSpan analyzerAcquisitionTime;
-    private TimeSpan analyzerSetDataSourceTime;
-    private TimeSpan newProjectAnalyzersTime;
-
-    public void AddAnalyzerStats(string name, TimeSpan subtotal)
-    {
-        if (TracingStats.TryGetValue(name, out TimeSpan existing))
-        {
-            TracingStats[name] = existing + subtotal;
-        }
-        else
-        {
-            TracingStats[name] = subtotal;
-        }
-    }
+    private TimeSpan checkAcquisitionTime;
+    private TimeSpan checkSetDataSourceTime;
+    private TimeSpan newProjectChecksTime;
 
     public void AddAcquisitionStats(TimeSpan subtotal)
     {
-        analyzerAcquisitionTime += subtotal;
+        checkAcquisitionTime += subtotal;
     }
 
     public void AddSetDataSourceStats(TimeSpan subtotal)
     {
-        analyzerSetDataSourceTime += subtotal;
+        checkSetDataSourceTime += subtotal;
     }
 
     public void AddNewProjectStats(TimeSpan subtotal)
     {
-        newProjectAnalyzersTime += subtotal;
+        newProjectChecksTime += subtotal;
     }
 
-    public void AddAnalyzerInfraStats()
-    {
-        var infraStats = new Dictionary<string, TimeSpan>() {
-                { $"{BuildCheckConstants.infraStatPrefix}analyzerAcquisitionTime", analyzerAcquisitionTime },
-                { $"{BuildCheckConstants.infraStatPrefix}analyzerSetDataSourceTime", analyzerSetDataSourceTime },
-                { $"{BuildCheckConstants.infraStatPrefix}newProjectAnalyzersTime", newProjectAnalyzersTime }
-            };
-
-        TracingStats.Merge(infraStats, (span1, span2) => span1 + span2);
-    }
+    public Dictionary<string, TimeSpan> GetInfrastructureTracingStats()
+        => new Dictionary<string, TimeSpan>()
+        {
+            { $"{BuildCheckConstants.infraStatPrefix}checkAcquisitionTime", checkAcquisitionTime },
+            { $"{BuildCheckConstants.infraStatPrefix}checkSetDataSourceTime", checkSetDataSourceTime },
+            { $"{BuildCheckConstants.infraStatPrefix}newProjectChecksTime", newProjectChecksTime }
+        };
 }

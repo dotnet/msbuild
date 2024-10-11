@@ -110,11 +110,8 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Log all environment variables whether or not they are used in a build in the binary log.
         /// </summary>
-        public static bool LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"))
-#if !TASKHOST
-            && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4)
-#endif
-            ;
+        public static bool LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"));
+
         /// <summary>
         /// Log property tracking information.
         /// </summary>
@@ -367,6 +364,11 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         public readonly bool DoNotVersionBuildResult = Environment.GetEnvironmentVariable("MSBUILDDONOTVERSIONBUILDRESULT") == "1";
 
+        /// <summary>
+        /// Escape hatch to ensure build check does not limit amount of results.
+        /// </summary>
+        public readonly bool DoNotLimitBuildCheckResultsNumber = Environment.GetEnvironmentVariable("MSBUILDDONOTLIMITBUILDCHECKRESULTSNUMBER") == "1";
+
         private bool _sdkReferencePropertyExpansionInitialized;
         private SdkReferencePropertyExpansionMode? _sdkReferencePropertyExpansionValue;
 
@@ -418,26 +420,6 @@ namespace Microsoft.Build.Framework
             get
             {
                 return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
-            }
-        }
-
-        private bool? _isBinaryFormatterSerializationAllowed;
-        public bool IsBinaryFormatterSerializationAllowed
-        {
-            get
-            {
-                if (!_isBinaryFormatterSerializationAllowed.HasValue)
-                {
-#if RUNTIME_TYPE_NETCORE
-                    AppContext.TryGetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization",
-                        out bool enabled);
-                    _isBinaryFormatterSerializationAllowed = enabled;
-#else
-                    _isBinaryFormatterSerializationAllowed = true;
-#endif
-                }
-
-                return _isBinaryFormatterSerializationAllowed.Value;
             }
         }
 

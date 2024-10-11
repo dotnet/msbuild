@@ -340,7 +340,7 @@ namespace Microsoft.Build.Evaluation
         /// Properties may be null.
         ///
         /// Used for tests and for ToolsetReader - that operates agnostic on the project
-        ///   - so no logging context is passed, and no BuildCheck analysis will be executed.
+        ///   - so no logging context is passed, and no BuildCheck check will be executed.
         /// </summary>
         internal Expander(IPropertyProvider<P> properties, IFileSystem fileSystem)
         : this(properties, fileSystem, null)
@@ -394,9 +394,9 @@ namespace Microsoft.Build.Evaluation
         /// Any or all may be null.
         ///
         /// This is for the purpose of evaluations through API calls, that might not be able to pass the logging context
-        ///  - BuildCheck analysis won't be executed for those.
+        ///  - BuildCheck checking won't be executed for those.
         /// (for one of the calls we can actually pass IDataConsumingContext - as we have logging service and project)
-        /// 
+        ///
         /// </summary>
         internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata, IFileSystem fileSystem)
             : this(properties, items, fileSystem, null)
@@ -1554,12 +1554,12 @@ namespace Microsoft.Build.Evaluation
 
                 object propertyValue;
 
-                bool isArtifical = property == null && ((endIndex - startIndex) >= 7) &&
+                bool isArtificial = property == null && ((endIndex - startIndex) >= 7) &&
                                    MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7);
 
-                propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, elementLocation, property == null, isArtifical);
-                
-                if (isArtifical)
+                propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, elementLocation, property == null, isArtificial);
+
+                if (isArtificial)
                 {
                     // It could be one of the MSBuildThisFileXXXX properties,
                     // whose values vary according to the file they are in.
@@ -1583,7 +1583,7 @@ namespace Microsoft.Build.Evaluation
                         environmentDerivedProperty.loggingContext = propertiesUseTracker.LoggingContext;
                     }
 
-                    propertyValue = property.EvaluatedValueEscaped;
+                    propertyValue = property.GetEvaluatedValueEscaped(elementLocation);
                 }
 
                 return propertyValue;
@@ -1654,9 +1654,8 @@ namespace Microsoft.Build.Evaluation
             {
 #if RUNTIME_TYPE_NETCORE
                 // .NET Core MSBuild used to always return empty, so match that behavior
-                // on non-Windows (no registry), and with a changewave (in case someone
-                // had a registry property and it breaks when it lights up).
-                if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                // on non-Windows (no registry).
+                if (!NativeMethodsShared.IsWindows)
                 {
                     return string.Empty;
                 }
@@ -2017,8 +2016,7 @@ namespace Microsoft.Build.Evaluation
                     if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)) != true)
                     {
                         // ...or a function "AnyHaveMetadataValue", since that will want to return false for an empty list.
-                        if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) ||
-                            expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
+                        if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
                         {
                             itemsFromCapture = new List<KeyValuePair<string, S>>();
                             return false;
@@ -2154,7 +2152,7 @@ namespace Microsoft.Build.Evaluation
                     if (functionName == null)
                     {
                         functionName = "ExpandQuotedExpressionFunction";
-                        arguments = new string[] { function };
+                        arguments = [function];
                     }
                     else if (argumentsExpression != null)
                     {
@@ -3285,7 +3283,7 @@ namespace Microsoft.Build.Evaluation
                 _methodMethodName = methodName;
                 if (arguments == null)
                 {
-                    _arguments = Array.Empty<string>();
+                    _arguments = [];
                 }
                 else
                 {
@@ -3527,10 +3525,13 @@ namespace Microsoft.Build.Evaluation
                     if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", _methodMethodName, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", _methodMethodName, StringComparison.OrdinalIgnoreCase)))
                     {
                         // Support comparison when the lhs is an integer
-                        if (IsFloatingPointRepresentation(args[0]) && !IsFloatingPointRepresentation(objectInstance))
+                        if (IsFloatingPointRepresentation(args[0]))
                         {
-                            objectInstance = Convert.ChangeType(objectInstance, typeof(double), CultureInfo.InvariantCulture);
-                            _receiverType = objectInstance.GetType();
+                            if (double.TryParse(objectInstance.ToString(), NumberStyles.Number | NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out double result))
+                            {
+                                objectInstance = result;
+                                _receiverType = objectInstance.GetType();
+                            }
                         }
 
                         // change the type of the final unescaped string into the destination
@@ -3547,11 +3548,7 @@ namespace Microsoft.Build.Evaluation
                             // include $(MSBuildThisFileDirectory) as a parameter.
                             string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
-                            args = new[]
-                            {
-                                args[0],
-                                startingDirectory,
-                            };
+                            args = [args[0], startingDirectory];
                         }
                     }
 
@@ -3571,8 +3568,14 @@ namespace Microsoft.Build.Evaluation
                         try
                         {
                             // First attempt to recognize some well-known functions to avoid binding
-                            // and potential first-chance MissingMethodExceptions
+                            // and potential first-chance MissingMethodExceptions.
                             wellKnownFunctionSuccess = TryExecuteWellKnownFunction(out functionResult, objectInstance, args);
+
+                            if (!wellKnownFunctionSuccess)
+                            {
+                                // Some well-known functions need evaluated value from properties.
+                                wellKnownFunctionSuccess = TryExecuteWellKnownFunctionWithPropertiesParam(properties, out functionResult, objectInstance, args);
+                            }
                         }
                         // we need to preserve the same behavior on exceptions as the actual binder
                         catch (Exception ex)
@@ -3593,8 +3596,17 @@ namespace Microsoft.Build.Evaluation
                             // otherwise there is the potential of running a function twice!
                             try
                             {
-                                // First use InvokeMember using the standard binder - this will match and coerce as needed
-                                functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                // If there are any out parameters, try to figure out their type and create defaults for them as appropriate before calling the method.
+                                if (args.Any(a => "out _".Equals(a)))
+                                {
+                                    IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
+                                    functionResult = GetMethodResult(objectInstance, methods, args, 0);
+                                }
+                                else
+                                {
+                                    // If there are no out parameters, use InvokeMember using the standard binder - this will match and coerce as needed
+                                    functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                }
                             }
                             // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
                             // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coercion is possible, so throw.
@@ -3665,6 +3677,69 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", partiallyEvaluated, ex.Message);
                     }
 
+                    return null;
+                }
+            }
+
+            private bool TryExecuteWellKnownFunctionWithPropertiesParam(IPropertyProvider<T> properties, out object returnVal, object objectInstance, object[] args)
+            {
+                returnVal = null;
+
+                if (_receiverType == typeof(IntrinsicFunctions))
+                {
+                    if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterBuildCheck), StringComparison.OrdinalIgnoreCase))
+                    {
+                        string projectPath = properties.GetProperty("MSBuildProjectFullPath")?.EvaluatedValue ?? string.Empty;
+                        ErrorUtilities.VerifyThrow(_loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = IntrinsicFunctions.RegisterBuildCheck(projectPath, arg0, _loggingContext);
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
+
+            private object GetMethodResult(object objectInstance, IEnumerable<MethodInfo> methods, object[] args, int index)
+            {
+                for (int i = index; i < args.Length; i++)
+                {
+                    if (args[i].Equals("out _"))
+                    {
+                        object toReturn = null;
+                        foreach (MethodInfo method in methods)
+                        {
+                            Type t = method.GetParameters()[i].ParameterType;
+                            args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
+                            object currentReturnValue = GetMethodResult(objectInstance, methods, args, i + 1);
+                            if (currentReturnValue is not null)
+                            {
+                                if (toReturn is null)
+                                {
+                                    toReturn = currentReturnValue;
+                                }
+                                else if (!toReturn.Equals(currentReturnValue))
+                                {
+                                    // There were multiple methods that seemed viable and gave different results. We can't differentiate between them so throw.
+                                    ErrorUtilities.ThrowArgument("CouldNotDifferentiateBetweenCompatibleMethods", _methodMethodName, args.Length);
+                                    return null;
+                                }
+                            }
+                        }
+
+                        return toReturn;
+                    }
+                }
+
+                try
+                {
+                    return _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture) ?? "null";
+                }
+                catch (Exception)
+                {
+                    // This isn't a viable option, but perhaps another set of parameters will work.
                     return null;
                 }
             }
@@ -3864,6 +3939,14 @@ namespace Microsoft.Build.Evaluation
                             return true;
                         }
                     }
+                    else if (string.Equals(_methodMethodName, nameof(string.Equals), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (TryGetArg(args, out string arg0))
+                        {
+                            returnVal = text.Equals(arg0);
+                            return true;
+                        }
+                    }
                 }
                 else if (objectInstance is string[] stringArray)
                 {
@@ -3926,16 +4009,6 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (_receiverType == typeof(IntrinsicFunctions))
                     {
-                        if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterBuildCheck), StringComparison.OrdinalIgnoreCase))
-                        {
-                            ErrorUtilities.VerifyThrow(_loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.RegisterBuildCheck(arg0, _loggingContext);
-                                return true;
-                            }
-                        }
-
                         if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.EnsureTrailingSlash), StringComparison.OrdinalIgnoreCase))
                         {
                             if (TryGetArg(args, out string arg0))
@@ -4310,6 +4383,22 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.NormalizeDirectory), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.NormalizeDirectory(arg0);
+                                return true;
+                            }
+                        }
+                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsOSPlatform), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = IntrinsicFunctions.IsOSPlatform(arg0);
+                                return true;
+                            }
+                        }
                     }
                     else if (_receiverType == typeof(Path))
                     {
@@ -4407,6 +4496,14 @@ namespace Microsoft.Build.Evaluation
                                 return true;
                             }
                         }
+                        else if (string.Equals(_methodMethodName, nameof(Path.GetFileNameWithoutExtension), StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (TryGetArg(args, out string arg0))
+                            {
+                                returnVal = Path.GetFileNameWithoutExtension(arg0);
+                                return true;
+                            }
+                        }
                     }
                     else if (_receiverType == typeof(Version))
                     {
@@ -4419,7 +4516,7 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
-                    else if (_receiverType == typeof(System.Guid))
+                    else if (_receiverType == typeof(Guid))
                     {
                         if (string.Equals(_methodMethodName, nameof(Guid.NewGuid), StringComparison.OrdinalIgnoreCase))
                         {
@@ -4430,8 +4527,31 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+                    else if (string.Equals(_methodMethodName, nameof(Regex.Replace), StringComparison.OrdinalIgnoreCase) && args.Length == 3)
+                    {
+                        if (TryGetArg([args[0]], out string arg1) && TryGetArg([args[1]], out string arg2) && TryGetArg([args[2]], out string arg3))
+                        {
+                            returnVal = Regex.Replace(arg1, arg2, arg3);
+                            return true;
+                        }
+                    }
                 }
-
+                else if (string.Equals(_methodMethodName, nameof(Version.ToString), StringComparison.OrdinalIgnoreCase) && objectInstance is Version v)
+                {
+                    if (TryGetArg(args, out int arg0))
+                    {
+                        returnVal = v.ToString(arg0);
+                        return true;
+                    }
+                }
+                else if (string.Equals(_methodMethodName, nameof(Int32.ToString), StringComparison.OrdinalIgnoreCase) && objectInstance is int i)
+                {
+                    if (TryGetArg(args, out string arg0))
+                    {
+                        returnVal = i.ToString(arg0);
+                        return true;
+                    }
+                }
                 if (Traits.Instance.LogPropertyFunctionsRequiringReflection)
                 {
                     LogFunctionCall("PropertyFunctionsRequiringReflection", objectInstance, args);
@@ -4872,13 +4992,10 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
 
-                if (IntrinsicFunctionOverload.IsIntrinsicFunctionOverloadsEnabled())
+                if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
                 {
-                    if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
-                    {
-                        resultValue = integerOperation(argLong0, argLong1);
-                        return true;
-                    }
+                    resultValue = integerOperation(argLong0, argLong1);
+                    return true;
                 }
 
                 if (TryConvertToDouble(args[0], out double argDouble0) && TryConvertToDouble(args[1], out double argDouble1))
@@ -5087,7 +5204,7 @@ namespace Microsoft.Build.Evaluation
                 // If there are no arguments, then just create an empty array
                 if (String.IsNullOrEmpty(argumentsContent))
                 {
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = [];
                 }
                 else
                 {
@@ -5161,7 +5278,7 @@ namespace Microsoft.Build.Evaluation
                     // It may be that there are '()' but no actual arguments content
                     if (argumentStartIndex == expressionFunction.Length - 1)
                     {
-                        functionArguments = Array.Empty<string>();
+                        functionArguments = [];
                     }
                     else
                     {
@@ -5171,7 +5288,7 @@ namespace Microsoft.Build.Evaluation
                         // If there are no arguments, then just create an empty array
                         if (string.IsNullOrEmpty(argumentsContent))
                         {
-                            functionArguments = Array.Empty<string>();
+                            functionArguments = [];
                         }
                         else
                         {
@@ -5194,7 +5311,7 @@ namespace Microsoft.Build.Evaluation
                         nextMethodIndex = indexerIndex;
                     }
 
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = [];
 
                     if (nextMethodIndex > 0)
                     {
@@ -5510,16 +5627,10 @@ namespace Microsoft.Build.Evaluation
         // For reuse, the comparer is cached in a non-generic type.
         // Both comparer instances can be cached to support change wave testing.
         private static IComparer<MemberInfo>? s_comparerLongBeforeDouble;
-        private static IComparer<MemberInfo>? s_comparerDoubleBeforeLong;
 
-        internal static IComparer<MemberInfo> IntrinsicFunctionOverloadMethodComparer => IsIntrinsicFunctionOverloadsEnabled() ? LongBeforeDoubleComparer : DoubleBeforeLongComparer;
+        internal static IComparer<MemberInfo> IntrinsicFunctionOverloadMethodComparer => LongBeforeDoubleComparer;
 
         private static IComparer<MemberInfo> LongBeforeDoubleComparer => s_comparerLongBeforeDouble ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key0).CompareTo(SelectTypeOfFirstParameter(key1)));
-
-        private static IComparer<MemberInfo> DoubleBeforeLongComparer => s_comparerDoubleBeforeLong ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key1).CompareTo(SelectTypeOfFirstParameter(key0)));
-
-        // The arithmetic overload feature uses this method to test for the change wave.
-        internal static bool IsIntrinsicFunctionOverloadsEnabled() => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8);
 
         internal static bool IsKnownOverloadMethodName(string methodName) => s_knownOverloadName.Any(name => string.Equals(name, methodName, StringComparison.OrdinalIgnoreCase));
 

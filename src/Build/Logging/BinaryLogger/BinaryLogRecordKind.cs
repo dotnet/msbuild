@@ -40,5 +40,12 @@ namespace Microsoft.Build.Logging
         TaskParameter,
         ResponseFileUsed,
         AssemblyLoad,
+        BuildCheckMessage,
+        BuildCheckWarning,
+        BuildCheckError,
+        BuildCheckTracing,
+        BuildCheckAcquisition,
+        BuildSubmissionStarted,
+        BuildCanceled,
     }
 }

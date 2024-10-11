@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Xml.Linq;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -899,10 +900,8 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void ConsoleUIRespectsSDKLanguage(bool enableFeature)
+        [Fact]
+        public void ConsoleUIRespectsSDKLanguage()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
             {
@@ -923,18 +922,10 @@ namespace Microsoft.Build.UnitTests
             {
                 // Set the UI language based on the SDK environment var.
                 testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, "ja"); // Japanese chose arbitrarily.
-                ChangeWaves.ResetStateForTests();
-                if (!enableFeature)
-                {
-                    testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_8.ToString());
-                }
                 MSBuildApp.SetConsoleUI();
 
-                Assert.Equal(enableFeature ? new CultureInfo("ja") : CultureInfo.CurrentUICulture.GetConsoleFallbackUICulture(), thisThread.CurrentUICulture);
-                if (enableFeature)
-                {
-                    Assert.Equal(65001, Console.OutputEncoding.CodePage); // UTF-8 enabled for correct rendering.
-                }
+                Assert.Equal(new CultureInfo("ja"), thisThread.CurrentUICulture);
+                Assert.Equal(65001, Console.OutputEncoding.CodePage); // UTF-8 enabled for correct rendering.
             }
             finally
             {
@@ -956,7 +947,6 @@ namespace Microsoft.Build.UnitTests
         /// We shouldn't change the UI culture if the current UI culture is invariant.
         /// In other cases, we can get an exception on CultureInfo creation when System.Globalization.Invariant enabled.
         /// </summary>
-
         [Fact]
         public void SetConsoleUICultureInInvariantCulture()
         {
@@ -996,8 +986,8 @@ namespace Microsoft.Build.UnitTests
                 var msbuildExeName = Path.GetFileName(RunnerUtilities.PathToCurrentlyRunningMsBuildExe);
                 var newPathToMSBuildExe = Path.Combine(startDirectory, msbuildExeName);
                 var pathToConfigFile = Path.Combine(startDirectory, msbuildExeName + ".config");
-
-                string configContent = @"<?xml version =""1.0""?>
+                XElement configRuntimeElement = XDocument.Load(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + ".config").Root.Element("runtime");
+                string configContent = $@"<?xml version =""1.0""?>
                                             <configuration>
                                                 <configSections>
                                                     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
@@ -1017,6 +1007,7 @@ namespace Microsoft.Build.UnitTests
                                                 <foo/>
                                                 </msbuildToolsets>
                                                 <foo/>
+                                                {configRuntimeElement}
                                             </configuration>";
                 File.WriteAllText(pathToConfigFile, configContent);
 
@@ -2633,11 +2624,11 @@ EndGlobal
         [InlineData("/v:minimal /bl", MessageImportance.Low)] // v:minimal but with binary logger so everything must be logged
         [InlineData("/v:quiet /bl", MessageImportance.Low)] // v:quiet but with binary logger so everything must be logged
 
-        [InlineData("/v:diagnostic /analyze", MessageImportance.Low)]
-        [InlineData("/v:detailed /analyze", MessageImportance.Low)]
-        [InlineData("/v:normal /analyze", MessageImportance.Normal)]
-        [InlineData("/v:minimal /analyze", MessageImportance.High)]
-        [InlineData("/v:quiet /analyze", MessageImportance.High)]
+        [InlineData("/v:diagnostic /check", MessageImportance.Low)]
+        [InlineData("/v:detailed /check", MessageImportance.Low)]
+        [InlineData("/v:normal /check", MessageImportance.Normal)]
+        [InlineData("/v:minimal /check", MessageImportance.High)]
+        [InlineData("/v:quiet /check", MessageImportance.High)]
 
         [InlineData("/v:diagnostic /tl", MessageImportance.Low)]
         [InlineData("/v:detailed /tl", MessageImportance.Low)]

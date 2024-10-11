@@ -134,11 +134,14 @@ namespace Microsoft.Build.Construction
                 ValidateValidMetadataAsAttributeName(newName, Parent.ElementName, Parent.Location);
             }
 
+            string oldName = XmlElement.Name;
+
             // Because the element was created from our special XmlDocument, we know it's
             // an XmlElementWithLocation.
             XmlElementWithLocation newElement = XmlUtilities.RenameXmlElement(XmlElement, newName, XmlElement.NamespaceURI);
 
             ReplaceElement(newElement);
+            Parent.UpdateElementName(this, oldName);
         }
 
         internal static void ValidateValidMetadataAsAttributeName(string name, string parentName, IElementLocation parentLocation)

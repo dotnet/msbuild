@@ -238,24 +238,10 @@ namespace Microsoft.Build.BackEnd
                     TranslatePrimitiveTypeArray(translator);
                     break;
                 case TaskParameterType.ValueType:
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
-                    {
                         TranslateValueType(translator);
-                    }
-                    else
-                    {
-                        translator.TranslateDotNet(ref _wrappedParameter);
-                    }
                     break;
                 case TaskParameterType.ValueTypeArray:
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
-                    {
                         TranslateValueTypeArray(translator);
-                    }
-                    else
-                    {
-                        translator.TranslateDotNet(ref _wrappedParameter);
-                    }
                     break;
                 case TaskParameterType.ITaskItem:
                     TranslateITaskItem(translator);
@@ -1017,12 +1003,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_customEscapedMetadata == null || _customEscapedMetadata.Count == 0)
                 {
-#if TASKHOST
-                    // MSBuildTaskHost.dll compiles against .NET 3.5 which doesn't have Enumerable.Empty()
-                    return new KeyValuePair<string, string>[0];
-#else
-                    return Enumerable.Empty<KeyValuePair<string, string>>();
-#endif
+                    return [];
                 }
 
                 var result = new KeyValuePair<string, string>[_customEscapedMetadata.Count];

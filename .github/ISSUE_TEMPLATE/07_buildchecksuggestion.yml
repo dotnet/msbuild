@@ -1,0 +1,27 @@
+name: 💡 BuildCheck Suggestion
+description: Suggesting a diagnostic check (AKA [BuildCheck](https://github.com/dotnet/msbuild/blob/main/documentation/specs/BuildCheck/BuildCheck.md)) that MSBuild could provide.
+title: "[BuildCheck Suggestion]: "
+labels: ["BuildCheck Suggestion", "Area: BuildCheck"]
+body:
+  - type: textarea
+    attributes:
+      label: Summary
+      description: Brief summary of what this proposal is about.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Background and Motivation
+      description: What is the problem MSBuild should be flagging and in what context did you encounter it?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Sample issue or antipattern that the check should be flagging
+      description: Please provide as specific as possible sample that you envision to be catched by the check.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Sample output
+      description: If you have an idea what and how to report - please try to provide possible sample.

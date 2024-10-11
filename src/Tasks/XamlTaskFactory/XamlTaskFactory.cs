@@ -118,13 +118,12 @@ namespace Microsoft.Build.Tasks
             // create the code generator options
             // Since we are running msbuild 12.0 these had better load.
             var compilerParameters = new CompilerParameters(
-                new[]
-                {
+                [
                     "System.dll",
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Framework.dll"),
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Utilities.Core.dll"),
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll")
-                })
+                ])
             {
                 GenerateInMemory = true,
                 TreatWarningsAsErrors = false

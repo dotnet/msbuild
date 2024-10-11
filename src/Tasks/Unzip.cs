@@ -231,7 +231,33 @@ namespace Microsoft.Build.Tasks
                 {
                     Log.LogMessageFromResources(MessageImportance.Normal, "Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
 
+#if NET
+                    FileStreamOptions fileStreamOptions = new()
+                    {
+                        Access = FileAccess.Write,
+                        Mode = FileMode.Create,
+                        Share = FileShare.None,
+                        BufferSize = 0x1000
+                    };
+
+                    const UnixFileMode OwnershipPermissions =
+                        UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+                        UnixFileMode.GroupRead | UnixFileMode.GroupWrite | UnixFileMode.GroupExecute |
+                        UnixFileMode.OtherRead | UnixFileMode.OtherWrite | UnixFileMode.OtherExecute;
+
+                    // Restore Unix permissions.
+                    // For security, limit to ownership permissions, and respect umask (through UnixCreateMode).
+                    // We don't apply UnixFileMode.None because .zip files created on Windows and .zip files created
+                    // with previous versions of .NET don't include permissions.
+                    UnixFileMode mode = (UnixFileMode)(zipArchiveEntry.ExternalAttributes >> 16) & OwnershipPermissions;
+                    if (mode != UnixFileMode.None && !NativeMethodsShared.IsWindows)
+                    {
+                        fileStreamOptions.UnixCreateMode = mode;
+                    }
+                    using (FileStream destination = new FileStream(destinationPath.FullName, fileStreamOptions))
+#else
                     using (Stream destination = File.Open(destinationPath.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
+#endif
                     using (Stream stream = zipArchiveEntry.Open())
                     {
                         stream.CopyToAsync(destination, _DefaultCopyBufferSize, _cancellationToken.Token)
@@ -293,7 +319,7 @@ namespace Microsoft.Build.Tasks
 
         private void ParsePattern(string pattern, out string[] patterns)
         {
-            patterns = Array.Empty<string>();
+            patterns = [];
             if (!string.IsNullOrWhiteSpace(pattern))
             {
                 if (FileMatcher.HasPropertyOrItemReferences(pattern))
@@ -308,8 +334,8 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     patterns = pattern.Contains(';')
-                                   ? pattern.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(FileMatcher.Normalize).ToArray()
-                                   : new[] { pattern };
+                                   ? pattern.Split([';'], StringSplitOptions.RemoveEmptyEntries).Select(FileMatcher.Normalize).ToArray()
+                                   : [pattern];
                 }
             }
         }

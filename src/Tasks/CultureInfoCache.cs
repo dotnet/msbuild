@@ -23,13 +23,15 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal static class CultureInfoCache
     {
+#if !NET5_0_OR_GREATER
         private static readonly Lazy<HashSet<string>> ValidCultureNames = new Lazy<HashSet<string>>(() => InitializeValidCultureNames());
+#endif
 
         // https://docs.microsoft.com/en-gb/windows/desktop/Intl/using-pseudo-locales-for-localization-testing
         // These pseudo-locales are available in versions of Windows from Vista and later.
         // However, from Windows 10, version 1803, they are not returned when enumerating the
         // installed cultures, even if the registry keys are set. Therefore, add them to the list manually.
-        private static readonly string[] pseudoLocales = new[] { "qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh" };
+        private static readonly string[] pseudoLocales = ["qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh"];
 
         private static HashSet<string> InitializeValidCultureNames()
         {
@@ -62,22 +64,20 @@ namespace Microsoft.Build.Tasks
         internal static bool IsValidCultureString(string name)
         {
 #if NET5_0_OR_GREATER
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            try
             {
-                try
-                {
-                    // GetCultureInfo throws if the culture doesn't exist
-                    CultureInfo.GetCultureInfo(name, predefinedOnly: true);
-                    return true;
-                }
-                catch
-                {
-                    // Second attempt: try pseudolocales (see above)
-                    return pseudoLocales.Contains(name, StringComparer.OrdinalIgnoreCase);
-                }
+                // GetCultureInfo throws if the culture doesn't exist
+                CultureInfo.GetCultureInfo(name, predefinedOnly: true);
+                return true;
             }
-#endif
+            catch
+            {
+                // Second attempt: try pseudolocales (see above)
+                return pseudoLocales.Contains(name, StringComparer.OrdinalIgnoreCase);
+            }
+#else
             return ValidCultureNames.Value.Contains(name);
+#endif
         }
 
 #if !FEATURE_CULTUREINFO_GETCULTURES

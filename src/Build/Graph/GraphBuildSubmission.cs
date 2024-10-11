@@ -62,7 +62,40 @@ namespace Microsoft.Build.Graph
             return BuildResult!;
         }
 
+        protected internal override void CheckResultValidForCompletion(GraphBuildResult result)
+        {
+            ErrorUtilities.VerifyThrow(result.SubmissionId == SubmissionId,
+                "GraphBuildResult's submission id doesn't match GraphBuildSubmission's");
+        }
+
         protected internal override GraphBuildResult CreateFailedResult(Exception exception)
             => new(SubmissionId, exception);
+
+        /// <summary>
+        /// Whether the build has started.
+        /// </summary>
+        internal override bool IsStarted { get; set; }
+
+        // WARNING!: Do not remove the below proxy properties.
+        //  They are required to make the OM forward compatible
+        //  (code built against this OM should run against binaries with previous version of OM).
+
+        /// <inheritdoc cref="BuildSubmissionBase{GraphBuildRequestData, GraphBuildResult}.BuildResult"/>
+        public new GraphBuildResult? BuildResult => base.BuildResult;
+
+        /// <inheritdoc cref="BuildSubmissionBase.BuildManager"/>
+        public new BuildManager BuildManager => base.BuildManager;
+
+        /// <inheritdoc cref="BuildSubmissionBase.SubmissionId"/>
+        public new int SubmissionId => base.SubmissionId;
+
+        /// <inheritdoc cref="BuildSubmissionBase.AsyncContext"/>
+        public new object? AsyncContext => base.AsyncContext;
+
+        /// <inheritdoc cref="BuildSubmissionBase.WaitHandle"/>
+        public new WaitHandle WaitHandle => base.WaitHandle;
+
+        /// <inheritdoc cref="BuildSubmissionBase.IsCompleted"/>
+        public new bool IsCompleted => base.IsCompleted;
     }
 }

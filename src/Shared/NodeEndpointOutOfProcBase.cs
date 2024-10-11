@@ -531,13 +531,15 @@ namespace Microsoft.Build.BackEnd
             {
                 // Ordering is important.  We want packetAvailable to supercede terminate otherwise we will not properly wait for all
                 // packets to be sent by other threads which are shutting down, such as the logging thread.
-                WaitHandle[] handles = new WaitHandle[] {
+                WaitHandle[] handles =
+                [
 #if FEATURE_APM
                     result.AsyncWaitHandle,
 #else
                     ((IAsyncResult)readTask).AsyncWaitHandle,
 #endif
-                    localPacketAvailable, localTerminatePacketPump };
+                    localPacketAvailable, localTerminatePacketPump
+                ];
 
                 int waitId = WaitHandle.WaitAny(handles);
                 switch (waitId)

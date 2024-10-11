@@ -1627,7 +1627,7 @@ namespace Microsoft.Build.BackEnd
 
             // The request we blocked on couldn't have been executing (because we are) so it must either be yielding (which is ok because
             // it isn't modifying its own state, just running a background process), ready, or still blocked.
-            blockingRequest.VerifyOneOfStates(new SchedulableRequestState[] { SchedulableRequestState.Yielding, SchedulableRequestState.Ready, SchedulableRequestState.Blocked });
+            blockingRequest.VerifyOneOfStates([SchedulableRequestState.Yielding, SchedulableRequestState.Ready, SchedulableRequestState.Blocked]);
 
             // detect the case for https://github.com/dotnet/msbuild/issues/3047
             // if we have partial results AND blocked and blocking share the same configuration AND are blocked on each other
@@ -1651,7 +1651,7 @@ namespace Microsoft.Build.BackEnd
         private void HandleRequestBlockedOnResultsTransfer(SchedulableRequest parentRequest, List<ScheduleResponse> responses)
         {
             // Create the new request which will go to the configuration's results node.
-            BuildRequest newRequest = new BuildRequest(parentRequest.BuildRequest.SubmissionId, BuildRequest.ResultsTransferNodeRequestId, parentRequest.BuildRequest.ConfigurationId, Array.Empty<string>(), null, parentRequest.BuildRequest.BuildEventContext, parentRequest.BuildRequest, parentRequest.BuildRequest.BuildRequestDataFlags);
+            BuildRequest newRequest = new BuildRequest(parentRequest.BuildRequest.SubmissionId, BuildRequest.ResultsTransferNodeRequestId, parentRequest.BuildRequest.ConfigurationId, [], null, parentRequest.BuildRequest.BuildEventContext, parentRequest.BuildRequest, parentRequest.BuildRequest.BuildRequestDataFlags);
 
             // Assign a new global request id - always different from any other.
             newRequest.GlobalRequestId = _nextGlobalRequestId;
@@ -2565,13 +2565,19 @@ namespace Microsoft.Build.BackEnd
         {
             if (_debugDumpState)
             {
-                FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+                try
+                {
+                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
-                StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
-                file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, _schedulingData.EventTime.Ticks);
-                file.WriteLine(format, stuff);
-                file.Flush();
-                file.Dispose();
+                    using StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
+                    file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, _schedulingData.EventTime.Ticks);
+                    file.WriteLine(format, stuff);
+                    file.Flush();
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    // Ignore exceptions
+                }
             }
         }
 
@@ -2584,9 +2590,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_schedulingData != null)
                 {
-                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
-                    using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
+                    try
                     {
+                        FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+                        using StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
+
                         file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
                         file.WriteLine("------------------------------------------------");
 
@@ -2680,6 +2688,10 @@ namespace Microsoft.Build.BackEnd
 
                         file.WriteLine();
                     }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        // Ignore exceptions
+                    }
                 }
             }
         }
@@ -2693,8 +2705,10 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_schedulingData != null)
                 {
-                    using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
+                    try
                     {
+                        using StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
+
                         file.WriteLine("Configurations used during this build");
                         file.WriteLine("-------------------------------------");
 
@@ -2714,6 +2728,10 @@ namespace Microsoft.Build.BackEnd
 
                         file.Flush();
                     }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        // Ignore exceptions
+                    }
                 }
             }
         }
@@ -2727,13 +2745,19 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_schedulingData != null)
                 {
-                    using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
+                    try
                     {
+                        using StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
+
                         file.WriteLine("Requests used during the build:");
                         file.WriteLine("-------------------------------");
                         file.WriteLine("Format: GlobalRequestId: [NodeId] FinalState (ConfigId) Path (Targets)");
                         DumpRequestHierarchy(file, null, 0);
                         file.Flush();
+                    }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        // Ignore exceptions
                     }
                 }
             }

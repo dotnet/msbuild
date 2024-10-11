@@ -1551,8 +1551,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <Target Name="IgnoreJavaScriptOutputAssembly"
-    BeforeTargets="AssignProjectConfiguration"
-    Condition="$([MSBuild]::AreFeaturesEnabled('17.8'))">
+    BeforeTargets="AssignProjectConfiguration">
       <ItemGroup>
         <ProjectReference Condition="'%(ProjectReference.Extension)' == '.esproj' and '%(ProjectReference.ReferenceOutputAssembly)' == ''">
           <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -1985,7 +1984,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <IsRidAgnostic>@(_TargetFrameworkInfo->'%(IsRidAgnostic)')</IsRidAgnostic>
         <!-- Extract necessary information for SetPlatform negotiation -->
         <IsVcxOrNativeProj Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">true</IsVcxOrNativeProj>
-        <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
+        <Platform>$(Platform)</Platform>
         <Platforms>$(Platforms)</Platforms>
         <!-- .vcxproj and .nativeproj contain a `ProjectConfiguration` item that have `Platform` metadata within.
              Build the `Platforms` property from that. -->
@@ -2172,10 +2171,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_ResolvedProjectReferencePaths>
     </ItemGroup>
 
-    <!-- Issue a warning for each non-existent project. -->
+    <!-- Issue a warning or error for each non-existent project. -->
     <Warning
         Text="The referenced project '%(_MSBuildProjectReferenceNonexistent.Identity)' does not exist."
-        Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != ''"/>
+        Code="MSB9008"
+        Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' != 'True'"/>
+
+    <Error
+        Text="The referenced project '%(_MSBuildProjectReferenceNonexistent.Identity)' does not exist."
+        Code="MSB9008"
+        Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' == 'True'"/>
 
   </Target>
 
@@ -2207,10 +2212,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     metadata.
     ============================================================
     -->
-  <PropertyGroup>
-    <GetTargetPathDependsOn>$(GetTargetPathDependsOn)</GetTargetPathDependsOn>
-  </PropertyGroup>
-
   <Target
       Name="GetTargetPath"
       DependsOnTargets="$(GetTargetPathDependsOn)"
@@ -2736,7 +2737,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
      <FindInvalidProjectReferences
          TargetPlatformVersion="$(TargetPlatformVersion)"
          TargetPlatformIdentifier="$(TargetPlatformIdentifier)"
-         ProjectReferences="@(TargetPathWithTargetPlatformMoniker)">
+         ProjectReferences="@(_ProjectReferenceTargetPlatformMonikers)">
        <Output TaskParameter="InvalidReferences" ItemName="InvalidProjectReferences" />
      </FindInvalidProjectReferences>
 
@@ -2753,7 +2754,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       BuildInParallel="$(BuildInParallel)"
       ContinueOnError="!$(BuildingProject)"
       RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
-      <Output TaskParameter="TargetOutputs" ItemName="TargetPathWithTargetPlatformMoniker" />
+      <Output TaskParameter="TargetOutputs" ItemName="_ProjectReferenceTargetPlatformMonikers" />
     </MSBuild>
   </Target>
 
@@ -4551,7 +4552,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_ClickOnceTransitiveContentItemsTemp>
       <_ClickOnceTransitiveContentItems Include="@(_ClickOnceTransitiveContentItemsTemp->'%(SavedIdentity)')" Condition="'%(Identity)'=='@(PublishFile)' Or '%(Extension)'=='.exe' Or '%(Extension)'=='.dll'" />
 
-      <!-- 
+      <!--
         ClickOnce content items is union of transitive content items and content items from this project.
         We also exclude content items from this project that have set CopyToPublishDirectory to Never.
       -->
@@ -5945,7 +5946,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <DeploymentComputeClickOnceManifestInfoDependsOn>
       CleanPublishFolder;
       $(_RecursiveTargetForContentCopying);
-      _DeploymentGenerateTrustInfo
+      _DeploymentGenerateTrustInfo;
       $(DeploymentComputeClickOnceManifestInfoDependsOn)
     </DeploymentComputeClickOnceManifestInfoDependsOn>
   </PropertyGroup>
@@ -6887,9 +6888,20 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <PropertyGroup>
     <MsAppxPackageTargets Condition="'$(MsAppxPackageTargets)'==''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\AppxPackage\Microsoft.AppXPackage.Targets</MsAppxPackageTargets>
+
+    <!-- Opt-out switch to allow disabling importing the 'AppxPackage' targets for UWP class libraries using modern .NET -->
+    <EnableAppxPackageTargetsForUwpClassLibraries Condition="'$(EnableAppxPackageTargetsForUwpClassLibraries)' == ''">true</EnableAppxPackageTargetsForUwpClassLibraries>
   </PropertyGroup>
 
-  <Import Project="$(MsAppxPackageTargets)" Condition="'$(WindowsAppContainer)' == 'true' and Exists('$(MsAppxPackageTargets)')" />
+  <!--
+    We want to import the 'AppXPackage' .targets in two scenarios:
+      - For legacy UWP, in all cases (original behavior). These projects will always set 'WindowsAppContainer' by default.
+      - For UWP (XAML) apps and libraries on modern .NET, we only enable this for class libraries. This allows the existing
+        .appx tooling to take care of generating .pri resources without the need to pull in WinAppSDK or other external tools.
+        We cannot use this for applications, because the rest of that tooling is not capable of handling modern .NET projects.
+        In that case, we either leverage the tooling in WinAppSDK, or DesktopBridge (via a .wapproj project for packaging).
+  -->
+  <Import Project="$(MsAppxPackageTargets)" Condition="('$(WindowsAppContainer)' == 'true' or ('$(UseUwpTools)' == 'true' and '$(OutputType)' == 'Library' and '$(EnableAppxPackageTargetsForUwpClassLibraries)' != 'false')) and Exists('$(MsAppxPackageTargets)')" />
 
   <!-- This import is temporary and will be removed once it is moved into the silverlight targets -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.Data.Entity.targets" Condition="'$(TargetFrameworkIdentifier)' == 'Silverlight' and Exists('$(MSBuildToolsPath)\Microsoft.Data.Entity.targets')"/>

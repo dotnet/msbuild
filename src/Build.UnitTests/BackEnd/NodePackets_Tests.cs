@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
@@ -73,8 +75,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             PropertyReassignmentEventArgs propReassign = new("prop", "prevValue", "newValue", "loc", "message", "help", "sender", MessageImportance.Normal);
             ResponseFileUsedEventArgs responseFileUsed = new("path");
             UninitializedPropertyReadEventArgs uninitializedPropertyRead = new("prop", "message", "help", "sender", MessageImportance.Normal);
-            EnvironmentVariableReadEventArgs environmentVariableRead = new("env", "message", "help", "sender", MessageImportance.Normal);
+            EnvironmentVariableReadEventArgs environmentVariableRead = new("env", "message", "file", 0, 0);
             GeneratedFileUsedEventArgs generatedFileUsed = new GeneratedFileUsedEventArgs("path", "some content");
+            BuildSubmissionStartedEventArgs buildSubmissionStarted = new(new Dictionary<string, string> { { "Value1", "Value2" } }, ["Path1"], ["TargetName"], BuildRequestDataFlags.ReplaceExistingProjectInstance, 123);
+            BuildCheckTracingEventArgs buildCheckTracing = new();
+            BuildCanceledEventArgs buildCanceled = new("message", DateTime.UtcNow);
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
@@ -108,6 +113,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(uninitializedPropertyRead, LoggingEventType.UninitializedPropertyRead);
             VerifyLoggingPacket(environmentVariableRead, LoggingEventType.EnvironmentVariableReadEvent);
             VerifyLoggingPacket(generatedFileUsed, LoggingEventType.GeneratedFileUsedEvent);
+            VerifyLoggingPacket(buildSubmissionStarted, LoggingEventType.BuildSubmissionStartedEvent);
+            VerifyLoggingPacket(buildCheckTracing, LoggingEventType.BuildCheckTracingEvent);
+            VerifyLoggingPacket(buildCanceled, LoggingEventType.BuildCanceledEvent);
         }
 
         private static BuildEventContext CreateBuildEventContext()
@@ -251,7 +259,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     new ResponseFileUsedEventArgs("path"),
                     new UninitializedPropertyReadEventArgs("prop", "message", "help", "sender", MessageImportance.Normal),
-                    new EnvironmentVariableReadEventArgs("env", "message", "help", "sender", MessageImportance.Normal) { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6) },
+                    new EnvironmentVariableReadEventArgs("env", "message", "file", 0, 0) { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6) },
                     new PropertyReassignmentEventArgs("prop", "prevValue", "newValue", "loc", "message", "help", "sender", MessageImportance.Normal),
                     new PropertyInitialValueSetEventArgs("prop", "val", "propsource", "message", "help", "sender", MessageImportance.Normal),
                     new MetaprojectGeneratedEventArgs("metaName", "path", "message"),

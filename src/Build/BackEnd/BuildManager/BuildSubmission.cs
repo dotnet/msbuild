@@ -78,13 +78,14 @@ namespace Microsoft.Build.Execution
         internal void CompleteResults(TResultData result)
         {
             ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
-            ErrorUtilities.VerifyThrow(result.SubmissionId == SubmissionId,
-                "GraphBuildResult's submission id doesn't match GraphBuildSubmission's");
+            CheckResultValidForCompletion(result);
 
             BuildResult ??= result;
 
             CheckForCompletion();
         }
+
+        protected internal abstract void CheckResultValidForCompletion(TResultData result);
 
         protected internal abstract TResultData CreateFailedResult(Exception exception);
 
@@ -186,7 +187,7 @@ namespace Microsoft.Build.Execution
             ExecuteAsync(null, null, _legacyThreadingSemantics);
             if (_legacyThreadingSemantics)
             {
-                RequestBuilder.WaitWithBuilderThreadStart(new[] { WaitHandle }, false, legacyThreadingData, SubmissionId);
+                RequestBuilder.WaitWithBuilderThreadStart([WaitHandle], false, legacyThreadingData, SubmissionId);
             }
             else
             {
@@ -201,13 +202,35 @@ namespace Microsoft.Build.Execution
             return BuildResult!;
         }
 
+        /// <summary>
+        /// Whether the build has started.
+        /// </summary>
+        internal override bool IsStarted
+        {
+            get => BuildRequest != null;
+            // Ignore the set - the submission is started once the BuildRequest is set.
+            set { }
+        }
+
         protected internal override BuildResult CreateFailedResult(Exception exception)
         {
             ErrorUtilities.VerifyThrow(BuildRequest != null,
                 "BuildRequest is not populated while reporting failed result.");
             return new(BuildRequest!, exception);
         }
-        
+
+        protected internal override void CheckResultValidForCompletion(BuildResult result)
+        {
+            // We verify that we got results from the same configuration, but not necessarily the same request, because we are
+            // rather flexible in how users are allowed to submit multiple requests for the same configuration.  In this case, the
+            // request id of the result will match the first request, even though it will contain results for all requests (including
+            // this one.)
+            if (result.ConfigurationId != BuildRequest?.ConfigurationId)
+            {
+                ErrorUtilities.ThrowInternalError("BuildResult configuration ({0}) doesn't match BuildRequest configuration ({1})",
+                    result.ConfigurationId, BuildRequest?.ConfigurationId);
+            }
+        }
 
         protected internal override void OnCompletition()
         {
@@ -219,5 +242,27 @@ namespace Microsoft.Build.Execution
                 BuildResult.SetOverallResult(overallResult: false);
             }
         }
+
+        // WARNING!: Do not remove the below proxy properties.
+        //  They are required to make the OM forward compatible
+        //  (code built against this OM should run against binaries with previous version of OM).
+
+        /// <inheritdoc cref="BuildSubmissionBase{BuildRequestData, BuildResult}.BuildResult"/>
+        public new BuildResult? BuildResult => base.BuildResult;
+
+        /// <inheritdoc cref="BuildSubmissionBase.BuildManager"/>
+        public new BuildManager BuildManager => base.BuildManager;
+
+        /// <inheritdoc cref="BuildSubmissionBase.SubmissionId"/>
+        public new int SubmissionId => base.SubmissionId;
+
+        /// <inheritdoc cref="BuildSubmissionBase.AsyncContext"/>
+        public new object? AsyncContext => base.AsyncContext;
+
+        /// <inheritdoc cref="BuildSubmissionBase.WaitHandle"/>
+        public new WaitHandle WaitHandle => base.WaitHandle;
+
+        /// <inheritdoc cref="BuildSubmissionBase.IsCompleted"/>
+        public new bool IsCompleted => base.IsCompleted;
     }
 }

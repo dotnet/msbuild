@@ -829,7 +829,7 @@ namespace Microsoft.Build.Evaluation
         /// their previously stored value to find out, and if so perhaps decide to update their own state.
         /// Note that the number may not increase monotonically.
         ///
-        /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationId"/> and can be used to connect
+        /// This number corresponds to the <see cref="BuildEventContext.EvaluationId"/> and can be used to connect
         /// evaluation logging events back to the Project instance.
         /// </summary>
         public int LastEvaluationId => implementation.LastEvaluationId;
@@ -1574,7 +1574,7 @@ namespace Microsoft.Build.Evaluation
         public bool Build(string target, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
             // targets may be null, but not an entry within it
-            string[] targets = (target == null) ? null : new[] { target };
+            string[] targets = (target == null) ? null : [target];
 
             return Build(targets, loggers, remoteLoggers);
         }
@@ -1981,7 +1981,6 @@ namespace Microsoft.Build.Evaluation
             /// - <see cref="RemoveItems"/>
             /// - <see cref="AddItem(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
             /// - <see cref="AddItemFast(string,string, IEnumerable&lt;KeyValuePair&lt;string, string&gt;&gt;)"/>
-            /// - <see cref="ProjectItem.ChangeItemType"/>
             /// - <see cref="ProjectItem.Rename"/>
             /// - <see cref="ProjectItem.RemoveMetadata"/>
             /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
@@ -2628,7 +2627,7 @@ namespace Microsoft.Build.Evaluation
                 ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.TextFragment).ToImmutableArray();
                 var includeGlob = CompositeGlob.Create(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
 
-                IEnumerable<string> excludeFragmentStrings = Enumerable.Empty<string>();
+                IEnumerable<string> excludeFragmentStrings = [];
                 IMSBuildGlob excludeGlob = null;
 
                 if (!string.IsNullOrEmpty(itemElement.Exclude))
@@ -2639,7 +2638,7 @@ namespace Microsoft.Build.Evaluation
                     excludeGlob = excludeItemspec.ToMSBuildGlob();
                 }
 
-                IEnumerable<string> removeFragmentStrings = Enumerable.Empty<string>();
+                IEnumerable<string> removeFragmentStrings = [];
                 IMSBuildGlob removeGlob = null;
 
                 if (removeElementCache.TryGetValue(itemElement.ItemType, out CumulativeRemoveElementData removeItemElement))
@@ -2764,7 +2763,7 @@ namespace Microsoft.Build.Evaluation
                         itemElement.RemoveLocation == null);
 
                 // add the include operation that created the project item element
-                return new[] { item.Xml }.Concat(relevantElementsAfterInclude);
+                return [item.Xml, ..relevantElementsAfterInclude];
             }
 
             private static List<ProjectItemElement> GetItemElementsByType(IEnumerable<ProjectItemElement> itemElements, string itemType)
@@ -3571,7 +3570,6 @@ namespace Microsoft.Build.Evaluation
             {
                 Xml.OnAfterProjectRename -= _renameHandler;
                 Xml.OnProjectXmlChanged -= ProjectRootElement_ProjectXmlChangedHandler;
-                Xml.XmlDocument.ClearAnyCachedStrings();
                 _renameHandler = null;
             }
 
@@ -4439,7 +4437,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Sets a property which is not derived from Xml.
             /// </summary>
-            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, BackEnd.Logging.LoggingContext loggingContext = null)
+            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false)
             {
                 ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext);
                 Properties.Set(property);
@@ -4452,7 +4450,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Sets a property derived from Xml.
             /// </summary>
-            public ProjectProperty SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
+            public ProjectProperty SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, LoggingContext loggingContext)
             {
                 ProjectProperty predecessor = GetProperty(propertyElement.Name);
                 ProjectProperty property = ProjectProperty.Create(Project, propertyElement, evaluatedValueEscaped, predecessor);

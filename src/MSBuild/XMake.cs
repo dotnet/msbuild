@@ -43,6 +43,17 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
 using TerminalLogger = Microsoft.Build.Logging.TerminalLogger.TerminalLogger;
 
+#if NETFRAMEWORK
+// Use I/O operations from Microsoft.IO.Redist which is generally higher perf
+// and also works around https://github.com/dotnet/msbuild/issues/10540.
+// Unnecessary on .NET 6+ because the perf improvements are in-box there.
+using Microsoft.IO;
+using Directory = Microsoft.IO.Directory;
+using File = Microsoft.IO.File;
+using FileInfo = Microsoft.IO.FileInfo;
+using Path = Microsoft.IO.Path;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.CommandLine
@@ -247,7 +258,6 @@ namespace Microsoft.Build.CommandLine
 
             int exitCode;
             if (
-                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) &&
                 Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
                 CanRunServerBasedOnCommandLineSwitches(
@@ -317,7 +327,7 @@ namespace Microsoft.Build.CommandLine
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
                     FileUtilities.IsBinaryLogFilename(projectFile) ||
-                    ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]) == false ||
+                    !ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]) ||
                     IsInteractiveBuild(commandLineSwitches))
                 {
                     canRunServer = false;
@@ -685,7 +695,7 @@ namespace Microsoft.Build.CommandLine
                 // process the detected command line switches -- gather build information, take action on non-build switches, and
                 // check for non-trivial errors
                 string projectFile = null;
-                string[] targets = Array.Empty<string>();
+                string[] targets = [];
                 string toolsVersion = null;
                 Dictionary<string, string> globalProperties = null;
                 Dictionary<string, string> restoreProperties = null;
@@ -718,9 +728,9 @@ namespace Microsoft.Build.CommandLine
                 string outputResultsCache = null;
                 bool question = false;
                 bool isBuildCheckEnabled = false;
-                string[] getProperty = Array.Empty<string>();
-                string[] getItem = Array.Empty<string>();
-                string[] getTargetResult = Array.Empty<string>();
+                string[] getProperty = [];
+                string[] getItem = [];
+                string[] getTargetResult = [];
                 string getResultOutputFile = string.Empty;
                 BuildResult result = null;
 #if FEATURE_REPORTFILEACCESSES
@@ -1570,7 +1580,7 @@ namespace Microsoft.Build.CommandLine
 
                                 if (graphBuildOptions != null)
                                 {
-                                    graphBuildRequest = new GraphBuildRequestData(new[] { new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, flags, graphBuildOptions);
+                                    graphBuildRequest = new GraphBuildRequestData([new ProjectGraphEntryPoint(projectFile, globalProperties)], targets, null, flags, graphBuildOptions);
                                 }
                                 else
                                 {
@@ -1762,6 +1772,18 @@ namespace Microsoft.Build.CommandLine
                         MessageImportance.Low));
             }
 
+            NativeMethodsShared.SAC_State SAC_State = NativeMethodsShared.GetSACState();
+            if (SAC_State != NativeMethodsShared.SAC_State.NotApplicable && SAC_State != NativeMethodsShared.SAC_State.Missing)
+            {
+                messages.Add(
+                    new BuildManager.DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            "SAC",
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "SAC_" + SAC_State.ToString())),
+                        MessageImportance.Low));
+            }
+
             if (Traits.Instance.DebugEngine)
             {
                 messages.Add(
@@ -1843,7 +1865,7 @@ namespace Microsoft.Build.CommandLine
                 projectFile,
                 restoreGlobalProperties,
                 toolsVersion,
-                targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
+                targetsToBuild: [MSBuildConstants.RestoreTargetName],
                 hostServices: null,
                 flags: flags);
 
@@ -2516,6 +2538,11 @@ namespace Microsoft.Build.CommandLine
 #endif
 
             bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
+
+            // This is temporary until we can remove the need for the environment variable.
+            // DO NOT use this environment variable for any new features as it will be removed without further notice.
+            Environment.SetEnvironmentVariable("_MSBUILDTLENABLED", useTerminalLogger ? "1" : "0");
+
             DisplayVersionMessageIfNeeded(recursing, useTerminalLogger, commandLineSwitches);
 
             // Idle priority would prevent the build from proceeding as the user does normal actions.
@@ -2632,9 +2659,9 @@ namespace Microsoft.Build.CommandLine
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
 
                     // If we are looking for the value of a specific property or item post-evaluation or a target post-build, figure that out now
-                    getProperty = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetProperty] ?? Array.Empty<string>();
-                    getItem = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetItem] ?? Array.Empty<string>();
-                    getTargetResult = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetTargetResult] ?? Array.Empty<string>();
+                    getProperty = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetProperty] ?? [];
+                    getItem = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetItem] ?? [];
+                    getTargetResult = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetTargetResult] ?? [];
                     getResultOutputFile = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetResultOutputFile].FirstOrDefault() ?? string.Empty;
 
                     bool minimizeStdOutOutput = getProperty.Length + getItem.Length + getTargetResult.Length > 0 && getResultOutputFile.Length == 0;
@@ -2780,8 +2807,8 @@ namespace Microsoft.Build.CommandLine
         private static bool IsBuildCheckEnabled(CommandLineSwitches commandLineSwitches)
         {
             // Opt-in behavior to be determined by: https://github.com/dotnet/msbuild/issues/9723
-            bool isAnalysisEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Analyze);
-            return isAnalysisEnabled;
+            bool isBuildCheckEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Check);
+            return isBuildCheckEnabled;
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
@@ -3235,7 +3262,7 @@ namespace Microsoft.Build.CommandLine
             ISet<string> warningSwitches = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (string code in parameters
-                .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries) ?? new string[] { null }))
+                .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries) ?? [null]))
             {
                 if (code == null)
                 {
@@ -3510,7 +3537,7 @@ namespace Microsoft.Build.CommandLine
             if (projectFile == null)
             {
                 ValidateExtensions(projectsExtensionsToIgnore);
-                HashSet<string> extensionsToIgnore = new HashSet<string>(projectsExtensionsToIgnore ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+                HashSet<string> extensionsToIgnore = new HashSet<string>(projectsExtensionsToIgnore ?? [], StringComparer.OrdinalIgnoreCase);
                 // Get all files in the current directory that have a proj-like extension
                 string[] potentialProjectFiles = getFiles(projectDirectory ?? ".", "*.*proj");
                 List<string> actualProjectFiles = new List<string>();
