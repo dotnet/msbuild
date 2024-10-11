@@ -39,10 +39,6 @@
 
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageVersion Include="Microsoft.VisualStudio.SolutionPersistence" Version="$(MicrosoftVisualStudioSolutionPersistenceVersion)" />
-  </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
