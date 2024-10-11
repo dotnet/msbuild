@@ -8,7 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -28,7 +28,7 @@ namespace Microsoft.Build.Evaluation
     /// we do use it for build-time items.
     /// </comment>
     [DebuggerDisplay("{ItemType}={EvaluatedInclude} [{UnevaluatedInclude}] #DirectMetadata={DirectMetadataCount}")]
-    public class ProjectItem : IItem<ProjectMetadata>, IProjectMetadataParent, IItemData
+    public class ProjectItem : IItem<ProjectMetadata>, IProjectMetadataParent, IItemDataWithMetadata
     {
         /// <summary>
         /// Project that this item lives in.
@@ -144,8 +144,11 @@ namespace Microsoft.Build.Evaluation
 
         internal virtual ProjectItemLink Link => null;
 
-        /// <inheritdoc cref="IItemData.EnumerateMetadata"/>
-        IEnumerable<KeyValuePair<string, string>> IItemData.EnumerateMetadata() => this.Metadata.Select(m => new KeyValuePair<string, string>(m.Name, m.EvaluatedValue));
+        /// <inheritdoc cref="IItemData.ItemSpec"/>
+        string IItemData.ItemSpec => this.EvaluatedInclude;
+
+        /// <inheritdoc cref="IItemDataWithMetadata.EnumerateMetadata"/>
+        IEnumerable <KeyValuePair<string, string>> IItemDataWithMetadata.EnumerateMetadata() => this.Metadata.Select(m => new KeyValuePair<string, string>(m.Name, m.EvaluatedValue));
 
         /// <summary>
         /// Backing XML item.

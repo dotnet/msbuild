@@ -14,7 +14,7 @@ namespace Microsoft.Build.Framework
     /// </summary>
     [ComVisible(true)]
     [Guid("8661674F-2148-4F71-A92A-49875511C528")]
-    public interface ITaskItem
+    public interface ITaskItem : IItemData
     {
         /// <summary>
         /// Gets or sets the item "specification" e.g. for disk-based items this would be the file path.
@@ -23,7 +23,7 @@ namespace Microsoft.Build.Framework
         /// This should be named "EvaluatedInclude" but that would be a breaking change to this interface.
         /// </remarks>
         /// <value>The item-spec string.</value>
-        string ItemSpec
+        new string ItemSpec
         {
             get;
 

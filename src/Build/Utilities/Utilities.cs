@@ -763,10 +763,6 @@ namespace Microsoft.Build.Internal
                         {
                             data = dt;
                         }
-                        else if (itemValue is ITaskItem taskItem)
-                        {
-                            data = new ItemAccessor(taskItem);
-                        }
                     }
 
                     if (!String.IsNullOrEmpty(itemType))
@@ -775,12 +771,6 @@ namespace Microsoft.Build.Internal
                     }
                 }
             }
-        }
-
-        private class ItemAccessor(ITaskItem item) : IItemData
-        {
-            public string EvaluatedInclude => item.ItemSpec;
-            public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata() => item.EnumerateMetadata();
         }
 
         public static void EnumerateItems(IEnumerable items, Action<DictionaryEntry> callback)

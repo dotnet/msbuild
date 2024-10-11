@@ -16,7 +16,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -39,7 +38,7 @@ namespace Microsoft.Build.Execution
         ITranslatable,
         IMetadataContainer,
         IItemTypeDefinition,
-        IItemData
+        IItemDataWithMetadata
     {
         /// <summary>
         /// The project instance to which this item belongs.
@@ -303,8 +302,11 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        /// <inheritdoc cref="IItemData.EnumerateMetadata"/>
-        IEnumerable<KeyValuePair<string, string>> IItemData.EnumerateMetadata() => ((IMetadataContainer)this).EnumerateMetadata();
+        /// <inheritdoc cref="IItemData.ItemSpec"/>
+        string IItemData.ItemSpec => this.EvaluatedInclude;
+
+        /// <inheritdoc cref="IItemDataWithMetadata.EnumerateMetadata"/>
+        IEnumerable<KeyValuePair<string, string>> IItemDataWithMetadata.EnumerateMetadata() => ((IMetadataContainer)this).EnumerateMetadata();
 
         /// <summary>
         /// ITaskItem implementation
