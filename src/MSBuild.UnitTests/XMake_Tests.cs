@@ -1819,7 +1819,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchSlnxProjDifferentNames()
         {
-            string[] projects = { "test.proj", "Different.slnx" };
+            string[] projects = ["test.proj", "Different.slnx"];
             string[] extensionsToIgnore = null;
 
             Should.Throw<InitializationException>(() =>
