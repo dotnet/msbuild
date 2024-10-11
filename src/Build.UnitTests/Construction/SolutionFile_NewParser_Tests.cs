@@ -86,7 +86,6 @@ namespace Microsoft.Build.UnitTests.Construction
 
             solution.ProjectsInOrder[0].ProjectType.ShouldBe(SolutionProjectType.WebProject);
             solution.ProjectsInOrder[0].ProjectName.ShouldBe(@"C:\WebSites\WebApplication3\");
-            // TODO: try set Relative path with a port http://localhost:8080/WebSites/WebApplication3/
             solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"C:\WebSites\WebApplication3\");
             solution.ProjectsInOrder[0].Dependencies.Count.ShouldBe(2);
             solution.ProjectsInOrder[0].ParentProjectGuid.ShouldBeNull();
