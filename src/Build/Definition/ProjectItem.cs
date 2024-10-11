@@ -148,7 +148,7 @@ namespace Microsoft.Build.Evaluation
         string IItemData.ItemSpec => this.EvaluatedInclude;
 
         /// <inheritdoc cref="IItemDataWithMetadata.EnumerateMetadata"/>
-        IEnumerable <KeyValuePair<string, string>> IItemDataWithMetadata.EnumerateMetadata() => this.Metadata.Select(m => new KeyValuePair<string, string>(m.Name, m.EvaluatedValue));
+        IEnumerable<KeyValuePair<string, string>> IItemDataWithMetadata.EnumerateMetadata() => this.Metadata.Select(m => new KeyValuePair<string, string>(m.Name, m.EvaluatedValue));
 
         /// <summary>
         /// Backing XML item.

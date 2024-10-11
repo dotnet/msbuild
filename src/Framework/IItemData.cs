@@ -2,28 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Framework;
-
 
 /// <summary>
 /// Represents an item data (per single item type) that might be returned via <see cref="ProjectEvaluationFinishedEventArgs"/> or <see cref="ProjectStartedEventArgs"/>.
 /// </summary>
 public interface IItemData
 {
-    ///// <summary>
-    ///// The item evaluated include value
-    ///// </summary>
-    //string EvaluatedInclude { get; }
-
     /// <summary>
-    /// Gets or sets the item "specification" e.g. for disk-based items this would be the file path.
+    /// Gets the item evaluated include data. It is in fact a 'specification' of the item (e.g. path on disk to a specific ProjectReference)
     /// </summary>
     /// <remarks>
-    /// This should be named "EvaluatedInclude" but that would be a breaking change to this interface.
+    /// This should be named "EvaluatedInclude" but that would be a breaking change to the upstream interface.
     /// </remarks>
-    /// <value>The item-spec string.</value>
     string ItemSpec
     {
         get;

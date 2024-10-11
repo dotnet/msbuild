@@ -763,9 +763,13 @@ namespace Microsoft.Build.Internal
                         {
                             data = dt;
                         }
+                        else
+                        {
+                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(itemValue)} {itemValue} of type {itemValue?.GetType().ToString()}");
+                        }
                     }
 
-                    if (!String.IsNullOrEmpty(itemType))
+                    if (!string.IsNullOrEmpty(itemType))
                     {
                         yield return (itemType, data);
                     }
