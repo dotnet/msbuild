@@ -1876,10 +1876,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchSlnAndSlnx()
         {
+            string[] projects = ["test.slnx", "Different.sln"];
+            string[] extensionsToIgnore = null;
+
             Should.Throw<InitializationException>(() =>
-            {
-                string[] projects = { "test.slnx", "Different.sln" };
-                string[] extensionsToIgnore = null;
+            {            
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
             });
@@ -1887,10 +1888,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchTwoSlnx()
         {
+            string[] projects = ["test.slnx", "Different.slnx"];
+            string[] extensionsToIgnore = null;
+
             Should.Throw<InitializationException>(() =>
             {
-                string[] projects = { "test.slnx", "Different.slnx" };
-                string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
             });
