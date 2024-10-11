@@ -132,34 +132,26 @@ namespace Microsoft.Build.UnitTests.Construction
         internal static SolutionFile ParseSolutionHelper(string solutionFileContents, bool convertToSlnx = false)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
-            string solutionPath = FileUtilities.GetTemporaryFileName(".sln");
-            string slnxPath = solutionPath + "x";
-            try
+
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
-                File.WriteAllText(solutionPath, solutionFileContents);
-                if (convertToSlnx)
-                {
-                    ISolutionSerializer serializer = SolutionSerializers.GetSerializerByMoniker(solutionPath);
-                    SolutionModel solutionModel = serializer.OpenAsync(solutionPath, CancellationToken.None).Result;
-                    SolutionSerializers.SlnXml.SaveAsync(slnxPath, solutionModel, CancellationToken.None).Wait();
+                TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
 
-                    SolutionFile slnx = new SolutionFile { FullPath = slnxPath };
-                    slnx.ParseUsingNewParser();
-                    return slnx;
-                }
+                string solutionPath = convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path;
 
-                SolutionFile sln = SolutionFile.Parse(solutionPath);
-                return sln;
+                SolutionFile solutionFile = new SolutionFile { FullPath = solutionPath };
+                solutionFile.ParseUsingNewParser();
+                return solutionFile;
             }
-            finally
-            {
-                File.Delete(solutionPath);
+        }
 
-                if (convertToSlnx)
-                {
-                    File.Delete(slnxPath);
-                }
-            }
+        private static string ConvertToSlnx(string slnPath)
+        {
+            string slnxPath = slnPath + "x";
+            ISolutionSerializer serializer = SolutionSerializers.GetSerializerByMoniker(slnPath).ShouldNotBeNull();
+            SolutionModel solutionModel = serializer.OpenAsync(slnPath, CancellationToken.None).Result;
+            SolutionSerializers.SlnXml.SaveAsync(slnxPath, solutionModel, CancellationToken.None).Wait();
+            return slnxPath;
         }
     }
 }
