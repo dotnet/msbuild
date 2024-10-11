@@ -305,13 +305,6 @@ namespace Microsoft.Build.Construction
                     SolutionModel solutionModel = serializer.OpenAsync(FullPath, CancellationToken.None).Result;
                     ReadSolutionModel(solutionModel);
                 }
-                catch (AggregateException aggregateException)
-                {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
-                            new BuildEventFileInfo(FullPath),
-                            $"InvalidProjectFile",
-                            string.Join(" ", aggregateException.InnerExceptions.Select(inner => inner.Message)));
-                }
                 catch (Exception ex)
                 {
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(
