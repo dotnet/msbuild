@@ -285,8 +285,8 @@ EndGlobal
         private static string ConvertToSlnx(string slnPath)
         {
             string slnxPath = slnPath + "x";
-            ISolutionSerializer? serializer = SolutionSerializers.GetSerializerByMoniker(slnPath);
-            SolutionModel solutionModel = serializer!.OpenAsync(slnPath, CancellationToken.None).Result;
+            ISolutionSerializer serializer = SolutionSerializers.GetSerializerByMoniker(slnPath).ShouldNotBeNull();
+            SolutionModel solutionModel = serializer.OpenAsync(slnPath, CancellationToken.None).Result;
             SolutionSerializers.SlnXml.SaveAsync(slnxPath, solutionModel, CancellationToken.None).Wait();
             return slnxPath;
         }
