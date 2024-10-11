@@ -335,7 +335,7 @@ namespace Microsoft.Build.Construction
         /// <param name="solutionModel"></param>
         private void ReadSolutionModel(SolutionModel solutionModel)
         {
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(_solutionFile), "ParseSolutionFile() got a null solution file!");
+            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(_solutionFile), "ParseSolutionFile() got a null or empty solution file.");
             ErrorUtilities.VerifyThrowInternalRooted(_solutionFile);
 
             _projectsByGuid = new Dictionary<string, ProjectInSolution>(StringComparer.OrdinalIgnoreCase);
@@ -409,7 +409,7 @@ namespace Microsoft.Build.Construction
             => !string.IsNullOrEmpty(projectModel.DisplayName) ? projectModel.DisplayName : projectModel.ActualDisplayName;
 
         /// <summary>
-        /// Returns a string from Guid in the format "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}".
+        /// Returns a string from Guid in the format that the old MSBuild solution parser returned.
         /// </summary>
         private static string ToProjectGuidFormat(Guid id) => id.ToString("B").ToUpper();
 

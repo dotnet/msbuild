@@ -1819,10 +1819,11 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestProcessProjectSwitchSlnxProjDifferentNames()
         {
+            string[] projects = { "test.proj", "Different.slnx" };
+            string[] extensionsToIgnore = null;
+
             Should.Throw<InitializationException>(() =>
             {
-                string[] projects = { "test.proj", "Different.slnx" };
-                string[] extensionsToIgnore = null;
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
             });
