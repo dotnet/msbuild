@@ -371,9 +371,7 @@ namespace Microsoft.Build.Shared
             // NOTE: String.Format() does not allow a null arguments array
             if (args?.Length > 0)
             {
-#if DEBUG
-                ValidateArgs(args);
-#endif
+                ValidateArgsIfDebug(args);
 
                 // Format the string, using the variable arguments passed in.
                 // NOTE: all String methods are thread-safe
@@ -393,9 +391,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted string.</returns>
         internal static string FormatString(string unformatted, object arg1)
         {
-#if DEBUG
-            ValidateArgs([arg1]);
-#endif
+            ValidateArgsIfDebug([arg1]);
             return string.Format(CultureInfo.CurrentCulture, unformatted, arg1);
         }
 
@@ -408,9 +404,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted string.</returns>
         internal static string FormatString(string unformatted, object arg1, object arg2)
         {
-#if DEBUG
-            ValidateArgs([arg1, arg2]);
-#endif
+            ValidateArgsIfDebug([arg1, arg2]);
             return string.Format(CultureInfo.CurrentCulture, unformatted, arg1, arg2);
         }
 
@@ -424,14 +418,12 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted string.</returns>
         internal static string FormatString(string unformatted, object arg1, object arg2, object arg3)
         {
-#if DEBUG
-            ValidateArgs([arg1, arg2, arg3]);
-#endif
+            ValidateArgsIfDebug([arg1, arg2, arg3]);
             return string.Format(CultureInfo.CurrentCulture, unformatted, arg1, arg2, arg3);
         }
 
-#if DEBUG
-        private static void ValidateArgs(object[] args)
+        [Conditional("DEBUG")]
+        private static void ValidateArgsIfDebug(object[] args)
         {
             // If you accidentally pass some random type in that can't be converted to a string,
             // FormatResourceString calls ToString() which returns the full name of the type!
@@ -450,7 +442,6 @@ namespace Microsoft.Build.Shared
                 }
             }
         }
-#endif
 
         /// <summary>
         /// Verifies that a particular resource string actually exists in the string table. This will only be called in debug
