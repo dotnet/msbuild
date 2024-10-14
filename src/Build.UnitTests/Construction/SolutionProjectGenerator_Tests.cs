@@ -355,7 +355,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
 
@@ -390,7 +390,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
 
@@ -419,7 +419,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
@@ -461,7 +461,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
@@ -496,7 +496,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
@@ -756,7 +756,7 @@ Global
 EndGlobal
 ".Replace("`", "\"");
 
-                SolutionFile sp = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+                SolutionFile sp = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
             });
         }
@@ -819,7 +819,7 @@ Global
 EndGlobal
 ".Replace("`", "\"");
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectRootElement projectXml = ProjectRootElement.Create();
 
@@ -1065,7 +1065,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectRootElement projectXml = ProjectRootElement.Create();
 
@@ -1133,7 +1133,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectRootElement projectXml = ProjectRootElement.Create();
 
@@ -1176,7 +1176,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectRootElement projectXml = ProjectRootElement.Create();
 
@@ -1235,7 +1235,7 @@ EndGlobal
                 ";
 
             // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
-            var solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            var solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             var instance = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, _buildEventContext, CreateMockLoggingService())[0];
 
@@ -1301,7 +1301,7 @@ EndGlobal
                 ";
 
             // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, _buildEventContext, CreateMockLoggingService());
 
@@ -1375,7 +1375,7 @@ EndGlobal
                 ";
 
             // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             string[] solutionToolsVersions = { "4.0", ObjectModelHelpers.MSBuildDefaultToolsVersion };
 
@@ -1434,7 +1434,7 @@ EndGlobal
                     EndGlobalSection
                 EndGlobal
                 ";
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
             bool caughtException = false;
 
             try
@@ -1480,7 +1480,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
@@ -1552,7 +1552,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             // These used to exist on the engine, but now need to be passed in explicitly
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
@@ -1588,7 +1588,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
@@ -1787,7 +1787,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
 
@@ -1832,7 +1832,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
             Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
@@ -1887,7 +1887,7 @@ EndGlobal
             {
                 Environment.SetEnvironmentVariable("MSBuildEmitSolution", "1");
 
-                solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+                solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
                 // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
                 Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
@@ -1969,7 +1969,7 @@ EndGlobal
                 globalProperties["Configuration"] = "Nonexistent";
                 globalProperties["SkipInvalidConfigurations"] = "true";
 
-                SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionContents.Replace('\'', '"'));
+                SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionContents.Replace('\'', '"'));
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService());
                 ProjectInstance msbuildProject = instances[0];
 
@@ -2226,7 +2226,7 @@ EndGlobal
                 globalProperties["Configuration"] = "Release";
                 globalProperties["SkipInvalidConfigurations"] = "true";
 
-                SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents.Replace('\'', '"'));
+                SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents.Replace('\'', '"'));
                 using ProjectCollection collection = new ProjectCollection();
                 collection.RegisterLogger(logger);
 
@@ -2259,7 +2259,7 @@ EndGlobal
         [Fact]
         public void CustomTargetNamesAreInInMetaproj()
         {
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(
             @"
                 Microsoft Visual Studio Solution File, Format Version 14.00
                 # Visual Studio 2015
@@ -2309,7 +2309,7 @@ EndGlobal
         {
             foreach(string projectName in ProjectInSolution.projectNamesToDisambiguate)
             {
-                SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(
+                SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(
                 $$"""
                     Microsoft Visual Studio Solution File, Format Version 14.00
                     # Visual Studio 2015
@@ -2353,7 +2353,7 @@ EndGlobal
         [InlineData(true)]
         public void IllegalUserTargetNamesDoNotThrow(bool forceCaseDifference)
         {
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(
             @"
                 Microsoft Visual Studio Solution File, Format Version 14.00
                 # Visual Studio 2015
@@ -2653,7 +2653,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project(""{{E24C65DC-7377-472B-9ABA-BC803B73C61A}}"") = ""WebSite1"", ""{relativePath}"", ""{{{{96E0707C-2E9C-4704-946F-FA583147737F}}}}""
 EndProject";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectInSolution projectInSolution = solution.ProjectsInOrder.ShouldHaveSingleItem();
 
@@ -2729,7 +2729,7 @@ EndProject";
                 EndGlobal
                 ";
 
-            SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, toolsVersion, BuildEventContext.Invalid, CreateMockLoggingService());
 
