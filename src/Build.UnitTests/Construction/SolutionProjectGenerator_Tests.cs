@@ -65,12 +65,14 @@ namespace Microsoft.Build.UnitTests.Construction
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
-                TransientTestFile sln = testEnvironment.CreateFile(folder, "MySln.sln", @"Microsoft Visual Studio Solution File, Format Version 16.00");
+                TransientTestFile sln = testEnvironment.CreateFile(folder, "MySln.sln", "Microsoft Visual Studio Solution File, Format Version 12.00");
                 TransientTestFile targetsFile = testEnvironment.CreateFile(folder, name,
-                    @"<Project>
-                        <Target Name=""Build"" AfterTargets=""NonsenseTarget"">
+                      """
+                      <Project>
+                        <Target Name="Build" AfterTargets="NonsenseTarget">
                         </Target>
-                      </Project>");
+                      </Project>
+                      """);
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(SolutionFile.Parse(sln.Path), null, null, _buildEventContext, CreateMockLoggingService());
                 instances.ShouldHaveSingleItem();
                 instances[0].Targets["Build"].AfterTargets.ShouldBe(string.Empty);
@@ -87,33 +89,35 @@ namespace Microsoft.Build.UnitTests.Construction
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
                 TransientTestFolder classLibFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "classlib"), createFolder: true);
                 TransientTestFile classLibrary = testEnvironment.CreateFile(classLibFolder, "classlib.csproj",
-                    @"<Project>
-                  <Target Name=""ClassLibraryTarget"">
-                      <Message Text=""ClassLibraryBuilt""/>
+                  """
+                  <Project>
+                  <Target Name="ClassLibraryTarget">
+                      <Message Text="ClassLibraryBuilt"/>
                   </Target>
                   </Project>
-                    ");
+                  """);
 
                 TransientTestFolder simpleProjectFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "simpleProject"), createFolder: true);
                 TransientTestFile simpleProject = testEnvironment.CreateFile(simpleProjectFolder, "simpleProject.csproj",
-                    @"<Project>
-                  <Target Name=""SimpleProjectTarget"">
-                      <Message Text=""SimpleProjectBuilt""/>
+                  """
+                  <Project>
+                  <Target Name="SimpleProjectTarget">
+                      <Message Text="SimpleProjectBuilt"/>
                   </Target>
                   </Project>
-                    ");
+                  """);
 
                 TransientTestFile solutionFile = testEnvironment.CreateFile(folder, "testFolder.sln",
-                    @"
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.6.30114.105
-MinimumVisualStudioVersion = 10.0.40219.1
-Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""simpleProject"", ""simpleProject\simpleProject.csproj"", ""{AA52A05F-A9C0-4C89-9933-BF976A304C91}""
-EndProject
-Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""classlib"", ""classlib\classlib.csproj"", ""{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}""
-EndProject
-                ");
+                    """
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 16
+                    VisualStudioVersion = 16.6.30114.105
+                    MinimumVisualStudioVersion = 10.0.40219.1
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simpleProject", "simpleProject\simpleProject.csproj", "{AA52A05F-A9C0-4C89-9933-BF976A304C91}"
+                    EndProject
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "classlib", "classlib\classlib.csproj", "{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}"
+                    EndProject
+                    """);
                 RunnerUtilities.ExecMSBuild(solutionFile.Path + " /t:classlib", out bool success);
                 success.ShouldBeTrue();
             }
@@ -130,56 +134,58 @@ EndProject
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
                 TransientTestFolder classLibFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "classlib"), createFolder: true);
                 TransientTestFile classLibrary = testEnvironment.CreateFile(classLibFolder, "classlib.csproj",
-                    @"<Project>
-                  <Target Name=""Build"">
-                      <Message Text=""classlib.Build""/>
+                  """
+                  <Project>
+                  <Target Name="Build">
+                      <Message Text="classlib.Build"/>
                   </Target>
-                  <Target Name=""Clean"">
-                      <Message Text=""classlib.Clean""/>
+                  <Target Name="Clean">
+                      <Message Text="classlib.Clean"/>
                   </Target>
-                  <Target Name=""Custom"">
-                      <Message Text=""classlib.Custom""/>
+                  <Target Name="Custom">
+                      <Message Text="classlib.Custom"/>
                   </Target>
                   </Project>
-                    ");
+                  """);
 
                 TransientTestFolder simpleProjectFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "simpleProject"), createFolder: true);
                 TransientTestFile simpleProject = testEnvironment.CreateFile(simpleProjectFolder, "simpleProject.csproj",
-                    @"<Project>
-                  <Target Name=""Build"">
-                      <Message Text=""simpleProject.Build""/>
+                  """
+                  <Project>
+                  <Target Name="Build">
+                      <Message Text="simpleProject.Build"/>
                   </Target>
-                  <Target Name=""Clean"">
-                      <Message Text=""simpleProject.Clean""/>
+                  <Target Name="Clean">
+                      <Message Text="simpleProject.Clean"/>
                   </Target>
-                  <Target Name=""Custom"">
-                      <Message Text=""simpleProject.Custom""/>
+                  <Target Name="Custom">
+                      <Message Text="simpleProject.Custom"/>
                   </Target>
                   </Project>
-                    ");
+                  """);
 
                 TransientTestFile solutionFile = testEnvironment.CreateFile(folder, "testFolder.sln",
-                    @"
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.6.30114.105
-MinimumVisualStudioVersion = 10.0.40219.1
-Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""simpleProject"", ""simpleProject\simpleProject.csproj"", ""{AA52A05F-A9C0-4C89-9933-BF976A304C91}""
-EndProject
-Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""classlib"", ""classlib\classlib.csproj"", ""{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}""
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x86 = Debug|x86
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AA52A05F-A9C0-4C89-9933-BF976A304C91}.Debug|x86.ActiveCfg = Debug|x86
-		{AA52A05F-A9C0-4C89-9933-BF976A304C91}.Debug|x86.Build.0 = Debug|x86
-		{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}.Debug|x86.ActiveCfg = Debug|x86
-		{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}.Debug|x86.Build.0 = Debug|x86
-	EndGlobalSection
-EndGlobal
-                ");
+                    """
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 16
+                    VisualStudioVersion = 16.6.30114.105
+                    MinimumVisualStudioVersion = 10.0.40219.1
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simpleProject", "simpleProject\simpleProject.csproj", "{AA52A05F-A9C0-4C89-9933-BF976A304C91}"
+                    EndProject
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "classlib", "classlib\classlib.csproj", "{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|x86 = Debug|x86
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {AA52A05F-A9C0-4C89-9933-BF976A304C91}.Debug|x86.ActiveCfg = Debug|x86
+                            {AA52A05F-A9C0-4C89-9933-BF976A304C91}.Debug|x86.Build.0 = Debug|x86
+                            {80B8E6B8-E46D-4456-91B1-848FD35C4AB9}.Debug|x86.ActiveCfg = Debug|x86
+                            {80B8E6B8-E46D-4456-91B1-848FD35C4AB9}.Debug|x86.Build.0 = Debug|x86
+                        EndGlobalSection
+                        EndGlobal
+                    """);
 
                 string output = RunnerUtilities.ExecMSBuild(solutionFile.Path + " /t:Clean;Build;Custom", out bool success);
                 success.ShouldBeTrue();
@@ -204,56 +210,58 @@ EndGlobal
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
                 TransientTestFolder classLibFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "classlib"), createFolder: true);
                 TransientTestFile classLibrary = testEnvironment.CreateFile(classLibFolder, "classlib.csproj",
-                    @"<Project>
-                  <Target Name=""Build"">
-                      <Message Text=""classlib.Build""/>
+                  """
+                  <Project>
+                  <Target Name="Build">
+                      <Message Text="classlib.Build"/>
                   </Target>
-                  <Target Name=""Clean"">
-                      <Message Text=""classlib.Clean""/>
+                  <Target Name="Clean">
+                      <Message Text="classlib.Clean"/>
                   </Target>
-                  <Target Name=""Custom"">
-                      <Message Text=""classlib.Custom""/>
+                  <Target Name="Custom">
+                      <Message Text="classlib.Custom"/>
                   </Target>
                   </Project>
-                    ");
+                  """);
 
                 TransientTestFolder simpleProjectFolder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "simpleProject"), createFolder: true);
                 TransientTestFile simpleProject = testEnvironment.CreateFile(simpleProjectFolder, "simpleProject.csproj",
-                    @"<Project>
-                  <Target Name=""Build"">
-                      <Message Text=""simpleProject.Build""/>
+                  """
+                  <Project>
+                  <Target Name="Build">
+                      <Message Text="simpleProject.Build"/>
                   </Target>
-                  <Target Name=""Clean"">
-                      <Message Text=""simpleProject.Clean""/>
+                  <Target Name="Clean">
+                      <Message Text="simpleProject.Clean"/>
                   </Target>
-                  <Target Name=""Custom"">
-                      <Message Text=""simpleProject.Custom""/>
+                  <Target Name="Custom">
+                      <Message Text="simpleProject.Custom"/>
                   </Target>
                   </Project>
-                    ");
+                  """);
 
                 TransientTestFile solutionFile = testEnvironment.CreateFile(folder, "testFolder.sln",
-                    @"
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.6.30114.105
-MinimumVisualStudioVersion = 10.0.40219.1
-Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""simpleProject"", ""simpleProject\simpleProject.csproj"", ""{AA52A05F-A9C0-4C89-9933-BF976A304C91}""
-EndProject
-Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""classlib"", ""classlib\classlib.csproj"", ""{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}""
-EndProject
-Global
-	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x86 = Debug|x86
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AA52A05F-A9C0-4C89-9933-BF976A304C91}.Debug|x86.ActiveCfg = Debug|x86
-		{AA52A05F-A9C0-4C89-9933-BF976A304C91}.Debug|x86.Build.0 = Debug|x86
-		{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}.Debug|x86.ActiveCfg = Debug|x86
-		{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}.Debug|x86.Build.0 = Debug|x86
-	EndGlobalSection
-EndGlobal
-                ");
+                    """
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 16
+                    VisualStudioVersion = 16.6.30114.105
+                    MinimumVisualStudioVersion = 10.0.40219.1
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "simpleProject", "simpleProject\simpleProject.csproj", "{AA52A05F-A9C0-4C89-9933-BF976A304C91}"
+                    EndProject
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "classlib", "classlib\classlib.csproj", "{80B8E6B8-E46D-4456-91B1-848FD35C4AB9}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|x86 = Debug|x86
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {AA52A05F-A9C0-4C89-9933-BF976A304C91}.Debug|x86.ActiveCfg = Debug|x86
+                            {AA52A05F-A9C0-4C89-9933-BF976A304C91}.Debug|x86.Build.0 = Debug|x86
+                            {80B8E6B8-E46D-4456-91B1-848FD35C4AB9}.Debug|x86.ActiveCfg = Debug|x86
+                            {80B8E6B8-E46D-4456-91B1-848FD35C4AB9}.Debug|x86.Build.0 = Debug|x86
+                        EndGlobalSection
+                    EndGlobal
+                    """);
 
                 try
                 {
@@ -331,10 +339,12 @@ EndGlobal
         /// Test to make sure we properly set the ToolsVersion attribute on the in-memory project based
         /// on the Solution File Format Version.
         /// </summary>
-        [Fact]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void EmitToolsVersionAttributeToInMemoryProject9()
+        public void EmitToolsVersionAttributeToInMemoryProject9(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
             {
@@ -343,7 +353,7 @@ EndGlobal
             }
 
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 Global
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -353,9 +363,9 @@ EndGlobal
                         Other|Win32 = Other|Win32
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
 
@@ -366,10 +376,12 @@ EndGlobal
         /// Test to make sure we properly set the ToolsVersion attribute on the in-memory project based
         /// on the Solution File Format Version.
         /// </summary>
-        [Fact]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void EmitToolsVersionAttributeToInMemoryProject10()
+        public void EmitToolsVersionAttributeToInMemoryProject10(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
             {
@@ -378,7 +390,7 @@ EndGlobal
             }
 
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 10.00
                 Global
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -388,9 +400,9 @@ EndGlobal
                         Other|Win32 = Other|Win32
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
 
@@ -407,7 +419,7 @@ EndGlobal
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
 
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 10.00
                 Global
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -417,7 +429,7 @@ EndGlobal
                         Other|Win32 = Other|Win32
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
@@ -443,13 +455,15 @@ EndGlobal
         /// Test to make sure that if the solution version corresponds to an existing sub-toolset version,
         /// barring other factors that might override, the sub-toolset will be based on the solution version.
         /// </summary>
-        [Fact]
-        public void SubToolsetSetBySolutionVersion()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SubToolsetSetBySolutionVersion(bool useNewParser)
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
 
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 Global
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -459,9 +473,9 @@ EndGlobal
                         Other|Win32 = Other|Win32
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
@@ -478,13 +492,15 @@ EndGlobal
         /// <summary>
         /// Test to make sure that even if the solution version corresponds to an existing sub-toolset version,
         /// </summary>
-        [Fact]
-        public void SolutionBasedSubToolsetVersionOverriddenByEnvironment()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SolutionBasedSubToolsetVersionOverriddenByEnvironment(bool useNewParser)
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", "ABC");
 
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 Global
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -494,9 +510,9 @@ EndGlobal
                         Other|Win32 = Other|Win32
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
@@ -719,42 +735,43 @@ EndGlobal
         /// Verify that we throw the appropriate error if the solution declares a dependency
         /// on a project that doesn't exist.
         /// </summary>
+        /// <remarks>This test would only work for the old parser. In the new parser the dependency is not added if it was not in the solution file.</remarks>
         [Fact]
         public void SolutionWithMissingDependencies()
         {
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string solutionFileContents =
-                    @"
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 11
-Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `B`, `Project2\B.csproj`, `{881C1674-4ECA-451D-85B6-D7C59B7F16FA}`
-    ProjectSection(ProjectDependencies) = postProject
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
-    EndProjectSection
-EndProject
-Global
-    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-        Debug|Any CPU = Debug|Any CPU
-        Debug|x64 = Debug|x64
-        Release|Any CPU = Release|Any CPU
-        Release|x64 = Release|x64
-    EndGlobalSection
-    GlobalSection(ProjectConfigurationPlatforms) = preSolution
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.ActiveCfg = Debug|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.Build.0 = Debug|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.Build.0 = Release|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.ActiveCfg = Release|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.Build.0 = Release|Any CPU
-    EndGlobalSection
-    GlobalSection(SolutionProperties) = preSolution
-        HideSolutionNode = FALSE
-    EndGlobalSection
-EndGlobal
-".Replace("`", "\"");
+                    """
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio 11
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "B", "Project2\B.csproj", "{881C1674-4ECA-451D-85B6-D7C59B7F16FA}"
+                        ProjectSection(ProjectDependencies) = postProject
+                            {4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
+                        EndProjectSection
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|Any CPU = Debug|Any CPU
+                            Debug|x64 = Debug|x64
+                            Release|Any CPU = Release|Any CPU
+                            Release|x64 = Release|x64
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = preSolution
+                            {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                            {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.ActiveCfg = Debug|Any CPU
+                            {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.Build.0 = Debug|Any CPU
+                            {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                            {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.Build.0 = Release|Any CPU
+                            {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.ActiveCfg = Release|Any CPU
+                            {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.Build.0 = Release|Any CPU
+                        EndGlobalSection
+                        GlobalSection(SolutionProperties) = preSolution
+                            HideSolutionNode = FALSE
+                        EndGlobalSection
+                    EndGlobal
+                    """;
 
                 SolutionFile sp = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
@@ -764,62 +781,64 @@ EndGlobal
         /// Blob should contain dependency info
         /// Here B depends on C
         /// </summary>
-        [Fact]
-        public void SolutionConfigurationWithDependencies()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SolutionConfigurationWithDependencies(bool useNewParser)
         {
             string solutionFileContents =
-                @"
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 11
-Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `A`, `Project1\A.csproj`, `{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}`
-EndProject
-Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `B`, `Project2\B.csproj`, `{881C1674-4ECA-451D-85B6-D7C59B7F16FA}`
-    ProjectSection(ProjectDependencies) = postProject
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
-    EndProjectSection
-EndProject
-Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `C`, `Project3\C.csproj`, `{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}`
-EndProject
-Global
-    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-        Debug|Any CPU = Debug|Any CPU
-        Debug|x64 = Debug|x64
-        Release|Any CPU = Release|Any CPU
-        Release|x64 = Release|x64
-    EndGlobalSection
-    GlobalSection(ProjectConfigurationPlatforms) = preSolution
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.Build.0 = Debug|Any CPU
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|x64.ActiveCfg = Debug|Any CPU
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|x64.Build.0 = Debug|Any CPU
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.Build.0 = Release|Any CPU
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|x64.ActiveCfg = Release|Any CPU
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|x64.Build.0 = Release|Any CPU
-        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|x64.ActiveCfg = Debug|Any CPU
-        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|x64.Build.0 = Debug|Any CPU
-        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|Any CPU.Build.0 = Release|Any CPU
-        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|x64.ActiveCfg = Release|Any CPU
-        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|x64.Build.0 = Release|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.ActiveCfg = Debug|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.Build.0 = Debug|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.Build.0 = Release|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.ActiveCfg = Release|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.Build.0 = Release|Any CPU
-    EndGlobalSection
-    GlobalSection(SolutionProperties) = preSolution
-        HideSolutionNode = FALSE
-    EndGlobalSection
-EndGlobal
-".Replace("`", "\"");
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio 11
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A", "Project1\A.csproj", "{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}"
+                EndProject
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "B", "Project2\B.csproj", "{881C1674-4ECA-451D-85B6-D7C59B7F16FA}"
+                    ProjectSection(ProjectDependencies) = postProject
+                        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
+                    EndProjectSection
+                EndProject
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C", "Project3\C.csproj", "{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Debug|x64 = Debug|x64
+                        Release|Any CPU = Release|Any CPU
+                        Release|x64 = Release|x64
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = preSolution
+                        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|x64.ActiveCfg = Debug|Any CPU
+                        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|x64.Build.0 = Debug|Any CPU
+                        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|x64.ActiveCfg = Release|Any CPU
+                        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Release|x64.Build.0 = Release|Any CPU
+                        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|x64.ActiveCfg = Debug|Any CPU
+                        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Debug|x64.Build.0 = Debug|Any CPU
+                        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|x64.ActiveCfg = Release|Any CPU
+                        {786E302A-96CE-43DC-B640-D6B6CC9BF6C0}.Release|x64.Build.0 = Release|Any CPU
+                        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.ActiveCfg = Debug|Any CPU
+                        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|x64.Build.0 = Debug|Any CPU
+                        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.ActiveCfg = Release|Any CPU
+                        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Release|x64.Build.0 = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                EndGlobal
+                """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectRootElement projectXml = ProjectRootElement.Create();
 
@@ -838,11 +857,14 @@ EndGlobal
             string solutionConfigurationContents = msbuildProject.GetPropertyValue("CurrentSolutionConfigurationContents");
 
             // Only the specified solution configuration is represented in THE BLOB: nothing for x64 in this case
-            string expected = $@"<SolutionConfiguration>
-  <ProjectConfiguration Project=`{{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}}` AbsolutePath=`##temp##{Path.Combine("Project1", "A.csproj")}` BuildProjectInSolution=`True`>Debug|AnyCPU</ProjectConfiguration>
-  <ProjectConfiguration Project=`{{881C1674-4ECA-451D-85B6-D7C59B7F16FA}}` AbsolutePath=`##temp##{Path.Combine("Project2", "B.csproj")}` BuildProjectInSolution=`True`>Debug|AnyCPU<ProjectDependency Project=`{{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}}` /></ProjectConfiguration>
-  <ProjectConfiguration Project=`{{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}}` AbsolutePath=`##temp##{Path.Combine("Project3", "C.csproj")}` BuildProjectInSolution=`True`>Debug|AnyCPU</ProjectConfiguration>
-</SolutionConfiguration>".Replace("`", "\"").Replace("##temp##", FileUtilities.TempFileDirectory);
+            string expected =
+                $$"""
+                <SolutionConfiguration>
+                  <ProjectConfiguration Project="{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}" AbsolutePath="##temp##{{Path.Combine("Project1", "A.csproj")}}" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+                  <ProjectConfiguration Project="{881C1674-4ECA-451D-85B6-D7C59B7F16FA}" AbsolutePath="##temp##{{Path.Combine("Project2", "B.csproj")}}" BuildProjectInSolution="True">Debug|AnyCPU<ProjectDependency Project="{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}" /></ProjectConfiguration>
+                  <ProjectConfiguration Project="{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}" AbsolutePath="##temp##{{Path.Combine("Project3", "C.csproj")}}" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
+                </SolutionConfiguration>
+                """.Replace("##temp##", FileUtilities.TempFileDirectory);
 
             Helpers.VerifyAssertLineByLine(expected, solutionConfigurationContents);
         }
@@ -860,19 +882,19 @@ EndGlobal
                 TransientTestFile proj2 = env.CreateFile("B.csproj", @"<Project><Target Name=""Printer""><Message Importance=""high"" Text=""print string"" /></Target></Project>");
                 TransientTestFile proj3 = env.CreateFile("C.csproj", @"<Project><Target Name=""Printer""><Message Importance=""high"" Text=""print string"" /></Target></Project>");
                 TransientTestFile proj = env.CreateFile("mysln.sln",
-                @$"
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 11
-Project(`{"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"}`) = `A`, `{proj1.Path}`, `{"{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}"}`
-EndProject
-Project(`{"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"}`) = `B`, `{proj2.Path}`, `{"{881C1674-4ECA-451D-85B6-D7C59B7F16FA}"}`
-    ProjectSection(ProjectDependencies) = postProject
-        {"{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}"} = {"{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}"}
-    EndProjectSection
-EndProject
-Project(`{"{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"}`) = `C`, `{proj3.Path}`, `{"{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}"}`
-EndProject
-".Replace("`", "\""));
+                    $$"""
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio 11
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "A", "{{proj1.Path}}", "{786E302A-96CE-43DC-B640-D6B6CC9BF6C0}"
+                    EndProject
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "B", "{{proj2.Path}}", "{881C1674-4ECA-451D-85B6-D7C59B7F16FA}"
+                        ProjectSection(ProjectDependencies) = postProject
+                            {"{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}"} = {"{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}"}
+                        EndProjectSection
+                    EndProject
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "C", "{{proj3.Path}}", "{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}"
+                    EndProject
+                    """);
                 RunnerUtilities.ExecMSBuild("\"" + proj.Path + "\"", out bool successfulExit);
                 successfulExit.ShouldBeTrue();
             }
@@ -890,37 +912,37 @@ EndProject
         {
             #region Large strings representing solution & projects
             const string solutionFileContents =
-                @"
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 11
-Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `B`, `B.csproj`, `{881C1674-4ECA-451D-85B6-D7C59B7F16FA}`
-    ProjectSection(ProjectDependencies) = postProject
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
-    EndProjectSection
-EndProject
-Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `C`, `C.csproj`, `{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}`
-EndProject
-Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `D`, `D.csproj`, `{B6E7E06F-FC0B-48F1-911A-55E0E1566F00}`
-EndProject
-Global
-    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-        Debug|Any CPU = Debug|Any CPU
-    EndGlobalSection
-    GlobalSection(ProjectConfigurationPlatforms) = preSolution
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.Build.0 = Debug|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-        {B6E7E06F-FC0B-48F1-911A-55E0E1566F00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {B6E7E06F-FC0B-48F1-911A-55E0E1566F00}.Debug|Any CPU.Build.0 = Debug|Any CPU
-    EndGlobalSection
-    GlobalSection(SolutionProperties) = preSolution
-        HideSolutionNode = FALSE
-    EndGlobalSection
-EndGlobal
-";
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio 11
+                Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `B`, `B.csproj`, `{881C1674-4ECA-451D-85B6-D7C59B7F16FA}`
+                    ProjectSection(ProjectDependencies) = postProject
+                        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167} = {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}
+                    EndProjectSection
+                EndProject
+                Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `C`, `C.csproj`, `{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}`
+                EndProject
+                Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `D`, `D.csproj`, `{B6E7E06F-FC0B-48F1-911A-55E0E1566F00}`
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = preSolution
+                        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {4A727FF8-65F2-401E-95AD-7C8BBFBE3167}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {881C1674-4ECA-451D-85B6-D7C59B7F16FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {B6E7E06F-FC0B-48F1-911A-55E0E1566F00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {B6E7E06F-FC0B-48F1-911A-55E0E1566F00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                EndGlobal
+                """;
             const string projectBravoFileContents =
-                    @"
+                    """
                         <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                             <Target Name='Build' Outputs='@(ComputedQuestion)'>
                                 <ItemGroup>
@@ -934,9 +956,9 @@ EndGlobal
                                 </ProjectReference>
                             </ItemGroup>
                         </Project>
-                    ";
+                    """;
             const string projectCharlieFileContents =
-                    @"
+                    """
                         <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                             <Target Name='Build' Outputs='@(ComputedAnswer)'>
                                 <ItemGroup>
@@ -944,9 +966,9 @@ EndGlobal
                                 </ItemGroup>
                             </Target>
                         </Project>
-                    ";
+                    """;
             const string projectDeltaFileContents =
-                    @"
+                    """
                         <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                             <PropertyGroup>
                                 <ProjectGuid>{B6E7E06F-FC0B-48F1-911A-55E0E1566F00}</ProjectGuid>
@@ -957,60 +979,62 @@ EndGlobal
                                 </ItemGroup>
                             </Target>
                         </Project>
-                    ";
-            const string automaticProjectFileContents = @"
-<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='compile' xmlns='msbuildnamespace'>
-    <Target Name='compile'>
-        <!-- Build projects to get a baseline for their output -->
-        <MSBuild Projects='B.csproj' Targets='Build'>
-            <Output
-                TaskParameter='TargetOutputs'
-                ItemName='BravoProjectOutputs' />
-        </MSBuild>
-        <Message Importance='high' Text='BravoProjectOutputs: @(BravoProjectOutputs)' />
+                    """;
+            const string automaticProjectFileContents =
+                """
+                <Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='compile' xmlns='msbuildnamespace'>
+                    <Target Name='compile'>
+                        <!-- Build projects to get a baseline for their output -->
+                        <MSBuild Projects='B.csproj' Targets='Build'>
+                            <Output
+                                TaskParameter='TargetOutputs'
+                                ItemName='BravoProjectOutputs' />
+                        </MSBuild>
+                        <Message Importance='high' Text='BravoProjectOutputs: @(BravoProjectOutputs)' />
 
-        <MSBuild Projects='C.csproj' Targets='Build'>
-            <Output
-                TaskParameter='TargetOutputs'
-                ItemName='CharlieProjectOutputs' />
-        </MSBuild>
-        <Message Importance='high' Text='CharlieProjectOutputs: @(CharlieProjectOutputs)' />
+                        <MSBuild Projects='C.csproj' Targets='Build'>
+                            <Output
+                                TaskParameter='TargetOutputs'
+                                ItemName='CharlieProjectOutputs' />
+                        </MSBuild>
+                        <Message Importance='high' Text='CharlieProjectOutputs: @(CharlieProjectOutputs)' />
 
-        <MSBuild Projects='D.csproj' Targets='Build'>
-            <Output
-                TaskParameter='TargetOutputs'
-                ItemName='DeltaProjectOutputs' />
-        </MSBuild>
-        <Message Importance='high' Text='DeltaProjectOutputs: @(DeltaProjectOutputs)' />
+                        <MSBuild Projects='D.csproj' Targets='Build'>
+                            <Output
+                                TaskParameter='TargetOutputs'
+                                ItemName='DeltaProjectOutputs' />
+                        </MSBuild>
+                        <Message Importance='high' Text='DeltaProjectOutputs: @(DeltaProjectOutputs)' />
 
-        <PropertyGroup>
-            <StringifiedBravoProjectOutputs>@(BravoProjectOutputs)</StringifiedBravoProjectOutputs>
-            <StringifiedCharlieProjectOutputs>@(CharlieProjectOutputs)</StringifiedCharlieProjectOutputs>
-            <StringifiedDeltaProjectOutputs>@(DeltaProjectOutputs)</StringifiedDeltaProjectOutputs>
-        </PropertyGroup>
+                        <PropertyGroup>
+                            <StringifiedBravoProjectOutputs>@(BravoProjectOutputs)</StringifiedBravoProjectOutputs>
+                            <StringifiedCharlieProjectOutputs>@(CharlieProjectOutputs)</StringifiedCharlieProjectOutputs>
+                            <StringifiedDeltaProjectOutputs>@(DeltaProjectOutputs)</StringifiedDeltaProjectOutputs>
+                        </PropertyGroup>
 
-        <!-- Explicitly build the metaproject generated for B -->
-        <MSBuild Projects='B.csproj.metaproj' Targets='Build'>
-            <Output
-                TaskParameter='TargetOutputs'
-                ItemName='BravoMetaProjectOutputs' />
-        </MSBuild>
-        <Message Importance='high' Text='BravoMetaProjectOutputs: @(BravoMetaProjectOutputs)' />
-        <Error Condition=` '@(BravoProjectOutputs)' != '@(BravoMetaProjectOutputs)' ` Text='Metaproj outputs must match outputs of normal project build.' />
+                        <!-- Explicitly build the metaproject generated for B -->
+                        <MSBuild Projects='B.csproj.metaproj' Targets='Build'>
+                            <Output
+                                TaskParameter='TargetOutputs'
+                                ItemName='BravoMetaProjectOutputs' />
+                        </MSBuild>
+                        <Message Importance='high' Text='BravoMetaProjectOutputs: @(BravoMetaProjectOutputs)' />
+                        <Error Condition=` '@(BravoProjectOutputs)' != '@(BravoMetaProjectOutputs)' ` Text='Metaproj outputs must match outputs of normal project build.' />
 
-        <!-- Build the solution as a whole (which will build the metaproj and return overall outputs) -->
-        <MSBuild Projects='MSBuildIssue.sln'>
-            <Output
-                TaskParameter='TargetOutputs'
-                ItemName='SolutionProjectOutputs' />
-        </MSBuild>
-        <Message Importance='high' Text='SolutionProjectOutputs: @(SolutionProjectOutputs)' />
-        <Error Condition=` '@(SolutionProjectOutputs->Count())' != '3' ` Text='Overall sln outputs must include outputs of each referenced project (there should be 3).' />
-        <Error Condition=` '@(SolutionProjectOutputs->AnyHaveMetadataValue('Identity', '$(StringifiedBravoProjectOutputs)'))' != 'true'` Text='Overall sln outputs must include outputs of normal project build of project B.' />
-        <Error Condition=` '@(SolutionProjectOutputs->AnyHaveMetadataValue('Identity', '$(StringifiedCharlieProjectOutputs)'))' != 'true' ` Text='Overall sln outputs must include outputs of normal project build of project C.' />
-        <Error Condition=` '@(SolutionProjectOutputs->AnyHaveMetadataValue('Identity', '$(StringifiedDeltaProjectOutputs)'))' != 'true' ` Text='Overall sln outputs must include outputs of normal project build of project D.' />
-    </Target>
-</Project>";
+                        <!-- Build the solution as a whole (which will build the metaproj and return overall outputs) -->
+                        <MSBuild Projects='MSBuildIssue.sln'>
+                            <Output
+                                TaskParameter='TargetOutputs'
+                                ItemName='SolutionProjectOutputs' />
+                        </MSBuild>
+                        <Message Importance='high' Text='SolutionProjectOutputs: @(SolutionProjectOutputs)' />
+                        <Error Condition=` '@(SolutionProjectOutputs->Count())' != '3' ` Text='Overall sln outputs must include outputs of each referenced project (there should be 3).' />
+                        <Error Condition=` '@(SolutionProjectOutputs->AnyHaveMetadataValue('Identity', '$(StringifiedBravoProjectOutputs)'))' != 'true'` Text='Overall sln outputs must include outputs of normal project build of project B.' />
+                        <Error Condition=` '@(SolutionProjectOutputs->AnyHaveMetadataValue('Identity', '$(StringifiedCharlieProjectOutputs)'))' != 'true' ` Text='Overall sln outputs must include outputs of normal project build of project C.' />
+                        <Error Condition=` '@(SolutionProjectOutputs->AnyHaveMetadataValue('Identity', '$(StringifiedDeltaProjectOutputs)'))' != 'true' ` Text='Overall sln outputs must include outputs of normal project build of project D.' />
+                    </Target>
+                </Project>
+                """;
             #endregion
 
             var logger = new MockLogger(output);
@@ -1039,11 +1063,13 @@ EndGlobal
         /// <summary>
         /// Test the SolutionProjectGenerator.AddPropertyGroupForSolutionConfiguration method
         /// </summary>
-        [Fact]
-        public void TestAddPropertyGroupForSolutionConfiguration()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TestAddPropertyGroupForSolutionConfiguration(bool useNewParser)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -1063,9 +1089,9 @@ EndGlobal
                         {A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Debug|Mixed Platforms.Build.0 = VCConfig1|Win32
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectRootElement projectXml = ProjectRootElement.Create();
 
@@ -1112,11 +1138,13 @@ EndGlobal
         /// <summary>
         /// Make sure that BuildProjectInSolution is set to true of the Build.0 entry is in the solution configuration.
         /// </summary>
-        [Fact]
-        public void TestAddPropertyGroupForSolutionConfigurationBuildProjectInSolutionSet()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TestAddPropertyGroupForSolutionConfigurationBuildProjectInSolutionSet(bool useNewParser)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -1131,9 +1159,9 @@ EndGlobal
                         {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Mixed Platforms.Build.0 = CSConfig1|Any CPU
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectRootElement projectXml = ProjectRootElement.Create();
 
@@ -1156,11 +1184,13 @@ EndGlobal
         /// <summary>
         /// Make sure that BuildProjectInSolution is set to false of the Build.0 entry is in the solution configuration.
         /// </summary>
-        [Fact]
-        public void TestAddPropertyGroupForSolutionConfigurationBuildProjectInSolutionNotSet()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TestAddPropertyGroupForSolutionConfigurationBuildProjectInSolutionNotSet(bool useNewParser)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -1174,9 +1204,9 @@ EndGlobal
                         {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Mixed Platforms.ActiveCfg = CSConfig1|Any CPU
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectRootElement projectXml = ProjectRootElement.Create();
 
@@ -1200,10 +1230,12 @@ EndGlobal
         /// In this bug, SkipNonexistentProjects was always set to 'Build'. It should be 'Build' for metaprojects and 'True' for everything else.
         /// The repro below has one of each case. WebProjects can't build so they are set as SkipNonexistentProjects='Build'
         /// </summary>
-        [Fact]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void Regress751742_SkipNonexistentProjects()
+        public void Regress751742_SkipNonexistentProjects(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
             {
@@ -1212,7 +1244,7 @@ EndGlobal
             }
 
             var solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -1232,10 +1264,10 @@ EndGlobal
                         {A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Debug|Mixed Platforms.Build.0 = VCConfig1|Win32
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
-            var solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             var instance = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, _buildEventContext, CreateMockLoggingService())[0];
 
@@ -1274,11 +1306,13 @@ EndGlobal
         /// if set when building a solution, will be specified as the ToolsVersion on the MSBuild task when
         /// building the projects contained within the solution.
         /// </summary>
-        [Fact]
-        public void ToolsVersionOverrideShouldBeSpecifiedOnMSBuildTaskInvocations()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ToolsVersionOverrideShouldBeSpecifiedOnMSBuildTaskInvocations(bool useNewParser)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -1298,10 +1332,10 @@ EndGlobal
                         {A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Debug|Mixed Platforms.Build.0 = VCConfig1|Win32
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, _buildEventContext, CreateMockLoggingService());
 
@@ -1340,42 +1374,44 @@ EndGlobal
         /// <summary>
         /// Make sure that whatever the solution ToolsVersion is, it gets mapped to all its metaprojs, too.
         /// </summary>
-        [Fact]
-        public void SolutionWithDependenciesHasCorrectToolsVersionInMetaprojs()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SolutionWithDependenciesHasCorrectToolsVersionInMetaprojs(bool useNewParser)
         {
             string solutionFileContents =
-                @"
-Microsoft Visual Studio Solution File, Format Version 12.00
-Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ConsoleApplication2', 'ConsoleApplication2\ConsoleApplication2.csproj', '{5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}'
-    ProjectSection(ProjectDependencies) = postProject
-        {E0D295A1-CAFA-4E68-9929-468657DAAC6C} = {E0D295A1-CAFA-4E68-9929-468657DAAC6C}
-    EndProjectSection
-EndProject
-Project('{F184B08F-C81C-45F6-A57F-5ABD9991F28F}') = 'ConsoleApplication1', 'ConsoleApplication1\ConsoleApplication1.vbproj', '{E0D295A1-CAFA-4E68-9929-468657DAAC6C}'
-EndProject
-Global
-    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-        Debug|Any CPU = Debug|Any CPU
-        Release|Any CPU = Release|Any CPU
-    EndGlobalSection
-    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-        {5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-        {5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Release|Any CPU.Build.0 = Release|Any CPU
-        {E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-        {E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-        {E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Release|Any CPU.Build.0 = Release|Any CPU
-    EndGlobalSection
-    GlobalSection(SolutionProperties) = preSolution
-        HideSolutionNode = FALSE
-    EndGlobalSection
-EndGlobal
-                ";
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ConsoleApplication2', 'ConsoleApplication2\ConsoleApplication2.csproj', '{5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}'
+                    ProjectSection(ProjectDependencies) = postProject
+                        {E0D295A1-CAFA-4E68-9929-468657DAAC6C} = {E0D295A1-CAFA-4E68-9929-468657DAAC6C}
+                    EndProjectSection
+                EndProject
+                Project('{F184B08F-C81C-45F6-A57F-5ABD9991F28F}') = 'ConsoleApplication1', 'ConsoleApplication1\ConsoleApplication1.vbproj', '{E0D295A1-CAFA-4E68-9929-468657DAAC6C}'
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {5B97A3C7-3DEE-47A4-870F-5CB6384FE6A4}.Release|Any CPU.Build.0 = Release|Any CPU
+                        {E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {E0D295A1-CAFA-4E68-9929-468657DAAC6C}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                EndGlobal
+                """;
 
             // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             string[] solutionToolsVersions = { "4.0", ObjectModelHelpers.MSBuildDefaultToolsVersion };
 
@@ -1409,11 +1445,13 @@ EndGlobal
         /// <summary>
         /// Test the SolutionProjectGenerator.Generate method has its toolset redirected correctly.
         /// </summary>
-        [Fact]
-        public void ToolsVersionOverrideCausesToolsetRedirect()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ToolsVersionOverrideCausesToolsetRedirect(bool useNewParser)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{6185CC21-BE89-448A-B3C0-D1C27112E595}'
@@ -1433,8 +1471,8 @@ EndGlobal
                         {A6F99D27-47B9-4EA4-BFC9-25157CBDC281}.Debug|Mixed Platforms.Build.0 = VCConfig1|Win32
                     EndGlobalSection
                 EndGlobal
-                ";
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+                """;
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
             bool caughtException = false;
 
             try
@@ -1454,11 +1492,13 @@ EndGlobal
         /// <summary>
         /// Test the SolutionProjectGenerator.AddPropertyGroupForSolutionConfiguration method
         /// </summary>
-        [Fact]
-        public void TestDisambiguateProjectTargetName()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TestDisambiguateProjectTargetName(bool useNewParser)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'Build', 'Build\Build.csproj', '{21397922-C38F-4A0E-B950-77B3FBD51881}'
@@ -1478,9 +1518,9 @@ EndGlobal
                                 HideSolutionNode = FALSE
                         EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
@@ -1534,11 +1574,13 @@ EndGlobal
         /// <summary>
         /// Tests the algorithm for choosing default configuration/platform values for solutions
         /// </summary>
+        /// <remarks>This test would only work for the old parser. In the new parser SolutionConfigurations are not available,
+        /// and constructed from projects configurations.</remarks>
         [Fact]
         public void TestConfigurationPlatformDefaults1()
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 Global
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1550,7 +1592,7 @@ EndGlobal
                         Release|Win32 = Release|Win32
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
@@ -1572,11 +1614,13 @@ EndGlobal
         /// <summary>
         /// Tests the algorithm for choosing default configuration/platform values for solutions
         /// </summary>
+        /// <remarks>This test would only work for the old parser. In the new parser SolutionConfigurations are not available,
+        /// and constructed from projects configurations.</remarks>
         [Fact]
         public void TestConfigurationPlatformDefaults2()
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 Global
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1586,7 +1630,7 @@ EndGlobal
                         Other|Win32 = Other|Win32
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
@@ -1602,10 +1646,12 @@ EndGlobal
         /// <summary>
         /// Tests the algorithm for choosing default Venus configuration values for solutions
         /// </summary>
-        [Fact]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void TestVenusConfigurationDefaults()
+        public void TestVenusConfigurationDefaults(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
             {
@@ -1615,13 +1661,13 @@ EndGlobal
 
             Dictionary<string, string> globalProperties = new Dictionary<string, string>();
             globalProperties["Configuration"] = "Debug";
-            ProjectInstance msbuildProject = CreateVenusSolutionProject(globalProperties);
+            ProjectInstance msbuildProject = CreateVenusSolutionProject(globalProperties, useNewParser);
 
             // ASP.NET configuration should match the selected solution configuration
             Assert.Equal("Debug", msbuildProject.GetPropertyValue("AspNetConfiguration"));
 
             globalProperties["Configuration"] = "Release";
-            msbuildProject = CreateVenusSolutionProject(globalProperties);
+            msbuildProject = CreateVenusSolutionProject(globalProperties, useNewParser);
             Assert.Equal("Release", msbuildProject.GetPropertyValue("AspNetConfiguration"));
 
             // Check that the two standard Asp.net configurations are represented on the targets
@@ -1632,10 +1678,12 @@ EndGlobal
         /// <summary>
         /// Tests that the correct value for TargetFrameworkVersion gets set when creating Venus solutions
         /// </summary>
-        [Fact]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void VenusSolutionDefaultTargetFrameworkVersion()
+        public void VenusSolutionDefaultTargetFrameworkVersion(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
             {
@@ -1644,7 +1692,7 @@ EndGlobal
             }
 
             // v4.0 by default
-            ProjectInstance msbuildProject = CreateVenusSolutionProject();
+            ProjectInstance msbuildProject = CreateVenusSolutionProject(useNewParser);
             Assert.Equal("v4.0", msbuildProject.GetPropertyValue("TargetFrameworkVersion"));
 
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
@@ -1654,34 +1702,36 @@ EndGlobal
             }
 
             // v3.5 if MSBuildToolsVersion is 3.5
-            msbuildProject = CreateVenusSolutionProject("3.5");
+            msbuildProject = CreateVenusSolutionProject("3.5", useNewParser);
             Assert.Equal("v3.5", msbuildProject.GetPropertyValue("TargetFrameworkVersion"));
 
             // v2.0 if MSBuildToolsVersion is 2.0
-            msbuildProject = CreateVenusSolutionProject("2.0");
+            msbuildProject = CreateVenusSolutionProject("2.0", useNewParser);
             Assert.Equal("v2.0", msbuildProject.GetPropertyValue("TargetFrameworkVersion"));
 
             // may be user defined
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
             globalProperties.Add("TargetFrameworkVersion", "userdefined");
-            msbuildProject = CreateVenusSolutionProject(globalProperties);
+            msbuildProject = CreateVenusSolutionProject(globalProperties, useNewParser);
             Assert.Equal("userdefined", msbuildProject.GetPropertyValue("TargetFrameworkVersion"));
         }
 
         /// <summary>
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
-        [Fact]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void TestTargetFrameworkPaths0()
+        public void TestTargetFrameworkPaths0(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkSdkV20 != null)
             {
                 IDictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties.Add("TargetFrameworkVersion", "v2.0");
 
-                ProjectInstance msbuildProject = CreateVenusSolutionProject("2.0");
+                ProjectInstance msbuildProject = CreateVenusSolutionProject("2.0", useNewParser);
 
                 // ToolsVersion is 2.0, TargetFrameworkVersion is v2.0 --> one item pointing to v2.0
                 Assert.Equal("2.0", msbuildProject.ToolsVersion);
@@ -1696,10 +1746,12 @@ EndGlobal
         /// <summary>
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
-        [Fact]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void TestTargetFrameworkPaths1()
+        public void TestTargetFrameworkPaths1(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
             {
@@ -1707,7 +1759,7 @@ EndGlobal
                 return;
             }
 
-            ProjectInstance msbuildProject = CreateVenusSolutionProject();
+            ProjectInstance msbuildProject = CreateVenusSolutionProject(useNewParser);
 
             // ToolsVersion is 4.0, TargetFrameworkVersion is v2.0 --> one item pointing to v2.0
             msbuildProject.SetProperty("TargetFrameworkVersion", "v2.0");
@@ -1722,10 +1774,12 @@ EndGlobal
         /// <summary>
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
-        [Fact]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void TestTargetFrameworkPaths2()
+        public void TestTargetFrameworkPaths2(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
             {
@@ -1733,7 +1787,7 @@ EndGlobal
                 return;
             }
 
-            ProjectInstance msbuildProject = CreateVenusSolutionProject();
+            ProjectInstance msbuildProject = CreateVenusSolutionProject(useNewParser);
 
             // ToolsVersion is 4.0, TargetFrameworkVersion is v4.0 --> items for v2.0 and v4.0
             msbuildProject.SetProperty("TargetFrameworkVersion", "v4.0");
@@ -1771,11 +1825,13 @@ EndGlobal
         /// <summary>
         /// Test the PredictActiveSolutionConfigurationName method
         /// </summary>
+        /// <remarks>This test would only work for the old parser.
+        /// In the new parser SolutionConfigurations are not available, and constructed from projects configurations.</remarks>
         [Fact]
         public void TestPredictSolutionConfigurationName()
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 Global
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1785,7 +1841,7 @@ EndGlobal
                         Debug|Win32 = Debug|Win32
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
@@ -1806,11 +1862,13 @@ EndGlobal
         /// <summary>
         /// Verifies that the SolutionProjectGenerator will correctly escape project file paths
         /// </summary>
-        [Fact]
-        public void SolutionGeneratorEscapingProjectFilePaths()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SolutionGeneratorEscapingProjectFilePaths(bool useNewParser)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{F184B08F-C81C-45F6-A57F-5ABD9991F28F}') = 'ConsoleApplication1', '%abtest\ConsoleApplication1.vbproj', '{AB3413A6-D689-486D-B7F0-A095371B3F13}'
@@ -1830,9 +1888,9 @@ EndGlobal
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
             Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
@@ -1849,8 +1907,10 @@ EndGlobal
         /// <summary>
         /// Verifies that the SolutionProjectGenerator will emit a solution file.
         /// </summary>
-        [Fact]
-        public void SolutionGeneratorCanEmitSolutions()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SolutionGeneratorCanEmitSolutions(bool useNewParser)
         {
             string oldValueForMSBuildEmitSolution = Environment.GetEnvironmentVariable("MSBuildEmitSolution");
 
@@ -1858,7 +1918,7 @@ EndGlobal
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
 
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{F184B08F-C81C-45F6-A57F-5ABD9991F28F}') = 'ConsoleApplication1', 'ConsoleApplication1\ConsoleApplication1.vbproj', '{AB3413A6-D689-486D-B7F0-A095371B3F13}'
@@ -1878,7 +1938,7 @@ EndGlobal
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
             SolutionFile solution = null;
             using ProjectCollection collection = new ProjectCollection();
@@ -1887,7 +1947,7 @@ EndGlobal
             {
                 Environment.SetEnvironmentVariable("MSBuildEmitSolution", "1");
 
-                solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+                solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
                 // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
                 Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
@@ -1919,16 +1979,18 @@ EndGlobal
         /// Make sure that we output a warning and don't build anything when we're given an invalid
         /// solution configuration and SkipInvalidConfigurations is set to true.
         /// </summary>
-        [Fact]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        public void TestSkipInvalidConfigurationsCase()
+        public void TestSkipInvalidConfigurationsCase(bool useNewParser)
         {
             string tmpFileName = FileUtilities.GetTemporaryFileName();
             string projectFilePath = tmpFileName + ".sln";
 
-            string solutionContents =
-                @"
+            string solutionFileContents =
+                """
                 Microsoft Visual Studio Solution File, Format Version 11.00
                 # Visual Studio 2005
                 Project('{E24C65DC-7377-472B-9ABA-BC803B73C61A}') = 'C:\solutions\WebSite2\', '..\..\solutions\WebSite2\', '{F90528C4-6989-4D33-AFE8-F53173597CC2}'
@@ -1959,7 +2021,8 @@ EndGlobal
                         {F90528C4-6989-4D33-AFE8-F53173597CC2}.Debug|Any CPU.ActiveCfg = Debug|.NET
                         {F90528C4-6989-4D33-AFE8-F53173597CC2}.Debug|Any CPU.Build.0 = Debug|.NET
                     EndGlobalSection
-                EndGlobal";
+                EndGlobal
+                """;
 
             try
             {
@@ -1969,7 +2032,7 @@ EndGlobal
                 globalProperties["Configuration"] = "Nonexistent";
                 globalProperties["SkipInvalidConfigurations"] = "true";
 
-                SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionContents.Replace('\'', '"'));
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService());
                 ProjectInstance msbuildProject = instances[0];
 
@@ -2173,50 +2236,52 @@ EndGlobal
         /// Bug indicated that when a target framework version greater than 4.0 was used then the solution project generator would crash.
         /// this test is to make sure the fix is not regressed.
         /// </summary>
-        [Fact]
-        public void TestTargetFrameworkVersionGreaterThan4()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void TestTargetFrameworkVersionGreaterThan4(bool useNewParser)
         {
             string tmpFileName = FileUtilities.GetTemporaryFileName();
             string projectFilePath = tmpFileName + ".sln";
 
             string solutionFileContents =
-               @"
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project('{E24C65DC-7377-472B-9ABA-BC803B73C61A}') = 'WebSite1', '..\WebSite1\', '{6B8F98F2-C976-4029-9321-5CCD73A174DA}'
-    ProjectSection(WebsiteProperties) = preProject
-        TargetFrameworkMoniker = '.NETFramework,Version=v4.34'
-        Debug.AspNetCompiler.VirtualPath = '/WebSite1'
-        Debug.AspNetCompiler.PhysicalPath = '..\WebSite1\'
-        Debug.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
-        Debug.AspNetCompiler.Updateable = 'true'
-        Debug.AspNetCompiler.ForceOverwrite = 'true'
-        Debug.AspNetCompiler.FixedNames = 'false'
-        Debug.AspNetCompiler.Debug = 'True'
-        Release.AspNetCompiler.VirtualPath = '/WebSite1'
-        Release.AspNetCompiler.PhysicalPath = '..\WebSite1\'
-        Release.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
-        Release.AspNetCompiler.Updateable = 'true'
-        Release.AspNetCompiler.ForceOverwrite = 'true'
-        Release.AspNetCompiler.FixedNames = 'false'
-        Release.AspNetCompiler.Debug = 'False'
-        VWDPort = '45602'
-        DefaultWebSiteLanguage = 'Visual Basic'
-    EndProjectSection
-EndProject
-Global
-    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-        Debug|Any CPU = Debug|Any CPU
-    EndGlobalSection
-    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-        {6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-        {6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-    EndGlobalSection
-    GlobalSection(SolutionProperties) = preSolution
-        HideSolutionNode = FALSE
-    EndGlobalSection
-EndGlobal
-                ";
+               """
+                Microsoft Visual Studio Solution File, Format Version 11.00
+                # Visual Studio 2010
+                Project('{E24C65DC-7377-472B-9ABA-BC803B73C61A}') = 'WebSite1', '..\WebSite1\', '{6B8F98F2-C976-4029-9321-5CCD73A174DA}'
+                    ProjectSection(WebsiteProperties) = preProject
+                        TargetFrameworkMoniker = '.NETFramework,Version=v4.34'
+                        Debug.AspNetCompiler.VirtualPath = '/WebSite1'
+                        Debug.AspNetCompiler.PhysicalPath = '..\WebSite1\'
+                        Debug.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
+                        Debug.AspNetCompiler.Updateable = 'true'
+                        Debug.AspNetCompiler.ForceOverwrite = 'true'
+                        Debug.AspNetCompiler.FixedNames = 'false'
+                        Debug.AspNetCompiler.Debug = 'True'
+                        Release.AspNetCompiler.VirtualPath = '/WebSite1'
+                        Release.AspNetCompiler.PhysicalPath = '..\WebSite1\'
+                        Release.AspNetCompiler.TargetPath = 'PrecompiledWeb\WebSite1\'
+                        Release.AspNetCompiler.Updateable = 'true'
+                        Release.AspNetCompiler.ForceOverwrite = 'true'
+                        Release.AspNetCompiler.FixedNames = 'false'
+                        Release.AspNetCompiler.Debug = 'False'
+                        VWDPort = '45602'
+                        DefaultWebSiteLanguage = 'Visual Basic'
+                    EndProjectSection
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {6B8F98F2-C976-4029-9321-5CCD73A174DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                EndGlobal
+                """;
 
             try
             {
@@ -2226,7 +2291,9 @@ EndGlobal
                 globalProperties["Configuration"] = "Release";
                 globalProperties["SkipInvalidConfigurations"] = "true";
 
-                SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents.Replace('\'', '"'));
+
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
+
                 using ProjectCollection collection = new ProjectCollection();
                 collection.RegisterLogger(logger);
 
@@ -2256,14 +2323,16 @@ EndGlobal
         /// <summary>
         /// Verifies that when target names are specified they end up in the metaproj.
         /// </summary>
-        [Fact]
-        public void CustomTargetNamesAreInInMetaproj()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void CustomTargetNamesAreInInMetaproj(bool useNewParser)
         {
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(
-            @"
-                Microsoft Visual Studio Solution File, Format Version 14.00
+            string solutionFileContents =
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 2015
-                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1.csproj", "{6185CC21-BE89-448A-B3C0-D1C27112E595}"
                 EndProject
                 Global
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -2275,7 +2344,9 @@ EndGlobal
                         {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = CSConfig2|Any CPU
                     EndGlobalSection
                 EndGlobal
-            ");
+                """;
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "One" });
 
@@ -2304,14 +2375,16 @@ EndGlobal
         /// <summary>
         /// Verifies that disambiguated target names are used when a project name matches a standard solution entry point.
         /// </summary>
-        [Fact]
-        public void DisambiguatedTargetNamesAreInInMetaproj()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void DisambiguatedTargetNamesAreInMetaproj(bool useNewParser)
         {
-            foreach(string projectName in ProjectInSolution.projectNamesToDisambiguate)
+            foreach (string projectName in ProjectInSolution.projectNamesToDisambiguate)
             {
-                SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(
-                $$"""
-                    Microsoft Visual Studio Solution File, Format Version 14.00
+                string solutionFileContents =
+                    $$"""
+                    Microsoft Visual Studio Solution File, Format Version 12.00
                     # Visual Studio 2015
                     Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "{{projectName}}", "{{projectName}}.csproj", "{6185CC21-BE89-448A-B3C0-D1C27112E595}"
                     EndProject
@@ -2326,7 +2399,9 @@ EndGlobal
                             {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
                         EndGlobalSection
                     EndGlobal
-                """);
+                    """;
+
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), null);
 
@@ -2349,29 +2424,33 @@ EndGlobal
         /// Verifies that illegal user target names (the ones already used internally) don't crash the SolutionProjectGenerator
         /// </summary>
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void IllegalUserTargetNamesDoNotThrow(bool forceCaseDifference)
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(true, true)]
+        public void IllegalUserTargetNamesDoNotThrow(bool forceCaseDifference, bool useNewParser)
         {
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(
-            @"
-                Microsoft Visual Studio Solution File, Format Version 14.00
+            string solutionFileContents =
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 2015
-                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1.csproj", "{6185CC21-BE89-448A-B3C0-D1C27112E595}"
                 EndProject
                 Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Debug|Any CPU = Debug|Any CPU
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
                 EndGlobal
-            ");
+                """;
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectInstance[] instances;
 
@@ -2426,31 +2505,34 @@ EndGlobal
         {
             string baseDirectory = Guid.NewGuid().ToString("N");
 
-            string solutionFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"{Guid.NewGuid():N}.sln"), @"
-                Microsoft Visual Studio Solution File, Format Version 14.00
+            string solutionFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"{Guid.NewGuid():N}.sln"),
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 2015
-                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1.csproj", "{6185CC21-BE89-448A-B3C0-D1C27112E595}"
                 EndProject
                 Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Debug|Any CPU = Debug|Any CPU
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
                 EndGlobal
-            ");
+                """);
 
-            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"after.{Path.GetFileName(solutionFilePath)}.targets"), @"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-                    <Target Name=""MyTarget"">
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"after.{Path.GetFileName(solutionFilePath)}.targets"),
+                """
+                <Project ToolsVersion="msbuilddefaulttoolsversion" xmlns="msbuildnamespace">
+                    <Target Name="MyTarget">
                         <MyTask />
                     </Target>
-                </Project>");
+                </Project>
+                """);
 
             try
             {
@@ -2482,31 +2564,34 @@ EndGlobal
         {
             string baseDirectory = Guid.NewGuid().ToString("N");
 
-            string solutionFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"{Guid.NewGuid():N}.sln"), @"
-                Microsoft Visual Studio Solution File, Format Version 14.00
+            string solutionFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"{Guid.NewGuid():N}.sln"),
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 2015
-                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1.csproj", "{6185CC21-BE89-448A-B3C0-D1C27112E595}"
                 EndProject
                 Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Debug|Any CPU = Debug|Any CPU
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
                 EndGlobal
-            ");
+                """);
 
-            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"after.{Path.GetFileName(solutionFilePath)}.targets"), @"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-                    <Target Name=""MyTarget"" BeforeTargets=""DynamicTraversalTarget"">
-                        <Warning Text=""Message from MyTarget"" />
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"after.{Path.GetFileName(solutionFilePath)}.targets"),
+                """
+                <Project ToolsVersion="msbuilddefaulttoolsversion" xmlns="msbuildnamespace">
+                    <Target Name="MyTarget" BeforeTargets="DynamicTraversalTarget">
+                        <Warning Text="Message from MyTarget" />
                     </Target>
-                </Project>");
+                </Project>
+                """);
 
             try
             {
@@ -2557,48 +2642,55 @@ EndGlobal
 
             string baseDirectory = Guid.NewGuid().ToString("N");
 
-            string solutionFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"{Guid.NewGuid():N}.sln"), @"
-                Microsoft Visual Studio Solution File, Format Version 14.00
+            string solutionFilePath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, $"{Guid.NewGuid():N}.sln"),
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 2015
-                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1.csproj"", ""{6185CC21-BE89-448A-B3C0-D1C27112E595}""
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1.csproj", "{6185CC21-BE89-448A-B3C0-D1C27112E595}"
                 EndProject
                 Global
-	                GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		                Debug|Any CPU = Debug|Any CPU
-		                Release|Any CPU = Release|Any CPU
-	                EndGlobalSection
-	                GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		                {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
-	                EndGlobalSection
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                        Release|Any CPU = Release|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                        {6185CC21-BE89-448A-B3C0-D1C27112E595}.Release|Any CPU.Build.0 = Release|Any CPU
+                    EndGlobalSection
                 EndGlobal
-            ");
+                """);
 
-            string projectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, projectName), $@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
+            string projectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, projectName),
+                $$"""
+                <Project ToolsVersion="msbuilddefaulttoolsversion" xmlns="msbuildnamespace">
                     <PropertyGroup>
-                        <PropertyA>{expectedPropertyValue}</PropertyA>
+                        <PropertyA>{{expectedPropertyValue}}</PropertyA>
                     </PropertyGroup>
-                </Project>");
+                </Project>
+                """);
 
             if (projectPath.StartsWith("Custom", StringComparison.OrdinalIgnoreCase))
             {
                 // If a custom file name was given, create a Directory.Solution.props and Directory.Build.targets to ensure that they aren't imported
-                ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, "Directory.Solution.props"), $@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-                    <PropertyGroup>
-                        <PropertyA>This file should not be imported</PropertyA>
-                    </PropertyGroup>
-                </Project>");
+                ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, "Directory.Solution.props"),
+                    """
+                    <Project ToolsVersion="msbuilddefaulttoolsversion" xmlns="msbuildnamespace">
+                        <PropertyGroup>
+                            <PropertyA>This file should not be imported</PropertyA>
+                        </PropertyGroup>
+                    </Project>
+                    """);
 
-                ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, "Directory.Solution.targets"), $@"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-                    <PropertyGroup>
-                        <PropertyA>This file should not be imported</PropertyA>
-                    </PropertyGroup>
-                </Project>");
+                ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine(baseDirectory, "Directory.Solution.targets"),
+                    """
+                    <Project ToolsVersion="msbuilddefaulttoolsversion" xmlns="msbuildnamespace">
+                        <PropertyGroup>
+                            <PropertyA>This file should not be imported</PropertyA>
+                        </PropertyGroup>
+                    </Project>
+                    """);
             }
 
             try
@@ -2640,20 +2732,23 @@ EndGlobal
         /// Regression test for https://github.com/dotnet/msbuild/issues/6236
         /// </summary>
         [Theory]
-        [InlineData("http://localhost:8080")]
-        [InlineData("a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-")]
-        public void AbsolutePathWorksForUnsupportedPaths(string relativePath)
+        [InlineData("http://localhost:8080", false)]
+        [InlineData("http://localhost:8080", true)]
+        [InlineData("a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-", false)]
+        [InlineData("a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-", true)]
+        public void AbsolutePathWorksForUnsupportedPaths(string relativePath, bool useNewParser)
         {
             string solutionFileContents =
-                $@"
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31025.194
-MinimumVisualStudioVersion = 10.0.40219.1
-Project(""{{E24C65DC-7377-472B-9ABA-BC803B73C61A}}"") = ""WebSite1"", ""{relativePath}"", ""{{{{96E0707C-2E9C-4704-946F-FA583147737F}}}}""
-EndProject";
+                $$"""
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 16
+                VisualStudioVersion = 16.0.31025.194
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "WebSite1", "{{relativePath}}", "{96E0707C-2E9C-4704-946F-FA583147737F}"
+                EndProject
+                """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectInSolution projectInSolution = solution.ProjectsInOrder.ShouldHaveSingleItem();
 
@@ -2665,25 +2760,25 @@ EndProject";
         /// <summary>
         /// Create a Project derived from a Venus solution
         /// </summary>
-        private ProjectInstance CreateVenusSolutionProject()
+        private ProjectInstance CreateVenusSolutionProject(bool useNewParser)
         {
-            return CreateVenusSolutionProject(null, null);
+            return CreateVenusSolutionProject(null, null, useNewParser);
         }
 
         /// <summary>
         /// Create a Project derived from a Venus solution
         /// </summary>
-        private ProjectInstance CreateVenusSolutionProject(IDictionary<string, string> globalProperties)
+        private ProjectInstance CreateVenusSolutionProject(IDictionary<string, string> globalProperties, bool useNewParser)
         {
-            return CreateVenusSolutionProject(globalProperties, null);
+            return CreateVenusSolutionProject(globalProperties, null, useNewParser);
         }
 
         /// <summary>
         /// Create a Project derived from a Venus solution
         /// </summary>
-        private ProjectInstance CreateVenusSolutionProject(string toolsVersion)
+        private ProjectInstance CreateVenusSolutionProject(string toolsVersion, bool useNewParser)
         {
-            return CreateVenusSolutionProject(null, toolsVersion);
+            return CreateVenusSolutionProject(null, toolsVersion, useNewParser);
         }
 
         /// <summary>
@@ -2692,10 +2787,10 @@ EndProject";
         /// </summary>
         /// <param name="globalProperties">The dictionary of global properties.  May be null.</param>
         /// <param name="toolsVersion">The ToolsVersion override value.  May be null.</param>
-        private ProjectInstance CreateVenusSolutionProject(IDictionary<string, string> globalProperties, string toolsVersion)
+        private ProjectInstance CreateVenusSolutionProject(IDictionary<string, string> globalProperties, string toolsVersion, bool useNewParser)
         {
             string solutionFileContents =
-                @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{E24C65DC-7377-472B-9ABA-BC803B73C61A}') = 'C:\solutions\WebSite2\', '..\..\solutions\WebSite2\', '{F90528C4-6989-4D33-AFE8-F53173597CC2}'
@@ -2727,9 +2822,9 @@ EndProject";
                         {F90528C4-6989-4D33-AFE8-F53173597CC2}.Debug|Any CPU.Build.0 = Debug|.NET
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, toolsVersion, BuildEventContext.Invalid, CreateMockLoggingService());
 
@@ -2774,6 +2869,12 @@ EndProject";
             IEnumerable<ProjectItemInstance> itemGroup = msbuildProject.GetItems(itemType);
             Assert.NotNull(itemGroup);
             Assert.Equal(count, itemGroup.Count());
+        }
+
+        private SolutionFile ParseSolutionHelper(string solutionFileContents, bool useNewParser)
+        {
+            return useNewParser ? SolutionFile_NewParser_Tests.ParseSolutionHelper(solutionFileContents) :
+                SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
         }
 
         #endregion // Helper Functions
