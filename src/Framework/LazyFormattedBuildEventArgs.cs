@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 
@@ -41,7 +42,7 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword.</param>
         /// <param name="senderName">name of event sender.</param>
         public LazyFormattedBuildEventArgs(
-            string? message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string? message,
             string? helpKeyword,
             string? senderName)
             : this(message, helpKeyword, senderName, DateTime.Now, null)
@@ -57,7 +58,7 @@ namespace Microsoft.Build.Framework
         /// <param name="eventTimestamp">Timestamp when event was created.</param>
         /// <param name="messageArgs">Message arguments.</param>
         public LazyFormattedBuildEventArgs(
-            string? message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string? message,
             string? helpKeyword,
             string? senderName,
             DateTime eventTimestamp,
@@ -164,7 +165,7 @@ namespace Microsoft.Build.Framework
         /// <param name="unformatted">The string to format.</param>
         /// <param name="args">Optional arguments for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
-        private static string FormatString(string unformatted, params object[] args)
+        private static string FormatString([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string unformatted, params object[] args)
         {
             // Based on the one in Shared/ResourceUtilities.
             string formatted = unformatted;
