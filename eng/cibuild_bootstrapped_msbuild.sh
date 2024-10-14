@@ -60,7 +60,7 @@ if [ $host_type = "core" ]
 then
   _InitializeBuildTool="$bootstrapRoot/core/dotnet"
   # The version must be consistent with BootstrapSdkVersion
-  _InitializeBuildToolCommand="$bootstrapRoot/core/sdk/9.0.0-rc.2.24473.5/MSBuild.dll"
+  _InitializeBuildToolCommand="$bootstrapRoot/core/sdk/9.0.100-rc.2.24474.11/MSBuild.dll"
   _InitializeBuildToolFramework="net9.0"
 else
   echo "Unsupported hostType ($host_type)"
