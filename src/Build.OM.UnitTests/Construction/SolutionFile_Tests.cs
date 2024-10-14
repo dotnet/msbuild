@@ -2,18 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 using Microsoft.VisualStudio.SolutionPersistence;
 using Shouldly;
 using Xunit;
+using Microsoft.VisualStudio.SolutionPersistence.Model;
+using System.Threading;
 using System.Linq;
 
 #nullable disable
@@ -34,7 +35,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string solutionFileContents =
-                    @"
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}') = 'Project name.vcproj', 'Relative path\to\Project name.vcproj', '{0ABED153-9451-483C-8140-9E8D7306B216}'
@@ -54,7 +55,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
                 ParseSolutionHelper(solutionFileContents);
                 Assert.Fail("Should not get here");
@@ -111,8 +112,10 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void ParseSolution_EmptyProjectName()
         {
-            string solutionFileContents =
-                           @"
+            Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                string solutionFileContents =
+                """
                 Microsoft Visual Studio Solution File, Format Version 9.00
                 # Visual Studio 2005
                 Project('{Project GUID}') = '', 'src\.proj', '{0ABED153-9451-483C-8140-9E8D7306B216}'
@@ -132,13 +135,10 @@ namespace Microsoft.Build.UnitTests.Construction
                         HideSolutionNode = FALSE
                     EndGlobalSection
                 EndGlobal
-                ";
+                """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
-
-            Assert.StartsWith("EmptyProjectName", solution.ProjectsInOrder[0].ProjectName);
-            Assert.Equal("src\\.proj", solution.ProjectsInOrder[0].RelativePath);
-            Assert.Equal("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            });
         }
 
         /// <summary>
@@ -217,88 +217,10 @@ namespace Microsoft.Build.UnitTests.Construction
         /// solution folders will get correctly uniquified.
         /// For the new parser, solution folders are not included to ProjectsInOrder or ProjectsByGuid.
         /// </summary>
-        [Fact]
-        public void SolutionFolders()
-        {
-            string solutionFileContents =
-                @"
-                Microsoft Visual Studio Solution File, Format Version 9.00
-                # Visual Studio 2005
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{34E0D07D-CF8F-459D-9449-C4188D8C5564}'
-                EndProject
-                Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'MySlnFolder', 'MySlnFolder', '{E0F97730-25D2-418A-A7BD-02CAFDC6E470}'
-                EndProject
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'MyPhysicalFolder\ClassLibrary1\ClassLibrary1.csproj', '{A5EE8128-B08E-4533-86C5-E46714981680}'
-                EndProject
-                Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'MySubSlnFolder', 'MySubSlnFolder', '{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}'
-                EndProject
-                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary2', 'ClassLibrary2\ClassLibrary2.csproj', '{6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}'
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|Any CPU = Debug|Any CPU
-                        Release|Any CPU = Release|Any CPU
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {34E0D07D-CF8F-459D-9449-C4188D8C5564}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                        {34E0D07D-CF8F-459D-9449-C4188D8C5564}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                        {34E0D07D-CF8F-459D-9449-C4188D8C5564}.Release|Any CPU.ActiveCfg = Release|Any CPU
-                        {34E0D07D-CF8F-459D-9449-C4188D8C5564}.Release|Any CPU.Build.0 = Release|Any CPU
-                        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                        {A5EE8128-B08E-4533-86C5-E46714981680}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|Any CPU.ActiveCfg = Release|Any CPU
-                        {A5EE8128-B08E-4533-86C5-E46714981680}.Release|Any CPU.Build.0 = Release|Any CPU
-                        {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                        {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                        {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-                        {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}.Release|Any CPU.Build.0 = Release|Any CPU
-                    EndGlobalSection
-                    GlobalSection(SolutionProperties) = preSolution
-                        HideSolutionNode = FALSE
-                    EndGlobalSection
-                    GlobalSection(NestedProjects) = preSolution
-                        {A5EE8128-B08E-4533-86C5-E46714981680} = {E0F97730-25D2-418A-A7BD-02CAFDC6E470}
-                        {2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B} = {E0F97730-25D2-418A-A7BD-02CAFDC6E470}
-                        {6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4} = {2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}
-                    EndGlobalSection
-                EndGlobal
-                ";
-
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
-
-            Assert.Equal(5, solution.ProjectsInOrder.Count);
-
-            Assert.Equal(@"ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[0].RelativePath);
-            Assert.Equal("{34E0D07D-CF8F-459D-9449-C4188D8C5564}", solution.ProjectsInOrder[0].ProjectGuid);
-            Assert.Empty(solution.ProjectsInOrder[0].Dependencies);
-            Assert.Null(solution.ProjectsInOrder[0].ParentProjectGuid);
-
-            Assert.Equal("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", solution.ProjectsInOrder[1].ProjectGuid);
-            Assert.Empty(solution.ProjectsInOrder[1].Dependencies);
-            Assert.Null(solution.ProjectsInOrder[1].ParentProjectGuid);
-
-            Assert.Equal(@"MyPhysicalFolder\ClassLibrary1\ClassLibrary1.csproj", solution.ProjectsInOrder[2].RelativePath);
-            Assert.Equal("{A5EE8128-B08E-4533-86C5-E46714981680}", solution.ProjectsInOrder[2].ProjectGuid);
-            Assert.Empty(solution.ProjectsInOrder[2].Dependencies);
-            Assert.Equal("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", solution.ProjectsInOrder[2].ParentProjectGuid);
-
-            Assert.Equal("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}", solution.ProjectsInOrder[3].ProjectGuid);
-            Assert.Empty(solution.ProjectsInOrder[3].Dependencies);
-            Assert.Equal("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", solution.ProjectsInOrder[3].ParentProjectGuid);
-
-            Assert.Equal(@"ClassLibrary2\ClassLibrary2.csproj", solution.ProjectsInOrder[4].RelativePath);
-            Assert.Equal("{6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}", solution.ProjectsInOrder[4].ProjectGuid);
-            Assert.Empty(solution.ProjectsInOrder[4].Dependencies);
-            Assert.Equal("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}", solution.ProjectsInOrder[4].ParentProjectGuid);
-        }
-
-        /// <summary>
-        /// Exercises solution folders, and makes sure that samely named projects in different
-        /// solution folders will get correctly uniquified.
-        /// For the new parser, solution folders are not included to ProjectsInOrder or ProjectsByGuid.
-        /// </summary>
-        [Fact]
-        public void SolutionFoldersSlnx()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SolutionFolders(bool convertToSlnx)
         {
             string solutionFileContents =
                 """
@@ -344,7 +266,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, true);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
 
             Assert.Equal(3, solution.ProjectsInOrder.Count);
 
@@ -359,9 +281,17 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Empty(classLibrary2.Dependencies);
 
             // When converting to slnx, the guids are not preserved.
-            // try at list assert not null
-            Assert.NotNull(myPhysicalFolderClassLibrary1.ParentProjectGuid);
-            Assert.NotNull(classLibrary2.ParentProjectGuid);
+            if (!convertToSlnx)
+            {
+                Assert.Equal("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", myPhysicalFolderClassLibrary1.ParentProjectGuid);
+                Assert.Equal("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}", classLibrary2.ParentProjectGuid);
+            }
+            else
+            {
+                // try at list assert not null
+                Assert.NotNull(myPhysicalFolderClassLibrary1.ParentProjectGuid);
+                Assert.NotNull(classLibrary2.ParentProjectGuid);
+            }
         }
 
         /// <summary>
@@ -679,69 +609,10 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.True(vcProject.ProjectConfigurations["Release|Win32"].IncludeInBuild);
         }
 
-        /// <summary>
-        /// Make sure the project configurations in solution configurations get parsed correctly
-        /// for a more tricky solution
-        /// </summary>
-        [Fact]
-        public void ParseProjectConfigurationsInSolutionConfigurations2()
-        {
-            string solutionFileContents =
-                @"
-                Microsoft Visual Studio Solution File, Format Version 9.00
-                # Visual Studio 2005
-                Project('{E24C65DC-7377-472B-9ABA-BC803B73C61A}') = 'C:\solutions\WebSite1\', '..\WebSite1\', '{E8E75132-67E4-4D6F-9CAE-8DA4C883F418}'
-                EndProject
-                Project('{E24C65DC-7377-472B-9ABA-BC803B73C61A}') = 'C:\solutions\WebSite2\', '..\WebSite2\', '{E8E75132-67E4-4D6F-9CAE-8DA4C883F419}'
-                EndProject
-                Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'NewFolder1', 'NewFolder1', '{54D20FFE-84BE-4066-A51E-B25D040A4235}'
-                EndProject
-                Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'NewFolder2', 'NewFolder2', '{D2633E4D-46FF-4C4E-8340-4BC7CDF78615}'
-                EndProject
-                Project('{8BC9CEB9-8B4A-11D0-8D11-00A0C91BC942}') = 'MSBuild.exe', '..\..\dd\binaries.x86dbg\bin\i386\MSBuild.exe', '{25FD9E7C-F37E-48E0-9A7C-607FE4AACCC0}'
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|.NET = Debug|.NET
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {E8E75132-67E4-4D6F-9CAE-8DA4C883F418}.Debug|.NET.ActiveCfg = Debug|.NET
-                        {E8E75132-67E4-4D6F-9CAE-8DA4C883F418}.Debug|.NET.Build.0 = Debug|.NET
-                        {25FD9E7C-F37E-48E0-9A7C-607FE4AACCC0}.Debug|.NET.ActiveCfg = Debug
-                    EndGlobalSection
-                    GlobalSection(SolutionProperties) = preSolution
-                        HideSolutionNode = FALSE
-                    EndGlobalSection
-                    GlobalSection(NestedProjects) = preSolution
-                        {25FD9E7C-F37E-48E0-9A7C-607FE4AACCC0} = {D2633E4D-46FF-4C4E-8340-4BC7CDF78615}
-                    EndGlobalSection
-                EndGlobal
-                ";
-
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
-
-            ProjectInSolution webProject = (ProjectInSolution)solution.ProjectsByGuid["{E8E75132-67E4-4D6F-9CAE-8DA4C883F418}"];
-            ProjectInSolution exeProject = (ProjectInSolution)solution.ProjectsByGuid["{25FD9E7C-F37E-48E0-9A7C-607FE4AACCC0}"];
-            ProjectInSolution missingWebProject = (ProjectInSolution)solution.ProjectsByGuid["{E8E75132-67E4-4D6F-9CAE-8DA4C883F419}"];
-
-            Assert.Single(webProject.ProjectConfigurations);
-
-            Assert.Equal("Debug|.NET", webProject.ProjectConfigurations["Debug|.NET"].FullName);
-            Assert.True(webProject.ProjectConfigurations["Debug|.NET"].IncludeInBuild);
-
-            Assert.Single(exeProject.ProjectConfigurations);
-
-            Assert.Equal("Debug", exeProject.ProjectConfigurations["Debug|.NET"].FullName);
-            Assert.False(exeProject.ProjectConfigurations["Debug|.NET"].IncludeInBuild);
-
-            Assert.Empty(missingWebProject.ProjectConfigurations);
-
-            Assert.Equal("Debug", solution.GetDefaultConfigurationName()); // "Default solution configuration"
-            Assert.Equal(".NET", solution.GetDefaultPlatformName()); // "Default solution platform"
-        }
-
-        [Fact]
-        public void ParseProjectConfigurationsInSolutionConfigurationsSlnx()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseProjectConfigurationsInSolutionConfigurations2(bool convertToSlnx)
         {
             string solutionFileContents =
                 """
@@ -777,7 +648,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, true);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
 
             ProjectInSolution winFormsApp1 = solution.ProjectsInOrder.First(p => p.ProjectName == "WinFormsApp1");
             ProjectInSolution classLibrary1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
@@ -806,24 +677,33 @@ namespace Microsoft.Build.UnitTests.Construction
         private static SolutionFile ParseSolutionHelper(string solutionFileContents, bool convertToSlnx = false)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
-
-            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            string solutionPath = FileUtilities.GetTemporaryFileName(".sln");
+            string slnxPath = solutionPath + "x";
+            try
             {
-                TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
+                File.WriteAllText(solutionPath, solutionFileContents);
+                if (convertToSlnx)
+                {
+                    ISolutionSerializer serializer = SolutionSerializers.GetSerializerByMoniker(solutionPath);
+                    SolutionModel solutionModel = serializer.OpenAsync(solutionPath, CancellationToken.None).Result;
+                    SolutionSerializers.SlnXml.SaveAsync(slnxPath, solutionModel, CancellationToken.None).Wait();
 
-                string solutionPath = convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path;
+                    SolutionFile slnx = SolutionFile.Parse(slnxPath);
+                    return slnx;
+                }
 
-                return SolutionFile.Parse(solutionPath);
+                SolutionFile sln = SolutionFile.Parse(solutionPath);
+                return sln;
             }
-        }
+            finally
+            {
+                File.Delete(solutionPath);
 
-        private static string ConvertToSlnx(string slnPath)
-        {
-            string slnxPath = slnPath + "x";
-            ISolutionSerializer serializer = SolutionSerializers.GetSerializerByMoniker(slnPath).ShouldNotBeNull();
-            SolutionModel solutionModel = serializer.OpenAsync(slnPath, CancellationToken.None).Result;
-            SolutionSerializers.SlnXml.SaveAsync(slnxPath, solutionModel, CancellationToken.None).Wait();
-            return slnxPath;
+                if (convertToSlnx)
+                {
+                    File.Delete(slnxPath);
+                }
+            }
         }
     }
 }
