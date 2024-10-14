@@ -53,7 +53,7 @@
     <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.24509.3</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>7.0.0</MicrosoftExtensionsDependencyModelVersion>
     <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.12.0-3.24504.7</MicrosoftNetCompilersToolsetVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.12.0-3.24510.2</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.12.0-rc.127</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
   </PropertyGroup>
