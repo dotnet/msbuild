@@ -318,10 +318,11 @@
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     Derleme sırasında BuildChecks'i sağlar.
+                     BuildCheck, derleme özelliklerinin 
+ güvenliğini sağlamak için
+                     kuralların değerlendirilmesini sağlar. Daha fazla bilgi için bkz. aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -1832,7 +1833,7 @@
       </trans-unit>
       <trans-unit id="SAC_Evaluation">
         <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
-        <target state="translated">2: değerlendirmede. Aksi takdirde performansın etkilenebileceği için geliştirme ortamında Akıllı Uygulama Denetimi’nin kapatılması önerilir</target>
+        <target state="translated">2: değerlendirmede. Aksi takdirde performans etkilenebileceği için geliştirme ortamında Akıllı Uygulama Denetiminin kapatılması önerilir</target>
         <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Off">

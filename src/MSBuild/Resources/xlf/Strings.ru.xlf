@@ -200,7 +200,7 @@
     </source>
         <target state="translated">  -featureAvailability:featureName,...
                      Проверьте доступность функции. Результатом является одна из 
-                     строк "Неопределено", "Доступно", "Недоступно" и 
+                     строк "Не определено", "Доступно", "Недоступно" и 
                      "Предварительный просмотр". 
                      - Не определено — доступность функции не определена 
                      (имя функции неизвестно средству проверки доступности 
@@ -273,18 +273,18 @@
                      Доступные параметры. 
                         по умолчанию — определяет поведение логгера 
                         терминала. Требуется одно из следующих значений: 
-                           - `on`, `true` заставляет использовать TerminalLogger даже 
+                           - "on", "true" заставляет использовать TerminalLogger даже 
                             когда он будет отключен. 
-                           - `off`, `false` запрещает использование TerminalLogger 
+                           - "off", "false" запрещает использование TerminalLogger 
                             даже если бы он был включен. 
-                           - `auto` включает TerminalLogger, когда терминал 
+                           - "auto" включает TerminalLogger, когда терминал 
                             поддерживает это, и в сеансе нет перенаправления
                             stdout/stderr
                         verbosity – Переопределить параметр -verbosity для этого 
                         терминала 
                         showCommandLine — Показать сообщения TaskCommandLineEvent 
 
-                      Пример: 
+                      Пример:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
@@ -318,10 +318,10 @@
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     Включает BuildChecks во время сборки.
+                     BuildCheck дает оценивать правила для проверки свойств 
+                     сборки. Дополнительные сведения см. на странице aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}

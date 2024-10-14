@@ -139,7 +139,7 @@
     </source>
         <target state="translated">  -getProperty:propertyName,...
                      빌드를 실행하지 않고 평가 후
-                     지정된 속성 중 하나 이상의 값을 작성하거나,
+                     하나 이상의 지정된 속성 값을 작성하거나,
                      -targets 옵션 또는 -getTargetResult 옵션을 사용하는 경우
                      빌드 후 값을 작성합니다.
     </target>
@@ -158,8 +158,8 @@
     </source>
         <target state="translated">  -getItem:itemName,...
                      빌드를 실행하지 않고 평가 후
-                     지정된 항목 중 하나 이상의 값 및
-                     연결된 해당 메타데이터를 작성하거나,
+                     하나 이상의 지정된 항목 및
+                     관련 메타데이터의 값을 작성하거나
                      -targets 옵션 또는 -getTargetResult 옵션을 사용하는 경우
                      빌드 후 값을 작성합니다.
     </target>
@@ -174,7 +174,7 @@
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                     대상 하나 이상의 출력 값을 작성하면
+                     하나 이상의 대상의 출력 값을 작성하면
                      지정된 대상이 실행됩니다.
     </target>
         <note>
@@ -202,11 +202,11 @@
                      기능 가용성을 확인합니다. 결과는
                      문자열 "Undefined", "Available", "NotAvailable" 및
                      "Preview" 중 하나입니다.
-                     - 정의되지 않음 - 기능의 가용성이 정의되지 않았습니다
+                     - Undefined - 기능의 가용성이 정의되지 않았습니다
                      (기능 가용성 검사기에서 기능 이름을 인식할 수
                      없음).
                      - NotAvailable - 기능을 사용할 수 없습니다(
-                     정의되지 않음과는 달리, 기능 가용성 검사가에서 기능 이름을
+                     Undefined와 달리, 기능 가용성 검사가에서 기능 이름을
                      인식할 수 있으며 기능이 현재 MSBuild 엔진에서 지원되지
                      않는 것으로 인식하고 있음).
                      - Available - 기능을 사용할 수 있습니다.
@@ -232,14 +232,14 @@
                      (Short form: -tl)
     </source>
         <target state="translated">  -terminalLogger[:auto,on,off]
-                     터미널 로거를 사용하거나 사용하지 않도록 설정합니다. 터미널 로거
-                     는 콘솔에서 향상된 빌드 출력을 실시간으로 제공합니다.
-                     이러한 출력은 프로젝트별로 논리적으로 구성되고 실행 가능한 정보를
-                     강조 표시하도록 설계되어 있습니다. 자동을 지정(또는 인수 없이 옵션
-                     사용)하여 터미널 로거를 사용합니다. 단, 이 경우
-                     표준 출력이 리디렉션되지 않아야 합니다. 출력을 구문 분석하지 않습니다.
-                     그렇지 않을 경우 이후 버전에서 변경되지 않은 상태로
-                     유지됩니다. 이 옵션은 MSBuild 17.8 이상 버전에서
+                     터미널 로거를 사용하거나 사용하지 않도록 설정합니다. 터미널 로거는
+                     콘솔에서 향상된 빌드 출력을 실시간으로 제공하고
+                     프로젝트별로 논리적으로 구성되며 실행 가능한 정보를
+                     강조 표시하도록 설계되어 있습니다. 표준 출력이 리디렉션되지 않는
+                     경우에만 터미널 로거를 사용하려면 auto를 지정하거나
+                     인수 없이 옵션을 사용합니다. 출력을 구문 분석하지 않으면
+                     향후 버전에서도 변경되지 않은 상태로 유지될 것이라고
+                     기대하지 마세요. 이 옵션은 MSBuild 17.8 이상 버전에서
                      제공됩니다.
                      (약식: -tl)
     </target>
@@ -271,21 +271,20 @@
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
                      터미널 로거에 대한 매개 변수입니다. (약식: -tlp)
                      사용 가능한 매개 변수입니다.
-                        default--터미널의 기본 동작을 지정합니다.
-                        로거입니다. 다음 값 중 하나가 필요합니다.
-                           - 'on', 'true'는 terminalLogger를 사용하도록 강제하며,
-                            이는 사용하지 않도록 설정된 경우에도 마찬가지입니다.
-                           - 'off', 'false'는 terminalLogger를 사용하지 않도록 강제하며,
-                            이는 사용하도록 설정된 경우에도 마찬가지입니다.
-                           - 'auto'는 터미널이
-                            지원하고 세션이 리디렉션되지 않을 때 TerminalLogger를 사용하도록 설정합니다.
+                        default--터미널 로거의 기본 동작을
+                        지정합니다. 다음 값 중 하나가 필요합니다.
+                           - 'on', 'true'는 비활성화된 경우에도 terminalLogger를
+                            사용하도록 강제합니다.
+                           - 'off', 'false'는 활성화된 경우에도 terminalLogger를
+                            사용하지 않도록 강제합니다.
+                           - 'auto'는 터미널이 지원하고 세션이
+                            리디렉션되지 않을 때 TerminalLogger를 활성화합니다.
                             stdout/stderr
-                        verbosity--이
-로거에 대한 -verbosity 설정을
+                        verbosity--이 로거에 대한 -verbosity 설정을
                         재정의합니다.
                         showCommandLine--TaskCommandLineEvent 메시지를 표시합니다.
 
-                      예:
+                      예: 
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
@@ -304,7 +303,7 @@
         <target state="translated">  -getResultOutputFile:file
                      get*에서 파일로 출력을 리디렉션합니다.
 
-                     예:
+                     예: 
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      그러면 속성 Bar의 값이 Biz.txt에 기록됩니다.
     </target>
@@ -319,10 +318,10 @@
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     빌드하는 동안 BuildChecks를 사용하도록 설정합니다.
+                     BuildCheck를 사용하면 규칙을 평가하여 빌드의 속성을 
+                     확인할 수 있습니다. 자세한 내용은 aka.ms/buildcheck를 참조하세요.
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}

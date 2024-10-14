@@ -301,7 +301,7 @@
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      This writes the value of property Bar into Biz.txt.
     </source>
-        <target state="translated">  -getResultOutputFile:file
+        <target state="translated">  -getResultOutputFile:arquivo
                      Redirecionar a saída de get* para um arquivo.
 
                      Exemplo:
@@ -319,10 +319,10 @@
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     Habilita BuildChecks durante o build.
+                     BuildCheck habilita a avaliação de regras para garantir que as propriedades 
+                     do build. Para obter mais informações, confira aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}

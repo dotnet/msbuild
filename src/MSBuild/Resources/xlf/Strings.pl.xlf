@@ -203,8 +203,8 @@
                      ciągów „Undefined”, „Available”, „NotAvailable” i
                      „Preview”.
                      — Undefined — dostępność funkcji jest niezdefiniowana
-                     (nazwa funkcji jest nieznana dla dostępności funkcji
-                     kontroler)
+                     (nazwa funkcji jest nieznana dla kontrolera dostępności
+                     funkcji)
                      — NotAvailable — funkcja jest niedostępna (w przeciwieństwie do
                      Undefined, nazwa funkcji jest znana kontrolerowi
                      dostępności funkcji i wie on, że funkcja nie jest
@@ -235,12 +235,12 @@
                      Włącz lub wyłącz rejestrator terminali. Rejestrator terminali
                      udostępnia ulepszone dane wyjściowe kompilacji na konsoli w czasie rzeczywistym,
                      uporządkowane logicznie według projektu i zaprojektowane do wyróżniania
-                     informacji umożliwiających podejmowanie działań. Określ auto (lub użyj opcji
+                     informacji umożliwiających podejmowanie działań. Określ automatycznie (lub użyj opcji
                      bez argumentów), aby używać rejestratora terminali tylko wtedy, gdy
-                     standardowe dane wyjściowe nie są przekierowywane. Nie analizowanie danych wyjściowych
-                     lub inaczej – poleganie na nich pozostanie niezmienione w przyszłych
+                     standardowe dane wyjściowe nie są przekierowywane. Nie analizuj danych wyjściowych
+                     albo w przeciwnym razie poleganie na nich pozostanie niezmienione w przyszłych
                      wersjach. Ta opcja jest dostępna w wersji MSBuild 17.8 i
-                     późniejszych.
+                     nowszych.
                      (Krótka forma: -tl)
     </target>
         <note>
@@ -272,17 +272,17 @@
                      Parametry rejestratora terminali. (Krótka forma: -tlp)
                      Dostępne parametry.
                         default-- określa domyślne zachowanie rejestratora
-                        terminalu. Wymaga jednej z następujących wartości:
-                           — „on”, „true” wymusza użycie elementu TerminalLogger nawet
+                        terminali. Wymaga jednej z następujących wartości:
+                           — „on”, „true” wymusza użycie elementu TerminalLogger, nawet
                             kiedy zostanie on wyłączony.
                            — „off”, „false” wymusza nieużywanie elementu TerminalLogger
                             nawet wtedy, gdy zostanie on włączony.
                            — „auto” włącza element TerminalLogger, gdy terminal
                             go obsługuje, a sesja nie została przekierowana
                             stdout/stderr
-                        verbosity-- zastąp ustawienie -verbosity dla tego
+                        verbosity-- zastępuje ustawienie -verbosity dla tego
                         rejestratora
-                        showCommandLine-- pokaż komunikaty TaskCommandLineEvent
+                        showCommandLine-- pokazuje komunikaty TaskCommandLineEvent
 
                       Przykład:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
@@ -318,10 +318,10 @@
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     Włącza funkcję BuildChecks podczas kompilacji.
+                     Funkcja BuildCheck umożliwia ocenę reguł w celu zapewnienia właściwości 
+                     kompilacji. Aby uzyskać więcej informacji, zobacz aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
