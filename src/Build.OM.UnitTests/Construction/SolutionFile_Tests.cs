@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             string expectedProjectName = convertToSlnx ? "Project name" : "Project name.myvctype";
             Assert.Equal(expectedProjectName, solution.ProjectsInOrder[0].ProjectName);
-            Assert.Equal(ConvertToUnixPathIfNeeded("Relative path\\to\\Project name.myvctype"), solution.ProjectsInOrder[0].RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("Relative path\\to\\Project name.myvctype", convertToSlnx), solution.ProjectsInOrder[0].RelativePath);
             if (!convertToSlnx)
             {
                 // When converting to SLNX, the project GUID is not preserved.
@@ -416,7 +416,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             Assert.Equal(5, solution.ProjectsInOrder.Count);
 
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj"), solution.ProjectsInOrder[0].RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj", false), solution.ProjectsInOrder[0].RelativePath);
             Assert.Equal("{34E0D07D-CF8F-459D-9449-C4188D8C5564}", solution.ProjectsInOrder[0].ProjectGuid);
             Assert.Empty(solution.ProjectsInOrder[0].Dependencies);
             Assert.Null(solution.ProjectsInOrder[0].ParentProjectGuid);
@@ -425,7 +425,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Empty(solution.ProjectsInOrder[1].Dependencies);
             Assert.Null(solution.ProjectsInOrder[1].ParentProjectGuid);
 
-            Assert.Equal(ConvertToUnixPathIfNeeded("MyPhysicalFolder\\ClassLibrary1\\ClassLibrary1.csproj"), solution.ProjectsInOrder[2].RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("MyPhysicalFolder\\ClassLibrary1\\ClassLibrary1.csproj", false), solution.ProjectsInOrder[2].RelativePath);
             Assert.Equal("{A5EE8128-B08E-4533-86C5-E46714981680}", solution.ProjectsInOrder[2].ProjectGuid);
             Assert.Empty(solution.ProjectsInOrder[2].Dependencies);
             Assert.Equal("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", solution.ProjectsInOrder[2].ParentProjectGuid);
@@ -434,7 +434,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Empty(solution.ProjectsInOrder[3].Dependencies);
             Assert.Equal("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", solution.ProjectsInOrder[3].ParentProjectGuid);
 
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj"), solution.ProjectsInOrder[4].RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj", false), solution.ProjectsInOrder[4].RelativePath);
             Assert.Equal("{6DB98C35-FDCC-4818-B5D4-1F0A385FDFD4}", solution.ProjectsInOrder[4].ProjectGuid);
             Assert.Empty(solution.ProjectsInOrder[4].Dependencies);
             Assert.Equal("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}", solution.ProjectsInOrder[4].ParentProjectGuid);
@@ -496,16 +496,19 @@ namespace Microsoft.Build.UnitTests.Construction
 
             Assert.Equal(3, solution.ProjectsInOrder.Count);
 
-            var classLibrary1 = solution.ProjectsInOrder.FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj"));
+            var classLibrary1 = solution.ProjectsInOrder
+                .FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj", true));
             Assert.NotNull(classLibrary1);
             Assert.Empty(classLibrary1.Dependencies);
             Assert.Null(classLibrary1.ParentProjectGuid);
 
-            var myPhysicalFolderClassLibrary1 = solution.ProjectsInOrder.FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("MyPhysicalFolder\\ClassLibrary1\\ClassLibrary1.csproj"));
+            var myPhysicalFolderClassLibrary1 = solution.ProjectsInOrder
+                .FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("MyPhysicalFolder\\ClassLibrary1\\ClassLibrary1.csproj", true));
             Assert.NotNull(myPhysicalFolderClassLibrary1);
             Assert.Empty(myPhysicalFolderClassLibrary1.Dependencies);
 
-            var classLibrary2 = solution.ProjectsInOrder.FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj"));
+            var classLibrary2 = solution.ProjectsInOrder
+                .FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj", true));
             Assert.NotNull(classLibrary2);
             Assert.Empty(classLibrary2.Dependencies);
 
@@ -708,19 +711,19 @@ namespace Microsoft.Build.UnitTests.Construction
             var classLibrary2 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary2");
             var classLibrary3 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary3");
 
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj"), classLibrary1.RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj", convertToSlnx), classLibrary1.RelativePath);
             Assert.Single(classLibrary1.Dependencies);
             Assert.Equal(classLibrary3.ProjectGuid, classLibrary1.Dependencies[0]);
             Assert.Null(solution.ProjectsInOrder[0].ParentProjectGuid);
 
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj"), classLibrary2.RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj", convertToSlnx), classLibrary2.RelativePath);
             Assert.Equal(2, classLibrary2.Dependencies.Count);
             // When converting to SLNX, the projects dependencies order is not preserved.
             Assert.Contains(classLibrary3.ProjectGuid, classLibrary2.Dependencies);
             Assert.Contains(classLibrary1.ProjectGuid, classLibrary2.Dependencies);
             Assert.Null(solution.ProjectsInOrder[1].ParentProjectGuid);
 
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary3\\ClassLibrary3.csproj"), solution.ProjectsInOrder[2].RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary3\\ClassLibrary3.csproj", convertToSlnx), solution.ProjectsInOrder[2].RelativePath);
             Assert.Empty(solution.ProjectsInOrder[2].Dependencies);
             Assert.Null(solution.ProjectsInOrder[2].ParentProjectGuid);
         }
@@ -1243,9 +1246,10 @@ namespace Microsoft.Build.UnitTests.Construction
             return slnxPath;
         }
 
-        private static string ConvertToUnixPathIfNeeded(string path)
+        private static string ConvertToUnixPathIfNeeded(string path, bool isConvertedToSlnx)
         {
-            return NativeMethodsShared.IsWindows ? path : path.Replace('\\', '/');
+            // When converting to SLNX, the paths are converted to Unix style
+            return !NativeMethodsShared.IsWindows && isConvertedToSlnx ? path.Replace('\\', '/') : path;
         }
     }
 }
