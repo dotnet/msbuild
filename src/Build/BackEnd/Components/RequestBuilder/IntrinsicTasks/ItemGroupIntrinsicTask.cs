@@ -215,27 +215,18 @@ namespace Microsoft.Build.BackEnd
                 FileSystems.Default,
                 LoggingContext);
 
-            // This is the first place where we have access both to the item list and the keepDuplicates condition so if we want to avoid the logging issue, we kind of have to do it here.
-            if (!keepDuplicates)
-            {
-                itemsToAdd = itemsToAdd.Distinct(ProjectItemInstance.EqualityComparer).ToList();
-            }
-
-            if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd?.Count > 0)
-            {
+            // Now add the items we created to the lookup.
+            bucket.Lookup.AddNewItemsOfItemType(child.ItemType, itemsToAdd, !keepDuplicates, (itemList) => {
                 ItemGroupLoggingHelper.LogTaskParameter(
                     LoggingContext,
                     TaskParameterMessageKind.AddItem,
                     parameterName: null,
                     propertyName: null,
                     child.ItemType,
-                    itemsToAdd,
+                    itemList,
                     logItemMetadata: true,
                     child.Location);
-            }
-
-            // Now add the items we created to the lookup.
-            bucket.Lookup.AddNewItemsOfItemType(child.ItemType, itemsToAdd, !keepDuplicates); // Add in one operation for potential copy-on-write
+            }); // Add in one operation for potential copy-on-write
         }
 
         /// <summary>
