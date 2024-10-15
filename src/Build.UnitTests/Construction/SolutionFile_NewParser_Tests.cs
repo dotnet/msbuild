@@ -156,7 +156,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
         private static string GetPathForCurrentOs(string path)
         {
-            return NativeMethodsShared.IsWindows ? path : Path.GetFullPath(path).Replace('\\', '/');
+            return NativeMethodsShared.IsWindows ? path : path.Replace('\\', '/');
         }
     }
 }
