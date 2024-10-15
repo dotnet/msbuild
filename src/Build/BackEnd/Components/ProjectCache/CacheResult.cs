@@ -89,7 +89,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public static CacheResult IndicateCacheHit(IReadOnlyCollection<PluginTargetResult> targetResults)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(targetResults, nameof(targetResults));
+            ErrorUtilities.VerifyThrowArgumentLength(targetResults);
 
             return new CacheResult(CacheResultType.CacheHit, ConstructBuildResult(targetResults));
         }

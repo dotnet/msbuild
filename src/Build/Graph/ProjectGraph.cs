@@ -421,7 +421,7 @@ namespace Microsoft.Build.Graph
             int degreeOfParallelism,
             CancellationToken cancellationToken)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             var measurementInfo = BeginMeasurement();
 
@@ -498,7 +498,7 @@ namespace Microsoft.Build.Graph
             Func<ProjectGraphNode, string> nodeIdProvider,
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(nodeIdProvider, nameof(nodeIdProvider));
+            ErrorUtilities.VerifyThrowArgumentNull(nodeIdProvider);
 
             var nodeIds = new ConcurrentDictionary<ProjectGraphNode, string>();
 

@@ -29,7 +29,7 @@ namespace Microsoft.Build.Graph
         /// <param name="globalProperties">The global properties to use for this entry point. May be null.</param>
         public ProjectGraphEntryPoint(string projectFile, IDictionary<string, string> globalProperties)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
+            ErrorUtilities.VerifyThrowArgumentLength(projectFile);
 
             ProjectFile = FileUtilities.NormalizePath(projectFile);
             GlobalProperties = globalProperties;

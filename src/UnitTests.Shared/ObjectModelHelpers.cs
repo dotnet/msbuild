@@ -1127,7 +1127,7 @@ namespace Microsoft.Build.UnitTests
     {
         public static string Format(this string s, params object[] formatItems)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(s, nameof(s));
+            ErrorUtilities.VerifyThrowArgumentNull(s);
 
             return string.Format(s, formatItems);
         }

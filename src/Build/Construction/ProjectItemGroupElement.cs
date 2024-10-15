@@ -39,7 +39,7 @@ namespace Microsoft.Build.Construction
         internal ProjectItemGroupElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -99,8 +99,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemElement AddItem(string itemType, string include, IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
-            ErrorUtilities.VerifyThrowArgumentLength(include, nameof(include));
+            ErrorUtilities.VerifyThrowArgumentLength(itemType);
+            ErrorUtilities.VerifyThrowArgumentLength(include);
 
             // If there are no items, or it turns out that there are only items with
             // item types that sort earlier, then we should go after the last child

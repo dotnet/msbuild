@@ -80,7 +80,7 @@ namespace Microsoft.Build.Utilities
         public TaskItem(
             string itemSpec)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(itemSpec, nameof(itemSpec));
+            ErrorUtilities.VerifyThrowArgumentNull(itemSpec);
 
             _itemSpec = FileUtilities.FixFilePath(itemSpec);
         }
@@ -99,7 +99,7 @@ namespace Microsoft.Build.Utilities
             IDictionary itemMetadata) :
             this(itemSpec)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(itemMetadata, nameof(itemMetadata));
+            ErrorUtilities.VerifyThrowArgumentNull(itemMetadata);
 
             if (itemMetadata.Count > 0)
             {
@@ -124,7 +124,7 @@ namespace Microsoft.Build.Utilities
         public TaskItem(
             ITaskItem sourceItem)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sourceItem, nameof(sourceItem));
+            ErrorUtilities.VerifyThrowArgumentNull(sourceItem);
 
             // Attempt to preserve escaped state
             if (!(sourceItem is ITaskItem2 sourceItemAsITaskItem2))
@@ -243,7 +243,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="metadataName">Name of metadata to remove.</param>
         public void RemoveMetadata(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentNull(metadataName);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName),
                 "Shared.CannotChangeItemSpecModifiers", metadataName);
 
@@ -262,7 +262,7 @@ namespace Microsoft.Build.Utilities
             string metadataName,
             string metadataValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentLength(metadataName);
 
             // Non-derivable metadata can only be set at construction time.
             // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
@@ -296,7 +296,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="destinationItem">The item to copy metadata to.</param>
         public void CopyMetadataTo(ITaskItem destinationItem)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
+            ErrorUtilities.VerifyThrowArgumentNull(destinationItem);
 
             // also copy the original item-spec under a "magic" metadata -- this is useful for tasks that forward metadata
             // between items, and need to know the source item where the metadata came from
@@ -419,7 +419,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>The item-spec of the item.</returns>
         public static explicit operator string(TaskItem taskItemToCast)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskItemToCast, nameof(taskItemToCast));
+            ErrorUtilities.VerifyThrowArgumentNull(taskItemToCast);
             return taskItemToCast.ItemSpec;
         }
 
@@ -432,7 +432,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         string ITaskItem2.GetMetadataValueEscaped(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentNull(metadataName);
 
             string metadataValue = null;
 

@@ -53,7 +53,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted string.</returns>
         internal static string FormatString(string unformatted, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(unformatted, nameof(unformatted));
+            ErrorUtilities.VerifyThrowArgumentNull(unformatted);
 
             return ResourceUtilities.FormatString(unformatted, args);
         }
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted string.</returns>
         internal static string FormatResourceString(string resourceName, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(resourceName, nameof(resourceName));
+            ErrorUtilities.VerifyThrowArgumentNull(resourceName);
 
             // NOTE: the ResourceManager.GetString() method is thread-safe
             string resourceString = GetString(resourceName);

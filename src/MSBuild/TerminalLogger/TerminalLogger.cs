@@ -217,7 +217,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     private bool _hasUsedCache = false;
 
     /// <summary>
-    /// Whether to show TaskCommandLineEventArgs high-priority messages. 
+    /// Whether to show TaskCommandLineEventArgs high-priority messages.
     /// </summary>
     private bool _showCommandLine = false;
 
@@ -309,7 +309,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </remark>
     private void ApplyParameter(string parameterName, string? parameterValue)
     {
-        ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
+        ErrorUtilities.VerifyThrowArgumentNull(parameterName);
 
         switch (parameterName.ToUpperInvariant())
         {

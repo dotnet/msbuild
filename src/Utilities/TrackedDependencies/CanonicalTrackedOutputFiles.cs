@@ -272,7 +272,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>An array of the rooting markers that were removed.</returns>
         public string[] RemoveRootsWithSharedOutputs(ITaskItem[] sources)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sources, nameof(sources));
+            ErrorUtilities.VerifyThrowArgumentNull(sources);
 
             var removedMarkers = new List<string>();
             string currentRoot = FileTracker.FormatRootingMarker(sources);
