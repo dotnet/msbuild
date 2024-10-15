@@ -215,6 +215,12 @@ namespace Microsoft.Build.BackEnd
                 FileSystems.Default,
                 LoggingContext);
 
+            // This is the first place where we have access both to the item list and the keepDuplicates condition so if we want to avoid the logging issue, we kind of have to do it here.
+            if (!keepDuplicates)
+            {
+                itemsToAdd = itemsToAdd.Distinct(ProjectItemInstance.EqualityComparer).ToList();
+            }
+
             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd?.Count > 0)
             {
                 ItemGroupLoggingHelper.LogTaskParameter(
