@@ -15,10 +15,10 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 public class ProjectImportedCheckData : CheckData
 {
     internal ProjectImportedCheckData(string importedProjectFile, string projectFilePath, int? projectConfigurationId)
-        : base(projectFilePath, projectConfigurationId) => ImportedProjectFilePath = importedProjectFile;
+        : base(projectFilePath, projectConfigurationId) => ImportedProjectFileFullPath = importedProjectFile;
 
     /// <summary>
     /// Gets the file path of the imported project.
     /// </summary>
-    public string ImportedProjectFilePath { get; }
+    public string ImportedProjectFileFullPath { get; }
 }
