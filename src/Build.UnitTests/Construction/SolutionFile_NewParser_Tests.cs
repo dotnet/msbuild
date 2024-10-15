@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             solution.ProjectsInOrder[0].ProjectType.ShouldBe(SolutionProjectType.WebProject);
             solution.ProjectsInOrder[0].ProjectName.ShouldBe(@"C:\WebSites\WebApplication3\");
-            solution.ProjectsInOrder[0].RelativePath.ShouldBe(ConvertToUnixPathIfNeeded(@"C:\WebSites\WebApplication3\", convertToSlnx));
+            solution.ProjectsInOrder[0].RelativePath.ShouldBe(ConvertToUnixPathIfNeeded(@"C:\WebSites\WebApplication3\"));
             solution.ProjectsInOrder[0].Dependencies.Count.ShouldBe(2);
             solution.ProjectsInOrder[0].ParentProjectGuid.ShouldBeNull();
             solution.ProjectsInOrder[0].GetUniqueProjectName().ShouldBe(@"C:\WebSites\WebApplication3\");
@@ -154,10 +154,10 @@ namespace Microsoft.Build.UnitTests.Construction
             return slnxPath;
         }
 
-        private static string ConvertToUnixPathIfNeeded(string path, bool isConvertedToSlnx)
+        private static string ConvertToUnixPathIfNeeded(string path)
         {
-            // When converting to SLNX, the paths are converted to Unix style
-            return !NativeMethodsShared.IsWindows && isConvertedToSlnx ? path.Replace('\\', '/') : path;
+            // In the new parser, ProjectModel.FilePath is converted to Unix-style.
+            return !NativeMethodsShared.IsWindows ? path.Replace('\\', '/') : path;
         }
     }
 }

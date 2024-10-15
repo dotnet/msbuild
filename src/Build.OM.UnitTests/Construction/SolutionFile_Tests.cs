@@ -338,17 +338,17 @@ namespace Microsoft.Build.UnitTests.Construction
 
             // When converting to slnx, the order of the projects is not preserved.
             ProjectInSolution consoleApplication1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ConsoleApplication1");
-            Assert.Equal(@"ConsoleApplication1\ConsoleApplication1.vbproj", consoleApplication1.RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("ConsoleApplication1\\ConsoleApplication1.vbproj", convertToSlnx), consoleApplication1.RelativePath);
             Assert.Empty(consoleApplication1.Dependencies);
             Assert.Null(consoleApplication1.ParentProjectGuid);
 
             ProjectInSolution vbClassLibrary = solution.ProjectsInOrder.First(p => p.ProjectName == "vbClassLibrary");
-            Assert.Equal(@"vbClassLibrary\vbClassLibrary.vbproj", vbClassLibrary.RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("vbClassLibrary\vbClassLibrary.vbproj", convertToSlnx), vbClassLibrary.RelativePath);
             Assert.Empty(vbClassLibrary.Dependencies);
             Assert.Null(vbClassLibrary.ParentProjectGuid);
 
             ProjectInSolution classLibrary1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
-            Assert.Equal(@"ClassLibrary1\ClassLibrary1.csproj", classLibrary1.RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj", convertToSlnx), classLibrary1.RelativePath);
             Assert.Empty(classLibrary1.Dependencies);
             Assert.Null(classLibrary1.ParentProjectGuid);
 
@@ -1248,7 +1248,8 @@ namespace Microsoft.Build.UnitTests.Construction
 
         private static string ConvertToUnixPathIfNeeded(string path, bool isConvertedToSlnx)
         {
-            // When converting to SLNX, the paths are converted to Unix style
+            // In the new parser, ProjectModel.FilePath is converted to Unix-style.
+            // we are using the new parser only for slnx files.
             return !NativeMethodsShared.IsWindows && isConvertedToSlnx ? path.Replace('\\', '/') : path;
         }
     }
