@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -636,7 +637,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Implements a true add, an item that has been created in a batch.
         /// </summary>
-        internal void AddNewItemsOfItemType(string itemType, ICollection<ProjectItemInstance> group, bool doNotAddDuplicates = false)
+        internal void AddNewItemsOfItemType(string itemType, ICollection<ProjectItemInstance> group, bool doNotAddDuplicates = false, Action<List<ProjectItemInstance>> logFunction = null)
         {
             // Adding to outer scope could be easily implemented, but our code does not do it at present
             MustNotBeOuterScope();
@@ -668,6 +669,7 @@ namespace Microsoft.Build.BackEnd
                     itemsToAdd = itemsToAdd.Where(item => !existingItems.Contains(item, ProjectItemInstance.EqualityComparer));
                 }
             }
+            logFunction?.Invoke(itemsToAdd.ToList());
 
             PrimaryAddTable.ImportItemsOfType(itemType, itemsToAdd);
         }
