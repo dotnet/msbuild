@@ -318,10 +318,10 @@
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="translated">  -check
-                     Active BuildChecks pendant la build.
-                     BuildCheck permet d'évaluer les règles pour garantir les propriétés 
-                     de la build. Pour plus d'informations, consultez aka.ms/buildcheck
+        <target state="needs-review-translation">  -check
+                     Active BuildChecks pendant la construction.
+                     BuildCheck permet d'évaluer les règles pour garantir les propriétés
+                     de la construction. Pour plus d'informations, consultez aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -2326,7 +2326,7 @@ fois plus petit que le journal
         <target state="translated">  -profileEvaluation:&lt;fichier&gt;
          Profile l'évaluation MSBuild et écrit le résultat
          dans le fichier spécifié. Si l'extension du fichier spécifié
-         est '.md', le résultat est généré au format Markdown. 
+         est '.md', le résultat est généré au format Markdown.
          Sinon, un fichier de valeurs séparées par des tabulations est généré.
     </target>
         <note />

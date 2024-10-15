@@ -106,7 +106,7 @@ How we'll internally handle the distributed model:
 Planned model:
 * Checks factories get registered with the BuildCheck infrastructure (`BuildCheckManager`)
     * For inbox checks - this happens on startup.
-    * For custom checks - this happens on connecting `ILogger` instance in scheduler node receives acquistion event (`BuildCheckAcquisitionEventArgs`). This event is being sent by worker node as soon as it hits a special marker (a magic property function call) during early evaluation. Loading is not processed by worker node as currently we want custom checks only in the main node (as they will be only given data proxied from BuildEventArgs).
+    * For custom checks - this happens on connecting `ILogger` instance in scheduler node receives acquistion event (`BuildCheckAcquisitionEventArgs`). This event is being sent by worker node as soon as it hits a special marker (a magic property function call) during early evaluation. Loading is not processed by worker node as currently we want custom checks only in the main node (as they will be only given data proxied from BuildEventArgs). Loading in worker node in Evaluation context would result in double work as the custom Check needs to be loaded in the main node anyways.
     The `BuildCheckAcquisitionEventArgs` should be sent prior `ProjectEvaluationStartedEventArgs` (buffering will need to take place), or main node will need to replay some initial data after custom check is registered.
 * `BuildCheckManager` receives info about new project starting to be build
     * On scheduler node the information is sourced from `ProjectEvaluationStartedEventArgs`
@@ -135,6 +135,8 @@ Once `TargetFramework` is known, we can combine the default checks config with w
 Since we are unlikely to enable any checks by default in .NET 9, the focus in this release should be on optimizing the `.editorconfig` handling.
 
 # Acquisition
+
+(For details on internals of processing acquisition by the infrastructure see [Check Lifecycle](#check-lifecycle))
 
 BuildCheck employs two distinct types of checks: inbox and custom. As a result, the acquisition and distribution processes vary.
 Inbox rules are integrated into the MSBuild repository, while custom checks can be packaged as NuGet packages and detected by MSBuild provided they adhere to a specific structure. 

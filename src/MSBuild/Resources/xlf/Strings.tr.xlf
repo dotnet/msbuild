@@ -272,7 +272,7 @@
                      Terminal günlükçüsü için parametreler. (Kısa biçimi: -tlp)
                      Mevcut parametreler.
                         default--Terminalin davranışını varsayılan olarak ayarlar
-                        günlükçü. Şu değerlerden birini gerektirir: 
+                        günlükçü. Şu değerlerden birini gerektirir:
                            - `on`, `true` TerminalLogger’ı devre dışı olsa bile
                             kullanılmaya zorlar.
                            - `on`, `true` TerminalLogger’ı etkinleştirilmiş olsa bile
@@ -318,9 +318,9 @@
                      BuildCheck enables evaluating rules to ensure properties 
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="translated">  -check
+        <target state="needs-review-translation">  -check
                      Derleme sırasında BuildChecks'i sağlar.
-                     BuildCheck, derleme özelliklerinin 
+                     BuildCheck, derleme özelliklerinin
  güvenliğini sağlamak için
                      kuralların değerlendirilmesini sağlar. Daha fazla bilgi için bkz. aka.ms/buildcheck
 	</target>
@@ -471,7 +471,7 @@
                      izin verildiğini gösterir.  Etkileşimin beklenmediği
                      otomatik bir senaryoda bu bağımsız değişkeni
                      kullanmayın.
-                     -interactive değerinin belirtilmesi, -interactive:true 
+                     -interactive değerinin belirtilmesi, -interactive:true
                      değerinin belirtilmesiyle aynıdır.  Parametreyi, yanıt
                      dosyasından gelen bir değeri geçersiz kılmak için kullanın.
     </target>
@@ -764,7 +764,7 @@
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Bu proje düzeyi özellikleri ayarlayın veya geçersiz kılın. &lt;n&gt; 
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Bu proje düzeyi özellikleri ayarlayın veya geçersiz kılın. &lt;n&gt;
                      özelliğin adı ve &lt;v&gt; özelliğin değeridir. Birden çok
                      özelliği birbirinden ayırmak için noktalı virgül veya virgül
                      kullanın veya her özelliği ayrı ayrı belirtin. (Kısa biçim: -p)
@@ -1139,8 +1139,8 @@
    </source>
         <target state="translated">  -toolsVersion:&lt;sürüm&gt;
                      Derleme sırasında kullanılacak MSBuild Araç Kümesinin
-                     (görevler, hedefler vb.) sürümü. Bu sürüm, tek tek projelerde 
-                     belirtilen sürümleri geçersiz kılar. (Kısa biçim: 
+                     (görevler, hedefler vb.) sürümü. Bu sürüm, tek tek projelerde
+                     belirtilen sürümleri geçersiz kılar. (Kısa biçim:
                      -tv)
                      Örnek:
                        -toolsVersion:3.5
@@ -1199,13 +1199,13 @@
         <target state="translated">  -distributedFileLogger
                      Derleme çıkışını, her MSBuild düğümü için bir günlük
                      dosyası olmak üzere birden çok günlük dosyasına kaydeder. Bu
-                     dosyaların ilk konumu geçerli dizindir. Dosyaların 
-                     varsayılan adı "MSBuild&lt;düğümkimliği&gt;.log"dur. 
-                     Dosyaların konumu ve fileLogger'ın diğer parametreleri 
+                     dosyaların ilk konumu geçerli dizindir. Dosyaların
+                     varsayılan adı "MSBuild&lt;düğümkimliği&gt;.log"dur.
+                     Dosyaların konumu ve fileLogger'ın diğer parametreleri
                      "/fileLoggerParameters" anahtarının eklenmesi yoluyla
                      belirtilebilir.
                      Günlük dosyası adı fileLoggerParameters anahtarı
-                     aracılığıyla ayarlanırsa dağıtılmış günlükçü fileName 
+                     aracılığıyla ayarlanırsa dağıtılmış günlükçü fileName
                      değerini şablon olarak kullanıp her düğümün günlük dosyasını
                      oluşturmak için bu fileName değerine düğüm kimliğini ekler.
     </target>

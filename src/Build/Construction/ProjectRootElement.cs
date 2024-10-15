@@ -1791,7 +1791,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal XmlElementWithLocation CreateElement(string name, ElementLocation location = null)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
             return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace, location);
         }
 
@@ -1848,7 +1848,7 @@ namespace Microsoft.Build.Construction
         internal void MarkProjectDirty(Project project)
         {
             ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             // Only bubble this event up if the cache knows about this PRE, which is equivalent to
             // whether this PRE has a path.

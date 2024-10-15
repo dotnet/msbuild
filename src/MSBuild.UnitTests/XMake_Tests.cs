@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Xml.Linq;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -985,8 +986,8 @@ namespace Microsoft.Build.UnitTests
                 var msbuildExeName = Path.GetFileName(RunnerUtilities.PathToCurrentlyRunningMsBuildExe);
                 var newPathToMSBuildExe = Path.Combine(startDirectory, msbuildExeName);
                 var pathToConfigFile = Path.Combine(startDirectory, msbuildExeName + ".config");
-
-                string configContent = @"<?xml version =""1.0""?>
+                XElement configRuntimeElement = XDocument.Load(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + ".config").Root.Element("runtime");
+                string configContent = $@"<?xml version =""1.0""?>
                                             <configuration>
                                                 <configSections>
                                                     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
@@ -1006,6 +1007,7 @@ namespace Microsoft.Build.UnitTests
                                                 <foo/>
                                                 </msbuildToolsets>
                                                 <foo/>
+                                                {configRuntimeElement}
                                             </configuration>";
                 File.WriteAllText(pathToConfigFile, configContent);
 

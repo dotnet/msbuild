@@ -43,6 +43,17 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
 using TerminalLogger = Microsoft.Build.Logging.TerminalLogger.TerminalLogger;
 
+#if NETFRAMEWORK
+// Use I/O operations from Microsoft.IO.Redist which is generally higher perf
+// and also works around https://github.com/dotnet/msbuild/issues/10540.
+// Unnecessary on .NET 6+ because the perf improvements are in-box there.
+using Microsoft.IO;
+using Directory = Microsoft.IO.Directory;
+using File = Microsoft.IO.File;
+using FileInfo = Microsoft.IO.FileInfo;
+using Path = Microsoft.IO.Path;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.CommandLine
@@ -684,7 +695,7 @@ namespace Microsoft.Build.CommandLine
                 // process the detected command line switches -- gather build information, take action on non-build switches, and
                 // check for non-trivial errors
                 string projectFile = null;
-                string[] targets = Array.Empty<string>();
+                string[] targets = [];
                 string toolsVersion = null;
                 Dictionary<string, string> globalProperties = null;
                 Dictionary<string, string> restoreProperties = null;
@@ -717,9 +728,9 @@ namespace Microsoft.Build.CommandLine
                 string outputResultsCache = null;
                 bool question = false;
                 bool isBuildCheckEnabled = false;
-                string[] getProperty = Array.Empty<string>();
-                string[] getItem = Array.Empty<string>();
-                string[] getTargetResult = Array.Empty<string>();
+                string[] getProperty = [];
+                string[] getItem = [];
+                string[] getTargetResult = [];
                 string getResultOutputFile = string.Empty;
                 BuildResult result = null;
 #if FEATURE_REPORTFILEACCESSES
@@ -1569,7 +1580,7 @@ namespace Microsoft.Build.CommandLine
 
                                 if (graphBuildOptions != null)
                                 {
-                                    graphBuildRequest = new GraphBuildRequestData(new[] { new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, flags, graphBuildOptions);
+                                    graphBuildRequest = new GraphBuildRequestData([new ProjectGraphEntryPoint(projectFile, globalProperties)], targets, null, flags, graphBuildOptions);
                                 }
                                 else
                                 {
@@ -1854,7 +1865,7 @@ namespace Microsoft.Build.CommandLine
                 projectFile,
                 restoreGlobalProperties,
                 toolsVersion,
-                targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
+                targetsToBuild: [MSBuildConstants.RestoreTargetName],
                 hostServices: null,
                 flags: flags);
 
@@ -2648,9 +2659,9 @@ namespace Microsoft.Build.CommandLine
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
 
                     // If we are looking for the value of a specific property or item post-evaluation or a target post-build, figure that out now
-                    getProperty = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetProperty] ?? Array.Empty<string>();
-                    getItem = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetItem] ?? Array.Empty<string>();
-                    getTargetResult = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetTargetResult] ?? Array.Empty<string>();
+                    getProperty = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetProperty] ?? [];
+                    getItem = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetItem] ?? [];
+                    getTargetResult = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetTargetResult] ?? [];
                     getResultOutputFile = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetResultOutputFile].FirstOrDefault() ?? string.Empty;
 
                     bool minimizeStdOutOutput = getProperty.Length + getItem.Length + getTargetResult.Length > 0 && getResultOutputFile.Length == 0;
@@ -3251,7 +3262,7 @@ namespace Microsoft.Build.CommandLine
             ISet<string> warningSwitches = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (string code in parameters
-                .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries) ?? new string[] { null }))
+                .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries) ?? [null]))
             {
                 if (code == null)
                 {
@@ -3526,7 +3537,7 @@ namespace Microsoft.Build.CommandLine
             if (projectFile == null)
             {
                 ValidateExtensions(projectsExtensionsToIgnore);
-                HashSet<string> extensionsToIgnore = new HashSet<string>(projectsExtensionsToIgnore ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+                HashSet<string> extensionsToIgnore = new HashSet<string>(projectsExtensionsToIgnore ?? [], StringComparer.OrdinalIgnoreCase);
                 // Get all files in the current directory that have a proj-like extension
                 string[] potentialProjectFiles = getFiles(projectDirectory ?? ".", "*.*proj");
                 List<string> actualProjectFiles = new List<string>();

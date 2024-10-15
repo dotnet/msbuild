@@ -469,7 +469,7 @@ namespace Microsoft.Build.Construction
                 return null;
             }
 
-            return ProjectGuid.Trim(new char[] { '{', '}' });
+            return ProjectGuid.Trim(['{', '}']);
         }
 
         /// <summary>

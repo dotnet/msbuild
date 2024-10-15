@@ -187,6 +187,7 @@ namespace Microsoft.Build.Logging
                     BuildSubmissionStarted
                     BuildStarted
                     BuildFinished
+                    BuildCanceled
                     ProjectEvaluationStarted
                     ProjectEvaluationFinished
                 BuildError
@@ -215,6 +216,7 @@ namespace Microsoft.Build.Logging
                 case BuildSubmissionStartedEventArgs buildSubmissionStarted: return Write(buildSubmissionStarted);
                 case BuildStartedEventArgs buildStarted: return Write(buildStarted);
                 case BuildFinishedEventArgs buildFinished: return Write(buildFinished);
+                case BuildCanceledEventArgs buildCanceled: return Write(buildCanceled);
                 case ProjectEvaluationStartedEventArgs projectEvaluationStarted: return Write(projectEvaluationStarted);
                 case ProjectEvaluationFinishedEventArgs projectEvaluationFinished: return Write(projectEvaluationFinished);
                 case BuildCheckTracingEventArgs buildCheckTracing: return Write(buildCheckTracing);
@@ -305,6 +307,13 @@ namespace Microsoft.Build.Logging
             Write(e.Succeeded);
 
             return BinaryLogRecordKind.BuildFinished;
+        }
+
+        private BinaryLogRecordKind Write(BuildCanceledEventArgs e)
+        {
+            WriteBuildEventArgsFields(e);
+
+            return BinaryLogRecordKind.BuildCanceled;
         }
 
         private BinaryLogRecordKind Write(ProjectEvaluationStartedEventArgs e)
