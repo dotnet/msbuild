@@ -343,7 +343,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Null(consoleApplication1.ParentProjectGuid);
 
             ProjectInSolution vbClassLibrary = solution.ProjectsInOrder.First(p => p.ProjectName == "vbClassLibrary");
-            Assert.Equal(ConvertToUnixPathIfNeeded("vbClassLibrary\vbClassLibrary.vbproj", convertToSlnx), vbClassLibrary.RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("vbClassLibrary\\vbClassLibrary.vbproj", convertToSlnx), vbClassLibrary.RelativePath);
             Assert.Empty(vbClassLibrary.Dependencies);
             Assert.Null(vbClassLibrary.ParentProjectGuid);
 
