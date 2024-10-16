@@ -22,5 +22,9 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>e438144bbffb29ed5d7c113dc4947b51650344dc</Sha>
     </Dependency>
+    <Dependency Name="System.Formats.Asn1" Version="6.0.1">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha />
+    </Dependency>
   </ToolsetDependencies>
 </Dependencies>
