@@ -221,6 +221,10 @@ namespace Microsoft.Build.Construction
 
             set
             {
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_13) && string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentException(nameof(FullPath));
+                }
                 // Should already be canonicalized to a full path
                 ErrorUtilities.VerifyThrowInternalRooted(value);
                 // To reduce code duplication, this should be
