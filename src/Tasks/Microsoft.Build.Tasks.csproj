@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -973,6 +973,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
 
+    <PackageReference Include="System.Formats.Asn1" />
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
