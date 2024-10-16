@@ -17,8 +17,8 @@ namespace Microsoft.Build.Tasks.UnitTests
         public MSBuildInternalMessage_Tests(ITestOutputHelper testOutput) => _testOutput = testOutput;
 
         [Theory]
-        [InlineData(true, true, "CommonTarget.Prefer32BitAndPreferNativeArm64Enabled", false)]
-        [InlineData(false, false, "CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled", true, new[] { "Release" })]
+        [InlineData(true, true, "CommonSdk.Prefer32BitAndPreferNativeArm64Enabled", false)]
+        [InlineData(false, false, "CommonSdk.PlatformIsAnyCPUAndPreferNativeArm64Enabled", true, new[] { "Release" })]
         public void E2EScenarioTests(bool prefer32, bool isPlatformAnyCpu, string expectedResourceName, bool isNetWarningExpected, string[]? formatArgs = null)
         {
             using (TestEnvironment env = TestEnvironment.Create())
