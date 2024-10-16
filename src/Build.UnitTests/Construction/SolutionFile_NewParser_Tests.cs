@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             solution.ProjectsInOrder[0].ProjectType.ShouldBe(SolutionProjectType.WebProject);
             solution.ProjectsInOrder[0].ProjectName.ShouldBe(@"C:\WebSites\WebApplication3\");
-            solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"C:\WebSites\WebApplication3\");
+            solution.ProjectsInOrder[0].RelativePath.ShouldBe(ConvertToUnixPathIfNeeded(@"C:\WebSites\WebApplication3\"));
             solution.ProjectsInOrder[0].Dependencies.Count.ShouldBe(2);
             solution.ProjectsInOrder[0].ParentProjectGuid.ShouldBeNull();
             solution.ProjectsInOrder[0].GetUniqueProjectName().ShouldBe(@"C:\WebSites\WebApplication3\");
@@ -152,6 +152,12 @@ namespace Microsoft.Build.UnitTests.Construction
             SolutionModel solutionModel = serializer.OpenAsync(slnPath, CancellationToken.None).Result;
             SolutionSerializers.SlnXml.SaveAsync(slnxPath, solutionModel, CancellationToken.None).Wait();
             return slnxPath;
+        }
+
+        private static string ConvertToUnixPathIfNeeded(string path)
+        {
+            // In the new parser, ProjectModel.FilePath is converted to Unix-style.
+            return !NativeMethodsShared.IsWindows ? path.Replace('\\', '/') : path;
         }
     }
 }
