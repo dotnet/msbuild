@@ -198,14 +198,14 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// All projects in this solution, in the order they appeared in the solution file
         /// </summary>
-        /// <remarks>Solution folders are no longer for the new parser.</remarks>
+        /// <remarks>For the new parser, solution folders are no longer included.</remarks>
         public IReadOnlyList<ProjectInSolution> ProjectsInOrder => _projectsInOrder.AsReadOnly();
 
         /// <summary>
         /// The collection of projects in this solution, accessible by their guids as a
         /// string in "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" form
         /// </summary>
-        /// <remarks>Solution folders are no longer included for the new parser.</remarks>
+        /// <remarks>For the new parser, solution folders are no longer included.</remarks>
         public IReadOnlyDictionary<string, ProjectInSolution> ProjectsByGuid => new ReadOnlyDictionary<string, ProjectInSolution>(_projectsByGuid);
 
         internal IReadOnlyDictionary<string, ProjectInSolution> SolutionFoldersByGuid => new ReadOnlyDictionary<string, ProjectInSolution>(_solutionFoldersByGuid);
@@ -324,6 +324,7 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Maps <see cref="SolutionModel"/> to <see cref="SolutionFile" />.
+        /// <see cref="SolutionModel"/> is a result of parsing solution using the new parser.
         /// </summary>
         /// <param name="solutionModel"></param>
         private void ReadSolutionModel(SolutionModel solutionModel)
