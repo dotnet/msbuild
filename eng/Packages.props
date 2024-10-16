@@ -26,6 +26,7 @@
     <PackageReference Update="System.CodeDom" Version="4.4.0" />
     <PackageReference Update="System.Collections.Immutable" Version="5.0.0" />
     <PackageReference Update="System.Configuration.ConfigurationManager" Version="4.7.0" />
+    <PackageReference Update="System.Formats.Asn1" Version="$(SystemFormatsAsn1Version)" />
     <PackageReference Update="System.Net.Http" Version="4.3.4" />
     <PackageReference Update="System.Memory" Version="4.5.4" />
     <PackageReference Update="System.Reflection.Metadata" Version="1.6.0" />
