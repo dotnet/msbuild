@@ -5,17 +5,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Threading;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
-using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 using Microsoft.VisualStudio.SolutionPersistence;
+using Microsoft.VisualStudio.SolutionPersistence.Model;
+using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 using Shouldly;
 using Xunit;
-using Microsoft.VisualStudio.SolutionPersistence.Model;
-using System.Threading;
-using System.Linq;
 
 #nullable disable
 
