@@ -23,6 +23,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Promote CompilerServices.Unsafe from the old version we get from System.Memory on net472. -->
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
     <PackageReference Include="System.Security.Permissions" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
     <Reference Include="System.Xaml" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
