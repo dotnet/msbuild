@@ -415,3 +415,34 @@ dotnet_diagnostic.IDE0305.severity = suggestion
 
 # Temporarily disable SA1010 "Opening square brackets should not be preceded by a space" until https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3687 is fixed
 dotnet_diagnostic.SA1010.severity = none
+
+# Remove unnecessary equality operator  IDE0100 (https://learn.microsoft.com/en-gb/dotnet/fundamentals/code-analysis/style-rules/ide0100)
+# Making it a suggestion to have a flexibility for future
+dotnet_diagnostic.IDE0100.severity = suggestion
+
+# File header should match the template, making it error since couple of files met in the code base without any header
+dotnet_diagnostic.IDE0073.severity = error
+
+# Use 'System.Threading.Lock'
+dotnet_diagnostic.IDE0330.severity = suggestion
+
+# Value types are incompatible with null values. https://xunit.net/xunit.analyzers/rules/xUnit1012
+dotnet_diagnostic.xUnit1012.severity = warning
+
+# Use Assert.Fail() instead of Assert.True(false) or Assert.False(true)
+dotnet_diagnostic.xUnit2020.severity = warning
+
+# Use Assert.DoesNotContain instead of Assert.Empty on filtered collections
+dotnet_diagnostic.xUnit2029.severity = warning
+
+# Do not use blocking task operations in test method. https://xunit.net/xunit.analyzers/rules/xUnit1031
+# The parallelization is disabled in https://github.com/dotnet/msbuild/blob/371d00f5c10a15b0858c411aafa11aac74596b06/src/Shared/UnitTests/xunit.runner.json#L6-L7
+# Issue to consider enabling parallelization: https://github.com/dotnet/msbuild/issues/10640
+dotnet_diagnostic.xUnit1031.severity = none
+
+# Do not use equality check to check for collection size. https://xunit.net/xunit.analyzers/rules/xUnit2013
+# To fix the warning for empty collection we can use Assert.Empty() instead of Assert.Equal(0, collection.Count)
+# However to fix the warning for collections with 1 elements we should use Assert.Single() instead of Assert.Equal(1, collection.Count)
+# The latter brings incosistency in the codebase and some times in one test case.
+# So we are disabling this rule with respect to the above mentioned reasons.
+dotnet_diagnostic.xUnit2013.severity = none

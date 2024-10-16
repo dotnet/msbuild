@@ -7,7 +7,7 @@ To track the request on sharing the code: https://github.com/dotnet/roslyn/issue
 In current implementation the usage of the editorconfig is internal only and exposed via ConfigurationProvider functionality. 
 
 Configuration divided into two categories: 
-- Infra related configuration. IsEnabled, Severity, EvaluationAnalysisScope
+- Infra related configuration. IsEnabled, Severity, EvaluationCheckScope
 - Custom configuration, any other config specified by user for this particular rule
 
 ### Example
@@ -38,7 +38,7 @@ list<editorConfig>{
 }
 ```
 Reverse the order and collect all matching section key-value pairs into new dictionary
-Remove non-msbuild-analyzer related key-values (keys not starting with msbuild_analyzer.RULEID)
+Remove non-msbuild-check related key-values (keys not starting with msbuild_check.RULEID)
 
 The implementation differs depending on category: 
  - Infra related config: Merges the configuration retrieved from configuration module with default values (respecting the specified configs in editorconfig) 
@@ -67,12 +67,12 @@ Lifecycle of BuildCheckManager could be found [here](https://github.com/dotnet/m
 
 
 #### Custom configuration data
-CustomConfigurationData is propogated to the BuildCheck Analyzer instance by passing the instance of [ConfigurationContext](https://github.com/dotnet/msbuild/blob/393c2fea652873416c8a2028810932a4fa94403f/src/Build/BuildCheck/API/ConfigurationContext.cs#L14)
-during the initialization of the [BuildAnalyzer](https://github.com/dotnet/msbuild/blob/393c2fea652873416c8a2028810932a4fa94403f/src/Build/BuildCheck/API/BuildAnalyzer.cs#L36).
+CustomConfigurationData is propogated to the BuildCheck Check instance by passing the instance of [ConfigurationContext](https://github.com/dotnet/msbuild/blob/393c2fea652873416c8a2028810932a4fa94403f/src/Build/BuildCheck/API/ConfigurationContext.cs#L14)
+during the initialization of the [BuildExecutionCheck](https://github.com/dotnet/msbuild/blob/393c2fea652873416c8a2028810932a4fa94403f/src/Build/BuildCheck/API/BuildExecutionCheck.cs#L36).
 
 
 #### Example of consuming the CustomConfigurationData
-The `Initialize` method of BuildCheck Analyzer:
+The `Initialize` method of BuildCheck Check:
 ```C#
 public override void Initialize(ConfigurationContext configurationContext)
 {
