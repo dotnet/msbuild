@@ -75,7 +75,7 @@ namespace Microsoft.Build.Evaluation
         protected void AppendDefaultHeaderWithSeparator(StringBuilder stringBuilder, string separator)
         {
             stringBuilder.AppendLine(
-                string.Join(separator, ["Id", "ParentId", "Pass", "File", "Line #", "Expression", "Inc (ms)", "Inc (%)", "Exc (ms)",
+                string.Join(separator, (string[])["Id", "ParentId", "Pass", "File", "Line #", "Expression", "Inc (ms)", "Inc (%)", "Exc (ms)",
                         "Exc (%)", "#", "Kind", "Bug"]));
         }
 
