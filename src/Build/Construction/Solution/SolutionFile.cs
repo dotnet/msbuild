@@ -328,7 +328,7 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Maps <see cref="SolutionModel"/> to <see cref="SolutionFile" />.
-        /// /// <see cref="SolutionModel"/> is a result of parsing solution using the new parser.
+        /// <see cref="SolutionModel"/> is a result of parsing solution using the new parser.
         /// </summary>
         /// <param name="solutionModel"></param>
         private void ReadSolutionModel(SolutionModel solutionModel)
