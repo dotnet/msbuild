@@ -294,7 +294,7 @@ namespace Microsoft.Build.UnitTests.Construction
             }
             else
             {
-                // try at list assert not null
+                // try at least assert not null
                 Assert.NotNull(myPhysicalFolderClassLibrary1.ParentProjectGuid);
                 Assert.NotNull(classLibrary2.ParentProjectGuid);
             }
