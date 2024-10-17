@@ -669,7 +669,16 @@ namespace Microsoft.Build.BackEnd
                     itemsToAdd = itemsToAdd.Where(item => !existingItems.Contains(item, ProjectItemInstance.EqualityComparer));
                 }
             }
-            logFunction?.Invoke(itemsToAdd.ToList());
+
+            if (doNotAddDuplicates)
+            {
+                logFunction?.Invoke(itemsToAdd.ToList());
+            }
+            else {
+                var groupAsList = group as List<ProjectItemInstance>;
+                logFunction?.Invoke(groupAsList ?? group.ToList());  
+            }
+           
 
             PrimaryAddTable.ImportItemsOfType(itemType, itemsToAdd);
         }
