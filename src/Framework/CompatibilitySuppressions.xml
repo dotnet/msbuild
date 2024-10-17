@@ -1,7 +1,70 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <!-- PKV004 for netstandard2.0-supporting TFs that we do not have runtime assemblies for.
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Framework.AssemblyLoadingContext</Target>
+    <Left>ref/net7.0/Microsoft.Build.Framework.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Framework.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Framework.LoggerVerbosity</Target>
+    <Left>ref/net7.0/Microsoft.Build.Framework.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Framework.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Framework.MessageImportance</Target>
+    <Left>ref/net7.0/Microsoft.Build.Framework.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Framework.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Framework.Profiler.EvaluationLocationKind</Target>
+    <Left>ref/net7.0/Microsoft.Build.Framework.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Framework.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Framework.Profiler.EvaluationPass</Target>
+    <Left>ref/net7.0/Microsoft.Build.Framework.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Framework.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Framework.RegisteredTaskObjectLifetime</Target>
+    <Left>ref/net7.0/Microsoft.Build.Framework.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Framework.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Framework.TargetBuiltReason</Target>
+    <Left>ref/net7.0/Microsoft.Build.Framework.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Framework.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Framework.TargetSkipReason</Target>
+    <Left>ref/net7.0/Microsoft.Build.Framework.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Framework.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Framework.TaskParameterMessageKind</Target>
+    <Left>ref/net7.0/Microsoft.Build.Framework.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Framework.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+    <!-- PKV004 for netstandard2.0-supporting TFs that we do not have runtime assemblies for.
        This is intentional, because you can only use MSBuild in the context of a .NET SDK
        (on net7.0, as of MSBuild 17.4) or in the context of Visual Studio (net472), but we
        have previously shipped netstandard2.0 packages, and if you want to support both
