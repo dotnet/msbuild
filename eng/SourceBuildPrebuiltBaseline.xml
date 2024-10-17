@@ -17,6 +17,7 @@
     <UsagePattern IdentityGlob="System.Security.Cryptography.Xml/*8.0.0*" />
     <UsagePattern IdentityGlob="System.Text.Json/*8.0.5*" />
     <UsagePattern IdentityGlob="System.Threading.Tasks.Dataflow/*8.0.0*" />
+	  <UsagePattern IdentityGlob="Microsoft.VisualStudio.SolutionPersistence/*1.0.9*" />
   </IgnorePatterns>
   <Usages>
   </Usages>
