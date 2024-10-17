@@ -24,7 +24,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 ## Current Rotation of Change Waves
 
 ### 17.13
-- [.SLNX support - use the new parser for .sln and .slnx]()
+- [.SLNX support - use the new parser for .sln and .slnx](https://github.com/dotnet/msbuild/pull/10836)
 
 ### 17.12
 - [Log TaskParameterEvent for scalar parameters](https://github.com/dotnet/msbuild/pull/9908)
