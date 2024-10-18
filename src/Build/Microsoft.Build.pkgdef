@@ -29,3 +29,11 @@
 "culture"="neutral"
 "oldVersion"="0.0.0.0-1.0.0.0"
 "newVersion"="1.0.0.0"
+
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{AA8C2479-DD4C-45C2-A591-E656F1B7D90A}]
+"name"="Microsoft.VisualStudio.SolutionPersistence"
+"codeBase"="$BaseInstallDir$\MSBuild\Current\Bin\Microsoft.VisualStudio.SolutionPersistence.dll"
+"publicKeyToken"="b03f5f7f11d50a3a"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-1.0.0.0"
+"newVersion"="1.0.0.0"
