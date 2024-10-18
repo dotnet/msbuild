@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Serialization;
 using Microsoft.Build.Shared;
@@ -98,7 +99,7 @@ namespace Microsoft.Build.Framework
         /// <param name="eventTimestamp">Timestamp when event was created</param>
         /// <param name="messageArgs">message arguments</param>
         public BuildMessageEventArgs(
-            string message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             string helpKeyword,
             string senderName,
             MessageImportance importance,
@@ -197,7 +198,7 @@ namespace Microsoft.Build.Framework
             int columnNumber,
             int endLineNumber,
             int endColumnNumber,
-            string message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             string helpKeyword,
             string senderName,
             MessageImportance importance,
