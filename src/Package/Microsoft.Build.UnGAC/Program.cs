@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnGAC
                     "BuildXL.Processes, Version=1.0.0.0",
                     "BuildXL.Utilities.Core, Version=1.0.0.0",
                     "BuildXL.Native, Version=1.0.0.0",
-                    "Microsoft.VisualStudio.SolutionPersistence, Version=1.0.0.0"
+                    "Microsoft.VisualStudio.SolutionPersistence, Version=1.0.0.0",
                 };
 
                 uint hresult = NativeMethods.CreateAssemblyCache(out IAssemblyCache assemblyCache, 0);
