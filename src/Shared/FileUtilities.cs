@@ -1065,12 +1065,19 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal static bool IsSolutionFilename(string filename)
         {
-            return HasExtension(filename, ".sln") || HasExtension(filename, ".slnf");
+            return HasExtension(filename, ".sln") ||
+                   HasExtension(filename, ".slnf") ||
+                   HasExtension(filename, ".slnx");
         }
 
         internal static bool IsSolutionFilterFilename(string filename)
         {
             return HasExtension(filename, ".slnf");
+        }
+
+        internal static bool IsSolutionXFilename(string filename)
+        {
+            return HasExtension(filename, ".slnx");
         }
 
         /// <summary>
