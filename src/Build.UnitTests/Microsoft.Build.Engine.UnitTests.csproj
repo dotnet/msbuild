@@ -21,6 +21,7 @@
     <PackageReference Include="Shouldly" />
     <PackageReference Include="FakeItEasy" />
     <PackageReference Include="System.Net.Http" />
+    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
     <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
