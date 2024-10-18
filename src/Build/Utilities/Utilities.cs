@@ -626,7 +626,7 @@ namespace Microsoft.Build.Internal
             return enumerator.ToEnumerable().ToArray();
         }
 
-        public static IEnumerable<(string propertyName, string propertyValue)> EnumerateProperties(IEnumerable properties)
+        public static IEnumerable<PropertyData> EnumerateProperties(IEnumerable properties)
         {
             if (properties == null)
             {
@@ -646,25 +646,25 @@ namespace Microsoft.Build.Internal
                 return CastOneByOne(properties);
             }
 
-            IEnumerable<(string propertyName, string propertyValue)> CastOneByOne(IEnumerable props)
+            IEnumerable<PropertyData> CastOneByOne(IEnumerable props)
             {
                 foreach (var item in props)
                 {
                     if (item is IProperty property && !string.IsNullOrEmpty(property.Name))
                     {
-                        yield return (property.Name, property.EvaluatedValue ?? string.Empty);
+                        yield return new(property.Name, property.EvaluatedValue ?? string.Empty);
                     }
                     else if (item is DictionaryEntry dictionaryEntry && dictionaryEntry.Key is string key && !string.IsNullOrEmpty(key))
                     {
-                        yield return (key, dictionaryEntry.Value as string ?? string.Empty);
+                        yield return new(key, dictionaryEntry.Value as string ?? string.Empty);
                     }
                     else if (item is KeyValuePair<string, string> kvp)
                     {
-                        yield return (kvp.Key, kvp.Value);
+                        yield return new(kvp.Key, kvp.Value);
                     }
                     else if (item is KeyValuePair<string, TimeSpan> keyTimeSpanValue)
                     {
-                        yield return (keyTimeSpanValue.Key, keyTimeSpanValue.Value.Ticks.ToString());
+                        yield return new(keyTimeSpanValue.Key, keyTimeSpanValue.Value.Ticks.ToString());
                     }
                     else
                     {
@@ -685,14 +685,14 @@ namespace Microsoft.Build.Internal
         {
             foreach (var tuple in EnumerateProperties(properties))
             {
-                callback(arg, new KeyValuePair<string, string>(tuple.propertyName, tuple.propertyValue));
+                callback(arg, new KeyValuePair<string, string>(tuple.Name, tuple.Value));
             }
         }
 
         /// <summary>
         /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types
         /// </summary>
-        public static IEnumerable<(string itemType, IItemData itemValue)> EnumerateItems(IEnumerable items)
+        public static IEnumerable<ItemData> EnumerateItems(IEnumerable items)
         {
             // The actual type of the item data can be of types:
             //  * <see cref="ProjectItemInstance"/>
@@ -711,14 +711,14 @@ namespace Microsoft.Build.Internal
             {
                 return projectItemInstanceDictionary
                     .EnumerateItemsPerType()
-                    .Select(t => t.itemValue.Select(itemValue => (t.itemType, (IItemData)itemValue)))
+                    .Select(t => t.itemValue.Select(itemValue => new ItemData(t.itemType, (IItemData)itemValue)))
                     .SelectMany(tpl => tpl);
             }
             else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
             {
                 return projectItemDictionary
                     .EnumerateItemsPerType()
-                    .Select(t => t.itemValue.Select(itemValue => (t.itemType, (IItemData)itemValue)))
+                    .Select(t => t.itemValue.Select(itemValue => new ItemData(t.itemType, (IItemData)itemValue)))
                     .SelectMany(tpl => tpl);
             }
             else
@@ -726,7 +726,7 @@ namespace Microsoft.Build.Internal
                 return CastOneByOne(items);
             }
 
-            IEnumerable<(string itemType, IItemData itemValue)> CastOneByOne(IEnumerable itms)
+            IEnumerable<ItemData> CastOneByOne(IEnumerable itms)
             {
                 foreach (var item in itms)
                 {
@@ -769,9 +769,9 @@ namespace Microsoft.Build.Internal
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(itemType))
+                    if (data != null)
                     {
-                        yield return (itemType, data);
+                        yield return new(itemType!, data);
                     }
                 }
             }
@@ -781,7 +781,7 @@ namespace Microsoft.Build.Internal
         {
             foreach (var tuple in EnumerateItems(items))
             {
-                callback(new DictionaryEntry(tuple.itemType, tuple.itemValue));
+                callback(new DictionaryEntry(tuple.Type, tuple.Value));
             }
         }
     }

@@ -36,11 +36,11 @@ namespace Microsoft.Build.UnitTests
                 Items = null
             };
 
-            List<(string propertyName, string propertyValue)> results = args.EnumerateProperties().ToList();
+            List<PropertyData> results = args.EnumerateProperties().ToList();
             results.Count.ShouldBe(3);
-            results[0].ShouldBe(("Key", "Value"));
-            results[1].ShouldBe(("prop", "val"));
-            results[2].ShouldBe(("foo", "bar"));
+            results[0].ShouldBe(new("Key", "Value"));
+            results[1].ShouldBe(new("prop", "val"));
+            results[2].ShouldBe(new("foo", "bar"));
         }
 
         [Fact]
@@ -64,18 +64,18 @@ namespace Microsoft.Build.UnitTests
                 }
             };
 
-            List<(string itemType, IItemData itemValue)> results = args.EnumerateItems().ToList();
+            List<ItemData> results = args.EnumerateItems().ToList();
 
             results.Count.ShouldBe(2);
-            results[0].itemType.ShouldBe("Key");
-            results[0].itemValue.ItemSpec.ShouldBe("TestItemSpec");
-            results[0].itemValue.GetEvaluatedInclude().ShouldBe("TestItemSpec");
-            results[0].itemValue.EnumerateMetadata().ShouldBeEmpty();
+            results[0].Type.ShouldBe("Key");
+            results[0].Value.ItemSpec.ShouldBe("TestItemSpec");
+            results[0].Value.GetEvaluatedInclude().ShouldBe("TestItemSpec");
+            results[0].Value.EnumerateMetadata().ShouldBeEmpty();
 
-            results[1].itemType.ShouldBe("Key2");
-            results[1].itemValue.ItemSpec.ShouldBe("spec");
-            results[1].itemValue.GetEvaluatedInclude().ShouldBe("spec");
-            List<KeyValuePair<string, string>> metadata = results[1].itemValue.EnumerateMetadata().ToList();
+            results[1].Type.ShouldBe("Key2");
+            results[1].Value.ItemSpec.ShouldBe("spec");
+            results[1].Value.GetEvaluatedInclude().ShouldBe("spec");
+            List<KeyValuePair<string, string>> metadata = results[1].Value.EnumerateMetadata().ToList();
             metadata.Count.ShouldBe(2);
             metadata[0].Key.ShouldBe("metadat1");
             metadata[0].Value.ShouldBe("val1");

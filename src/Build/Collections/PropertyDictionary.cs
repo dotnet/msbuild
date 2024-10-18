@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -529,22 +530,22 @@ namespace Microsoft.Build.Collections
             }
         }
 
-        internal IEnumerable<(string propertyName, string propertyValue)> Enumerate()
+        internal IEnumerable<PropertyData> Enumerate()
         {
             lock (_properties)
             {
                 foreach (var kvp in (ICollection<T>)_properties)
                 {
-                    yield return (kvp.Key, EscapingUtilities.UnescapeAll(kvp.EscapedValue));
+                    yield return new(kvp.Key, EscapingUtilities.UnescapeAll(kvp.EscapedValue));
                 }
             }
         }
 
         internal void Enumerate(Action<string, string> keyValueCallback)
         {
-            foreach (var tuple in Enumerate())
+            foreach (var property in Enumerate())
             {
-                keyValueCallback(tuple.propertyName, tuple.propertyValue);
+                keyValueCallback(property.Name, property.Value);
             }
         }
 

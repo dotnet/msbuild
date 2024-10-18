@@ -21,14 +21,14 @@ public static class BuildEventArgsExtensions
     /// <summary>
     /// Lazy enumerates and strong types properties from Properties property.
     /// </summary>
-    public static IEnumerable<(string propertyName, string propertyValue)> EnumerateProperties(
+    public static IEnumerable<PropertyData> EnumerateProperties(
         this ProjectEvaluationFinishedEventArgs eventArgs)
         => EnumerateProperties(eventArgs.Properties);
 
     /// <summary>
     /// Lazy enumerates and strong types properties from Properties property.
     /// </summary>
-    public static IEnumerable<(string propertyName, string propertyValue)> EnumerateProperties(
+    public static IEnumerable<PropertyData> EnumerateProperties(
         this ProjectStartedEventArgs eventArgs)
         => EnumerateProperties(eventArgs.Properties);
 
@@ -37,7 +37,7 @@ public static class BuildEventArgsExtensions
     /// The actual item value might be wrapped to be able to provide defined interface
     /// </summary>
     /// <returns></returns>
-    public static IEnumerable<(string itemType, IItemData itemValue)> EnumerateItems(
+    public static IEnumerable<ItemData> EnumerateItems(
         this ProjectEvaluationFinishedEventArgs eventArgs)
         => EnumerateItems(eventArgs.Items);
 
@@ -45,7 +45,7 @@ public static class BuildEventArgsExtensions
     /// Lazy enumerates and strong types items from Items property.
     /// The actual item value might be wrapped to be able to provide defined interface
     /// </summary>
-    public static IEnumerable<(string itemType, IItemData itemValue)> EnumerateItems(
+    public static IEnumerable<ItemData> EnumerateItems(
         this ProjectStartedEventArgs eventArgs)
         => EnumerateItems(eventArgs.Items);
 
@@ -73,9 +73,9 @@ public static class BuildEventArgsExtensions
     public static string GetEvaluatedInclude(this IItemData itemData)
         => itemData.ItemSpec;
 
-    private static IEnumerable<(string propertyName, string propertyValue)> EnumerateProperties(IEnumerable? properties)
+    private static IEnumerable<PropertyData> EnumerateProperties(IEnumerable? properties)
         => Internal.Utilities.EnumerateProperties(properties);
 
-    private static IEnumerable<(string itemType, IItemData itemValue)> EnumerateItems(IEnumerable? items)
+    private static IEnumerable<ItemData> EnumerateItems(IEnumerable? items)
         => Internal.Utilities.EnumerateItems(items);
 }
