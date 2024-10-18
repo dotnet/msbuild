@@ -495,7 +495,7 @@ namespace Microsoft.Build.Utilities
         {
             if (_metadata == null)
             {
-                return Enumerable.Empty<KeyValuePair<string, string>>();
+                return [];
             }
 
             int count = _metadata.Count;

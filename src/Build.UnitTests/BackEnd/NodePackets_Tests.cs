@@ -79,6 +79,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             GeneratedFileUsedEventArgs generatedFileUsed = new GeneratedFileUsedEventArgs("path", "some content");
             BuildSubmissionStartedEventArgs buildSubmissionStarted = new(new Dictionary<string, string> { { "Value1", "Value2" } }, ["Path1"], ["TargetName"], BuildRequestDataFlags.ReplaceExistingProjectInstance, 123);
             BuildCheckTracingEventArgs buildCheckTracing = new();
+            BuildCanceledEventArgs buildCanceled = new("message", DateTime.UtcNow);
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
@@ -114,6 +115,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(generatedFileUsed, LoggingEventType.GeneratedFileUsedEvent);
             VerifyLoggingPacket(buildSubmissionStarted, LoggingEventType.BuildSubmissionStartedEvent);
             VerifyLoggingPacket(buildCheckTracing, LoggingEventType.BuildCheckTracingEvent);
+            VerifyLoggingPacket(buildCanceled, LoggingEventType.BuildCanceledEvent);
         }
 
         private static BuildEventContext CreateBuildEventContext()

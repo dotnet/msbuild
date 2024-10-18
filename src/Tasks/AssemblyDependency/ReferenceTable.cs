@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks
         private readonly Dictionary<string, AssemblyNameExtension> _externallyResolvedImmutableFiles = new Dictionary<string, AssemblyNameExtension>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>The table of remapped assemblies. Used for Unification.</summary>
-        private IEnumerable<DependentAssembly> _remappedAssemblies = Enumerable.Empty<DependentAssembly>();
+        private IEnumerable<DependentAssembly> _remappedAssemblies = [];
 
         /// <summary>If true, then search for dependencies.</summary>
         private readonly bool _findDependencies;
@@ -817,7 +817,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
             position += component.Length + 1;
-            int nextDelimiter = fusionName.IndexOfAny(new[] { ',', ' ' }, position);
+            int nextDelimiter = fusionName.IndexOfAny([',', ' '], position);
             if (nextDelimiter == -1)
             {
                 value = fusionName.Substring(position);
@@ -1290,7 +1290,7 @@ namespace Microsoft.Build.Tasks
             // If a reference has the SDKName metadata on it then we will only search using a single resolver, that is the InstalledSDKResolver.
             if (reference.SDKName.Length > 0)
             {
-                jaggedResolvers.Add(new Resolver[] { new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion) });
+                jaggedResolvers.Add([new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion)]);
             }
             else
             {
