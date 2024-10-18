@@ -1,0 +1,7 @@
+[$RootKey$\RuntimeConfiguration\dependentAssembly\bindingRedirection\{69CFFD1A-343F-46C5-81B3-8437CD1272CD}]
+"name"="Microsoft.Build.Conversion.Core"
+"codeBase"="$BaseInstallDir$\MSBuild\Current\Bin\Microsoft.Build.Conversion.Core.dll"
+"publicKeyToken"="b03f5f7f11d50a3a"
+"culture"="neutral"
+"oldVersion"="0.0.0.0-99.9.9.9"
+"newVersion"="15.1.0.0"
