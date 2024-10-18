@@ -16,4 +16,6 @@ public interface IBuildCheckRegistrationContext
     void RegisterEnvironmentVariableReadAction(Action<BuildCheckDataContext<EnvironmentVariableCheckData>> environmentVariableAction);
 
     void RegisterBuildFinishedAction(Action<BuildCheckDataContext<BuildFinishedCheckData>> buildFinishedAction);
+
+    void RegisterProjectImportedAction(Action<BuildCheckDataContext<ProjectImportedCheckData>> projectImportedAction);
 }
