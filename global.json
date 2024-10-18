@@ -3,7 +3,7 @@
     "allowPrerelease": true
   },
   "tools": {
-    "dotnet": "6.0.132",
+    "dotnet": "6.0.133",
     "runtimes": {
       "dotnet/x64": [
         "2.1.7"
