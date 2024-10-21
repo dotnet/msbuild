@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -94,6 +95,7 @@ namespace Microsoft.Build.Tasks
         /// use to spot error lines in the tool output. This is
         /// useful for tools that produce unusually formatted output
         /// </summary>
+        [StringSyntax(StringSyntaxAttribute.Regex)]
         public string CustomErrorRegularExpression
         {
             get => _customErrorRegex;
@@ -105,6 +107,7 @@ namespace Microsoft.Build.Tasks
         /// use to spot warning lines in the tool output. This is
         /// useful for tools that produce unusually formatted output
         /// </summary>
+        [StringSyntax(StringSyntaxAttribute.Regex)]
         public string CustomWarningRegularExpression
         {
             get => _customWarningRegex;
