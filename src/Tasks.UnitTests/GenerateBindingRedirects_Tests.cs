@@ -415,6 +415,8 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 throw new NotImplementedException();
             }
+
+            string IItemData.ItemSpec => ((ITaskItem)this).ItemSpec;
         }
     }
 }
