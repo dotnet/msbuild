@@ -291,7 +291,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Array of paths to redist lists under given framework directory.</returns>
         public static string[] GetRedistListPathsFromDisk(string frameworkDirectory)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory, nameof(frameworkDirectory));
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory);
 
             lock (s_locker)
             {
@@ -429,7 +429,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool FrameworkAssemblyEntryInRedist(AssemblyNameExtension assemblyName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyName, nameof(assemblyName));
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyName);
 
             if (!_assemblyNameInRedist.TryGetValue(assemblyName, out bool isAssemblyNameInRedist))
             {
@@ -991,7 +991,7 @@ namespace Microsoft.Build.Tasks
         /// found in the target framework directories. This can happen if the subsets are instead passed in as InstalledDefaultSubsetTables</param>
         internal SubsetListFinder(string[] subsetToSearchFor)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor, nameof(subsetToSearchFor));
+            ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor);
             _subsetToSearchFor = subsetToSearchFor;
         }
 
@@ -1015,7 +1015,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Array of paths locations to subset lists under the given framework directory.</returns>
         public string[] GetSubsetListPathsFromDisk(string frameworkDirectory)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory, nameof(frameworkDirectory));
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory);
 
             // Make sure we have some subset names to search for it is possible that no subsets are asked for
             // so we should return as quickly as possible in that case.

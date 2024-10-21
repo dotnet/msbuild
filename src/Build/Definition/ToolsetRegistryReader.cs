@@ -234,7 +234,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>An enumeration of property definitions.</returns>
         protected override IEnumerable<ToolsetPropertyDefinition> GetSubToolsetPropertyDefinitions(string toolsVersion, string subToolsetVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion, nameof(subToolsetVersion));
+            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion);
 
             RegistryKeyWrapper toolsVersionWrapper = null;
             RegistryKeyWrapper subToolsetWrapper = null;

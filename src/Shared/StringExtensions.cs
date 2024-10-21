@@ -15,9 +15,9 @@ namespace Microsoft.Build.Shared
     {
         public static string Replace(this string aString, string oldValue, string newValue, StringComparison stringComparison)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(aString, nameof(aString));
-            ErrorUtilities.VerifyThrowArgumentNull(oldValue, nameof(oldValue));
-            ErrorUtilities.VerifyThrowArgumentLength(oldValue, nameof(oldValue));
+            ErrorUtilities.VerifyThrowArgumentNull(aString);
+            ErrorUtilities.VerifyThrowArgumentNull(oldValue);
+            ErrorUtilities.VerifyThrowArgumentLength(oldValue);
 
             if (newValue == null)
             {

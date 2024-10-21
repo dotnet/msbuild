@@ -139,7 +139,7 @@ namespace Microsoft.Build.BackEnd
             )
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
-            ErrorUtilities.VerifyThrowInternalNull(taskType, nameof(taskType));
+            ErrorUtilities.VerifyThrowInternalNull(taskType);
 
             _taskLocation = taskLocation;
             _taskLoggingContext = taskLoggingContext;

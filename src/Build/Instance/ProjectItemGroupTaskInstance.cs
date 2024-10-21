@@ -50,9 +50,9 @@ namespace Microsoft.Build.Execution
             ElementLocation conditionLocation,
             List<ProjectItemGroupTaskItemInstance> items)
         {
-            ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
-            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
-            ErrorUtilities.VerifyThrowInternalNull(items, nameof(items));
+            ErrorUtilities.VerifyThrowInternalNull(condition);
+            ErrorUtilities.VerifyThrowInternalNull(location);
+            ErrorUtilities.VerifyThrowInternalNull(items);
 
             _condition = condition;
             _location = location;

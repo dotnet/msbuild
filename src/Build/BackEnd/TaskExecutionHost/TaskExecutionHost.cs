@@ -299,8 +299,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
-            ErrorUtilities.VerifyThrowArgumentNull(batchBucket, nameof(batchBucket));
+            ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
+            ErrorUtilities.VerifyThrowArgumentNull(batchBucket);
 
             _taskLoggingContext = loggingContext;
             _batchBucket = batchBucket;
@@ -352,7 +352,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the parameters were set correctly, false otherwise.</returns>
         public bool SetTaskParameters(IDictionary<string, (string, ElementLocation)> parameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameters, nameof(parameters));
+            ErrorUtilities.VerifyThrowArgumentNull(parameters);
 
             bool taskInitialized = true;
 

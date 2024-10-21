@@ -105,7 +105,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void ApplyParameter(IEventSource eventSource, string parameterName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
+            ErrorUtilities.VerifyThrowArgumentNull(parameterName);
 
             bool isEventForwardingParameter = true;
 
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public virtual void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
+            ErrorUtilities.VerifyThrowArgumentNull(eventSource);
 
             ParseParameters(eventSource);
 

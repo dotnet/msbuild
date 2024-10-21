@@ -28,7 +28,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public PlatformManifest(string pathToManifest)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(pathToManifest, nameof(pathToManifest));
+            ErrorUtilities.VerifyThrowArgumentLength(pathToManifest);
             _pathToManifest = pathToManifest;
             LoadManifestFile();
         }

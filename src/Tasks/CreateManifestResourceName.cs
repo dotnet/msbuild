@@ -295,7 +295,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void MakeValidEverettSubFolderIdentifier(StringBuilder builder, string subName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(subName, nameof(subName));
+            ErrorUtilities.VerifyThrowArgumentNull(subName);
 
             if (string.IsNullOrEmpty(subName)) { return; }
 
@@ -333,7 +333,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static void MakeValidEverettFolderIdentifier(StringBuilder builder, string name)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentNull(name);
 
             if (string.IsNullOrEmpty(name)) { return; }
 
@@ -365,7 +365,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public static string MakeValidEverettIdentifier(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentNull(name);
             if (string.IsNullOrEmpty(name)) { return name; }
 
             var everettId = new StringBuilder(name.Length);

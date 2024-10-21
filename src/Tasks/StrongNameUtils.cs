@@ -137,7 +137,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal static StrongNameLevel GetAssemblyStrongNameLevel(string assemblyPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyPath, nameof(assemblyPath));
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyPath);
 
             StrongNameLevel snLevel = StrongNameLevel.Unknown;
             IntPtr fileHandle = NativeMethods.InvalidIntPtr;

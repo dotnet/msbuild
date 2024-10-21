@@ -1010,7 +1010,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void AddToolset(Toolset toolset)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(toolset, nameof(toolset));
+            ErrorUtilities.VerifyThrowArgumentNull(toolset);
             using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets[toolset.ToolsVersion] = toolset;
@@ -1026,7 +1026,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public bool RemoveToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
 
             bool changed;
             using (_locker.EnterDisposableWriteLock())
@@ -1070,7 +1070,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public Toolset GetToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
             using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets.TryGetValue(toolsVersion, out var toolset);
@@ -1157,7 +1157,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>A loaded project.</returns>
         public Project LoadProject(string fileName, IDictionary<string, string> globalProperties, string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(fileName, nameof(fileName));
+            ErrorUtilities.VerifyThrowArgumentLength(fileName);
             fileName = FileUtilities.NormalizePath(fileName);
 
             using (_locker.EnterDisposableWriteLock())
@@ -1379,7 +1379,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         public void UnloadProject(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
             if (projectRootElement.Link != null)
             {
                 return;
@@ -1529,7 +1529,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectRootElement">The project XML root element to unload.</param>
         public bool TryUnloadProject(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
             if (projectRootElement.Link != null)
             {
                 return false;
@@ -1668,7 +1668,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void RegisterLoggerInternal(ILogger logger)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(logger, nameof(logger));
+            ErrorUtilities.VerifyThrowArgumentNull(logger);
             Debug.Assert(_locker.IsWriteLockHeld);
             _loggingService.RegisterLogger(new ReusableLogger(logger));
         }
@@ -1942,7 +1942,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public ReusableLogger(ILogger originalLogger)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(originalLogger, nameof(originalLogger));
+                ErrorUtilities.VerifyThrowArgumentNull(originalLogger);
                 _originalLogger = originalLogger;
             }
 

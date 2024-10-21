@@ -103,10 +103,10 @@ namespace Microsoft.Build.BackEnd
         public async Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, (string name, TargetBuiltReason reason)[] targetNames, Lookup baseLookup, CancellationToken cancellationToken)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "projectLoggingContext");
-            ErrorUtilities.VerifyThrowArgumentNull(entry, nameof(entry));
+            ErrorUtilities.VerifyThrowArgumentNull(entry);
             ErrorUtilities.VerifyThrowArgumentNull(callback, "requestBuilderCallback");
-            ErrorUtilities.VerifyThrowArgumentNull(targetNames, nameof(targetNames));
-            ErrorUtilities.VerifyThrowArgumentNull(baseLookup, nameof(baseLookup));
+            ErrorUtilities.VerifyThrowArgumentNull(targetNames);
+            ErrorUtilities.VerifyThrowArgumentNull(baseLookup);
             ErrorUtilities.VerifyThrow(targetNames.Length > 0, "List of targets must be non-empty");
             ErrorUtilities.VerifyThrow(_componentHost != null, "InitializeComponent must be called before building targets.");
 
@@ -212,7 +212,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
             _componentHost = host;
         }
 
