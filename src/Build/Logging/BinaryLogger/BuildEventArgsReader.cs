@@ -243,10 +243,11 @@ namespace Microsoft.Build.Logging
                     (e is EndOfStreamException && _readStream.BytesCountAllowedToReadRemaining <= 0))
                 {
                     hasError = true;
-
+                    int localSerializedEventLength = serializedEventLength;
+                    Exception localException = e;
                     string ErrorFactory() =>
                         ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_ReaderMismatchedRead",
-                            _recordNumber, serializedEventLength, e.GetType(), e.Message) + (_skipUnknownEvents
+                            _recordNumber, localSerializedEventLength, localException.GetType(), localException.Message) + (_skipUnknownEvents
                             ? " " + ResourceUtilities.GetResourceString("Binlog_ReaderSkippingRecord")
                             : string.Empty);
 
@@ -255,9 +256,11 @@ namespace Microsoft.Build.Logging
 
                 if (result == null && !hasError)
                 {
+                    int localSerializedEventLength = serializedEventLength;
+                    BinaryLogRecordKind localRecordKind = recordKind;
                     string ErrorFactory() =>
                         ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_ReaderUnknownType",
-                            _recordNumber, serializedEventLength, recordKind) + (_skipUnknownEvents
+                            _recordNumber, localSerializedEventLength, localRecordKind) + (_skipUnknownEvents
                             ? " " + ResourceUtilities.GetResourceString("Binlog_ReaderSkippingRecord")
                             : string.Empty);
 
@@ -266,9 +269,10 @@ namespace Microsoft.Build.Logging
 
                 if (_readStream.BytesCountAllowedToReadRemaining > 0)
                 {
+                    int localSerializedEventLength = serializedEventLength;
                     string ErrorFactory() => ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
-                        "Binlog_ReaderUnderRead", _recordNumber, serializedEventLength,
-                        serializedEventLength - _readStream.BytesCountAllowedToReadRemaining);
+                        "Binlog_ReaderUnderRead", _recordNumber, localSerializedEventLength,
+                        localSerializedEventLength - _readStream.BytesCountAllowedToReadRemaining);
 
                     HandleError(ErrorFactory, _skipUnknownEventParts, ReaderErrorType.UnknownEventData, recordKind);
                 }
@@ -1437,9 +1441,9 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private IEnumerable? ReadPropertyList()
+        private IList<DictionaryEntry>? ReadPropertyList()
         {
-            var properties = ReadStringDictionary();
+            IDictionary<string, string>? properties = ReadStringDictionary();
             if (properties == null || properties.Count == 0)
             {
                 return null;
@@ -1530,7 +1534,7 @@ namespace Microsoft.Build.Logging
             return taskItem;
         }
 
-        private IEnumerable? ReadProjectItems()
+        private IList<DictionaryEntry>? ReadProjectItems()
         {
             IList<DictionaryEntry>? list;
 
@@ -1612,7 +1616,7 @@ namespace Microsoft.Build.Logging
             return list;
         }
 
-        private IEnumerable? ReadTaskItemList()
+        private IList<ITaskItem>? ReadTaskItemList()
         {
             int count = ReadInt32();
             if (count == 0)
