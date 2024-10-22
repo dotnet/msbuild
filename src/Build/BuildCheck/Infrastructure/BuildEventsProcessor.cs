@@ -96,6 +96,16 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         _buildCheckCentralContext.RunEnvironmentVariableActions(checkData, checkContext, ReportResult);
     }
 
+    /// <summary>
+    /// The method handles events associated with the ProjectImportedEventArgs.
+    /// </summary>
+    internal void ProcessProjectImportedEventArgs(ICheckContext checkContext, string projectPath, string importedProjectPath)
+    {
+        ProjectImportedCheckData checkData = new(importedProjectPath, projectPath, checkContext.BuildEventContext?.ProjectInstanceId);
+
+        _buildCheckCentralContext.RunProjectImportedActions(checkData, checkContext, ReportResult);
+    }
+
     internal void ProcessBuildDone(ICheckContext checkContext)
     {
         if (!_buildCheckCentralContext.HasBuildFinishedActions)
