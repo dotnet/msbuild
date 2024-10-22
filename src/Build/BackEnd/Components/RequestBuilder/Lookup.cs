@@ -664,9 +664,20 @@ namespace Microsoft.Build.BackEnd
 
                 // Ensure we don't also add any that already exist.
                 var existingItems = GetItems(itemType);
+              
+                var existingItemsHashSet = existingItems.ToHashSet(ProjectItemInstance.EqualityComparer);
+                
                 if (existingItems.Count > 0)
                 {
-                    itemsToAdd = itemsToAdd.Where(item => !existingItems.Contains(item, ProjectItemInstance.EqualityComparer));
+                    
+                    var deduplicatedItemsToAdd = new List<ProjectItemInstance>();
+                    foreach (var item in itemsToAdd) {
+                        if (!existingItemsHashSet.Contains(item)) {
+                            deduplicatedItemsToAdd.Add(item);
+                        }
+                    }
+                   itemsToAdd = deduplicatedItemsToAdd;
+                   // itemsToAdd = itemsToAdd.Where(item => !existingItems.Contains(item, ProjectItemInstance.EqualityComparer));
                 }
             }
 
