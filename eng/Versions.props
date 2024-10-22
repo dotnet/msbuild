@@ -2,8 +2,7 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>17.3.4</VersionPrefix>
-    <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
+    <VersionPrefix>17.3.5</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
@@ -27,6 +26,7 @@
   <!-- Production Dependencies -->
   <PropertyGroup>
     <SystemResourcesExtensionsPackageVersion>6.0.0</SystemResourcesExtensionsPackageVersion>
+    <SystemFormatsAsn1Version>6.0.1</SystemFormatsAsn1Version>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
@@ -35,7 +35,7 @@
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>6.0.0-beta.24508.2</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftExtensionsDependencyModelVersion>6.0.0-preview.2.21154.6</MicrosoftExtensionsDependencyModelVersion>
-    <MicrosoftIORedistVersion>6.0.0</MicrosoftIORedistVersion>
+    <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
     <MicrosoftNetCompilersToolsetVersion>4.2.0-4.22314.14</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.2.0-rc.146</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
