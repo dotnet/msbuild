@@ -2210,6 +2210,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal("x", i1Group.First().EvaluatedInclude);
         }
 
+
         /// <summary>
         /// This bug was caused by batching over the ItemGroup as well as over each child.
         /// If the condition on a child did not exclude it, an unwitting child could be included multiple times,
@@ -2288,6 +2289,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Single(p.ItemsToBuildWith["i0"]);
             Assert.Single(p.ItemsToBuildWith.ItemTypes);
         }
+        /*
+        [Fact]
+        public void performanceTestRemoveDuplicates()
+        {
+            StreamReader t = new StreamReader("C:\\Users\\tbartonek\\source\\perftest\\testSquare.csproj");
+            string content = ObjectModelHelpers.CleanupFileContents(t.ReadToEnd());
+
+            IntrinsicTask task = CreateIntrinsicTask(content);
+
+            Lookup lookup = GenerateLookupWithItemsAndProperties(task.Project);
+
+            task.ExecuteTask(lookup);
+
+            ICollection<ProjectItemInstance> i1Group = lookup.GetItems("item1");
+
+            //Assert.Single(i1Group);
+            //Assert.Equal("x", i1Group.First().EvaluatedInclude);
+            Assert.Equal(i1Group.Count, 100000);
+
+            t.Dispose();
+        }*/
 
         [Fact]
         public void RemovesOfPersistedItemsAreReversed1()
