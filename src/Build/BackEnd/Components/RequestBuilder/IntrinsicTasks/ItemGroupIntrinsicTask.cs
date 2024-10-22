@@ -233,9 +233,8 @@ namespace Microsoft.Build.BackEnd
                 };
             }
            
-
-                // Now add the items we created to the lookup.
-                bucket.Lookup.AddNewItemsOfItemType(child.ItemType, itemsToAdd, !keepDuplicates, logFunction);
+            // Now add the items we created to the lookup.
+            bucket.Lookup.AddNewItemsOfItemType(child.ItemType, itemsToAdd, !keepDuplicates, logFunction);
             // Add in one operation for potential copy-on-write
         }
 
