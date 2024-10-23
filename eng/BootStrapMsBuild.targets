@@ -238,6 +238,6 @@
 
   </Target>
 
-  <Import Project=".\TestAssets" />
+  <Import Project=".\TestAssets.targets" />
 
 </Project>
