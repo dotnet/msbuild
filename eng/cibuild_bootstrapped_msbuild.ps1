@@ -85,8 +85,7 @@ try {
   else
   {
     $buildToolPath = Join-Path $bootstrapRoot "core\dotnet.exe"
-    # The version must be consistent with BootstrapSdkVersion
-    $buildToolCommand = Join-Path $bootstrapRoot "core\sdk\9.0.100-rc.2.24474.11\MSBuild.dll"
+    $buildToolCommand = "build"
     $buildToolFramework = "net9.0"
   }
 

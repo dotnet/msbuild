@@ -1098,7 +1098,7 @@ namespace Microsoft.Build.UnitTests
                 true);
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void Unc()
         {
             // Check UNC functionality
