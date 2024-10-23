@@ -120,9 +120,8 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Faz com que o MSBuild relate acessos a arquivos a qualquer
- configurado
-                     plug-ins de cache do projeto.
+                     Faz com que o MSBuild relate acessos a arquivos para qualquer plug-in
+                     de cache de projeto configurado.
 
                      Este sinalizador é experimental e pode não funcionar conforme o esperado.
     </target>
@@ -301,7 +300,7 @@
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      This writes the value of property Bar into Biz.txt.
     </source>
-        <target state="translated">  -getResultOutputFile:arquivo
+        <target state="translated">  -getResultOutputFile:file
                      Redirecionar a saída de get* para um arquivo.
 
                      Exemplo:
