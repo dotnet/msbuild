@@ -850,7 +850,7 @@
     <value>Task name cannot be empty.</value>
   </data>
   <data name="ProjectUpgradeNeeded" xml:space="preserve">
-    <value>MSB4075: The project file "{0}" must be opened in version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</value>
+    <value>MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</value>
     <comment>{StrBegin="MSB4075: "}</comment>
   </data>
   <data name="ProjectUpgradeNeededToVcxProj" xml:space="preserve">

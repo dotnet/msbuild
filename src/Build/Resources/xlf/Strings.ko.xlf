@@ -1579,7 +1579,7 @@ Errors: {3}</source>
         <note />
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeeded">
-        <source>MSB4075: The project file "{0}" must be opened in version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</source>
+        <source>MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</source>
         <target state="needs-review-translation">MSB4075: 프로젝트 파일 "{0}"을(를) MSBuild로 빌드하려면 파일을 Visual Studio IDE에서 열어 최신 버전으로 변환해야 합니다.</target>
         <note>{StrBegin="MSB4075: "}</note>
       </trans-unit>
