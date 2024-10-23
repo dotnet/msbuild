@@ -1,5 +1,5 @@
 <Project>
-  <!-- This target creates packages needed for e2e testing. Inputs and outputs are defined to enable incremental builds.
+<!-- This target creates packages needed for e2e testing. Inputs and outputs are defined to enable incremental builds.
     It must be run after getting bootstrapped msbuild versions because copy operation blocks the dlls.-->
   <PropertyGroup Label="TestAssests">
     <ArtifactsNonShippingPackagesDir>$(ArtifactsBinDir)Microsoft.Build.BuildCheck.UnitTests\CustomChecks</ArtifactsNonShippingPackagesDir>
@@ -8,7 +8,9 @@
   <ItemGroup Label="TestAssets">
     <ProjectsToPack Include="..\Build\Microsoft.Build.csproj" />
     <ProjectsToPack Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectsToPack Include="..\StringTools\StringTools.csproj" />
+    <ProjectsToPack Include="..\StringTools\StringTools.csproj">
+      <TargetFrameworks Condition="'$(MSBuildRuntimeType)' != 'Core'">$(LibraryTargetFrameworks);net35</TargetFrameworks>
+    </ProjectsToPack>
   </ItemGroup>
 
   <Target Name="GetSourceFilesForPacking">
@@ -24,5 +26,4 @@
           Outputs="$(ArtifactsNonShippingPackagesDir)\Microsoft.Build.$(Version).nupkg;$(ArtifactsNonShippingPackagesDir)\Microsoft.Build.Framework.$(Version).nupkg;$(ArtifactsNonShippingPackagesDir)\Microsoft.NET.StringTools.$(Version).nupkg">
     <Exec Command="dotnet pack &quot;%(ProjectsToPack.Identity)&quot; -o &quot;$(ArtifactsNonShippingPackagesDir)&quot; -p:PackageVersion=$(PackageVersion)" />
   </Target>
-
 </Project>
