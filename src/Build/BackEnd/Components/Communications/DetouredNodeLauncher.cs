@@ -15,7 +15,6 @@ using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using static BuildXL.Processes.FileAccessManifest;
 
 #nullable disable
 
@@ -107,15 +106,7 @@ namespace Microsoft.Build.BackEnd
                 FileAccessPolicy.AllowAll | FileAccessPolicy.ReportAccess);
 
             // Support shared compilation
-            info.FileAccessManifest.ChildProcessesToBreakawayFromSandbox =
-            [
-#if RUNTIME_TYPE_NETCORE
-                new BreakawayChildProcess(NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet", "vbcscompiler.dll", CommandLineArgsSubstringContainmentIgnoreCase: true)
-#else
-                new BreakawayChildProcess(NativeMethodsShared.IsWindows ? "VBCSCompiler.exe" : "VBCSCompiler")
-#endif
-            ];
-            
+            info.FileAccessManifest.ChildProcessesToBreakawayFromSandbox = new string[] { NativeMethodsShared.IsWindows ? "VBCSCompiler.exe" : "VBCSCompiler" };
             info.FileAccessManifest.MonitorChildProcesses = true;
             info.FileAccessManifest.IgnoreReparsePoints = true;
             info.FileAccessManifest.UseExtraThreadToDrainNtClose = false;
