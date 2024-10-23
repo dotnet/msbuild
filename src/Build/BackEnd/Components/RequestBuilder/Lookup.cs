@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -636,7 +637,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Implements a true add, an item that has been created in a batch.
         /// </summary>
-        internal void AddNewItemsOfItemType(string itemType, ICollection<ProjectItemInstance> group, bool doNotAddDuplicates = false, Action<List<ProjectItemInstance>> logFunction = null)
+        internal void AddNewItemsOfItemType(string itemType, ICollection<ProjectItemInstance> group, bool doNotAddDuplicates = false, Action<IList> logFunction = null)
         {
             // Adding to outer scope could be easily implemented, but our code does not do it at present
             MustNotBeOuterScope();
@@ -658,24 +659,29 @@ namespace Microsoft.Build.BackEnd
             IEnumerable<ProjectItemInstance> itemsToAdd = group;
             if (doNotAddDuplicates)
             {
-                // Remove duplicates from the inputs.
-                itemsToAdd = itemsToAdd.Distinct(ProjectItemInstance.EqualityComparer);
 
                 // Ensure we don't also add any that already exist.
                 var existingItems = GetItems(itemType);
               
                 var existingItemsHashSet = existingItems.ToHashSet(ProjectItemInstance.EqualityComparer);
-                
+
                 if (existingItems.Count > 0)
                 {
-                    
+
                     var deduplicatedItemsToAdd = new List<ProjectItemInstance>();
-                    foreach (var item in itemsToAdd) {
-                        if (!existingItemsHashSet.Contains(item)) {
+                    foreach (var item in itemsToAdd)
+                    {
+                        if (existingItemsHashSet.Add(item))
+                        {
                             deduplicatedItemsToAdd.Add(item);
                         }
                     }
-                   itemsToAdd = deduplicatedItemsToAdd;
+                    itemsToAdd = deduplicatedItemsToAdd;
+                }
+                else
+                {
+                    // Remove the duplicates in case we're not concerned with the existing items.
+                    itemsToAdd = itemsToAdd.Distinct(ProjectItemInstance.EqualityComparer);
                 }
             }
 
@@ -687,7 +693,6 @@ namespace Microsoft.Build.BackEnd
                 var groupAsList = group as List<ProjectItemInstance>;
                 logFunction?.Invoke(groupAsList ?? group.ToList());  
             }
-           
 
             PrimaryAddTable.ImportItemsOfType(itemType, itemsToAdd);
         }

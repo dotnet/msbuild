@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -215,7 +216,7 @@ namespace Microsoft.Build.BackEnd
                 FileSystems.Default,
                 LoggingContext);
 
-            Action<List<ProjectItemInstance>> logFunction = null;
+            Action<IList> logFunction = null;
 
             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd?.Count > 0)
             {
@@ -232,7 +233,7 @@ namespace Microsoft.Build.BackEnd
                         child.Location);
                 };
             }
-           
+
             // Now add the items we created to the lookup.
             bucket.Lookup.AddNewItemsOfItemType(child.ItemType, itemsToAdd, !keepDuplicates, logFunction);
             // Add in one operation for potential copy-on-write
