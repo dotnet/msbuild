@@ -4144,6 +4144,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                    };
 
             var errorTests = new List<string> {
+            // Following two are comparison between non-numeric and numeric properties. More details: #10583
+            "$(a.Equals($(c)))",
+            "$(a.CompareTo($(c)))",
             "$(input[)",
             "$(input.ToString()])",
             "$(input.ToString()[)",
