@@ -579,7 +579,7 @@ namespace Microsoft.Build.Tasks
                     if (!ExtractResWFiles)
                     {
                         commandLineBuilder.AppendFileNamesIfNotNull(
-                            new string[] { inputFiles[i].ItemSpec, outputFiles[i].ItemSpec },
+                            [inputFiles[i].ItemSpec, outputFiles[i].ItemSpec],
                             ",");
                     }
                     else
@@ -597,7 +597,7 @@ namespace Microsoft.Build.Tasks
                 // append the strongly-typed resource details
                 commandLineBuilder.AppendSwitchIfNotNull(
                     "/str:",
-                    new string[] { StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName },
+                    [StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName],
                     ",");
             }
 
@@ -1238,7 +1238,7 @@ namespace Microsoft.Build.Tasks
             while (currentCommand.Length < s_maximumCommandLength && i < inputsToProcess.Count)
             {
                 currentCommand.AppendFileNamesIfNotNull(
-                        new ITaskItem[] { inputsToProcess[i], outputsToProcess[i] },
+                        [inputsToProcess[i], outputsToProcess[i]],
                         ",");
                 i++;
             }
@@ -1705,7 +1705,7 @@ namespace Microsoft.Build.Tasks
 
             // Check the timestamp of each of the passed-in references to find the newest;
             // and then the additional inputs
-            var inputs = (this.References ?? Enumerable.Empty<ITaskItem>()).Concat(this.AdditionalInputs ?? Enumerable.Empty<ITaskItem>());
+            ITaskItem[] inputs = this.References ?? [..(this.AdditionalInputs ?? [])];
 
             foreach (ITaskItem input in inputs)
             {
@@ -2008,6 +2008,8 @@ namespace Microsoft.Build.Tasks
 
             using (MemoryStream memoryStream = new MemoryStream(serializedData))
             {
+                // CodeQL [SM03722] required trust of BinaryFormatter-serialized resources documented at https://learn.microsoft.com/visualstudio/msbuild/generateresource-task
+                // CodeQL [SM04191] required trust of BinaryFormatter-serialized resources documented at https://learn.microsoft.com/visualstudio/msbuild/generateresource-task
                 object result = binaryFormatter.Deserialize(memoryStream);
 
                 return result != null;
@@ -2018,7 +2020,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Chars that should be ignored in the nicely justified block of base64
         /// </summary>
-        private static readonly char[] s_specialChars = new char[] { ' ', '\r', '\n' };
+        private static readonly char[] s_specialChars = [' ', '\r', '\n'];
 
         /// <summary>
         /// Turns the nicely justified block of base64 found in a resx into a byte array.

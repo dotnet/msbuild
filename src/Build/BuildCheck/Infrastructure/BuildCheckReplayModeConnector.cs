@@ -43,7 +43,7 @@ public static class BuildCheckReplayModeConnector
 
         // Create BuildCheckBuildEventHandler that passes new events to the mergedEventSource
         var buildCheckEventHandler = new BuildCheckBuildEventHandler(
-            new AnalysisDispatchingContextFactory(mergedEventSource),
+            new CheckDispatchingContextFactory(mergedEventSource),
             buildCheckManagerProvider.Instance);
 
         // Pass the events from replayEventSource to the BuildCheckBuildEventHandler to produce new events

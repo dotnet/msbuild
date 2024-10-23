@@ -1,11 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
@@ -17,8 +14,12 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     }
 
     public void ProcessEvaluationFinishedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checkContext,
         ProjectEvaluationFinishedEventArgs projectEvaluationFinishedEventArgs)
+    {
+    }
+
+    public void ProcessBuildFinished(ICheckContext analysisContext)
     {
     }
 
@@ -27,26 +28,26 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     }
 
     public void ProcessTaskStartedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checkContext,
         TaskStartedEventArgs taskStartedEventArgs)
     {
     }
 
     public void ProcessTaskFinishedEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checkContext,
         TaskFinishedEventArgs taskFinishedEventArgs)
     {
     }
 
     public void ProcessTaskParameterEventArgs(
-        IAnalysisContext analysisContext,
+        ICheckContext checkContext,
         TaskParameterEventArgs taskParameterEventArgs)
     {
     }
 
-    public void ProcessAnalyzerAcquisition(
-        AnalyzerAcquisitionData acquisitionData,
-        IAnalysisContext analysisContext)
+    public void ProcessCheckAcquisition(
+        CheckAcquisitionData acquisitionData,
+        ICheckContext checkContext)
     {
     }
 
@@ -54,48 +55,42 @@ internal class NullBuildCheckManager : IBuildCheckManager, IBuildEngineDataRoute
     {
     }
 
-    public void StartProjectEvaluation(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext, string fullPath)
-    {
-    }
-
-    public void EndProjectEvaluation(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
-    {
-    }
-
-    public void StartProjectRequest(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext, string projectFullPath)
-    {
-    }
-
-    public void EndProjectRequest(BuildCheckDataSource buildCheckDataSource, IAnalysisContext analysisContext,
+    public void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, ICheckContext checkContext,
         string projectFullPath)
     {
     }
 
-    public void YieldProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void ProcessProjectEvaluationStarted(ICheckContext checkContext, string projectFullPath)
     {
     }
 
-    public void ResumeProject(BuildCheckDataSource buildCheckDataSource, BuildEventContext buildEventContext)
+    public void EndProjectEvaluation(BuildEventContext buildEventContext)
     {
     }
 
-    public Dictionary<string, TimeSpan> CreateAnalyzerTracingStats() => new Dictionary<string, TimeSpan>();
+    public void StartProjectRequest(ICheckContext checksContext, string projectFullPath)
+    {
+    }
 
-    public void StartTaskInvocation(BuildCheckDataSource buildCheckDataSource, TaskStartedEventArgs eventArgs)
-    { }
+    public void EndProjectRequest(ICheckContext checkContext, string projectFullPath)
+    {
+    }
 
-    public void EndTaskInvocation(BuildCheckDataSource buildCheckDataSource, TaskFinishedEventArgs eventArgs)
-    { }
+    public BuildCheckTracingData CreateCheckTracingStats() => new BuildCheckTracingData();
 
-    public void ProcessTaskParameter(BuildCheckDataSource buildCheckDataSource, TaskParameterEventArgs eventArg)
-    { }
+    public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext buildEventContext)
+    {
+    }
 
-    public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext buildEventContext)
-    { }
+    public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext buildEventContext)
+    {
+    }
 
-    public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext buildEventContext)
-    { }
-	
-    public void ProcessEnvironmentVariableReadEventArgs(IAnalysisContext analysisContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
-    { }
+    public void ProcessEnvironmentVariableReadEventArgs(ICheckContext checkContext, EnvironmentVariableReadEventArgs projectEvaluationEventArgs)
+    {
+    }
+
+    public void ProcessProjectImportedEventArgs(ICheckContext checkContext, ProjectImportedEventArgs projectImportedEventArgs)
+    {
+    }
 }

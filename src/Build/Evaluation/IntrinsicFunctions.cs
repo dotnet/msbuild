@@ -34,7 +34,7 @@ namespace Microsoft.Build.Evaluation
     internal static class IntrinsicFunctions
     {
 #pragma warning disable CA1416 // Platform compatibility: we'll only use this on Windows
-        private static readonly object[] DefaultRegistryViews = new object[] { RegistryView.Default };
+        private static readonly object[] DefaultRegistryViews = [RegistryView.Default];
 #pragma warning restore CA1416
 
         private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
@@ -191,9 +191,8 @@ namespace Microsoft.Build.Evaluation
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
-            // on non-Windows (no registry), and with a changewave (in case someone
-            // had a registry property and it breaks when it lights up).
-            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
             {
                 return null;
             }
@@ -208,9 +207,8 @@ namespace Microsoft.Build.Evaluation
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
-            // on non-Windows (no registry), and with a changewave (in case someone
-            // had a registry property and it breaks when it lights up).
-            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
             {
                 return defaultValue;
             }
@@ -222,9 +220,8 @@ namespace Microsoft.Build.Evaluation
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
-            // on non-Windows (no registry), and with a changewave (in case someone
-            // had a registry property and it breaks when it lights up).
-            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
             {
                 return defaultValue;
             }
@@ -245,9 +242,8 @@ namespace Microsoft.Build.Evaluation
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
-            // on non-Windows (no registry), and with a changewave (in case someone
-            // had a registry property and it breaks when it lights up).
-            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
             {
                 return defaultValue;
             }
@@ -697,17 +693,17 @@ namespace Microsoft.Build.Evaluation
 
         public static bool IsRunningFromVisualStudio() => BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
 
-        public static bool RegisterBuildCheck(string pathToAssembly, LoggingContext loggingContext)
+        public static bool RegisterBuildCheck(string projectPath, string pathToAssembly, LoggingContext loggingContext)
         {
             pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
             if (File.Exists(pathToAssembly))
             {
-                loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly));
+                loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly, projectPath));
 
                 return true;
             }
 
-            loggingContext.LogComment(MessageImportance.Low, "CustomAnalyzerAssemblyNotExist", pathToAssembly);
+            loggingContext.LogComment(MessageImportance.Low, "CustomCheckAssemblyNotExist", pathToAssembly);
 
             return false;
         }

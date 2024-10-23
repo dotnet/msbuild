@@ -6,11 +6,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
@@ -240,10 +243,11 @@ namespace Microsoft.Build.Logging
                     (e is EndOfStreamException && _readStream.BytesCountAllowedToReadRemaining <= 0))
                 {
                     hasError = true;
-
+                    int localSerializedEventLength = serializedEventLength;
+                    Exception localException = e;
                     string ErrorFactory() =>
                         ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_ReaderMismatchedRead",
-                            _recordNumber, serializedEventLength, e.GetType(), e.Message) + (_skipUnknownEvents
+                            _recordNumber, localSerializedEventLength, localException.GetType(), localException.Message) + (_skipUnknownEvents
                             ? " " + ResourceUtilities.GetResourceString("Binlog_ReaderSkippingRecord")
                             : string.Empty);
 
@@ -252,9 +256,11 @@ namespace Microsoft.Build.Logging
 
                 if (result == null && !hasError)
                 {
+                    int localSerializedEventLength = serializedEventLength;
+                    BinaryLogRecordKind localRecordKind = recordKind;
                     string ErrorFactory() =>
                         ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Binlog_ReaderUnknownType",
-                            _recordNumber, serializedEventLength, recordKind) + (_skipUnknownEvents
+                            _recordNumber, localSerializedEventLength, localRecordKind) + (_skipUnknownEvents
                             ? " " + ResourceUtilities.GetResourceString("Binlog_ReaderSkippingRecord")
                             : string.Empty);
 
@@ -263,9 +269,10 @@ namespace Microsoft.Build.Logging
 
                 if (_readStream.BytesCountAllowedToReadRemaining > 0)
                 {
+                    int localSerializedEventLength = serializedEventLength;
                     string ErrorFactory() => ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
-                        "Binlog_ReaderUnderRead", _recordNumber, serializedEventLength,
-                        serializedEventLength - _readStream.BytesCountAllowedToReadRemaining);
+                        "Binlog_ReaderUnderRead", _recordNumber, localSerializedEventLength,
+                        localSerializedEventLength - _readStream.BytesCountAllowedToReadRemaining);
 
                     HandleError(ErrorFactory, _skipUnknownEventParts, ReaderErrorType.UnknownEventData, recordKind);
                 }
@@ -294,6 +301,7 @@ namespace Microsoft.Build.Logging
             {
                 BinaryLogRecordKind.BuildStarted => ReadBuildStartedEventArgs(),
                 BinaryLogRecordKind.BuildFinished => ReadBuildFinishedEventArgs(),
+                BinaryLogRecordKind.BuildSubmissionStarted => ReadBuildSubmissionStartedEventArgs(),
                 BinaryLogRecordKind.ProjectStarted => ReadProjectStartedEventArgs(),
                 BinaryLogRecordKind.ProjectFinished => ReadProjectFinishedEventArgs(),
                 BinaryLogRecordKind.TargetStarted => ReadTargetStartedEventArgs(),
@@ -316,6 +324,12 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.UninitializedPropertyRead => ReadUninitializedPropertyReadEventArgs(),
                 BinaryLogRecordKind.PropertyInitialValueSet => ReadPropertyInitialValueSetEventArgs(),
                 BinaryLogRecordKind.AssemblyLoad => ReadAssemblyLoadEventArgs(),
+                BinaryLogRecordKind.BuildCheckMessage => ReadBuildCheckMessageEventArgs(),
+                BinaryLogRecordKind.BuildCheckWarning => ReadBuildWarningEventArgs(),
+                BinaryLogRecordKind.BuildCheckError => ReadBuildErrorEventArgs(),
+                BinaryLogRecordKind.BuildCheckTracing => ReadBuildCheckTracingEventArgs(),
+                BinaryLogRecordKind.BuildCheckAcquisition => ReadBuildCheckAcquisitionEventArgs(),
+                BinaryLogRecordKind.BuildCanceled => ReadBuildCanceledEventArgs(),
                 _ => null
             };
 
@@ -497,6 +511,7 @@ namespace Microsoft.Build.Logging
         }
 
         private readonly StringReadEventArgs stringReadEventArgs = new StringReadEventArgs(string.Empty);
+
         private void ReadStringRecord()
         {
             string text = ReadString();
@@ -614,6 +629,29 @@ namespace Microsoft.Build.Logging
                 succeeded,
                 fields.Timestamp);
             SetCommonFields(e, fields);
+            return e;
+        }
+
+        private BuildEventArgs ReadBuildSubmissionStartedEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+
+            IDictionary<string, string>? globalProperties = null;
+            globalProperties = ReadStringDictionary() ?? new Dictionary<string, string>();
+
+            var entryProjectsFullPath = ReadStringIEnumerable() ?? [];
+            var targetNames = ReadStringIEnumerable() ?? [];
+            var flags = (BuildRequestDataFlags)ReadInt32();
+            var submissionId = ReadInt32();
+
+            var e = new BuildSubmissionStartedEventArgs(
+                (IReadOnlyDictionary<string, string?>)globalProperties,
+                entryProjectsFullPath,
+                targetNames,
+                flags,
+                submissionId);
+            SetCommonFields(e, fields);
+
             return e;
         }
 
@@ -1185,6 +1223,15 @@ namespace Microsoft.Build.Logging
             return e;
         }
 
+        private BuildEventArgs ReadBuildCheckMessageEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            var e = new BuildCheckResultMessage(fields.Message);
+            SetCommonFields(e, fields);
+
+            return e;
+        }
+
         private AssemblyLoadBuildEventArgs ReadAssemblyLoadEventArgs()
         {
             var fields = ReadBuildEventArgsFields(readImportance: false);
@@ -1205,6 +1252,39 @@ namespace Microsoft.Build.Logging
                 appDomainName);
             SetCommonFields(e, fields);
             e.ProjectFile = fields.ProjectFile;
+
+            return e;
+        }
+
+        private BuildEventArgs ReadBuildCheckTracingEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            var rawTracingData = ReadStringDictionary() ?? new Dictionary<string, string>();
+
+            var e = new BuildCheckTracingEventArgs(rawTracingData.ToDictionary(
+                kvp => kvp.Key,
+                kvp => TimeSpan.FromTicks(long.Parse(kvp.Value))));
+            SetCommonFields(e, fields);
+
+            return e;
+        }
+
+        private BuildEventArgs ReadBuildCheckAcquisitionEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            var acquisitionPath = ReadString();
+            var projectPath = ReadString();
+            var e = new BuildCheckAcquisitionEventArgs(acquisitionPath, projectPath);
+            SetCommonFields(e, fields);
+
+            return e;
+        }
+
+        private BuildEventArgs ReadBuildCanceledEventArgs()
+        {
+            var fields = ReadBuildEventArgsFields();
+            var e = new BuildCanceledEventArgs(fields.Message);
+            SetCommonFields(e, fields);
 
             return e;
         }
@@ -1361,9 +1441,9 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private IEnumerable? ReadPropertyList()
+        private IList<DictionaryEntry>? ReadPropertyList()
         {
-            var properties = ReadStringDictionary();
+            IDictionary<string, string>? properties = ReadStringDictionary();
             if (properties == null || properties.Count == 0)
             {
                 return null;
@@ -1454,7 +1534,7 @@ namespace Microsoft.Build.Logging
             return taskItem;
         }
 
-        private IEnumerable? ReadProjectItems()
+        private IList<DictionaryEntry>? ReadProjectItems()
         {
             IList<DictionaryEntry>? list;
 
@@ -1536,7 +1616,7 @@ namespace Microsoft.Build.Logging
             return list;
         }
 
-        private IEnumerable? ReadTaskItemList()
+        private IList<ITaskItem>? ReadTaskItemList()
         {
             int count = ReadInt32();
             if (count == 0)
@@ -1550,6 +1630,28 @@ namespace Microsoft.Build.Logging
             {
                 ITaskItem item = ReadTaskItem();
                 list[i] = item;
+            }
+
+            return list;
+        }
+
+        private IEnumerable<string>? ReadStringIEnumerable()
+        {
+            int count = ReadInt32();
+            if (count == 0)
+            {
+                return null;
+            }
+
+            var list = new string[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                string? item = ReadDeduplicatedString();
+                if (item is not null)
+                {
+                    list[i] = item;
+                }
             }
 
             return list;

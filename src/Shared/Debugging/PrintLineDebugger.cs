@@ -128,7 +128,7 @@ namespace Microsoft.Build.Shared.Debugging
 #if DEBUG
             var writer = GetWriter();
 
-            writer?.Invoke(_id, CallsiteString(sourceFilePath, memberName, sourceLineNumber), new[] { message });
+            writer?.Invoke(_id, CallsiteString(sourceFilePath, memberName, sourceLineNumber), [message]);
 #endif
         }
 

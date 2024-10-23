@@ -26,7 +26,7 @@ namespace Microsoft.Build.Tasks
     {
         private const char ItemSeparatorCharacter = '\u2028';
         private static readonly Encoding s_encoding = Encoding.UTF8;
-        private static readonly byte[] s_itemSeparatorCharacterBytes = s_encoding.GetBytes(new char[] { ItemSeparatorCharacter });
+        private static readonly byte[] s_itemSeparatorCharacterBytes = s_encoding.GetBytes([ItemSeparatorCharacter]);
 
         // Size of buffer where bytes of the strings are stored until sha.TransformBlock is to be run on them.
         // It is needed to get a balance between amount of costly sha.TransformBlock calls and amount of allocated memory.
@@ -121,12 +121,7 @@ namespace Microsoft.Build.Tasks
 
         private HashAlgorithm CreateHashAlgorithm()
         {
-            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) ?
-                SHA256.Create() :
-#pragma warning disable CA5350
-                // Kept for back compatibility reasons when chnange wave is opted-out
-                SHA1.Create();
-#pragma warning restore CA5350
+            return SHA256.Create();
         }
 
         /// <summary>

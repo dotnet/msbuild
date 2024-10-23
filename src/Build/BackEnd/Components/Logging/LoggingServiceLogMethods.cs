@@ -498,6 +498,39 @@ namespace Microsoft.Build.BackEnd.Logging
             int evaluationId = BuildEventContext.InvalidEvaluationId,
             int projectContextId = BuildEventContext.InvalidProjectContextId)
         {
+            var args = CreateProjectStarted(nodeBuildEventContext,
+                submissionId,
+                configurationId,
+                parentBuildEventContext,
+                projectFile,
+                targetNames,
+                properties,
+                items,
+                evaluationId,
+                projectContextId);
+
+            this.LogProjectStarted(args);
+
+            return args.BuildEventContext;
+        }
+
+        public void LogProjectStarted(ProjectStartedEventArgs buildEvent)
+        {
+            ProcessLoggingEvent(buildEvent);
+        }
+
+        public ProjectStartedEventArgs CreateProjectStarted(
+            BuildEventContext nodeBuildEventContext,
+            int submissionId,
+            int configurationId,
+            BuildEventContext parentBuildEventContext,
+            string projectFile,
+            string targetNames,
+            IEnumerable<DictionaryEntry> properties,
+            IEnumerable<DictionaryEntry> items,
+            int evaluationId = BuildEventContext.InvalidEvaluationId,
+            int projectContextId = BuildEventContext.InvalidProjectContextId)
+        {
             ErrorUtilities.VerifyThrow(nodeBuildEventContext != null, "Need a nodeBuildEventContext");
 
             if (projectContextId == BuildEventContext.InvalidProjectContextId)
@@ -560,9 +593,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     buildRequestConfiguration.ToolsVersion);
             buildEvent.BuildEventContext = projectBuildEventContext;
 
-            ProcessLoggingEvent(buildEvent);
-
-            return projectBuildEventContext;
+            return buildEvent;
         }
 
         /// <summary>
@@ -798,10 +829,17 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #endregion
 
-        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext analysisContext)
-            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.ProcessPropertyRead(propertyReadInfo, analysisContext);
+#nullable enable
+        private IBuildEngineDataRouter? _buildEngineDataRouter;
 
-        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext analysisContext)
-            => BuildCheckManagerProvider.GlobalBuildEngineDataRouter?.ProcessPropertyWrite(propertyWriteInfo, analysisContext);
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext checkContext)
+            => _buildEngineDataRouter?.ProcessPropertyRead(propertyReadInfo, checkContext);
+
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext checkContext)
+            => _buildEngineDataRouter?.ProcessPropertyWrite(propertyWriteInfo, checkContext);
+
+        public void ProcessProjectEvaluationStarted(ICheckContext checkContext, string projectFullPath)
+            => _buildEngineDataRouter?.ProcessProjectEvaluationStarted(checkContext, projectFullPath);
+#nullable disable
     }
 }

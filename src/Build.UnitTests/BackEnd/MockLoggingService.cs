@@ -550,6 +550,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return new BuildEventContext(0, 0, 0, 0);
         }
 
+        public void LogProjectStarted(ProjectStartedEventArgs args)
+        { }
+
+        public ProjectStartedEventArgs CreateProjectStarted(
+            BuildEventContext nodeBuildEventContext,
+            int submissionId,
+            int configurationId,
+            BuildEventContext parentBuildEventContext,
+            string projectFile,
+            string targetNames,
+            IEnumerable<DictionaryEntry> properties,
+            IEnumerable<DictionaryEntry> items,
+            int evaluationId = BuildEventContext.InvalidEvaluationId,
+            int projectContextId = BuildEventContext.InvalidProjectContextId)
+        {
+            return new ProjectStartedEventArgs(
+                configurationId,
+                message: null,
+                helpKeyword: null,
+                projectFile,
+                targetNames,
+                properties,
+                items,
+                parentBuildEventContext);
+        }
+
         /// <summary>
         /// Logs a project finished event
         /// </summary>
@@ -663,10 +689,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
-        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, AnalysisLoggingContext analysisContext)
+        public void ProcessPropertyRead(PropertyReadInfo propertyReadInfo, CheckLoggingContext checkContext)
         { /* Ignore the data */ }
 
-        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, AnalysisLoggingContext analysisContext)
+        public void ProcessPropertyWrite(PropertyWriteInfo propertyWriteInfo, CheckLoggingContext checkContext)
+        { /* Ignore the data */ }
+
+        public void ProcessProjectEvaluationStarted(ICheckContext analysisContext, string projectFullPath)
         { /* Ignore the data */ }
     }
 }

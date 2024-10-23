@@ -19,6 +19,15 @@ internal readonly record struct PropertyReadInfo(
     string PropertyName,
     int StartIndex,
     int EndIndex,
-    IMsBuildElementLocation ElementLocation,
+    IMSBuildElementLocation ElementLocation,
     bool IsUninitialized,
-    PropertyReadContext PropertyReadContext);
+    PropertyReadContext PropertyReadContext)
+{
+    internal PropertyReadInfo(
+        string PropertyName,
+        IMSBuildElementLocation ElementLocation,
+        bool IsUninitialized,
+        PropertyReadContext PropertyReadContext)
+        : this(PropertyName, 0, PropertyName.Length - 1, ElementLocation, IsUninitialized, PropertyReadContext)
+    { }
+}

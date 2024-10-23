@@ -12,19 +12,27 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
+/// <summary>
+/// Central logger for the build check infrastructure.
+/// Receives events from the <see cref="BuildCheckForwardingLogger"/>.
+/// Processes the events and forwards them to the <see cref="IBuildCheckManager"/> and registered checks.
+/// </summary>
+/// <remarks>
+/// Ensure that the consuming events are in sync with <see cref="BuildCheckForwardingLogger"/>.
+/// </remarks>
 internal sealed class BuildCheckConnectorLogger : ILogger
 {
     private readonly BuildCheckBuildEventHandler _eventHandler;
     private readonly IBuildCheckManager _buildCheckManager;
-    private readonly IAnalysisContextFactory _analysisContextFactory;
+    private readonly ICheckContextFactory _checkContextFactory;
 
     internal BuildCheckConnectorLogger(
-        IAnalysisContextFactory analyzerContextFactory,
+        ICheckContextFactory checkContextFactory,
         IBuildCheckManager buildCheckManager)
     {
         _buildCheckManager = buildCheckManager;
-        _analysisContextFactory = analyzerContextFactory;
-        _eventHandler = new BuildCheckBuildEventHandler(analyzerContextFactory, buildCheckManager);
+        _checkContextFactory = checkContextFactory;
+        _eventHandler = new BuildCheckBuildEventHandler(checkContextFactory, buildCheckManager);
     }
 
     public LoggerVerbosity Verbosity { get; set; }

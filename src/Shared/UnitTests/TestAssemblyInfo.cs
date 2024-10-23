@@ -55,11 +55,11 @@ namespace Microsoft.Build.UnitTests
             // Reset the VisualStudioVersion environment variable.  This will be set if tests are run from a VS command prompt.  However,
             //  if the environment variable is set, it will interfere with tests which set the SubToolsetVersion
             //  (VerifySubToolsetVersionSetByConstructorOverridable), as the environment variable would take precedence.
-            _testEnvironment.SetEnvironmentVariable("VisualStudioVersion", string.Empty);
+            _testEnvironment.SetEnvironmentVariable("VisualStudioVersion", null);
 
             // Prevent test assemblies from logging any performance info.
             // https://github.com/dotnet/msbuild/pull/6274
-            _testEnvironment.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", string.Empty);
+            _testEnvironment.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", null);
 
             SetDotnetHostPath(_testEnvironment);
 

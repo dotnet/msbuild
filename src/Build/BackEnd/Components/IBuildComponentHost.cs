@@ -144,7 +144,7 @@ namespace Microsoft.Build.BackEnd
         NodeLauncher,
 
         /// <summary>
-        /// The Build Analyzer Manager.
+        /// The Build Check Manager.
         /// </summary>
         BuildCheckManagerProvider,
     }

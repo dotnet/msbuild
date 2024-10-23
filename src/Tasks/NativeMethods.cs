@@ -1334,7 +1334,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        _gacDirectories = Array.Empty<string>();
+                        _gacDirectories = [];
                     }
                 }
             }

@@ -44,11 +44,7 @@ namespace Microsoft.Build.Graph
 
         public static ProjectInterpretation Instance = new ProjectInterpretation();
 
-        private ProjectInterpretation()
-        {
-        }
-
-        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = new[] { (GlobalPropertiesModifier)ProjectReferenceGlobalPropertiesModifier }.ToImmutableList();
+        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = [(GlobalPropertiesModifier)ProjectReferenceGlobalPropertiesModifier];
 
         internal enum ProjectType
         {
@@ -103,7 +99,7 @@ namespace Microsoft.Build.Graph
             }
 
             SolutionConfiguration solutionConfiguration = null;
-            string solutionConfigurationXml = requesterInstance.GetPropertyValue(SolutionProjectGenerator.CurrentSolutionConfigurationContents);
+            string solutionConfigurationXml = requesterInstance.GetEngineRequiredPropertyValue(SolutionProjectGenerator.CurrentSolutionConfigurationContents);
             if (!string.IsNullOrWhiteSpace(solutionConfigurationXml))
             {
                 solutionConfiguration = new SolutionConfiguration(solutionConfigurationXml);
@@ -123,7 +119,7 @@ namespace Microsoft.Build.Graph
                 }
 
                 string projectReferenceFullPath = projectReferenceItem.GetMetadataValue(FullPathMetadataName);
-                bool enableDynamicPlatformResolution = ConversionUtilities.ValidBooleanTrue(requesterInstance.GetPropertyValue(EnableDynamicPlatformResolutionPropertyName));
+                bool enableDynamicPlatformResolution = ConversionUtilities.ValidBooleanTrue(requesterInstance.GetEngineRequiredPropertyValue(EnableDynamicPlatformResolutionPropertyName));
 
                 PropertyDictionary<ProjectPropertyInstance> referenceGlobalProperties = GetGlobalPropertiesForItem(
                     projectReferenceItem,
@@ -161,7 +157,7 @@ namespace Microsoft.Build.Graph
                     else
                     {
                         // Note: ShouldUnsetParentConfigurationAndPlatform defaults to true in the AssignProjectConfiguration target when building a solution, so check that it's not false instead of checking that it's true.
-                        bool shouldUnsetParentConfigurationAndPlatform = !ConversionUtilities.ValidBooleanFalse(requesterInstance.GetPropertyValue(ShouldUnsetParentConfigurationAndPlatformPropertyName));
+                        bool shouldUnsetParentConfigurationAndPlatform = !ConversionUtilities.ValidBooleanFalse(requesterInstance.GetEngineRequiredPropertyValue(ShouldUnsetParentConfigurationAndPlatformPropertyName));
                         if (shouldUnsetParentConfigurationAndPlatform)
                         {
                             referenceGlobalProperties.Remove(ConfigurationMetadataName);
@@ -178,8 +174,8 @@ namespace Microsoft.Build.Graph
                 // unless the project isn't known to the solution.
                 if (enableDynamicPlatformResolution && !configurationDefined && !projectReferenceItem.HasMetadata(SetPlatformMetadataName))
                 {
-                    string requesterPlatform = requesterInstance.GetPropertyValue("Platform");
-                    string requesterPlatformLookupTable = requesterInstance.GetPropertyValue("PlatformLookupTable");
+                    string requesterPlatform = requesterInstance.GetEngineRequiredPropertyValue("Platform");
+                    string requesterPlatformLookupTable = requesterInstance.GetEngineRequiredPropertyValue("PlatformLookupTable");
 
                     var projectInstance = projectInstanceFactory(
                         projectReferenceFullPath,
@@ -188,7 +184,7 @@ namespace Microsoft.Build.Graph
 
                     string overridePlatformNegotiationMetadataValue = projectReferenceItem.GetMetadataValue(OverridePlatformNegotiationValue);
 
-                    var selectedPlatform = PlatformNegotiation.GetNearestPlatform(overridePlatformNegotiationMetadataValue, projectInstance.GetPropertyValue(PlatformMetadataName), projectInstance.GetPropertyValue(PlatformsMetadataName), projectInstance.GetPropertyValue(PlatformLookupTableMetadataName), requesterInstance.GetPropertyValue(PlatformLookupTableMetadataName), projectInstance.FullPath, requesterInstance.GetPropertyValue(PlatformMetadataName));
+                    var selectedPlatform = PlatformNegotiation.GetNearestPlatform(overridePlatformNegotiationMetadataValue, projectInstance.GetEngineRequiredPropertyValue(PlatformMetadataName), projectInstance.GetEngineRequiredPropertyValue(PlatformsMetadataName), projectInstance.GetEngineRequiredPropertyValue(PlatformLookupTableMetadataName), requesterInstance.GetEngineRequiredPropertyValue(PlatformLookupTableMetadataName), projectInstance.FullPath, requesterInstance.GetEngineRequiredPropertyValue(PlatformMetadataName));
 
                     if (selectedPlatform.Equals(String.Empty))
                     {
@@ -298,7 +294,7 @@ namespace Microsoft.Build.Graph
                     project: outerBuild,
                     itemType: InnerBuildReferenceItemName,
                     includeEscaped: outerBuild.FullPath,
-                    directMetadata: new[] { new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}") },
+                    directMetadata: [new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}")],
                     definingFileEscaped: outerBuild.FullPath);
             }
         }
@@ -559,15 +555,15 @@ namespace Microsoft.Build.Graph
 
             // special case for Quickbuild which updates msbuild binaries independent of props/targets. Remove this when all QB repos will have
             // migrated to new enough Visual Studio versions whose Microsoft.Managed.After.Targets enable transitive references.
-            if (string.IsNullOrWhiteSpace(projectInstance.GetPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName)) &&
-                MSBuildStringIsTrue(projectInstance.GetPropertyValue("UsingMicrosoftNETSdk")) &&
-                MSBuildStringIsFalse(projectInstance.GetPropertyValue("DisableTransitiveProjectReferences")))
+            if (string.IsNullOrWhiteSpace(projectInstance.GetEngineRequiredPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName)) &&
+                MSBuildStringIsTrue(projectInstance.GetEngineRequiredPropertyValue("UsingMicrosoftNETSdk")) &&
+                MSBuildStringIsFalse(projectInstance.GetEngineRequiredPropertyValue("DisableTransitiveProjectReferences")))
             {
                 return true;
             }
 
             return MSBuildStringIsTrue(
-                projectInstance.GetPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName));
+                projectInstance.GetEngineRequiredPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName));
         }
 
         private static bool MSBuildStringIsTrue(string msbuildString) =>

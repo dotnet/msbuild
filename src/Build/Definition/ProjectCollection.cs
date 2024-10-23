@@ -894,11 +894,26 @@ namespace Microsoft.Build.Evaluation
                 // This is only done once, when the project collection is created. Any subsequent
                 // environment changes will be ignored. Child nodes will be passed this set
                 // of properties in their build parameters.
+                return new PropertyDictionary<ProjectPropertyInstance>(SharedReadOnlyEnvironmentProperties);
+            }
+        }
+
+        /// <summary>
+        /// Returns a shared immutable property dictionary containing the properties representing the environment.
+        /// </summary>
+        internal PropertyDictionary<ProjectPropertyInstance> SharedReadOnlyEnvironmentProperties
+        {
+            get
+            {
+                // Retrieves the environment properties.
+                // This is only done once, when the project collection is created. Any subsequent
+                // environment changes will be ignored. Child nodes will be passed this set
+                // of properties in their build parameters.
                 using (_locker.EnterDisposableReadLock())
                 {
                     if (_environmentProperties != null)
                     {
-                        return new PropertyDictionary<ProjectPropertyInstance>(_environmentProperties);
+                        return _environmentProperties;
                     }
                 }
 
@@ -906,9 +921,9 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (_environmentProperties == null)
                     {
-                        _environmentProperties = Utilities.GetEnvironmentProperties();
+                        _environmentProperties = Utilities.GetEnvironmentProperties(makeReadOnly: true);
                     }
-                    return new PropertyDictionary<ProjectPropertyInstance>(_environmentProperties);
+                    return _environmentProperties;
                 }
             }
         }
@@ -1348,18 +1363,6 @@ namespace Microsoft.Build.Evaluation
                 // free memory. These may be the last references to the ProjectRootElements
                 // in the cache, so the cache shouldn't hold strong references to them of its own.
                 ProjectRootElementCache.DiscardStrongReferences();
-
-                // Aggressively release any strings from all the contributing documents.
-                // It's fine if we cache less (by now we likely did a lot of loading and got the benefits)
-                // If we don't do this, we could be releasing the last reference to a
-                // ProjectRootElement, causing it to fall out of the weak cache leaving its strings and XML
-                // behind in the string cache.
-                project.Xml.XmlDocument.ClearAnyCachedStrings();
-
-                foreach (var import in project.Imports)
-                {
-                    import.ImportedProject.XmlDocument.ClearAnyCachedStrings();
-                }
             }
         }
 
@@ -1390,7 +1393,6 @@ namespace Microsoft.Build.Evaluation
                     ErrorUtilities.ThrowInvalidOperation("OM_ProjectXmlCannotBeUnloadedDueToLoadedProjects", projectRootElement.FullPath, conflictingProject.FullPath);
                 }
 
-                projectRootElement.XmlDocument.ClearAnyCachedStrings();
                 ProjectRootElementCache.DiscardAnyWeakReference(projectRootElement);
             }
         }
@@ -1541,7 +1543,6 @@ namespace Microsoft.Build.Evaluation
                 if (conflictingProject == null)
                 {
                     ProjectRootElementCache.DiscardAnyWeakReference(projectRootElement);
-                    projectRootElement.XmlDocument.ClearAnyCachedStrings();
                     return true;
                 }
 
@@ -2026,7 +2027,7 @@ namespace Microsoft.Build.Evaluation
             /// The telemetry sent event.
             /// </summary>
             public event TelemetryEventHandler TelemetryLogged;
-            
+
             /// <summary>
             /// Should evaluation events include generated metaprojects?
             /// </summary>

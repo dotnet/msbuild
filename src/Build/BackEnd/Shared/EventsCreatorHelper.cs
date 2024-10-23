@@ -60,4 +60,35 @@ internal static class EventsCreatorHelper
 
         return buildEvent;
     }
+
+    public static BuildWarningEventArgs CreateWarningEventFromText(BuildEventContext buildEventContext, string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
+    {
+        ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
+        ErrorUtilities.VerifyThrowInternalNull(file, nameof(file));
+        ErrorUtilities.VerifyThrowInternalNull(message, nameof(message));
+
+        string? subcategory = null;
+
+        if (subcategoryResourceName != null)
+        {
+            subcategory = AssemblyResources.GetString(subcategoryResourceName);
+        }
+
+        BuildWarningEventArgs buildEvent =
+        new BuildWarningEventArgs(
+            subcategory,
+            errorCode,
+            file!.File,
+            file.Line,
+            file.Column,
+            file.EndLine,
+            file.EndColumn,
+            message,
+            helpKeyword,
+            "MSBuild");
+
+        buildEvent.BuildEventContext = buildEventContext;
+
+        return buildEvent;
+    }
 }

@@ -14,4 +14,4 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 internal readonly record struct PropertyWriteInfo(
     string PropertyName,
     bool IsEmpty,
-    IMsBuildElementLocation? ElementLocation);
+    IMSBuildElementLocation? ElementLocation);

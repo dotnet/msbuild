@@ -438,13 +438,7 @@ namespace Microsoft.Build.Evaluation
             {
                 DebugTraceCache("Clearing strong refs: ", _strongCache.Count);
 
-                LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
                 _strongCache = new LinkedList<ProjectRootElement>();
-
-                foreach (ProjectRootElement projectRootElement in oldStrongCache)
-                {
-                    RaiseProjectRootElementRemovedFromStrongCache(projectRootElement);
-                }
 
                 // A scavenge of the weak cache is probably not worth it as
                 // the GC would have had to run immediately after the line above.
@@ -459,45 +453,8 @@ namespace Microsoft.Build.Evaluation
         {
             lock (_locker)
             {
-                if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck)
-                {
-                    LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
-                    _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
-                    _strongCache = new LinkedList<ProjectRootElement>();
-
-                    foreach (ProjectRootElement projectRootElement in oldStrongCache)
-                    {
-                        RaiseProjectRootElementRemovedFromStrongCache(projectRootElement);
-                    }
-                }
-                else
-                {
-                    // Manually iterate through LinkedList so we can remove items during this iteration
-                    for (var listNode = _strongCache.First; listNode != null;)
-                    {
-                        var nextNode = listNode.Next;
-
-                        ProjectRootElement projectRootElement = listNode.Value;
-                        // Do not remove cache of files from immutable locations.
-                        // Those are mostly SDK project files and will be most probably needed in next builds.
-                        if (!FileClassifier.Shared.IsNonModifiable(projectRootElement.FullPath))
-                        {
-                            _weakCache.Remove(projectRootElement.FullPath);
-                            _strongCache.Remove(listNode);
-                            RaiseProjectRootElementRemovedFromStrongCache(projectRootElement);
-                        }
-
-                        listNode = nextNode;
-                    }
-
-                    // From weak list remove all which is not in strong list anymore
-                    IList<string> toBeRemovedFromWeakRefs = _weakCache.Keys.Except(_strongCache.Select(i => i.FullPath)).ToList();
-                    foreach (string victim in toBeRemovedFromWeakRefs)
-                    {
-                        _weakCache.Remove(victim);
-                    }
-                    _weakCache.Scavenge();
-                }
+                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+                _strongCache = new LinkedList<ProjectRootElement>();
             }
         }
 
@@ -539,10 +496,6 @@ namespace Microsoft.Build.Evaluation
                         if (kvp.Value.IsExplicitlyLoaded)
                         {
                             _strongCache.AddFirst(kvp.Value);
-                        }
-                        else
-                        {
-                            RaiseProjectRootElementRemovedFromStrongCache(kvp.Value);
                         }
                     }
                 }
@@ -608,7 +561,6 @@ namespace Microsoft.Build.Evaluation
             if (existingWeakEntry != null && !object.ReferenceEquals(existingWeakEntry, projectRootElement))
             {
                 _strongCache.Remove(existingWeakEntry);
-                RaiseProjectRootElementRemovedFromStrongCache(existingWeakEntry);
             }
 
             DebugTraceCache("Adding: ", projectRootElement.FullPath);
@@ -654,7 +606,6 @@ namespace Microsoft.Build.Evaluation
 
                 DebugTraceCache("Shedding: ", node.Value.FullPath);
                 _strongCache.Remove(node);
-                RaiseProjectRootElementRemovedFromStrongCache(node.Value);
             }
         }
 
@@ -674,7 +625,6 @@ namespace Microsoft.Build.Evaluation
             if (strongCacheEntry != null)
             {
                 _strongCache.Remove(strongCacheEntry);
-                RaiseProjectRootElementRemovedFromStrongCache(strongCacheEntry.Value);
             }
 
             DebugTraceCache("Out of date dropped from XML cache: ", projectRootElement.FullPath);

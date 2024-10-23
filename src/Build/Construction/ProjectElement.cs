@@ -164,7 +164,7 @@ namespace Microsoft.Build.Construction
 
             internal set
             {
-                ErrorUtilities.VerifyThrow(Link == null, "External project");
+                ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
                 if (value == null)
                 {
                     // We're about to lose the parent. Hijack the field to store the owning PRE.
@@ -261,7 +261,7 @@ namespace Microsoft.Build.Construction
             // ContainingProject is set ONLY when an element is first constructed.
             internal set
             {
-                ErrorUtilities.VerifyThrow(Link == null, "External project");
+                ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
                 ErrorUtilities.VerifyThrowArgumentNull(value, "ContainingProject");
 
                 if (_parent == null)

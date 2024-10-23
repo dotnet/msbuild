@@ -1060,7 +1060,7 @@ namespace Microsoft.Build.Utilities
                 ErrorUtilities.DebugTraceMessage("GetLegacyTargetPlatformReferences", "Encountered exception trying to gather the platform references: {0}", e.Message);
             }
 
-            return Array.Empty<string>();
+            return [];
         }
 
         /// <summary>
@@ -1081,7 +1081,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentLength(targetPlatformIdentifier, nameof(targetPlatformIdentifier));
             ErrorUtilities.VerifyThrowArgumentLength(targetPlatformVersion, nameof(targetPlatformVersion));
 
-            string[] contractWinMDs = Array.Empty<string>();
+            string[] contractWinMDs = [];
 
             TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
             string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
@@ -1119,7 +1119,7 @@ namespace Microsoft.Build.Utilities
         {
             if (apiContracts == null)
             {
-                return Array.Empty<string>();
+                return [];
             }
 
             var contractWinMDs = new List<string>();
@@ -2460,7 +2460,7 @@ namespace Microsoft.Build.Utilities
                     var monikers = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
                     GatherSDKListFromDirectory(sdkDiskRoots, monikers);
 
-                    if (NativeMethodsShared.IsWindows && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                    if (NativeMethodsShared.IsWindows)
                     {
                         GatherSDKListFromRegistry(registryRoot, monikers);
                     }
@@ -2479,7 +2479,7 @@ namespace Microsoft.Build.Utilities
                         GatherExtensionSDKListFromDirectory(extensionSdkDiskRoots, extensionSdk);
                         s_cachedExtensionSdks.Add(cachedExtensionSdksKey, extensionSdk);
                     }
-                    collection = collection.Concat(new[] { extensionSdk });
+                    collection = collection.Concat([extensionSdk]);
                 }
 
                 return collection;
