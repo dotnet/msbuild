@@ -2,7 +2,7 @@
 <!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
-<!-- For ease of logging the "not supported on Core" message, this task is a
+  <!-- For ease of logging the "not supported on Core" message, this task is a
          TaskExtension on netstandard/netcore. Since the type is sealed there,
          that shouldn't cause any implementation problems since no one can derive
          from it and try to call TaskExtension.Log. -->
@@ -11,11 +11,51 @@
     <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
     <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
   </Suppression>
-
-  <!-- We don't have the net7 reference assemblies handy to pass in to compare against the net8 ones -->
   <Suppression>
-    <DiagnosticId>CP1002</DiagnosticId>
-    <Target>System.Security.Cryptography, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Target>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.Bootstrapper.BuildMessageSeverity</Target>
+    <Left>ref/net7.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.Bootstrapper.ComponentsLocation</Target>
+    <Left>ref/net7.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.ManifestUtilities.AssemblyIdentity.FullNameFlags</Target>
+    <Left>ref/net7.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.ManifestUtilities.AssemblyReferenceType</Target>
+    <Left>ref/net7.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.ManifestUtilities.OutputMessageType</Target>
+    <Left>ref/net7.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.ManifestUtilities.UpdateMode</Target>
+    <Left>ref/net7.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.ManifestUtilities.UpdateUnit</Target>
     <Left>ref/net7.0/Microsoft.Build.Tasks.Core.dll</Left>
     <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
