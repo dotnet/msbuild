@@ -344,7 +344,7 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
+            ErrorUtilities.VerifyThrowArgumentNull(task);
         }
 
         /// <summary>

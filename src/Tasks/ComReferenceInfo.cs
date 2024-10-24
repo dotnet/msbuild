@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal bool InitializeWithPath(TaskLoggingHelper log, bool silent, string path, ITaskItem originalTaskItem, string targetProcessorArchitecture)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentNull(path);
 
             this.taskItem = originalTaskItem;
 

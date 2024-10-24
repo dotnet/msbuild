@@ -240,7 +240,7 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">The ProjectCollection from which the BuildParameters should populate itself.</param>
         public BuildParameters(ProjectCollection projectCollection)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             Initialize(new PropertyDictionary<ProjectPropertyInstance>(projectCollection.EnvironmentProperties), projectCollection.ProjectRootElementCache, new ToolsetProvider(projectCollection.Toolsets));
 
@@ -265,7 +265,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal BuildParameters(BuildParameters other, bool resetEnvironment = false)
         {
-            ErrorUtilities.VerifyThrowInternalNull(other, nameof(other));
+            ErrorUtilities.VerifyThrowInternalNull(other);
 
             _buildId = other._buildId;
             _culture = other._culture;

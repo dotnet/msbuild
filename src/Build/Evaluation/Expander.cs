@@ -493,7 +493,7 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, _loggingContext);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -514,7 +514,7 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             return PropertyExpander<P>.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -562,7 +562,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -636,7 +636,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             return ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, expression, _items, itemFactory, options, includeNullItems, out isTransformExpression, elementLocation);
         }

@@ -34,7 +34,7 @@ internal class CheckDispatchingContext : ICheckContext
 
     public void DispatchBuildEvent(BuildEventArgs buildEvent)
     {
-        ErrorUtilities.VerifyThrowInternalNull(buildEvent, nameof(buildEvent));
+        ErrorUtilities.VerifyThrowInternalNull(buildEvent);
 
         _eventDispatcher.Dispatch(buildEvent);
     }

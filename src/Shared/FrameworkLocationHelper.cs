@@ -972,8 +972,8 @@ namespace Microsoft.Build.Shared
         /// <returns>The path to the reference assembly location</returns>
         internal static string GenerateReferenceAssemblyPath(string targetFrameworkRootPath, FrameworkName frameworkName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkRootPath, nameof(targetFrameworkRootPath));
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkName, nameof(frameworkName));
+            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkRootPath);
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkName);
 
             try
             {

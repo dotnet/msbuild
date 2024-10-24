@@ -65,7 +65,7 @@ namespace Microsoft.Build.Construction
         internal ProjectItemElement(XmlElementWithLocation xmlElement, ProjectItemGroupElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -389,8 +389,8 @@ namespace Microsoft.Build.Construction
         /// </param>
         public ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
 
             if (expressAsAttribute)
             {
@@ -439,7 +439,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ChangeItemType(string newItemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newItemType, nameof(newItemType));
+            ErrorUtilities.VerifyThrowArgumentLength(newItemType);
             XmlUtilities.VerifyThrowArgumentValidElementName(newItemType);
             ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newItemType), "CannotModifyReservedItem", newItemType);
             if (Link != null)

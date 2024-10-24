@@ -1325,7 +1325,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void LogReferenceDependenciesAndSourceItemsToStringBuilder(string fusionName, Reference conflictCandidate, StringBuilder log, bool referenceIsUnified = false)
         {
-            ErrorUtilities.VerifyThrowInternalNull(conflictCandidate, nameof(conflictCandidate));
+            ErrorUtilities.VerifyThrowInternalNull(conflictCandidate);
             log.Append(Strings.FourSpaces);
 
             string resource = referenceIsUnified ? "ResolveAssemblyReference.UnifiedReferenceDependsOn" : "ResolveAssemblyReference.ReferenceDependsOn";
@@ -1746,7 +1746,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="importance">The importance of the message.</param>
         private void LogFullName(Reference reference, MessageImportance importance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(reference, nameof(reference));
+            ErrorUtilities.VerifyThrowArgumentNull(reference);
 
             if (reference.IsResolved)
             {
@@ -1801,7 +1801,7 @@ namespace Microsoft.Build.Tasks
                         else
                         {
                             Log.LogMessage(importance, Strings.SearchPath, lastSearchPath);
-                        }                 
+                        }
                         if (logAssemblyFoldersMinimal)
                         {
                             Log.LogMessage(importance, Strings.SearchedAssemblyFoldersEx);

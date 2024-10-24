@@ -2541,8 +2541,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool CompareAssembliesIgnoringVersion(AssemblyName a, AssemblyName b)
         {
-            ErrorUtilities.VerifyThrowInternalNull(a, nameof(a));
-            ErrorUtilities.VerifyThrowInternalNull(b, nameof(b));
+            ErrorUtilities.VerifyThrowInternalNull(a);
+            ErrorUtilities.VerifyThrowInternalNull(b);
 
             if (a == b)
             {

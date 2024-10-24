@@ -13,7 +13,7 @@ namespace Microsoft.Build.Execution
             BuildRequestDataFlags flags,
             HostServices? hostServices)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetNames, nameof(targetNames));
+            ErrorUtilities.VerifyThrowArgumentNull(targetNames);
             foreach (string targetName in targetNames)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(targetName, "target");

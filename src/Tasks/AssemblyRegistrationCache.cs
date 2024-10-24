@@ -64,7 +64,7 @@ namespace Microsoft.Build.Tasks
 
         public override void Translate(ITranslator translator)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(translator, nameof(translator));
+            ErrorUtilities.VerifyThrowArgumentNull(translator);
             translator.Translate(ref _assemblies);
             translator.Translate(ref _typeLibraries);
         }

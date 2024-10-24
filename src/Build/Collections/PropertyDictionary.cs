@@ -459,7 +459,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool Remove(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             lock (_properties)
             {
@@ -475,7 +475,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal void Set(T projectProperty)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectProperty, nameof(projectProperty));
+            ErrorUtilities.VerifyThrowArgumentNull(projectProperty);
 
             lock (_properties)
             {

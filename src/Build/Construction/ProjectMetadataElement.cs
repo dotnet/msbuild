@@ -31,7 +31,7 @@ namespace Microsoft.Build.Construction
         internal ProjectMetadataElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement project)
             : base(xmlElement, parent, project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Microsoft.Build.Construction
                     return;
                 }
 
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(Value));
+                ErrorUtilities.VerifyThrowArgumentNull(value);
                 Internal.Utilities.SetXmlNodeInnerContents(XmlElement, value);
                 Parent?.UpdateElementValue(this);
                 MarkDirty("Set metadata Value {0}", value);
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ChangeName(string newName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newName, nameof(newName));
+            ErrorUtilities.VerifyThrowArgumentLength(newName);
             XmlUtilities.VerifyThrowArgumentValidElementName(newName);
             ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newName), "CannotModifyReservedItemMetadata", newName);
 
