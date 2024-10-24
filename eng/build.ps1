@@ -108,7 +108,6 @@ function Process-Arguments() {
 function Build-Repo() {
   $bl = if ($binaryLog) { "/bl:" + (Join-Path $LogDir "Build.binlog") } else { "" }
   $toolsetBuildProj = InitializeToolset
-
   if ($projects) {
     # Re-assign properties to a new variable because PowerShell doesn't let us append properties directly for unclear reasons.
     # Explicitly set the type as string[] because otherwise PowerShell would make this char[] if $properties is empty.
@@ -116,10 +115,8 @@ function Build-Repo() {
     $msbuildArgs += "/p:Projects=$projects"
     $properties = $msbuildArgs
   }
-
   # Do not set this property to true explicitly, since that would override values set in projects.
   $suppressPartialNgenOptimization = if (!$applyOptimizationData) { "/p:EnableNgenOptimization=false" } else { "" }
-
   MSBuild $toolsetBuildProj `
     $bl `
     /p:Configuration=$configuration `
@@ -139,6 +136,34 @@ function Build-Repo() {
     /p:OfficialBuildId=$officialBuildId `
     $suppressPartialNgenOptimization `
     @properties
+
+   Publish-BuildLogs
+}
+
+function Publish-BuildLogs {
+    if (-not (Test-Path $LogDir)) {
+        Write-Warning "Log directory not found: $LogDir"
+        return
+    }
+
+    Write-Host "Publishing logs from $LogDir"
+    
+    # Create artifact staging directory
+    $artifactStagingDirectory = Join-Path $env:BUILD_ARTIFACTSTAGINGDIRECTORY "BuildLogs"
+    if (-not (Test-Path $artifactStagingDirectory)) {
+        New-Item -Path $artifactStagingDirectory -ItemType Directory -Force | Out-Null
+    }
+
+    # Copy all logs to staging directory
+    Copy-Item -Path "$LogDir\*" -Destination $artifactStagingDirectory -Recurse -Force
+
+    # Publish artifacts using Azure DevOps CLI
+    Write-Host "Publishing build logs as artifacts..."
+    
+    $artifactName = "BuildLogs"
+
+    # Use Azure Pipeline Task to publish
+    Write-Host "##vso[artifact.upload containerfolder=$artifactName;artifactname=$artifactName]$artifactStagingDirectory"
 }
 
 # Set VSO variables used by MicroBuildBuildVSBootstrapper pipeline task
