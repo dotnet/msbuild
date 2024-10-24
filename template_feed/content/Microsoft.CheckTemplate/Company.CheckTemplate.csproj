@@ -5,7 +5,7 @@
     <DevelopmentDependency>true</DevelopmentDependency>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageTags>BuildCheck</PackageTags>
+    <PackageTags>BuildCheck;MSBuild</PackageTags>
     <!-- The output structure was modified for msbuild development needs.-->
     <NoWarn>NU5101;NU5128</NoWarn>
   </PropertyGroup>
