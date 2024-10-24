@@ -6,24 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup Label="TestAssets">
-    <ProjectsToPack Include="..\Build\Microsoft.Build.csproj">
-		  <IncludeSymbols>false</IncludeSymbols>  
-		  <EmbedAllSources>true</EmbedAllSources>
-		  <EmbedUntrackedSources>true</EmbedUntrackedSources>
-		  <DebugType>embedded</DebugType>	
-    </ProjectsToPack>
-    <ProjectsToPack Include="..\Framework\Microsoft.Build.Framework.csproj">
-		  <IncludeSymbols>false</IncludeSymbols>  
-		  <EmbedAllSources>true</EmbedAllSources>
-		  <EmbedUntrackedSources>true</EmbedUntrackedSources>
-		  <DebugType>embedded</DebugType>	
-    </ProjectsToPack>
-    <ProjectsToPack Include="..\StringTools\StringTools.csproj">
-		  <IncludeSymbols>false</IncludeSymbols>  
-		  <EmbedAllSources>true</EmbedAllSources>
-		  <EmbedUntrackedSources>true</EmbedUntrackedSources>
-		  <DebugType>embedded</DebugType>	
-    </ProjectsToPack>
+    <ProjectsToPack Include="..\Build\Microsoft.Build.csproj"/>
+    <ProjectsToPack Include="..\Framework\Microsoft.Build.Framework.csproj"/>
+    <ProjectsToPack Include="..\StringTools\StringTools.csproj"/>
   </ItemGroup>
 
   <Target Name="GetSourceFilesForPacking">
@@ -37,6 +22,26 @@
           DependsOnTargets="GetSourceFilesForPacking"
           Inputs="@(ProjectsToPack);@(SourceFilesForPacking)"
           Outputs="$(ArtifactsNonShippingPackagesDir)\Microsoft.Build.$(Version).nupkg;$(ArtifactsNonShippingPackagesDir)\Microsoft.Build.Framework.$(Version).nupkg;$(ArtifactsNonShippingPackagesDir)\Microsoft.NET.StringTools.$(Version).nupkg">
-    <Exec Command="dotnet pack &quot;%(ProjectsToPack.Identity)&quot; -o &quot;$(ArtifactsNonShippingPackagesDir)&quot; -p:PackageVersion=$(PackageVersion) -p:IncludeSymbols=false --no-restore" />
+
+    <Message Text="-------------------------------------------" Importance="high" />
+    <Message Text="Checking files for: %(ProjectsToPack.Filename)" Importance="high" />
+    <PropertyGroup>
+        <PdbPath>$(ArtifactsBinDir)%(ProjectsToPack.Filename)\Release\net472\%(ProjectsToPack.Filename).pdb</PdbPath>
+    </PropertyGroup>
+    
+    <Message Text="Before Pack - PDB exists: $(PdbPath)" 
+             Condition="Exists('$(PdbPath)')"
+             Importance="high" />
+    <Message Text="Before Pack - PDB missing: $(PdbPath)" 
+             Condition="!Exists('$(PdbPath)')"
+             Importance="high" />
+
+    <Exec Command="dotnet pack &quot;%(ProjectsToPack.Identity)&quot; -o &quot;$(ArtifactsNonShippingPackagesDir)&quot; -p:PackageVersion=$(PackageVersion) --no-restore -bl:&quot;$(ArtifactsDir)\testLogs\%(ProjectsToPack.Filename).binlog&quot;" " />
+
+    <!-- Check files after packing -->
+    <Message Text="After Pack - PDB exists: $(PdbPath)" 
+             Condition="Exists('$(PdbPath)')"
+             Importance="high" />
+    <Message Text="-------------------------------------------" Importance="high" />
   </Target>
 </Project>
