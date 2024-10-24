@@ -22,6 +22,6 @@
           DependsOnTargets="GetSourceFilesForPacking"
           Inputs="@(ProjectsToPack);@(SourceFilesForPacking)"
           Outputs="$(ArtifactsNonShippingPackagesDir)\Microsoft.Build.$(Version).nupkg;$(ArtifactsNonShippingPackagesDir)\Microsoft.Build.Framework.$(Version).nupkg;$(ArtifactsNonShippingPackagesDir)\Microsoft.NET.StringTools.$(Version).nupkg">
-    <Exec Command="dotnet pack &quot;%(ProjectsToPack.Identity)&quot; -o &quot;$(ArtifactsNonShippingPackagesDir)&quot; -p:PackageVersion=$(PackageVersion) --no-restore" />
+    <Exec Command="dotnet pack &quot;%(ProjectsToPack.Identity)&quot; -o &quot;$(ArtifactsNonShippingPackagesDir)&quot; -p:PackageVersion=$(PackageVersion) -p:IncludeSymbols=false --no-restore" />
   </Target>
 </Project>
