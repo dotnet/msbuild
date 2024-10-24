@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
@@ -16,11 +17,11 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
-    public class SolutionFile_Tests
+    public class SolutionFile_OldParser_Tests
     {
         public ITestOutputHelper TestOutputHelper { get; }
 
-        public SolutionFile_Tests(ITestOutputHelper testOutputHelper)
+        public SolutionFile_OldParser_Tests(ITestOutputHelper testOutputHelper)
         {
             TestOutputHelper = testOutputHelper;
         }
@@ -102,6 +103,42 @@ namespace Microsoft.Build.UnitTests.Construction
             proj.ProjectName.ShouldBe("Project name");
             proj.RelativePath.ShouldBe("Relative path to project file");
             proj.ProjectGuid.ShouldBe("Unique name-GUID");
+        }
+
+        /// <summary>
+        /// A slightly more complicated test where there is some different whitespace.
+        /// </summary>
+        [Fact]
+        public void ParseSolutionWithDifferentSpacing()
+        {
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 9.00
+                # Visual Studio 2005
+                Project(' { Project GUID} ')  = ' Project name ',  ' Relative path to project file '    , ' {0ABED153-9451-483C-8140-9E8D7306B216} '
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|AnyCPU = Debug|AnyCPU
+                        Release|AnyCPU = Release|AnyCPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+                        {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+                        {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+                        {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.Build.0 = Release|AnyCPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+
+            Assert.Equal("Project name", solution.ProjectsInOrder[0].ProjectName);
+            Assert.Equal("Relative path to project file", solution.ProjectsInOrder[0].RelativePath);
+            Assert.Equal("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
         }
 
         /// <summary>
@@ -685,6 +722,43 @@ namespace Microsoft.Build.UnitTests.Construction
             proj.ProjectName.ShouldBe("MyProject,(=IsGreat)");
             proj.RelativePath.ShouldBe("Relative path to project file");
             proj.ProjectGuid.ShouldBe("Unique name-GUID");
+        }
+
+        /// <summary>
+        /// Test some characters that are valid in a file name but that also could be
+        /// considered a delimiter by a parser. Does quoting work for special characters?
+        /// </summary>
+        [Fact]
+        public void ParseSolutionWhereProjectNameHasSpecialCharacters()
+        {
+            string solutionFileContents =
+                           @"
+                Microsoft Visual Studio Solution File, Format Version 9.00
+                # Visual Studio 2005
+                Project('{Project GUID}')  = 'MyProject,(=IsGreat)',  'Relative path to project file'    , '{0ABED153-9451-483C-8140-9E8D7306B216}'
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|AnyCPU = Debug|AnyCPU
+                        Release|AnyCPU = Release|AnyCPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+                        {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+                        {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+                        {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.Build.0 = Release|AnyCPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+
+            Assert.Equal("MyProject,(=IsGreat)", solution.ProjectsInOrder[0].ProjectName);
+            Assert.Equal("Relative path to project file", solution.ProjectsInOrder[0].RelativePath);
+            Assert.Equal("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
         }
 
         /// <summary>
@@ -2354,6 +2428,59 @@ EndGlobal
             solution.ProjectsInOrder[0].RelativePath.ShouldBe(expectedRelativePath);
             solution.ProjectsInOrder[0].AbsolutePath.ShouldBe(Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solution.FullPath)!, expectedRelativePath)));
             solution.ProjectsInOrder[0].ProjectGuid.ShouldBe("{0ABED153-9451-483C-8140-9E8D7306B216}");
+        }
+
+        /// <summary>
+        /// Parse solution file with comments
+        /// </summary>
+        [Fact]
+        public void ParseSolutionWithComments()
+        {
+            const string solutionFileContent = @"
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 16
+                    VisualStudioVersion = 16.0.29123.89
+                    MinimumVisualStudioVersion = 10.0.40219.1
+                    Project('{9A19103F-16F7-4668-BE54-9A1E7A4F7556}') = 'SlnCommentTest', 'SlnCommentTest.csproj', '{00000000-0000-0000-FFFF-FFFFFFFFFFFF}'
+                    EndProject
+                    Project('{2150E333-8FDC-42A3-9474-1A3956D46DE8}') = 'Solution Items', 'Solution Items', '{054DED3B-B890-4652-B449-839F581E5D86}'
+	                    ProjectSection(SolutionItems) = preProject
+		                    SlnFile.txt = SlnFile.txt
+	                    EndProjectSection
+                    EndProject
+                    Global
+	                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		                    Debug|Any CPU = Debug|Any CPU
+		                    Release|Any CPU = Release|Any CPU
+	                    EndGlobalSection
+	                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		                    {00000000-0000-0000-FFFF-FFFFFFFFFFFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		                    {00000000-0000-0000-FFFF-FFFFFFFFFFFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		                    {00000000-0000-0000-FFFF-FFFFFFFFFFFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		                    {00000000-0000-0000-FFFF-FFFFFFFFFFFF}.Release|Any CPU.Build.0 = Release|Any CPU
+	                    EndGlobalSection
+	                    GlobalSection(SolutionProperties) = preSolution
+		                    HideSolutionNode = FALSE
+	                    EndGlobalSection
+	                    GlobalSection(ExtensibilityGlobals) = postSolution
+		                    SolutionGuid = {FFFFFFFF-FFFF-FFFF-0000-000000000000}
+	                    EndGlobalSection
+                    EndGlobal
+                    ";
+
+            StringBuilder stringBuilder = new StringBuilder();
+
+            // Put comment between all lines
+            const string comment = "\t# comment";
+            string[] lines = solutionFileContent.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < lines.Length; i++)
+            {
+                stringBuilder.AppendLine(comment);
+                stringBuilder.AppendLine(lines[i]);
+            }
+            stringBuilder.AppendLine(comment);
+
+            Should.NotThrow(() => ParseSolutionHelper(stringBuilder.ToString()));
         }
     }
 }
