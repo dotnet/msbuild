@@ -626,6 +626,9 @@ namespace Microsoft.Build.Internal
             return enumerator.ToEnumerable().ToArray();
         }
 
+        /// <summary>
+        /// Iterates through the nongeneric enumeration and provides generic strong-typed enumeration of properties.
+        /// </summary>
         public static IEnumerable<PropertyData> EnumerateProperties(IEnumerable properties)
         {
             if (properties == null)
@@ -681,6 +684,9 @@ namespace Microsoft.Build.Internal
             }
         }
 
+        /// <summary>
+        /// Iterates through the nongeneric enumeration and provides generic strong-typed callback to handle the properties.
+        /// </summary>
         public static void EnumerateProperties<TArg>(IEnumerable properties, TArg arg, Action<TArg, KeyValuePair<string, string>> callback)
         {
             foreach (var tuple in EnumerateProperties(properties))
@@ -690,7 +696,7 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types.
         /// </summary>
         public static IEnumerable<ItemData> EnumerateItems(IEnumerable items)
         {
@@ -779,6 +785,9 @@ namespace Microsoft.Build.Internal
             }
         }
 
+        /// <summary>
+        /// Iterates through the nongeneric enumeration of items and provides generic strong-typed callback to handle the items.
+        /// </summary>
         public static void EnumerateItems(IEnumerable items, Action<DictionaryEntry> callback)
         {
             foreach (var tuple in EnumerateItems(items))
