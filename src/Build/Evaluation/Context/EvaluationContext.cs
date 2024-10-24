@@ -72,11 +72,10 @@ namespace Microsoft.Build.Evaluation.Context
             _projectLoadSettings = projectLoadSettings;
             SdkResolverService = sdkResolverService ?? new CachingSdkResolverService();
             FileEntryExpansionCache = fileEntryExpansionCache ?? new ConcurrentDictionary<string, IReadOnlyList<string>>();
-            FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default, SkipExistenceCheck);
+            bool skipExistenceCheck = (_projectLoadSettings?.HasFlag(ProjectLoadSettings.IgnoreMissingImports) ?? false) && Traits.Instance.SkipExistenceCheckForCache;
+            FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default, skipExistenceCheck);
             FileMatcher = new FileMatcher(FileSystem, FileEntryExpansionCache);
         }
-
-        private bool SkipExistenceCheck => (_projectLoadSettings?.HasFlag(ProjectLoadSettings.IgnoreMissingImports) ?? false) && Traits.Instance.SkipExistenceCheckForCache;
 
         /// <summary>
         ///     Factory for <see cref="EvaluationContext" />
