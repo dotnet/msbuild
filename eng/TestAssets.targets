@@ -36,7 +36,17 @@
              Condition="!Exists('$(PdbPath)')"
              Importance="high" />
 
+    <!-- Save PDB state before pack -->
+    <Copy SourceFiles="$(ArtifactsBinDir)%(ProjectsToPack.Filename)\Release\net472\%(ProjectsToPack.Filename).pdb"
+          DestinationFiles="$(ArtifactsBinDir)%(ProjectsToPack.Filename)\Release\net472\%(ProjectsToPack.Filename).pdb.bak"
+          Condition="Exists('$(ArtifactsBinDir)%(ProjectsToPack.Filename)\Release\net472\%(ProjectsToPack.Filename).pdb')" />
+
     <Exec Command="dotnet pack &quot;%(ProjectsToPack.Identity)&quot; -o &quot;$(ArtifactsNonShippingPackagesDir)&quot; -p:PackageVersion=$(PackageVersion) --no-restore -bl:&quot;$(ArtifactsDir)\testLogs\%(ProjectsToPack.Filename).binlog&quot;" " />
+
+    <!-- Restore PDB after pack -->
+    <Copy SourceFiles="$(ArtifactsBinDir)%(ProjectsToPack.Filename)\Release\net472\%(ProjectsToPack.Filename).pdb.bak"
+          DestinationFiles="$(ArtifactsBinDir)%(ProjectsToPack.Filename)\Release\net472\%(ProjectsToPack.Filename).pdb"
+          Condition="Exists('$(ArtifactsBinDir)%(ProjectsToPack.Filename)\Release\net472\%(ProjectsToPack.Filename).pdb.bak')" />
 
     <!-- Check files after packing -->
     <Message Text="After Pack - PDB exists: $(PdbPath)" 
