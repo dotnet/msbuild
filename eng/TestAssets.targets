@@ -20,7 +20,7 @@
           Inputs="@(ProjectsToPack);@(SourceFilesForPacking)"
           Outputs="$(ArtifactsNonShippingPackagesDir)\Microsoft.Build.$(Version).nupkg;$(ArtifactsNonShippingPackagesDir)\Microsoft.Build.Framework.$(Version).nupkg;$(ArtifactsNonShippingPackagesDir)\Microsoft.NET.StringTools.$(Version).nupkg">
   
-    <Exec Command="dotnet pack &quot;%(ProjectsToPack.Identity)&quot; -o &quot;$(ArtifactsNonShippingPackagesDir)&quot; -p:PackageVersion=$(PackageVersion) -p:TargetFramework=netstandard2.0 -bl:&quot;$(ArtifactsDir)\logs\%(ProjectsToPack.Filename).binlog&quot;" />
+    <Exec Command="dotnet pack &quot;%(ProjectsToPack.Identity)&quot; -o &quot;$(ArtifactsNonShippingPackagesDir)&quot; -p:PackageVersion=$(PackageVersion) -bl:&quot;$(ArtifactsDir)\logs\%(ProjectsToPack.Filename).binlog&quot;" />
    
   </Target>
 </Project>
