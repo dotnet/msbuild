@@ -67,19 +67,19 @@ The BuildCheck infrastructure will be prepared to be available concurrently with
 
 Prerequisites: [MSBuild Replaying a Binary Log](../../wiki/Binary-Log.md#replaying-a-binary-log)
 
-When replaying a binary log, we can apply BuildCheck with help of `-check` switch:
+When replaying a binary log, we can apply BuildChecks with help of `-check` switch:
 ```
-> msbuild.exe msbuild.binlog -check
+> msbuild msbuild.binlog -check
 ```
 
 If BuildCheck is enabled, then the events from `BinaryLogReplayEventSource` and new events from BuildCheck are merged into the `IEventSource`, from which the loggers get events.
 
 ```mermaid
 flowchart TD
-    replayEventSource[BinaryLogReplayEventSource\nreplayEventSource] --> mergedEventSource[IEventSource\nmergedEventSource]
-    replayEventSource[BinaryLogReplayEventSource\nreplayEventSource] --> BuildCheckBuildEventHandler[BuildCheckBuildEventHandler]
-    BuildCheckBuildEventHandler[BuildCheckBuildEventHandler] --> mergedEventSource[IEventSource\nmergedEventSource]
-    mergedEventSource[IEventSource\nmergedEventSource] --> loggers
+    replayEventSource[BinaryLogReplayEventSource replayEventSource] --> mergedEventSource[IEventSource mergedEventSource]
+    replayEventSource[BinaryLogReplayEventSource replayEventSource] --> BuildCheckBuildEventHandler[BuildCheckBuildEventHandler]
+    BuildCheckBuildEventHandler[BuildCheckBuildEventHandler] --> mergedEventSource[IEventSource mergedEventSource]
+    mergedEventSource[IEventSource mergedEventSource] --> loggers
 ```
 1. The events from `BinaryLogReplayEventSource replayEventSource` are passed to the `IEventSource mergedEventSource` unchanged.
 2. The events from `BinaryLogReplayEventSource replayEventSource` are passed to `BuildCheckBuildEventHandler` in order to produce new events from BuildCheck.
