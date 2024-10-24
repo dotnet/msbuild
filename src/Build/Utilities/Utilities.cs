@@ -759,6 +759,8 @@ namespace Microsoft.Build.Internal
 
                     if (itemValue != null)
                     {
+                        // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
+                        //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
                         if (itemValue is IItemData dt)
                         {
                             data = dt;

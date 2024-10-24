@@ -28,7 +28,7 @@ namespace Microsoft.Build.Evaluation
     /// we do use it for build-time items.
     /// </comment>
     [DebuggerDisplay("{ItemType}={EvaluatedInclude} [{UnevaluatedInclude}] #DirectMetadata={DirectMetadataCount}")]
-    public class ProjectItem : IItem<ProjectMetadata>, IProjectMetadataParent, IItemDataWithMetadata
+    public class ProjectItem : IItem<ProjectMetadata>, IProjectMetadataParent, IItemData
     {
         /// <summary>
         /// Project that this item lives in.
@@ -144,11 +144,8 @@ namespace Microsoft.Build.Evaluation
 
         internal virtual ProjectItemLink Link => null;
 
-        /// <inheritdoc cref="IItemData.ItemSpec"/>
-        string IItemData.ItemSpec => this.EvaluatedInclude;
-
-        /// <inheritdoc cref="IItemDataWithMetadata.EnumerateMetadata"/>
-        IEnumerable<KeyValuePair<string, string>> IItemDataWithMetadata.EnumerateMetadata() => Metadata.Select(m => new KeyValuePair<string, string>(m.Name, m.EvaluatedValue));
+        /// <inheritdoc cref="IItemData.EnumerateMetadata"/>
+        IEnumerable<KeyValuePair<string, string>> IItemData.EnumerateMetadata() => Metadata.Select(m => new KeyValuePair<string, string>(m.Name, m.EvaluatedValue));
 
         /// <summary>
         /// Backing XML item.
@@ -200,9 +197,10 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        /// <summary>
+        /// <inheritdoc cref="IItemData.EvaluatedInclude"/>
+        /// <remarks>
         /// Gets the evaluated value of the include, unescaped.
-        /// </summary>
+        /// </remarks>
         public string EvaluatedInclude
         {
             [DebuggerStepThrough]
