@@ -761,25 +761,13 @@ namespace Microsoft.Build.Internal
                         }
                     }
 
-                    IItemData data = null;
-
                     if (itemValue != null)
                     {
                         // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
                         //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
-                        if (itemValue is IItemData dt)
-                        {
-                            data = dt;
-                        }
-                        else
-                        {
-                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(itemValue)} {itemValue} of type {itemValue?.GetType().ToString()}");
-                        }
-                    }
-
-                    if (data != null)
-                    {
-                        yield return new(itemType!, data);
+                        // However! NodePacketTranslator and BuildEventArgsReader might deserialize those as TaskItemData
+                        //  (see xml comments of TaskItemData for details)
+                        yield return new ItemData(itemType!, itemValue);
                     }
                 }
             }

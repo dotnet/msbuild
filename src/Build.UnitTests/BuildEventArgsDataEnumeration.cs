@@ -68,12 +68,12 @@ namespace Microsoft.Build.UnitTests
 
             results.Count.ShouldBe(2);
             results[0].Type.ShouldBe("Key");
-            results[0].Value.EvaluatedInclude.ShouldBe("TestItemSpec");
-            results[0].Value.EnumerateMetadata().ShouldBeEmpty();
+            results[0].EvaluatedInclude.ShouldBe("TestItemSpec");
+            results[0].EnumerateMetadata().ShouldBeEmpty();
 
             results[1].Type.ShouldBe("Key2");
-            results[1].Value.EvaluatedInclude.ShouldBe("spec");
-            List<KeyValuePair<string, string>> metadata = results[1].Value.EnumerateMetadata().ToList();
+            results[1].EvaluatedInclude.ShouldBe("spec");
+            List<KeyValuePair<string, string>> metadata = results[1].EnumerateMetadata().ToList();
             metadata.Count.ShouldBe(2);
             metadata[0].Key.ShouldBe("metadat1");
             metadata[0].Value.ShouldBe("val1");
