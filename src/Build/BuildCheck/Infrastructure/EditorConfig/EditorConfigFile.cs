@@ -177,7 +177,7 @@ private static partial Regex GetPropertyMatcherRegex();
 
         /// <summary>
         /// Keys and values for this section. All keys are lower-cased according to the
-        /// EditorConfig specification and keys are compared case-insensitively. 
+        /// EditorConfig specification and keys are compared case-insensitively.
         /// </summary>
         public ImmutableDictionary<string, string> Properties { get; }
     }

@@ -39,6 +39,7 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)BuildXL.Native.dll
   file source=$(X86BinPath)BuildXL.Processes.dll
   file source=$(X86BinPath)BuildXL.Utilities.Core.dll
+  file source=$(X86BinPath)Microsoft.VisualStudio.SolutionPersistence.dll
   file source=$(X86BinPath)RuntimeContracts.dll
   file source=$(X86BinPath)System.Buffers.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)System.Memory.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1

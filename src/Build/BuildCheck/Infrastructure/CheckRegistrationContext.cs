@@ -2,13 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Threading;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Checks;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-internal sealed class CheckRegistrationContext(CheckWrapper checkWrapper, BuildCheckCentralContext buildCheckCentralContext) : IInternalCheckRegistrationContext
+internal sealed class CheckRegistrationContext(CheckWrapper checkWrapper, BuildCheckCentralContext buildCheckCentralContext)
+    : IInternalCheckRegistrationContext
 {
     public void RegisterEnvironmentVariableReadAction(Action<BuildCheckDataContext<EnvironmentVariableCheckData>> environmentVariableAction) =>
         buildCheckCentralContext.RegisterEnvironmentVariableReadAction(checkWrapper, environmentVariableAction);
@@ -33,4 +32,7 @@ internal sealed class CheckRegistrationContext(CheckWrapper checkWrapper, BuildC
 
     public void RegisterBuildFinishedAction(Action<BuildCheckDataContext<BuildFinishedCheckData>> buildFinishedAction)
         => buildCheckCentralContext.RegisterBuildFinishedAction(checkWrapper, buildFinishedAction);
+
+    public void RegisterProjectImportedAction(Action<BuildCheckDataContext<ProjectImportedCheckData>> projectImportedAction) =>
+        buildCheckCentralContext.RegisterProjectImportedAction(checkWrapper, projectImportedAction);
 }
