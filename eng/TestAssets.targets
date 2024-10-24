@@ -6,9 +6,24 @@
   </PropertyGroup>
 
   <ItemGroup Label="TestAssets">
-    <ProjectsToPack Include="..\Build\Microsoft.Build.csproj" />
-    <ProjectsToPack Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectsToPack Include="..\StringTools\StringTools.csproj"/>
+    <ProjectsToPack Include="..\Build\Microsoft.Build.csproj">
+		  <IncludeSymbols>false</IncludeSymbols>  
+		  <EmbedAllSources>true</EmbedAllSources>
+		  <EmbedUntrackedSources>true</EmbedUntrackedSources>
+		  <DebugType>embedded</DebugType>	
+    </ProjectsToPack>
+    <ProjectsToPack Include="..\Framework\Microsoft.Build.Framework.csproj">
+		  <IncludeSymbols>false</IncludeSymbols>  
+		  <EmbedAllSources>true</EmbedAllSources>
+		  <EmbedUntrackedSources>true</EmbedUntrackedSources>
+		  <DebugType>embedded</DebugType>	
+    </ProjectsToPack>
+    <ProjectsToPack Include="..\StringTools\StringTools.csproj">
+		  <IncludeSymbols>false</IncludeSymbols>  
+		  <EmbedAllSources>true</EmbedAllSources>
+		  <EmbedUntrackedSources>true</EmbedUntrackedSources>
+		  <DebugType>embedded</DebugType>	
+    </ProjectsToPack>
   </ItemGroup>
 
   <Target Name="GetSourceFilesForPacking">
