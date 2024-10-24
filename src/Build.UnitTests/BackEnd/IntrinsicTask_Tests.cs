@@ -315,6 +315,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void ItemKeepDuplicatesFalseTwoDuplicatesAtOnce()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+            <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+            <Target Name='t'>
+                <ItemGroup>
+                    <i1 Include='a1'/>
+                    <i1 Include='a1;a1' KeepDuplicates='false' />
+                </ItemGroup>
+            </Target>
+            </Project>");
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            ExecuteTask(task, lookup);
+
+            var group = lookup.GetItems("i1");
+            Assert.Single(group);
+        }
+
+        [Fact]
         public void ItemKeepDuplicatesAsCondition()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
