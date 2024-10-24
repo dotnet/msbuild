@@ -4034,7 +4034,7 @@ namespace Microsoft.Build.CommandLine
                 else
                 {
                     // For performance, register this logger using the forwarding logger mechanism.
-                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", TerminalLogger.ConfigurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
+                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", [.. TerminalLogger.ConfigurableForwardingLoggerParameters, "verbosity=diagnostic"]), LoggerVerbosity.Quiet);
                     distributedLoggerRecords.Add(forwardingLoggerRecord);
                 }
             }
