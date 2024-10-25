@@ -37,7 +37,8 @@ namespace Microsoft.Build.Execution
         IMetadataTable,
         ITranslatable,
         IMetadataContainer,
-        IItemTypeDefinition
+        IItemTypeDefinition,
+        IItemData
     {
         /// <summary>
         /// The project instance to which this item belongs.
@@ -184,10 +185,11 @@ namespace Microsoft.Build.Execution
             { return _itemType; }
         }
 
-        /// <summary>
+        /// <inheritdoc cref="IItemData.EvaluatedInclude"/>
+        /// <remarks>
         /// Evaluated include value.
         /// May be empty string.
-        /// </summary>
+        /// </remarks>
         public string EvaluatedInclude
         {
             [DebuggerStepThrough]
@@ -300,6 +302,9 @@ namespace Microsoft.Build.Execution
                 EvaluatedInclude = value;
             }
         }
+
+        /// <inheritdoc cref="IItemData.EnumerateMetadata"/>
+        IEnumerable<KeyValuePair<string, string>> IItemData.EnumerateMetadata() => ((IMetadataContainer)this).EnumerateMetadata();
 
         /// <summary>
         /// ITaskItem implementation
