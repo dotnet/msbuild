@@ -38,6 +38,8 @@ namespace Microsoft.Build.UnitTests.Construction
 
         private static readonly BuildEventContext _buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
 
+        private const string _longLineString = "a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-";
+
         public SolutionProjectGenerator_Tests(ITestOutputHelper output)
         {
             this.output = output;
@@ -2734,8 +2736,8 @@ EndGlobal
         [Theory]
         [InlineData("http://localhost:8080", false)]
         [InlineData("http://localhost:8080", true)]
-        [InlineData("a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-", false)]
-        [InlineData("a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-", true)]
+        [InlineData(_longLineString, false)]
+        [InlineData(_longLineString, true)]
         public void AbsolutePathWorksForUnsupportedPaths(string relativePath, bool useNewParser)
         {
             string solutionFileContents =
