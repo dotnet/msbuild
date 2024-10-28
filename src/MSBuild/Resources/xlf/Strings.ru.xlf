@@ -17,7 +17,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">Сборка {0} через {1} с</target>
+        <target state="needs-review-translation">Сборка {0} через {1} с</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -87,7 +87,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
+        <target state="needs-review-translation">({0:F1} c)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
@@ -140,9 +140,9 @@
                      used, write out the values after the build.
     </source>
         <target state="translated">  -getProperty:propertyName,...
-                     Запишите значение одного или нескольких указанных свойств 
-                     после оценки, не выполняя сборку, или, если 
-                     опция -targets или опция -getTargetResult 
+                     Запишите значение одного или нескольких указанных свойств
+                     после оценки, не выполняя сборку, или, если
+                     опция -targets или опция -getTargetResult
                      используется, запишите значения после сборки.
     </target>
         <note>
@@ -159,11 +159,11 @@
                      the values after the build.
     </source>
         <target state="translated">  -getItem:itemName,...
-                     Запишите значение одного или нескольких указанных элементов и 
-                     связанных с ними метаданных после оценки без 
-                     выполнения сборки или, если используется опция -targets 
-                     или опция -getTargetResult, запишите 
-                     значения после сборки. 
+                     Запишите значение одного или нескольких указанных элементов и
+                     связанных с ними метаданных после оценки без
+                     выполнения сборки или, если используется опция -targets
+                     или опция -getTargetResult, запишите
+                     значения после сборки.
     </target>
         <note>
       LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
@@ -176,8 +176,8 @@
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                     Запишите выходное значение одной или нескольких целей и 
-                     указанные цели будут выполнены. 
+                     Запишите выходное значение одной или нескольких целей и
+                     указанные цели будут выполнены.
     </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
@@ -201,18 +201,18 @@
                      (Short form: -fa)
     </source>
         <target state="translated">  -featureAvailability:featureName,...
-                     Проверьте доступность функции. Результатом является одна из 
-                     строк "Неопределено", "Доступно", "Недоступно" и 
-                     "Предварительный просмотр". 
-                     - Не определено — доступность функции не определена 
-                     (имя функции неизвестно средству проверки доступности 
-                     функции) 
-                     - NotAvailable — функция недоступна (в отличие от 
-                     Не определено, имя функции известно средству проверки 
-                     доступности функции, и ему известно, что функция не 
-                     поддерживается текущим механизмом MSBuild) 
-                     - Доступно – функция доступна 
-                     - Предварительная версия — функция находится в предварительной версии (не стабильна) 
+                     Проверьте доступность функции. Результатом является одна из
+                     строк "Неопределено", "Доступно", "Недоступно" и
+                     "Предварительный просмотр".
+                     - Не определено — доступность функции не определена
+                     (имя функции неизвестно средству проверки доступности
+                     функции)
+                     - NotAvailable — функция недоступна (в отличие от
+                     Не определено, имя функции известно средству проверки
+                     доступности функции, и ему известно, что функция не
+                     поддерживается текущим механизмом MSBuild)
+                     - Доступно – функция доступна
+                     - Предварительная версия — функция находится в предварительной версии (не стабильна)
                      (Short form: -fa)
     </target>
         <note>
@@ -233,16 +233,16 @@
                      later.
                      (Short form: -tl)
     </source>
-        <target state="translated">  -terminalLogger[:авто,вкл,выкл] 
-                     Включите или отключите регистратор терминала. Регистратор терминала 
-                     обеспечивает расширенный вывод сборки на консоль в режиме реального времени, 
-                     логически организованный по проектам и предназначенный для выделения 
-                     полезной информации. Укажите авто (или используйте опцию 
-                     без аргументов), чтобы использовать регистратор терминала только в том случае, если 
-                     стандартный вывод не перенаправляется. Не анализируйте выходные данные 
-                     и не полагайтесь на то, что они останутся неизменными в будущих 
-                     версиях. Этот параметр будет доступен в MSBuild 17.8 и 
-                     позже. 
+        <target state="translated">  -terminalLogger[:авто,вкл,выкл]
+                     Включите или отключите регистратор терминала. Регистратор терминала
+                     обеспечивает расширенный вывод сборки на консоль в режиме реального времени,
+                     логически организованный по проектам и предназначенный для выделения
+                     полезной информации. Укажите авто (или используйте опцию
+                     без аргументов), чтобы использовать регистратор терминала только в том случае, если
+                     стандартный вывод не перенаправляется. Не анализируйте выходные данные
+                     и не полагайтесь на то, что они останутся неизменными в будущих
+                     версиях. Этот параметр будет доступен в MSBuild 17.8 и
+                     позже.
                      (Short form: -tl)
     </target>
         <note>
@@ -272,21 +272,21 @@
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
                      Параметры для логгера терминала. (Short form: -tlp)
-                     Доступные параметры. 
-                        по умолчанию — определяет поведение логгера 
-                        терминала. Требуется одно из следующих значений: 
-                           - `on`, `true` заставляет использовать TerminalLogger даже 
-                            когда он будет отключен. 
-                           - `off`, `false` запрещает использование TerminalLogger 
-                            даже если бы он был включен. 
-                           - `auto` включает TerminalLogger, когда терминал 
+                     Доступные параметры.
+                        по умолчанию — определяет поведение логгера
+                        терминала. Требуется одно из следующих значений:
+                           - `on`, `true` заставляет использовать TerminalLogger даже
+                            когда он будет отключен.
+                           - `off`, `false` запрещает использование TerminalLogger
+                            даже если бы он был включен.
+                           - `auto` включает TerminalLogger, когда терминал
                             поддерживает это, и в сеансе нет перенаправления
                             stdout/stderr
-                        verbosity – Переопределить параметр -verbosity для этого 
-                        терминала 
-                        showCommandLine — Показать сообщения TaskCommandLineEvent 
+                        verbosity – Переопределить параметр -verbosity для этого
+                        терминала
+                        showCommandLine — Показать сообщения TaskCommandLineEvent
 
-                      Пример: 
+                      Пример:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
@@ -303,11 +303,11 @@
                      This writes the value of property Bar into Biz.txt.
     </source>
         <target state="translated">  -getResultOutputFile:file
-                     Перенаправить вывод get* в файл. 
+                     Перенаправить вывод get* в файл.
 
                      Пример:
                      -getProperty:Bar -getResultOutputFile:Biz.txt
-                     При этом значение свойства Bar будет записано в Biz.txt. 
+                     При этом значение свойства Bar будет записано в Biz.txt.
     </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
@@ -1113,7 +1113,7 @@
     </source>
         <target state="translated">  -ignoreprojectextensions:&lt;расширения&gt;
                      Список игнорируемых расширений при определении
-                     типа создаваемого файла проекта. Используйте точку с запятой или запятую 
+                     типа создаваемого файла проекта. Используйте точку с запятой или запятую
                      для разделения нескольких расширений.
                      (Краткая форма: -ignore)
                      Пример:
@@ -1140,7 +1140,7 @@
         <target state="translated">  -toolsversion:&lt;версия&gt;
                      Версия набора инструментов MSBuild Toolset (задачи, целевые объекты и т. д.),
                      которая будет использована при сборке. Эта версия заменит
-                   версии, определенные для отдельных проектов. (Краткая форма: 
+                   версии, определенные для отдельных проектов. (Краткая форма:
                      -tv)
                      Пример:
                        -toolsVersion:3.5
@@ -1199,7 +1199,7 @@
         <target state="translated">  -distributedFileLogger
           Вносит результаты сборки в несколько файлов журнала, по одному файлу журнала
                      на узел MSBuild. Исходным расположением этих файлов является
-                     текущий каталог. По умолчанию файлы называются 
+                     текущий каталог. По умолчанию файлы называются
                      "MSBuild&lt;идентификатор узла nodeid&gt;.log". Можно указать расположение файлов и
                      другие параметры для fileLogger,
                     добавив  параметр "-fileLoggerParameters".
@@ -1250,7 +1250,7 @@
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;параметры&gt;
                      Дополнительные параметры для журналов файлов.
-                     Наличие этого параметра предполагает наличие 
+                     Наличие этого параметра предполагает наличие
                      соответствующего параметра -fileLogger[n].
                      Значение "n" (при его наличии) может быть цифрой от 1 до 9.
                      -fileLoggerParameters также используется любым распределенным
@@ -1729,7 +1729,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3} с)</target>
+        <target state="needs-review-translation">{0}{1} {2} ({3} с)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1749,7 +1749,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4} с)</target>
+        <target state="needs-review-translation">{0}{1} {2} {3} ({4} с)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1809,7 +1809,7 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="translated">Восстановление завершено ({0} с)</target>
+        <target state="needs-review-translation">Восстановление завершено ({0} с)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
@@ -1817,7 +1817,7 @@
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="translated">Восстановление {0} через {1} с</target>
+        <target state="needs-review-translation">Восстановление {0} через {1} с</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1911,7 +1911,7 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="translated">{0}{1} (тест) {2} ({3} с)</target>
+        <target state="needs-review-translation">{0}{1} (тест) {2} ({3} с)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1923,7 +1923,7 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} (тест) {2} {3} ({4} с)</target>
+        <target state="needs-review-translation">{0}{1} (тест) {2} {3} ({4} с)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1941,7 +1941,7 @@
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="translated">длительность: {0} с</target>
+        <target state="needs-review-translation">длительность: {0} с</target>
         <note>
       {0} whole number
       's' should reflect the localized abbreviation for seconds

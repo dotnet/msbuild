@@ -17,7 +17,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">Construir {0} em {1}s</target>
+        <target state="needs-review-translation">Construir {0} em {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -87,7 +87,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
+        <target state="needs-review-translation">({0:F1}s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
@@ -201,7 +201,7 @@
                      (Short form: -fa)
     </source>
         <target state="translated">  -featureAvailability:featureName,...
-                     Verifica a disponibilidade do recurso. O resultado é uma das 
+                     Verifica a disponibilidade do recurso. O resultado é uma das
                      cadeias de caracteres "Indefinido", "Disponível", "Não Disponível" e
                      "Visualizar".
                      - Indefinido - a disponibilidade do recurso é indefinida
@@ -985,10 +985,10 @@ arquivo de resposta.
                      MSBuild will use up to the number of processors on the
                      computer. (Short form: -m[:n])
       </source>
-        <target state="translated">  -maxCpuCount[:n] Especifica o número máximo de processos simultâneos a serem 
+        <target state="translated">  -maxCpuCount[:n] Especifica o número máximo de processos simultâneos a serem
                      compilados. Se a opção não for usada, o valor padrão
                      usado será 1. Se a opção for usada sem um valor, o
-                     MSBuild usará o número de processadores do 
+                     MSBuild usará o número de processadores do
                      computador. (Forma abreviada: -m[:n])
       </target>
         <note>
@@ -1006,7 +1006,7 @@ arquivo de resposta.
         <target state="translated">Exemplos:
 
         MSBuild MyApp.sln -t:Rebuild -p:Configuration=Release
-        MSBuild MyApp.csproj -t:Clean 
+        MSBuild MyApp.csproj -t:Clean
                              -p:Configuration=Debug;TargetFrameworkVersion=v3.5
     </target>
         <note>
@@ -1167,12 +1167,12 @@ arquivo de resposta.
                      10 file loggers to be attached. (Short form: -fl[n])
     </source>
         <target state="translated">  -fileLogger[n] Registra a saída do build em um arquivo. Por padrão,
-                     o arquivo está no diretório atual e tem o nome 
+                     o arquivo está no diretório atual e tem o nome
                      "msbuild[n].log". Os eventos de todos os nós são combinados em
                      um único log. A localização do arquivo e outros
-                     parâmetros do fileLogger pode ser especificada por meio 
+                     parâmetros do fileLogger pode ser especificada por meio
                      do acréscimo da opção "-fileLoggerParameters[n]".
-                     "n", se presente, pode ser um dígito de 1 a 9, permitindo que até 
+                     "n", se presente, pode ser um dígito de 1 a 9, permitindo que até
                      10 agentes de arquivo sejam anexados. (Forma abreviada: -fl[n])
     </target>
         <note>
@@ -1325,14 +1325,14 @@ arquivo de resposta.
                      Example:
                        -pp:out.txt
     </source>
-        <target state="translated">  -preprocess[:arquivo] 
+        <target state="translated">  -preprocess[:arquivo]
                      Cria um arquivo de projeto único e agregado
                      embutindo todos os arquivos que poderiam ser importados durante um
                      build, com seus limites marcados. Isso pode ser
                      útil para descobrir quais arquivos são importados,
                      de qual localização e como contribuirão para
                      o build. Por padrão, a saída é gravada na
-                     janela do console. Se o caminho de um arquivo de saída 
+                     janela do console. Se o caminho de um arquivo de saída
                      for fornecido, ele será usado.
                      (Forma abreviada: -pp)
                      Exemplo:
@@ -1731,7 +1731,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3}s)</target>
+        <target state="needs-review-translation">{0}{1} {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1751,7 +1751,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
+        <target state="needs-review-translation">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1811,7 +1811,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="translated">Restauração concluída ({0}s)</target>
+        <target state="needs-review-translation">Restauração concluída ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
@@ -1819,7 +1819,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="translated">Restaurar {0} em {1}s</target>
+        <target state="needs-review-translation">Restaurar {0} em {1}s</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1913,7 +1913,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="translated">{0}{1} teste {2} ({3}s)</target>
+        <target state="needs-review-translation">{0}{1} teste {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1925,7 +1925,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} teste {2} {3} ({4}s)</target>
+        <target state="needs-review-translation">{0}{1} teste {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1943,7 +1943,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="translated">duração: {0}s</target>
+        <target state="needs-review-translation">duração: {0}s</target>
         <note>
       {0} whole number
       's' should reflect the localized abbreviation for seconds
@@ -2123,7 +2123,7 @@ arquivo de resposta.
                        -warnAsError:MSB4130
 
                      Quando um aviso for tratado como um erro, o destino continuará
-                     a ser executado como se ele fosse um aviso, mas o 
+                     a ser executado como se ele fosse um aviso, mas o
                      build geral falhará.
     </target>
         <note>
