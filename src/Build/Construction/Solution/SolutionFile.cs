@@ -223,7 +223,7 @@ namespace Microsoft.Build.Construction
             {
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_13) && string.IsNullOrEmpty(value))
                 {
-                    throw new ArgumentException(nameof(FullPath));
+                    throw new ArgumentNullException(nameof(FullPath));
                 }
                 // Should already be canonicalized to a full path
                 ErrorUtilities.VerifyThrowInternalRooted(value);
