@@ -49,7 +49,7 @@
 
   <Target Name="RemoveExtraAssemblyReferences" BeforeTargets="ResolveAssemblyReferences">
     <!-- This is really hacky, but these references will cause issues when trying to 'build' this project.
-         To acquire the NuGet binaries we depend on for local run-time ('bootstrap'), we we are using a PackageReference (to
+         To acquire the NuGet binaries we depend on for local run-time ('bootstrap'), we are using a PackageReference (to
          'NuGet.Build.Tasks' and 'Microsoft.Build.NuGetSdkResolver'). This has the advantage of using NuGets compatibility
          check to ensure we choose the right version of those assemblies. But, at 'bootstrap' time these runtime dependencies
          need to be in a specific location that does not mesh with NuGet. To resolve this, we include the default
@@ -60,6 +60,7 @@
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Newtonsoft.Json'))' == 'true'" />
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGetSdkResolver'))' == 'true'" />
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Extensions.'))' == 'true'" />
+        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.VisualStudio.SolutionPersistence'))' == 'true'" />
     </ItemGroup>
   </Target>
 
