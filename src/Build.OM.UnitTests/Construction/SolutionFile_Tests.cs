@@ -32,31 +32,31 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void ParseSolution_VC()
         {
+            string solutionFileContents =
+            """
+            Microsoft Visual Studio Solution File, Format Version 9.00
+            # Visual Studio 2005
+            Project('{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}') = 'Project name.vcproj', 'Relative path\to\Project name.vcproj', '{0ABED153-9451-483C-8140-9E8D7306B216}'
+            EndProject
+            Global
+                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                    Debug|AnyCPU = Debug|AnyCPU
+                    Release|AnyCPU = Release|AnyCPU
+                EndGlobalSection
+                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                    {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+                    {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+                    {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+                    {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.Build.0 = Release|AnyCPU
+                EndGlobalSection
+                GlobalSection(SolutionProperties) = preSolution
+                    HideSolutionNode = FALSE
+                EndGlobalSection
+            EndGlobalf
+            """;
+
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                string solutionFileContents =
-                """
-                Microsoft Visual Studio Solution File, Format Version 9.00
-                # Visual Studio 2005
-                Project('{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}') = 'Project name.vcproj', 'Relative path\to\Project name.vcproj', '{0ABED153-9451-483C-8140-9E8D7306B216}'
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|AnyCPU = Debug|AnyCPU
-                        Release|AnyCPU = Release|AnyCPU
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
-                        {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
-                        {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
-                        {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.Build.0 = Release|AnyCPU
-                    EndGlobalSection
-                    GlobalSection(SolutionProperties) = preSolution
-                        HideSolutionNode = FALSE
-                    EndGlobalSection
-                EndGlobal
-                """;
-
                 ParseSolutionHelper(solutionFileContents);
                 Assert.Fail("Should not get here");
             });
@@ -112,31 +112,31 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void ParseSolution_EmptyProjectName()
         {
+            string solutionFileContents =
+            """
+            Microsoft Visual Studio Solution File, Format Version 9.00
+            # Visual Studio 2005
+            Project('{Project GUID}') = '', 'src\.proj', '{0ABED153-9451-483C-8140-9E8D7306B216}'
+            EndProject
+            Global
+                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                    Debug|AnyCPU = Debug|AnyCPU
+                    Release|AnyCPU = Release|AnyCPU
+                EndGlobalSection
+                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                    {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+                    {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+                    {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+                    {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.Build.0 = Release|AnyCPU
+                EndGlobalSection
+                GlobalSection(SolutionProperties) = preSolution
+                    HideSolutionNode = FALSE
+                EndGlobalSection
+            EndGlobal
+            """;
+
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                string solutionFileContents =
-                """
-                Microsoft Visual Studio Solution File, Format Version 9.00
-                # Visual Studio 2005
-                Project('{Project GUID}') = '', 'src\.proj', '{0ABED153-9451-483C-8140-9E8D7306B216}'
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|AnyCPU = Debug|AnyCPU
-                        Release|AnyCPU = Release|AnyCPU
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
-                        {0ABED153-9451-483C-8140-9E8D7306B216}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
-                        {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
-                        {0ABED153-9451-483C-8140-9E8D7306B216}.Release|AnyCPU.Build.0 = Release|AnyCPU
-                    EndGlobalSection
-                    GlobalSection(SolutionProperties) = preSolution
-                        HideSolutionNode = FALSE
-                    EndGlobalSection
-                EndGlobal
-                """;
-
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
             });
         }
