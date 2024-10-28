@@ -17,11 +17,12 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">在 {1} 中生成 {0}</target>
+        <target state="needs-review-translation">在 {1} 秒内生成 {0}</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
@@ -86,9 +87,10 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
+        <target state="needs-review-translation">({0:F1}s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
+        's' should reflect the localized abbreviation for seconds
       </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
@@ -315,10 +317,10 @@
       <trans-unit id="HelpMessage_52_BuildCheckSwitch">
         <source>  -check
                      Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
+                     BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="translated">  -check
+        <target state="needs-review-translation">  -check
                      在生成中启用 BuildChecks。
                      BuildCheck 允许评估规则以确保生成的
                      属性。有关详细信息，请参阅 aka.ms/buildcheck
@@ -899,9 +901,9 @@
             WarningsOnly -- 仅显示警告。
             NoItemAndPropertyList -- 在开始生成每个项目时不显示
               项和属性的列表。
-            ShowCommandLine -- 显示 TaskCommandLineEvent 消息 
+            ShowCommandLine -- 显示 TaskCommandLineEvent 消息
             ShowTimestamp -- 将时间戳作为所有消息的前缀
-              显示。                      
+              显示。
             ShowEventId -- 显示已开始事件、已完成事件和消息
               的事件 ID。
             ForceNoAlign -- 不将文本与控制台缓冲区的大小
@@ -958,10 +960,10 @@
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate     依据默认架构验证项目。(缩写: 
+        <target state="translated">  -validate     依据默认架构验证项目。(缩写:
            -val)
 
- -validate:&lt;schema&gt; 依据指定的架构验证项目。(缩写: 
+ -validate:&lt;schema&gt; 依据指定的架构验证项目。(缩写:
            -val)
            示例:
             -validate:MyExtendedBuildSchema.xsd
@@ -1139,7 +1141,7 @@
         <target state="translated">  -toolsversion:&lt;version&gt;
            要在生成过程中使用的 MSBuild 工具集
            (任务、目标等)的版本。此版本将重写
-           各个项目指定的版本。(缩写: 
+           各个项目指定的版本。(缩写:
            -tv)
            示例:
             -toolsversion:3.5
@@ -1195,17 +1197,17 @@
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="translated">  -distributedFileLogger                            
+        <target state="translated">  -distributedFileLogger
            将生成输出记录到多个日志文件，每个 MSBuild 节点
            一个日志文件。这些文件的初始位置为
            当前目录。默认情况下，这些文件名为
            “MSBuild&lt;nodeid&gt;.log”。可通过添加
-           “-fileLoggerParameters”开关来指定 
+           “-fileLoggerParameters”开关来指定
            这些文件的位置和 fileLogger 的其他参数。
 
            如果日志文件名是通过 fileLoggerParameters
            开关设置的，分布式记录器将使用 fileName 作为
-           模板并将节点 ID 附加到此 fileName 
+           模板并将节点 ID 附加到此 fileName
            以便为每个节点创建一个日志文件。
     </target>
         <note>
@@ -1247,12 +1249,12 @@
                        -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="translated">  -fileloggerparameters[n]:&lt;parameters&gt;                
+        <target state="translated">  -fileloggerparameters[n]:&lt;parameters&gt;
            为文件记录器提供任何额外的参数。
            存在此开关意味着
            存在对应的 -filelogger[n] 开关。
           “n”(如果存在)可以为 1-9 的数字。
-           任何分布式文件记录器也可以使用 
+           任何分布式文件记录器也可以使用
            -fileloggerparameters，具体可参阅 -distributedFileLogger 的说明。
            (缩写: -flp[n])
            为控制台记录器列出的相同参数
@@ -1272,8 +1274,8 @@
             -fileLoggerParameters:LogFile=MyLog.log;Append;
                       Verbosity=diagnostic;Encoding=UTF-8
 
-            -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-            -flp1:warningsonly;logfile=msbuild.wrn 
+            -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+            -flp1:warningsonly;logfile=msbuild.wrn
             -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1728,13 +1730,14 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3})</target>
+        <target state="needs-review-translation">{0}{1} {2} ({3} 秒)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
       {1}: project name
       {2}: BuildResult_{X}
       {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
@@ -1747,7 +1750,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4})</target>
+        <target state="needs-review-translation">{0}{1} {2} {3} ({4} 秒)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1755,6 +1758,7 @@
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="ProjectNotFoundError">
@@ -1806,18 +1810,20 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="translated">还原完成({0})</target>
+        <target state="needs-review-translation">还原完成({0} 秒)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="translated">在 {1} 中还原 {0}</target>
+        <target state="needs-review-translation">在 {1} 秒内还原 {0}</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="SAC">
@@ -1906,18 +1912,19 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="translated">{0}{1} 测试 {2} ({3} 秒)</target>
+        <target state="needs-review-translation">{0}{1} 测试 {2} ({3} 秒)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
       {1}: project name
       {2}: BuildResult_{X}
       {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} 测试 {2} {3} ({4} 秒)</target>
+        <target state="needs-review-translation">{0}{1} 测试 {2} {3} ({4} 秒)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1925,6 +1932,7 @@
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="TestSummary_BannerAndTotal">
@@ -1934,8 +1942,11 @@
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="translated">持续时间: {0} 秒</target>
-        <note>{0} whole number</note>
+        <target state="needs-review-translation">持续时间: {0} 秒</target>
+        <note>
+      {0} whole number
+      's' should reflect the localized abbreviation for seconds
+    </note>
       </trans-unit>
       <trans-unit id="TestSummary_Failed">
         <source>failed: {0}</source>
