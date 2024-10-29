@@ -18,9 +18,6 @@
     <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
-    <!-- Override Arcade's default VSSDK version with one that supports client enablement.
-         Can be removed after Arcade moves up. -->
-    <MicrosoftVSSDKBuildToolsVersion>16.7.13</MicrosoftVSSDKBuildToolsVersion>
   </PropertyGroup>
   <!-- Production Dependencies -->
   <PropertyGroup>
