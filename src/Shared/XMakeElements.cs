@@ -49,7 +49,7 @@ namespace Microsoft.Build.Shared
             usingTask,
             projectExtensions,
             onError,
-            // import "Import" items are used by Visual Basic projects
+            // import, "Import" items are used by Visual Basic projects
             importGroup,
             choose,
             when,
