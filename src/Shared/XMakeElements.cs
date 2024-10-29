@@ -53,7 +53,7 @@ namespace Microsoft.Build.Shared
             importGroup,
             choose,
             when,
-            otherwise
+            otherwise,
         ];
     }
 }
