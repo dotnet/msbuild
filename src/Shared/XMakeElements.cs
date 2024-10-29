@@ -38,7 +38,7 @@ namespace Microsoft.Build.Shared
         internal static char[] InvalidTargetNameCharacters => [ '$', '@', '(', ')', '%', '*', '?', '.' ];
 
         // Names that cannot be used as property or item names because they are reserved
-        internal static readonly HashSet<string> ReservedItemNames =
+        internal static HashSet<string> ReservedItemNames =>
         [
             // project, "Project" is not reserved, because unfortunately ProjectReference items already use it as metadata name.
             visualStudioProject,
