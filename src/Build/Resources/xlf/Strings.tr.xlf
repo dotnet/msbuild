@@ -759,7 +759,7 @@ Hatalar: {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Bu, MSBuild'de işlenmeyen bir istisnadır -- LÜTFEN MEVCUT BİR SORUNU OYLAYIN VEYA https://aka.ms/msbuild/unhandled ADRESİNDE YENİ BİR SORUN DOSYALAYIN
+        <target state="translated">Bu, MSBuild'de işlenmeyen bir istisnadır -- LÜTFEN MEVCUT BİR SORUNU OYLAYIN VEYA https://aka.ms/msbuild/unhandled ADRESİNDE YENİ BİR SORUN OLUŞTURUN
     {0}</target>
         <note />
       </trans-unit>
@@ -1579,8 +1579,8 @@ Hatalar: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeeded">
-        <source>MSB4075: The project file "{0}" must be opened in the Visual Studio IDE and converted to the latest version before it can be built by MSBuild.</source>
-        <target state="translated">MSB4075: MSBuild tarafından derlenebilmesi için, "{0}" proje dosyasının Visual Studio IDE içinde açılması ve en son sürüme dönüştürülmesi gerekir.</target>
+        <source>MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</source>
+        <target state="new">MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</target>
         <note>{StrBegin="MSB4075: "}</note>
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeededToVcxProj">
