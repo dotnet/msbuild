@@ -34,14 +34,14 @@
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with {0} error(s)</source>
-        <target state="translated">selhalo s {0} chybou/chybami.</target>
+        <target state="translated">selhalo s {0} chybami.</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
         <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="translated">selhalo s chybami (celkem {0}) a upozorněními (celkem {1})</target>
+        <target state="translated">selhalo s {0} chybami a {1} upozorněními.</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -62,7 +62,7 @@
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with {0} warning(s)</source>
-        <target state="translated">uspělo s {0} upozorněním(i).</target>
+        <target state="translated">akce proběhla úspěšně s {0} upozorněním(i).</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -321,10 +321,10 @@
                      BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="needs-review-translation">  -check
-                     Povolí během sestavení BuildChecks.
-                     BuildCheck umožňuje vyhodnocovat pravidla, aby se zajistily vlastnosti 
-                     sestavení. Další informace viz aka.ms/buildcheck
+        <target state="new">  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties
+                     of the build. For more info see aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -642,7 +642,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <target state="translated">  -warnNotAsError[:code[;code2]]
                      Seznam kódů upozornění, které se nemají považovat za chyby.
                      K oddělení
- více kódů upozornění použijte středník 
+ více kódů upozornění použijte středník
                      nebo čárku. Nemá žádný vliv, pokud přepínač -warnaserror
                      není nastavený.
 
@@ -709,9 +709,9 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <target state="translated">  @&lt;soubor&gt;            Vložení nastavení příkazového řádku z textového souboru. Chcete-li zadat
                      více souborů odpovědí, uveďte každý soubor
                      odpovědí zvlášť.
-                     
-                     Automaticky jsou použity všechny soubory s názvem msbuild.rsp 
-                     nacházející se v následujících umístěních: 
+
+                     Automaticky jsou použity všechny soubory s názvem msbuild.rsp
+                     nacházející se v následujících umístěních:
                      (1) adresář nástroje msbuild.exe
                      (2) adresář prvního sestaveného projektu nebo řešení
 </target>
@@ -772,7 +772,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
 </source>
         <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Nastavení nebo potlačení daných vlastností na úrovni
                      projektu. &lt;n&gt; je název vlastnosti a &lt;v&gt; je její hodnota. Více
-                     vlastností oddělte středníkem či čárkou nebo zadejte 
+                     vlastností oddělte středníkem či čárkou nebo zadejte
                      každou vlastnost zvlášť. (Krátký tvar: -p)
                      Příklad:
                        -property:WarningLevel=2;OutDir=bin\Debug\
@@ -802,17 +802,20 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;logger&gt;   Použít daný protokolovací nástroj k protokolování událostí nástroje MSBuild. Pokud chcete zadat 
-                     více protokolovacích nástrojů, musíte je zadat jednotlivě.
-                     Syntaxe hodnoty &lt;logger&gt; je:
-                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
-                     Syntaxe hodnoty &lt;logger class&gt; je:
-                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
-                     Syntaxe hodnoty &lt;logger assembly&gt; je:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+        <target state="translated">  -logger:&lt;protok_nást&gt;   Použít daný protokolovací nástroj k protokolování
+                     událostí nástroje MSBuild. Chcete-li zadat více protokolovacích.
+                     nástrojů, musíte je zadat jednotlivě.
+                     Syntaxe hodnoty &lt;protok_nást&gt;:
+                        [&lt;třída_protok_nást&gt;,]&lt;sestavení_protok_nást&gt;
+                        [;&lt;param_protok_nást&gt;]
+                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
+                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
+                     Syntaxe hodnoty &lt;sestavení_protok_nást&gt;:
+                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
-                     Parametry &lt;logger parameters&gt; jsou volitelné a předávají se
-                     protokolovacímu nástroji přesně v tom tvaru, v jakém byly zadány. (Krátký tvar: -l)
+                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se
+                     protokolovacímu nástroji přesně v tom tvaru, v jakém
+                     byly zadány. (Krátký tvar: -l)
                      Příklady:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -920,7 +923,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                             režimu.
                         EnableMPLogging – povolí víceprocesorový styl výstupu
                             protokolování i při práci v jiném
-                            režimu. Tento styl protokolování je výchozí. 
+                            režimu. Tento styl protokolování je výchozí.
                         ForceConsoleColor – použije barvy konzoly ANSI,
                             i když to konzola nepodporuje.
                         PreferConsoleColor– použije barvy konzoly ANSI, pouze pokud
@@ -965,10 +968,10 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          Ověřit projekt podle výchozího schématu. 
+        <target state="translated">  -validate          Ověřit projekt podle výchozího schématu.
                      (Krátký tvar: -val)
 
-  -validate:&lt;schéma&gt; Ověřit projekt podle zadaného schématu. 
+  -validate:&lt;schéma&gt; Ověřit projekt podle zadaného schématu.
                      (Krátký tvar: -val)
                      Příklad:
                        -validate:MyExtendedBuildSchema.xsd
@@ -1081,20 +1084,23 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
-                     Použít zadaný protokolovací nástroj pro protokolování událostí z nástroje MSBuild; ke každému uzlu připojit
-                     jinou instanci protokolovacího nástroje. Pokud chcete zadat více
+        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;
+                     Použít zadaný protokolovací nástroj pro protokolování událostí
+                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci
+                     protokolovacího nástroje. Chcete-li zadat více
                      protokolovacích nástrojů, uveďte je jednotlivě.
                      (Krátký tvar: -dl)
-                     Syntaxe hodnoty &lt;logger&gt; je:
-                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
-                     Syntaxe hodnoty &lt;logger class&gt; je:
-                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
-                     Syntaxe hodnoty &lt;logger assembly&gt; je:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     Syntaxe hodnoty &lt;protok_nást&gt;:
+                        [&lt;třída_protok_nást&gt;,]&lt;sestav_protok_nást&gt;
+                        [;&lt;param_protok_nást&gt;]
+                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
+                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
+                     Syntaxe hodnoty &lt;sestav_protok_nást&gt;:
+                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
                      Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se
-                     protokolovacímu nástroji přesně v zadaném tvaru. (Krátký tvar: -l)
+                     protokolovacímu nástroji přesně v zadaném tvaru.
+                     (Krátký tvar: -l)
                      Příklady:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -1146,7 +1152,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <target state="translated">  -toolsversion:&lt;verze&gt;
                      Verze sady nástrojů MSBuild (úloh, cílů apod.), která má být
                      použita při sestavení. Tato verze má přednost před verzemi
-                     uvedenými v jednotlivých projektech. 
+                     uvedenými v jednotlivých projektech.
                      (Krátký tvar: -tv)
                      Příklad:
                        -toolsversion:3.5
@@ -1264,24 +1270,24 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                      popis přepínače -distributedFileLogger.
                      (Krátký tvar: -flp[n])
                      K dispozici jsou stejné parametry jako ty,
-                     které jsou uvedeny u protokolovacího nástroje 
+                     které jsou uvedeny u protokolovacího nástroje
                      konzoly. Některé další dostupné parametry:
                        LogFile – cesta k souboru protokolu, do nějž bude zapsán
-                                  protokol sestavení 
+                                  protokol sestavení
                        Append  – určuje, zda bude protokol sestavení připojen
-                                  k souboru protokolu, nebo jej přepíše. Při nastavení 
+                                  k souboru protokolu, nebo jej přepíše. Při nastavení
                                   přepínače bude protokol sestavení připojen k souboru
-                                  protokolu. Není-li přepínač nastaven, bude obsah 
-                                  existujícího souboru protokolu přepsán. 
+                                  protokolu. Není-li přepínač nastaven, bude obsah
+                                  existujícího souboru protokolu přepsán.
                                   Podle výchozího nastavení je soubor protokolu přepsán.
-                       Encoding – určuje kódování souboru, například 
+                       Encoding – určuje kódování souboru, například
                      UTF-8, Unicode nebo ASCII.
                        Výchozí úroveň podrobností je Detailed.
                      Příklady:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                              Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
                        -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
