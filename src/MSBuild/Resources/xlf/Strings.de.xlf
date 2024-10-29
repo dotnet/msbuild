@@ -17,7 +17,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="needs-review-translation">Erstellen von {0} in {1}s</target>
+        <target state="translated">Erstellen von {0} in {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -87,7 +87,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="needs-review-translation">({0:F1}s)</target>
+        <target state="translated">({0:F1}s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
@@ -287,7 +287,7 @@
                         Logger
                         showCommandLine: TaskCommandLineEvent-Meldungen anzeigen
 
-                      Beispiel:
+                      Beispiel: 
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
@@ -306,7 +306,7 @@
         <target state="translated">  -getResultOutputFile:file
                      Leiten Sie die Ausgabe von get* in eine Datei um.
 
-                     Beispiel:
+                     Beispiel: 
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      Dadurch wird der Wert der Eigenschaftsleiste in Biz.txt geschrieben.
     </target>
@@ -321,10 +321,10 @@
                      BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     Aktiviert BuildChecks während des Builds.
+                     BuildCheck ermöglicht die Regelauswertung, um Eigenschaften 
+                     des Builds sicherzustellen. Weitere Infos: aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -469,7 +469,7 @@
                      value that comes from a response file.
     </source>
         <target state="translated">  -interactive[:True|False]
-                     Weist darauf hin, dass für Aktionen im Build eine
+                     Weist darauf hin, dass für Aktionen im Build eine 
                      Interaktion mit dem Benutzer zugelassen ist. Verwenden Sie dieses Argument
                      in einem automatisierten Szenario, in dem keine Interaktivität
                      erwartet wird.
@@ -638,7 +638,7 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
     </source>
         <target state="translated">  -warnNotAsError[:code[;code2]]
                      Liste der Warnungscodes, die nicht als Fehler behandelt werden.
-                     Semikolon oder Komma zum Trennen
+                     Semikolon oder Komma zum Trennen 
                      mehrerer Warnungscodes verwenden. Hat keine Auswirkungen, wenn der Switch -warnaserror
                      nicht festgelegt ist.
 
@@ -706,8 +706,8 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
                      Antwortdateien anzugeben, geben Sie jede Antwortdatei
                      gesondert an.
 
-                     Alle Antwortdateien mit dem Name "msbuild.rsp" werden automatisch
-                     in den folgenden Speicherorten verwendet:
+                     Alle Antwortdateien mit dem Name "msbuild.rsp" werden automatisch 
+                     in den folgenden Speicherorten verwendet: 
                      (1) Verzeichnis von "msbuild.exe"
                      (2) Verzeichnis des ersten erstellten Projekts oder Projektmappe
 </target>
@@ -798,7 +798,7 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben,
+        <target state="translated">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben, 
                      wird jede Protokollierung gesondert angegeben.
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
                        [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
@@ -807,7 +807,7 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
                        {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
-                     Die &lt;Protokollierungsparameter&gt; sind optional und werden genau
+                     Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
                      Beispiele:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -902,7 +902,7 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
                         WarningsOnly: Zeigt nur Warnungen an.
                         NoItemAndPropertyList: Zeigt keine Liste der Elemente
                             und Eigenschaften am Anfang jeder Projekterstellung an.
-                        ShowCommandLine: Zeigt TaskCommandLineEvent-Meldungen an.
+                        ShowCommandLine: Zeigt TaskCommandLineEvent-Meldungen an. 
                         ShowTimestamp: Zeigt den Timestamp als Präfix einer
                             Meldung an.
                         ShowEventId: Zeigt die eventId für gestartete
@@ -1078,8 +1078,8 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
         <target state="translated">  -distributedlogger:&lt;Zentrale Protokollierung&gt;*&lt;Weiterleitende Protokollierung&gt;
-                     Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert, wobei an jeden Knoten eine andere
-                     Protokollierungsinstanz angefügt wird. Um mehrere Protokollierungen anzugeben, wird jede Protokollierung
+                     Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert, wobei an jeden Knoten eine andere 
+                     Protokollierungsinstanz angefügt wird. Um mehrere Protokollierungen anzugeben, wird jede Protokollierung 
                      gesondert angegeben.
                      (Kurzform -dl)
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
@@ -1089,7 +1089,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
                        {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
-                     Die &lt;Protokollierungsparameter&gt; sind optional und werden genau
+                     Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
                      Beispiele:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -1114,8 +1114,8 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreprojectextensions:&lt;Erweiterungen&gt;
-                     Liste der zu ignorierenden Erweiterungen, wenn die zu erstellende
-                     Projektdatei ermittelt wird. Verwenden Sie ein Semikolon oder ein Komma,
+                     Liste der zu ignorierenden Erweiterungen, wenn die zu erstellende 
+                     Projektdatei ermittelt wird. Verwenden Sie ein Semikolon oder ein Komma, 
                      um mehrere Erweiterungen voneinander zu trennen.
                      (Kurzform: -ignore)
                      Beispiel:
@@ -1141,8 +1141,8 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
    </source>
         <target state="translated">  -toolsversion:&lt;Version&gt;
                      Die Version des MSBuild-Toolsets (Aufgaben, Ziele usw.),
-                     die während des Erstellens zu verwenden ist. Diese Version überschreibt die
-                     von einzelnen Projekten angegebenen Versionen. (Kurzform:
+                     die während des Erstellens zu verwenden ist. Diese Version überschreibt die 
+                     von einzelnen Projekten angegebenen Versionen. (Kurzform: 
                      -tv)
                      Beispiel:
                        -toolsversion:3.5
@@ -1201,14 +1201,14 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
         <target state="translated">  -distributedFileLogger
                      Protokolliert die Erstellungsausgabe in mehrere Dateien, eine Protokolldatei
                      pro MSBuild-Knoten. Der anfängliche Speicherort für diese Dateien ist
-                     das aktuelle Verzeichnis. Standardmäßig werden die Dateien
+                     das aktuelle Verzeichnis. Standardmäßig werden die Dateien 
                      "MSBuild&lt;Knoten-ID&gt;.log" benannt. Der Speicherort der Datei und
-                     andere Parameter für fileLogger können durch das Hinzufügen
+                     andere Parameter für fileLogger können durch das Hinzufügen 
                      des Schalters "-fileLoggerParameters" angegeben werden.
 
                      Wenn mithilfe des fileLoggerParameters-Parameters ein Protokolldateiname festgelegt wurde,
-                     verwendet die verteilte Protokollierung den Dateinamen als
-                     Vorlage und fügt die Knoten-ID an diesen Dateinamen an,
+                     verwendet die verteilte Protokollierung den Dateinamen als 
+                     Vorlage und fügt die Knoten-ID an diesen Dateinamen an, 
                      um für jeden Knoten eine Protokolldatei zu erstellen.
     </target>
         <note>
@@ -1252,31 +1252,31 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;Parameter&gt;
                      Gibt zusätzliche Parameter für Dateiprotokollierungen an.
-                     Dieser Schalter bedeutet, dass der entsprechende
+                     Dieser Schalter bedeutet, dass der entsprechende 
                      Schalter "-fileLogger[n]" ebenfalls vorhanden ist.
                      "n" (optional) kann eine Zahl von 1–9 sein.
-                     "-fileLoggerParameters" wird auch von verteilten
+                     "-fileLoggerParameters" wird auch von verteilten 
                      Dateiprotokollierungen verwendet (siehe Beschreibung zu "-distributedFileLogger").
                      (Kurzform: -flp[n])
                      Es sind dieselben Parameter wie für die Konsolenprotokollierung
                      verfügbar. Einige zusätzliche Parameter:
-                        LogFile: Pfad der Protokolldatei, in die das
+                        LogFile: Pfad der Protokolldatei, in die das 
                             Buildprotokoll geschrieben wird.
-                        Append: Gibt an, ob das Buildprotokoll erweitert oder
+                        Append: Gibt an, ob das Buildprotokoll erweitert oder 
                             oder überschrieben wird. Mit diesem Schalter
                             wird das Buildprotokoll an die Protokolldatei angefügt;
-                            Ohne diesen Schalter wird der Inhalt
-                            der vorhandenen Protokolldatei überschrieben.
+                            Ohne diesen Schalter wird der Inhalt 
+                            der vorhandenen Protokolldatei überschrieben. 
                             Standardmäßig wird die Protokolldatei nicht erweitert.
-                        Encoding: Gibt die Codierung der Datei an,
+                        Encoding: Gibt die Codierung der Datei an, 
                             z. B. UTF-8, Unicode oder ASCII.
                      Die Standardeinstellung für "verbosity" ist "Detailed".
                      Beispiele:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1302,7 +1302,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
         <target state="translated">  -nodeReuse:&lt;Parameter&gt;
                      Aktiviert oder deaktiviert die Wiederverwendung von MSBuild-Knoten.
                      Die Parameter lauten:
-                     True: Knoten bleiben nach dem Abschluss der Erstellung
+                     True: Knoten bleiben nach dem Abschluss der Erstellung 
                      erhalten und werden bei folgenden Erstellungen wiederverwendet (Standardeinstellung).
                      False: Knoten bleiben nach dem Abschluss der Erstellung nicht erhalten.
                      (Kurzform: -nr)
@@ -1731,7 +1731,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} ({3}s)</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1751,7 +1751,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1811,7 +1811,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="needs-review-translation">Wiederherstellung abgeschlossen ({0}s)</target>
+        <target state="translated">Wiederherstellung abgeschlossen ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
@@ -1819,7 +1819,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="needs-review-translation">Wiederherstellen von {0} in {1}s</target>
+        <target state="translated">Wiederherstellen von {0} in {1}s</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1913,7 +1913,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="needs-review-translation">{0}{1} Test {2} ({3}s)</target>
+        <target state="translated">{0}{1} Test {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1925,7 +1925,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="needs-review-translation">{0}{1} Test {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} Test {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1943,7 +1943,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="needs-review-translation">Dauer: {0} Sek.</target>
+        <target state="translated">Dauer: {0} Sek.</target>
         <note>
       {0} whole number
       's' should reflect the localized abbreviation for seconds

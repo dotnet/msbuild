@@ -17,7 +17,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="needs-review-translation">Kompiluj {0} w {1}s</target>
+        <target state="translated">Kompiluj {0} w {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -87,7 +87,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="needs-review-translation">({0:F1}s)</target>
+        <target state="translated">({0:F1}s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
@@ -320,10 +320,10 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     Włącza funkcję BuildChecks podczas kompilacji.
+                     Funkcja BuildCheck umożliwia ocenę reguł w celu zapewnienia właściwości
+                     kompilacji. Aby uzyskać więcej informacji, zobacz aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -474,7 +474,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      interakcyjność nie jest oczekiwana.
                      Podanie parametru -interactive jest równoznaczne
                      z podaniem parametru -interactive:true. Użyj tego
-                     parametru, aby przesłonić wartość pochodzącą z pliku
+                     parametru, aby przesłonić wartość pochodzącą z pliku 
                      odpowiedzi.
     </target>
         <note>
@@ -509,7 +509,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      Po ustawieniu na wartość „MessageUponIsolationViolation” (lub jej skróconą
                      formę „Message”), serializowane są tylko wyniki z celów najwyższego poziomu
                      , jeśli przełącznik -outputResultsCache jest
-                     dostarczony. Ma to na celu zmniejszenie szans na to, że cel
+                     dostarczony. Ma to na celu zmniejszenie szans na to, że cel 
                      naruszy izolację w projekcie zależnym przy użyciu
                      nieprawidłowego stanu z powodu jego zależności od buforowanego celu
                      którego efekty uboczne nie byłyby brane pod uwagę.
@@ -543,7 +543,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -graphBuild[:True|False]
-                     Powoduje, że program MSBuild tworzy i kompiluje graf
+                     Powoduje, że program MSBuild tworzy i kompiluje graf                 
                      projektu.
 
                      Tworzenie grafu obejmuje identyfikowanie odwołań do
@@ -711,7 +711,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      osobno.
 
                      Wszelkie pliki odpowiedzi o nazwie „msbuild.rsp” będą automatycznie
-                     wykorzystywane z następujących lokalizacji:
+                     wykorzystywane z następujących lokalizacji: 
                      (1) katalog programu msbuild.exe
                      (2) katalog pierwszej kompilacji projektu lub rozwiązania
 </target>
@@ -1033,7 +1033,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      to False, this sets it to True. (short form: -irc)
    </source>
         <target state="translated">  -inputResultsCaches:&lt;cacheFile&gt;...
-                     Rozdzielona średnikami lista wejściowych plików pamięci podręcznej, z których MSBuild
+                     Rozdzielona średnikami lista wejściowych plików pamięci podręcznej, z których MSBuild 
                      odczyta wyniki kompilacji. Jeśli jest ustawione -isolateProjects
                      na wartość Fałsz, ta opcja ustawia ją na wartość Prawda. (skrócona forma: -irc)
    </target>
@@ -1271,7 +1271,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      Dostępne są parametry takie same, jak podane dla rejestratora
                      konsoli. Dostępne są również dodatkowe parametry:
                        LogFile — ścieżka do pliku dziennika, w którym będzie
-                                 zapisywany dziennik kompilacji.
+                                 zapisywany dziennik kompilacji. 
                        Append — określa, czy plik dziennika kompilacji zostanie
                                 dołączony do pliku dziennika, czy go zastąpi.
                                 Ustawienie tego przełącznika powoduje dołączenie dziennika kompilacji
@@ -1285,8 +1285,8 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1741,7 +1741,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} ({3}s)</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1761,7 +1761,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1821,7 +1821,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="needs-review-translation">Zakończono przywracanie ({0}s)</target>
+        <target state="translated">Zakończono przywracanie ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
@@ -1829,7 +1829,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="needs-review-translation">Przywróć {0} w {1}s</target>
+        <target state="translated">Przywróć {0} w {1}s</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1923,7 +1923,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="needs-review-translation">{0}{1} test {2} ({3}s)</target>
+        <target state="translated">{0}{1} test {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1935,7 +1935,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="needs-review-translation">{0}{1} test {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} test {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1953,7 +1953,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="needs-review-translation">czas trwania: {0}s</target>
+        <target state="translated">czas trwania: {0}s</target>
         <note>
       {0} whole number
       's' should reflect the localized abbreviation for seconds
@@ -2288,10 +2288,10 @@ dzienników                     tekstowych i wykorzystać w innych narzędziach 
     </source>
         <target state="translated">  -restore[:True|False]
                      Uruchamia element docelowy o nazwie Restore przed skompilowaniem
-                     innych elementów docelowych i zapewnia, że kompilacja tych
-                     elementów docelowych korzysta z najnowszej logiki przywróconej
-                     kompilacji. Jest to przydatne, gdy drzewo projektu wymaga
-                     przywrócenia pakietów przed ich skompilowaniem. Podanie parametru
+                     innych elementów docelowych i zapewnia, że kompilacja tych 
+                     elementów docelowych korzysta z najnowszej logiki przywróconej 
+                     kompilacji. Jest to przydatne, gdy drzewo projektu wymaga 
+                     przywrócenia pakietów przed ich skompilowaniem. Podanie parametru 
                      -restore jest równoznaczne z podaniem parametru -restore:True.
                      Za pomocą tego parametru można przesłonić wartość pochodzącą
                      z pliku odpowiedzi.
