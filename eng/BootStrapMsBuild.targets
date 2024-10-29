@@ -238,4 +238,6 @@
 
   </Target>
 
+   <Import Project=".\TestAssets.targets" />
+
 </Project>
