@@ -17,7 +17,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="needs-review-translation">Sestavení {0} za {1}s</target>
+        <target state="translated">Sestavení {0} za {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -87,7 +87,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="needs-review-translation">({0:F1} s)</target>
+        <target state="translated">({0:F1} s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
@@ -321,10 +321,10 @@
                      BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     Povolí během sestavování BuildChecks.
+                     BuildCheck umožňuje vyhodnocovat pravidla, aby se zajistily vlastnosti
+                     sestavení. Další informace viz aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -642,7 +642,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <target state="translated">  -warnNotAsError[:code[;code2]]
                      Seznam kódů upozornění, které se nemají považovat za chyby.
                      K oddělení
- více kódů upozornění použijte středník
+ více kódů upozornění použijte středník 
                      nebo čárku. Nemá žádný vliv, pokud přepínač -warnaserror
                      není nastavený.
 
@@ -709,9 +709,9 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <target state="translated">  @&lt;soubor&gt;            Vložení nastavení příkazového řádku z textového souboru. Chcete-li zadat
                      více souborů odpovědí, uveďte každý soubor
                      odpovědí zvlášť.
-
-                     Automaticky jsou použity všechny soubory s názvem msbuild.rsp
-                     nacházející se v následujících umístěních:
+                     
+                     Automaticky jsou použity všechny soubory s názvem msbuild.rsp 
+                     nacházející se v následujících umístěních: 
                      (1) adresář nástroje msbuild.exe
                      (2) adresář prvního sestaveného projektu nebo řešení
 </target>
@@ -772,7 +772,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
 </source>
         <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  Nastavení nebo potlačení daných vlastností na úrovni
                      projektu. &lt;n&gt; je název vlastnosti a &lt;v&gt; je její hodnota. Více
-                     vlastností oddělte středníkem či čárkou nebo zadejte
+                     vlastností oddělte středníkem či čárkou nebo zadejte 
                      každou vlastnost zvlášť. (Krátký tvar: -p)
                      Příklad:
                        -property:WarningLevel=2;OutDir=bin\Debug\
@@ -813,7 +813,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                      Syntaxe hodnoty &lt;sestavení_protok_nást&gt;:
                         {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
-                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se
+                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se 
                      protokolovacímu nástroji přesně v tom tvaru, v jakém
                      byly zadány. (Krátký tvar: -l)
                      Příklady:
@@ -923,7 +923,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                             režimu.
                         EnableMPLogging – povolí víceprocesorový styl výstupu
                             protokolování i při práci v jiném
-                            režimu. Tento styl protokolování je výchozí.
+                            režimu. Tento styl protokolování je výchozí. 
                         ForceConsoleColor – použije barvy konzoly ANSI,
                             i když to konzola nepodporuje.
                         PreferConsoleColor– použije barvy konzoly ANSI, pouze pokud
@@ -968,10 +968,10 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          Ověřit projekt podle výchozího schématu.
+        <target state="translated">  -validate          Ověřit projekt podle výchozího schématu. 
                      (Krátký tvar: -val)
 
-  -validate:&lt;schéma&gt; Ověřit projekt podle zadaného schématu.
+  -validate:&lt;schéma&gt; Ověřit projekt podle zadaného schématu. 
                      (Krátký tvar: -val)
                      Příklad:
                        -validate:MyExtendedBuildSchema.xsd
@@ -1084,11 +1084,11 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;
+        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;                     
                      Použít zadaný protokolovací nástroj pro protokolování událostí
-                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci
-                     protokolovacího nástroje. Chcete-li zadat více
-                     protokolovacích nástrojů, uveďte je jednotlivě.
+                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci 
+                     protokolovacího nástroje. Chcete-li zadat více 
+                     protokolovacích nástrojů, uveďte je jednotlivě. 
                      (Krátký tvar: -dl)
                      Syntaxe hodnoty &lt;protok_nást&gt;:
                         [&lt;třída_protok_nást&gt;,]&lt;sestav_protok_nást&gt;
@@ -1152,7 +1152,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <target state="translated">  -toolsversion:&lt;verze&gt;
                      Verze sady nástrojů MSBuild (úloh, cílů apod.), která má být
                      použita při sestavení. Tato verze má přednost před verzemi
-                     uvedenými v jednotlivých projektech.
+                     uvedenými v jednotlivých projektech. 
                      (Krátký tvar: -tv)
                      Příklad:
                        -toolsversion:3.5
@@ -1270,25 +1270,25 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                      popis přepínače -distributedFileLogger.
                      (Krátký tvar: -flp[n])
                      K dispozici jsou stejné parametry jako ty,
-                     které jsou uvedeny u protokolovacího nástroje
+                     které jsou uvedeny u protokolovacího nástroje 
                      konzoly. Některé další dostupné parametry:
                        LogFile – cesta k souboru protokolu, do nějž bude zapsán
-                                  protokol sestavení
+                                  protokol sestavení 
                        Append  – určuje, zda bude protokol sestavení připojen
-                                  k souboru protokolu, nebo jej přepíše. Při nastavení
+                                  k souboru protokolu, nebo jej přepíše. Při nastavení 
                                   přepínače bude protokol sestavení připojen k souboru
-                                  protokolu. Není-li přepínač nastaven, bude obsah
-                                  existujícího souboru protokolu přepsán.
+                                  protokolu. Není-li přepínač nastaven, bude obsah 
+                                  existujícího souboru protokolu přepsán. 
                                   Podle výchozího nastavení je soubor protokolu přepsán.
-                       Encoding – určuje kódování souboru, například
+                       Encoding – určuje kódování souboru, například 
                      UTF-8, Unicode nebo ASCII.
                        Výchozí úroveň podrobností je Detailed.
                      Příklady:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                              Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-                       -flp1:warningsonly;logfile=msbuild.wrn
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+                       -flp1:warningsonly;logfile=msbuild.wrn 
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1743,7 +1743,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} ({3}s)</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1763,7 +1763,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1823,7 +1823,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="needs-review-translation">Obnovení dokončeno ({0}s)</target>
+        <target state="translated">Obnovení dokončeno ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
@@ -1831,7 +1831,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="needs-review-translation">Obnoví se {0} za {1}s</target>
+        <target state="translated">Obnoví se {0} za {1}s</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1925,7 +1925,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="needs-review-translation">{0}{1} – test {2} ({3} s)</target>
+        <target state="translated">{0}{1} – test {2} ({3} s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1937,7 +1937,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="needs-review-translation">{0}{1} – test {2} {3} ({4} s)</target>
+        <target state="translated">{0}{1} – test {2} {3} ({4} s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1955,7 +1955,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="needs-review-translation">doba trvání: {0} s</target>
+        <target state="translated">doba trvání: {0} s</target>
         <note>
       {0} whole number
       's' should reflect the localized abbreviation for seconds
