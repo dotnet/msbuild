@@ -779,7 +779,7 @@ namespace Microsoft.Build.Internal
         /// <param name="items">Nongeneric list of items.</param>
         /// <param name="itemTypeNameToFetch">If not null, only the items with matching type (case insensitive, MSBuild valid names only) will be returned.</param>
         /// <returns></returns>
-        private static IEnumerable<ItemData> CastItemsOneByOne(IEnumerable items, string? itemTypeNameToFetch)
+        private static IEnumerable<ItemData> CastItemsOneByOne(IEnumerable items, string itemTypeNameToFetch)
         {
             foreach (var item in items)
             {
