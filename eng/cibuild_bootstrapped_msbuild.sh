@@ -58,7 +58,8 @@ bootstrapRoot="$Stage1Dir/bin/bootstrap"
 
 if [ $host_type = "core" ]
 then
-  props_file="$(dirname "$0")/Versions.props"
+  script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  props_file="$script_dir/Versions.props"
   sdk_version=$(grep -A1 "BootstrapSdkVersion" "$props_file" | grep -o ">.*<" | sed 's/[><]//g')
 
   _InitializeBuildTool="${bootstrapRoot}/core/dotnet"
