@@ -729,47 +729,36 @@ namespace Microsoft.Build.Internal
             }
             else
             {
-                return CastOneByOne(items);
+                return CastItemsOneByOne(items, null);
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types.
+        /// Only items with matching type (case insensitive, MSBuild valid names only) will be returned.
+        /// </summary>
+        public static IEnumerable<ItemData> EnumerateItemsOfType(IEnumerable items, string typeName)
+        {
+            if (items == null)
+            {
+                return [];
             }
 
-            IEnumerable<ItemData> CastOneByOne(IEnumerable itms)
+            if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
             {
-                foreach (var item in itms)
-                {
-                    string itemType = default;
-                    object itemValue = null;
-
-                    if (item is IItem iitem)
-                    {
-                        itemType = iitem.Key;
-                        itemValue = iitem;
-                    }
-                    else if (item is DictionaryEntry dictionaryEntry)
-                    {
-                        itemType = dictionaryEntry.Key as string;
-                        itemValue = dictionaryEntry.Value;
-                    }
-                    else
-                    {
-                        if (item == null)
-                        {
-                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
-                        }
-                        else
-                        {
-                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
-                        }
-                    }
-
-                    if (itemValue != null)
-                    {
-                        // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
-                        //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
-                        // However! NodePacketTranslator and BuildEventArgsReader might deserialize those as TaskItemData
-                        //  (see xml comments of TaskItemData for details)
-                        yield return new ItemData(itemType!, itemValue);
-                    }
-                }
+                return
+                    projectItemInstanceDictionary[typeName]
+                        .Select(i => new ItemData(i.ItemType, (IItemData)i));
+            }
+            else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
+            {
+                return
+                    projectItemDictionary[typeName]
+                        .Select(i => new ItemData(i.ItemType, (IItemData)i));
+            }
+            else
+            {
+                return CastItemsOneByOne(items, typeName);
             }
         }
 
@@ -781,6 +770,53 @@ namespace Microsoft.Build.Internal
             foreach (var tuple in EnumerateItems(items))
             {
                 callback(new DictionaryEntry(tuple.Type, tuple.Value));
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the nongeneric items and attempts to cast them.
+        /// </summary>
+        /// <param name="items">Nongeneric list of items.</param>
+        /// <param name="itemTypeNameToFetch">If not null, only the items with matching type (case insensitive, MSBuild valid names only) will be returned.</param>
+        /// <returns></returns>
+        private static IEnumerable<ItemData> CastItemsOneByOne(IEnumerable items, string? itemTypeNameToFetch)
+        {
+            foreach (var item in items)
+            {
+                string itemType = default;
+                object itemValue = null;
+
+                if (item is IItem iitem)
+                {
+                    itemType = iitem.Key;
+                    itemValue = iitem;
+                }
+                else if (item is DictionaryEntry dictionaryEntry)
+                {
+                    itemType = dictionaryEntry.Key as string;
+                    itemValue = dictionaryEntry.Value;
+                }
+                else
+                {
+                    if (item == null)
+                    {
+                        Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
+                    }
+                    else
+                    {
+                        Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
+                    }
+                }
+
+                // if itemTypeNameToFetch was not set - then return all items
+                if (itemValue != null && (itemTypeNameToFetch == null || MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, itemTypeNameToFetch)))
+                {
+                    // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
+                    //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
+                    // However! NodePacketTranslator and BuildEventArgsReader might deserialize those as TaskItemData
+                    //  (see xml comments of TaskItemData for details)
+                    yield return new ItemData(itemType!, itemValue);
+                }
             }
         }
     }

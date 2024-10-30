@@ -37,7 +37,7 @@ public readonly record struct PropertyData(string Name, string Value);
 /// Structure defining single MSBuild item instance.
 /// </summary>
 /// <remarks>
-/// The underlying Value property can be of various distinct types - so it's suggested to use provided accessor methods
+/// The underlying data can be of various distinct types - so it needs to be accessed via provided accessor methods
 /// </remarks>
 public readonly struct ItemData
 {
@@ -80,7 +80,7 @@ public readonly struct ItemData
     /// This can be of a distinct types, hence the helper methods <see cref="EvaluatedInclude"/> and <see cref="EnumerateMetadata"/>
     ///  are recommended for accessing the data
     /// </summary>
-    public object? Value { get; private init; }
+    internal object? Value { get; private init; }
 
     /// <summary>
     /// Gets the item evaluated include data. It is in fact a 'specification' of the item (e.g. path on disk to a specific ProjectReference)

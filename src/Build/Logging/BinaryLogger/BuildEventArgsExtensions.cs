@@ -34,7 +34,7 @@ public static class BuildEventArgsExtensions
 
     /// <summary>
     /// Lazy enumerates and partially strong types items from Items property.
-    /// The actual item value might be wrapped to be able to provide defined interface
+    /// The actual item value is proxied via accessor methods - to be able to provide defined interface
     /// </summary>
     /// <returns></returns>
     public static IEnumerable<ItemData> EnumerateItems(
@@ -42,16 +42,37 @@ public static class BuildEventArgsExtensions
         => EnumerateItems(eventArgs.Items);
 
     /// <summary>
+    /// Lazy enumerates and partially strong types items from Items property. Only items with matching type will be returned (case-insensitive, MSBuild valid names only).
+    /// The actual item value is proxied via accessor methods - to be able to provide defined interface
+    /// </summary>
+    /// <returns></returns>
+    public static IEnumerable<ItemData> EnumerateItemsOfType(
+        this ProjectEvaluationFinishedEventArgs eventArgs, string typeName)
+        => EnumerateItemsOfType(eventArgs.Items, typeName);
+
+    /// <summary>
     /// Lazy enumerates and strong types items from Items property.
-    /// The actual item value might be wrapped to be able to provide defined interface
+    /// The actual item value is proxied via accessor methods - to be able to provide defined interface
     /// </summary>
     public static IEnumerable<ItemData> EnumerateItems(
         this ProjectStartedEventArgs eventArgs)
         => EnumerateItems(eventArgs.Items);
+
+    /// <summary>
+    /// Lazy enumerates and partially strong types items from Items property. Only items with matching type will be returned (case-insensitive, MSBuild valid names only).
+    /// The actual item value is proxied via accessor methods - to be able to provide defined interface
+    /// </summary>
+    /// <returns></returns>
+    public static IEnumerable<ItemData> EnumerateItemsOfType(
+        this ProjectStartedEventArgs eventArgs, string typeName)
+        => EnumerateItemsOfType(eventArgs.Items, typeName);
 
     private static IEnumerable<PropertyData> EnumerateProperties(IEnumerable? properties)
         => Internal.Utilities.EnumerateProperties(properties);
 
     private static IEnumerable<ItemData> EnumerateItems(IEnumerable? items)
         => Internal.Utilities.EnumerateItems(items);
+
+    private static IEnumerable<ItemData> EnumerateItemsOfType(IEnumerable? items, string typeName)
+        => Internal.Utilities.EnumerateItemsOfType(items, typeName);
 }
