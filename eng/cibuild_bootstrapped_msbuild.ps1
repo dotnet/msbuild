@@ -84,10 +84,10 @@ try {
   }
   else
   {
-    $buildToolPath = Join-Path $bootstrapRoot "core" "dotnet.exe"
+    $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
     $propsFile = Join-Path $PSScriptRoot "Vesions.props"
     $bootstrapSdkVersion = ([xml](Get-Content $propsFile)).SelectSingleNode("//PropertyGroup/BootstrapSdkVersion").InnerText
-    $buildToolCommand = Join-Path $bootstrapRoot "core" "sdk" $bootstrapSdkVersion "MSBuild.dll"
+    $buildToolCommand = "$bootstrapRoot\core\sdk\$bootstrapSdkVersion\MSBuild.dll"
     $buildToolFramework = "net9.0"
   }
 
