@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -219,15 +220,26 @@ internal sealed class BuildCheckCentralContext
             // Here we might want to check the configPerRule[0].EvaluationsCheckScope - if the input data supports that
             // The decision and implementation depends on the outcome of the investigation tracked in:
             // https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57851137
+            try
+            {
+                BuildCheckDataContext<T> context = new BuildCheckDataContext<T>(
+                    checkCallback.Item1,
+                    checkContext,
+                    configPerRule,
+                    resultHandler,
+                    checkData);
 
-            BuildCheckDataContext<T> context = new BuildCheckDataContext<T>(
-                checkCallback.Item1,
-                checkContext,
-                configPerRule,
-                resultHandler,
-                checkData);
-
-            checkCallback.Item2(context);
+                checkCallback.Item2(context);
+            }
+            catch (Exception e)
+            {
+                checkContext.DispatchAsWarningFromText(
+                    null,
+                    null,
+                    null,
+                    new BuildEventFileInfo(projectFullPath),
+                    $"The check '{checkCallback.Item1.Check.FriendlyName}' threw an exception while executing a registered action with message: {e.Message}");
+            }
         }
 
         _removeThrottledChecks(checkContext);

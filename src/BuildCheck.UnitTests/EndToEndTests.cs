@@ -514,12 +514,10 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
+    [Theory]
     [InlineData("X01236", "Something went wrong initializing")]
-    // These tests are for failure one different points, will be addressed in a different PR
-    // https://github.com/dotnet/msbuild/issues/10522
-    // [InlineData("X01237", "message")]
-    // [InlineData("X01238", "message")]
+    [InlineData("X01237", "something went wrong when executing registered action")]
+    [InlineData("X01238", "something went wrong when registering actions")]
     public void CustomChecksFailGracefully(string ruleId, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())

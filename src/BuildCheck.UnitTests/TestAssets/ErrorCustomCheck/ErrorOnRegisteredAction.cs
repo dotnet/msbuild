@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
 
@@ -33,7 +34,7 @@ namespace ErrorCustomCheck
 
         private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
         {
-            throw new Exception("something went wrong");
+            throw new Exception("something went wrong when executing registered action");
         }
     }
 }
