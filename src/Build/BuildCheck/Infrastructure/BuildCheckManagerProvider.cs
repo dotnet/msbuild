@@ -272,7 +272,15 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 // Create the wrapper and register to central context
                 wrapper.StartNewProject(projectFullPath, configurations, userEditorConfigs);
                 var wrappedContext = new CheckRegistrationContext(wrapper, _buildCheckCentralContext);
-                check.RegisterActions(wrappedContext);
+                try
+                {
+                    check.RegisterActions(wrappedContext);
+                }
+                catch (Exception e)
+                {
+                    throw new BuildCheckConfigurationException(
+                        $"The check '{check.FriendlyName}' failed to register actions with the following message: '{e.Message}'");
+                }
             }
             else
             {

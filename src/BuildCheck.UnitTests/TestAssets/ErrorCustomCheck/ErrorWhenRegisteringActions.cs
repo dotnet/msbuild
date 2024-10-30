@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
 
@@ -29,7 +30,7 @@ namespace ErrorCustomCheck
         public override void RegisterActions(IBuildCheckRegistrationContext registrationContext)
         {
             registrationContext.RegisterEvaluatedPropertiesAction(EvaluatedPropertiesAction);
-            throw new Exception("something went wrong");
+            throw new Exception("something went wrong when registering actions");
         }
 
         private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
