@@ -35,10 +35,10 @@ namespace Microsoft.Build.Shared
         internal const string usingTaskBody = "Task";
         internal const string sdk = "Sdk";
 
-        internal static char[] InvalidTargetNameCharacters => [ '$', '@', '(', ')', '%', '*', '?', '.' ];
+        internal static readonly char[] InvalidTargetNameCharacters = [ '$', '@', '(', ')', '%', '*', '?', '.' ];
 
         // Names that cannot be used as property or item names because they are reserved
-        internal static HashSet<string> ReservedItemNames =>
+        internal static readonly HashSet<string> ReservedItemNames =
         [
             // project, "Project" is not reserved, because unfortunately ProjectReference items already use it as metadata name.
             visualStudioProject,
