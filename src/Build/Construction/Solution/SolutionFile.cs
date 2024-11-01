@@ -193,7 +193,7 @@ namespace Microsoft.Build.Construction
 
         internal bool UseNewParser => ShouldUseNewParser(_solutionFile);
 
-        internal static bool ShouldUseNewParser(string solutionFile) => FileUtilities.IsSolutionXFilename(solutionFile) || ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14);
+        internal static bool ShouldUseNewParser(string solutionFile) => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14) || FileUtilities.IsSolutionXFilename(solutionFile);
 
         /// <summary>
         /// All projects in this solution, in the order they appeared in the solution file
