@@ -1155,7 +1155,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.Request.BuildEventContext);
             }
 
-            
+
             try
             {
                 HandleProjectStarted(buildCheckManager);

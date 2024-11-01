@@ -238,10 +238,10 @@ namespace Microsoft.Build.BackEnd
                     TranslatePrimitiveTypeArray(translator);
                     break;
                 case TaskParameterType.ValueType:
-                        TranslateValueType(translator);
+                    TranslateValueType(translator);
                     break;
                 case TaskParameterType.ValueTypeArray:
-                        TranslateValueTypeArray(translator);
+                    TranslateValueTypeArray(translator);
                     break;
                 case TaskParameterType.ITaskItem:
                     TranslateITaskItem(translator);

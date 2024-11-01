@@ -395,7 +395,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-#endregion
+        #endregion
 
         #region IBuildEngine Members
 
@@ -957,7 +957,7 @@ namespace Microsoft.Build.BackEnd
 
         public EngineServices EngineServices { get; }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Called by the internal MSBuild task.

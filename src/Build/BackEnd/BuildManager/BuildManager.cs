@@ -866,7 +866,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
         public BuildSubmission PendBuildRequest(BuildRequestData requestData)
-            => (BuildSubmission) PendBuildRequest<BuildRequestData, BuildResult>(requestData);
+            => (BuildSubmission)PendBuildRequest<BuildRequestData, BuildResult>(requestData);
 
         /// <summary>
         /// Submits a graph build request to the current build but does not start it immediately.  Allows the user to
@@ -874,7 +874,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
         public GraphBuildSubmission PendBuildRequest(GraphBuildRequestData requestData)
-            => (GraphBuildSubmission) PendBuildRequest<GraphBuildRequestData, GraphBuildResult>(requestData);
+            => (GraphBuildSubmission)PendBuildRequest<GraphBuildRequestData, GraphBuildResult>(requestData);
 
         /// <summary>
         /// Submits a build request to the current build but does not start it immediately.  Allows the user to
