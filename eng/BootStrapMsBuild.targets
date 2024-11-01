@@ -60,7 +60,6 @@
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Newtonsoft.Json'))' == 'true'" />
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGetSdkResolver'))' == 'true'" />
         <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Extensions.'))' == 'true'" />
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.VisualStudio.SolutionPersistence'))' == 'true'" />
     </ItemGroup>
   </Target>
 
