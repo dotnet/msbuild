@@ -328,7 +328,7 @@ namespace Microsoft.Build.Evaluation
                         newValue,
                         location,
                         message: null)
-                    { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
+                { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
 
                 _evaluationLoggingContext.LogBuildEvent(args);
             }

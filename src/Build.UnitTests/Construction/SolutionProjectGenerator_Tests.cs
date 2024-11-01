@@ -2307,7 +2307,7 @@ EndGlobal
         [Fact]
         public void DisambiguatedTargetNamesAreInInMetaproj()
         {
-            foreach(string projectName in ProjectInSolution.projectNamesToDisambiguate)
+            foreach (string projectName in ProjectInSolution.projectNamesToDisambiguate)
             {
                 SolutionFile solution = SolutionFile_Tests.ParseSolutionHelper(
                 $$"""

@@ -555,7 +555,7 @@ namespace Microsoft.Build.CommandLine
 
         public EngineServices EngineServices { get; }
 
-#endregion
+        #endregion
 
 #endif
 

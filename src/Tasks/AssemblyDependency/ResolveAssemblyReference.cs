@@ -1801,7 +1801,7 @@ namespace Microsoft.Build.Tasks
                         else
                         {
                             Log.LogMessage(importance, Strings.SearchPath, lastSearchPath);
-                        }                 
+                        }
                         if (logAssemblyFoldersMinimal)
                         {
                             Log.LogMessage(importance, Strings.SearchedAssemblyFoldersEx);
