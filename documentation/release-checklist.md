@@ -13,10 +13,10 @@
 
 ## At release time
 Before starting the process:
-- [ ] If the release is being cut more than a few days before the VS-side snap, do these two steps. Otherwise check them off.
-  - [ ]  Modify the VS insertion so that it flows from MSBuild `vs{{THIS_RELEASE_VERSION}}` to VS `main` [in the MSBuild-release-branch release definition](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=1319&view=mine&_a=releases). Alternatively, if the release being cut no more than couple of weeks, disable the scheduled releases and create releases from `vs{{THIS_RELEASE_VERSION}}` manually until the VS-side snap: Edit -> Schedule set under Artifacts -> disable toggle
-AND
-  - [ ]  Disable automated run of [the MSBuild-main-branch release definition](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=2153&view=mine&_a=releases) (because our {{NEXT_VERSION}} builds don't have a place to go in VS yet)
+- [ ] If the release is being cut more than a few days before the VS-side snap, run insertions manually OR redirect MSBuild release branch 
+  - [ ]  Disabling automated run of [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) (our {{NEXT_VERSION}} builds don't have a place to go in VS yet) is done by: Edit -> ... -> Triggers -> add a schedule on a dead branch (this overrides the YAML defined once-per-day schedule). In manual pipeline run you select MSBuild branch `vs{{THIS_RELEASE_VERSION}}` and VS TargetBranch `main`.
+OR
+  - [ ]  If the release is being cut more than couple of weeks modify YAML (and merge to affected MSBuild branches) of the [VS insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) so that it flows from MSBuild `vs{{THIS_RELEASE_VERSION}}` to VS `main` [in the MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) and keep scheduled insertions to simplify your workflow.
 
 ### Branching from main
 - [ ]  If the new version's branch was created before the Visual Studio fork: fast-forward merge the correct commit (the one that is currently inserted to VS main) to the `vs{{THIS_RELEASE_VERSION}}` branch \
@@ -59,9 +59,9 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
   - [ ] Run the [official build](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) for vs{{THIS_RELEASE_VERSION}} without OptProf (set `SkipApplyOptimizationData` variable in 'Advanced options' section of the 'Run pipeline' menu to `true`) or alternatively with the latest Opt-Prof collected for the main branch (set `Optional OptProfDrop Override` to the drop path of the collected data, which could be found in the logs of the pipeline: Windows_NT -> Build -> search for `OptimizationData`). 
   - [ ] Check that the [OptProf data collection](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=17389) pipeline run is triggered for vs{{THIS_RELEASE_VERSION}}. If not, run manually ('Run pipeline' in upper right)
   - [ ] Run the [official build](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) for vs{{THIS_RELEASE_VERSION}} with no extra customization - OptProf should succeed now
-- [ ]  When VS main snaps to {{THIS_RELEASE_VERSION}} and updates its version to {{NEXT_VERSION}}, turn on / modify the VS insertion so that it flows from MSBuild main to VS main.
-  - [ ]  Update the [release-branch insertion release definition](https://dev.azure.com/devdiv/DevDiv/_releaseDefinition?definitionId=2153&_a=definition-variables) to have `InsertTargetBranch` `rel/d{{THIS_RELEASE_VERSION}}`.
-- [ ]  Turn [the release pipeline](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=2153&view=mine&_a=releases) back on.
+- [ ]  When VS main snaps to {{THIS_RELEASE_VERSION}} and updates its version to {{NEXT_VERSION}}, modify the [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) YAML so that it flows from MSBuild main to VS main.
+  - [ ]  Update auto target branch selection in the YAML of the [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) to insert MSBuild `vs{{THIS_RELEASE_VERSION}}` to the corresponding VS branch `rel/d{{THIS_RELEASE_VERSION}}`.
+- [ ] Restore [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) to the default YAML defined schedule, by removing all triggers from Edit -> ... -> Triggers.
 
 ### Configure localization
 - [ ]  Create {{THIS_RELEASE_VERSION}} localization ticket: https://aka.ms/ceChangeLocConfig (requesting to switch localization from {{PREVIOUS_RELEASE_VERSION}} to {{THIS_RELEASE_VERSION}}): {{URL_OF_LOCALIZATION_TICKET}}
