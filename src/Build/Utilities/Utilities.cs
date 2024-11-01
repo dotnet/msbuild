@@ -9,9 +9,12 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
@@ -623,46 +626,48 @@ namespace Microsoft.Build.Internal
             return enumerator.ToEnumerable().ToArray();
         }
 
-        public static void EnumerateProperties<TArg>(IEnumerable properties, TArg arg, Action<TArg, KeyValuePair<string, string>> callback)
+        /// <summary>
+        /// Iterates through the nongeneric enumeration and provides generic strong-typed enumeration of properties.
+        /// </summary>
+        public static IEnumerable<PropertyData> EnumerateProperties(IEnumerable properties)
         {
             if (properties == null)
             {
-                return;
+                return [];
             }
 
             if (properties is PropertyDictionary<ProjectPropertyInstance> propertyInstanceDictionary)
             {
-                propertyInstanceDictionary.Enumerate((key, value) =>
-                {
-                    callback(arg, new KeyValuePair<string, string>(key, value));
-                });
+                return propertyInstanceDictionary.Enumerate();
             }
             else if (properties is PropertyDictionary<ProjectProperty> propertyDictionary)
             {
-                propertyDictionary.Enumerate((key, value) =>
-                {
-                    callback(arg, new KeyValuePair<string, string>(key, value));
-                });
+                return propertyDictionary.Enumerate();
             }
             else
             {
-                foreach (var item in properties)
+                return CastOneByOne(properties);
+            }
+
+            IEnumerable<PropertyData> CastOneByOne(IEnumerable props)
+            {
+                foreach (var item in props)
                 {
                     if (item is IProperty property && !string.IsNullOrEmpty(property.Name))
                     {
-                        callback(arg, new KeyValuePair<string, string>(property.Name, property.EvaluatedValue ?? string.Empty));
+                        yield return new(property.Name, property.EvaluatedValue ?? string.Empty);
                     }
                     else if (item is DictionaryEntry dictionaryEntry && dictionaryEntry.Key is string key && !string.IsNullOrEmpty(key))
                     {
-                        callback(arg, new KeyValuePair<string, string>(key, dictionaryEntry.Value as string ?? string.Empty));
+                        yield return new(key, dictionaryEntry.Value as string ?? string.Empty);
                     }
                     else if (item is KeyValuePair<string, string> kvp)
                     {
-                        callback(arg, kvp);
+                        yield return new(kvp.Key, kvp.Value);
                     }
                     else if (item is KeyValuePair<string, TimeSpan> keyTimeSpanValue)
                     {
-                        callback(arg, new KeyValuePair<string, string>(keyTimeSpanValue.Key, keyTimeSpanValue.Value.Ticks.ToString()));
+                        yield return new(keyTimeSpanValue.Key, keyTimeSpanValue.Value.Ticks.ToString());
                     }
                     else
                     {
@@ -679,61 +684,138 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        public static void EnumerateItems(IEnumerable items, Action<DictionaryEntry> callback)
+        /// <summary>
+        /// Iterates through the nongeneric enumeration and provides generic strong-typed callback to handle the properties.
+        /// </summary>
+        public static void EnumerateProperties<TArg>(IEnumerable properties, TArg arg, Action<TArg, KeyValuePair<string, string>> callback)
         {
+            foreach (var tuple in EnumerateProperties(properties))
+            {
+                callback(arg, new KeyValuePair<string, string>(tuple.Name, tuple.Value));
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types.
+        /// </summary>
+        public static IEnumerable<ItemData> EnumerateItems(IEnumerable items)
+        {
+            // The actual type of the item data can be of types:
+            //  * <see cref="ProjectItemInstance"/>
+            //  * <see cref="ProjectItem"/>
+            //  * <see cref="IItem"/>
+            //  * <see cref="ITaskItem"/>
+            //  * possibly others
+            // That's why we here wrap with ItemAccessor if needed
+
+            if (items == null)
+            {
+                return [];
+            }
+
             if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
             {
-                projectItemInstanceDictionary.EnumerateItemsPerType((itemType, itemList) =>
-                {
-                    foreach (var item in itemList)
-                    {
-                        callback(new DictionaryEntry(itemType, item));
-                    }
-                });
+                return projectItemInstanceDictionary
+                    .EnumerateItemsPerType()
+                    .Select(t => t.itemValue.Select(itemValue => new ItemData(t.itemType, (IItemData)itemValue)))
+                    .SelectMany(tpl => tpl);
             }
             else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
             {
-                projectItemDictionary.EnumerateItemsPerType((itemType, itemList) =>
-                {
-                    foreach (var item in itemList)
-                    {
-                        callback(new DictionaryEntry(itemType, item));
-                    }
-                });
+                return projectItemDictionary
+                    .EnumerateItemsPerType()
+                    .Select(t => t.itemValue.Select(itemValue => new ItemData(t.itemType, (IItemData)itemValue)))
+                    .SelectMany(tpl => tpl);
             }
             else
             {
-                foreach (var item in items)
-                {
-                    string itemType = default;
-                    object itemValue = null;
+                return CastItemsOneByOne(items, null);
+            }
+        }
 
-                    if (item is IItem iitem)
+        /// <summary>
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types.
+        /// Only items with matching type (case insensitive, MSBuild valid names only) will be returned.
+        /// </summary>
+        public static IEnumerable<ItemData> EnumerateItemsOfType(IEnumerable items, string typeName)
+        {
+            if (items == null)
+            {
+                return [];
+            }
+
+            if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
+            {
+                return
+                    projectItemInstanceDictionary[typeName]
+                        .Select(i => new ItemData(i.ItemType, (IItemData)i));
+            }
+            else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
+            {
+                return
+                    projectItemDictionary[typeName]
+                        .Select(i => new ItemData(i.ItemType, (IItemData)i));
+            }
+            else
+            {
+                return CastItemsOneByOne(items, typeName);
+            }
+        }
+
+        /// <summary>
+        /// Iterates through the nongeneric enumeration of items and provides generic strong-typed callback to handle the items.
+        /// </summary>
+        public static void EnumerateItems(IEnumerable items, Action<DictionaryEntry> callback)
+        {
+            foreach (var tuple in EnumerateItems(items))
+            {
+                callback(new DictionaryEntry(tuple.Type, tuple.Value));
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the nongeneric items and attempts to cast them.
+        /// </summary>
+        /// <param name="items">Nongeneric list of items.</param>
+        /// <param name="itemTypeNameToFetch">If not null, only the items with matching type (case insensitive, MSBuild valid names only) will be returned.</param>
+        /// <returns></returns>
+        private static IEnumerable<ItemData> CastItemsOneByOne(IEnumerable items, string itemTypeNameToFetch)
+        {
+            foreach (var item in items)
+            {
+                string itemType = default;
+                object itemValue = null;
+
+                if (item is IItem iitem)
+                {
+                    itemType = iitem.Key;
+                    itemValue = iitem;
+                }
+                else if (item is DictionaryEntry dictionaryEntry)
+                {
+                    itemType = dictionaryEntry.Key as string;
+                    itemValue = dictionaryEntry.Value;
+                }
+                else
+                {
+                    if (item == null)
                     {
-                        itemType = iitem.Key;
-                        itemValue = iitem;
-                    }
-                    else if (item is DictionaryEntry dictionaryEntry)
-                    {
-                        itemType = dictionaryEntry.Key as string;
-                        itemValue = dictionaryEntry.Value;
+                        Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
                     }
                     else
                     {
-                        if (item == null)
-                        {
-                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
-                        }
-                        else
-                        {
-                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
-                        }
+                        Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
                     }
+                }
 
-                    if (!String.IsNullOrEmpty(itemType))
-                    {
-                        callback(new DictionaryEntry(itemType, itemValue));
-                    }
+                // if itemTypeNameToFetch was not set - then return all items
+                if (itemValue != null && (itemTypeNameToFetch == null || MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, itemTypeNameToFetch)))
+                {
+                    // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
+                    //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
+                    // However! NodePacketTranslator and BuildEventArgsReader might deserialize those as TaskItemData
+                    //  (see xml comments of TaskItemData for details)
+                    yield return new ItemData(itemType!, itemValue);
                 }
             }
         }

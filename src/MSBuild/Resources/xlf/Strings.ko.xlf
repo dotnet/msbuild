@@ -17,7 +17,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="needs-review-translation">{0} 빌드({1}초)</target>
+        <target state="translated">{0} 빌드({1}초)</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -87,7 +87,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="needs-review-translation">({0:F1}s)</target>
+        <target state="translated">({0:F1}s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
@@ -321,10 +321,10 @@
                      BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+        <target state="translated">  -check
+                     빌드하는 동안 BuildChecks를 사용하도록 설정합니다.
+                     BuildCheck는 속성을 확실히 하기 위해 규칙 평가를 사용 설정합니다
+                     빌드의 자세한 내용은 aka.ms/buildcheck를 참조하세요.
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -469,12 +469,12 @@
                      value that comes from a response file.
     </source>
         <target state="translated">  -interactive[:True|False]
-                     빌드의 작업이 사용자와 상호 작용할 수
-                     있음을 나타냅니다. 상호 작용이 필요하지
-                     않은 자동화된 시나리오에서는 이 인수를
+                     빌드의 작업이 사용자와 상호 작용할 수 
+                     있음을 나타냅니다. 상호 작용이 필요하지 
+                     않은 자동화된 시나리오에서는 이 인수를 
                      사용하지 마세요.
                      -interactive를 지정하는 것은 -interactive:true를
-                     지정하는 것과 같습니다. 매개 변수를
+                     지정하는 것과 같습니다. 매개 변수를 
                      사용하여 지시 파일에서 가져오는 값을 재정의합니다.
     </target>
         <note>
@@ -544,9 +544,9 @@
         <target state="translated">  -graphBuild[:True|False]
                      MSBuild가 프로젝트 그래프를 생성 및 빌드하도록 합니다.
 
-                     그래프 생성에는 종속성을 형성하기 위한 프로젝트
-                     참조 식별이 관련됩니다. 해당 그래프 빌드에는 프로젝트
-                     참조를 참조하는 프로젝트 전에 프로젝트 참조를
+                     그래프 생성에는 종속성을 형성하기 위한 프로젝트 
+                     참조 식별이 관련됩니다. 해당 그래프 빌드에는 프로젝트 
+                     참조를 참조하는 프로젝트 전에 프로젝트 참조를 
                      빌드하는 시도가 관련되며, 이는 기존 MSBuild
                      예약과 다릅니다.
                      (약식: -graph)
@@ -600,7 +600,7 @@
         <target state="translated">  -lowPriority[:True|False]
                      MSBuild가 낮은 프로세스 우선 순위로 실행됩니다.
 
-                     -lowPriority를 지정하는 것은
+                     -lowPriority를 지정하는 것은 
                      -lowPriority:True를 지정하는 것과 같습니다.
                      (약식: -low)
     </target>
@@ -702,11 +702,11 @@
                      (1) the directory of msbuild.exe
                      (2) the directory of the first project or solution built
 </source>
-        <target state="translated">  @&lt;file&gt;            텍스트 파일에서 명령줄 설정을 삽입합니다.
-                     여러 지시 파일을 지정하려면 각 지시 파일을 개별적으로
+        <target state="translated">  @&lt;file&gt;            텍스트 파일에서 명령줄 설정을 삽입합니다. 
+                     여러 지시 파일을 지정하려면 각 지시 파일을 개별적으로 
                      지정합니다.
 
-                     "msbuild.rsp"라는 지시 파일이 다음 위치에서
+                     "msbuild.rsp"라는 지시 파일이 다음 위치에서 
                      자동으로 사용됩니다.
                      (1) msbuild.exe의 디렉터리
                      (2) 빌드된 첫 번째 프로젝트 또는 솔루션의 디렉터리
@@ -743,8 +743,8 @@
                      Example:
                        -target:Resources;Compile
 </source>
-        <target state="translated">  -target:&lt;targets&gt;  이 프로젝트에서 대상을 빌드합니다. 세미콜론 또는 쉼표를 사용하여
-                     여러 대상을 구분하거나, 각 대상을
+        <target state="translated">  -target:&lt;targets&gt;  이 프로젝트에서 대상을 빌드합니다. 세미콜론 또는 쉼표를 사용하여 
+                     여러 대상을 구분하거나, 각 대상을 
                      개별적으로 지정합니다. (약식: -t)
                      예:
                        -target:Resources;Compile
@@ -766,9 +766,9 @@
                      Example:
                        -property:WarningLevel=2;OutDir=bin\Debug\
 </source>
-        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  프로젝트 수준 속성을 설정하거나 재정의합니다. &lt;n&gt;은
-                     속성 이름이고 &lt;v&gt;는 속성 값입니다.
-                     세미콜론 또는 쉼표를 사용하여 여러 속성을 구분하거나,
+        <target state="translated">  -property:&lt;n&gt;=&lt;v&gt;  프로젝트 수준 속성을 설정하거나 재정의합니다. &lt;n&gt;은 
+                     속성 이름이고 &lt;v&gt;는 속성 값입니다. 
+                     세미콜론 또는 쉼표를 사용하여 여러 속성을 구분하거나, 
                      각 속성을 개별적으로 지정합니다. (약식: -p)
                      예:
                        -property:WarningLevel=2;OutDir=bin\Debug\
@@ -893,26 +893,26 @@
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
                      콘솔 로거에 대한 매개 변수입니다. (약식: -clp)
                      사용 가능한 매개 변수는 다음과 같습니다.
-                        PerformanceSummary--작업, 대상, 프로젝트에서 소요된 시간을
+                        PerformanceSummary--작업, 대상, 프로젝트에서 소요된 시간을 
                             표시합니다.
                         Summary--종료 시 오류 및 경고 요약을 표시합니다.
                         NoSummary--종료 시 오류 및 경고 요약을 표시하지
                             않습니다.
                         ErrorsOnly--오류만 표시합니다.
                         WarningsOnly--경고만 표시합니다.
-                        NoItemAndPropertyList--각 프로젝트 빌드를 시작할 때 항목 및 속성 목록을
+                        NoItemAndPropertyList--각 프로젝트 빌드를 시작할 때 항목 및 속성 목록을 
                             표시하지 않습니다.
                         ShowCommandLine--TaskCommandLineEvent 메시지를 표시합니다.
-                        ShowTimestamp--메시지 접두사로 타임스탬프를
+                        ShowTimestamp--메시지 접두사로 타임스탬프를 
                             표시합니다.
-                        ShowEventId--시작된 이벤트, 완료된 이벤트, 메시지의 eventId를
+                        ShowEventId--시작된 이벤트, 완료된 이벤트, 메시지의 eventId를 
                             표시합니다.
-                        ForceNoAlign--콘솔 버퍼 크기에 텍스트를 맞추지
+                        ForceNoAlign--콘솔 버퍼 크기에 텍스트를 맞추지 
                             않습니다.
                         DisableConsoleColor--모든 로깅 메시지에 기본 콘솔 색을
                             사용합니다.
                         DisableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우
-                            출력의 다중 프로세서 로깅 스타일을
+                            출력의 다중 프로세서 로깅 스타일을 
                             사용하지 않도록 설정합니다.
                         EnableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우에도
                             다중 프로세서 로깅 스타일을 사용하도록 설정합니다.
@@ -921,7 +921,7 @@
                             사용합니다
                         PreferConsoleColor--대상 콘솔에서 지원되는 경우에만
                              ANSI 콘솔 색을 사용합니다.
-                     Verbosity--이 로거에 대한 -verbosity 설정을
+                     Verbosity--이 로거에 대한 -verbosity 설정을 
                             재정의합니다.
                      예:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
@@ -961,10 +961,10 @@
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate          기본 스키마를 기준으로 프로젝트의 유효성을 검사합니다.
+        <target state="translated">  -validate          기본 스키마를 기준으로 프로젝트의 유효성을 검사합니다. 
                      (약식: -val)
 
-  -validate:&lt;schema&gt; 지정된 스키마를 기준으로 프로젝트의 유효성을 검사합니다.
+  -validate:&lt;schema&gt; 지정된 스키마를 기준으로 프로젝트의 유효성을 검사합니다. 
                      (약식: -val)
                      예:
                        -validate:MyExtendedBuildSchema.xsd
@@ -1114,8 +1114,8 @@
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreProjectExtensions:&lt;extensions&gt;
-                     빌드할 프로젝트 파일을 결정할 때
-                     무시할 확장 목록입니다. 여러 확장을 구분하는 데는
+                     빌드할 프로젝트 파일을 결정할 때 
+                     무시할 확장 목록입니다. 여러 확장을 구분하는 데는 
                      세미콜론 또는 쉼표를 사용합니다.
                      (약식: -ignore)
                      예:
@@ -1141,7 +1141,7 @@
    </source>
         <target state="translated">  -toolsVersion:&lt;version&gt;
                      빌드 중에 사용할 MSBuild 도구 세트(작업, 대상 등)의 버전입니다.
-                     이 버전은 개별 프로젝트에서 지정한 버전을
+                     이 버전은 개별 프로젝트에서 지정한 버전을 
                      재정의합니다. (약식:
                      -tv)
                      예:
@@ -1170,9 +1170,9 @@
                      파일은 현재 디렉터리에 있고
                      "msbuild[n].log"로 이름이 지정되어 있습니다. 모든 노드의 이벤트는 단일 로그로
                      결합됩니다. 파일의 위치 및 fileLogger의
-                     다른 매개 변수는 "-fileLoggerParameters[n]" 스위치를
+                     다른 매개 변수는 "-fileLoggerParameters[n]" 스위치를 
                      추가하여 지정할 수 있습니다.
-                     "n"은 1-9 사이의 숫자일 수 있으며 최대 10개의
+                     "n"은 1-9 사이의 숫자일 수 있으며 최대 10개의 
                      파일 로거가 추가될 수 있습니다. (약식: -fl[n])
     </target>
         <note>
@@ -1199,16 +1199,16 @@
                      create a log file for each node.
     </source>
         <target state="translated">  -distributedFileLogger
-                     MSBuild 노드당 로그 파일 하나씩, 여러 로그 파일에 빌드 출력을
-                     기록합니다. 해당 파일의 초기 위치는
-                     현재 디렉터리입니다. 기본적으로 해당 파일을
-                     "MSBuild&lt;nodeid&gt;.log"라고 합니다. 파일 위치 및 fileLogger의 기타 매개 변수는
-                     "-fileLoggerParameters" 스위치를 추가해서
+                     MSBuild 노드당 로그 파일 하나씩, 여러 로그 파일에 빌드 출력을 
+                     기록합니다. 해당 파일의 초기 위치는 
+                     현재 디렉터리입니다. 기본적으로 해당 파일을 
+                     "MSBuild&lt;nodeid&gt;.log"라고 합니다. 파일 위치 및 fileLogger의 기타 매개 변수는 
+                     "-fileLoggerParameters" 스위치를 추가해서 
                      지정할 수 있습니다.
 
-                     로그 파일 이름이 fileLoggerParameters 스위치를 통해 설정되면
-                     배포된 로거가 fileName을 템플릿으로 사용하고
-                     노드 ID를 이 fileName에 추가하여
+                     로그 파일 이름이 fileLoggerParameters 스위치를 통해 설정되면 
+                     배포된 로거가 fileName을 템플릿으로 사용하고 
+                     노드 ID를 이 fileName에 추가하여 
                      각 노드의 로그 파일을 만듭니다.
     </target>
         <note>
@@ -1252,20 +1252,20 @@
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;parameters&gt;
                      파일 로거의 추가 매개 변수를 제공합니다.
-                     이 스위치가 있다는 것은
+                     이 스위치가 있다는 것은 
                      해당 fileLogger[n] 스위치를 의미합니다.
                      "n"(있는 경우)은 1~9의 숫자일 수 있습니다.
-                     -fileLoggerParameters는 배포된 파일 로거에서도
+                     -fileLoggerParameters는 배포된 파일 로거에서도 
                      사용됩니다. -distributedFileLogger에 대한 설명을 참조하세요.
                      (약식: -flp[n])
                      콘솔 로거용으로 나열된 동일한 매개 변수를 사용할 수 있습니다.
                      다음과 같은 몇 가지 추가 매개 변수를 사용할 수 있습니다.
-                        LogFile--빌드 로그가 기록되는
+                        LogFile--빌드 로그가 기록되는 
                             로그 파일의 경로입니다.
-                        Append--빌드 로그가 로그 파일에 추가되는지,
-                            아니면 로그 파일을 덮어쓰는지 여부를 결정합니다.
+                        Append--빌드 로그가 로그 파일에 추가되는지, 
+                            아니면 로그 파일을 덮어쓰는지 여부를 결정합니다. 
                             스위치를 설정하면 빌드 로그가 로그 파일에 추가됩니다.
-                            스위치를 설정하지 않으면 기존 로그 파일의
+                            스위치를 설정하지 않으면 기존 로그 파일의 
                             콘텐츠를 덮어씁니다.
                             기본값은 로그 파일에 추가하지 않는 것입니다.
                         Encoding--파일의 인코딩을 지정합니다
@@ -1302,7 +1302,7 @@
         <target state="translated">  -nodeReuse:&lt;parameters&gt;
                      MSBuild 노드를 다시 사용하거나 다시 사용하지 않도록 설정합니다.
                      매개 변수는 다음가 같습니다.
-                     True --빌드 완료 후 노드가 유지되고
+                     True --빌드 완료 후 노드가 유지되고 
                             후속 빌드에서 다시 사용됩니다(기본값).
                      False--빌드 완료 후 노드가 유지되지 않습니다.
                      (약식: -nr)
@@ -1731,7 +1731,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} ({3}초)</target>
+        <target state="translated">{0}{1} {2} ({3}초)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1751,7 +1751,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} {3} ({4}초)</target>
+        <target state="translated">{0}{1} {2} {3} ({4}초)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1811,7 +1811,7 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="needs-review-translation">복원 완료({0}초)</target>
+        <target state="translated">복원 완료({0}초)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
@@ -1819,7 +1819,7 @@
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="needs-review-translation">{0} 복원({1}초)</target>
+        <target state="translated">{0} 복원({1}초)</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1913,7 +1913,7 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="needs-review-translation">{0}{1} 테스트 {2}({3}초)</target>
+        <target state="translated">{0}{1} 테스트 {2}({3}초)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1925,7 +1925,7 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="needs-review-translation">{0}{1} 테스트 {2} {3}({4}초)</target>
+        <target state="translated">{0}{1} 테스트 {2} {3}({4}초)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1943,7 +1943,7 @@
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="needs-review-translation">기간: {0}초</target>
+        <target state="translated">기간: {0}초</target>
         <note>
       {0} whole number
       's' should reflect the localized abbreviation for seconds
@@ -2278,10 +2278,10 @@
     </source>
         <target state="translated">  -restore[:True|False]
                      다른 대상을 빌드하기 전에 Restore라는 대상을
-                     실행하고 이러한 대상의 빌드에 최신 복원된
-                     빌드 논리가 사용되는지 확인합니다.
-                     프로젝트 트리를 빌드하기 전에
-                     프로젝트 트리에서 패키지를 복원해야 하는
+                     실행하고 이러한 대상의 빌드에 최신 복원된 
+                     빌드 논리가 사용되는지 확인합니다. 
+                     프로젝트 트리를 빌드하기 전에 
+                     프로젝트 트리에서 패키지를 복원해야 하는 
                      경우에 유용합니다. -restore를 지정하는 것은
                      -restore:True를 지정하는 것과 동일합니다. 이 매개 변수를 사용하여
                      지시 파일에서 가져오는 값을 재정의할 수 있습니다.
@@ -2319,7 +2319,7 @@
     </source>
         <target state="translated">  -profileEvaluation:&lt;file&gt;
                      MSBuild 평가를 프로파일링하고 결과를 지정된 파일에 기록합니다.
-                     지정된 파일의 확장명이 '.md'이면
+                     지정된 파일의 확장명이 '.md'이면 
                      결과가 Markdown 형식으로 생성됩니다.
                      그렇지 않으면 탭으로 구분된 파일이 생성됩니다.
     </target>
@@ -2338,9 +2338,9 @@
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                     복원하는 동안 프로젝트 수준 속성만 설정하거나
-                     재정의하고, -property 인수로 지정된 속성을
-                     사용하지 않습니다. &lt;n&gt;은 속성 이름이고
+                     복원하는 동안 프로젝트 수준 속성만 설정하거나 
+                     재정의하고, -property 인수로 지정된 속성을 
+                     사용하지 않습니다. &lt;n&gt;은 속성 이름이고 
                      &lt;v&gt;는 속성 값입니다.
                      세미콜론 또는 쉼표를 사용하여 여러 속성을 구분하거나,
                      각 속성을 개별적으로 지정합니다.
