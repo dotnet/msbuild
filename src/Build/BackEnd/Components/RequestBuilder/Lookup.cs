@@ -661,34 +661,25 @@ namespace Microsoft.Build.BackEnd
             {
                 // Ensure we don't also add any that already exist.
                 var existingItems = GetItems(itemType);
-              
                 var existingItemsHashSet = existingItems.ToHashSet(ProjectItemInstance.EqualityComparer);
 
-                if (existingItems.Count > 0)
+                var deduplicatedItemsToAdd = new List<ProjectItemInstance>();
+                foreach (var item in itemsToAdd)
                 {
-                    var deduplicatedItemsToAdd = new List<ProjectItemInstance>();
-                    foreach (var item in itemsToAdd)
+                    if (existingItemsHashSet.Add(item))
                     {
-                        if (existingItemsHashSet.Add(item))
-                        {
-                            deduplicatedItemsToAdd.Add(item);
-                        }
+                        deduplicatedItemsToAdd.Add(item);
                     }
-
-                    itemsToAdd = deduplicatedItemsToAdd;
                 }
-                else
-                {
-                    // Remove the duplicates in case we're not concerned with the existing items.
-                    itemsToAdd = itemsToAdd.Distinct(ProjectItemInstance.EqualityComparer);
-                }
+                itemsToAdd = deduplicatedItemsToAdd;
             }
 
             if (logFunction != null)
             {
                 if (doNotAddDuplicates)
                 {
-                    logFunction.Invoke(itemsToAdd.ToList());
+                    // itemsToAdd is guaranteed to be a List if we're doing the doNotAddDuplicates part.
+                    logFunction.Invoke(itemsToAdd as List<ProjectItemInstance>);
                 }
                 else
                 {
