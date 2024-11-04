@@ -488,7 +488,7 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("CheckCandidate", "X01234", "error", "error X01234: http://sampleling.com/X01234")]
+    [InlineData("CheckCandidate", "X01234", "error", "error X01234: http://samplelink.com/X01234")]
     [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234: http://samplelink.com/X01234")]
     public void CustomCheckTest_WithEditorConfig(string checkCandidate, string ruleId, string severity, string expectedMessage)
     {
