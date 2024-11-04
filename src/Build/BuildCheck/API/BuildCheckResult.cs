@@ -52,8 +52,11 @@ public sealed class BuildCheckResult : IBuildCheckResult
 
     public string FormatMessage() =>
         _message ??= _isBuiltIn
+            // Builtin rules get unified helplink.
             ? $"https://aka.ms/buildcheck/codes#{CheckRule.Id} - {string.Format(CheckRule.MessageFormat, MessageArgs)}"
-            : string.Format(CheckRule.MessageFormat, MessageArgs);
+            // Custom rules can provide their own helplink.
+            : (!string.IsNullOrEmpty(CheckRule.HelpLinkUri) ? $"{CheckRule.HelpLinkUri} - " : null) +
+              string.Format(CheckRule.MessageFormat, MessageArgs);
 
     private string? _message;
     private bool _isBuiltIn;
