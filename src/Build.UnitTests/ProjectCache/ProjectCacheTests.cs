@@ -1704,13 +1704,19 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 }
             }
             """);
+
+            // Create EmbeddedResources file
             var file1 = directory.CreateFile("File1.txt", "A=1");
             var file2 = directory.CreateFile("File2.txt", "B=1");
+
+            // Build and run the project
             RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath} -restore", out bool success);
             success.ShouldBeTrue();
             string output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/net8.0/app"), "", out success, false, _output);
             output.ShouldContain("A=1");
             output.ShouldContain("B=1");
+
+            // Delete a file and build
             FileUtilities.DeleteNoThrow(file1.Path);
             RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath}", out success);
             success.ShouldBeTrue();
