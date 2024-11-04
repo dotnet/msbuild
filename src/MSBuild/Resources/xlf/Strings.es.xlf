@@ -22,6 +22,7 @@
       Overall build summary
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
@@ -89,6 +90,7 @@
         <target state="translated">({0:F1}s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
+        's' should reflect the localized abbreviation for seconds
       </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
@@ -315,13 +317,13 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       <trans-unit id="HelpMessage_52_BuildCheckSwitch">
         <source>  -check
                      Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
+                     BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
                      Habilita BuildChecks durante la compilación.
-                     BuildCheck permite evaluar reglas para garantizar que las propiedades 
-                     de la compilación. Para obtener más información, consulte aka.ms/buildcheck
+                     BuildCheck permite evaluar reglas para garantizar que las propiedades
+                     de la compilación. Para obtener más información, consulta aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -1742,6 +1744,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       {1}: project name
       {2}: BuildResult_{X}
       {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
@@ -1762,6 +1765,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="ProjectNotFoundError">
@@ -1816,6 +1820,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <target state="translated">Restauración completada ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
@@ -1825,6 +1830,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="SAC">
@@ -1920,6 +1926,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       {1}: project name
       {2}: BuildResult_{X}
       {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
@@ -1932,6 +1939,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="TestSummary_BannerAndTotal">
@@ -1942,7 +1950,10 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
         <target state="translated">duración: {0} s</target>
-        <note>{0} whole number</note>
+        <note>
+      {0} whole number
+      's' should reflect the localized abbreviation for seconds
+    </note>
       </trans-unit>
       <trans-unit id="TestSummary_Failed">
         <source>failed: {0}</source>

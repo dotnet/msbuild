@@ -22,6 +22,7 @@
       Overall build summary
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
@@ -89,6 +90,7 @@
         <target state="translated">({0:F1}s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
+        's' should reflect the localized abbreviation for seconds
       </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
@@ -316,13 +318,13 @@ futures
       <trans-unit id="HelpMessage_52_BuildCheckSwitch">
         <source>  -check
                      Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
+                     BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
                      Active BuildChecks pendant la construction.
-                     BuildCheck permet d'évaluer les règles pour garantir les propriétés 
-                     de la construction. Pour plus d'informations, consultez aka.ms/buildcheck
+                     BuildCheck permet d'évaluer les règles pour garantir les propriétés
+                     de la build. Pour plus d'informations, consultez aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -1736,6 +1738,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       {1}: project name
       {2}: BuildResult_{X}
       {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
@@ -1756,6 +1759,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="ProjectNotFoundError">
@@ -1810,6 +1814,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <target state="translated">Restauration terminée ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
@@ -1819,6 +1824,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="SAC">
@@ -1914,6 +1920,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       {1}: project name
       {2}: BuildResult_{X}
       {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
@@ -1926,6 +1933,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="TestSummary_BannerAndTotal">
@@ -1936,7 +1944,10 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
         <target state="translated">durée : {0}s</target>
-        <note>{0} whole number</note>
+        <note>
+      {0} whole number
+      's' should reflect the localized abbreviation for seconds
+    </note>
       </trans-unit>
       <trans-unit id="TestSummary_Failed">
         <source>failed: {0}</source>

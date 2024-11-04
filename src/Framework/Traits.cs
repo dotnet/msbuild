@@ -30,7 +30,7 @@ namespace Microsoft.Build.Framework
         {
             EscapeHatches = new EscapeHatches();
 
-            DebugScheduler = DebugEngine || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER"));
+            DebugScheduler = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER"));
             DebugNodeCommunication = DebugEngine || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"));
         }
 
