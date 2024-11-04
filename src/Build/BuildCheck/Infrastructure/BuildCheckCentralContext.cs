@@ -23,7 +23,10 @@ internal sealed class BuildCheckCentralContext
 
     private record CallbackRegistry(
         List<(CheckWrapper, Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>>)> EvaluatedPropertiesActions,
+#pragma warning disable CS0618 // Type or member is obsolete
         List<(CheckWrapper, Action<BuildCheckDataContext<ParsedItemsCheckData>>)> ParsedItemsActions,
+#pragma warning restore CS0618 // Type or member is obsolete
+        List<(CheckWrapper, Action<BuildCheckDataContext<EvaluatedItemsCheckData>>)> EvaluatedItemsActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<TaskInvocationCheckData>>)> TaskInvocationActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<PropertyReadData>>)> PropertyReadActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<PropertyWriteData>>)> PropertyWriteActions,
@@ -33,7 +36,7 @@ internal sealed class BuildCheckCentralContext
         List<(CheckWrapper, Action<BuildCheckDataContext<ProjectImportedCheckData>>)> ProjectImportedCheckDataActions)
     {
         public CallbackRegistry()
-            : this([], [], [], [], [], [], [], [], [])
+            : this([], [], [], [], [], [], [], [], [], [])
         {
         }
 
@@ -41,6 +44,7 @@ internal sealed class BuildCheckCentralContext
         {
             EvaluatedPropertiesActions.RemoveAll(a => a.Item1 == check);
             ParsedItemsActions.RemoveAll(a => a.Item1 == check);
+            EvaluatedItemsActions.RemoveAll(a => a.Item1 == check);
             PropertyReadActions.RemoveAll(a => a.Item1 == check);
             PropertyWriteActions.RemoveAll(a => a.Item1 == check);
             ProjectRequestProcessingDoneActions.RemoveAll(a => a.Item1 == check);
@@ -74,8 +78,13 @@ internal sealed class BuildCheckCentralContext
         //  (it was being communicated via MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION)
         => RegisterAction(check, evaluatedPropertiesAction, _globalCallbacks.EvaluatedPropertiesActions);
 
+#pragma warning disable CS0618 // Type or member is obsolete
     internal void RegisterParsedItemsAction(CheckWrapper check, Action<BuildCheckDataContext<ParsedItemsCheckData>> parsedItemsAction)
+#pragma warning restore CS0618 // Type or member is obsolete
         => RegisterAction(check, parsedItemsAction, _globalCallbacks.ParsedItemsActions);
+
+    internal void RegisterEvaluatedItemsAction(CheckWrapper check, Action<BuildCheckDataContext<EvaluatedItemsCheckData>> parsedItemsAction)
+        => RegisterAction(check, parsedItemsAction, _globalCallbacks.EvaluatedItemsActions);
 
     internal void RegisterTaskInvocationAction(CheckWrapper check, Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction)
         => RegisterAction(check, taskInvocationAction, _globalCallbacks.TaskInvocationActions);
@@ -130,11 +139,21 @@ internal sealed class BuildCheckCentralContext
         => RunRegisteredActions(_globalCallbacks.EvaluatedPropertiesActions, evaluatedPropertiesCheckData, checkContext, resultHandler);
 
     internal void RunParsedItemsActions(
+#pragma warning disable CS0618 // Type or member is obsolete
         ParsedItemsCheckData parsedItemsCheckData,
+#pragma warning restore CS0618 // Type or member is obsolete
         ICheckContext checkContext,
         Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ParsedItemsActions, parsedItemsCheckData,
+            checkContext, resultHandler);
+
+    internal void RunEvaluatedItemsActions(
+        EvaluatedItemsCheckData evaluatedItemsCheckData,
+        ICheckContext checkContext,
+        Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
+            resultHandler)
+        => RunRegisteredActions(_globalCallbacks.EvaluatedItemsActions, evaluatedItemsCheckData,
             checkContext, resultHandler);
 
     internal void RunTaskInvocationActions(

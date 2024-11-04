@@ -18,6 +18,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         public void RegisterEvaluatedPropertiesAction(Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction)
             => _evaluatedPropertiesAction += evaluatedPropertiesAction;
         public void RegisterParsedItemsAction(Action<BuildCheckDataContext<ParsedItemsCheckData>> parsedItemsAction) => throw new NotImplementedException();
+        public void RegisterEvaluatedItemsAction(Action<BuildCheckDataContext<EvaluatedItemsCheckData>> evaluatedItemsAction) => throw new NotImplementedException();
 
         public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction)
             => _taskInvocationAction += taskInvocationAction;
