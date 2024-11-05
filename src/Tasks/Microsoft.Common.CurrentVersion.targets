@@ -3681,12 +3681,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Clean Include="$(TargetFrameworkMonikerAssemblyAttributesPath)"/>
   </ItemGroup>
 
-  <Target Name="GenerateTargetFrameworkMonikerAttribute"
-          BeforeTargets="BeforeCompile"
-          DependsOnTargets="PrepareForBuild;GetReferenceAssemblyPaths"
+  <Target Name="GenerateTargetFrameworkMonikerAttribute" BeforeTargets="BeforeCompile" DependsOnTargets="PrepareForBuild;GetReferenceAssemblyPaths;_WriteTargetFrameworkMonikerAttributeToFile"/>
+
+  <Target Name="_WriteTargetFrameworkMonikerAttributeToFile"
           Inputs="$(MSBuildToolsPath)\Microsoft.Common.targets"
           Outputs="$(TargetFrameworkMonikerAssemblyAttributesPath)"
-          Condition="'@(Compile)' != '' and '$(GenerateTargetFrameworkAttribute)' == 'true'">
+          Condition="'@(Compile)' != '' and '$(GenerateTargetFrameworkAttribute)' == 'true' and '$(TargetFrameworkMonikerAssemblyAttributeText)' != ''">
 
     <!-- This is a file shared between projects so we have to take care to handle simultaneous writes (by ContinueOnError)
              and a race between clean from one project and build from another (by not adding to FilesWritten so it doesn't clean) -->
@@ -3694,11 +3694,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         File="$(TargetFrameworkMonikerAssemblyAttributesPath)"
         Lines="$(TargetFrameworkMonikerAssemblyAttributeText)"
         Overwrite="true"
-        ContinueOnError="true"
-        Condition="'@(Compile)' != '' and '$(TargetFrameworkMonikerAssemblyAttributeText)' != ''"
-        />
-
-    <ItemGroup Condition="'@(Compile)' != '' and '$(TargetFrameworkMonikerAssemblyAttributeText)' != ''">
+        ContinueOnError="true"/>
+    <ItemGroup>
       <Compile Include="$(TargetFrameworkMonikerAssemblyAttributesPath)"/>
       <!-- Do not put in FileWrites: this is a file shared between projects in %temp%, and cleaning it would create a race between projects during rebuild -->
     </ItemGroup>
