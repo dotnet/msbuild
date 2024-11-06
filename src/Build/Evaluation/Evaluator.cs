@@ -2239,7 +2239,7 @@ namespace Microsoft.Build.Evaluation
                             VerifyVSDistributionPath(importElement.Project, importLocationInProject);
 
                             ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectNotFound",
-                                                                      importFileUnescaped, importExpressionEscaped);
+                                                                      importFileUnescaped, unescapedExpression, importExpressionEscaped);
                         }
                         else
                         {
