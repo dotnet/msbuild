@@ -85,17 +85,17 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>3c393bbd85ae16ddddba20d0b75035b0c6f1a52d</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.13.0-preview.1.46">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.13.0-preview.1.52">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>dddfdd8617e80ec5a2ea0dd94a094b243f355d09</Sha>
+      <Sha>edb1d2f0a148e80a1b2c86bc930ca55f09635aa4</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.13.0-2.24551.4">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.13.0-2.24555.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>cbb2d124058fc80051c9d5e9d798d22e8d5aaab3</Sha>
+      <Sha>9dcb2a31699f7d09974c9b5af571b102b291ee44</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn" Version="4.13.0-2.24551.4">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn" Version="4.13.0-2.24555.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>cbb2d124058fc80051c9d5e9d798d22e8d5aaab3</Sha>
+      <Sha>9dcb2a31699f7d09974c9b5af571b102b291ee44</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="9.0.0-beta.24516.2">

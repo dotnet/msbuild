@@ -90,7 +90,7 @@ namespace Microsoft.Build.Tasks
         /// <exception cref="InvalidOperationException">Thrown when the <c>TaskResources</c> property of the owner task is not set.</exception>
         public override string FormatResourceString(string resourceName, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(resourceName, nameof(resourceName));
+            ErrorUtilities.VerifyThrowArgumentNull(resourceName);
             ErrorUtilities.VerifyThrowInvalidOperation(TaskResources != null, "Shared.TaskResourcesNotRegistered", TaskName);
             ErrorUtilities.VerifyThrowInvalidOperation(TaskSharedResources != null, "Shared.TaskResourcesNotRegistered", TaskName);
 

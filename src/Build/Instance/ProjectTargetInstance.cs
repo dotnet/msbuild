@@ -163,16 +163,16 @@ namespace Microsoft.Build.Execution
             bool parentProjectSupportsReturnsAttribute)
         {
             ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
-            ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
-            ErrorUtilities.VerifyThrowInternalNull(inputs, nameof(inputs));
-            ErrorUtilities.VerifyThrowInternalNull(outputs, nameof(outputs));
-            ErrorUtilities.VerifyThrowInternalNull(keepDuplicateOutputs, nameof(keepDuplicateOutputs));
-            ErrorUtilities.VerifyThrowInternalNull(dependsOnTargets, nameof(dependsOnTargets));
-            ErrorUtilities.VerifyThrowInternalNull(beforeTargets, nameof(beforeTargets));
-            ErrorUtilities.VerifyThrowInternalNull(afterTargets, nameof(afterTargets));
-            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
-            ErrorUtilities.VerifyThrowInternalNull(children, nameof(children));
-            ErrorUtilities.VerifyThrowInternalNull(onErrorChildren, nameof(onErrorChildren));
+            ErrorUtilities.VerifyThrowInternalNull(condition);
+            ErrorUtilities.VerifyThrowInternalNull(inputs);
+            ErrorUtilities.VerifyThrowInternalNull(outputs);
+            ErrorUtilities.VerifyThrowInternalNull(keepDuplicateOutputs);
+            ErrorUtilities.VerifyThrowInternalNull(dependsOnTargets);
+            ErrorUtilities.VerifyThrowInternalNull(beforeTargets);
+            ErrorUtilities.VerifyThrowInternalNull(afterTargets);
+            ErrorUtilities.VerifyThrowInternalNull(location);
+            ErrorUtilities.VerifyThrowInternalNull(children);
+            ErrorUtilities.VerifyThrowInternalNull(onErrorChildren);
 
             _name = name;
             _condition = condition;

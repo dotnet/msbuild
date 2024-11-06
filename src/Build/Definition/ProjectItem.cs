@@ -127,12 +127,12 @@ namespace Microsoft.Build.Evaluation
                              PropertyDictionary<ProjectMetadata> directMetadataCloned,
                              List<ProjectItemDefinition> inheritedItemDefinitionsCloned)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
-            ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
+            ErrorUtilities.VerifyThrowInternalNull(project);
+            ErrorUtilities.VerifyThrowArgumentNull(xml);
 
             // Orcas accidentally allowed empty includes if they resulted from expansion: we preserve that bug
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeEscaped, nameof(evaluatedIncludeEscaped));
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeBeforeWildcardExpansionEscaped, nameof(evaluatedIncludeBeforeWildcardExpansionEscaped));
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeEscaped);
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeBeforeWildcardExpansionEscaped);
 
             _xml = xml;
             _project = project;
@@ -412,7 +412,7 @@ namespace Microsoft.Build.Evaluation
                 return Link.GetMetadata(name);
             }
 
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             ProjectMetadata result = null;
 
@@ -478,7 +478,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         string IItem.GetMetadataValueEscaped(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             string value = null;
 
@@ -640,7 +640,7 @@ namespace Microsoft.Build.Evaluation
                 return Link.RemoveMetadata(name);
             }
 
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
             ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
