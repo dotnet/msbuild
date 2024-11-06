@@ -49,7 +49,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal ProjectElement(ProjectElementLink link)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(link, nameof(link));
+            ErrorUtilities.VerifyThrowArgumentNull(link);
 
             _xmlSource = link;
         }
@@ -60,8 +60,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal ProjectElement(XmlElement xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xmlElement, nameof(xmlElement));
-            ErrorUtilities.VerifyThrowArgumentNull(containingProject, nameof(containingProject));
+            ErrorUtilities.VerifyThrowArgumentNull(xmlElement);
+            ErrorUtilities.VerifyThrowArgumentNull(containingProject);
 
             _xmlSource = (XmlElementWithLocation)xmlElement;
             _parent = parent;
@@ -350,7 +350,7 @@ namespace Microsoft.Build.Construction
         /// <param name="element">The element to act as a template to copy from.</param>
         public virtual void CopyFrom(ProjectElement element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
+            ErrorUtilities.VerifyThrowArgumentNull(element);
             ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), "CannotCopyFromElementOfThatType");
 
             if (this == element)
@@ -617,7 +617,7 @@ namespace Microsoft.Build.Construction
             /// </summary>
             internal WrapperForProjectRootElement(ProjectRootElement containingProject)
             {
-                ErrorUtilities.VerifyThrowInternalNull(containingProject, nameof(containingProject));
+                ErrorUtilities.VerifyThrowInternalNull(containingProject);
                 ContainingProject = containingProject;
             }
 
