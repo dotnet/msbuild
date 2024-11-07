@@ -780,9 +780,9 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectContents">The project file content in string format.</param>
         /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
-        public static MockLogger BuildProjectExpectFailure(string projectContents)
+        public static MockLogger BuildProjectExpectFailure(string projectContents, ITestOutputHelper testOutputHelper = null)
         {
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new MockLogger(testOutputHelper);
             BuildProjectExpectFailure(projectContents, logger);
             return logger;
         }
