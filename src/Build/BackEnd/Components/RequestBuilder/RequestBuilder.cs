@@ -1390,7 +1390,8 @@ namespace Microsoft.Build.BackEnd
             // Ensure everything that is required is available at this time
             if (project != null && buildEventContext != null && loggingService != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
-                if (String.Equals(project.GetEngineRequiredPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(project.GetEngineRequiredPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase) ||
+                    String.Equals(project.GetEngineRequiredPropertyValue(MSBuildConstants.TreatWarningsAsErrorsNoPrefix)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
                 {
                     // If <MSBuildTreatWarningsAsErrors was specified then an empty ISet<string> signals the IEventSourceSink to treat all warnings as errors
                     loggingService.AddWarningsAsErrors(buildEventContext, new HashSet<string>());
@@ -1398,6 +1399,20 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     ISet<string> warningsAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsErrors));
+                    var warningsAsErrorsNoPrefix = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsErrorsNoPrefix));
+                    if (warningsAsErrorsNoPrefix != null)
+                    {
+                        if (warningsAsErrors != null)
+                        {
+                            warningsAsErrors.UnionWith(warningsAsErrorsNoPrefix);
+                        }
+                        else
+                        {
+                            warningsAsErrors = warningsAsErrorsNoPrefix;
+                        }
+                    }
+
+
 
                     if (warningsAsErrors?.Count > 0)
                     {
@@ -1406,6 +1421,20 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 ISet<string> warningsNotAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsNotAsErrors));
+                var warningsNotAsErrorsNoPrefix = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsNotAsErrorsNoPrefix));
+                if (warningsNotAsErrorsNoPrefix != null)
+                {
+                    if (warningsNotAsErrors != null)
+                    {
+                        warningsNotAsErrors.UnionWith(warningsNotAsErrorsNoPrefix);
+                    }
+                    else
+                    {
+                        warningsNotAsErrors = warningsNotAsErrorsNoPrefix;
+                    }
+                }
+
+
 
                 if (warningsNotAsErrors?.Count > 0)
                 {
@@ -1413,6 +1442,12 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 ISet<string> warningsAsMessages = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsMessages));
+                var warningsAsMessagesNoPrefix = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsMessagesNoPrefix));
+                if (warningsAsMessagesNoPrefix != null)
+                {
+                    warningsAsMessages?.UnionWith(warningsAsMessagesNoPrefix);
+                    warningsAsMessages ??= warningsAsMessagesNoPrefix;
+                }
 
                 if (warningsAsMessages?.Count > 0)
                 {
