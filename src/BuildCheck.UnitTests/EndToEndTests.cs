@@ -91,7 +91,7 @@ public class EndToEndTests : IDisposable
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
 
-        
+
         // each finding should be found just once - but reported twice, due to summary
         if (limitReportsCount)
         {
@@ -349,9 +349,9 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData(null, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." } )]
+    [InlineData(null, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." })]
     [InlineData(true, new[] { "Property is derived from environment variable: 'TestFromTarget' with value: 'FromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation' with value: 'FromEvaluation'." })]
-    [InlineData(false, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." } )]
+    [InlineData(false, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." })]
     public void NoEnvironmentVariableProperty_Test(bool? customConfigEnabled, string[] expectedMessages)
     {
         List<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? customConfigData = null;
@@ -409,7 +409,7 @@ public class EndToEndTests : IDisposable
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output);
 
-        if(scope == EvaluationCheckScope.ProjectFileOnly)
+        if (scope == EvaluationCheckScope.ProjectFileOnly)
         {
             output.ShouldNotContain("Property is derived from environment variable: 'TestImported'. Properties should be passed explicitly using the /p option.");
         }

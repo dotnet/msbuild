@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
             }
             const string DOTNET_CLI_UI_LANGUAGE = nameof(DOTNET_CLI_UI_LANGUAGE);
             using TestEnvironment testEnvironment = TestEnvironment.Create();
-            
+
             // Override the ui language by setting environment variable
             testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, inputLanguage);
 

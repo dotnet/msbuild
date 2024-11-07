@@ -1157,7 +1157,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             s_buildCancellationSource.Cancel();
-            
+
 
             // The OS takes a lock in
             // kernel32.dll!_SetConsoleCtrlHandler, so if a task

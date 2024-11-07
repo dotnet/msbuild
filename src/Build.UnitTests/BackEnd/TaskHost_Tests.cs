@@ -407,7 +407,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _mockHost.BuildParameters.MaxNodeCount = 4;
 
             // Log the custom event args.  (Pretend that the task actually did this.)
-            _taskHost.LogErrorEvent(new ExtendedBuildErrorEventArgs("testExtCustomBuildError", null, null, null, 0, 0, 0, 0,"ext err message", null, null));
+            _taskHost.LogErrorEvent(new ExtendedBuildErrorEventArgs("testExtCustomBuildError", null, null, null, 0, 0, 0, 0, "ext err message", null, null));
 
             // Make sure our custom logger received the actual custom event and not some fake.
             Assert.True(_customLogger.LastError is ExtendedBuildErrorEventArgs); // "Expected custom build Event"

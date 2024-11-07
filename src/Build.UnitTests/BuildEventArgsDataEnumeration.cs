@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests
             results = args.EnumerateItemsOfType("Key2").ToList();
 
             results.Count.ShouldBe(2);
-            
+
             results[0].Type.ShouldBe("Key2");
             results[0].EvaluatedInclude.ShouldBe("spec");
             metadata = results[0].EnumerateMetadata().ToList();

@@ -65,7 +65,7 @@ public sealed class CustomConfigurationData
             return false;
         }
 
-        var customConfigObj = (CustomConfigurationData) obj;
+        var customConfigObj = (CustomConfigurationData)obj;
 
         if (customConfigObj.RuleId != RuleId)
         {

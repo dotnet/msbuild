@@ -1240,7 +1240,7 @@ namespace Microsoft.Build.Tasks
             if (!parentReferencesAdded.Contains(parentReferenceFolder) && !parentReferenceResolvedFromGAC && !parentReferenceResolvedFromAssemblyFolders)
             {
                 parentReferencesAdded.Add(parentReferenceFolder);
-                parentReferenceFolders.Add(new (Directory: parentReferenceFolder, ParentAssembly: parentReference.FullPath));
+                parentReferenceFolders.Add(new(Directory: parentReferenceFolder, ParentAssembly: parentReference.FullPath));
             }
         }
 
