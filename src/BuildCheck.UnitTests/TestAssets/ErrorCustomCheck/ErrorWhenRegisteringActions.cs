@@ -17,7 +17,7 @@ namespace ErrorCustomCheck
             "Message format: {0}",
             new CheckConfiguration());
 
-        public override string FriendlyName => "ErrorOnEvaluatedPropertiesCheck";
+        public override string FriendlyName => "ErrorWhenRegisteringActions";
 
         public override IReadOnlyList<CheckRule> SupportedRules { get; } = new List<CheckRule>() { SupportedRule };
 

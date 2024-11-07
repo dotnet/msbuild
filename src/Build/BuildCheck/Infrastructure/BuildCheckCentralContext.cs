@@ -16,10 +16,14 @@ internal sealed class BuildCheckCentralContext
 {
     private readonly IConfigurationProvider _configurationProvider;
 
-    public BuildCheckCentralContext(IConfigurationProvider configurationProvider, Action<ICheckContext> removeThrottledChecks)
+    public BuildCheckCentralContext(
+        IConfigurationProvider configurationProvider,
+        Action<ICheckContext> removeThrottledChecks,
+        Action<List<CheckWrapper>, ICheckContext> removeCheck)
     {
         _configurationProvider = configurationProvider;
         _removeThrottledChecks = removeThrottledChecks;
+        _removeChecks = removeCheck;
     }
 
     private record CallbackRegistry(
@@ -52,6 +56,8 @@ internal sealed class BuildCheckCentralContext
     // In a future we can have callbacks per project as well
     private readonly CallbackRegistry _globalCallbacks = new();
     private readonly Action<ICheckContext> _removeThrottledChecks;
+    private readonly Action<List<CheckWrapper>, ICheckContext> _removeChecks;
+
 
     // This we can potentially use to subscribe for receiving evaluated props in the
     //  build event args. However - this needs to be done early on, when checks might not be known yet
@@ -190,6 +196,7 @@ internal sealed class BuildCheckCentralContext
     where T : CheckData
     {
         string projectFullPath = checkData.ProjectFilePath;
+        List<CheckWrapper> checksToRemove = [];
 
         foreach (var checkCallback in registeredCallbacks)
         {
@@ -220,15 +227,15 @@ internal sealed class BuildCheckCentralContext
             // Here we might want to check the configPerRule[0].EvaluationsCheckScope - if the input data supports that
             // The decision and implementation depends on the outcome of the investigation tracked in:
             // https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57851137
+            BuildCheckDataContext<T> context = new BuildCheckDataContext<T>(
+                checkCallback.Item1,
+                checkContext,
+                configPerRule,
+                resultHandler,
+                checkData);
+
             try
             {
-                BuildCheckDataContext<T> context = new BuildCheckDataContext<T>(
-                    checkCallback.Item1,
-                    checkContext,
-                    configPerRule,
-                    resultHandler,
-                    checkData);
-
                 checkCallback.Item2(context);
             }
             catch (Exception e)
@@ -239,9 +246,11 @@ internal sealed class BuildCheckCentralContext
                     null,
                     new BuildEventFileInfo(projectFullPath),
                     $"The check '{checkCallback.Item1.Check.FriendlyName}' threw an exception while executing a registered action with message: {e.Message}");
+                checksToRemove.Add(checkCallback.Item1);
             }
         }
 
+        _removeChecks(checksToRemove, checkContext);
         _removeThrottledChecks(checkContext);
     }
 }

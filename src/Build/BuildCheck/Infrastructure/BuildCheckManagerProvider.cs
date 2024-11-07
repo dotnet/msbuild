@@ -74,7 +74,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
             _checkRegistry = new List<CheckFactoryContext>();
             _acquisitionModule = new BuildCheckAcquisitionModule();
-            _buildCheckCentralContext = new(_configurationProvider, RemoveThrottledChecks);
+            _buildCheckCentralContext = new(_configurationProvider, RemoveThrottledChecks, RemoveChecks);
             _buildEventsProcessor = new(_buildCheckCentralContext);
         }
 
@@ -278,8 +278,15 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
                 catch (Exception e)
                 {
-                    throw new BuildCheckConfigurationException(
-                        $"The check '{check.FriendlyName}' failed to register actions with the following message: '{e.Message}'");
+                    string message = $"The check '{check.FriendlyName}' failed to register actions with the following message: '{e.Message}'";
+                    if (e.InnerException is null)
+                    {
+                        throw new BuildCheckConfigurationException(message);
+                    }
+                    else
+                    {
+                        throw new BuildCheckConfigurationException(message, e.InnerException);
+                    }
                 }
             }
             else
@@ -345,6 +352,19 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"Dismounting check '{checkToRemove.FriendlyName}'. The check has exceeded the maximum number of results allowed. Any additional results will not be displayed.");
                 RemoveCheck(checkToRemove);
+            }
+        }
+
+        public void RemoveChecks(List<CheckWrapper> checkToRemove, ICheckContext checkContext)
+        {
+            foreach (CheckWrapper check in checkToRemove)
+            {
+                var checkFactory = _checkRegistry.Find(c => c.MaterializedCheck == check);
+                if (checkFactory is not null)
+                {
+                    checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting check '{check.Check.FriendlyName}'");
+                    RemoveCheck(checkFactory);
+                }
             }
         }
 

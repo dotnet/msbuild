@@ -515,10 +515,10 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("X01236", "Something went wrong initializing")]
-    [InlineData("X01237", "something went wrong when executing registered action")]
-    [InlineData("X01238", "something went wrong when registering actions")]
-    public void CustomChecksFailGracefully(string ruleId, string expectedMessage)
+    [InlineData("X01236", "ErrorOnInitializeCheck", "Something went wrong initializing")]
+    [InlineData("X01237", "ErrorOnRegisteredAction", "something went wrong when executing registered action")]
+    [InlineData("X01238", "ErrorWhenRegisteringActions", "something went wrong when registering actions")]
+    public void CustomChecksFailGracefully(string ruleId, string friendlyName, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())
         {
@@ -539,6 +539,7 @@ public class EndToEndTests : IDisposable
             success.ShouldBeTrue();
             projectCheckBuildLog.ShouldContain(expectedMessage);
             projectCheckBuildLog.ShouldNotContain("This check should have been disabled");
+            projectCheckBuildLog.ShouldContain($"Dismounting check '{friendlyName}'");
 
             // Cleanup
             File.Delete(editorConfigName);
