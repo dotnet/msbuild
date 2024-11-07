@@ -785,7 +785,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
         public static MockLogger BuildProjectExpectFailure([StringSyntax(StringSyntaxAttribute.Xml)] string projectContents)
         {
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new MockLogger(testOutputHelper);
             BuildProjectExpectFailure(projectContents, logger);
             return logger;
         }
