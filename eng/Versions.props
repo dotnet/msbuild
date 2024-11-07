@@ -3,7 +3,7 @@
 <Project>
   <PropertyGroup>
     <VersionPrefix>17.13.0</VersionPrefix>
-    <PackageValidationBaselineVersion>17.12.0</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>17.12.6</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
@@ -51,8 +51,8 @@
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.24516.2</MicrosoftDotNetXUnitExtensionsVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.13.0-2.24528.6</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.13.0-preview.1.46</NuGetBuildTasksVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.13.0-2.24555.1</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.13.0-preview.1.52</NuGetBuildTasksVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
     <BootstrapSdkVersion>9.0.200-preview.0.24523.19</BootstrapSdkVersion>
