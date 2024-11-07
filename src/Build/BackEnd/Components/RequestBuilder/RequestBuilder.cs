@@ -1279,7 +1279,7 @@ namespace Microsoft.Build.BackEnd
             BuildEventContext projectBuildEventContext = _projectLoggingContext?.BuildEventContext;
 
             // We can set the warning as errors and messages only after the project logging context has been created (as it creates the new ProjectContextId)
-            if (buildCheckManager != null && loggingService != null && projectBuildEventContext != null)
+            if (loggingService != null && projectBuildEventContext != null)
             {
                 args.WarningsAsErrors = loggingService.GetWarningsAsErrors(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 args.WarningsAsMessages = loggingService.GetWarningsAsMessages(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
