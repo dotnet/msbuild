@@ -681,7 +681,7 @@ namespace Microsoft.Build.Graph
                                     targetName);
 
                                 ProjectGraphNode node = GetNodeForProject(project);
-                                ProjectGraphBuildRequest entryEdge = new(node,[projectTargetName]);
+                                ProjectGraphBuildRequest entryEdge = new(node, [projectTargetName]);
                                 encounteredEdges.Add(entryEdge);
                                 edgesToVisit.Enqueue(entryEdge);
                                 isSolutionTraversalTarget = true;
@@ -696,7 +696,7 @@ namespace Microsoft.Build.Graph
                     {
                         foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                         {
-                            ProjectGraphBuildRequest entryEdge = new(entryPointNode,[targetName]);
+                            ProjectGraphBuildRequest entryEdge = new(entryPointNode, [targetName]);
                             encounteredEdges.Add(entryEdge);
                             edgesToVisit.Enqueue(entryEdge);
                         }

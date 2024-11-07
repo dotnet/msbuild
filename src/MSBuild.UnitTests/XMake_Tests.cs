@@ -1880,7 +1880,7 @@ namespace Microsoft.Build.UnitTests
             string[] extensionsToIgnore = null;
 
             Should.Throw<InitializationException>(() =>
-            {            
+            {
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
             });

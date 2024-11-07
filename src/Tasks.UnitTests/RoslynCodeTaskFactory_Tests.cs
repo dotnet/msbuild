@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public RoslynCodeTaskFactory_Tests()
         {
             UseProjectRelativeDirectory("TaskFactorySource");
-            
+
             _verifySettings = new();
             _verifySettings.ScrubLinesContaining("Runtime Version:");
         }
@@ -674,7 +674,7 @@ namespace InlineTask
         {
             string taskName = "HelloTask";
 
-            string sourceContent =  $$"""
+            string sourceContent = $$"""
                 namespace InlineTask
                 {
                     using Microsoft.Build.Utilities;

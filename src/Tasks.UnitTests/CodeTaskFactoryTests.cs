@@ -1152,7 +1152,7 @@ namespace Microsoft.Build.UnitTests
         {
             string taskName = "HelloTask";
 
-            string sourceContent =  $$"""
+            string sourceContent = $$"""
                 namespace InlineTask
                 {
                     using Microsoft.Build.Utilities;

@@ -96,7 +96,7 @@ internal sealed class EditorConfigParser
                 }
             }
         }
-        
+
         return resultingDictionary;
     }
 

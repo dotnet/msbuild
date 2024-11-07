@@ -229,7 +229,7 @@ internal sealed class BuildCheckResultMessage : BuildMessageEventArgs
     public BuildCheckResultMessage(IBuildCheckResult result)
         : base(message: result.FormatMessage(), file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, MessageImportance.High)
         => RawMessage = result.FormatMessage();
-    
+
 
     internal BuildCheckResultMessage(string formattedMessage) => RawMessage = formattedMessage;
 
