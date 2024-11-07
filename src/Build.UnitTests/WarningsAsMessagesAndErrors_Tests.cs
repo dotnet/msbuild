@@ -252,7 +252,8 @@ namespace Microsoft.Build.Engine.UnitTests
                         new KeyValuePair<string, string>("WarningsNotAsErrors", $@"$(WarningsNotAsErrors);
                                                                                        {ExpectedEventCode.ToLowerInvariant()}"),
                         new KeyValuePair<string, string>("WarningsNotAsErrors", "$(WarningsNotAsErrors);ABC")
-                    }));
+                    }),
+                _output);
 
             VerifyBuildWarningEvent(logger);
         }
@@ -268,7 +269,8 @@ namespace Microsoft.Build.Engine.UnitTests
                         new KeyValuePair<string, string>("WarningsNotAsErrors", $@"$(MSBuildWarningsNotAsErrors);
                                                                                        {ExpectedEventCode.ToLowerInvariant()}"),
                         new KeyValuePair<string, string>("MSBuildWarningsNotAsErrors", "$(WarningsNotAsErrors);ABC")
-                    }));
+                    }),
+                _output);
 
             VerifyBuildWarningEvent(logger);
         }
@@ -287,7 +289,8 @@ namespace Microsoft.Build.Engine.UnitTests
                         new KeyValuePair<string, string>($@"{prefix}WarningsAsErrors", $@"$({prefix}WarningsAsErrors);
                                                                                        {ExpectedEventCode.ToLowerInvariant()}"),
                         new KeyValuePair<string, string>($@"{prefix}WarningsAsErrors", $@"$({prefix}WarningsAsErrors);ABC")
-                    }));
+                    }),
+                _output);
 
             VerifyBuildErrorEvent(logger);
         }
@@ -304,7 +307,8 @@ namespace Microsoft.Build.Engine.UnitTests
                         new KeyValuePair<string, string>("MSBuildWarningsAsErrors", $@"$(WarningsAsErrors);
                                                                                        {ExpectedEventCode.ToLowerInvariant()}"),
                         new KeyValuePair<string, string>("WarningsAsErrors", "$(MSBuildWarningsAsErrors);ABC")
-                    }));
+                    }),
+                _output);
 
             VerifyBuildErrorEvent(logger);
         }
@@ -318,7 +322,8 @@ namespace Microsoft.Build.Engine.UnitTests
                     {
                         new KeyValuePair<string, string>("MSBuildWarningsAsMessages", "123"),
                         new KeyValuePair<string, string>("MSBuildWarningsAsMessages", "$(MSBuildWarningsAsMessages);ABC")
-                    }));
+                    }),
+                _output);
 
             VerifyBuildWarningEvent(logger);
         }
