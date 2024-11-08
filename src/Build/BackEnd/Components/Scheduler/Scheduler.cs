@@ -1354,8 +1354,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AssignUnscheduledRequestToNode(SchedulableRequest request, int nodeId, List<ScheduleResponse> responses)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(request, nameof(request));
-            ErrorUtilities.VerifyThrowArgumentNull(responses, nameof(responses));
+            ErrorUtilities.VerifyThrowArgumentNull(request);
+            ErrorUtilities.VerifyThrowArgumentNull(responses);
             ErrorUtilities.VerifyThrow(nodeId != InvalidNodeId, "Invalid node id specified.");
 
             request.VerifyState(SchedulableRequestState.Unscheduled);
@@ -1619,8 +1619,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleRequestBlockedOnInProgressTarget(SchedulableRequest blockedRequest, BuildRequestBlocker blocker)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blockedRequest, nameof(blockedRequest));
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
+            ErrorUtilities.VerifyThrowArgumentNull(blockedRequest);
+            ErrorUtilities.VerifyThrowArgumentNull(blocker);
 
             // We are blocked on an in-progress request building a target whose results we need.
             SchedulableRequest blockingRequest = _schedulingData.GetScheduledRequest(blocker.BlockingRequestId);
@@ -1678,8 +1678,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleRequestBlockedByNewRequests(SchedulableRequest parentRequest, BuildRequestBlocker blocker, List<ScheduleResponse> responses)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
-            ErrorUtilities.VerifyThrowArgumentNull(responses, nameof(responses));
+            ErrorUtilities.VerifyThrowArgumentNull(blocker);
+            ErrorUtilities.VerifyThrowArgumentNull(responses);
 
             // The request is waiting on new requests.
             bool abortRequestBatch = false;
@@ -2033,7 +2033,7 @@ namespace Microsoft.Build.BackEnd
                 SchedulableRequest parentRequest = _schedulingData.BlockedRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId)
                     ?? _schedulingData.ExecutingRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId);
 
-                ErrorUtilities.VerifyThrowInternalNull(parentRequest, nameof(parentRequest));
+                ErrorUtilities.VerifyThrowInternalNull(parentRequest);
                 ErrorUtilities.VerifyThrow(
                     configCache.HasConfiguration(parentRequest.BuildRequest.ConfigurationId),
                     "All non root requests should have a parent with a loaded configuration");

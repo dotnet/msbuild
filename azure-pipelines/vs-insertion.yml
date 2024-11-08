@@ -1,0 +1,210 @@
+# Create a VS insertion (DotNet-MSBuild-Trusted -> VS) from a build artifact on main or any servicing branch. 
+trigger: none
+name: $(Date:yyyyMMdd).$(Rev:r)
+
+schedules:
+  - cron: '0 3 * * *'   # Runs every day at 3AM UTC
+    displayName: Daily VS insertion
+    branches:
+      include:
+        - main
+        - vs*
+    always: false # Don't run if there are no code changes
+
+parameters:
+  - name: TargetBranch
+    default: auto
+    type: string
+    displayName: 'Insertion Target Branch (recommended to use `auto`)'
+    values:
+      - auto
+      - main
+      - rel/d17.13
+      - rel/d17.12
+      - rel/d17.11
+      - rel/d17.10
+      - rel/d17.8
+      - rel/d17.6
+      - rel/d17.3
+      - rel/d17.0
+variables:
+  # `auto` should work every time and selecting a branch in parameters is likely to fail due to incompatible versions in MSBuild and VS
+  - name: AutoInsertTargetBranch
+    ${{ if eq(variables['Build.SourceBranchName'], 'vs17.13') }}:
+      value: 'rel/d17.13'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.12') }}:
+      value: 'rel/d17.12'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.11') }}:
+      value: 'rel/d17.11'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.10') }}:
+      value: 'rel/d17.10'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.8') }}:
+      value: 'rel/d17.8'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.6') }}:
+      value: 'rel/d17.6'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.3') }}:
+      value: 'rel/d17.3'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.0') }}:
+      value: 'rel/d17.0'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'main') }}:
+      value: 'main'
+    ${{ else }}:
+      value: ''
+  - name: InsertTargetBranch
+    ${{ if not(eq(parameters.TargetBranch, 'auto')) }}:
+      value: ${{ parameters.TargetBranch }}
+    ${{ else }}:
+      value: $(AutoInsertTargetBranch)
+  - name: InsertPropsValues
+    #  servicing branches until 17.12 also include Microsoft.Build.Engine and Microsoft.Build.Conversion.Core
+    ${{ if or(eq(variables['Build.SourceBranchName'], 'vs17.0'),  eq(variables['Build.SourceBranchName'], 'vs17.3'), eq(variables['Build.SourceBranchName'], 'vs17.6'),  eq(variables['Build.SourceBranchName'], 'vs17.8'), eq(variables['Build.SourceBranchName'], 'vs17.10'), eq(variables['Build.SourceBranchName'], 'vs17.11'), eq(variables['Build.SourceBranchName'], 'vs17.12')) }}: 
+      value: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Conversion.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Engine=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
+    ${{ else }}:
+      value: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
+  - name:  TeamName
+    value: msbuild
+  - name: TeamEmail
+    value: msbuild@microsoft.com
+
+resources:
+  pipelines:
+  - pipeline: 'MSBuild'
+    project: 'DevDiv'
+    source: 'MSBuild'
+  repositories:
+  - repository: 1ESPipelineTemplates
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+    ref: refs/tags/release
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    pool:
+      name: VSEngSS-MicroBuild2022-1ES
+    customBuildTags:
+    - ES365AIMigrationTooling-Release
+    stages:
+    - stage: RetainBuild
+      displayName: Retain build
+      jobs:
+      - job: Job_1
+        displayName: Run on agent
+        condition: succeeded()
+        timeoutInMinutes: 0
+        steps:
+          # Check that InsertTargetBranch is valid before running anything else.
+        - task: PowerShell@2
+          name: CheckInsertTargetBranch
+          inputs:
+            targetType: inline
+            script: |
+              if ("$(InsertTargetBranch)" -eq "") {
+                Write-Error "InsertTargetBranch is not set, this means your're not inserting from main or a valid servicing branch."
+                exit 1
+              }
+        - task: MicroBuildRetainVstsDrops@1
+          name: MicroBuildRetainVstsDrops_2
+          displayName: Retain VSTS Drops
+          inputs:
+            DropNames: Products/DevDiv/DotNet-msbuild-Trusted/$(Build.SourceBranchName)/$(Build.BuildNumber)
+            AccessToken: $(System.AccessToken)
+            DropServiceUri: https://devdiv.artifacts.visualstudio.com/DefaultCollection
+            # retain servicing indefinitely, main only for 183 days
+            ${{ if eq(variables['InsertTargetBranch'], 'main') }}:
+              DropRetentionDays: 183
+    - stage: VSInsertion
+      displayName: VS insertion
+      dependsOn: RetainBuild
+      variables:
+          InsertConfigValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion)
+          InsertCustomScriptExecutionCommand: $(Pipeline.Workspace)\xsd\Update-MSBuildXsds.ps1
+          InsertDescription: Insert MSBuild $(Build.BuildNumber) from the branch $(Build.SourceBranchName) at commit $(Build.SourceVersion). Corresponding package version is $(MSBuild_ExtApisPackageVersion)
+          InsertJsonValues: Microsoft.Build.vsman{$(MSBuild_ExtApisPackageVersion)+$(Build.SourceVersion)}=https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(Build.SourceBranchName)/$(Build.BuildNumber);Microsoft.Build.vsman,Microsoft.Build.Arm64.vsman{$(MSBuild_ExtApisPackageVersion)+$(Build.SourceVersion)}=https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(Build.SourceBranchName)/$(Build.BuildNumber);Microsoft.Build.Arm64.vsman,Microsoft.Build.UnGAC.vsman=https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(Build.SourceBranchName)/$(Build.BuildNumber);Microsoft.Build.UnGAC.vsman
+          InsertPayloadName: MSBuild $(Build.SourceBranchName) $(Build.BuildNumber)
+          SymbolsAgentPath: $(Pipeline.Workspace)\$(Build.DefinitionName)\Symbols
+          SymbolsEmailContacts: raines
+          SymbolsFeatureName: MSBuild
+          SymbolsSymwebProject: DDE
+          SymbolsUncPath: '\\cpvsbuild\drops\MSBuild\symbols\$(Build.DefinitionName)\$(Build.BuildNumber)\symbols.archive'
+      jobs:
+      - job: PushPackages
+        displayName: Push Packages
+        condition: succeeded()
+        timeoutInMinutes: 0
+        templateContext:
+          inputs:
+          - input: pipelineArtifact
+            pipeline: 'MSBuild'
+            artifactName: 'BuildLogs_SourceBuild_Managed_Attempt1'
+            targetPath: '$(Pipeline.Workspace)/BuildLogs_SourceBuild_Managed_Attempt1'
+          - input: pipelineArtifact
+            pipeline: 'MSBuild'
+            artifactName: 'build_Windows_NT_SBOM'
+            targetPath: '$(Pipeline.Workspace)/build_Windows_NT_SBOM'
+          - input: pipelineArtifact
+            pipeline: 'MSBuild'
+            artifactName: 'xsd'
+            targetPath: '$(Pipeline.Workspace)/xsd'
+          - input: pipelineArtifact
+            pipeline: 'MSBuild'
+            artifactName: 'PackageArtifacts'
+            targetPath: '$(Build.ArtifactStagingDirectory)/PackageArtifacts'
+        steps:
+        - task: Powershell@2
+          name: PwshMungeExternalAPIsPkgVersion
+          displayName: Munge ExternalAPIs package version
+          inputs:
+            targetType: inline
+            script: |
+              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/VS.ExternalAPIs.*.nupkg"
+              $packageFile = Get-ChildItem -Path $folder -Filter VS.ExternalAPIs.*.nupkg | Select-Object -First 1
+              $packageVersion = $packageFile.BaseName.TrimStart("VS.ExternalAPIs.MSBuild")
+              Write-Host "Setting MSBuild_ExtApisPackageVersion to '$packageVersion'"
+              Write-Host "##vso[task.setvariable variable=MSBuild_ExtApisPackageVersion]$($packageVersion)"
+              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.NET.StringTools*.nupkg"
+              $packageFile = Get-ChildItem -Path $folder -Filter Microsoft.NET.StringTools*.nupkg | Select-Object -First 1
+              $packageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
+              Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$packageVersion'"
+              Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($packageVersion)"
+        - task: 1ES.PublishNuGet@1
+          displayName: 'Push MSBuild CoreXT packages'
+          inputs:
+            packageParentPath: '$(Build.ArtifactStagingDirectory)'
+            packagesToPush: $(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.Build.*.nupkg;$(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.NET.StringTools.*.nupkg;$(Build.ArtifactStagingDirectory)/PackageArtifacts/VS.ExternalAPIs.*.nupkg
+            nuGetFeedType: internal
+            publishVstsFeed: VS
+            allowPackageConflicts: true
+        - template: /azure-pipelines/WIFtoPATauth.yml@self
+          parameters:
+            wifServiceConnectionName: azure-public/vside package push
+            deadPATServiceConnectionId: 42175e93-c771-4a4f-a132-3cca78f44b3b
+        - task: 1ES.PublishNuGet@1
+          displayName: 'Push MSBuild packages to VSSDK'
+          inputs:
+            packageParentPath: '$(Build.ArtifactStagingDirectory)'
+            packagesToPush: $(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.Build.*.nupkg;$(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.NET.StringTools*.nupkg
+            nuGetFeedType: external
+            publishFeedCredentials: azure-public/vssdk
+            allowPackageConflicts: true
+        - task: PowerShell@2
+          name: PrintTargetBranch
+          inputs:
+            targetType: inline
+            script: |
+              Write-Host "InsertTargetBranch: $(InsertTargetBranch)"
+        - task: MicroBuildInsertVsPayload@4
+          name: MicroBuildInsertVsPayload_4
+          displayName: Insert VS Payload
+          inputs:
+            LinkWorkItemsToPR: true
+            TeamName: $(TeamName)
+            TeamEmail: $(TeamEmail)
+            TargetBranch: $(InsertTargetBranch)
+            InsertionPayloadName: $(InsertPayloadName)
+            PackagePropsValues: $(InsertPropsValues)
+            InsertionDescription: $(InsertDescription)
+            InsertionReviewers: MSBuild,VS ProTools
+            CustomScriptExecutionCommand: $(InsertCustomScriptExecutionCommand)
+            AutoCompletePR: true
+            AutoCompleteMergeStrategy: Squash
+            InsertionBuildPolicy: Request Perf DDRITs

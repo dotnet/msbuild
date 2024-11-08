@@ -34,14 +34,14 @@ internal class CheckDispatchingContext : ICheckContext
 
     public void DispatchBuildEvent(BuildEventArgs buildEvent)
     {
-        ErrorUtilities.VerifyThrowInternalNull(buildEvent, nameof(buildEvent));
+        ErrorUtilities.VerifyThrowInternalNull(buildEvent);
 
         _eventDispatcher.Dispatch(buildEvent);
     }
 
     public void DispatchAsComment(MessageImportance importance, string messageResourceName, params object?[] messageArgs)
     {
-        ErrorUtilities.VerifyThrowInternalLength(messageResourceName,nameof(messageResourceName));
+        ErrorUtilities.VerifyThrowInternalLength(messageResourceName, nameof(messageResourceName));
 
         DispatchAsCommentFromText(_eventContext, importance, ResourceUtilities.GetResourceString(messageResourceName), messageArgs);
     }

@@ -131,7 +131,6 @@ internal sealed class CheckWrapper
 
         switch (configurationEffective.Severity)
         {
-            
             case CheckResultSeverity.Suggestion:
                 telemetryData.IncrementMessagesCount();
                 break;

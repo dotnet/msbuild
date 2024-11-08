@@ -163,8 +163,8 @@ namespace Microsoft.Build.Construction
         internal ProjectRootElement(XmlReader xmlReader, ProjectRootElementCacheBase projectRootElementCache, bool isExplicitlyLoaded,
             bool preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xmlReader, nameof(xmlReader));
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowArgumentNull(xmlReader);
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
 
             IsExplicitlyLoaded = isExplicitlyLoaded;
             ProjectRootElementCache = projectRootElementCache;
@@ -182,7 +182,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
 
             ProjectRootElementCache = projectRootElementCache;
             _directory = NativeMethodsShared.GetCurrentDirectory();
@@ -214,9 +214,9 @@ namespace Microsoft.Build.Construction
                 ProjectRootElementCacheBase projectRootElementCache,
                 bool preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentLength(path);
             ErrorUtilities.VerifyThrowInternalRooted(path);
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
             ProjectRootElementCache = projectRootElementCache;
 
             IncrementVersion();
@@ -238,8 +238,8 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         private ProjectRootElement(XmlDocumentWithLocation document, ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(document, nameof(document));
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowArgumentNull(document);
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
 
             ProjectRootElementCache = projectRootElementCache;
             _directory = NativeMethodsShared.GetCurrentDirectory();
@@ -397,7 +397,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(value));
+                ErrorUtilities.VerifyThrowArgumentLength(value);
                 if (Link != null)
                 {
                     RootLink.FullPath = value;
@@ -744,7 +744,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(ProjectCollection projectCollection, NewProjectFileOptions projectFileOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             return Create(projectCollection.ProjectRootElementCache, projectFileOptions);
         }
@@ -782,8 +782,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(string path, ProjectCollection projectCollection, NewProjectFileOptions newProjectFileOptions)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentLength(path);
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             var projectRootElement = new ProjectRootElement(
                 projectCollection.ProjectRootElementCache,
@@ -820,7 +820,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Create(XmlReader xmlReader, ProjectCollection projectCollection, bool preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             return new ProjectRootElement(xmlReader, projectCollection.ProjectRootElementCache, true /*Explicitly loaded*/,
                 preserveFormatting);
@@ -853,8 +853,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public static ProjectRootElement Open(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentLength(path);
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             path = FileUtilities.NormalizePath(path);
 
@@ -873,7 +873,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public static ProjectRootElement TryOpen(string path)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentLength(path);
 
             return TryOpen(path, ProjectCollection.GlobalProjectCollection);
         }
@@ -910,8 +910,8 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public static ProjectRootElement TryOpen(string path, ProjectCollection projectCollection, bool? preserveFormatting)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentLength(path);
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             path = FileUtilities.NormalizePath(path);
 
@@ -927,7 +927,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectImportElement AddImport(string project)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentLength(project);
 
             ProjectImportGroupElement importGroupToAddTo =
                 ImportGroupsReversed.FirstOrDefault(importGroup => importGroup.Condition.Length <= 0);
@@ -984,8 +984,8 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public ProjectItemElement AddItem(string itemType, string include, IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
-            ErrorUtilities.VerifyThrowArgumentLength(include, nameof(include));
+            ErrorUtilities.VerifyThrowArgumentLength(itemType);
+            ErrorUtilities.VerifyThrowArgumentLength(include);
 
             ProjectItemGroupElement itemGroupToAddTo = null;
 
@@ -1061,7 +1061,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemDefinitionElement AddItemDefinition(string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowArgumentLength(itemType);
 
             ProjectItemDefinitionGroupElement itemDefinitionGroupToAddTo = null;
 
@@ -1847,7 +1847,7 @@ namespace Microsoft.Build.Construction
         /// <param name="project">The dirtied project.</param>
         internal void MarkProjectDirty(Project project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentNull(project);
             ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             // Only bubble this event up if the cache knows about this PRE, which is equivalent to

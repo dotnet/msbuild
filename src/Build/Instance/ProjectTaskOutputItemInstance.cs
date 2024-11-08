@@ -59,9 +59,9 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowInternalLength(itemType, nameof(itemType));
             ErrorUtilities.VerifyThrowInternalLength(taskParameter, nameof(taskParameter));
-            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
-            ErrorUtilities.VerifyThrowInternalNull(itemTypeLocation, nameof(itemTypeLocation));
-            ErrorUtilities.VerifyThrowInternalNull(taskParameterLocation, nameof(taskParameterLocation));
+            ErrorUtilities.VerifyThrowInternalNull(location);
+            ErrorUtilities.VerifyThrowInternalNull(itemTypeLocation);
+            ErrorUtilities.VerifyThrowInternalNull(taskParameterLocation);
 
             _itemType = itemType;
             _taskParameter = taskParameter;
