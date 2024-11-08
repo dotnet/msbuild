@@ -223,7 +223,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             // For custom checks - it should run only on projects where referenced
             // (otherwise error out - https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57849480)
             // on others it should work similarly as disabling them.
-            // Disabled check should not only post-filter results - it shouldn't even see the data 
+            // Disabled check should not only post-filter results - it shouldn't even see the data
             CheckWrapper wrapper;
             CheckConfigurationEffective[] configurations;
             if (checkFactoryContext.MaterializedCheck == null)
@@ -376,9 +376,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 if (importedProjects != null && TryGetProjectFullPath(checkContext.BuildEventContext, out string projectPath))
                 {
-                    foreach (string importedProject in importedProjects)
+                    lock (importedProjects)
                     {
-                        _buildEventsProcessor.ProcessProjectImportedEventArgs(checkContext, projectPath, importedProject);
+                        foreach (string importedProject in importedProjects)
+                        {
+                            _buildEventsProcessor.ProcessProjectImportedEventArgs(checkContext, projectPath, importedProject);
+                        }
                     }
                 }
             }
@@ -583,10 +586,12 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// <param name="newImportedProjectFile">The path of the newly imported project file.</param>
         private void PropagateImport(int evaluationId, string originalProjectFile, string newImportedProjectFile)
         {
-            if (_deferredProjectEvalIdToImportedProjects.TryGetValue(evaluationId, out HashSet<string>? importedProjects)
-                && importedProjects.Contains(originalProjectFile))
+            if (_deferredProjectEvalIdToImportedProjects.TryGetValue(evaluationId, out HashSet<string>? importedProjects))
             {
-                importedProjects.Add(newImportedProjectFile);
+                lock (importedProjects)
+                {
+                    importedProjects.Add(newImportedProjectFile);
+                }
             }
         }
 
