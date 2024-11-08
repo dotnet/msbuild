@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Framework;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 
