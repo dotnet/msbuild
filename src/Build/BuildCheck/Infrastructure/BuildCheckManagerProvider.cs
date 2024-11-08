@@ -590,7 +590,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 lock (importedProjects)
                 {
-                    importedProjects.Add(newImportedProjectFile);
+                    if (importedProjects.Contains(originalProjectFile))
+                    {
+                        importedProjects.Add(newImportedProjectFile);
+                    }
                 }
             }
         }
