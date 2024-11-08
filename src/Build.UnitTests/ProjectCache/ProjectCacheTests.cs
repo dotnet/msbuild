@@ -1661,6 +1661,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         }
 
         [Fact]
+        /// <summary>
+        /// https://github.com/dotnet/msbuild/issues/5334
+        /// </summary>
         public void EmbeddedResourcesFileCompileCache()
         {
             var directory = _env.CreateFolder();
@@ -1710,16 +1713,16 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             var file2 = directory.CreateFile("File2.txt", "B=1");
 
             // Build and run the project
-            RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath} -restore", out bool success);
-            success.ShouldBeTrue();
-            string output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/net8.0/app"), "", out success, false, _output);
+            string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath} -restore", out bool success);
+            success.ShouldBeTrue(output);
+            output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/net8.0/app"), "", out success, false, _output);
             output.ShouldContain("A=1");
             output.ShouldContain("B=1");
 
             // Delete a file and build
             FileUtilities.DeleteNoThrow(file1.Path);
-            RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath}", out success);
-            success.ShouldBeTrue();
+            output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath}", out success);
+            success.ShouldBeTrue(output);
             output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/net8.0/app"), "", out success, false, _output);
             output.ShouldNotContain("A=1");
             output.ShouldContain("B=1");
