@@ -171,6 +171,16 @@
         <target state="translated">ビルド中に環境変数から派生した暗黙的なプロパティを使用しないでください。</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_MessageFmt">
+        <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
+        <target state="new">Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_Title">
+        <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
+        <target state="new">A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">プロパティ: '{0}' にアクセスしましたが、初期化されませんでした。</target>

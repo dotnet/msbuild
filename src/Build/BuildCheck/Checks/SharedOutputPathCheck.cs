@@ -6,10 +6,13 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
@@ -37,8 +40,8 @@ internal sealed class SharedOutputPathCheck : Check
 
     internal override bool IsBuiltIn => true;
 
-    private readonly Dictionary<string, string> _projectsPerOutputPath = new(StringComparer.CurrentCultureIgnoreCase);
-    private readonly HashSet<string> _projects = new(StringComparer.CurrentCultureIgnoreCase);
+    private readonly Dictionary<string, string> _projectsPerOutputPath = new(MSBuildNameIgnoreCaseComparer.Default);
+    private readonly HashSet<string> _projects = new(MSBuildNameIgnoreCaseComparer.Default);
 
     private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
     {
@@ -56,8 +59,8 @@ internal sealed class SharedOutputPathCheck : Check
         // Check objPath only if it is different from binPath
         if (
             !string.IsNullOrEmpty(objPath) && !string.IsNullOrEmpty(absoluteBinPath) &&
-            !objPath.Equals(binPath, StringComparison.CurrentCultureIgnoreCase)
-            && !objPath.Equals(absoluteBinPath, StringComparison.CurrentCultureIgnoreCase)
+            !MSBuildNameIgnoreCaseComparer.Default.Equals(objPath, binPath)
+            && !MSBuildNameIgnoreCaseComparer.Default.Equals(objPath, absoluteBinPath)
         )
         {
             CheckAndAddFullOutputPath(objPath, context);

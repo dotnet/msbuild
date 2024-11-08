@@ -7,6 +7,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0101](#bc0101---shared-output-path) | Warning | Shared output path. |
 | [BC0102](#bc0102---double-writes) | Warning | Double writes. |
 | [BC0103](#bc0103---used-environment-variable) | Suggestion | Used environment variable. |
+| [BC0104](#bc0104---projectreference-is-prefered-to-reference) | Warning | ProjectReference is prefered to Reference. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Property first declared after it was used. |
 | [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Property declared but never used. |
@@ -47,6 +48,15 @@ Using environment variables as a data source in MSBuild is problematic and can l
 Relying on environment variables introduces variability and unpredictability, as their values can change between builds or environments.
 
 This practice can result in inconsistent build outcomes and makes debugging difficult, since environment variables are external to project files and build scripts. To ensure consistent and reproducible builds, avoid using environment variables. Instead, explicitly pass properties using the /p option, which offers better control and traceability.
+
+<a name="BC0104"></a>
+## BC0104 - ProjectReference is prefered to Reference.
+
+"A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'."
+
+It is not recommended to reference project outputs. Such practice leads to losing the explicit dependency between the projects. Build then might not order the projects properly, which can lead to randomly missing reference and hence undeterministic build.
+
+If you need to achieve more advanced dependency behavior - check [Controlling Dependencies Behavior](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Controlling-Dependencies-Behavior.md) document. If neither suits your needs - then you might need to disable this check for your build or for particular projects.
 
 <a name="BC0201"></a>
 ## BC0201 - Usage of undefined property.

@@ -19,17 +19,17 @@ internal class PropertiesUsageCheck : InternalCheck
     private static readonly CheckRule _usedBeforeInitializedRule = new CheckRule("BC0201", "PropertyUsedBeforeDeclared",
         ResourceUtilities.GetResourceString("BuildCheck_BC0201_Title")!,
         ResourceUtilities.GetResourceString("BuildCheck_BC0201_MessageFmt")!,
-        new CheckConfiguration() { Severity = CheckResultSeverity.Warning, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
+        new CheckConfiguration() { RuleId = "BC0201", Severity = CheckResultSeverity.Warning, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
 
     private static readonly CheckRule _initializedAfterUsedRule = new CheckRule("BC0202", "PropertyDeclaredAfterUsed",
         ResourceUtilities.GetResourceString("BuildCheck_BC0202_Title")!,
         ResourceUtilities.GetResourceString("BuildCheck_BC0202_MessageFmt")!,
-        new CheckConfiguration() { Severity = CheckResultSeverity.Warning, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
+        new CheckConfiguration() { RuleId = "BC0202", Severity = CheckResultSeverity.Warning, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
 
     private static readonly CheckRule _unusedPropertyRule = new CheckRule("BC0203", "UnusedPropertyDeclared",
         ResourceUtilities.GetResourceString("BuildCheck_BC0203_Title")!,
         ResourceUtilities.GetResourceString("BuildCheck_BC0203_MessageFmt")!,
-        new CheckConfiguration() { Severity = CheckResultSeverity.Suggestion, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
+        new CheckConfiguration() { RuleId = "BC0203", Severity = CheckResultSeverity.Suggestion, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
 
     internal static readonly IReadOnlyList<CheckRule> SupportedRulesList = [_usedBeforeInitializedRule, _initializedAfterUsedRule, _unusedPropertyRule];
 

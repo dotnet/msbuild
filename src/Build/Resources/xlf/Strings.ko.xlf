@@ -171,6 +171,16 @@
         <target state="translated">빌드하는 동안 환경 변수에서 파생된 암시적 속성을 사용하면 안 됩니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_MessageFmt">
+        <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
+        <target state="new">Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_Title">
+        <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
+        <target state="new">A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">속성: '{0}'에 액세스했지만 초기화되지 않았습니다.</target>
