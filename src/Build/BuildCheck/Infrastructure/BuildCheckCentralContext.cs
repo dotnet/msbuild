@@ -193,7 +193,7 @@ internal sealed class BuildCheckCentralContext
     where T : CheckData
     {
         string projectFullPath = checkData.ProjectFilePath;
-        List<CheckWrapper> checksToRemove = null;
+        List<CheckWrapper>? checksToRemove = null;
 
         foreach (var checkCallback in registeredCallbacks)
         {
