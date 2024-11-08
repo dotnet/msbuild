@@ -467,7 +467,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly ConcurrentDictionary<int, string> _projectsByInstanceId = new();
         private readonly ConcurrentDictionary<int, string> _projectsByEvaluationId = new();
 
-        private readonly Dictionary<int, HashSet<string>> _deferredProjectEvalIdToImportedProjects = new();
+        private readonly ConcurrentDictionary<int, HashSet<string>> _deferredProjectEvalIdToImportedProjects = new();
 
         /// <summary>
         /// This method fetches the project full path from the context id.
@@ -539,10 +539,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             string projectFullPath)
         {
             _projectsByEvaluationId[checkContext.BuildEventContext.EvaluationId] = projectFullPath;
-            if (!_deferredProjectEvalIdToImportedProjects.ContainsKey(checkContext.BuildEventContext.EvaluationId))
-            {
-                _deferredProjectEvalIdToImportedProjects.Add(checkContext.BuildEventContext.EvaluationId, [projectFullPath]);
-            }
+            _deferredProjectEvalIdToImportedProjects.TryAdd(checkContext.BuildEventContext.EvaluationId, [projectFullPath]);
         }
 
         /*
