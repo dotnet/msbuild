@@ -1579,8 +1579,8 @@ Errores: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeeded">
-        <source>MSB4075: The project file "{0}" must be opened in the Visual Studio IDE and converted to the latest version before it can be built by MSBuild.</source>
-        <target state="translated">MSB4075: El archivo del proyecto "{0}" debe abrirse en el IDE de Visual Studio y convertirse a la versión más reciente para que MSBuild lo pueda compilar.</target>
+        <source>MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</source>
+        <target state="translated">MSB4075: el archivo de proyecto "{0}" debe abrirse en una versión de IDE de Visual Studio compatible y convertirse a la versión más reciente antes de que MSBuild pueda compilarlo. Más información: https://aka.ms/DeprecatedProjectConversion</target>
         <note>{StrBegin="MSB4075: "}</note>
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeededToVcxProj">
