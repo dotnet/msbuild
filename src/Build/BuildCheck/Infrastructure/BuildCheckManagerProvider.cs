@@ -74,7 +74,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
             _checkRegistry = new List<CheckFactoryContext>();
             _acquisitionModule = new BuildCheckAcquisitionModule();
-            _buildCheckCentralContext = new(_configurationProvider, RemoveThrottledChecks, RemoveChecks);
+            _buildCheckCentralContext = new(_configurationProvider, RemoveChecksAfterExecutedActions);
             _buildEventsProcessor = new(_buildCheckCentralContext);
         }
 
@@ -279,14 +279,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 catch (Exception e)
                 {
                     string message = $"The check '{check.FriendlyName}' failed to register actions with the following message: '{e.Message}'";
-                    if (e.InnerException is null)
-                    {
-                        throw new BuildCheckConfigurationException(message);
-                    }
-                    else
-                    {
-                        throw new BuildCheckConfigurationException(message, e.InnerException);
-                    }
+                    throw new BuildCheckConfigurationException(message, e);
                 }
             }
             else
@@ -346,25 +339,25 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             }
         }
 
-        public void RemoveThrottledChecks(ICheckContext checkContext)
+        public void RemoveChecksAfterExecutedActions(List<CheckWrapper>? checksToRemove, ICheckContext checkContext)
         {
-            foreach (var checkToRemove in _checkRegistry.FindAll(c => c.MaterializedCheck?.IsThrottled ?? false))
+            if (checksToRemove is not null)
             {
-                checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"Dismounting check '{checkToRemove.FriendlyName}'. The check has exceeded the maximum number of results allowed. Any additional results will not be displayed.");
-                RemoveCheck(checkToRemove);
-            }
-        }
-
-        public void RemoveChecks(List<CheckWrapper> checkToRemove, ICheckContext checkContext)
-        {
-            foreach (CheckWrapper check in checkToRemove)
-            {
-                var checkFactory = _checkRegistry.Find(c => c.MaterializedCheck == check);
-                if (checkFactory is not null)
+                foreach (CheckWrapper check in checksToRemove)
                 {
-                    checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting check '{check.Check.FriendlyName}'");
-                    RemoveCheck(checkFactory);
+                    var checkFactory = _checkRegistry.Find(c => c.MaterializedCheck == check);
+                    if (checkFactory is not null)
+                    {
+                        checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting check '{check.Check.FriendlyName}'. The check has thrown an unhandled exception while executing registered actions.");
+                        RemoveCheck(checkFactory);
+                    }
                 }
+            }
+
+            foreach (var throttledCheck in _checkRegistry.FindAll(c => c.MaterializedCheck?.IsThrottled ?? false))
+            {
+                checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"Dismounting check '{throttledCheck.FriendlyName}'. The check has exceeded the maximum number of results allowed. Any additional results will not be displayed.");
+                RemoveCheck(throttledCheck);
             }
         }
 

@@ -18,11 +18,9 @@ internal sealed class BuildCheckCentralContext
 
     public BuildCheckCentralContext(
         IConfigurationProvider configurationProvider,
-        Action<ICheckContext> removeThrottledChecks,
-        Action<List<CheckWrapper>, ICheckContext> removeCheck)
+        Action<List<CheckWrapper>?, ICheckContext> removeCheck)
     {
         _configurationProvider = configurationProvider;
-        _removeThrottledChecks = removeThrottledChecks;
         _removeChecks = removeCheck;
     }
 
@@ -55,8 +53,7 @@ internal sealed class BuildCheckCentralContext
 
     // In a future we can have callbacks per project as well
     private readonly CallbackRegistry _globalCallbacks = new();
-    private readonly Action<ICheckContext> _removeThrottledChecks;
-    private readonly Action<List<CheckWrapper>, ICheckContext> _removeChecks;
+    private readonly Action<List<CheckWrapper>?, ICheckContext> _removeChecks;
 
 
     // This we can potentially use to subscribe for receiving evaluated props in the
@@ -196,7 +193,7 @@ internal sealed class BuildCheckCentralContext
     where T : CheckData
     {
         string projectFullPath = checkData.ProjectFilePath;
-        List<CheckWrapper> checksToRemove = [];
+        List<CheckWrapper> checksToRemove = null;
 
         foreach (var checkCallback in registeredCallbacks)
         {
@@ -246,11 +243,12 @@ internal sealed class BuildCheckCentralContext
                     null,
                     new BuildEventFileInfo(projectFullPath),
                     $"The check '{checkCallback.Item1.Check.FriendlyName}' threw an exception while executing a registered action with message: {e.Message}");
+
+                checksToRemove = checksToRemove ?? new List<CheckWrapper>();
                 checksToRemove.Add(checkCallback.Item1);
             }
         }
 
         _removeChecks(checksToRemove, checkContext);
-        _removeThrottledChecks(checkContext);
     }
 }
