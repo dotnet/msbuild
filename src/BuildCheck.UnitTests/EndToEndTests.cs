@@ -514,13 +514,11 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
-    [InlineData("X01236", "Something went wrong initializing")]
-    // These tests are for failure one different points, will be addressed in a different PR
-    // https://github.com/dotnet/msbuild/issues/10522
-    // [InlineData("X01237", "message")]
-    // [InlineData("X01238", "message")]
-    public void CustomChecksFailGracefully(string ruleId, string expectedMessage)
+    [Theory]
+    [InlineData("X01236", "ErrorOnInitializeCheck", "Something went wrong initializing")]
+    [InlineData("X01237", "ErrorOnRegisteredAction", "something went wrong when executing registered action")]
+    [InlineData("X01238", "ErrorWhenRegisteringActions", "something went wrong when registering actions")]
+    public void CustomChecksFailGracefully(string ruleId, string friendlyName, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())
         {
@@ -541,6 +539,7 @@ public class EndToEndTests : IDisposable
             success.ShouldBeTrue();
             projectCheckBuildLog.ShouldContain(expectedMessage);
             projectCheckBuildLog.ShouldNotContain("This check should have been disabled");
+            projectCheckBuildLog.ShouldContain($"Dismounting check '{friendlyName}'");
 
             // Cleanup
             File.Delete(editorConfigName);
