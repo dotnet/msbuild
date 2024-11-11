@@ -298,9 +298,9 @@ namespace Microsoft.Build.Framework
                 int balance = Interlocked.Decrement(ref s_getVsReleaseBalance);
                 Debug.Assert(balance == 0, "Unbalanced Get vs Release. Either forgotten Release or used from multiple threads concurrently.");
 #endif
-                FrameworkErrorUtilities.VerifyThrowInternalNull(returning._borrowedBuilder, nameof(returning._borrowedBuilder));
+                FrameworkErrorUtilities.VerifyThrowInternalNull(returning._borrowedBuilder);
 
-                StringBuilder returningBuilder = returning._borrowedBuilder!;
+                StringBuilder returningBuilder = returning._borrowedBuilder;
                 int returningLength = returningBuilder.Length;
 
                 // It's possible for someone to cause the builder to

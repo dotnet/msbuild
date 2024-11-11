@@ -42,8 +42,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="eventContext">The event context</param>
         public LoggingContext(ILoggingService loggingService, BuildEventContext eventContext)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingService, nameof(loggingService));
-            ErrorUtilities.VerifyThrowArgumentNull(eventContext, nameof(eventContext));
+            ErrorUtilities.VerifyThrowArgumentNull(loggingService);
+            ErrorUtilities.VerifyThrowArgumentNull(eventContext);
 
             _loggingService = loggingService;
             _eventContext = eventContext;

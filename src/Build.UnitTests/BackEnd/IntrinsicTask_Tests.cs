@@ -917,8 +917,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogDoesntContain("[a1][b1]");
             logger.ClearLog();
 
-           content = ObjectModelHelpers.CleanupFileContents(
-            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+            content = ObjectModelHelpers.CleanupFileContents(
+             @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
             <Target Name='t'>
                 <ItemGroup Condition='true'>
                     <i1 Include='a1'/>

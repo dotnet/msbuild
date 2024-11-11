@@ -75,7 +75,7 @@ namespace Microsoft.Build.BackEnd.Client
 
         public MSBuildClientPacketPump(Stream stream)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(stream, nameof(stream));
+            ErrorUtilities.VerifyThrowArgumentNull(stream);
 
             _stream = stream;
             _isServerDisconnecting = false;
