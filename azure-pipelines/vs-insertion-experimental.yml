@@ -1,13 +1,5 @@
 trigger: none
 name: $(Date:yyyyMMdd).$(Rev:r) MSBuild Experimental VS Insertion
-variables:
-  InsertConfigValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion)
-  InsertCustomScriptExecutionCommand: $(Pipeline.Workspace)\xsd\Update-MSBuildXsds.ps1
-  InsertDescription: Insert MSBuild $(Build.BuildNumber) from the branch $(Build.SourceBranchName) at commit $(Build.SourceVersion). Corresponding package version is $(MSBuild_ExtApisPackageVersion)
-  InsertJsonValues: Microsoft.Build.vsman{$(MSBuild_ExtApisPackageVersion)+$(Build.SourceVersion)}=https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(Build.SourceBranchName)/$(Build.BuildNumber);Microsoft.Build.vsman,Microsoft.Build.Arm64.vsman{$(MSBuild_ExtApisPackageVersion)+$(Build.SourceVersion)}=https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(Build.SourceBranchName)/$(Build.BuildNumber);Microsoft.Build.Arm64.vsman,Microsoft.Build.UnGAC.vsman=https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(Build.SourceBranchName)/$(Build.Build.Number);Microsoft.Build.UnGAC.vsman
-  InsertPayloadName: MSBuild $(Build.SourceBranchName) $(Build.BuildNumber)
-  TeamName: msbuild
-  TeamEmail: msbuild@microsoft.com
 resources:
   pipelines:
   - pipeline: 'MSBuild'
@@ -28,10 +20,18 @@ extends:
     pool:
       name: VSEngSS-MicroBuild2022-1ES
     customBuildTags:
-    - ES365AIMigrationTooling-Release
+    - Experimental
     stages:
     - stage: Stage_1
       displayName: Create VS PR
+      variables:
+        InsertConfigValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion)
+        InsertCustomScriptExecutionCommand: $(Pipeline.Workspace)\xsd\Update-MSBuildXsds.ps1
+        InsertDescription: Insert MSBuild $(resources.pipeline.MSBuild.runName) from the branch $(resources.pipeline.MSBuild.sourceBranch) at commit $(resources.pipeline.MSBuild.sourceVersion). Corresponding package version is $(MSBuild_ExtApisPackageVersion)
+        InsertJsonValues: Microsoft.Build.vsman{$(MSBuild_ExtApisPackageVersion)+$(resources.pipeline.MSBuild.sourceVersion)}=https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(resources.pipeline.MSBuild.sourceBranch)/$(resources.pipeline.MSBuild.runName);Microsoft.Build.vsman,Microsoft.Build.Arm64.vsman{$(MSBuild_ExtApisPackageVersion)+$(resources.pipeline.MSBuild.sourceVersion)}=https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(resources.pipeline.MSBuild.sourceBranch)/$(resources.pipeline.MSBuild.runName);Microsoft.Build.Arm64.vsman,Microsoft.Build.UnGAC.vsman=https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(resources.pipeline.MSBuild.sourceBranch)/$(resources.pipeline.MSBuild.runName);Microsoft.Build.UnGAC.vsman
+        InsertPayloadName: MSBuild $(resources.pipeline.MSBuild.sourceBranch) $(MSBuild_ExtApisPackageVersion)
+        TeamName: msbuild
+        TeamEmail: msbuild@microsoft.com
       jobs:
       - job: Job_1
         displayName: Run on agent
@@ -41,14 +41,6 @@ extends:
           inputs:
           - input: pipelineArtifact
             pipeline: 'MSBuild'
-            artifactName: 'BuildLogs_SourceBuild_Managed_Attempt1'
-            targetPath: '$(Pipeline.Workspace)/BuildLogs_SourceBuild_Managed_Attempt1'
-          - input: pipelineArtifact
-            pipeline: 'MSBuild'
-            artifactName: 'build_Windows_NT_SBOM'
-            targetPath: '$(Pipeline.Workspace)/build_Windows_NT_SBOM'
-          - input: pipelineArtifact
-            pipeline: 'MSBuild'
             artifactName: 'xsd'
             targetPath: '$(Pipeline.Workspace)/xsd'
           - input: pipelineArtifact
@@ -56,6 +48,14 @@ extends:
             artifactName: 'PackageArtifacts'
             targetPath: '$(Build.ArtifactStagingDirectory)/PackageArtifacts'
         steps:
+        - task: Powershell@2
+          name: RemoveSourceBuildPackage
+          displayName: Remove sourcebuild package
+          inputs:
+            targetType: inline
+            script: |
+              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts"
+              Get-ChildItem -Path $folder -Filter 'Microsoft.SourceBuild.Intermediate*.nupkg' | Remove-Item -Force
         - task: Powershell@2
           name: Powershell_1
           displayName: Munge ExternalAPIs package version
