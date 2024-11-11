@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
@@ -1390,29 +1391,17 @@ namespace Microsoft.Build.BackEnd
             // Ensure everything that is required is available at this time
             if (project != null && buildEventContext != null && loggingService != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
-                if (String.Equals(project.GetEngineRequiredPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase) ||
-                    String.Equals(project.GetEngineRequiredPropertyValue(MSBuildConstants.TreatWarningsAsErrorsNoPrefix)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(project.GetEngineRequiredPropertyValue(MSBuildConstants.MSBuildPrefix + MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase) ||
+                    (String.Equals(project.GetEngineRequiredPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase) &&
+                     ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14)))
                 {
                     // If <MSBuildTreatWarningsAsErrors was specified then an empty ISet<string> signals the IEventSourceSink to treat all warnings as errors
                     loggingService.AddWarningsAsErrors(buildEventContext, new HashSet<string>());
                 }
                 else
                 {
-                    ISet<string> warningsAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsErrors));
-                    var warningsAsErrorsNoPrefix = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsErrorsNoPrefix));
-                    if (warningsAsErrorsNoPrefix != null)
-                    {
-                        if (warningsAsErrors != null)
-                        {
-                            warningsAsErrors.UnionWith(warningsAsErrorsNoPrefix);
-                        }
-                        else
-                        {
-                            warningsAsErrors = warningsAsErrorsNoPrefix;
-                        }
-                    }
-
-
+                    ISet<string> warningsAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.MSBuildPrefix + MSBuildConstants.WarningsAsErrors),
+                                                                      project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsErrors));
 
                     if (warningsAsErrors?.Count > 0)
                     {
@@ -1420,20 +1409,8 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                ISet<string> warningsNotAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsNotAsErrors));
-                var warningsNotAsErrorsNoPrefix = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsNotAsErrorsNoPrefix));
-                if (warningsNotAsErrorsNoPrefix != null)
-                {
-                    if (warningsNotAsErrors != null)
-                    {
-                        warningsNotAsErrors.UnionWith(warningsNotAsErrorsNoPrefix);
-                    }
-                    else
-                    {
-                        warningsNotAsErrors = warningsNotAsErrorsNoPrefix;
-                    }
-                }
-
+                ISet<string> warningsNotAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.MSBuildPrefix + MSBuildConstants.WarningsNotAsErrors),
+                                                                     project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsNotAsErrors));
 
 
                 if (warningsNotAsErrors?.Count > 0)
@@ -1441,13 +1418,8 @@ namespace Microsoft.Build.BackEnd
                     loggingService.AddWarningsNotAsErrors(buildEventContext, warningsNotAsErrors);
                 }
 
-                ISet<string> warningsAsMessages = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsMessages));
-                var warningsAsMessagesNoPrefix = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsMessagesNoPrefix));
-                if (warningsAsMessagesNoPrefix != null)
-                {
-                    warningsAsMessages?.UnionWith(warningsAsMessagesNoPrefix);
-                    warningsAsMessages ??= warningsAsMessagesNoPrefix;
-                }
+                ISet<string> warningsAsMessages = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.MSBuildPrefix + MSBuildConstants.WarningsAsMessages),
+                                                                    project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsMessages));
 
                 if (warningsAsMessages?.Count > 0)
                 {
@@ -1465,15 +1437,39 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private static ISet<string> ParseWarningCodes(string warnings)
+        private static ISet<string> ParseWarningCodes(string warnings, string warningsNoPrefix)
         {
-            if (String.IsNullOrWhiteSpace(warnings))
+            // When this changewave is rotated out and this gets deleted, please consider removing
+            // the <MSBuildWarningsAsMessages Condition="'$(MSBuildWarningsAsMessages)'==''">$(NoWarn)</MSBuildWarningsAsMessages>
+            // and the two following lines from the msbuild/src/Tasks/Microsoft.Common.CurrentVersion.targets
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
             {
-                return null;
+                warningsNoPrefix = null;
             }
 
-            return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
+            HashSet<string> result1 = null;
+            if (!String.IsNullOrWhiteSpace(warnings))
+            {
+                result1 = new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
+            }
+            HashSet<string> result2 = null;
+            if (!String.IsNullOrWhiteSpace(warningsNoPrefix))
+            {
+                result2 = new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warningsNoPrefix), StringComparer.OrdinalIgnoreCase);
+            }
+
+            if (result1 != null)
+            {
+                if (result2 != null)
+                {
+                    result1.UnionWith(result2);
+                }
+                return result1;
+            }
+
+            return result2;
         }
+
 
         private sealed class DedicatedThreadsTaskScheduler : TaskScheduler
         {
