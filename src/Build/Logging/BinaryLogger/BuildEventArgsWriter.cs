@@ -11,9 +11,9 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.NET.StringTools;
 
@@ -124,7 +124,7 @@ namespace Microsoft.Build.Logging
         /// <param name="binaryWriter">A BinaryWriter to write the BuildEventArgs instances to</param>
         public BuildEventArgsWriter(BinaryWriter binaryWriter)
         {
-            this.originalStream = binaryWriter.BaseStream;
+            originalStream = binaryWriter.BaseStream;
 
             // this doesn't exceed 30K for smaller binlogs so seems like a reasonable
             // starting point to avoid reallocations in the common case
@@ -187,6 +187,7 @@ namespace Microsoft.Build.Logging
                     BuildSubmissionStarted
                     BuildStarted
                     BuildFinished
+                    BuildCanceled
                     ProjectEvaluationStarted
                     ProjectEvaluationFinished
                 BuildError
@@ -215,8 +216,11 @@ namespace Microsoft.Build.Logging
                 case BuildSubmissionStartedEventArgs buildSubmissionStarted: return Write(buildSubmissionStarted);
                 case BuildStartedEventArgs buildStarted: return Write(buildStarted);
                 case BuildFinishedEventArgs buildFinished: return Write(buildFinished);
+                case BuildCanceledEventArgs buildCanceled: return Write(buildCanceled);
                 case ProjectEvaluationStartedEventArgs projectEvaluationStarted: return Write(projectEvaluationStarted);
                 case ProjectEvaluationFinishedEventArgs projectEvaluationFinished: return Write(projectEvaluationFinished);
+                case BuildCheckTracingEventArgs buildCheckTracing: return Write(buildCheckTracing);
+                case BuildCheckAcquisitionEventArgs buildCheckAcquisition: return Write(buildCheckAcquisition);
                 default:
                     // convert all unrecognized objects to message
                     // and just preserve the message
@@ -305,11 +309,60 @@ namespace Microsoft.Build.Logging
             return BinaryLogRecordKind.BuildFinished;
         }
 
+        private BinaryLogRecordKind Write(BuildCanceledEventArgs e)
+        {
+            WriteBuildEventArgsFields(e);
+
+            return BinaryLogRecordKind.BuildCanceled;
+        }
+
         private BinaryLogRecordKind Write(ProjectEvaluationStartedEventArgs e)
         {
             WriteBuildEventArgsFields(e, writeMessage: false);
             WriteDeduplicatedString(e.ProjectFile);
             return BinaryLogRecordKind.ProjectEvaluationStarted;
+        }
+
+        private BinaryLogRecordKind Write(BuildCheckResultMessage e)
+        {
+            WriteBuildEventArgsFields(e, writeMessage: true);
+
+            return BinaryLogRecordKind.BuildCheckMessage;
+        }
+
+        private BinaryLogRecordKind Write(BuildCheckResultWarning e)
+        {
+            WriteBuildEventArgsFields(e, writeMessage: true);
+
+            return BinaryLogRecordKind.BuildCheckWarning;
+        }
+
+        private BinaryLogRecordKind Write(BuildCheckResultError e)
+        {
+            WriteBuildEventArgsFields(e, writeMessage: true);
+
+            return BinaryLogRecordKind.BuildCheckError;
+        }
+
+        private BinaryLogRecordKind Write(BuildCheckTracingEventArgs e)
+        {
+            WriteBuildEventArgsFields(e, writeMessage: false);
+
+            Dictionary<string, TimeSpan> stats = e.TracingData.ExtractCheckStats();
+            stats.Merge(e.TracingData.InfrastructureTracingData, (span1, span2) => span1 + span2);
+
+            WriteProperties(stats);
+
+            return BinaryLogRecordKind.BuildCheckTracing;
+        }
+
+        private BinaryLogRecordKind Write(BuildCheckAcquisitionEventArgs e)
+        {
+            WriteBuildEventArgsFields(e, writeMessage: false);
+            WriteDeduplicatedString(e.AcquisitionPath);
+            WriteDeduplicatedString(e.ProjectPath);
+
+            return BinaryLogRecordKind.BuildCheckAcquisition;
         }
 
         private BinaryLogRecordKind Write(ProjectEvaluationFinishedEventArgs e)
@@ -484,6 +537,8 @@ namespace Microsoft.Build.Logging
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: return Write(propertyInitialValueSet);
                 case CriticalBuildMessageEventArgs criticalBuildMessage: return Write(criticalBuildMessage);
                 case AssemblyLoadBuildEventArgs assemblyLoad: return Write(assemblyLoad);
+                case BuildCheckResultMessage buildCheckMessage: return Write(buildCheckMessage);
+
                 default: // actual BuildMessageEventArgs
                     WriteMessageFields(e, writeImportance: true);
                     return BinaryLogRecordKind.Message;
@@ -575,6 +630,7 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.ResponseFilePath);
             return BinaryLogRecordKind.ResponseFileUsed;
         }
+
         private BinaryLogRecordKind Write(TaskCommandLineEventArgs e)
         {
             WriteMessageFields(e, writeMessage: false, writeImportance: true);

@@ -1,6 +1,8 @@
 <Project>
   <ItemGroup>
-    <ItemsToSign Include="$(VisualStudioSetupInsertionPath)Microsoft.Build.UnGAC.exe" />
+    <!-- Do not include VS setup insertion files when not building on desktop. The Vsix generation targets do not get imported,
+         and thus this file is not populated to VisualStudioSetupInsertionPath -->
+    <ItemsToSign Include="$(VisualStudioSetupInsertionPath)Microsoft.Build.UnGAC.exe" Condition="'$(MSBuildRuntimeType)' != 'Core'" />
 
     <ItemsToSign Include="$(ArtifactsDir)\xsd\Update-MSBuildXsds.ps1" />
 

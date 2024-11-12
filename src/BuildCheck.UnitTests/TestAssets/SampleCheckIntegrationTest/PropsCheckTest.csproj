@@ -9,6 +9,7 @@
 
     <PropertyGroup Condition="'$(MyProp12)' == ''">
         <MyProp13>$(MyProp11)</MyProp13>
+        <MSBuildTreatWarningsAsErrors>false</MSBuildTreatWarningsAsErrors>
     </PropertyGroup>
 
     <!--

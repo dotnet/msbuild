@@ -131,6 +131,11 @@
         <target state="translated">MSB3654: 延迟签名要求至少指定一个公钥。请使用 KeyFile 或 KeyContainer 属性提供一个公钥，或者禁用延迟签名。</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
+      <trans-unit id="CodeTaskFactory.AttributeEmptyWithTaskElement">
+        <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</source>
+        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</target>
+        <note>{StrBegin="MSB3752: "}</note>
+      </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
         <source>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</source>
         <target state="translated">MSB3991: "{0}" 未设置或为空。如果 {1} 为 false，请确保为 "{0}" 设置非空值。</target>
@@ -1165,10 +1170,10 @@
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
-        <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://aka.ms/msbuild/net8-binaryformatter</source>
-        <target state="translated">MSB3825: “{1}”类型的资源“{0}”在运行时通过 BinaryFormatter 进行反序列化。由于可能存在安全风险，BinaryFormatter 已被弃用，并将使用 .NET 9 移除它。如果要继续使用它，请将属性 "GenerateResourceWarnOnBinaryFormatterUse" 设置为 false。
-           详细信息: https://aka.ms/msbuild/net8-binaryformatter</target>
+        <source>MSB3825: Resource "{0}" of type "{1}" may be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide</source>
+        <target state="translated">MSB3825: 可在运行时通过 BinaryFormatter 反序列化类型为“{1}”的资源“{0}”。由于已知的安全风险，BinaryFormatter 已被弃用，并从 .NET 9+ 中删除。如果要继续使用它，请将属性“GenerateResourceWarnOnBinaryFormatterUse”设置为 false。
+           有关详细信息，请参阅：https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">

@@ -76,14 +76,21 @@ namespace Microsoft.Build.Logging
         // version 22:
         //    - extend EnvironmentVariableRead with location where environment variable was used.
         // version 23:
-        //    - new record kind: BuildSubmissionStartedEventArgs
+        //    - new record kinds: BuildCheckMessageEvent, BuildCheckWarningEvent, BuildCheckErrorEvent,
+        //    BuildCheckTracingEvent, BuildCheckAcquisitionEvent, BuildSubmissionStartedEvent
+        // version 24:
+        //    - new record kind: BuildCanceledEventArgs
+
+        // MAKE SURE YOU KEEP BuildEventArgsWriter AND StructuredLogViewer.BuildEventArgsWriter IN SYNC WITH THE CHANGES ABOVE.
+        // Both components must stay in sync to avoid issues with logging or event handling in the products.
+
         // This should be never changed.
         // The minimum version of the binary log reader that can read log of above version.
         internal const int ForwardCompatibilityMinimalVersion = 18;
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 23;
+        internal const int FileFormatVersion = 24;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being
@@ -306,7 +313,7 @@ namespace Microsoft.Build.Logging
         public void Shutdown()
         {
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
-            Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", _initialLogImports ? "1" : "");
+            Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", _initialLogImports ? "1" : null);
             Environment.SetEnvironmentVariable("MSBUILDBINARYLOGGERENABLED", _initialIsBinaryLoggerEnabled);
 
             Traits.Instance.EscapeHatches.LogProjectImports = _initialLogImports;

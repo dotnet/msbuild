@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using Microsoft.Build.BackEnd.Logging;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
@@ -14,21 +13,11 @@ public class EvaluatedPropertiesCheckData : CheckData
     internal EvaluatedPropertiesCheckData(
         string projectFilePath,
         int? projectConfigurationId,
-        IReadOnlyDictionary<string, string> evaluatedProperties,
-        IReadOnlyDictionary<string, (string EnvVarValue, string File, int Line, int Column)> evaluatedEnvironmentVariables)
-        : base(projectFilePath, projectConfigurationId)
-    {
-        EvaluatedProperties = evaluatedProperties;
-        EvaluatedEnvironmentVariables = evaluatedEnvironmentVariables;
-    }
+        IReadOnlyDictionary<string, string> evaluatedProperties)
+        : base(projectFilePath, projectConfigurationId) => EvaluatedProperties = evaluatedProperties;
 
     /// <summary>
     /// Gets the evaluated properties of the project.
     /// </summary>
     public IReadOnlyDictionary<string, string> EvaluatedProperties { get; }
-
-    /// <summary>
-    /// Gets the evaluated environment variables and their metadata.
-    /// </summary>
-    public IReadOnlyDictionary<string, (string EnvVarValue, string File, int Line, int Column)> EvaluatedEnvironmentVariables { get; }
 }

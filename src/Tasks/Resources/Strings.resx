@@ -1162,8 +1162,8 @@
     <comment>{StrBegin="MSB3824: "}</comment>
   </data>
   <data name="GenerateResource.BinaryFormatterUse">
-    <value>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://aka.ms/msbuild/net8-binaryformatter</value>
+    <value>MSB3825: Resource "{0}" of type "{1}" may be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide</value>
     <comment>{StrBegin="MSB3825: "}</comment>
   </data>
 
@@ -2478,6 +2478,10 @@
   </data>
   <data name="CodeTaskFactory.AttributeEmptyWithElement" xml:space="preserve">
     <value>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element has been set but is empty. If the "{0}" attribute is set it must not be empty.</value>
+    <comment>{StrBegin="MSB3752: "}</comment>
+  </data>
+  <data name="CodeTaskFactory.AttributeEmptyWithTaskElement" xml:space="preserve">
+    <value>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</value>
     <comment>{StrBegin="MSB3752: "}</comment>
   </data>
   <data name="CodeTaskFactory.NeedsITaskInterface" xml:space="preserve">

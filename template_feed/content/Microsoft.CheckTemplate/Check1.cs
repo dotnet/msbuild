@@ -6,12 +6,12 @@ namespace Company.CheckTemplate
 {
     public sealed class Check1 : Check
     {
-        public static BuildCheckRule SupportedRule = new CheckRule(
+        public static CheckRule SupportedRule = new CheckRule(
             "X01234",
             "Title",
             "Description",
             "Message format: {0}",
-            new BuildCheckConfiguration());
+            new CheckConfiguration());
 
         public override string FriendlyName => "Company.Check1";
 

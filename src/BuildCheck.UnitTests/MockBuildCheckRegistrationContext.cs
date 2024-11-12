@@ -53,6 +53,9 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 
         private void ResultHandler(CheckWrapper wrapper, ICheckContext context, CheckConfigurationEffective[] configs, BuildCheckResult result)
             => Results.Add(result);
+
+        public void RegisterEnvironmentVariableReadAction(Action<BuildCheckDataContext<EnvironmentVariableCheckData>> environmentVariableAction) => throw new NotImplementedException();
+
+        public void RegisterProjectImportedAction(Action<BuildCheckDataContext<ProjectImportedCheckData>> projectImportedAction) => throw new NotImplementedException();
     }
 }
-

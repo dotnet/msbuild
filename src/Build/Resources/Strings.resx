@@ -534,7 +534,7 @@
     <comment>{StrBegin="MSB4101: "}</comment>
   </data>
   <data name="ImportedProjectNotFound" xml:space="preserve">
-    <value>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</value>
+    <value>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</value>
     <comment>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
   <data name="ImportedProjectFromVSDistribution" xml:space="preserve">
@@ -603,6 +603,9 @@
       UE: This message is shown when the user attempts to provide an expression like "$(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)"
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </comment>
+  </data>
+  <data name="CouldNotDifferentiateBetweenCompatibleMethods">
+    <value>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</value>
   </data>
   <data name="InvalidFunctionPropertyExpression" xml:space="preserve">
     <value>MSB4184: The expression "{0}" cannot be evaluated. {1}</value>
@@ -847,7 +850,7 @@
     <value>Task name cannot be empty.</value>
   </data>
   <data name="ProjectUpgradeNeeded" xml:space="preserve">
-    <value>MSB4075: The project file "{0}" must be opened in the Visual Studio IDE and converted to the latest version before it can be built by MSBuild.</value>
+    <value>MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</value>
     <comment>{StrBegin="MSB4075: "}</comment>
   </data>
   <data name="ProjectUpgradeNeededToVcxProj" xml:space="preserve">
@@ -1357,7 +1360,7 @@ Errors: {3}</value>
     <comment>
       LOCALIZATION: Do not localize the word SDK.
     </comment>
-  </data>  
+  </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
     <value>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</value>
   </data>
@@ -2138,6 +2141,50 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="CustomCheckRegistered" xml:space="preserve">
     <value>The custom check: '{0}' is registered for the build from the location: '{1}'.</value>
+  </data>
+  <data name="IllegalCharactersInFileOrDirectory" xml:space="preserve">
+    <value>There are illegal characters in '{0}' in the {1} item.</value>
+  </data>
+  <data name="BuildCheck_BC0101_Title" xml:space="preserve">
+    <value>Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</value>
+	<comment>'OutputPath' and 'IntermediateOutputPath' not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0101_MessageFmt" xml:space="preserve">
+    <value>Projects {0} and {1} have conflicting output paths: {2}.</value>
+  </data>
+  <data name="BuildCheck_BC0102_Title" xml:space="preserve">
+    <value>Two tasks should not write the same file.</value>
+  </data>
+  <data name="BuildCheck_BC0102_MessageFmt" xml:space="preserve">
+    <value>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</value>
+  </data>
+  <data name="BuildCheck_BC0103_Title" xml:space="preserve">
+    <value>No implicit property derived from an environment variable should be used during the build.</value>
+  </data>
+  <data name="BuildCheck_BC0103_MessageFmt" xml:space="preserve">
+    <value>Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</value>
+  </data>
+  <data name="BuildCheck_BC0103_MessageAddendum" xml:space="preserve">
+    <value>'{0}' with value: '{1}'</value>
+	<comment>Will be used as a parameter {0} in previous message.</comment>
+  </data>
+  <data name="BuildCheck_BC0201_Title" xml:space="preserve">
+    <value>A property that is accessed should be declared first.</value>
+  </data>
+  <data name="BuildCheck_BC0201_MessageFmt" xml:space="preserve">
+    <value>Property: '{0}' was accessed, but it was never initialized.</value>
+  </data>
+  <data name="BuildCheck_BC0202_Title" xml:space="preserve">
+    <value>A property should be declared before it is first used.</value>
+  </data>
+  <data name="BuildCheck_BC0202_MessageFmt" xml:space="preserve">
+    <value>Property: '{0}' first declared/initialized at {1} used before it was initialized.</value>
+  </data>
+  <data name="BuildCheck_BC0203_Title" xml:space="preserve">
+    <value>A property that is not used should not be declared.</value>
+  </data>
+  <data name="BuildCheck_BC0203_MessageFmt" xml:space="preserve">
+    <value>Property: '{0}' was declared/initialized, but it was never used.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

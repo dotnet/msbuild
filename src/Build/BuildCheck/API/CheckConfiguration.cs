@@ -35,19 +35,20 @@ public class CheckConfiguration
     ///
     /// If not supported by the data source - then the setting is ignored
     /// </summary>
-    public EvaluationCheckScope? EvaluationCheckScope { get; internal init; }
+    public EvaluationCheckScope? EvaluationCheckScope { get; init; }
 
     /// <summary>
     /// The severity of the result for the rule.
     /// </summary>
-    public CheckResultSeverity? Severity { get; internal init; }
+    public CheckResultSeverity? Severity { get; init; }
 
     /// <summary>
     /// Whether the check rule is enabled.
     /// If all rules within the check are not enabled, it will not be run.
     /// If some rules are enabled and some are not, the check will be run and reports will be post-filtered.
     /// </summary>
-    public bool? IsEnabled {
+    public bool? IsEnabled
+    {
         get
         {
             // Do not consider Default as enabled, because the default severity of the rule could be set to None
@@ -72,7 +73,6 @@ public class CheckConfiguration
         EvaluationCheckScope = TryExtractEvaluationCheckScope(configDictionary),
         Severity = TryExtractSeverity(configDictionary),
     };
-
 
     private static EvaluationCheckScope? TryExtractEvaluationCheckScope(Dictionary<string, string>? config)
     {

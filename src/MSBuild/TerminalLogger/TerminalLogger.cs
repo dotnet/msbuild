@@ -217,9 +217,11 @@ internal sealed partial class TerminalLogger : INodeLogger
     private bool _hasUsedCache = false;
 
     /// <summary>
-    /// Whether to show TaskCommandLineEventArgs high-priority messages. 
+    /// Whether to show TaskCommandLineEventArgs high-priority messages.
     /// </summary>
     private bool _showCommandLine = false;
+
+    private uint? _originalConsoleMode;
 
     /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
@@ -263,6 +265,8 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource)
     {
+        (_, _, _originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+
         ParseParameters();
 
         eventSource.BuildStarted += BuildStarted;
@@ -305,7 +309,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </remark>
     private void ApplyParameter(string parameterName, string? parameterValue)
     {
-        ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
+        ErrorUtilities.VerifyThrowArgumentNull(parameterName);
 
         switch (parameterName.ToUpperInvariant())
         {
@@ -358,6 +362,8 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Shutdown()
     {
+        NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
+
         _cts.Cancel();
         _refresher?.Join();
         Terminal.Dispose();

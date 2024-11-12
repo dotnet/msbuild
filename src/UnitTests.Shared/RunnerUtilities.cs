@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests.Shared
                 p.OutputDataReceived += handler;
                 p.ErrorDataReceived += handler;
 
-                WriteOutput( $"Executing [{process} {parameters}]");
+                WriteOutput($"Executing [{process} {parameters}]");
                 WriteOutput("==== OUTPUT ====");
                 p.Start();
                 p.BeginOutputReadLine();

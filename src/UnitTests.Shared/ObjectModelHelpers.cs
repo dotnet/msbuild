@@ -442,7 +442,7 @@ namespace Microsoft.Build.UnitTests
             // Log an error for any leftover items in the expectedItems collection.
             foreach (ITaskItem expectedItem in expectedItems)
             {
-                Assert.True(false, string.Format("Item '{0}' was expected but not returned.", expectedItem.ItemSpec));
+                Assert.Fail(string.Format("Item '{0}' was expected but not returned.", expectedItem.ItemSpec));
             }
 
             if (outOfOrder)
@@ -450,7 +450,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("ERROR:  Items were returned in the incorrect order...");
                 Console.WriteLine("Expected:  " + expectedItemSpecs);
                 Console.WriteLine("Actual:    " + actualItemSpecs);
-                Assert.True(false, "Items were returned in the incorrect order.  See 'Standard Out' tab for more details.");
+                Assert.Fail("Items were returned in the incorrect order.  See 'Standard Out' tab for more details.");
             }
         }
 
@@ -589,15 +589,17 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         public static string CleanupFileContents(string projectFileContents)
         {
+            StringBuilder temp = new (projectFileContents);
+
             // Replace reverse-single-quotes with double-quotes.
-            projectFileContents = projectFileContents.Replace("`", "\"");
+            temp.Replace('`', '"');
 
             // Place the correct MSBuild namespace into the <Project> tag.
-            projectFileContents = projectFileContents.Replace("msbuildnamespace", msbuildNamespace);
-            projectFileContents = projectFileContents.Replace("msbuilddefaulttoolsversion", s_msbuildDefaultToolsVersion);
-            projectFileContents = projectFileContents.Replace("msbuildassemblyversion", s_msbuildAssemblyVersion);
+            temp.Replace("msbuildnamespace", msbuildNamespace);
+            temp.Replace("msbuilddefaulttoolsversion", s_msbuildDefaultToolsVersion);
+            temp.Replace("msbuildassemblyversion", s_msbuildAssemblyVersion);
 
-            return projectFileContents;
+            return temp.ToString();
         }
 
         public static string Cleanup(this string aString)
@@ -1127,7 +1129,7 @@ namespace Microsoft.Build.UnitTests
     {
         public static string Format(this string s, params object[] formatItems)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(s, nameof(s));
+            ErrorUtilities.VerifyThrowArgumentNull(s);
 
             return string.Format(s, formatItems);
         }
@@ -1150,7 +1152,7 @@ namespace Microsoft.Build.UnitTests
             }
             else
             {
-                Assert.True(false, "unrecognized current platform");
+                Assert.Fail("unrecognized current platform");
             }
 
             return currentPlatformString;
@@ -1896,7 +1898,7 @@ namespace Microsoft.Build.UnitTests
 
             if (ex1 == null && ex2 == null)
             {
-                Assert.True(false, "Neither threw");
+                Assert.Fail("Neither threw");
             }
 
             Assert.NotNull(ex1); // "First method did not throw, second: {0}", ex2 == null ? "" : ex2.GetType() + ex2.Message);
@@ -1954,7 +1956,7 @@ namespace Microsoft.Build.UnitTests
                 string output = "\r\n#################################Expected#################################\n" + string.Join("\r\n", expectedLines);
                 output += "\r\n#################################Actual#################################\n" + string.Join("\r\n", actualLines);
 
-                Assert.True(false, output);
+                Assert.Fail(output);
             }
 
             if (actualLines.Length > expectedLines.Length)
@@ -1962,14 +1964,14 @@ namespace Microsoft.Build.UnitTests
                 LogLine("\n#################################Expected#################################\n" + string.Join("\n", expectedLines));
                 LogLine("#################################Actual#################################\n" + string.Join("\n", actualLines));
 
-                Assert.True(false, "Expected content was shorter, actual had this extra line: '" + actualLines[expectedLines.Length] + "'");
+                Assert.Fail("Expected content was shorter, actual had this extra line: '" + actualLines[expectedLines.Length] + "'");
             }
             else if (actualLines.Length < expectedLines.Length)
             {
                 LogLine("\n#################################Expected#################################\n" + string.Join("\n", expectedLines));
                 LogLine("#################################Actual#################################\n" + string.Join("\n", actualLines));
 
-                Assert.True(false, "Actual content was shorter, expected had this extra line: '" + expectedLines[actualLines.Length] + "'");
+                Assert.Fail("Actual content was shorter, expected had this extra line: '" + expectedLines[actualLines.Length] + "'");
             }
         }
 

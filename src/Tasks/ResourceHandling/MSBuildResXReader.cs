@@ -366,15 +366,15 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 string[] parts = remainingString.Split(';');
                 if (parts.Length > 1)
                 {
-                    result = new string[] { fileName, parts[0], parts[1] };
+                    result = [fileName, parts[0], parts[1]];
                 }
                 else if (parts.Length > 0)
                 {
-                    result = new string[] { fileName, parts[0] };
+                    result = [fileName, parts[0]];
                 }
                 else
                 {
-                    result = new string[] { fileName };
+                    result = [fileName];
                 }
             }
             return result;

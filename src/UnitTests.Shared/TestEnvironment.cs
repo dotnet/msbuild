@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests
                     item.AssertInvariant(Output);
                 }
 
-                SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+                SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
                 ChangeWaves.ResetStateForTests();
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests
         /// Will not work for out of proc nodes since the output writer does not reach into those
         public TransientPrintLineDebugger CreatePrintLineDebuggerWithTestOutputHelper()
         {
-            ErrorUtilities.VerifyThrowInternalNull(Output, nameof(Output));
+            ErrorUtilities.VerifyThrowInternalNull(Output);
             return WithTransientTestState(new TransientPrintLineDebugger(this, OutPutHelperWriter(Output)));
 
             CommonWriterType OutPutHelperWriter(ITestOutputHelper output)

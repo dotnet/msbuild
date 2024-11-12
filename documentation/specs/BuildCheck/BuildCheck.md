@@ -166,7 +166,7 @@ For the `.editorconfig` file configuration, following will apply:
 build_check.BC0101.severity=warning
 
 build_check.COND0543.severity=none
-build_check.COND0543.scope=project
+build_check.COND0543.scope=project_file
 build_check.COND0543.custom_switch=QWERTY
 ```
 

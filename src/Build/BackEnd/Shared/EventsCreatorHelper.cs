@@ -15,8 +15,8 @@ internal static class EventsCreatorHelper
 {
     public static BuildMessageEventArgs CreateMessageEventFromText(BuildEventContext buildEventContext, MessageImportance importance, string message, params object?[]? messageArgs)
     {
-        ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
-        ErrorUtilities.VerifyThrowInternalNull(message, nameof(message));
+        ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
+        ErrorUtilities.VerifyThrowInternalNull(message);
 
         BuildMessageEventArgs buildEvent = new BuildMessageEventArgs(
                 message,
@@ -32,9 +32,9 @@ internal static class EventsCreatorHelper
 
     public static BuildErrorEventArgs CreateErrorEventFromText(BuildEventContext buildEventContext, string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
     {
-        ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
-        ErrorUtilities.VerifyThrowInternalNull(file, nameof(file));
-        ErrorUtilities.VerifyThrowInternalNull(message, nameof(message));
+        ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
+        ErrorUtilities.VerifyThrowInternalNull(file);
+        ErrorUtilities.VerifyThrowInternalNull(message);
 
         string? subcategory = null;
 
@@ -45,6 +45,37 @@ internal static class EventsCreatorHelper
 
         BuildErrorEventArgs buildEvent =
         new BuildErrorEventArgs(
+            subcategory,
+            errorCode,
+            file!.File,
+            file.Line,
+            file.Column,
+            file.EndLine,
+            file.EndColumn,
+            message,
+            helpKeyword,
+            "MSBuild");
+
+        buildEvent.BuildEventContext = buildEventContext;
+
+        return buildEvent;
+    }
+
+    public static BuildWarningEventArgs CreateWarningEventFromText(BuildEventContext buildEventContext, string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
+    {
+        ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
+        ErrorUtilities.VerifyThrowInternalNull(file);
+        ErrorUtilities.VerifyThrowInternalNull(message);
+
+        string? subcategory = null;
+
+        if (subcategoryResourceName != null)
+        {
+            subcategory = AssemblyResources.GetString(subcategoryResourceName);
+        }
+
+        BuildWarningEventArgs buildEvent =
+        new BuildWarningEventArgs(
             subcategory,
             errorCode,
             file!.File,

@@ -586,6 +586,7 @@ namespace System.Deployment.Internal.CodeSigning
                 else
                 {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                    // codeql[cs/weak-crypto] SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/139025
                     using (SHA1 sha1 = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA1CryptoServiceProvider"
@@ -648,6 +649,7 @@ namespace System.Deployment.Internal.CodeSigning
                 else
                 {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                    // codeql[cs/weak-crypto] SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/139025
                     using (SHA1 sha1 = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA1CryptoServiceProvider"
@@ -833,7 +835,7 @@ namespace System.Deployment.Internal.CodeSigning
                     // To ensure this does not happen, ensure that the most significant byte in the little
                     // endian byte sequence is in the 0x01-0x7F range; clear that byte's most significant bit
                     // and set that byte's least significant bit.
- 
+
                     nonce[nonce.Length - 1] &= 0x7f;
                     nonce[nonce.Length - 1] |= 0x01;
 

@@ -36,6 +36,30 @@ namespace Microsoft.Build.Framework
     /// </remarks>
     internal class FileClassifier
     {
+        private bool _isImmutablePathsInitialized;
+
+        /// <summary>
+        /// This event notifies subscribers when the immutable paths have been initialized.
+        /// </summary>
+        public event Action? OnImmutablePathsInitialized;
+
+        /// <summary>
+        ///  Tracks whether the immutable paths have been initialized.
+        /// </summary>
+        public bool IsImmutablePathsInitialized
+        {
+            get => _isImmutablePathsInitialized;
+            private set
+            {
+                if (!_isImmutablePathsInitialized && value)
+                {
+                    OnImmutablePathsInitialized?.Invoke();
+                }
+
+                _isImmutablePathsInitialized = value;
+            }
+        }
+
         /// <summary>
         ///     StringComparison used for comparing paths on current OS.
         /// </summary>
@@ -61,7 +85,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         ///     Copy on write snapshot of <see cref="_knownImmutableDirectories"/>.
         /// </summary>
-        private volatile IReadOnlyList<string> _knownImmutableDirectoriesSnapshot = Array.Empty<string>();
+        private volatile IReadOnlyList<string> _knownImmutableDirectoriesSnapshot = [];
 
         /// <summary>
         ///     Creates default FileClassifier which following immutable folders:
@@ -79,7 +103,7 @@ namespace Microsoft.Build.Framework
         public FileClassifier()
         {
             // Register Microsoft "Reference Assemblies" as immutable
-            string[] programFilesEnvs = new[] { "ProgramFiles(x86)", "ProgramW6432", "ProgramFiles(Arm)" };
+            string[] programFilesEnvs = ["ProgramFiles(x86)", "ProgramW6432", "ProgramFiles(Arm)"];
             foreach (string programFilesEnv in programFilesEnvs)
             {
                 string? programFiles = Environment.GetEnvironmentVariable(programFilesEnv);
@@ -215,6 +239,8 @@ namespace Microsoft.Build.Framework
             RegisterImmutableDirectory(getPropertyValue("NetCoreRoot")?.Trim());
             // example: C:\Users\<username>\.nuget\packages\
             RegisterImmutableDirectory(getPropertyValue("NuGetPackageFolders")?.Trim());
+
+            IsImmutablePathsInitialized = true;
         }
 
         private static string? GetExistingRootOrNull(string? path)

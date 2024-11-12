@@ -32,9 +32,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// Contains the current results for all of the targets which have produced results for a particular configuration.
     /// </summary>
-    /// <remarks>
     /// When modifying serialization/deserialization, bump the version and support previous versions in order to keep <see cref="ResultsCache"/> backwards compatible.
-    /// </remarks>
     public class BuildResult : BuildResultBase, INodePacket, IBuildResults
     {
         /// <summary>
@@ -382,7 +380,7 @@ namespace Microsoft.Build.Execution
                     return BuildResultCode.Failure;
                 }
 
-                foreach (KeyValuePair<string, TargetResult> result in _resultsByTarget ?? Enumerable.Empty<KeyValuePair<string, TargetResult>>())
+                foreach (KeyValuePair<string, TargetResult> result in _resultsByTarget ?? [])
                 {
                     if ((result.Value.ResultCode == TargetResultCode.Failure && !result.Value.TargetFailureDoesntCauseBuildFailure)
                         || result.Value.AfterTargetsHaveFailed)
@@ -421,7 +419,7 @@ namespace Microsoft.Build.Execution
         /// See <see cref="Execution.BuildRequestDataFlags"/> for examples of the available flags.
         /// </summary>
         /// <remarks>
-        /// Is optional, this property exists starting <see cref="_version"/> 1.
+        /// Is optional, this property exists starting version 1.
         /// </remarks>
         public BuildRequestDataFlags? BuildRequestDataFlags => (_version > 0) ? _buildRequestDataFlags : null;
 
@@ -525,8 +523,8 @@ namespace Microsoft.Build.Execution
         /// <param name="result">The results for the target.</param>
         public void AddResultsForTarget(string target, TargetResult result)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(target, nameof(target));
-            ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
+            ErrorUtilities.VerifyThrowArgumentNull(target);
+            ErrorUtilities.VerifyThrowArgumentNull(result);
 
             lock (this)
             {
@@ -551,7 +549,7 @@ namespace Microsoft.Build.Execution
                 targetsToKeep.Count > 0,
                 $"{nameof(targetsToKeep)} should contain at least one target.");
 
-            foreach (string target in _resultsByTarget?.Keys ?? Enumerable.Empty<string>())
+            foreach (string target in _resultsByTarget?.Keys ?? [])
             {
                 if (!targetsToKeep.Contains(target))
                 {
@@ -566,7 +564,7 @@ namespace Microsoft.Build.Execution
         /// <param name="results">The results to merge in.</param>
         public void MergeResults(BuildResult results)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(results, nameof(results));
+            ErrorUtilities.VerifyThrowArgumentNull(results);
             ErrorUtilities.VerifyThrow(results.ConfigurationId == ConfigurationId, "Result configurations don't match");
 
             // If we are merging with ourself or with a shallow clone, do nothing.
@@ -576,7 +574,7 @@ namespace Microsoft.Build.Execution
             }
 
             // Merge in the results
-            foreach (KeyValuePair<string, TargetResult> targetResult in results._resultsByTarget ?? Enumerable.Empty<KeyValuePair<string, TargetResult>>())
+            foreach (KeyValuePair<string, TargetResult> targetResult in results._resultsByTarget ?? [])
             {
                 // NOTE: I believe that because we only allow results for a given target to be produced and cached once for a given configuration,
                 // we can never receive conflicting results for that target, since the cache and build request manager would always return the
@@ -698,7 +696,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void CacheIfPossible()
         {
-            foreach (KeyValuePair<string, TargetResult> targetResultPair in _resultsByTarget ?? Enumerable.Empty<KeyValuePair<string, TargetResult>>())
+            foreach (KeyValuePair<string, TargetResult> targetResultPair in _resultsByTarget ?? [])
             {
                 targetResultPair.Value.CacheItems(ConfigurationId, targetResultPair.Key);
             }

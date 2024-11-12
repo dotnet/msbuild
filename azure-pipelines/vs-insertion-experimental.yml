@@ -1,0 +1,94 @@
+trigger: none
+name: $(Date:yyyyMMdd).$(Rev:r) MSBuild Experimental VS Insertion
+variables:
+  InsertConfigValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion)
+  InsertCustomScriptExecutionCommand: $(Pipeline.Workspace)\xsd\Update-MSBuildXsds.ps1
+  InsertDescription: Insert MSBuild $(Build.BuildNumber) from the branch $(Build.SourceBranchName) at commit $(Build.SourceVersion). Corresponding package version is $(MSBuild_ExtApisPackageVersion)
+  InsertJsonValues: Microsoft.Build.vsman{$(MSBuild_ExtApisPackageVersion)+$(Build.SourceVersion)}=https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(Build.SourceBranchName)/$(Build.BuildNumber);Microsoft.Build.vsman,Microsoft.Build.Arm64.vsman{$(MSBuild_ExtApisPackageVersion)+$(Build.SourceVersion)}=https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(Build.SourceBranchName)/$(Build.BuildNumber);Microsoft.Build.Arm64.vsman,Microsoft.Build.UnGAC.vsman=https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(Build.SourceBranchName)/$(Build.Build.Number);Microsoft.Build.UnGAC.vsman
+  InsertPayloadName: MSBuild $(Build.SourceBranchName) $(Build.BuildNumber)
+  TeamName: msbuild
+  TeamEmail: msbuild@microsoft.com
+resources:
+  pipelines:
+  - pipeline: 'MSBuild'
+    project: 'DevDiv'
+    source: 'MSBuild'
+    trigger:
+      branches:
+        include:
+        - exp/*
+  repositories:
+  - repository: 1ESPipelineTemplates
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+    ref: refs/tags/release
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    pool:
+      name: VSEngSS-MicroBuild2022-1ES
+    customBuildTags:
+    - ES365AIMigrationTooling-Release
+    stages:
+    - stage: Stage_1
+      displayName: Create VS PR
+      jobs:
+      - job: Job_1
+        displayName: Run on agent
+        condition: succeeded()
+        timeoutInMinutes: 0
+        templateContext:
+          inputs:
+          - input: pipelineArtifact
+            pipeline: 'MSBuild'
+            artifactName: 'BuildLogs_SourceBuild_Managed_Attempt1'
+            targetPath: '$(Pipeline.Workspace)/BuildLogs_SourceBuild_Managed_Attempt1'
+          - input: pipelineArtifact
+            pipeline: 'MSBuild'
+            artifactName: 'build_Windows_NT_SBOM'
+            targetPath: '$(Pipeline.Workspace)/build_Windows_NT_SBOM'
+          - input: pipelineArtifact
+            pipeline: 'MSBuild'
+            artifactName: 'xsd'
+            targetPath: '$(Pipeline.Workspace)/xsd'
+          - input: pipelineArtifact
+            pipeline: 'MSBuild'
+            artifactName: 'PackageArtifacts'
+            targetPath: '$(Build.ArtifactStagingDirectory)/PackageArtifacts'
+        steps:
+        - task: Powershell@2
+          name: Powershell_1
+          displayName: Munge ExternalAPIs package version
+          inputs:
+            targetType: inline
+            script: |
+              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/VS.ExternalAPIs.*.nupkg"
+              $packageFile = Get-ChildItem -Path $folder -Filter VS.ExternalAPIs.*.nupkg | Select-Object -First 1
+              $packageVersion = $packageFile.BaseName.TrimStart("VS.ExternalAPIs.MSBuild")
+              Write-Host "Setting MSBuild_ExtApisPackageVersion to '$packageVersion'"
+              Write-Host "##vso[task.setvariable variable=MSBuild_ExtApisPackageVersion]$($packageVersion)"
+              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.NET.StringTools*.nupkg"
+              $packageFile = Get-ChildItem -Path $folder -Filter Microsoft.NET.StringTools*.nupkg | Select-Object -First 1
+              $packageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
+              Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$packageVersion'"
+              Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($packageVersion)"
+        - task: 1ES.PublishNuGet@1
+          displayName: 'Push MSBuild CoreXT packages'
+          inputs:
+            packageParentPath: '$(Build.ArtifactStagingDirectory)'
+            packagesToPush: $(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.Build.*.nupkg;$(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.NET.StringTools.*.nupkg;$(Build.ArtifactStagingDirectory)/PackageArtifacts/VS.ExternalAPIs.*.nupkg
+            nuGetFeedType: internal
+            publishVstsFeed: VS
+            allowPackageConflicts: true
+        - task: MicroBuildInsertVsPayload@4
+          name: MicroBuildInsertVsPayload_4
+          displayName: Insert VS Payload
+          inputs:
+            PackagePropsValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
+            LinkWorkItemsToPR: true
+            TeamEmail: $(TeamEmail)
+            TeamName: $(TeamName)
+            InsertionReviewers: MSBuild
+            TargetBranch: main
+            InsertionPayloadName: '[Experimental] [Skip-SymbolCheck] $(InsertPayloadName)'
+            InsertionBuildPolicy: Request Perf DDRITs

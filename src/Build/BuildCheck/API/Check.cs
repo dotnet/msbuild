@@ -43,6 +43,8 @@ public abstract class Check : IDisposable
     /// </param>
     public abstract void RegisterActions(IBuildCheckRegistrationContext registrationContext);
 
+    internal virtual bool IsBuiltIn => false;
+
     public virtual void Dispose()
     { }
 }

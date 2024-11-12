@@ -58,8 +58,15 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns>The BuildEventContext to use for this project.</returns>
         internal ProjectLoggingContext LogProjectStarted(BuildRequestEntry requestEntry)
         {
+            (ProjectStartedEventArgs arg, ProjectLoggingContext ctx) = CreateProjectLoggingContext(requestEntry);
+            LoggingService.LogProjectStarted(arg);
+            return ctx;
+        }
+
+        internal (ProjectStartedEventArgs, ProjectLoggingContext) CreateProjectLoggingContext(BuildRequestEntry requestEntry)
+        {
             ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
-            return new ProjectLoggingContext(this, requestEntry);
+            return ProjectLoggingContext.CreateLoggingContext(this, requestEntry);
         }
 
         /// <summary>

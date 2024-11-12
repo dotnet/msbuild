@@ -9,7 +9,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0103](#bc0103---used-environment-variable) | Suggestion | Used environment variable. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Property first declared after it was used. |
-| [BC0203](#bc0203----property-declared-but-never-used) | None | Property declared but never used. |
+| [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Property declared but never used. |
 
 
 To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
@@ -91,7 +91,12 @@ If `BC0202` and [BC0201](#BC0201) are both enabled - then `BC0201` reports only 
 
 This check indicates that a property was defined in the observed scope (by default it's the project file only) and it was then not used anywhere in the build.
 
-This is a runtime check, not a static analysis check - so it can have false positives (as property not used in particular build might be needed in a build with different conditions). For this reasons it's currently only suggestion.
+This is a runtime check, not a static analysis check - so it can have false positives - for this reasons it's currently only suggestion.
+
+Common cases of false positives:
+ * Property not used in a particular build might be needed in a build with different conditions or a build of a different target (e.g. `dotnet pack /check` or `dotnet build /t:pack /check` accesses some additional properties as compared to ordinary `dotnet build /check`).
+ * Property accessing is tracked for each project build request. There might be multiple distinct build requests for a project in a single build. Specific case of this is a call to the [MSBuild task](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-task) or [CallTarget task](https://learn.microsoft.com/en-us/visualstudio/msbuild/calltarget-task) that can request a result from a project build, while passing additional or different global properties and/or calling specific target. This happens often as part of common targets - e.g. for [multi-targeted project build parallelization](../../High-level-overview.md#parallelism)
+ * Incremental build might skip execution of some targets, that might have been accessing properties of interest.
 
 <BR/>
 <BR/>

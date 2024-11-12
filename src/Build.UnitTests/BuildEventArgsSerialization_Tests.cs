@@ -4,11 +4,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using FluentAssertions;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
@@ -93,6 +95,18 @@ namespace Microsoft.Build.UnitTests
             Roundtrip(args,
                 e => ToString(e.BuildEventContext),
                 e => e.Succeeded.ToString());
+        }
+
+        [Fact]
+        public void RoundtripBuildCanceledEventArgs()
+        {
+            var args = new BuildCanceledEventArgs(
+                "Message",
+                eventTimestamp: DateTime.Parse("12/12/2015 06:11:56 PM"));
+
+            Roundtrip(args,
+                e => e.Message,
+                e => e.Timestamp.ToString());
         }
 
         [Fact]
@@ -399,11 +413,11 @@ namespace Microsoft.Build.UnitTests
                 "SenderName",
                 DateTime.Parse("9/1/2021 12:02:07 PM"),
                 withOptionalData ? new object[] { "argument0" } : null)
-                {
-                    ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
-                    ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
-                    BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
-                };
+            {
+                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
+                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            };
 
             Roundtrip(args,
                 e => e.Code,
@@ -528,6 +542,27 @@ namespace Microsoft.Build.UnitTests
                 e => e.MVID.ToString(),
                 e => e.AppDomainDescriptor,
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+        }
+
+        [Fact]
+        public void RoundtripBuildCheckTracingEventArgs()
+        {
+            string key1 = "AA";
+            TimeSpan span1 = TimeSpan.FromSeconds(5);
+            string key2 = "b";
+            TimeSpan span2 = TimeSpan.FromSeconds(15);
+            string key3 = "cCc";
+            TimeSpan span3 = TimeSpan.FromSeconds(50);
+
+            Dictionary<string, TimeSpan> stats = new() { { key1, span1 }, { key2, span2 }, { key3, span3 } };
+
+            BuildCheckTracingEventArgs args = new BuildCheckTracingEventArgs(stats);
+
+            Roundtrip(args,
+                e => e.TracingData.InfrastructureTracingData.Keys.Count.ToString(),
+                e => e.TracingData.InfrastructureTracingData.Keys.ToCsvString(false),
+                e => e.TracingData.InfrastructureTracingData.Values
+                    .Select(v => v.TotalSeconds.ToString(CultureInfo.InvariantCulture)).ToCsvString(false));
         }
 
         [Theory]
@@ -896,6 +931,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.HelpKeyword,
                 e => e.SenderName);
         }
+
         [Fact]
         public void ReadingCorruptedStreamThrows()
         {
@@ -1012,7 +1048,7 @@ namespace Microsoft.Build.UnitTests
             memoryStream.Position = 0;
 
             // some future type that is not known in current version
-            BinaryLogRecordKind unknownType = (BinaryLogRecordKind) Enum.GetValues(typeof(BinaryLogRecordKind)).Cast<BinaryLogRecordKind>().Select(e => (int)e).Max() + 2;
+            BinaryLogRecordKind unknownType = (BinaryLogRecordKind)Enum.GetValues(typeof(BinaryLogRecordKind)).Cast<BinaryLogRecordKind>().Select(e => (int)e).Max() + 2;
             Microsoft.Build.Shared.BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, (int)unknownType);
             memoryStream.Position.ShouldBe(eventSizePos, "The event type need to be overwritten in place - without overwriting any bytes after the type info");
             memoryStream.Position = positionAfterFirstEvent;

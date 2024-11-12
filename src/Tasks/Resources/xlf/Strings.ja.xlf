@@ -131,6 +131,11 @@
         <target state="translated">MSB3654: 遅延署名には、最低でも 1 つの公開キーを指定する必要があります。KeyFile または KeyContainer プロパティを使用して公開キーを提供するか、遅延署名を無効にしてください。</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
+      <trans-unit id="CodeTaskFactory.AttributeEmptyWithTaskElement">
+        <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</source>
+        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</target>
+        <note>{StrBegin="MSB3752: "}</note>
+      </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
         <source>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</source>
         <target state="translated">MSB3991: '{0}' が設定されていないか、空です。{1} が false の場合は、'{0}' に空でない値を設定してください。</target>
@@ -1165,10 +1170,10 @@
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
-        <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://aka.ms/msbuild/net8-binaryformatter</source>
-        <target state="translated">MSB3825: "{0}" 型のリソース "{1}" は、実行時に BinaryFormatter を介して逆シリアル化されます。BinaryFormatter は、セキュリティ上のリスクが発生する可能性があるため非推奨であり、.NET 9 を使用して削除されます。引き続き使用する場合は、プロパティ "GenerateResourceWarnOnBinaryFormatterUse" を false に設定してください。
-           詳細情報: https://aka.ms/msbuild/net8-binaryformatter</target>
+        <source>MSB3825: Resource "{0}" of type "{1}" may be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide</source>
+        <target state="translated">MSB3825: 実行時に BinaryFormatter を使用して、型が "{1}" のリソース "{0}" が逆シリアル化されている可能性があります。BinaryFormatter は、既知のセキュリティ リスクにより非推奨となり、.NET 9 以降では削除されます。引き続き使用する場合は、プロパティ "GenerateResourceWarnOnBinaryFormatterUse" を false に設定します。
+           詳細情報: https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
