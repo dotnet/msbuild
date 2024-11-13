@@ -55,7 +55,7 @@
     <NuGetBuildTasksVersion>6.13.0-preview.1.60</NuGetBuildTasksVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
-    <BootstrapSdkVersion>9.0.200-preview.0.24523.19</BootstrapSdkVersion>
+    <BootstrapSdkVersion>9.0.100</BootstrapSdkVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
