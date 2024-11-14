@@ -2,15 +2,15 @@
 
 Report codes are chosen to conform to suggested guidelines. Those guidelines are currently in revew: https://github.com/dotnet/msbuild/pull/10088
 
-| Diagnostic&nbsp;Code | Default Severity | Default Scope | Available from | Reason |
+| Diagnostic&nbsp;Code | Default Severity | Default Scope | Available from SDK | Reason |
 |:-----|-------|-------|-------|----------|
-| [BC0101](#bc0101---shared-output-path) | Warning | Project | 9.0.0 | Shared output path. |
-| [BC0102](#bc0102---double-writes) | Warning | Project | 9.0.0 | Double writes. |
-| [BC0103](#bc0103---used-environment-variable) | Suggestion | Project | 9.0.0 | Used environment variable. |
-| [BC0104](#bc0104---projectreference-is-prefered-to-reference) | Warning | Project | 9.0.2 | ProjectReference is prefered to Reference. |
-| [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.0 | Usage of undefined property. |
-| [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.0 | Property first declared after it was used. |
-| [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Project | 9.0.0 | Property declared but never used. |
+| [BC0101](#bc0101---shared-output-path) | Warning | Project | 9.0.100 | Shared output path. |
+| [BC0102](#bc0102---double-writes) | Warning | Project | 9.0.100 | Double writes. |
+| [BC0103](#bc0103---used-environment-variable) | Suggestion | Project | 9.0.100 | Used environment variable. |
+| [BC0104](#bc0104---projectreference-is-prefered-to-reference) | Warning | Project | 9.0.200 | ProjectReference is prefered to Reference. |
+| [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
+| [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
+| [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Project | 9.0.100 | Property declared but never used. |
 
 
 To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
