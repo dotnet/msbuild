@@ -1705,7 +1705,7 @@ namespace Microsoft.Build.Tasks
 
             // Check the timestamp of each of the passed-in references to find the newest;
             // and then the additional inputs
-            ITaskItem[] inputs = this.References ?? [..(this.AdditionalInputs ?? [])];
+            ITaskItem[] inputs = this.References ?? [.. (this.AdditionalInputs ?? [])];
 
             foreach (ITaskItem input in inputs)
             {

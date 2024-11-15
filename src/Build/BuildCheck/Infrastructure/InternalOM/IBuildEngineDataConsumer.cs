@@ -11,7 +11,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 internal interface IBuildEngineDataConsumer
 {
     void ProcessPropertyRead(PropertyReadInfo propertyReadInfo);
-    
+
     /// <summary>
     /// Signals that a property was written to.
     /// </summary>

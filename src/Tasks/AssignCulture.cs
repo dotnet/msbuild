@@ -141,7 +141,7 @@ namespace Microsoft.Build.Tasks
 
                     string dependentUpon = AssignedFiles[i].GetMetadata(ItemMetadataNames.dependentUpon);
                     string existingCulture = AssignedFiles[i].GetMetadata(ItemMetadataNames.culture);
-                    
+
                     if (RespectAlreadyAssignedItemCulture && !string.IsNullOrEmpty(existingCulture))
                     {
                         AssignedFiles[i].SetMetadata(ItemMetadataNames.withCulture, "true");
