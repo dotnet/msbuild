@@ -4244,6 +4244,55 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.Targets.Keys.ShouldBe(new[] { "t" });
         }
 
+        /// <summary>
+        /// Test that the ImportedProjectNotFound error message
+        /// contains the unevaluated value of the project attribute.
+        /// </summary>
+        [Fact]
+        public void ImportNotFound()
+        {
+            const string PropertyName = "SomeProperty";
+            const string PropertyValue = "Import";
+            const string ImportValue = $"$({PropertyName})DoesNotExist";
+            const string ErrorCode = "MSB4019"; // ImportedProjectNotFound
+
+            string file = null;
+
+            try
+            {
+                using ProjectCollection collection = new ProjectCollection();
+                MockLogger logger = new MockLogger();
+                collection.RegisterLogger(logger);
+
+                Project project = new Project(collection);
+                project.Xml.AddProperty(PropertyName, PropertyValue);
+                project.Xml.AddImport(ImportValue);
+
+                file = FileUtilities.GetTemporaryFileName();
+                project.Save(file);
+
+                Assert.Throws<InvalidProjectFileException>(() => project.ReevaluateIfNecessary());
+
+                // Find and test the error event record.
+                // logger.AssertLogContains() will find multiple strings but not within the same line
+                bool hasErrorCode = false;
+                foreach (var error in logger.Errors)
+                {
+                    if (error.Code == ErrorCode)
+                    {
+                        hasErrorCode = true;
+                        Assert.Contains(ImportValue, error.Message);
+                        break;
+                    }
+                }
+                Assert.True(hasErrorCode);
+            }
+            finally
+            {
+                File.Delete(file);
+            }
+        }
+
         private static void AssertGlobResult(GlobResultList expected, string project)
         {
             var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs();

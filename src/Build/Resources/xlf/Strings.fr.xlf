@@ -1191,8 +1191,8 @@ Erreurs : {3}</target>
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
-        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: le projet importé "{0}" est introuvable. Vérifiez que l'expression de la déclaration Import "{1}" est correcte et que le fichier existe sur le disque.</target>
+        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>
+        <target state="translated">MSB4019: le projet importé « {0} » est introuvable. Confirmez que l'expression dans la déclaration d'importation « {1} », qui a été évaluée à « {2} », est correcte et que le fichier existe sur le disque.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
