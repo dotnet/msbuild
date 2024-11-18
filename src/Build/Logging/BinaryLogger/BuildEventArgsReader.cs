@@ -324,7 +324,7 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.UninitializedPropertyRead => ReadUninitializedPropertyReadEventArgs(),
                 BinaryLogRecordKind.PropertyInitialValueSet => ReadPropertyInitialValueSetEventArgs(),
                 BinaryLogRecordKind.AssemblyLoad => ReadAssemblyLoadEventArgs(),
-                BinaryLogRecordKind.BuildCheckMessage => ReadBuildCheckMessageEventArgs(),
+                BinaryLogRecordKind.BuildCheckMessage => ReadBuildMessageEventArgs(),
                 BinaryLogRecordKind.BuildCheckWarning => ReadBuildWarningEventArgs(),
                 BinaryLogRecordKind.BuildCheckError => ReadBuildErrorEventArgs(),
                 BinaryLogRecordKind.BuildCheckTracing => ReadBuildCheckTracingEventArgs(),
@@ -1218,15 +1218,6 @@ namespace Microsoft.Build.Logging
                 fields.HelpKeyword,
                 fields.SenderName,
                 fields.Importance);
-            SetCommonFields(e, fields);
-
-            return e;
-        }
-
-        private BuildEventArgs ReadBuildCheckMessageEventArgs()
-        {
-            var fields = ReadBuildEventArgsFields();
-            var e = new BuildCheckResultMessage(fields.Message);
             SetCommonFields(e, fields);
 
             return e;
