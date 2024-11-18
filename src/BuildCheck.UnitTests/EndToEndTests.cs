@@ -234,7 +234,7 @@ public class EndToEndTests : IDisposable
         // The conflicting outputs warning appears - but only if check was requested
         if (checkRequested)
         {
-            output.ShouldContain("BC0101");
+            output.ShouldContain(FormatExpectedDiagOutput("BC0101", BC0101Severity));
             output.ShouldContain("BC0102");
             output.ShouldContain("BC0103");
         }
@@ -243,6 +243,12 @@ public class EndToEndTests : IDisposable
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
             output.ShouldNotContain("BC0103");
+        }
+
+        string FormatExpectedDiagOutput(string code, string severity)
+        {
+            string msbuildSeverity = severity.Equals("suggestion") ? "message" : severity;
+            return $"{msbuildSeverity} {code}: https://aka.ms/buildcheck/codes#{code}";
         }
     }
 
