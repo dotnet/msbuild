@@ -5,7 +5,7 @@ If you are expecting to see a certain type of message (like test logs) but are u
 
 ### Message types
 There are various types of messages within MSBuild with different importances and purposes.
-There are some message types that are built-in within the engine, `errors`, `warnings`, and MSBuild engine information. The custom messages, that can come either from the engine or other sources, are selected and displayed based on the `importance` of the message. There can be high, normal, and low importance messages being displayed. More detail on which messages are displayed on individual loggers are on their respective sections.
+Some message types are built-in within the engine, such as  `errors`, `warnings`, and MSBuild engine information. Others are custom messages, that can come either from the engine or other sources, and are selected and displayed based on the `importance` of the message. There can be high, normal, and low importance messages being displayed. More detail on which messages are displayed on individual loggers are on their respective sections.
 
 For more information on custom messages please reference the Microsoft Learn page for the MSBuild [Message](https://learn.microsoft.com/visualstudio/msbuild/message-task) Task.
 
