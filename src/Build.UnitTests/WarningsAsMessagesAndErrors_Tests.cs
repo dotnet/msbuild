@@ -428,6 +428,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [InlineData("WarningsAsErrors", "MSB1007", false)]
         [InlineData("WarningsAsMessages", "MSB1007", false)]
         [InlineData("WarningsNotAsErrors", "MSB1007", true)]
+        [InlineData("WarningsNotAsErrors", "MSB1007", false)]
         public void WarningsChangeWaveTest(string property, string propertyData, bool treatWarningsAsErrors)
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
@@ -449,6 +450,8 @@ namespace Microsoft.Build.Engine.UnitTests
                 {
                     // Since the "no prefix" variations can't do anything with the change wave disabled, this should always fail.
                     MockLogger logger = proj.BuildProjectExpectFailure();
+                    logger.ErrorCount.ShouldBe(1);
+                    logger.AssertLogContains(warningCode);
                 }
                 else
                 {
@@ -459,6 +462,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                     logger.AssertLogContains(warningCode);
                 }
+                ChangeWaves.ResetStateForTests();
             }
         }
 
