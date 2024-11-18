@@ -10,7 +10,7 @@ There are some message types that are built-in within the engine, `errors`, `war
 For more information on custom messages please reference the Microsoft Learn page for the MSBuild [Message](https://learn.microsoft.com/visualstudio/msbuild/message-task) Task.
 
 ### Terminal logger
-Terminal logger is a new feature which improves the console experience. 
+Terminal logger is a new feature which improves the console experience for end users by focusing the output on the diagnostics raised from a build for each project. It also allows users to see at-a-glance information about how the engine is building their projects at any time. It is opinionated and explicitly hides some build messages and output to deliver a more streamlined end-user experience. Users that need more detailed output should use the [console logger](#console-logger) or a [binary log](#binary-logger-build-logger) along with the [Structured Log Viewer](https://msbuildlog.com/) to drive their investigations.
 For more information on how the terminal logger behaves see the [dotnet build options](https://learn.microsoft.com/dotnet/core/tools/dotnet-build#options) under `-tl`.
 
 To specify verbosity the `-verbosity` flag or `/tlp:verbosity={verbosity level}`
@@ -26,10 +26,13 @@ To specify verbosity the `-verbosity` flag or `/tlp:verbosity={verbosity level}`
 
 ### Binary logger / build logger
 The binary logger does not have a verbosity option. It includes all messages, projects and files from the build by default. It is intended to be a tooling-friendly way to get detailed information about what happened during a build, for analysis or automated processing.
+
 You can find more information about the binlogs on [MSBuild Github Documentation](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md).
 
 ### Console logger
 Console logger refers to the logger that outputs to the console in VS or the terminal that is being used. It is not the default logger after the [.NET 9 update](https://learn.microsoft.com/en-us/dotnet/core/compatibility/sdk/9.0/terminal-logger) but still can be accessed by opting out of the Terminal Logger feature.
+
+The console logger is a 1:1 textual representation of the data that are emitted during the build. It attempts small amounts of formatting, but it writes received messages from all of the worker nodes in an unbuffered format so can be difficult to follow the chain of execution.
 
 The console logger defaults to normal verbosity, and can be overriden by passing the `-verbosity` attribute, or passing the `verbosity` property to the console logger `clp:verbosity={verbosity level}`.
 
