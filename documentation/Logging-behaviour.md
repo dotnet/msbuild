@@ -7,7 +7,7 @@ If you are expecting to see a certain type of message (like test logs) but are u
 There are various types of messages within MSBuild with different importances and purposes.
 There are some message types that are built-in within the engine, `errors`, `warnings`, and MSBuild engine information. The custom messages, that can come either from the engine or other sources, are selected and displayed based on the `importance` of the message. There can be high, normal, and low importance messages being displayed. More detail on which messages are displayed on individual loggers are on their respective sections.
 
-For more information on custom messages you can more ou Microsoft Learn page for the [MSBuild Message Task](https://learn.microsoft.com/visualstudio/msbuild/message-task)
+For more information on custom messages please reference the Microsoft Learn page for the MSBuild [Message](https://learn.microsoft.com/visualstudio/msbuild/message-task) Task.
 
 ### Terminal logger
 Terminal logger is a new feature which improves the console experience. 
@@ -25,7 +25,7 @@ To specify verbosity the `-verbosity` flag or `/tlp:verbosity={verbosity level}`
 | MSBuild engine information |
 
 ### Binary logger / build logger
-The binary logger does not have a verbosity option. It includes all messages, projects and files from the build by default.
+The binary logger does not have a verbosity option. It includes all messages, projects and files from the build by default. It is intended to be a tooling-friendly way to get detailed information about what happened during a build, for analysis or automated processing.
 You can find more information about the binlogs on [MSBuild Github Documentation](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md).
 
 ### Console logger
