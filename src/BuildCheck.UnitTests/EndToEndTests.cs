@@ -493,9 +493,9 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
-    [InlineData("CheckCandidate", "X01234", "error", "error X01234")]
-    [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234")]
+    [Theory]
+    [InlineData("CheckCandidate", "X01234", "error", "error X01234: http://samplelink.com/X01234")]
+    [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234: http://samplelink.com/X01234")]
     public void CustomCheckTest_WithEditorConfig(string checkCandidate, string ruleId, string severity, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())
