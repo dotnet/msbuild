@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests
     public sealed class EncodingUtilities_Tests
     {
         /// <summary>
-        /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded 
+        /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded
         /// in the current system encoding.
         /// </summary>
         [WindowsOnlyFact]
@@ -52,6 +52,15 @@ namespace Microsoft.Build.UnitTests
             testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, inputLanguage);
 
             EncodingUtilities.GetExternalOverriddenUILanguageIfSupportableWithEncoding().ShouldBeEquivalentTo(new CultureInfo(expectedLanguage));
+        }
+
+        [WindowsOnlyFact]
+        public void BatchFileEncoding_EncodingSpecificationTrueEqualsAlways()
+        {
+            const string content = @"example";
+
+            var alwaysEncoding = EncodingUtilities.BatchFileEncoding(content, EncodingUtilities.UseUtf8Always);
+            EncodingUtilities.BatchFileEncoding(content, EncodingUtilities.UseUtf8True).ShouldBe(alwaysEncoding);
         }
     }
 }
