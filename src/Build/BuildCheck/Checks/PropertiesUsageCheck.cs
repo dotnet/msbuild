@@ -14,7 +14,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
-internal class PropertiesUsageCheck : InternalCheck
+internal class PropertiesUsageCheck : WorkerNodeCheck
 {
     private static readonly CheckRule _usedBeforeInitializedRule = new CheckRule("BC0201", "PropertyUsedBeforeDeclared",
         ResourceUtilities.GetResourceString("BuildCheck_BC0201_Title")!,
@@ -148,7 +148,7 @@ internal class PropertiesUsageCheck : InternalCheck
             {
                 _uninitializedReadsInScope.Remove(writeData.PropertyName);
 
-                context.ReportResult(BuildCheckResult.Create(
+                context.ReportResult(BuildCheckResult.CreateBuiltIn(
                     _initializedAfterUsedRule,
                     uninitInScopeReadLocation,
                     writeData.PropertyName, writeData.ElementLocation?.LocationString ?? string.Empty));
@@ -160,7 +160,7 @@ internal class PropertiesUsageCheck : InternalCheck
             {
                 _uninitializedReadsOutOfScope.Remove(writeData.PropertyName);
 
-                context.ReportResult(BuildCheckResult.Create(
+                context.ReportResult(BuildCheckResult.CreateBuiltIn(
                     _initializedAfterUsedRule,
                     uninitOutScopeReadLocation,
                     writeData.PropertyName, writeData.ElementLocation?.LocationString ?? string.Empty));
@@ -205,7 +205,7 @@ internal class PropertiesUsageCheck : InternalCheck
                          readData.ElementLocation, readData.ProjectFilePath))
             {
                 // report immediately
-                context.ReportResult(BuildCheckResult.Create(
+                context.ReportResult(BuildCheckResult.CreateBuiltIn(
                     _usedBeforeInitializedRule,
                     readData.ElementLocation,
                     readData.PropertyName));
@@ -220,7 +220,7 @@ internal class PropertiesUsageCheck : InternalCheck
         {
             if (propWithLocation.Value != null && !_readProperties.Contains(propWithLocation.Key))
             {
-                context.ReportResult(BuildCheckResult.Create(
+                context.ReportResult(BuildCheckResult.CreateBuiltIn(
                     _unusedPropertyRule,
                     propWithLocation.Value,
                     propWithLocation.Key));
@@ -231,7 +231,7 @@ internal class PropertiesUsageCheck : InternalCheck
         //  uninitialized reads immediately (instead we wait if they are attempted to be initialized late).
         foreach (var uninitializedRead in _uninitializedReadsInScope)
         {
-            context.ReportResult(BuildCheckResult.Create(
+            context.ReportResult(BuildCheckResult.CreateBuiltIn(
                 _usedBeforeInitializedRule,
                 uninitializedRead.Value,
                 uninitializedRead.Key));
