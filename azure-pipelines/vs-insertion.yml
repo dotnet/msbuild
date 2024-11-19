@@ -165,16 +165,11 @@ extends:
             pipeline: 'MSBuild'
             artifactName: 'PackageArtifacts'
             targetPath: '$(Build.ArtifactStagingDirectory)/PackageArtifacts'
+            # the CI build creates a sourcebuild intermediate package that is not signed, remove it to avoid warning from Guardian
+            itemPattern: |
+              **
+              !**/Microsoft.SourceBuild.Intermediate*.nupkg
         steps:
-        # the CI build creates a sourcebuild intermediate package that is not signed, remove it to avoid warning from Guardian
-        - task: Powershell@2
-          name: RemoveSourceBuildPackage
-          displayName: Remove sourcebuild package
-          inputs:
-            targetType: inline
-            script: |
-              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts"
-              Get-ChildItem -Path $folder -Filter 'Microsoft.SourceBuild.Intermediate*.nupkg' | Remove-Item -Force
         - task: Powershell@2
           name: PwshMungeExternalAPIsPkgVersion
           displayName: Munge ExternalAPIs package version
