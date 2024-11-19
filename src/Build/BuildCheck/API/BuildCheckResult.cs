@@ -32,12 +32,14 @@ public sealed class BuildCheckResult : IBuildCheckResult
         => severity switch
         {
             CheckResultSeverity.Suggestion => new BuildCheckResultMessage(this),
-            CheckResultSeverity.Warning => new BuildCheckResultWarning(this, CheckRule.Id),
-            CheckResultSeverity.Error => new BuildCheckResultError(this, CheckRule.Id),
+            CheckResultSeverity.Warning => new BuildCheckResultWarning(this),
+            CheckResultSeverity.Error => new BuildCheckResultError(this),
             _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null),
         };
 
     public CheckRule CheckRule { get; }
+
+    public string Code => CheckRule.Id;
 
     /// <summary>
     /// Optional location of the finding (in near future we might need to support multiple locations).

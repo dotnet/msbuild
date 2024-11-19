@@ -35,7 +35,7 @@ namespace Microsoft.Build.Framework.UnitTests
 
             argDeserialized.CreateFromStream(br, packetVersion);
             argDeserialized.Message.ShouldBe(message);
-            argDeserialized.Timestamp.ShouldBe(datetime); 
+            argDeserialized.Timestamp.ShouldBe(datetime);
         }
     }
 }

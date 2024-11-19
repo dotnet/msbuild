@@ -7,7 +7,7 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 
 internal sealed class SystemStopwatch : StopwatchAbstraction
 {
-    private Stopwatch _stopwatch = new ();
+    private Stopwatch _stopwatch = new();
 
     public override double ElapsedSeconds => _stopwatch.Elapsed.TotalSeconds;
 

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BuildCheck.Infrastructure;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
@@ -15,15 +16,20 @@ internal sealed class BuildCheckCentralContext
 {
     private readonly IConfigurationProvider _configurationProvider;
 
-    public BuildCheckCentralContext(IConfigurationProvider configurationProvider, Action<ICheckContext> removeThrottledChecks)
+    public BuildCheckCentralContext(
+        IConfigurationProvider configurationProvider,
+        Action<List<CheckWrapper>?, ICheckContext> removeCheck)
     {
         _configurationProvider = configurationProvider;
-        _removeThrottledChecks = removeThrottledChecks;
+        _removeChecks = removeCheck;
     }
 
     private record CallbackRegistry(
         List<(CheckWrapper, Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>>)> EvaluatedPropertiesActions,
+#pragma warning disable CS0618 // Type or member is obsolete
         List<(CheckWrapper, Action<BuildCheckDataContext<ParsedItemsCheckData>>)> ParsedItemsActions,
+#pragma warning restore CS0618 // Type or member is obsolete
+        List<(CheckWrapper, Action<BuildCheckDataContext<EvaluatedItemsCheckData>>)> EvaluatedItemsActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<TaskInvocationCheckData>>)> TaskInvocationActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<PropertyReadData>>)> PropertyReadActions,
         List<(CheckWrapper, Action<BuildCheckDataContext<PropertyWriteData>>)> PropertyWriteActions,
@@ -33,7 +39,7 @@ internal sealed class BuildCheckCentralContext
         List<(CheckWrapper, Action<BuildCheckDataContext<ProjectImportedCheckData>>)> ProjectImportedCheckDataActions)
     {
         public CallbackRegistry()
-            : this([], [], [], [], [], [], [], [], [])
+            : this([], [], [], [], [], [], [], [], [], [])
         {
         }
 
@@ -41,6 +47,7 @@ internal sealed class BuildCheckCentralContext
         {
             EvaluatedPropertiesActions.RemoveAll(a => a.Item1 == check);
             ParsedItemsActions.RemoveAll(a => a.Item1 == check);
+            EvaluatedItemsActions.RemoveAll(a => a.Item1 == check);
             PropertyReadActions.RemoveAll(a => a.Item1 == check);
             PropertyWriteActions.RemoveAll(a => a.Item1 == check);
             ProjectRequestProcessingDoneActions.RemoveAll(a => a.Item1 == check);
@@ -50,7 +57,8 @@ internal sealed class BuildCheckCentralContext
 
     // In a future we can have callbacks per project as well
     private readonly CallbackRegistry _globalCallbacks = new();
-    private readonly Action<ICheckContext> _removeThrottledChecks;
+    private readonly Action<List<CheckWrapper>?, ICheckContext> _removeChecks;
+
 
     // This we can potentially use to subscribe for receiving evaluated props in the
     //  build event args. However - this needs to be done early on, when checks might not be known yet
@@ -74,8 +82,13 @@ internal sealed class BuildCheckCentralContext
         //  (it was being communicated via MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION)
         => RegisterAction(check, evaluatedPropertiesAction, _globalCallbacks.EvaluatedPropertiesActions);
 
+#pragma warning disable CS0618 // Type or member is obsolete
     internal void RegisterParsedItemsAction(CheckWrapper check, Action<BuildCheckDataContext<ParsedItemsCheckData>> parsedItemsAction)
+#pragma warning restore CS0618 // Type or member is obsolete
         => RegisterAction(check, parsedItemsAction, _globalCallbacks.ParsedItemsActions);
+
+    internal void RegisterEvaluatedItemsAction(CheckWrapper check, Action<BuildCheckDataContext<EvaluatedItemsCheckData>> parsedItemsAction)
+        => RegisterAction(check, parsedItemsAction, _globalCallbacks.EvaluatedItemsActions);
 
     internal void RegisterTaskInvocationAction(CheckWrapper check, Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction)
         => RegisterAction(check, taskInvocationAction, _globalCallbacks.TaskInvocationActions);
@@ -130,11 +143,21 @@ internal sealed class BuildCheckCentralContext
         => RunRegisteredActions(_globalCallbacks.EvaluatedPropertiesActions, evaluatedPropertiesCheckData, checkContext, resultHandler);
 
     internal void RunParsedItemsActions(
+#pragma warning disable CS0618 // Type or member is obsolete
         ParsedItemsCheckData parsedItemsCheckData,
+#pragma warning restore CS0618 // Type or member is obsolete
         ICheckContext checkContext,
         Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
             resultHandler)
         => RunRegisteredActions(_globalCallbacks.ParsedItemsActions, parsedItemsCheckData,
+            checkContext, resultHandler);
+
+    internal void RunEvaluatedItemsActions(
+        EvaluatedItemsCheckData evaluatedItemsCheckData,
+        ICheckContext checkContext,
+        Action<CheckWrapper, ICheckContext, CheckConfigurationEffective[], BuildCheckResult>
+            resultHandler)
+        => RunRegisteredActions(_globalCallbacks.EvaluatedItemsActions, evaluatedItemsCheckData,
             checkContext, resultHandler);
 
     internal void RunTaskInvocationActions(
@@ -189,6 +212,7 @@ internal sealed class BuildCheckCentralContext
     where T : CheckData
     {
         string projectFullPath = checkData.ProjectFilePath;
+        List<CheckWrapper>? checksToRemove = null;
 
         foreach (var checkCallback in registeredCallbacks)
         {
@@ -219,7 +243,6 @@ internal sealed class BuildCheckCentralContext
             // Here we might want to check the configPerRule[0].EvaluationsCheckScope - if the input data supports that
             // The decision and implementation depends on the outcome of the investigation tracked in:
             // https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=57851137
-
             BuildCheckDataContext<T> context = new BuildCheckDataContext<T>(
                 checkCallback.Item1,
                 checkContext,
@@ -227,9 +250,24 @@ internal sealed class BuildCheckCentralContext
                 resultHandler,
                 checkData);
 
-            checkCallback.Item2(context);
+            try
+            {
+                checkCallback.Item2(context);
+            }
+            catch (Exception e)
+            {
+                checkContext.DispatchAsWarningFromText(
+                    null,
+                    null,
+                    null,
+                    new BuildEventFileInfo(projectFullPath),
+                    $"The check '{checkCallback.Item1.Check.FriendlyName}' threw an exception while executing a registered action with message: {e.Message}");
+
+                checksToRemove = checksToRemove ?? new List<CheckWrapper>();
+                checksToRemove.Add(checkCallback.Item1);
+            }
         }
 
-        _removeThrottledChecks(checkContext);
+        _removeChecks(checksToRemove, checkContext);
     }
 }
