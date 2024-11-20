@@ -2562,7 +2562,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <HasNoBindingRedirects Condition="'@(SuggestedBindingRedirects)' == ''">true</HasNoBindingRedirects>
     </PropertyGroup>
 
-    <!-- Overwrites .config file with a App.config content if RAR did not return @(SuggestedBindingRedirects). -->
+    <!-- Overwrites .config file with a App.config content if RAR returned empty @(SuggestedBindingRedirects). -->
     <Copy
       SourceFiles="@(AppConfigWithTargetPath->'%(FullPath)')"
       DestinationFiles="$(_GenerateBindingRedirectsIntermediateAppConfig)"
