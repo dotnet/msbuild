@@ -451,6 +451,8 @@ namespace Microsoft.Build.Engine.UnitTests
                     // Since the "no prefix" variations can't do anything with the change wave disabled, this should always fail.
                     MockLogger logger = proj.BuildProjectExpectFailure();
                     logger.ErrorCount.ShouldBe(1);
+                    logger.AssertLogContains($"error {warningCode}");
+
                     logger.AssertLogContains(warningCode);
                 }
                 else
@@ -458,11 +460,11 @@ namespace Microsoft.Build.Engine.UnitTests
                     MockLogger logger = proj.BuildProjectExpectSuccess();
 
                     logger.WarningCount.ShouldBe(1);
+                    logger.AssertLogContains($"warning {warningCode}");
                     logger.ErrorCount.ShouldBe(0);
 
                     logger.AssertLogContains(warningCode);
                 }
-                ChangeWaves.ResetStateForTests();
             }
         }
 
