@@ -18,7 +18,7 @@ Questions to consider:
 ## Stakeholders
 Questions to consider:
  - Who are the stakeholders? 
- - How does a successful handover look like? 
+ - For projects with concrete stakeholders, once the project is done how does a successful handover to the stakeholder look like? 
 
 ## Risks
 Questions to consider:
