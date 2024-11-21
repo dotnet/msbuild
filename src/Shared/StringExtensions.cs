@@ -92,5 +92,10 @@ namespace Microsoft.Build.Shared
             writer.WriteLine(buffer.ToString());
         }
 #endif
+
+        public static bool IsMSBuildTrueString(this string msbuildString) =>
+            ConversionUtilities.ConvertStringToBool(msbuildString, nullOrWhitespaceIsFalse: true);
+
+        public static bool IsMSBuildFalseString(this string msbuildString) => !IsMSBuildTrueString(msbuildString);
     }
 }
