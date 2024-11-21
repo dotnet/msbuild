@@ -187,12 +187,14 @@ public class EndToEndTests : IDisposable
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
             output.ShouldContain("BC0103");
+            output.ShouldContain("BC0104");
         }
         else
         {
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
             output.ShouldNotContain("BC0103");
+            output.ShouldNotContain("BC0104");
         }
     }
 
