@@ -7,7 +7,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0101](#bc0101---shared-output-path) | Warning | Project | 9.0.100 | Shared output path. |
 | [BC0102](#bc0102---double-writes) | Warning | Project | 9.0.100 | Double writes. |
 | [BC0103](#bc0103---used-environment-variable) | Suggestion | Project | 9.0.100 | Used environment variable. |
-| [BC0104](#bc0104---projectreference-is-prefered-to-reference) | Warning | Project | 9.0.200 | ProjectReference is prefered to Reference. |
+| [BC0104](#bc0104---projectreference-is-preferred-to-reference) | Warning | Project | 9.0.200 | ProjectReference is preferred to Reference. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
 | [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Project | 9.0.100 | Property declared but never used. |
@@ -50,7 +50,7 @@ Relying on environment variables introduces variability and unpredictability, as
 This practice can result in inconsistent build outcomes and makes debugging difficult, since environment variables are external to project files and build scripts. To ensure consistent and reproducible builds, avoid using environment variables. Instead, explicitly pass properties using the /p option, which offers better control and traceability.
 
 <a name="BC0104"></a>
-## BC0104 - ProjectReference is prefered to Reference.
+## BC0104 - ProjectReference is preferred to Reference.
 
 "A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'."
 
