@@ -37,6 +37,14 @@
         <target state="translated">分析 newVersion 特性时出现问题。{0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="AssignCulture.CultureOverwritten">
+        <source>MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</source>
+        <target state="new">MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</target>
+        <note>
+	{StrBegin="MSB3002: "}
+	'RespectAlreadyAssignedItemCulture' should not be translated
+	</note>
+      </trans-unit>
       <trans-unit id="AssignProjectConfiguration.IllegalMappingString">
         <source>The platform mapping "{0}" in the platform mapping list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "foo=bar;foo2=bar2".</source>
         <target state="translated">平台映射列表“{1}”中平台映射“{0}”的格式不正确。请只传入分号分隔的常量字符串值列表，常量字符串值以“=”分隔，例如“foo=bar;foo2=bar2”。</target>

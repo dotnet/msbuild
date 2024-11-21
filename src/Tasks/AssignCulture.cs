@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Collections;
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -157,6 +158,15 @@ namespace Microsoft.Build.Tasks
                             // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
                             // https://github.com/dotnet/msbuild/issues/3064
                             ConversionUtilities.ValidBooleanFalse(AssignedFiles[i].GetMetadata(ItemMetadataNames.withCulture)));
+
+                        // The culture was explicitly specified, but not opted in via 'RespectAlreadyAssignedItemCulture' and different will be used
+                        if (!string.IsNullOrEmpty(existingCulture) &&
+                            !MSBuildNameIgnoreCaseComparer.Default.Equals(existingCulture, info.culture) &&
+                            ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
+                        {
+                            Log.LogWarningFromResources("AssignCulture.CultureOverwritten",
+                                existingCulture, AssignedFiles[i].ItemSpec, info.culture);
+                        }
 
                         if (!string.IsNullOrEmpty(info.culture))
                         {
