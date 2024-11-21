@@ -270,7 +270,7 @@ namespace Microsoft.Build.UnitTests
 
             BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
         }
-        
+
         private void InvokeLoggerCallbacksForTwoProjects(bool succeeded, Action additionalCallbacks, Action additionalCallbacks2)
         {
             BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());

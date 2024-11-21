@@ -111,7 +111,7 @@ internal sealed class DoubleWritesCheck : Check
 
             if (_filesWritten.TryGetValue(fileBeingWritten, out (string projectFilePath, string taskName) existingEntry))
             {
-                context.ReportResult(BuildCheckResult.Create(
+                context.ReportResult(BuildCheckResult.CreateBuiltIn(
                     SupportedRule,
                     context.Data.TaskInvocationLocation,
                     context.Data.TaskName,

@@ -5,7 +5,7 @@ using System;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
-internal abstract class InternalCheck : Check
+internal abstract class WorkerNodeCheck : Check
 {
     /// <summary>
     /// Used by the implementors to subscribe to data and events they are interested in.

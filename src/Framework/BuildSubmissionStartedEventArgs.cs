@@ -62,7 +62,7 @@ namespace Microsoft.Build.Framework
             }
 
             writer.Write(EntryProjectsFullPath.Count());
-            foreach(var entry in EntryProjectsFullPath)
+            foreach (var entry in EntryProjectsFullPath)
             {
                 writer.Write((string)entry);
             }

@@ -142,7 +142,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public void InsertAfterChild(ProjectElement child, ProjectElement reference)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(child, nameof(child));
+            ErrorUtilities.VerifyThrowArgumentNull(child);
             if (Link != null)
             {
                 ContainerLink.InsertAfterChild(child, reference);
@@ -197,7 +197,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public void InsertBeforeChild(ProjectElement child, ProjectElement reference)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(child, nameof(child));
+            ErrorUtilities.VerifyThrowArgumentNull(child);
 
             if (Link != null)
             {
@@ -292,7 +292,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public void RemoveChild(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(child, nameof(child));
+            ErrorUtilities.VerifyThrowArgumentNull(child);
 
             ErrorUtilities.VerifyThrowArgument(child.Parent == this, "OM_NodeNotAlreadyParentedByThis");
 
@@ -351,7 +351,7 @@ namespace Microsoft.Build.Construction
         /// <param name="element">The element to act as a template to copy from.</param>
         public virtual void DeepCopyFrom(ProjectElementContainer element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
+            ErrorUtilities.VerifyThrowArgumentNull(element);
             ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), "CannotCopyFromElementOfThatType");
 
             if (this == element)
@@ -835,7 +835,7 @@ namespace Microsoft.Build.Construction
 
             public void CopyTo(T[] array, int arrayIndex)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(array, nameof(array));
+                ErrorUtilities.VerifyThrowArgumentNull(array);
 
                 if (_realizedElements != null)
                 {
@@ -864,7 +864,7 @@ namespace Microsoft.Build.Construction
 
             void ICollection.CopyTo(Array array, int index)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(array, nameof(array));
+                ErrorUtilities.VerifyThrowArgumentNull(array);
 
                 int i = index;
                 foreach (T entry in this)

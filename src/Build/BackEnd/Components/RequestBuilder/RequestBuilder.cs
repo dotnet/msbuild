@@ -196,8 +196,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="entry">The entry to build.</param>
         public void BuildRequest(NodeLoggingContext loggingContext, BuildRequestEntry entry)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
-            ErrorUtilities.VerifyThrowArgumentNull(entry, nameof(entry));
+            ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
+            ErrorUtilities.VerifyThrowArgumentNull(entry);
             ErrorUtilities.VerifyThrow(_componentHost != null, "Host not set.");
             ErrorUtilities.VerifyThrow(_targetBuilder == null, "targetBuilder not null");
             ErrorUtilities.VerifyThrow(_nodeLoggingContext == null, "nodeLoggingContext not null");
@@ -332,10 +332,10 @@ namespace Microsoft.Build.BackEnd
         public async Task<BuildResult[]> BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets = false)
         {
             VerifyIsNotZombie();
-            ErrorUtilities.VerifyThrowArgumentNull(projectFiles, nameof(projectFiles));
-            ErrorUtilities.VerifyThrowArgumentNull(properties, nameof(properties));
-            ErrorUtilities.VerifyThrowArgumentNull(targets, nameof(targets));
-            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions, nameof(toolsVersions));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFiles);
+            ErrorUtilities.VerifyThrowArgumentNull(properties);
+            ErrorUtilities.VerifyThrowArgumentNull(targets);
+            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions);
             ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
             ErrorUtilities.VerifyThrow(projectFiles.Length == properties.Length, "Properties and project counts not the same");
             ErrorUtilities.VerifyThrow(projectFiles.Length == toolsVersions.Length, "Tools versions and project counts not the same");
@@ -550,7 +550,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
             ErrorUtilities.VerifyThrow(_componentHost == null, "RequestBuilder already initialized.");
             _componentHost = host;
         }
@@ -1105,7 +1105,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
 
-            // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
+            // We consider this the entrypoint for the project build for purposes of BuildCheck processing
             bool isRestoring = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring] is not null;
 
             var buildCheckManager = isRestoring
@@ -1155,7 +1155,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.Request.BuildEventContext);
             }
 
-            
+
             try
             {
                 HandleProjectStarted(buildCheckManager);
@@ -1279,7 +1279,7 @@ namespace Microsoft.Build.BackEnd
             BuildEventContext projectBuildEventContext = _projectLoggingContext?.BuildEventContext;
 
             // We can set the warning as errors and messages only after the project logging context has been created (as it creates the new ProjectContextId)
-            if (buildCheckManager != null && loggingService != null && projectBuildEventContext != null)
+            if (loggingService != null && projectBuildEventContext != null)
             {
                 args.WarningsAsErrors = loggingService.GetWarningsAsErrors(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 args.WarningsAsMessages = loggingService.GetWarningsAsMessages(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -1390,14 +1390,17 @@ namespace Microsoft.Build.BackEnd
             // Ensure everything that is required is available at this time
             if (project != null && buildEventContext != null && loggingService != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
-                if (String.Equals(project.GetEngineRequiredPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(project.GetEngineRequiredPropertyValue(MSBuildConstants.MSBuildPrefix + MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase) ||
+                    (String.Equals(project.GetEngineRequiredPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase) &&
+                     ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14)))
                 {
                     // If <MSBuildTreatWarningsAsErrors was specified then an empty ISet<string> signals the IEventSourceSink to treat all warnings as errors
                     loggingService.AddWarningsAsErrors(buildEventContext, new HashSet<string>());
                 }
                 else
                 {
-                    ISet<string> warningsAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsErrors));
+                    ISet<string> warningsAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.MSBuildPrefix + MSBuildConstants.WarningsAsErrors),
+                                                                      project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsErrors));
 
                     if (warningsAsErrors?.Count > 0)
                     {
@@ -1405,14 +1408,17 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                ISet<string> warningsNotAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsNotAsErrors));
+                ISet<string> warningsNotAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.MSBuildPrefix + MSBuildConstants.WarningsNotAsErrors),
+                                                                     project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsNotAsErrors));
+
 
                 if (warningsNotAsErrors?.Count > 0)
                 {
                     loggingService.AddWarningsNotAsErrors(buildEventContext, warningsNotAsErrors);
                 }
 
-                ISet<string> warningsAsMessages = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsMessages));
+                ISet<string> warningsAsMessages = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.MSBuildPrefix + MSBuildConstants.WarningsAsMessages),
+                                                                    project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsMessages));
 
                 if (warningsAsMessages?.Count > 0)
                 {
@@ -1430,14 +1436,37 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private static ISet<string> ParseWarningCodes(string warnings)
+        private static ISet<string> ParseWarningCodes(string warnings, string warningsNoPrefix)
         {
-            if (String.IsNullOrWhiteSpace(warnings))
+            // When this changewave is rotated out and this gets deleted, please consider removing
+            // the <MSBuildWarningsAsMessages Condition="'$(MSBuildWarningsAsMessages)'==''">$(NoWarn)</MSBuildWarningsAsMessages>
+            // and the two following lines from the msbuild/src/Tasks/Microsoft.Common.CurrentVersion.targets
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
             {
-                return null;
+                warningsNoPrefix = null;
             }
 
-            return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
+            HashSet<string> result1 = null;
+            if (!String.IsNullOrWhiteSpace(warnings))
+            {
+                result1 = new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
+            }
+            HashSet<string> result2 = null;
+            if (!String.IsNullOrWhiteSpace(warningsNoPrefix))
+            {
+                result2 = new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warningsNoPrefix), StringComparer.OrdinalIgnoreCase);
+            }
+
+            if (result1 != null)
+            {
+                if (result2 != null)
+                {
+                    result1.UnionWith(result2);
+                }
+                return result1;
+            }
+
+            return result2;
         }
 
         private sealed class DedicatedThreadsTaskScheduler : TaskScheduler

@@ -41,7 +41,7 @@ namespace Microsoft.Build.Execution
         /// <param name="itemType">The type of item this definition object represents.</param>
         internal ProjectItemDefinitionInstance(string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowArgumentNull(itemType);
 
             _itemType = itemType;
         }

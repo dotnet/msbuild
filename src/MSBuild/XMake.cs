@@ -663,7 +663,7 @@ namespace Microsoft.Build.CommandLine
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
 
 #if FEATURE_GET_COMMANDLINE
-            ErrorUtilities.VerifyThrowArgumentLength(commandLine, nameof(commandLine));
+            ErrorUtilities.VerifyThrowArgumentLength(commandLine);
 #endif
 
             AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
@@ -1157,7 +1157,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             s_buildCancellationSource.Cancel();
-            
+
 
             // The OS takes a lock in
             // kernel32.dll!_SetConsoleCtrlHandler, so if a task

@@ -167,7 +167,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         {
             const long longMaxValue = long.MaxValue;
             bool result = Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong((double)longMaxValue, out long actual);
-            
+
             // Because of loss of precision, long.MaxValue will not 'round trip' from long to double to long.
             result.ShouldBeFalse();
             actual.ShouldBe(0);

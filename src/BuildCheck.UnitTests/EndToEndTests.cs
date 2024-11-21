@@ -91,7 +91,7 @@ public class EndToEndTests : IDisposable
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
 
-        
+
         // each finding should be found just once - but reported twice, due to summary
         if (limitReportsCount)
         {
@@ -236,7 +236,7 @@ public class EndToEndTests : IDisposable
         // The conflicting outputs warning appears - but only if check was requested
         if (checkRequested)
         {
-            output.ShouldContain("BC0101");
+            output.ShouldContain(FormatExpectedDiagOutput("BC0101", BC0101Severity));
             output.ShouldContain("BC0102");
             output.ShouldContain("BC0103");
         }
@@ -245,6 +245,12 @@ public class EndToEndTests : IDisposable
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
             output.ShouldNotContain("BC0103");
+        }
+
+        string FormatExpectedDiagOutput(string code, string severity)
+        {
+            string msbuildSeverity = severity.Equals("suggestion") ? "message" : severity;
+            return $"{msbuildSeverity} {code}: https://aka.ms/buildcheck/codes#{code}";
         }
     }
 
@@ -351,9 +357,9 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData(null, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." } )]
+    [InlineData(null, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." })]
     [InlineData(true, new[] { "Property is derived from environment variable: 'TestFromTarget' with value: 'FromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation' with value: 'FromEvaluation'." })]
-    [InlineData(false, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." } )]
+    [InlineData(false, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." })]
     public void NoEnvironmentVariableProperty_Test(bool? customConfigEnabled, string[] expectedMessages)
     {
         List<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? customConfigData = null;
@@ -411,7 +417,7 @@ public class EndToEndTests : IDisposable
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output);
 
-        if(scope == EvaluationCheckScope.ProjectFileOnly)
+        if (scope == EvaluationCheckScope.ProjectFileOnly)
         {
             output.ShouldNotContain("Property is derived from environment variable: 'TestImported'. Properties should be passed explicitly using the /p option.");
         }
@@ -489,9 +495,9 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
-    [InlineData("CheckCandidate", "X01234", "error", "error X01234")]
-    [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234")]
+    [Theory]
+    [InlineData("CheckCandidate", "X01234", "error", "error X01234: http://samplelink.com/X01234")]
+    [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234: http://samplelink.com/X01234")]
     public void CustomCheckTest_WithEditorConfig(string checkCandidate, string ruleId, string severity, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())
@@ -516,13 +522,11 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
-    [InlineData("X01236", "Something went wrong initializing")]
-    // These tests are for failure one different points, will be addressed in a different PR
-    // https://github.com/dotnet/msbuild/issues/10522
-    // [InlineData("X01237", "message")]
-    // [InlineData("X01238", "message")]
-    public void CustomChecksFailGracefully(string ruleId, string expectedMessage)
+    [Theory]
+    [InlineData("X01236", "ErrorOnInitializeCheck", "Something went wrong initializing")]
+    [InlineData("X01237", "ErrorOnRegisteredAction", "something went wrong when executing registered action")]
+    [InlineData("X01238", "ErrorWhenRegisteringActions", "something went wrong when registering actions")]
+    public void CustomChecksFailGracefully(string ruleId, string friendlyName, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())
         {
@@ -543,6 +547,7 @@ public class EndToEndTests : IDisposable
             success.ShouldBeTrue();
             projectCheckBuildLog.ShouldContain(expectedMessage);
             projectCheckBuildLog.ShouldNotContain("This check should have been disabled");
+            projectCheckBuildLog.ShouldContain($"Dismounting check '{friendlyName}'");
 
             // Cleanup
             File.Delete(editorConfigName);

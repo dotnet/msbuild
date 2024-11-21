@@ -206,7 +206,7 @@ internal sealed class ConfigurationProvider : IConfigurationProvider
             Dictionary<string, string> filteredData = FilterDictionaryByKeys($"{BuildCheck_ConfigurationKey}.", config);
             return filteredData;
         });
-        
+
         return editorConfigRules;
     }
 

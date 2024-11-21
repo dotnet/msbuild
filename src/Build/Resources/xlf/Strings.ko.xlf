@@ -299,7 +299,7 @@
       </trans-unit>
       <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
         <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
-        <target state="new">Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</target>
+        <target state="translated">{1} 매개 변수가 있는 "{0}" 메서드에 오버로드가 여러 개 발견되었습니다. 이는 현재 지원되지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
@@ -1201,8 +1201,8 @@ Errors: {3}</source>
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
-        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: 가져온 프로젝트 "{0}"을(를) 찾을 수 없습니다. Import 선언 "{1}"의 식이 올바르고 디스크에 파일이 있는지 확인하세요.</target>
+        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>
+        <target state="translated">MSB4019: 가져온 프로젝트 "{0}"을(를) 찾을 수 없습니다. "{2}"(으)로 평가된 Import 선언 "{1}의 식이 올바르고 파일이 디스크에 있는지 확인합니다.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">

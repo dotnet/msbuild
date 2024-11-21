@@ -589,15 +589,17 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         public static string CleanupFileContents(string projectFileContents)
         {
+            StringBuilder temp = new (projectFileContents);
+
             // Replace reverse-single-quotes with double-quotes.
-            projectFileContents = projectFileContents.Replace("`", "\"");
+            temp.Replace('`', '"');
 
             // Place the correct MSBuild namespace into the <Project> tag.
-            projectFileContents = projectFileContents.Replace("msbuildnamespace", msbuildNamespace);
-            projectFileContents = projectFileContents.Replace("msbuilddefaulttoolsversion", s_msbuildDefaultToolsVersion);
-            projectFileContents = projectFileContents.Replace("msbuildassemblyversion", s_msbuildAssemblyVersion);
+            temp.Replace("msbuildnamespace", msbuildNamespace);
+            temp.Replace("msbuilddefaulttoolsversion", s_msbuildDefaultToolsVersion);
+            temp.Replace("msbuildassemblyversion", s_msbuildAssemblyVersion);
 
-            return projectFileContents;
+            return temp.ToString();
         }
 
         public static string Cleanup(this string aString)
@@ -780,9 +782,9 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectContents">The project file content in string format.</param>
         /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
-        public static MockLogger BuildProjectExpectFailure(string projectContents)
+        public static MockLogger BuildProjectExpectFailure(string projectContents, ITestOutputHelper testOutputHelper = null)
         {
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new MockLogger(testOutputHelper);
             BuildProjectExpectFailure(projectContents, logger);
             return logger;
         }
@@ -1127,7 +1129,7 @@ namespace Microsoft.Build.UnitTests
     {
         public static string Format(this string s, params object[] formatItems)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(s, nameof(s));
+            ErrorUtilities.VerifyThrowArgumentNull(s);
 
             return string.Format(s, formatItems);
         }
