@@ -2,11 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.Shared;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;

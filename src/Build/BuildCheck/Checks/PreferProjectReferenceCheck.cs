@@ -1,13 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
@@ -20,7 +15,7 @@ internal class PreferProjectReferenceCheck : Check
     public static CheckRule SupportedRule = new CheckRule(RuleId, "PreferProjectReference",
         ResourceUtilities.GetResourceString("BuildCheck_BC0104_Title")!,
         ResourceUtilities.GetResourceString("BuildCheck_BC0104_MessageFmt")!,
-        new CheckConfiguration() { RuleId = "BC0104", Severity = CheckResultSeverity.Warning });
+        new CheckConfiguration() { RuleId = RuleId, Severity = CheckResultSeverity.Warning });
 
     public override string FriendlyName => "MSBuild.PreferProjectReferenceCheck";
 
@@ -39,33 +34,39 @@ internal class PreferProjectReferenceCheck : Check
 
     internal override bool IsBuiltIn => true;
 
-    private readonly Dictionary<string, (string, string)> _projectsPerReferencPath = new(MSBuildNameIgnoreCaseComparer.Default);
+    private readonly Dictionary<string, (string, string)> _projectsPerReferencePath = new(MSBuildNameIgnoreCaseComparer.Default);
     private readonly Dictionary<string, string> _projectsPerOutputPath = new(MSBuildNameIgnoreCaseComparer.Default);
-    private readonly HashSet<string> _projects = new(MSBuildNameIgnoreCaseComparer.Default);
+    private readonly HashSet<string> _projectsSeen = new(MSBuildNameIgnoreCaseComparer.Default);
 
     private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
     {
-        // Just check - do not add yet - it'll be done by EvaluatedItemsAction
-        if (_projects.Contains(context.Data.ProjectFilePath))
+        // We want to avoid repeated checking of a same project (as it might be evaluated multiple times)
+        //  for this reason we use a hashset with already seen projects.
+        // We want to do the same prevention for both registered actions: EvaluatedPropertiesAction and EvaluatedItemsAction.
+        //  To avoid the need to have separate hashset for each of those functions - we use a single one and we use the fact that
+        //  both functions are always called after each other (EvaluatedPropertiesAction first, then EvaluatedItemsAction),
+        //  so this function just checks the hashset (not to prevent execution of EvaluatedItemsAction) and EvaluatedItemsAction
+        //  updates the hashset.
+        if (_projectsSeen.Contains(context.Data.ProjectFilePath))
         {
             return;
         }
 
         string? targetPath;
 
-        context.Data.EvaluatedProperties.TryGetValue("TargetPath", out targetPath);
+        context.Data.EvaluatedProperties.TryGetValue(ItemMetadataNames.targetPath, out targetPath);
 
         if (string.IsNullOrEmpty(targetPath))
         {
             return;
         }
 
-        targetPath = RootEvaluatedPath(targetPath, context.Data.ProjectFilePath);
+        targetPath = BuildCheckUtilities.RootEvaluatedPath(targetPath, context.Data.ProjectFilePath);
 
         _projectsPerOutputPath[targetPath] = context.Data.ProjectFilePath;
 
         (string, string) projectProducingOutput;
-        if (_projectsPerReferencPath.TryGetValue(targetPath, out projectProducingOutput))
+        if (_projectsPerReferencePath.TryGetValue(targetPath, out projectProducingOutput))
         {
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,
@@ -79,17 +80,19 @@ internal class PreferProjectReferenceCheck : Check
 
     private void EvaluatedItemsAction(BuildCheckDataContext<EvaluatedItemsCheckData> context)
     {
-        if (!_projects.Add(context.Data.ProjectFilePath))
+        // We want to avoid repeated checking of a same project (as it might be evaluated multiple times)
+        //  for this reason we use a hashset with already seen projects.
+        if (!_projectsSeen.Add(context.Data.ProjectFilePath))
         {
             return;
         }
 
-        foreach (ItemData itemData in context.Data.EnumerateItemsOfType("Reference"))
+        foreach (ItemData itemData in context.Data.EnumerateItemsOfType(ItemNames.reference))
         {
             string evaluatedReferencePath = itemData.EvaluatedInclude;
-            string referenceFullPath = RootEvaluatedPath(evaluatedReferencePath, context.Data.ProjectFilePath);
+            string referenceFullPath = BuildCheckUtilities.RootEvaluatedPath(evaluatedReferencePath, context.Data.ProjectFilePath);
 
-            _projectsPerReferencPath[referenceFullPath] = (context.Data.ProjectFilePath, evaluatedReferencePath);
+            _projectsPerReferencePath[referenceFullPath] = (context.Data.ProjectFilePath, evaluatedReferencePath);
             string? projectReferencedViaOutput;
             if (_projectsPerOutputPath.TryGetValue(referenceFullPath, out projectReferencedViaOutput))
             {
@@ -102,17 +105,5 @@ internal class PreferProjectReferenceCheck : Check
                     evaluatedReferencePath));
             }
         }
-    }
-
-    private static string RootEvaluatedPath(string path, string projectFilePath)
-    {
-        if (!Path.IsPathRooted(path))
-        {
-            path = Path.Combine(Path.GetDirectoryName(projectFilePath)!, path);
-        }
-        // Normalize the path to avoid false negatives due to different path representations.
-        path = FileUtilities.NormalizePath(path)!;
-
-        return path;
     }
 }
