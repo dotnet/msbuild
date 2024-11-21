@@ -10,11 +10,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.BuildCheck.Checks;
+namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 internal class PreferProjectReferenceCheck : Check
 {
     private const string RuleId = "BC0104";
