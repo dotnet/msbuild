@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         public TComponent GetComponent<TComponent>(BuildComponentType type) where TComponent : IBuildComponent
-            => (TComponent) GetComponent(type);
+            => (TComponent)GetComponent(type);
 
         /// <summary>
         /// Register a new build component factory with the host.

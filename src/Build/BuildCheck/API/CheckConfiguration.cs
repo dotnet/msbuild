@@ -47,7 +47,8 @@ public class CheckConfiguration
     /// If all rules within the check are not enabled, it will not be run.
     /// If some rules are enabled and some are not, the check will be run and reports will be post-filtered.
     /// </summary>
-    public bool? IsEnabled {
+    public bool? IsEnabled
+    {
         get
         {
             // Do not consider Default as enabled, because the default severity of the rule could be set to None

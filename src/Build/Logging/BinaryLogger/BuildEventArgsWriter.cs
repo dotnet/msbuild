@@ -323,27 +323,6 @@ namespace Microsoft.Build.Logging
             return BinaryLogRecordKind.ProjectEvaluationStarted;
         }
 
-        private BinaryLogRecordKind Write(BuildCheckResultMessage e)
-        {
-            WriteBuildEventArgsFields(e, writeMessage: true);
-
-            return BinaryLogRecordKind.BuildCheckMessage;
-        }
-
-        private BinaryLogRecordKind Write(BuildCheckResultWarning e)
-        {
-            WriteBuildEventArgsFields(e, writeMessage: true);
-
-            return BinaryLogRecordKind.BuildCheckWarning;
-        }
-
-        private BinaryLogRecordKind Write(BuildCheckResultError e)
-        {
-            WriteBuildEventArgsFields(e, writeMessage: true);
-
-            return BinaryLogRecordKind.BuildCheckError;
-        }
-
         private BinaryLogRecordKind Write(BuildCheckTracingEventArgs e)
         {
             WriteBuildEventArgsFields(e, writeMessage: false);
@@ -537,7 +516,6 @@ namespace Microsoft.Build.Logging
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: return Write(propertyInitialValueSet);
                 case CriticalBuildMessageEventArgs criticalBuildMessage: return Write(criticalBuildMessage);
                 case AssemblyLoadBuildEventArgs assemblyLoad: return Write(assemblyLoad);
-                case BuildCheckResultMessage buildCheckMessage: return Write(buildCheckMessage);
 
                 default: // actual BuildMessageEventArgs
                     WriteMessageFields(e, writeImportance: true);

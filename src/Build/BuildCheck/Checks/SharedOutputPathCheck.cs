@@ -83,7 +83,7 @@ internal sealed class SharedOutputPathCheck : Check
 
         if (_projectsPerOutputPath.TryGetValue(path!, out string? conflictingProject))
         {
-            context.ReportResult(BuildCheckResult.Create(
+            context.ReportResult(BuildCheckResult.CreateBuiltIn(
                 SupportedRule,
                 // Populating precise location tracked via https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=58661732
                 ElementLocation.EmptyLocation,

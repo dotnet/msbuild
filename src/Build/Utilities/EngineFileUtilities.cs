@@ -32,7 +32,9 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        // used by test to reset regexes
+        /// <summary>
+        /// Test only: repopulate lazy wildcard regexes from the environment.
+        /// </summary>
         internal static void CaptureLazyWildcardRegexes()
         {
             s_lazyWildCardExpansionRegexes = PopulateRegexFromEnvironment();

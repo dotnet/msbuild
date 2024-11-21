@@ -357,7 +357,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             BuildRequestDataFlags buildRequestDataFlags = buildRequest.BuildRequestDataFlags;
-            BuildRequestDataFlags buildResultDataFlags = (BuildRequestDataFlags) buildResult.BuildRequestDataFlags;
+            BuildRequestDataFlags buildResultDataFlags = (BuildRequestDataFlags)buildResult.BuildRequestDataFlags;
 
             if ((buildRequestDataFlags & FlagsAffectingBuildResults) != (buildResultDataFlags & FlagsAffectingBuildResults))
             {
