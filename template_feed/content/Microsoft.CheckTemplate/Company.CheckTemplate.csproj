@@ -12,12 +12,14 @@
 
   <ItemGroup>
     <None Include="Company.CheckTemplate.props" Pack="true" PackagePath="build\Company.CheckTemplate.props" />
-    <Content Include="README.md" />
+    <None Include="README.md" />
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Please add IncludeInPackage field to all third party dependencies. See the example below.-->
-    <PackageReference Include="Microsoft.Build" PrivateAssets="all" IncludeInPackage="true" />
+    <PackageReference Include="Microsoft.Build" PrivateAssets="all" />
+
+    <!-- Please add IncludeInPackage field to all third party dependencies. It will help MSBuild to discover them in runtime. -->
+    <!-- <PackageReference Include="DummyDependency" PrivateAssets="all" IncludeInPackage="true"/> -->
   </ItemGroup>
 
   <Target Name="AddNuGetDlls" BeforeTargets="_GetPackageFiles">
