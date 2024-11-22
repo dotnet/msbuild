@@ -5128,6 +5128,16 @@ $(
             {
                 // Setting this env variable allows to track if expander was using reflection for a function invocation.
                 env.SetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection", "1");
+                string reflectionInfoPath = Path.Combine(Directory.GetCurrentDirectory(), "PropertyFunctionsRequiringReflection");
+                try
+                {
+                    // I just got bit by the file already existing due to an error in a previous test run.
+                    File.Delete(reflectionInfoPath);
+                }
+                catch (Exception)
+                {
+                    // we don't care about this.                    
+                }
 
                 var logger = new MockLogger();
                 ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -5142,12 +5152,41 @@ $(
                     loggingContext)
                     .ExpandIntoStringLeaveEscaped(methodInvocationMetadata, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-                string reflectionInfoPath = Path.Combine(Directory.GetCurrentDirectory(), "PropertyFunctionsRequiringReflection");
 
                 // the fast path was successfully resolved without reflection.
                 File.Exists(reflectionInfoPath).ShouldBeFalse();
             }
         }
+
+        [Fact]
+        public void ProfilingTestForMy()
+        {
+            string methodInvocationMetadata = """[InlineData("$([System.String]::new('Hi').Equals('Hello'))")""";
+            using (var env = TestEnvironment.Create())
+            {
+                // Setting this env variable allows to track if expander was using reflection for a function invocation.
+              
+                var logger = new MockLogger();
+                ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+                loggingService.RegisterLogger(logger);
+                var loggingContext = new MockLoggingContext(
+                    loggingService,
+                    new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
+
+                var e = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                    new PropertyDictionary<ProjectPropertyInstance>(),
+                    FileSystems.Default,
+                    loggingContext);
+
+                for (int i = 0; i != 100000; i++)
+                {
+                    e.ExpandIntoStringLeaveEscaped(methodInvocationMetadata, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                }
+
+                // the fast path was successfully resolved without reflection.
+            }
+        }
+
 
         /// <summary>
         /// Determines if ICU mode is enabled.
