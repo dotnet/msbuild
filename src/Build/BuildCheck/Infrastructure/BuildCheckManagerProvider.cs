@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BuildCheck.Checks;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
@@ -148,7 +149,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 new BuiltInCheckFactory([SharedOutputPathCheck.SupportedRule.Id], SharedOutputPathCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<SharedOutputPathCheck>),
                 new BuiltInCheckFactory([PreferProjectReferenceCheck.SupportedRule.Id], PreferProjectReferenceCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<PreferProjectReferenceCheck>),
                 new BuiltInCheckFactory([DoubleWritesCheck.SupportedRule.Id], DoubleWritesCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<DoubleWritesCheck>),
-                new BuiltInCheckFactory([NoEnvironmentVariablePropertyCheck.SupportedRule.Id], NoEnvironmentVariablePropertyCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<NoEnvironmentVariablePropertyCheck>)
+                new BuiltInCheckFactory([NoEnvironmentVariablePropertyCheck.SupportedRule.Id], NoEnvironmentVariablePropertyCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<NoEnvironmentVariablePropertyCheck>),
+                new BuiltInCheckFactory([EmbeddedResourceCheck.SupportedRule.Id], EmbeddedResourceCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<EmbeddedResourceCheck>),
             ],
 
             // BuildCheckDataSource.Execution
