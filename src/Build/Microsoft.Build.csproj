@@ -472,8 +472,8 @@
     <Compile Include="Evaluation\Conditionals\StringExpressionNode.cs" />
     <Compile Include="Evaluation\Conditionals\Token.cs" />
     <Compile Include="Evaluation\EvaluatorMetadataTable.cs" />
-	<Compile Include="Evaluation\WellKnownFunctions\ArgumentParsing.cs" />
-	<Compile Include="Evaluation\WellKnownFunctions\WellKnownFunctions.cs" />
+    <Compile Include="Evaluation\WellKnownFunctions\ArgumentParsing.cs" />
+    <Compile Include="Evaluation\WellKnownFunctions\WellKnownFunctions.cs" />
     <Compile Include="Evaluation\IEvaluatorData.cs" />
     <Compile Include="Evaluation\IItem.cs" />
     <Compile Include="Evaluation\IItemDefinition.cs" />
