@@ -1,26 +1,36 @@
-# Create a VS insertion (DotNet-MSBuild-Trusted -> VS) from a build artifact on main or any servicing branch. 
+# Create a VS insertion (DotNet-MSBuild-Trusted -> VS) from a build artifact on main or any servicing branch.
+# When triggering manually, trigger from main, set MSBuild resource to desired CI run and set corresponding TargetBranch. 
+# To acheive insertion automation, this pipeline defeinition yml has to be on servicing branches and main.
 trigger: none
+pr: none
 name: $(Date:yyyyMMdd).$(Rev:r)
+
+# trigger in 2 modes: 
+# 1. daily main insertion
+# 2. insert as a followup to servicing CI run
+schedules:
+  - cron: '0 3 * * 1-5' # Runs every weekday at 3AM UTC
+    displayName: Daily VS insertion main
+    branches:
+      include:
+        - main
+    always: false # Don't run if there are no code changes
 
 resources:
   pipelines:
   - pipeline: 'MSBuild'
     project: 'DevDiv'
     source: 'MSBuild'
+    branch: main # for daily main scheduled insertion
+    trigger:
+      branches:
+        include: # trigger as a followup to servicing CI
+          - vs*
   repositories:
   - repository: 1ESPipelineTemplates
     type: git
     name: 1ESPipelineTemplates/1ESPipelineTemplates
     ref: refs/tags/release
-
-schedules:
-  - cron: '0 3 * * *'   # Runs every day at 3AM UTC
-    displayName: Daily VS insertion
-    branches:
-      include:
-        - main
-        - vs*
-    always: false # Don't run if there are no code changes
 
 parameters:
   - name: TargetBranch
