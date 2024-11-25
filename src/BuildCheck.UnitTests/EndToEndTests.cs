@@ -100,7 +100,7 @@ public class EndToEndTests : IDisposable
         void AssertHasResourceForCulture(string culture)
         {
             KeyValuePair<string, JsonNode?> resource = output.DepsJsonResources.FirstOrDefault(
-                o => o.Value["locale"].ToString().Equals(culture, StringComparison.Ordinal));
+                o => o.Value?["locale"]?.ToString().Equals(culture, StringComparison.Ordinal) ?? false);
             resource.Equals(default(KeyValuePair<string, JsonNode?>)).ShouldBe(false,
                 $"Resource for culture {culture} was not found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");
 
@@ -109,7 +109,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    readonly record struct EmbedResourceTestOutput(String LogOutput, JsonObject DepsJsonResources);
+    private readonly record struct EmbedResourceTestOutput(String LogOutput, JsonObject DepsJsonResources);
 
     private EmbedResourceTestOutput RunEmbeddedResourceTest(string resourceXmlToAdd, string resourceExtension)
     {
@@ -136,9 +136,13 @@ public class EndToEndTests : IDisposable
         string[] depsFiles = Directory.GetFiles(Path.Combine(workFolder.Path, entryProjectName), $"{entryProjectName}.deps.json", SearchOption.AllDirectories);
         depsFiles.Length.ShouldBe(1);
 
-        JsonNode depsJson = JsonObject.Parse(File.ReadAllText(depsFiles[0]));
+        JsonNode? depsJson = JsonObject.Parse(File.ReadAllText(depsFiles[0]));
 
-        var resources = depsJson["targets"].AsObject().First().Value[$"{referencedProjectName}/1.0.0"]["resources"].AsObject();
+        depsJson.ShouldNotBeNull("Valid deps.json file expected");
+
+        var resources = depsJson!["targets"]?.AsObject().First().Value?[$"{referencedProjectName}/1.0.0"]?["resources"]?.AsObject();
+
+        resources.ShouldNotBeNull("Expected deps.json with 'resources' section");
 
         return new(output, resources);
 
