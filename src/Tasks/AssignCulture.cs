@@ -164,7 +164,7 @@ namespace Microsoft.Build.Tasks
                             !MSBuildNameIgnoreCaseComparer.Default.Equals(existingCulture, info.culture) &&
                             ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
                         {
-                            Log.LogWarningFromResources("AssignCulture.CultureOverwritten",
+                            Log.LogWarningWithCodeFromResources("AssignCulture.CultureOverwritten",
                                 existingCulture, AssignedFiles[i].ItemSpec, info.culture);
                         }
 
