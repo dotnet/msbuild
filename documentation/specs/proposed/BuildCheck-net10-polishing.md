@@ -1,0 +1,68 @@
+# BuildCheck Net10 polishing 
+
+In net 9.0 we delivered initial preview of BuildCheck feature. 
+ * Spec: https://github.com/dotnet/msbuild/blob/main/documentation/specs/BuildCheck/BuildCheck.md
+ * Work track:  https://github.com/orgs/dotnet/projects/373
+
+In addition to that we have item tracking possible improvemnts and extensions of the feature: https://github.com/dotnet/msbuild/issues/10548
+
+This doc focuses on minimal investment path that would still allow driving some adoption of BuildChecks feature and collecting feedback from real life usage.
+
+## Goals and Motivation 
+
+* Making sure the feature can be used in the real life scenarios.
+* Driving adoption.
+
+## Impact 
+
+* MSBuild team has a venue to evangelise best practices for the build.
+* Customers have a tool to formalize and distribute their view of best practices.
+* MSBuild team can be improving builds perf and security via providing new Checks notyfying about problems.
+
+
+## Stakeholders 
+- PM (@baronfel) - as a customer advocate
+- Selected internal partner repo owners (details https://github.com/dotnet/msbuild/issues/10726)
+
+### Successful handover
+- Internal partner teams ideas around BuildChecks collected and considered.
+- Selected internal partner teams are using BuildChecks in their build pipelines.
+- BuildChecks being evangelized externaly, adoption numbers grow up.
+
+## Risks 
+- Performance degradation is unacceptable on real scale project.
+- There are multiple hard to investigate or/and hard to fix bugs identified during inital adoptions.
+- Unsatisfactory specificity or/and sensitivity - leading to diminishing the valua added and endangering the adoption motivation.
+- Low perceived value of best practices enforced by the checks.
+- Confusing diagnostics/documentation leading to lowering the educational value.
+
+
+## Scope
+
+### Goals
+* Running buildchecks on partner repos, identifying and fixing issues
+* Enabling buildchecks on partner repos, providing initial support
+
+### Non-Goals
+
+* Measuring and defining the perf impact, detecting the sources of it
+* Providing additional helpful low-hanging-fruit checks
+
+### Out of scope
+
+* OM/API enriching
+* Configuration and other features improvements
+* VS, VS-Code integrations
+
+## Cost 
+
+The below plan is expected with 0.25 Dev / Month investment (except for Month #2, that will realistically need ~0.5-2 Dev / Month)
+
+## Plan 
+* Month #1 - Running build checks on selected partner repos and identifying issues
+* Month #2 - Resolve identified adoption blockers
+* Month #2 optional - run perf tests and define perf profile for build with Checks.
+* Month #3 - Enabling buildchecks on partner repos, providing initial support
+* Month #4 - Evangelization and driving the adoption in external community
+
+ 
