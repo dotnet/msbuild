@@ -2282,22 +2282,22 @@ elementFormDefault="qualified">
     <!-- ======================== TESTING PROPERTIES ======================== -->
     <xs:element name="UseVSTest" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="UseVSTest" _locComment="" -->Set to 'true' to use VSTest. The default is 'false' which uses MSTest runner. This property is unused when not using MSTest.Sdk.</xs:documentation>
+            <xs:documentation><!-- _locID_text="UseVSTest" _locComment="" -->Set to 'true' to use VSTest. The default is 'false' which uses MSTest runner. This property is only applicable when using MSTest.Sdk.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableMSTestRunner" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMSTestRunner" _locComment="" -->Enables or disables the use of the MSTest runner. The default is true when using MSTest.Sdk, and false otherwise. Supported in MSTest 3.2 and later versions.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMSTestRunner" _locComment="" -->Enables or disables the use of the MSTest runner. The default is 'true' when using MSTest.Sdk, and 'false' otherwise. Supported in MSTest 3.2 and later versions.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="GenerateTestingPlatformEntryPoint" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="GenerateTestingPlatformEntryPoint" _locComment="" -->Set this property to false to disable the automatic generation of entry point for Microsoft.Testing.Platform.</xs:documentation>
+            <xs:documentation><!-- _locID_text="GenerateTestingPlatformEntryPoint" _locComment="" -->Set this property to 'false' to disable the automatic generation of entry point for Microsoft.Testing.Platform.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="GenerateSelfRegisteredExtensions" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="GenerateSelfRegisteredExtensions" _locComment="" -->Set this property to false to disable the automatic generation of 'AddExtensions' calls in 'SelfRegisteredExtensions.AddSelfRegisteredExtensions' which is called by the generated entry point.</xs:documentation>
+            <xs:documentation><!-- _locID_text="GenerateSelfRegisteredExtensions" _locComment="" -->Set this property to 'false' to disable auto registration of extensions through the 'AddSelfRegisteredExtensions'.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="GenerateProgramFile" type="msb:boolean" substitutionGroup="msb:Property">
@@ -2320,17 +2320,17 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsCrashDump" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsCrashDump" _locComment="" -->Enables the Microsoft.Testing.Extensions.CrashDump extension. This is not supported by VSTest, and is enabled if TestingExtensionsProfile is AllMicrosoft.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsCrashDump" _locComment="" -->Enables the Microsoft.Testing.Extensions.CrashDump extension. This is not supported by VSTest, and is enabled if the property 'TestingExtensionsProfile' is set to 'AllMicrosoft'.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsCodeCoverage" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsCodeCoverage" _locComment="" -->Enables the Microsoft.Testing.Extensions.CodeCoverage extension. This is not supported by VSTest, and is enabled if TestingExtensionsProfile is Default or AllMicrosoft.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsCodeCoverage" _locComment="" -->Enables the Microsoft.Testing.Extensions.CodeCoverage extension. This is not supported by VSTest, and is enabled if the property 'TestingExtensionsProfile' is set to 'Default' or 'AllMicrosoft'.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsTrxReport" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsTrxReport" _locComment="" -->Enables the Microsoft.Testing.Extensions.TrxReport extension. This is not supported by VSTest, and is enabled if TestingExtensionsProfile is Default or AllMicrosoft.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsTrxReport" _locComment="" -->Enables the Microsoft.Testing.Extensions.TrxReport extension. This is not supported by VSTest, and is enabled if the property 'TestingExtensionsProfile' is set to 'Default' or 'AllMicrosoft'.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsHangDump" type="msb:boolean" substitutionGroup="msb:Property">
@@ -2350,17 +2350,17 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="EnableAspireTesting" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableAspireTesting" _locComment="" -->Set to true to enable the testing support for .NET Aspire application model. This adds a reference to 'Aspire.Hosting.Testing' NuGet package.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableAspireTesting" _locComment="" -->Enables the testing support for .NET Aspire application model. This adds a reference to 'Aspire.Hosting.Testing' NuGet package.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnablePlaywright" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnablePlaywright" _locComment="" -->Set to true to enable end-to-end testing for modern web apps using Playwright. This adds a reference to 'Microsoft.Playwright.MSTest' NuGet package.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnablePlaywright" _locComment="" -->Enables end-to-end testing for modern web apps using Playwright. This adds a reference to 'Microsoft.Playwright.MSTest' NuGet package.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="IsTestingPlatformApplication" type="msb:bool" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="IsTestingPlatformApplication" _locComment="" -->Set to false in a non-test project that references a test project to avoid error CS8892.</xs:documentation>
+        <xs:documentation><!-- _locID_text="IsTestingPlatformApplication" _locComment="" -->Controls whether the application is a test application. Set it to 'false' in a non-test project that references a test project to avoid error CS8892.</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="TestingPlatformCommandLineArguments" type="msb:StringPropertyType" substitutionGroup="msb:Property">
