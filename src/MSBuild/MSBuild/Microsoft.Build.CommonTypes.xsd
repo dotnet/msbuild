@@ -2302,7 +2302,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="GenerateProgramFile" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="GenerateProgramFile" _locComment="" -->Set this property to false to disable the automatic generation of entry point for VSTest.</xs:documentation>
+            <xs:documentation><!-- _locID_text="GenerateProgramFile" _locComment="" -->Set this property to 'false' to disable the automatic generation of entry point for VSTest.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <!-- Not documenting DisableTestingPlatformServerCapability intentionally for now. We don't expect any one to need it. -->
@@ -2320,32 +2320,32 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsCrashDump" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsCrashDump" _locComment="" -->Enables the Microsoft.Testing.Extensions.CrashDump extension. This is not supported by VSTest, and is enabled if the property 'TestingExtensionsProfile' is set to 'AllMicrosoft'.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsCrashDump" _locComment="" -->Enables the Microsoft.Testing.Extensions.CrashDump extension. This is not supported by VSTest.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsCodeCoverage" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsCodeCoverage" _locComment="" -->Enables the Microsoft.Testing.Extensions.CodeCoverage extension. This is not supported by VSTest, and is enabled if the property 'TestingExtensionsProfile' is set to 'Default' or 'AllMicrosoft'.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsCodeCoverage" _locComment="" -->Enables the Microsoft.Testing.Extensions.CodeCoverage extension. This is not supported by VSTest</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsTrxReport" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsTrxReport" _locComment="" -->Enables the Microsoft.Testing.Extensions.TrxReport extension. This is not supported by VSTest, and is enabled if the property 'TestingExtensionsProfile' is set to 'Default' or 'AllMicrosoft'.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsTrxReport" _locComment="" -->Enables the Microsoft.Testing.Extensions.TrxReport extension. This is not supported by VSTest.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsHangDump" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsHangDump" _locComment="" -->Enables the Microsoft.Testing.Extensions.HangDump extension. This is not supported by VSTest, and is enabled if the property 'TestingExtensionsProfile' is set to 'AllMicrosoft'.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsHangDump" _locComment="" -->Enables the Microsoft.Testing.Extensions.HangDump extension. This is not supported by VSTest.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsHotReload" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsHotReload" _locComment="" -->Enables the Microsoft.Testing.Extensions.HotReload extension (it has restrictive license). This is not supported by VSTest, and is enabled if the property 'TestingExtensionsProfile' is set to 'AllMicrosoft'.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsHotReload" _locComment="" -->Enables the Microsoft.Testing.Extensions.HotReload extension (it has restrictive license). This is not supported by VSTest.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsRetry" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsRetry" _locComment="" -->Enables the Microsoft.Testing.Extensions.Retry extension (it has restrictive license). This is not supported by VSTest, and is enabled if the property 'TestingExtensionsProfile' is set to 'AllMicrosoft'.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsRetry" _locComment="" -->Enables the Microsoft.Testing.Extensions.Retry extension (it has restrictive license). This is not supported by VSTest.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableAspireTesting" type="msb:boolean" substitutionGroup="msb:Property">
