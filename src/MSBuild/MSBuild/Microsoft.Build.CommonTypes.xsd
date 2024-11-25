@@ -2335,17 +2335,17 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsHangDump" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsHangDump" _locComment="" -->Enables the Microsoft.Testing.Extensions.HangDump extension. This is not supported by VSTest, and is enabled if TestingExtensionsProfile is AllMicrosoft.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsHangDump" _locComment="" -->Enables the Microsoft.Testing.Extensions.HangDump extension. This is not supported by VSTest, and is enabled if the property 'TestingExtensionsProfile' is set to 'AllMicrosoft'.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsHotReload" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsHotReload" _locComment="" -->Enables the Microsoft.Testing.Extensions.HotReload extension (it has restrictive license). This is not supported by VSTest, and is enabled if TestingExtensionsProfile is AllMicrosoft.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsHotReload" _locComment="" -->Enables the Microsoft.Testing.Extensions.HotReload extension (it has restrictive license). This is not supported by VSTest, and is enabled if the property 'TestingExtensionsProfile' is set to 'AllMicrosoft'.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableMicrosoftTestingExtensionsRetry" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsRetry" _locComment="" -->Enables the Microsoft.Testing.Extensions.Retry extension (it has restrictive license). This is not supported by VSTest, and is enabled if TestingExtensionsProfile is AllMicrosoft.</xs:documentation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsRetry" _locComment="" -->Enables the Microsoft.Testing.Extensions.Retry extension (it has restrictive license). This is not supported by VSTest, and is enabled if the property 'TestingExtensionsProfile' is set to 'AllMicrosoft'.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="EnableAspireTesting" type="msb:boolean" substitutionGroup="msb:Property">
