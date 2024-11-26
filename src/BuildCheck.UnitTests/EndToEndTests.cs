@@ -587,6 +587,8 @@ public class EndToEndTests : IDisposable
         var creationLog = ExecuteDotnetCommand($"new {templateShortName} -n {projectName} --MicrosoftBuildVersion {BuildCheckUnitTestsConstants.MicrosoftBuildPackageVersion} -o {workFolder.Path} ");
         creationLog.ShouldContain("The template \"MSBuild custom check skeleton project.\" was created successfully.");
         var buildLog = ExecuteDotnetCommand($"build {workFolder.Path}");
+        // investigate ci failure
+        File.ReadAllLines(Path.Combine(workFolder.Path, "nuget.config")).ShouldContain("what's here?");
         buildLog.ShouldContain("Build succeeded.");
         ExecuteDotnetCommand($"new -u {buildCheckTemplatePath}");
     }
