@@ -1,13 +1,17 @@
-# Create a VS insertion (DotNet-MSBuild-Trusted -> VS) from a build artifact on main or any servicing branch.
-# When triggering manually, trigger from main, set MSBuild resource to desired CI run and set corresponding TargetBranch. 
-# To acheive insertion automation, this pipeline defeinition yml has to be on servicing branches and main.
+# Create a VS insertion (DotNet-MSBuild-Trusted -> VS) from a CI run on main or any servicing branch.
+# To achieve insertion automation, this pipeline definition yml has to be on servicing branches and main.
+
+
+# Runs in 3 modes: 
+# 1. daily main insertion from latest main CI.
+#   - can be disabled in the UI by adding a custom schedule for any branch. 
+# 2. trigger insert as a followup to a servicing CI run.
+#   - can be disabled in the UI by adding a custom CI trigger.
+# 3. manual insertion - select manually the TargetBranch and inserted CI run.
 trigger: none
 pr: none
 name: $(Date:yyyyMMdd).$(Rev:r)
 
-# trigger in 2 modes: 
-# 1. daily main insertion
-# 2. insert as a followup to servicing CI run
 schedules:
   - cron: '0 3 * * 1-5' # Runs every weekday at 3AM UTC
     displayName: Daily VS insertion main
@@ -36,7 +40,7 @@ parameters:
   - name: TargetBranch
     default: auto
     type: string
-    displayName: 'Insertion Target Branch (recommended to use `auto`)'
+    displayName: 'Insertion Target Branch (select for manual insertion)'
     values:
       - auto
       - main
@@ -98,6 +102,11 @@ variables:
     value: '$(ArtifactPackagesPath)/Microsoft.NET.StringTools*.nupkg'
   - name: ExternalAPIsPackagePattern
     value: '$(ArtifactPackagesPath)/VS.ExternalAPIs.*.nupkg'
+  # servicing branches until 17.12 also include Microsoft.Build.Engine and Microsoft.Build.Conversion.Core
+  - name: EngineIncludedProps
+    value: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Conversion.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Engine=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
+  - name: NoEngineProps
+    value: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
 
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
@@ -196,6 +205,14 @@ extends:
               $packageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
               Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$packageVersion'"
               Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($packageVersion)"
+              if ("$(InsertTargetBranch)" -in @("vs17.0", "vs17.3", "vs17.6", "vs17.8", "vs17.10", "vs17.11", "vs17.12"))
+              {
+                  Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($EngineIncludedProps)"
+              }
+              else
+              {
+                  Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($NoEngineProps)"
+              }
         - task: 1ES.PublishNuGet@1
           displayName: 'Push MSBuild CoreXT packages'
           inputs:
@@ -231,11 +248,7 @@ extends:
             TeamEmail: $(TeamEmail)
             TargetBranch: $(InsertTargetBranch)
             InsertionPayloadName: $(InsertPayloadName)
-            # servicing branches until 17.12 also include Microsoft.Build.Engine and Microsoft.Build.Conversion.Core
-            ${{ if or(eq(variables['Build.SourceBranchName'], 'vs17.0'),  eq(variables['Build.SourceBranchName'], 'vs17.3'), eq(variables['Build.SourceBranchName'], 'vs17.6'),  eq(variables['Build.SourceBranchName'], 'vs17.8'), eq(variables['Build.SourceBranchName'], 'vs17.10'), eq(variables['Build.SourceBranchName'], 'vs17.11'), eq(variables['Build.SourceBranchName'], 'vs17.12')) }}: 
-              PackagePropsValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Conversion.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Engine=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
-            ${{ else }}:
-              PackagePropsValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
+            PackagePropsValues: $(InsertPackagePropsValues)
             InsertionDescription: $(InsertDescription)
             ComponentJsonValues: $(InsertJsonValues)
             DefaultConfigValues: $(InsertConfigValues)
