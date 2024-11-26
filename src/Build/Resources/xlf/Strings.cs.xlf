@@ -173,12 +173,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0104_MessageFmt">
         <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
-        <target state="new">Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</target>
+        <target state="translated">Projekt {0} odkazuje na výstup projektu {1}. Odkazovaná cesta: {2}. Místo toho by se měla použít položka ProjectReference.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0104_Title">
         <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
-        <target state="new">A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</target>
+        <target state="translated">Na projekt by se nemělo odkazovat přes Reference na jeho výstup, ale přímo přes ProjectReference.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">

@@ -173,12 +173,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0104_MessageFmt">
         <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
-        <target state="new">Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</target>
+        <target state="translated">项目 {0} 引用项目 {1} 的输出。引用的路径: {2}。应转而使用 ProjectReference。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0104_Title">
         <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
-        <target state="new">A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</target>
+        <target state="translated">不得通过 "Reference" 引用项目的输出来引用项目，而是应通过 "ProjectReference" 直接引用。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
