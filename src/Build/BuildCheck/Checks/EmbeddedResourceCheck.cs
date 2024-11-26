@@ -79,13 +79,14 @@ internal class EmbeddedResourceCheck : Check
                     ElementLocation.EmptyLocation,
                     Path.GetFileName(context.Data.ProjectFilePath),
                     evaluatedEmbedItem,
-                    GetMiddleExtension(evaluatedEmbedItem)));
+                    GetSupposedCultureExtension(evaluatedEmbedItem)));
             }
         }
     }
 
-    private static bool HasDoubleExtension(string s, char extensionSeparator = '.')
+    private static bool HasDoubleExtension(string s)
     {
+        const char extensionSeparator = '.';
         int firstIndex;
         return
             !string.IsNullOrEmpty(s) &&
@@ -97,18 +98,17 @@ internal class EmbeddedResourceCheck : Check
             s.IndexOf(extensionSeparator, firstIndex + 2) > -1;
     }
 
-    private string GetMiddleExtension(string s, char extensionSeparator = '.')
+    /// <summary>
+    /// Returns the extension that is supposed to implicitly denote the culture.
+    /// This is mimicking the behavior of Microsoft.Build.Tasks.Culture.GetItemCultureInfo
+    /// </summary>
+    private string GetSupposedCultureExtension(string s)
     {
-        int firstIndex = s.IndexOf(extensionSeparator);
-        if (firstIndex < 0 || firstIndex + 2 > s.Length)
+        string extension = Path.GetExtension(Path.GetFileNameWithoutExtension(s));
+        if (extension.Length > 1)
         {
-            return string.Empty;
+            extension = extension.Substring(1);
         }
-        int secondIndex = s.IndexOf(extensionSeparator, firstIndex + 2);
-        if (secondIndex < firstIndex)
-        {
-            return string.Empty;
-        }
-        return s.Substring(firstIndex + 1, secondIndex - firstIndex - 1);
+        return extension;
     }
 }
