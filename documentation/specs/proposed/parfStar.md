@@ -1,72 +1,38 @@
-# One Pager Template
-*The objective of this one-pager is to provide clear and concise information about a feature or project to foster inclusion and collaboration by enabling anyone who is interested to learn the essential information, such as the project's goals, motivation, impact, and risks. The points and questions in each section are illustrative, they are not intended as a definite list of questions to be answered.*
-
-## Description
- - Short summary of the feature or effort.
-
-New features and fixes for .NET 10 investment.
- - Running it nicely [1 dev week]
- - Report is working [2 dev weeks]
- - Performance tests for new features - making it easier to make these / docs. [3 dev days per feature]
-   - BuildCheck perf tests
- - Check Stability of perf tests / fixing those - so there is not a lot of noise around tests [2 dev weeks]
-   - Should be done through multiple iterations on a test
-   - Report needs to be reworked
- - We can maybe have more `msbuild.exe`. but not VS api [1 dev week]
- - Timeboxed collect and act on feedback from our team. Includes perf investigations that needs to be conducted. [1-2 dev months depending on dev feedback / requests]
- - Add more tests: check logger performance with different verbosities, buildCheck. [1 dev week]
-
-possible directions for perfStar / next versions:
- - More measurements. Like, dotnet counters tool. [3 dev weeks]
- - Trace collection, when something is on automatically turn it on. [2-3 dev weeks]
- - Report improvements: 
-   - Comparison between different versions that is not main [2 dev weeks]
-   - Automatic detection of perf issues. Don't have someone look at the report to have news about regression. [1 dev month]
- - Run VS API tests? There are some problems that we would need for VS specific tests [4 dev weeks - optional feature]
+# PerfStar
+PerfStar is a performance tracking and investigation tool for MSBuild. PerfStar infrastructure captures performance measurements of main MSBuild branch on schedule and allows us to request experimental runs and collect performance of the new changes. The first version of this project is being finalized, with some fixes necessary to run it automatically and according to prerequisites.
 
 ## Goals and Motivation
- - What are we trying to achieve and why? 
-Go fast
+MSBuild currently does not have a lot of performance data outside of Visual Studio performance tracking, which has a lot of variables that are beyond the team's control. PerfStar enables us to measure our performance without interference of elements that the team does not own. As such, we can measure the performance of in-development features and how it will impact build times, as well as have concrete numbers when working on performance improvement tasks.
 
 ## Impact
-Guidance: This document should not be an OKR. Let's keep the impact general here.
-Questions to consider:
- - What is the impact? 
- - Who will benefit from the feature?
- - How does success look like?
- - Are there any metrics or key results that could be quantified? 
-
-We can be sure to go faster
-Enable MSBuild team to track performance, identify low hanging fruits to improve performance, and watch new feature peformance.
-
-## Stakeholders
-Questions to consider:
- - Who are the stakeholders? 
- - For projects with concrete stakeholders, once the project is done how does a successful handover to the stakeholder look like? 
-Us.
-
+Perfstar's impact is focused on the team. We will be able to track performance with concrete numbers. Because of that the team will be able to take more informed decisions about taking performance improvement work, as well as future and implementation of new features.
 
 ## Risks
-Questions to consider:
- - Will the effort or feature cause breaking changes for existing consumers? 
- - Are there any unknowns that might derail the effort? 
- - Are there any dependencies we don’t have control over? 
- - Is there a hard deadline that needs to be met? 
- - What threatens completion of the feature? 
- - What is the impact of failing to deliver the feature?
-
-Dependencies: Crank, which is owned by ASP.NET team. This can cause problems with the machine set-up since they are responsible for this. 
-
-Deadlines:No hard deadlines. Just nice to have for the team.
-Threat: Randomization for the team. Security issues that come up.
-
-Impact of delivery failure. Less numbers in performance improvement for MSBuild features.
-
-
-## Cost
-Questions to consider:
- - What is the estimated cost of the end-to-end effort? 
- - How accurate is the cost? 
+The risks associated with our dependencies is about Crank, which is owned by the ASP.NET team and we use it to help us with machine setup to run the performance tests. 
 
 ## Plan
- - High-level milestones, with estimate effort for tasks. 
+Investiment for .NET 10:
+ 1. Making PerfStar execute automatically the way the design doc indicates
+    - Around 1 dev week.
+2. The PowerBI reporting is working and updating the new information
+   - Around 2 dev weeks.
+3. New performance tests for new features, and writting docs on how to write those tests. Next feature planned for tests: BuildCheck.
+   - Around 3 dev days per feature.
+4. Analyze stability of performance tests, and fix any noise found. This will be done through multiple iterations of the same test in the same machine, as well as updating the PowerBI report to handle the new data.
+   - Around 2 dev weeks.
+5. Add more tests using `msbuild.exe` for build instead of `dotnet build`.
+   - Around 1 dev week.
+6. Timeboxed collection of feedback from our team, as well as performance investigations that can derive from those.
+   - 1 - 2 dev month depending on feedback and requests for improvement from the team.
+7. Add more test cases. For example, build time with different verbosity levels.
+   - Around 1 dev week.
+
+There are more improvements form PerfStar, but these are not established for .NET 10 yet as they depend on the team's feedback to PerfStar.
+1. Add more measurements, like dotnet counter tool.
+   - Around 3 dev weeks.
+2. Trace collection when specific features are turned on for the test.
+   - Around 2 - 3 dev weeks.
+3. Report improvements:
+   - Compare performance numbers between two different iterations that are not from `main` branch. Around 2 dev weeks.
+   - Automatic detection of performance issues, so we don't need to check the reports to see regressions. Around 1 dev month.
+   - Run MSBuild API tests, so we can check performance of calls relating to Visual Studio builds. Around 1 dev month.
