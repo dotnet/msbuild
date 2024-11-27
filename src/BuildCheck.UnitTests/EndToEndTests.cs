@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.Build.Experimental.BuildCheck;
@@ -61,6 +62,112 @@ public class EndToEndTests : IDisposable
         Regex.Matches(output, "BC0201: .* Property").Count.ShouldBe(2);
         Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
         Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(2);
+    }
+
+    // <EmbeddedResource Update = "Resource1.cs.resx" />
+
+    [Theory]
+    [InlineData(
+        "cs",
+        "cs",
+        """<EmbeddedResource Update = "Resource1.cs.resx" />""",
+        "warning BC0105: .* 'Resource1\\.cs\\.resx'")]
+    // Following tests are prepared after the EmbeddedCulture handling fix is merged: https://github.com/dotnet/msbuild/pull/11000
+    ////[InlineData(
+    ////    "xyz",
+    ////    "xyz",
+    ////    """<EmbeddedResource Update = "Resource1.xyz.resx" />""",
+    ////    "warning BC0105: .* 'Resource1\\.xyz\\.resx'")]
+    ////[InlineData(
+    ////    "xyz",
+    ////    "zyx",
+    ////    """<EmbeddedResource Update = "Resource1.zyx.resx" Culture="xyz" />""",
+    ////    "")]
+    public void EmbeddedResourceCheckTest(string culture, string resourceExtension, string resourceElement, string expectedDiagnostic)
+    {
+        EmbedResourceTestOutput output = RunEmbeddedResourceTest(resourceElement, resourceExtension);
+
+        // each finding should be found just once - but reported twice, due to summary
+        if (!string.IsNullOrEmpty(expectedDiagnostic))
+        {
+            Regex.Matches(output.LogOutput, expectedDiagnostic).Count.ShouldBe(2);
+        }
+
+        AssertHasResourceForCulture("en");
+        AssertHasResourceForCulture(culture);
+        output.DepsJsonResources.Count.ShouldBe(2);
+
+        void AssertHasResourceForCulture(string culture)
+        {
+            KeyValuePair<string, JsonNode?> resource = output.DepsJsonResources.FirstOrDefault(
+                o => o.Value?["locale"]?.ToString().Equals(culture, StringComparison.Ordinal) ?? false);
+            resource.Equals(default(KeyValuePair<string, JsonNode?>)).ShouldBe(false,
+                $"Resource for culture {culture} was not found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");
+
+            resource.Key.ShouldBeEquivalentTo($"{culture}/ReferencedProject.resources.dll",
+                $"Unexpected resource for culture {culture} was found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");
+        }
+    }
+
+    private readonly record struct EmbedResourceTestOutput(String LogOutput, JsonObject DepsJsonResources);
+
+    private EmbedResourceTestOutput RunEmbeddedResourceTest(string resourceXmlToAdd, string resourceExtension)
+    {
+        string testAssetsFolderName = "EmbeddedResourceTest";
+        const string entryProjectName = "EntryProject";
+        const string referencedProjectName = "ReferencedProject";
+        const string templateToReplace = "###EmbeddedResourceToAdd";
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+
+        CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
+        ReplaceStringInFile(Path.Combine(workFolder.Path, referencedProjectName, $"{referencedProjectName}.csproj"),
+            templateToReplace, resourceXmlToAdd);
+        File.Copy(
+            Path.Combine(workFolder.Path, referencedProjectName, "Resource1.resx"),
+            Path.Combine(workFolder.Path, referencedProjectName, $"Resource1.{resourceExtension}.resx"));
+
+        _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue();
+
+        string[] depsFiles = Directory.GetFiles(Path.Combine(workFolder.Path, entryProjectName), $"{entryProjectName}.deps.json", SearchOption.AllDirectories);
+        depsFiles.Length.ShouldBe(1);
+
+        JsonNode? depsJson = JsonObject.Parse(File.ReadAllText(depsFiles[0]));
+
+        depsJson.ShouldNotBeNull("Valid deps.json file expected");
+
+        var resources = depsJson!["targets"]?.AsObject().First().Value?[$"{referencedProjectName}/1.0.0"]?["resources"]?.AsObject();
+
+        resources.ShouldNotBeNull("Expected deps.json with 'resources' section");
+
+        return new(output, resources);
+
+        void ReplaceStringInFile(string filePath, string original, string replacement)
+        {
+            File.Exists(filePath).ShouldBeTrue($"File {filePath} expected to exist.");
+            string text = File.ReadAllText(filePath);
+            text = text.Replace(original, replacement);
+            File.WriteAllText(filePath, text);
+        }
+    }
+
+    private static void CopyFilesRecursively(string sourcePath, string targetPath)
+    {
+        // First Create all directories
+        foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+        {
+            Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+        }
+
+        // Then copy all the files & Replaces any files with the same name
+        foreach (string newPath in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
+        {
+            File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+        }
     }
 
 
@@ -187,12 +294,14 @@ public class EndToEndTests : IDisposable
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
             output.ShouldContain("BC0103");
+            output.ShouldContain("BC0104");
         }
         else
         {
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
             output.ShouldNotContain("BC0103");
+            output.ShouldNotContain("BC0104");
         }
     }
 
@@ -234,7 +343,7 @@ public class EndToEndTests : IDisposable
         // The conflicting outputs warning appears - but only if check was requested
         if (checkRequested)
         {
-            output.ShouldContain("BC0101");
+            output.ShouldContain(FormatExpectedDiagOutput("BC0101", BC0101Severity));
             output.ShouldContain("BC0102");
             output.ShouldContain("BC0103");
         }
@@ -243,6 +352,12 @@ public class EndToEndTests : IDisposable
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
             output.ShouldNotContain("BC0103");
+        }
+
+        string FormatExpectedDiagOutput(string code, string severity)
+        {
+            string msbuildSeverity = severity.Equals("suggestion") ? "message" : severity;
+            return $"{msbuildSeverity} {code}: https://aka.ms/buildcheck/codes#{code}";
         }
     }
 
@@ -487,9 +602,9 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
-    [InlineData("CheckCandidate", "X01234", "error", "error X01234")]
-    [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234")]
+    [Theory]
+    [InlineData("CheckCandidate", "X01234", "error", "error X01234: http://samplelink.com/X01234")]
+    [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234: http://samplelink.com/X01234")]
     public void CustomCheckTest_WithEditorConfig(string checkCandidate, string ruleId, string severity, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())
@@ -632,7 +747,6 @@ public class EndToEndTests : IDisposable
         _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
 
         _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
-        _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
 
         // Needed for testing check BC0103
         _env.SetEnvironmentVariable("TestFromTarget", "FromTarget");

@@ -129,19 +129,32 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private static T Construct<T>() where T : new() => new();
 
-        private static readonly (string[] ruleIds, bool defaultEnablement, CheckFactory factory)[][] s_builtInFactoriesPerDataSource =
+        /// <summary>
+        /// The builtin check factory definition
+        /// </summary>
+        /// <param name="RuleIds">The rule ids that the check is able to emit.</param>
+        /// <param name="DefaultEnablement">Is it enabled by default?</param>
+        /// <param name="Factory">Factory method to create the check.</param>
+        internal readonly record struct BuiltInCheckFactory(
+            string[] RuleIds,
+            bool DefaultEnablement,
+            CheckFactory Factory);
+
+        private static readonly BuiltInCheckFactory[][] s_builtInFactoriesPerDataSource =
         [
 
             // BuildCheckDataSource.EventArgs
             [
-                ([SharedOutputPathCheck.SupportedRule.Id], SharedOutputPathCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<SharedOutputPathCheck>),
-                ([DoubleWritesCheck.SupportedRule.Id], DoubleWritesCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<DoubleWritesCheck>),
-                ([NoEnvironmentVariablePropertyCheck.SupportedRule.Id], NoEnvironmentVariablePropertyCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<NoEnvironmentVariablePropertyCheck>)
+                new BuiltInCheckFactory([SharedOutputPathCheck.SupportedRule.Id], SharedOutputPathCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<SharedOutputPathCheck>),
+                new BuiltInCheckFactory([PreferProjectReferenceCheck.SupportedRule.Id], PreferProjectReferenceCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<PreferProjectReferenceCheck>),
+                new BuiltInCheckFactory([DoubleWritesCheck.SupportedRule.Id], DoubleWritesCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<DoubleWritesCheck>),
+                new BuiltInCheckFactory([NoEnvironmentVariablePropertyCheck.SupportedRule.Id], NoEnvironmentVariablePropertyCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<NoEnvironmentVariablePropertyCheck>),
+                new BuiltInCheckFactory([EmbeddedResourceCheck.SupportedRule.Id], EmbeddedResourceCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<EmbeddedResourceCheck>),
             ],
 
             // BuildCheckDataSource.Execution
             [
-                (PropertiesUsageCheck.SupportedRulesList.Select(r => r.Id).ToArray(),
+                new BuiltInCheckFactory(PropertiesUsageCheck.SupportedRulesList.Select(r => r.Id).ToArray(),
                     PropertiesUsageCheck.SupportedRulesList.Any(r => r.DefaultConfiguration.IsEnabled ?? false),
                     Construct<PropertiesUsageCheck>)
             ]
@@ -150,19 +163,19 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// <summary>
         /// For tests only. TODO: Remove when check acquisition is done.
         /// </summary>
-        internal static (string[] ruleIds, bool defaultEnablement, CheckFactory factory)[][]? s_testFactoriesPerDataSource;
+        internal static BuiltInCheckFactory[][]? s_testFactoriesPerDataSource;
 
         private void RegisterBuiltInChecks(BuildCheckDataSource buildCheckDataSource)
         {
             _checkRegistry.AddRange(
                 s_builtInFactoriesPerDataSource[(int)buildCheckDataSource]
-                    .Select(v => new CheckFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
+                    .Select(v => new CheckFactoryContext(v.Factory, v.RuleIds, v.DefaultEnablement)));
 
             if (s_testFactoriesPerDataSource is not null)
             {
                 _checkRegistry.AddRange(
                     s_testFactoriesPerDataSource[(int)buildCheckDataSource]
-                        .Select(v => new CheckFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
+                        .Select(v => new CheckFactoryContext(v.Factory, v.RuleIds, v.DefaultEnablement)));
             }
         }
 

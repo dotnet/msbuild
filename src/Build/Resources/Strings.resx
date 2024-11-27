@@ -2168,6 +2168,20 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>'{0}' with value: '{1}'</value>
 	<comment>Will be used as a parameter {0} in previous message.</comment>
   </data>
+  <data name="BuildCheck_BC0104_Title" xml:space="preserve">
+    <value>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</value>
+  </data>
+  <data name="BuildCheck_BC0104_MessageFmt" xml:space="preserve">
+    <value>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</value>
+  </data>
+  <data name="BuildCheck_BC0105_Title" xml:space="preserve">
+    <value>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</value>
+	<comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0105_MessageFmt" xml:space="preserve">
+    <value>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</value>
+	<comment>Terms in quotes are not to be translated.</comment>
+  </data>
   <data name="BuildCheck_BC0201_Title" xml:space="preserve">
     <value>A property that is accessed should be declared first.</value>
   </data>
