@@ -133,7 +133,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithTaskElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</source>
-        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</target>
+        <target state="translated">MSB3752: атрибут "{0}" элемента &lt;{1}&gt; в задаче "{2}" установлен, но пуст. Предоставьте правильное значение атрибута.</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">

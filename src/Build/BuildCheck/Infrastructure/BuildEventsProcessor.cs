@@ -77,13 +77,17 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 evaluationFinishedEventArgs.ProjectFile!, /*unused*/
                 null, /*unused*/null, _cache, false /*Not explicitly loaded - unused*/);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             ParsedItemsCheckData itemsCheckData = new(
+#pragma warning restore CS0618 // Type or member is obsolete
                 evaluationFinishedEventArgs.ProjectFile!,
                 evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
                 new ItemsHolder(xml.Items, xml.ItemGroups));
 
             _buildCheckCentralContext.RunParsedItemsActions(itemsCheckData, checkContext, ReportResult);
         }
+
+        _buildCheckCentralContext.RunEvaluatedItemsActions(new EvaluatedItemsCheckData(evaluationFinishedEventArgs), checkContext, ReportResult);
     }
 
     /// <summary>

@@ -4888,37 +4888,28 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress314573_VeryLongPaths()
         {
-            string veryLongPath = @"C:\" + new String('a', 260);
-            string veryLongFile = veryLongPath + "\\A.dll";
+            string veryLongPath = @"C:\" + new string('a', 260);
+            string veryLongFile = veryLongPath + @"\A.dll";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine(_output);
+            MockEngine e = new (_output);
             t.BuildEngine = e;
 
-            t.Assemblies = new ITaskItem[]
-            {
-                new TaskItem("A")                    // Resolved by HintPath
-            };
+            t.Assemblies = [new TaskItem("A")]; // Resolved by HintPath
             t.Assemblies[0].SetMetadata(
                 "HintPath",
                 veryLongFile);
 
-            t.SearchPaths = new string[]
-            {
-                "{HintPathFromItem}"
-            };
+            t.SearchPaths = ["{HintPathFromItem}"];
 
-            t.AssemblyFiles = new ITaskItem[]
-            {
-                new TaskItem(veryLongFile)            // Resolved as File Reference
-            };
+            t.AssemblyFiles = [new TaskItem(veryLongFile)]; // Resolved as File Reference
 
-            Execute(t);
-
-            Assert.Equal(1, e.Warnings); // "One warning expected in this scenario." // Couldn't find dependencies for {HintPathFromItem}-resolved item.
-            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Empty(t.ResolvedFiles);  // This test used to have 1 here. But that was because the mock GetAssemblyName was not accurately throwing an exception for non-existent files.
+            e.ShouldSatisfyAllConditions(
+                () => Execute(t).ShouldBeTrue(),
+                () => e.Warnings.ShouldBe(1, "One warning expected in this scenario."), // Couldn't find dependencies for {HintPathFromItem}-resolved item.
+                () => e.Errors.ShouldBe(0, "No errors expected in this scenario."),
+                () => t.ResolvedFiles.ShouldBeEmpty());
         }
 
         /// <summary>
