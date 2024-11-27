@@ -1137,7 +1137,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Name="Run"
       DependsOnTargets="$(RunDependsOn)">
 
-    <MSBuildInternalMessage Condition="'$(TargetExt)'!='.exe'" ResouceName="CommonSdk.RunTargetDependsOnMessage" Severity="Error" FormatArguments="$(TargetPath)"/>
+    <MSBuildInternalMessage Condition="'$(TargetExt)'!='.exe'" ResourceName="CommonSdk.RunTargetDependsOnMessage" Severity="Error" FormatArguments="$(TargetPath)"/>
     <Exec Command="$(TargetPath) $(StartArguments)" WorkingDirectory="$(OutDir)" Condition=" '$(StartWorkingDirectory)' == '' "/>
     <Exec Command="$(TargetPath) $(StartArguments)" WorkingDirectory="$(StartWorkingDirectory)" Condition=" '$(StartWorkingDirectory)' != '' "/>
 
@@ -1965,7 +1965,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Returns="@(_ThisProjectBuildMetadata)">
 
     <MSBuildInternalMessage Condition="'$(IsCrossTargetingBuild)' == 'true'"
-      ResouceName="CommonSdk.CrossTargetingGetTargetFrameworks"
+      ResourceName="CommonSdk.CrossTargetingGetTargetFrameworks"
       Severity="Error"
     />
 
@@ -3271,10 +3271,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <RespectAlreadyAssignedItemCulture Condition="'$(RespectAlreadyAssignedItemCulture)' == ''">false</RespectAlreadyAssignedItemCulture>
     </PropertyGroup>
 
-    <MSBuildInternalMessage Condition="'@(ResxWithNoCulture)'!=''" ResouceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9000;ResxWithNoCulture" />
-    <MSBuildInternalMessage Condition="'@(ResxWithCulture)'!=''" ResouceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9001;ResxWithCulture" />
-    <MSBuildInternalMessage Condition="'@(NonResxWithCulture)'!=''" ResouceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9002;NonResxWithCulture" />
-    <MSBuildInternalMessage Condition="'@(NonResxWithNoCulture)'!=''" ResouceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9003;NonResxWithNoCulture" />
+    <MSBuildInternalMessage Condition="'@(ResxWithNoCulture)'!=''" ResourceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9000;ResxWithNoCulture" />
+    <MSBuildInternalMessage Condition="'@(ResxWithCulture)'!=''" ResourceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9001;ResxWithCulture" />
+    <MSBuildInternalMessage Condition="'@(NonResxWithCulture)'!=''" ResourceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9002;NonResxWithCulture" />
+    <MSBuildInternalMessage Condition="'@(NonResxWithNoCulture)'!=''" ResourceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9003;NonResxWithNoCulture" />
 
     <ItemGroup>
       <_LicxFile Include="@(EmbeddedResource)" Condition="'%(Extension)'=='.licx'"/>
@@ -3650,12 +3650,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <MSBuildInternalMessage
       Condition="'@(ManifestResourceWithNoCulture)'!='' and '%(ManifestResourceWithNoCulture.EmittedForCompatibilityOnly)'==''"
-      ResouceName="CommonSdk.ManifestResourceWithNoCultureWarning"
+      ResourceName="CommonSdk.ManifestResourceWithNoCultureWarning"
       Severity="Warning"
       FormatArguments="MSB9004;ManifestResourceWithNoCulture;false;Resx" />
     <MSBuildInternalMessage
       Condition="'@(ManifestNonResxWithNoCultureOnDisk)'!='' and '%(ManifestNonResxWithNoCultureOnDisk.EmittedForCompatibilityOnly)'==''"
-      ResouceName="CommonSdk.ManifestResourceWithNoCultureWarning"
+      ResourceName="CommonSdk.ManifestResourceWithNoCultureWarning"
       Severity="Warning"
       FormatArguments="MSB9005;ManifestNonResxWithNoCultureOnDisk;false;Non-Resx" />
 
@@ -4009,12 +4009,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <MSBuildInternalMessage
       Condition="'@(ManifestResourceWithCulture)'!='' and '%(ManifestResourceWithCulture.EmittedForCompatibilityOnly)'==''"
-      ResouceName="CommonSdk.ManifestResourceWithNoCultureWarning"
+      ResourceName="CommonSdk.ManifestResourceWithNoCultureWarning"
       Severity="Warning"
-      FormatArguments="MSB9006;ManifestResourceWithNoCulture;true;Resx" />
+      FormatArguments="MSB9006;ManifestResourceWithCulture;true;Resx" />
     <MSBuildInternalMessage
       Condition="'@(ManifestNonResxWithCultureOnDisk)'!='' and '%(ManifestNonResxWithCultureOnDisk.EmittedForCompatibilityOnly)'==''"
-      ResouceName="CommonSdk.ManifestResourceWithNoCultureWarning"
+      ResourceName="CommonSdk.ManifestResourceWithNoCultureWarning"
       Severity="Warning"
       FormatArguments="MSB9007;ManifestNonResxWithCultureOnDisk;true;Non-Resx" />
 
@@ -6010,7 +6010,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="_DeploymentUnpublishable">
 
-    <MSBuildInternalMessage ResouceName="CommonSdk.DeploymentUnpublishable" Severity="Message"/>
+    <MSBuildInternalMessage ResourceName="CommonSdk.DeploymentUnpublishable" Severity="Message"/>
 
   </Target>
 
@@ -6024,8 +6024,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target
       Name="SetGenerateManifests">
 
-    <MSBuildInternalMessage Condition="'$(OutputType)'!='winexe' and '$(OutputType)'!='exe' and '$(OutputType)'!='appcontainerexe'" ResouceName="CommonSdk.GenerateManifestsOnlyForExe" Severity="Error"/>
-    <MSBuildInternalMessage Condition="'$(_DeploymentSignClickOnceManifests)'=='true' and '$(ManifestCertificateThumbprint)'=='' and '$(ManifestKeyFile)'==''" ResouceName="CommonSdk.SigningKeyRequired" Severity="Error"/>
+    <MSBuildInternalMessage Condition="'$(OutputType)'!='winexe' and '$(OutputType)'!='exe' and '$(OutputType)'!='appcontainerexe'" ResourceName="CommonSdk.GenerateManifestsOnlyForExe" Severity="Error"/>
+    <MSBuildInternalMessage Condition="'$(_DeploymentSignClickOnceManifests)'=='true' and '$(ManifestCertificateThumbprint)'=='' and '$(ManifestKeyFile)'==''" ResourceName="CommonSdk.SigningKeyRequired" Severity="Error"/>
 
     <PropertyGroup>
       <GenerateClickOnceManifests>true</GenerateClickOnceManifests>
