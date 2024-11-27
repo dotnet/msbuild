@@ -2,15 +2,19 @@
 
 Report codes are chosen to conform to suggested guidelines. Those guidelines are currently in revew: https://github.com/dotnet/msbuild/pull/10088
 
-| Diagnostic&nbsp;Code | Default Severity | Reason |
-|:-----|-------|----------|
-| [BC0101](#bc0101---shared-output-path) | Warning | Shared output path. |
-| [BC0102](#bc0102---double-writes) | Warning | Double writes. |
-| [BC0103](#bc0103---used-environment-variable) | Suggestion | Used environment variable. |
-| [BC0201](#bc0201---usage-of-undefined-property) | Warning | Usage of undefined property. |
-| [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Property first declared after it was used. |
-| [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Property declared but never used. |
+| Diagnostic&nbsp;Code | Default Severity | Default Scope | Available from SDK | Reason |
+|:-----|-------|-------|-------|----------|
+| [BC0101](#bc0101---shared-output-path) | Warning | N/A | 9.0.100 | Shared output path. |
+| [BC0102](#bc0102---double-writes) | Warning | N/A | 9.0.100 | Double writes. |
+| [BC0103](#bc0103---used-environment-variable) | Suggestion | Project | 9.0.100 | Used environment variable. |
+| [BC0104](#bc0104---projectreference-is-preferred-to-reference) | Warning | N/A | 9.0.200 | ProjectReference is preferred to Reference. |
+| [BC0105](#bc0105---embeddedresource-should-specify-culture-metadata) | Warning | N/A | 9.0.200 | Culture specific EmbeddedResource should specify Culture metadata. |
+| [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
+| [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
+| [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Project | 9.0.100 | Property declared but never used. |
 
+
+Note: What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
 
 To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
 
@@ -47,6 +51,32 @@ Using environment variables as a data source in MSBuild is problematic and can l
 Relying on environment variables introduces variability and unpredictability, as their values can change between builds or environments.
 
 This practice can result in inconsistent build outcomes and makes debugging difficult, since environment variables are external to project files and build scripts. To ensure consistent and reproducible builds, avoid using environment variables. Instead, explicitly pass properties using the /p option, which offers better control and traceability.
+
+<a name="BC0104"></a>
+## BC0104 - ProjectReference is preferred to Reference.
+
+"A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'."
+
+It is not recommended to reference project outputs. Such practice leads to losing the explicit dependency between the projects. Build then might not order the projects properly, which can lead to randomly missing reference and hence undeterministic build.
+
+If you need to achieve more advanced dependency behavior - check [Controlling Dependencies Behavior](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Controlling-Dependencies-Behavior.md) document. If neither suits your needs - then you might need to disable this check for your build or for particular projects.
+
+<a name="BC0105"></a>
+## BC0105 - EmbeddedResource should specify Culture metadata.
+
+"It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation."
+
+[`EmbeddedResource` item](https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-items#embeddedresource) has a `Culture` and `WithCulture` metadata that are strongly recommended to be used - to prevent MSBuild to need to 'guess' the culture from the file extension - which may be dependent on the current OS/Runtime available cultures and hence it can lead to nondeterministic build.
+
+Examples:
+ * `<EmbeddedResource Update = "Resource1.xyz.resx" Culture="xyz" />` This indicates the culture to the MSBuild engine and the culture will be respected. No diagnostic (warning) is issued ([see below for exceptions](#RespectAlreadyAssignedItemCulture)).
+ * `<EmbeddedResource Update = "Resource1.xyz.resx" WithCulture="false" />` This indicates to the MSBuild engine that the file is culture neutral and the extension should not be treated as culture indicator. No diagnostic (warning)  is issued.
+ * `<EmbeddedResource Update = "Resource1.xyz.resx" />` MSBuild infers the culture from the extra extension ('xyz') and if it is known to [`System.Globalization.CultureInfo`](https://learn.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo) it is being used as the resource culture. The `BC0105` diagnostic is emitted (if BuildCheck is enabled and BC0105 is not disabled)
+ * `<EmbeddedResource Update = "Resource1.resx" />` MSBuild infers that the resource is culture neutral. No diagnostic (warning)  is issued.
+
+<a name="RespectAlreadyAssignedItemCulture"></a>
+**Note:** In Full Framework version of MSBuild (msbuild.exe, Visual Studio) and in .NET SDK prior 9.0 a global or project specific property `RespectAlreadyAssignedItemCulture` needs to be set to `'true'` in order for the explicit `Culture` metadata to be respected. Otherwise the explicit culture will be overwritten by MSBuild engine and if different from the extension - a `MSB3002` warning is emitted (`"MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set."`)
+ 
 
 <a name="BC0201"></a>
 ## BC0201 - Usage of undefined property.
