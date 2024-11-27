@@ -182,14 +182,14 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// BuildingInsideVisualStudio is true, the resourceName is CommonSdk.InvalidConfigurationTextWhenBuildingInsideVisualStudio, otherwise is CommonSdk.InvalidConfigurationTextWhenBuildingOutsideVisualStudio
         /// </summary>
         /// <param name="expectedResourceName"></param>
-        /// <param name="SkipInvalidConfigurations"></param>
-        /// <param name="BuildingInsideVisualStudio"></param>
+        /// <param name="skipInvalidConfigurations"></param>
+        /// <param name="buildingInsideVisualStudio"></param>
         [Theory]
         [InlineData("CommonSdk.InvalidConfigurationTextWhenBuildingInsideVisualStudio", false, true)]
         [InlineData("CommonSdk.InvalidConfigurationTextWhenBuildingOutsideVisualStudio", true, false)]
         [InlineData("CommonSdk.InvalidConfigurationTextWhenBuildingOutsideVisualStudio", false, false)]
         [InlineData("CommonSdk.InvalidConfigurationTextWhenBuildingInsideVisualStudio", true, true)]
-        public void CheckForInvalidConfigurationAndPlatformTargetMessage(string expectedResourceName, bool SkipInvalidConfigurations, bool BuildingInsideVisualStudio)
+        public void CheckForInvalidConfigurationAndPlatformTargetMessage(string expectedResourceName, bool skipInvalidConfigurations, bool buildingInsideVisualStudio)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
@@ -202,8 +202,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     <Import Project="$(MSBuildBinPath)\Microsoft.Common.props" />
 
                     <PropertyGroup>
-                         <SkipInvalidConfigurations>{SkipInvalidConfigurations}</SkipInvalidConfigurations>
-                         <BuildingInsideVisualStudio>{BuildingInsideVisualStudio}</BuildingInsideVisualStudio>
+                         <SkipInvalidConfigurations>{skipInvalidConfigurations}</SkipInvalidConfigurations>
+                         <BuildingInsideVisualStudio>{buildingInsideVisualStudio}</BuildingInsideVisualStudio>
                          <BaseOutputPathWasSpecified>false</BaseOutputPathWasSpecified>
                          <_OutputPathWasMissing>true</_OutputPathWasMissing>
                          <Configuration>{configuration}</Configuration>
@@ -223,7 +223,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 string expectedBuildMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(expectedResourceName, fileName, configuration, platform);
 
                 project.Build(logger);
-                if (SkipInvalidConfigurations)
+                if (skipInvalidConfigurations)
                 {
                     logger.Warnings[0].RawMessage.ShouldBe(expectedBuildMessage);
                 }
