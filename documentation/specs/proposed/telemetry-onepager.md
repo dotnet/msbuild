@@ -22,7 +22,7 @@ Goal: To have relevant data in that is actionable for decisions about developmen
 - SourceBuild – consulting and approving usage of OpenTelemetry 
 - MSBuild PM @baronfel – representing customers who want to monitor their builds locally
 
-### Successful handover of V1
+### V1 Successful handover
 - Shipped to Visual Studio
 - Data queryable in Kusto
 - Dashboards
@@ -35,7 +35,7 @@ Goal: To have relevant data in that is actionable for decisions about developmen
 - storage costs 
 - Potential additional costs and delays due to compliance with SourceBuild/VS data.
 
-## Cost 
+## V1 Cost 
 5 months of .5 developer's effort ~ 50 dev days (dd)
 
 20-30dd JanPro OTel design + implementation, 10-15dd JanK design + implementation, 5-10dd Mariana/someone getting available data in order/"data science"/dashboards + external documentation
