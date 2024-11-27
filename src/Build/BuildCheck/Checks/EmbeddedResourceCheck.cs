@@ -5,18 +5,17 @@ using System.IO;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.BuildCheck.Checks;
+namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 internal class EmbeddedResourceCheck : Check
 {
     private const string RuleId = "BC0105";
     public static CheckRule SupportedRule = new CheckRule(RuleId, "EmbeddedResourceCulture",
         ResourceUtilities.GetResourceString("BuildCheck_BC0105_Title")!,
         ResourceUtilities.GetResourceString("BuildCheck_BC0105_MessageFmt")!,
-        new CheckConfiguration() { RuleId = "BC0105", Severity = CheckResultSeverity.Warning });
+        new CheckConfiguration() { RuleId = RuleId, Severity = CheckResultSeverity.Warning });
 
     public override string FriendlyName => "MSBuild.EmbeddedResourceCulture";
 
@@ -104,6 +103,8 @@ internal class EmbeddedResourceCheck : Check
     /// </summary>
     private string GetSupposedCultureExtension(string s)
     {
+        // If the item is defined as "Strings.en-US.resx", then we want to arrive to 'en-US'
+
         string extension = Path.GetExtension(Path.GetFileNameWithoutExtension(s));
         if (extension.Length > 1)
         {

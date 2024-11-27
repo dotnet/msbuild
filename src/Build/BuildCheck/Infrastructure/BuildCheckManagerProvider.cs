@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Checks;
 using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;

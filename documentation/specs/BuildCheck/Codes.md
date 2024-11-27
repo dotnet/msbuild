@@ -4,15 +4,17 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 
 | Diagnostic&nbsp;Code | Default Severity | Default Scope | Available from SDK | Reason |
 |:-----|-------|-------|-------|----------|
-| [BC0101](#bc0101---shared-output-path) | Warning | | 9.0.100 | Shared output path. |
-| [BC0102](#bc0102---double-writes) | Warning | | 9.0.100 | Double writes. |
+| [BC0101](#bc0101---shared-output-path) | Warning | N/A | 9.0.100 | Shared output path. |
+| [BC0102](#bc0102---double-writes) | Warning | N/A | 9.0.100 | Double writes. |
 | [BC0103](#bc0103---used-environment-variable) | Suggestion | Project | 9.0.100 | Used environment variable. |
-| [BC0104](#bc0104---projectreference-is-preferred-to-reference) | Warning | | 9.0.200 | ProjectReference is preferred to Reference. |
-| [BC0105](#bc0105---embeddedresource-should-specify-culture-metadata) | Warning | | 9.0.200 | Culture specific EmbeddedResource should specify Culture metadata. |
+| [BC0104](#bc0104---projectreference-is-preferred-to-reference) | Warning | N/A | 9.0.200 | ProjectReference is preferred to Reference. |
+| [BC0105](#bc0105---embeddedresource-should-specify-culture-metadata) | Warning | N/A | 9.0.200 | Culture specific EmbeddedResource should specify Culture metadata. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
 | [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Project | 9.0.100 | Property declared but never used. |
 
+
+Note: What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
 
 To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
 
