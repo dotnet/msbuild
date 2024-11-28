@@ -149,6 +149,13 @@
   <data name="AssignCulture.Comment">
     <value>Culture of "{0}" was assigned to file "{1}".</value>
   </data>
+  <data name="AssignCulture.CultureOverwritten">
+    <value>MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</value>
+    <comment>
+	{StrBegin="MSB3002: "}
+	'RespectAlreadyAssignedItemCulture' should not be translated
+	</comment>
+  </data>
   <!--
         The AxImp message bucket is: MSB3656 - MSB3660.
 

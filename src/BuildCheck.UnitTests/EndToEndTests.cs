@@ -64,54 +64,102 @@ public class EndToEndTests : IDisposable
         Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(2);
     }
 
-    // <EmbeddedResource Update = "Resource1.cs.resx" />
-
     [Theory]
+    // The culture is not set explicitly, but the extension is a known culture
+    //  - a buildcheck warning will occur, but otherwise works
     [InlineData(
         "cs",
         "cs",
         """<EmbeddedResource Update = "Resource1.cs.resx" />""",
-        "warning BC0105: .* 'Resource1\\.cs\\.resx'")]
-    // Following tests are prepared after the EmbeddedCulture handling fix is merged: https://github.com/dotnet/msbuild/pull/11000
-    ////[InlineData(
-    ////    "xyz",
-    ////    "xyz",
-    ////    """<EmbeddedResource Update = "Resource1.xyz.resx" />""",
-    ////    "warning BC0105: .* 'Resource1\\.xyz\\.resx'")]
-    ////[InlineData(
-    ////    "xyz",
-    ////    "zyx",
-    ////    """<EmbeddedResource Update = "Resource1.zyx.resx" Culture="xyz" />""",
-    ////    "")]
-    public void EmbeddedResourceCheckTest(string culture, string resourceExtension, string resourceElement, string expectedDiagnostic)
+        false,
+        "warning BC0105: .* 'Resource1\\.cs\\.resx'",
+        true)]
+    // The culture is not set explicitly, and is not a known culture
+    //  - a buildcheck warning will occur, and resource is not recognized as culture specific - won't be copied around
+    [InlineData(
+        "xyz",
+        "xyz",
+        """<EmbeddedResource Update = "Resource1.xyz.resx" />""",
+        false,
+        "warning BC0105: .* 'Resource1\\.xyz\\.resx'",
+        false)]
+    // The culture is explicitly set, and it is not a known culture, but $(RespectAlreadyAssignedItemCulture) is set to true
+    //  - no warning will occur, and resource is recognized as culture specific - and copied around
+    [InlineData(
+        "xyz",
+        "xyz",
+        """<EmbeddedResource Update = "Resource1.xyz.resx" Culture="xyz" />""",
+        true,
+        "",
+        true)]
+    // The culture is explicitly set, and it is not a known culture and $(RespectAlreadyAssignedItemCulture) is not set to true
+    //  - so culture is overwritten, and resource is not recognized as culture specific - won't be copied around
+    [InlineData(
+        "xyz",
+        "zyx",
+        """<EmbeddedResource Update = "Resource1.zyx.resx" Culture="xyz" />""",
+        false,
+        "warning MSB3002: Explicitly set culture .* was overwritten",
+        false)]
+    // The culture is explicitly set, and it is not a known culture, but $(RespectAlreadyAssignedItemCulture) is set to true
+    //  - no warning will occur, and resource is recognized as culture specific - and copied around
+    [InlineData(
+        "xyz",
+        "zyx",
+        """<EmbeddedResource Update = "Resource1.zyx.resx" Culture="xyz" />""",
+        true,
+        "",
+        true)]
+    public void EmbeddedResourceCheckTest(
+        string culture,
+        string resourceExtension,
+        string resourceElement,
+        bool respectAssignedCulturePropSet,
+        string expectedDiagnostic,
+        bool resourceExpectedToBeRecognizedAsSatelite)
     {
-        EmbedResourceTestOutput output = RunEmbeddedResourceTest(resourceElement, resourceExtension);
+        EmbedResourceTestOutput output = RunEmbeddedResourceTest(resourceElement, resourceExtension, respectAssignedCulturePropSet);
 
+        int expectedWarningsCount = 0;
         // each finding should be found just once - but reported twice, due to summary
         if (!string.IsNullOrEmpty(expectedDiagnostic))
         {
             Regex.Matches(output.LogOutput, expectedDiagnostic).Count.ShouldBe(2);
+            expectedWarningsCount = 1;
         }
 
-        AssertHasResourceForCulture("en");
-        AssertHasResourceForCulture(culture);
-        output.DepsJsonResources.Count.ShouldBe(2);
+        AssertHasResourceForCulture("en", true);
+        AssertHasResourceForCulture(culture, resourceExpectedToBeRecognizedAsSatelite);
+        output.DepsJsonResources.Count.ShouldBe(resourceExpectedToBeRecognizedAsSatelite ? 2 : 1);
+        GetWarningsCount(output.LogOutput).ShouldBe(expectedWarningsCount);
 
-        void AssertHasResourceForCulture(string culture)
+        void AssertHasResourceForCulture(string culture, bool isResourceExpected)
         {
             KeyValuePair<string, JsonNode?> resource = output.DepsJsonResources.FirstOrDefault(
                 o => o.Value?["locale"]?.ToString().Equals(culture, StringComparison.Ordinal) ?? false);
-            resource.Equals(default(KeyValuePair<string, JsonNode?>)).ShouldBe(false,
-                $"Resource for culture {culture} was not found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");
+            // if not found - the KVP will be default
+            resource.Equals(default(KeyValuePair<string, JsonNode?>)).ShouldBe(!isResourceExpected,
+                $"Resource for culture {culture} was {(isResourceExpected ? "not " : "")}found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");
 
-            resource.Key.ShouldBeEquivalentTo($"{culture}/ReferencedProject.resources.dll",
-                $"Unexpected resource for culture {culture} was found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");
+            if (isResourceExpected)
+            {
+                resource.Key.ShouldBeEquivalentTo($"{culture}/ReferencedProject.resources.dll",
+                    $"Unexpected resource for culture {culture} was found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");
+            }
+        }
+
+        int GetWarningsCount(string output)
+        {
+            Regex regex = new Regex(@"(\d+) Warning\(s\)");
+            Match match = regex.Match(output);
+            match.Success.ShouldBeTrue("Expected Warnings section not found in the build output.");
+            return int.Parse(match.Groups[1].Value);
         }
     }
 
     private readonly record struct EmbedResourceTestOutput(String LogOutput, JsonObject DepsJsonResources);
 
-    private EmbedResourceTestOutput RunEmbeddedResourceTest(string resourceXmlToAdd, string resourceExtension)
+    private EmbedResourceTestOutput RunEmbeddedResourceTest(string resourceXmlToAdd, string resourceExtension, bool respectCulture)
     {
         string testAssetsFolderName = "EmbeddedResourceTest";
         const string entryProjectName = "EntryProject";
@@ -128,7 +176,7 @@ public class EndToEndTests : IDisposable
 
         _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore", out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();
