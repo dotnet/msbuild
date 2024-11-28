@@ -629,8 +629,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private void PropagateImport(int evaluationId, string originalProjectFile, string newImportedProjectFile)
         {
             if (_deferredProjectEvalIdToImportedProjects.TryGetValue(evaluationId,
-                    out HashSet<string>? importedProjects)
-                && importedProjects.Contains(originalProjectFile))
+                    out HashSet<string>? importedProjects))
             {
                 importedProjects.Add(newImportedProjectFile);
             }
