@@ -160,9 +160,9 @@ namespace Microsoft.Build.Tasks
                             ConversionUtilities.ValidBooleanFalse(AssignedFiles[i].GetMetadata(ItemMetadataNames.withCulture)));
 
                         // The culture was explicitly specified, but not opted in via 'RespectAlreadyAssignedItemCulture' and different will be used
-                        if (!string.IsNullOrEmpty(existingCulture) &&
-                            !MSBuildNameIgnoreCaseComparer.Default.Equals(existingCulture, info.culture) &&
-                            ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14) &&
+                            !string.IsNullOrEmpty(existingCulture) &&
+                            !MSBuildNameIgnoreCaseComparer.Default.Equals(existingCulture, info.culture))
                         {
                             Log.LogWarningWithCodeFromResources("AssignCulture.CultureOverwritten",
                                 existingCulture, AssignedFiles[i].ItemSpec, info.culture);

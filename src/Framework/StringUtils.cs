@@ -41,7 +41,7 @@ internal static class StringUtils
     /// <returns>The original string (if no occurrences found) or a new string, with last instance of <paramref name="substring"/> removed.</returns>
     internal static string RemoveLastInstanceOf(this string fromString, string substring, StringComparison comparison = StringComparison.Ordinal)
     {
-        int lastOccurrenceIndex = fromString.LastIndexOf(substring, StringComparison.Ordinal);
+        int lastOccurrenceIndex = fromString.LastIndexOf(substring, comparison);
 
         if (lastOccurrenceIndex != -1)
         {
