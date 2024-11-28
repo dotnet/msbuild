@@ -37,6 +37,14 @@
         <target state="translated">При синтаксическом анализе атрибута newVersion произошла ошибка. {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="AssignCulture.CultureOverwritten">
+        <source>MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</source>
+        <target state="new">MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</target>
+        <note>
+	{StrBegin="MSB3002: "}
+	'RespectAlreadyAssignedItemCulture' should not be translated
+	</note>
+      </trans-unit>
       <trans-unit id="AssignProjectConfiguration.IllegalMappingString">
         <source>The platform mapping "{0}" in the platform mapping list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "foo=bar;foo2=bar2".</source>
         <target state="translated">Неправильный формат сопоставления платформы "{0}" в списке сопоставлений платформ "{1}".  Данные должны передаваться только в виде списка, разделенного точкой с запятой, строковых констант, разделенных знаком "=". Например, "foo=bar;foo2=bar2".</target>
