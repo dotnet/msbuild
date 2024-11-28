@@ -166,6 +166,11 @@ namespace Microsoft.Build.Tasks
                         {
                             Log.LogWarningWithCodeFromResources("AssignCulture.CultureOverwritten",
                                 existingCulture, AssignedFiles[i].ItemSpec, info.culture);
+                            // Remove the culture if it's not recognized
+                            if (string.IsNullOrEmpty(info.culture))
+                            {
+                                AssignedFiles[i].RemoveMetadata(ItemMetadataNames.culture);
+                            }
                         }
 
                         if (!string.IsNullOrEmpty(info.culture))
