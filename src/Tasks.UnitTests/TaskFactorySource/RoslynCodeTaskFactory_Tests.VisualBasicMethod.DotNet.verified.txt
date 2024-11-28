@@ -17,7 +17,9 @@ Imports System.Collections
 Imports System.Collections.Generic
 Imports System.IO
 Imports System.Linq
+Imports System.Memory
 Imports System.Text
+Imports System.Text.Json
 
 Namespace InlineCode
     

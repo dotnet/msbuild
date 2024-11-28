@@ -16,6 +16,8 @@ namespace InlineCode {
     using System.IO;
     using System.Linq;
     using System.Text;
+    using System.Text.Json;
+    using System.Memory;
     
     
     public class MyInlineTask : Microsoft.Build.Utilities.Task {
