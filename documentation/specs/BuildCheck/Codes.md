@@ -9,6 +9,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0103](#bc0103---used-environment-variable) | Suggestion | Project | 9.0.100 | Used environment variable. |
 | [BC0104](#bc0104---projectreference-is-preferred-to-reference) | Warning | N/A | 9.0.200 | ProjectReference is preferred to Reference. |
 | [BC0105](#bc0105---embeddedresource-should-specify-culture-metadata) | Warning | N/A | 9.0.200 | Culture specific EmbeddedResource should specify Culture metadata. |
+| [BC0106](#bc0106---copytooutputdirectoryalways-should-be-avoided) | Warning | N/A | 9.0.200 | CopyToOutputDirectory='Always' should be avoided. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
 | [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Project | 9.0.100 | Property declared but never used. |
@@ -76,7 +77,36 @@ Examples:
 
 <a name="RespectAlreadyAssignedItemCulture"></a>
 **Note:** In Full Framework version of MSBuild (msbuild.exe, Visual Studio) and in .NET SDK prior 9.0 a global or project specific property `RespectAlreadyAssignedItemCulture` needs to be set to `'true'` in order for the explicit `Culture` metadata to be respected. Otherwise the explicit culture will be overwritten by MSBuild engine and if different from the extension - a `MSB3002` warning is emitted (`"MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set."`)
- 
+
+<a name="BC0106"></a>
+## BC0106 - CopyToOutputDirectory='Always' should be avoided.
+
+"It is recommended to avoid specifying 'Always' value of metadata 'CopyToOutputDirectory' as this can lead to unnecessary build performance degradation. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying."
+
+[`CopyToOutputDirectory` metadata](https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-items) has following recognized values:
+ * `Never`
+ * `Always`
+ * `PreserveNewest`
+ * `IfDifferent`
+
+The `Always` is not recommended - as it causes the files to be copied always - even if unnecesary.
+
+This might have been historicaly needed to workaround cases where the destination file could have changed between builds (e.g. a case of asset that can be changed during test run, but needs to be rest by the build). A `IfDifferent` value is currently offered to efficiently cover such scenario.
+
+In order to avoid a need for change all copy metada, it's now possible to specify `SkipUnchangedFilesOnCopyAlways` property with a value of `'True'` in order to flip all copy behavior of `CopyToOutputDirectory=Always` to behave identicaly as `CopyToOutputDirectory=IfDifferent`:
+
+```xml
+<PropertyGroup>
+    <SkipUnchangedFilesOnCopyAlways>True</SkipUnchangedFilesOnCopyAlways>
+</PropertyGroup>
+
+<ItemGroup>
+    <None Include="File1.txt" CopyToOutputDirectory="Always" />
+    <None Include="File2.txt" CopyToOutputDirectory="IfDifferent" />
+</ItemGroup>
+```
+
+Both items in above example are treated same and no BC0106 diagnostic is issued.
 
 <a name="BC0201"></a>
 ## BC0201 - Usage of undefined property.

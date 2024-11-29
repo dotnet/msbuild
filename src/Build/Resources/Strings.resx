@@ -2176,19 +2176,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="BuildCheck_BC0105_Title" xml:space="preserve">
     <value>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</value>
-	<comment>Terms in quotes are not to be translated.</comment>
+	  <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0105_MessageFmt" xml:space="preserve">
     <value>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</value>
-	<comment>Terms in quotes are not to be translated.</comment>
+	  <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0106_Title" xml:space="preserve">
     <value>It is recommended to avoid specifying 'Always' value of metadata 'CopyToOutputDirectory' as this can lead to unnecessary build performance degradation. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</value>
-	<comment>Terms in quotes are not to be translated.</comment>
+	  <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0106_MessageFmt" xml:space="preserve">
-    <value>Project {0} specifies '{0}' item '{1}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</value>
-	<comment>Terms in quotes are not to be translated.</comment>
+    <value>Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</value>
+	  <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0201_Title" xml:space="preserve">
     <value>A property that is accessed should be declared first.</value>
