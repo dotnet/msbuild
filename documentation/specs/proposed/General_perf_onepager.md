@@ -13,9 +13,9 @@ This document does not cover specific performance improvements, but rather outli
 
 ## Impact
     
-    - Opening project/solution, branch switching and other operations using MSBuild code in VS should be less impacted by the MSBuild.
-    - Overall build times should be reduced. 
-    - Even a small improvement can save a lot of time and computing resources across all builds done daily worldwide.
+ - Opening project/solution, branch switching and other operations using MSBuild code in VS should be less impacted by the MSBuild.
+ - Overall build times should be reduced. 
+ - Even a small improvement can save a lot of time and computing resources across all builds done daily worldwide.
 
 ## Stakeholders
 
