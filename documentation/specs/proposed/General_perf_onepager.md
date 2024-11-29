@@ -26,7 +26,7 @@ This document does not cover specific performance improvements, but rather outli
 
     - Performance improvements might not be as significant as expected.
     - We can break existing functionality while making changes.
-    - We can thow away some ideas due to technical limitations or complexity/improvements ratio.
+    - Some ideas and performance measurement findings might need to be skipped due to technical limitations or complexity/improvements ratio.
 
 ## Cost
 
