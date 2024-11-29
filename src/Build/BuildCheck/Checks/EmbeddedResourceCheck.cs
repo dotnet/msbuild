@@ -43,7 +43,7 @@ internal class EmbeddedResourceCheck : Check
             return;
         }
 
-        foreach (ItemData itemData in context.Data.EnumerateItemsOfType("EmbeddedResource"))
+        foreach (ItemData itemData in context.Data.EnumerateItemsOfType(ItemNames.EmbeddedResource))
         {
             string evaluatedEmbedItem = itemData.EvaluatedInclude;
             bool hasDoubleExtension = HasDoubleExtension(evaluatedEmbedItem);

@@ -87,7 +87,7 @@ internal class PreferProjectReferenceCheck : Check
             return;
         }
 
-        foreach (ItemData itemData in context.Data.EnumerateItemsOfType(ItemNames.reference))
+        foreach (ItemData itemData in context.Data.EnumerateItemsOfType(ItemNames.Reference))
         {
             string evaluatedReferencePath = itemData.EvaluatedInclude;
             string referenceFullPath = BuildCheckUtilities.RootEvaluatedPath(evaluatedReferencePath, context.Data.ProjectFilePath);
