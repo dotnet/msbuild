@@ -5156,7 +5156,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_CopyToOutputDirectoryTransitiveItems   KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='Always'"/>
       <_CopyToOutputDirectoryTransitiveItems   KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest'"/>
-        <_CopyToOutputDirectoryTransitiveItems   KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='IfDifferent'"/>
+      <_CopyToOutputDirectoryTransitiveItems   KeepDuplicates=" '$(_GCTODIKeepDuplicates)' != 'false' " KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(_AllChildProjectItemsWithTargetPath->'%(FullPath)')" Condition="'%(_AllChildProjectItemsWithTargetPath.CopyToOutputDirectory)'=='IfDifferent'"/>
     </ItemGroup>
 
     <!-- Remove items which we will never again use - they just sit around taking up memory otherwise -->
@@ -5168,7 +5168,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='Always' AND '%(ContentWithTargetPath.MSBuildSourceProjectFile)'!=''"/>
       <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='PreserveNewest' AND '%(ContentWithTargetPath.MSBuildSourceProjectFile)'!=''"/>
-        <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='IfDifferent' AND '%(ContentWithTargetPath.MSBuildSourceProjectFile)'!=''"/>
+      <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(ContentWithTargetPath->'%(FullPath)')" Condition="'%(ContentWithTargetPath.CopyToOutputDirectory)'=='IfDifferent' AND '%(ContentWithTargetPath.MSBuildSourceProjectFile)'!=''"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -5213,7 +5213,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='Always' AND '%(EmbeddedResource.MSBuildSourceProjectFile)'==''"/>
       <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='PreserveNewest' AND '%(EmbeddedResource.MSBuildSourceProjectFile)'==''"/>
-        <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='IfDifferent' AND '%(EmbeddedResource.MSBuildSourceProjectFile)'==''"/>
+      <_ThisProjectItemsToCopyToOutputDirectory       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='IfDifferent' AND '%(EmbeddedResource.MSBuildSourceProjectFile)'==''"/>
     </ItemGroup>
 
     <ItemGroup>
