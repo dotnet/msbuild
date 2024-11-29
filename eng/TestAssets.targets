@@ -18,7 +18,7 @@
   </Target>
   
   <Target Name="MSBuildPackagesForTests"
-          AfterTargets="BootstrapFull"
+          AfterTargets="$(BootstrapDependsOn)"
           DependsOnTargets="GetSourceFilesForPacking"
           Inputs="@(ProjectsToPack);@(SourceFilesForPacking)"
           Outputs="$(ArtifactsNonShippingPackagesDir)\Microsoft.Build.$(Version).nupkg;$(ArtifactsNonShippingPackagesDir)\Microsoft.Build.Framework.$(Version).nupkg;$(ArtifactsNonShippingPackagesDir)\Microsoft.NET.StringTools.$(Version).nupkg">
