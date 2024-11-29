@@ -17,6 +17,7 @@ Goal: To have relevant data in that is actionable for decisions about developmen
 
 ## Stakeholders 
 - @Jan(Krivanek|Provaznik) design and implementation of telemetry via VS OTel. @ - using data we already have from SDK.
+- @maridematte - documenting + dashboarding currently existing datapoints.
 - MSBuild Team+Management – want insights from builds in VS
 - VS OpenTelemetry team – provide support for VS OpenTelemetry collector library, want successful adoption 
 - SourceBuild – consulting and approving usage of OpenTelemetry 
@@ -25,7 +26,7 @@ Goal: To have relevant data in that is actionable for decisions about developmen
 ### V1 Successful handover
 - Shipped to Visual Studio
 - Data queryable in Kusto
-- Dashboards
+- Dashboards (even for pre-existing data - not introduced by this work)
 - Customers are able to monitor with OpenTelemetry collector of choice (can be cut)
 
 ## Risks 
@@ -46,15 +47,17 @@ It’s an exploratory project for VS OpenTelemetry, we'll be their first OSS com
 ## Plan 
 ### V1 scope
 - Collected data point definition
-- Instrumented data points
+- Instrumented data points (as an example how the instrumentation and collection works)
 - Telemetry sent to VS Telemetry in acceptable quantity
 - Dashboards for collected data
-- hooking of customer's telemetry collection 
+- Hooking of customer's telemetry collection
+- Documenting and leveraging pre-existing telemetry
 
 #### Out of scope
 - Unifying telemetry for SDK MSBuild and MSBuild.exe/VS MSBuild.
-- using MSBuild server
-- distributed tracing
+- Thorough instrumentation of MSBuild
+- Using MSBuild server
+- Distributed tracing
 
 ### Detailed cost
 - Prototyping the libraries/mechanism for collecting telemetry data (month 1) 10dd
