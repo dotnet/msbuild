@@ -33,7 +33,7 @@ This document does not cover specific performance improvements, but rather outli
 Performance improvements are a long-term investment. We need to balance the cost of the improvements with the expected benefits.
 We will need to invest time in collecting data, analyzing the data, and implementing improvements.
 
-Our goal in this scope is to find small and medium size opprotunities. Bigger functionalities such as evaluation caching and RAR caching are described in separate documents.
+Our goal in this scope is to find small and medium size opprotunities (Achievable within a single sprint with 1-2 dev investment). Bigger functionalities such as evaluation caching and RAR caching are described in separate documents.
 
 ## Plan
     
