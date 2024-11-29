@@ -46,4 +46,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\Shared\IsExternalInit.cs" />
+  </ItemGroup>
+
 </Project>

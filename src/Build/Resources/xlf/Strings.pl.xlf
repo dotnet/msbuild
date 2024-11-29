@@ -173,13 +173,23 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0104_MessageFmt">
         <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
-        <target state="new">Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</target>
+        <target state="translated">Projekt {0} odwołuje się do danych wyjściowych projektu {1}. Ścieżka, do której istnieje odwołanie: {2}. Zamiast tego należy użyć elementu ProjectReference.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0104_Title">
         <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
-        <target state="new">A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</target>
+        <target state="translated">Do projektu nie należy odwoływać się poprzez opcję „Odwołanie” do jego danych wyjściowych, ale raczej bezpośrednio poprzez opcję „Odwołanie do projektu”.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_MessageFmt">
+        <source>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</source>
+        <target state="translated">Projekt {0} określa element „EmbeddedResource” „{1}”, który może mieć rozszerzenie oznaczające kulturę („{2}”), ale nie określono jawnych metadanych „Culture” ani „WithCulture=false”.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_Title">
+        <source>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</source>
+        <target state="translated">Zaleca się określenie wyraźnych metadanych „Culture” lub metadanych „WithCulture=false” z elementem „EmbeddedResource” w celu uniknięcia błędnego lub niedeterministycznego oszacowania kultury.</target>
+        <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>

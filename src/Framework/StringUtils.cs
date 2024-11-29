@@ -31,4 +31,24 @@ internal static class StringUtils
         string randomBase64String = Convert.ToBase64String(randomBytes).Replace('/', '_');
         return randomBase64String.Substring(0, length);
     }
+
+    /// <summary>
+    /// Removes last occurence of <paramref name="substring"/> from <paramref name="fromString"/>, if present.
+    /// </summary>
+    /// <param name="fromString">String to be altered.</param>
+    /// <param name="substring">String to be removed.</param>
+    /// <param name="comparison">The comparison to use for finding.</param>
+    /// <returns>The original string (if no occurrences found) or a new string, with last instance of <paramref name="substring"/> removed.</returns>
+    internal static string RemoveLastInstanceOf(this string fromString, string substring, StringComparison comparison = StringComparison.Ordinal)
+    {
+        int lastOccurrenceIndex = fromString.LastIndexOf(substring, comparison);
+
+        if (lastOccurrenceIndex != -1)
+        {
+            fromString = fromString.Substring(0, lastOccurrenceIndex) +
+                         fromString.Substring(lastOccurrenceIndex + substring.Length);
+        }
+
+        return fromString;
+    }
 }
