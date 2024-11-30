@@ -281,7 +281,14 @@ public class EndToEndTests : IDisposable
         var output2 = RunCopyToOutputTest(false, skipUnchangedDuringCopy);
 
         // CopyToOutputDirectory="Always"
-        output2.File1AccessUtc.ShouldBeGreaterThan(output1.File1AccessUtc);
+        if (skipUnchangedDuringCopy)
+        {
+            output2.File1AccessUtc.ShouldBeEquivalentTo(output1.File1AccessUtc);
+        }
+        else
+        {
+            output2.File1AccessUtc.ShouldBeGreaterThan(output1.File1AccessUtc);
+        }
         // CopyToOutputDirectory="IfDifferent"
         output2.File2AccessUtc.ShouldBeEquivalentTo(output1.File2AccessUtc);
 
