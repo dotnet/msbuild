@@ -20,7 +20,7 @@ Depending on this, different MSBuild project stages can be considered (Evaluatio
 dotnet new install Microsoft.Build.Templates
 ```
 
-### 3. Create Project Template
+### 3. Instantiate Project Template
 ```powershell
 dotnet new msbuildcheck -n MyCustomBuildChecks
 ```
@@ -63,7 +63,7 @@ public sealed class MaxVersionCheck : Check
         "NoForbiddenProjectProperties",
         "Prevent unauthorized version usage",
         "The version '{0}' for property '{1}' is forbidden. Use version '{2}' instead.",
-        new CheckConfiguration());
+        new CheckConfiguration(Severity = CheckResultSeverity.Warning));
 
     // Registration Method
     public override void RegisterActions(IBuildCheckRegistrationContext registrationContext)
