@@ -6,10 +6,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <SkipUnchangedFilesOnCopyAlways>$(SkipUnchanged)</SkipUnchangedFilesOnCopyAlways>
-  </PropertyGroup>
-
   <ItemGroup>
     <None Include="File1.txt" CopyToOutputDirectory="Always" />
     <None Include="File2.txt" CopyToOutputDirectory="IfDifferent" />
