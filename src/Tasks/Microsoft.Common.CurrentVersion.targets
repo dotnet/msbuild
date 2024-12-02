@@ -864,7 +864,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <MSBuildInternalMessage Condition=" '$(PreferNativeArm64)' == 'true' and '$(Platform)' != 'AnyCPU' " ResourceName="CommonSdk.PlatformIsAnyCPUAndPreferNativeArm64Enabled" Severity="Warning" FormatArguments="$(Platform)" />
 
     <!--
-      Log an error if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project
+      Log an error MSB3540 if the user set MSBuildProjectExtensionsPath in the body of a project. In an SDK style project
       if you set a value in the body, the value is not used by the top implicit import but is used by the bottom.
       This can lead to confusing behavior and builds can fail for obscure reasons.
     -->
@@ -875,7 +875,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     />
 
     <!--
-      Log a warning if:
+      Log a warning MSB3539 if:
         1. $(EnableBaseIntermediateOutputPathMismatchWarning) is 'true'
         2. $(BaseIntermediateOutputPath) was set in the body of a project after its default value was set in Microsoft.Common.props
         3. $(BaseIntermediateOutputPath) is not the same as $(MSBuildProjectExtensionsPath)
@@ -2181,7 +2181,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </_ResolvedProjectReferencePaths>
     </ItemGroup>
 
-    <!-- Issue a warning for each non-existent project. -->
+    <!-- Issue a warning or error MSB9008 for each non-existent project. -->
     <PropertyGroup>
       <_NonExistentProjectReferenceSeverity  Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' != 'True'">Warning</_NonExistentProjectReferenceSeverity>
       <_NonExistentProjectReferenceSeverity  Condition="'@(ProjectReferenceWithConfiguration)' != '' and '@(_MSBuildProjectReferenceNonexistent)' != '' and '$(ErrorOnMissingProjectReference)' == 'True'">Error</_NonExistentProjectReferenceSeverity>

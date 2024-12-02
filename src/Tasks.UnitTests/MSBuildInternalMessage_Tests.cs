@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [InlineData(true, "CommonSdk.BaseIntermediateOutputPathMismatchWarning")]
         [InlineData(false, "CommonSdk.MSBuildProjectExtensionsPathModifiedAfterUse")]
 
-        public void BaseIntermediateOutputPathMisMatchWarning(bool IsInitialMSBuildProjectExtensionsPathEmpty, string expectedResourceName)
+        public void BaseIntermediateOutputPathMisMatchWarning(bool isInitialMSBuildProjectExtensionsPathEmpty, string expectedResourceName)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                     <PropertyGroup>
                         <EnableBaseIntermediateOutputPathMismatchWarning>true</EnableBaseIntermediateOutputPathMismatchWarning>
-                        <_InitialMSBuildProjectExtensionsPath>{(IsInitialMSBuildProjectExtensionsPathEmpty ? "" : "obj")}</_InitialMSBuildProjectExtensionsPath>
+                        <_InitialMSBuildProjectExtensionsPath>{(isInitialMSBuildProjectExtensionsPathEmpty ? "" : "obj")}</_InitialMSBuildProjectExtensionsPath>
                         <MSBuildProjectExtensionsPath></MSBuildProjectExtensionsPath>
                         <BaseIntermediateOutputPath>obj\Debug\</BaseIntermediateOutputPath>
                     </PropertyGroup>
@@ -92,7 +92,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 MockLogger logger = new MockLogger(_testOutput);
 
                 project.Build(logger);
-                if (!IsInitialMSBuildProjectExtensionsPathEmpty)
+                if (!isInitialMSBuildProjectExtensionsPathEmpty)
                 {
                     logger.Errors[0].RawMessage.ShouldBe(expectedBuildMessage);
                 }
