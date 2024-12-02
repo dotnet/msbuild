@@ -1,15 +1,14 @@
 # General performance improvements
-MSBuild is the main tool used for building .NET projects. It is used by Visual Studio, the .NET CLI, and other build tools. The performance of MSBuild is critical to the productivity of developers. This document outlines our goals to improve overall performance of MSBuild.
+MSBuild is the main tool used for building various types of projects. It is used by Visual Studio, the .NET CLI, and other build tools. The performance of MSBuild is critical to the productivity of developers. This document outlines our goals to improve overall performance of MSBuild.
 
 ## Goals and Motivation
 
 We are aiming for:
- - Searching opportunities to improve the build times.
+ - Searching for opportunities to improve evaluation and build times. We can utilize the data collected by ETW traces, the VS perf lab, and previously identified performance issues.
  - Reducing MSBuild overhead in the Visual Studio IDE.
  - Collecting data to understand the current performance bottlenecks.
 
 This document does not cover specific performance improvements, but rather outlines the general goals and motivation for the performance improvements.
-
 
 ## Impact
     
