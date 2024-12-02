@@ -2665,26 +2665,26 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns the DirectoryName of the items in itemsOfType
                 /// UNDONE: This can be removed in favor of a built-in %(DirectoryName) metadata in future.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> DirectoryName(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Tuple<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> DirectoryName(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     Dictionary<string, string> directoryNameTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                    foreach (Tuple<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         // If the item include has become empty,
                         // this is the end of the pipeline for this item
-                        if (String.IsNullOrEmpty(item.Item1))
+                        if (String.IsNullOrEmpty(item.Key))
                         {
                             continue;
                         }
 
                         string directoryName;
-                        if (!directoryNameTable.TryGetValue(item.Item1, out directoryName))
+                        if (!directoryNameTable.TryGetValue(item.Key, out directoryName))
                         {
                             // Unescape as we are passing to the file system
-                            string unescapedPath = EscapingUtilities.UnescapeAll(item.Item1);
+                            string unescapedPath = EscapingUtilities.UnescapeAll(item.Key);
 
                             try
                             {
@@ -2701,7 +2701,7 @@ namespace Microsoft.Build.Evaluation
                                     // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
                                     // In that case, we're safe to get the current directory as we'll be running on TaskItems which
                                     // only exist within a target where we can trust the current directory
-                                    string baseDirectoryToUse = item.Item2.ProjectDirectory ?? String.Empty;
+                                    string baseDirectoryToUse = item.Value.ProjectDirectory ?? String.Empty;
                                     rootedPath = Path.Combine(baseDirectoryToUse, unescapedPath);
                                 }
 
@@ -2709,7 +2709,7 @@ namespace Microsoft.Build.Evaluation
                             }
                             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Item1, e.Message);
+                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Key, e.Message);
                             }
 
                             // Escape as this is going back into the engine
@@ -2720,11 +2720,11 @@ namespace Microsoft.Build.Evaluation
                         if (!String.IsNullOrEmpty(directoryName))
                         {
                             // return a result through the enumerator
-                            yield return new KeyValuePair<string, S>(directoryName, item.Item2);
+                            yield return new KeyValuePair<string, S>(directoryName, item.Value);
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new KeyValuePair<string, S>(null, item.Item2);
+                            yield return new KeyValuePair<string, S>(null, item.Value);
                         }
                     }
                 }
