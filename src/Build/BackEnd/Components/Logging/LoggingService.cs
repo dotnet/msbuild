@@ -1666,8 +1666,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            // If this is BuildCheck-ed build - add the warnings promotability/demotability to the service
-            if (buildEventArgs is ProjectStartedEventArgs projectStartedEvent && this._componentHost.BuildParameters.IsBuildCheckEnabled)
+            // Respect warning-promotion properties from the remote project
+            if (buildEventArgs is ProjectStartedEventArgs projectStartedEvent)
             {
                 AddWarningsAsErrors(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsAsErrors);
                 AddWarningsAsMessages(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsAsMessages);

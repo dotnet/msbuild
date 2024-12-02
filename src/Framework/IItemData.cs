@@ -45,7 +45,7 @@ public readonly struct ItemData
 
     public ItemData(string type, object value)
     {
-        
+
         Type = type;
         Value = value;
 

@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <returns>A project instance.</returns>
         internal static ProjectInstance CreateEmptyProjectInstance()
         {
-            using ProjectFromString projectFromString = new( @"<Project>
+            using ProjectFromString projectFromString = new(@"<Project>
                       <Target Name='foo'/>
                   </Project>");
             Project project = projectFromString.Project;
