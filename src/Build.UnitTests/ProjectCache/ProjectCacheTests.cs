@@ -1668,16 +1668,18 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         {
             var directory = _env.CreateFolder();
             string content = ObjectModelHelpers.CleanupFileContents(
-            """
-            <Project Sdk="Microsoft.NET.Sdk">
+            $"""
+            <Project DefaultTargets="Build">
                 <PropertyGroup>
-                    <TargetFramework>net8.0</TargetFramework>
+                    <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                     <OutputType>Exe</OutputType>
                     <OutputPath>bin/</OutputPath>
                 </PropertyGroup>
                 <ItemGroup>
+                    <Compile Include="Program.cs" />
                     <EmbeddedResource Include="*.txt"/>
                 </ItemGroup>
+                <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
             </Project>
             """);
             var projectPath = directory.CreateFile("app.csproj", content).Path;
@@ -1687,7 +1689,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             using System.IO;
             using System.Reflection;
 
-            class Program
+            class Programe
             {
                 static void Main()
                 {
@@ -1715,7 +1717,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             // Build and run the project
             string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath} -restore", out bool success);
             success.ShouldBeTrue(output);
-            output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/net8.0/app"), "", out success, false, _output);
+            output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/app"), "", out success, false, _output);
             output.ShouldContain("A=1");
             output.ShouldContain("B=1");
 
@@ -1723,7 +1725,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             FileUtilities.DeleteNoThrow(file1.Path);
             output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath}", out success);
             success.ShouldBeTrue(output);
-            output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/net8.0/app"), "", out success, false, _output);
+            output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/app"), "", out success, false, _output);
             output.ShouldNotContain("A=1");
             output.ShouldContain("B=1");
         }
