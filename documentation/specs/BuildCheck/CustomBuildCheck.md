@@ -26,10 +26,9 @@ dotnet new msbuildcheck -n MyCustomBuildChecks
 ```
 
 ### 4. Examine Template Structure
-- Inherit from the MSBuild API base class
-- Do NOT attempt to unbind from the base class Check because it's validated on MSBuild side
-- Follow the strict type checking requirements
-- There is a custom target `AddNuGetDlls` included for copying 3rd party assemblies in the final package
+- Inherit from the MSBuild API base class (Microsoft.Build.Experimental.BuildCheck.Check) as already done by the template as otherwise your checks won't be registered during build runtime
+- <CustomCheckName>.props file contains the intrinsic function "RegisterBuildCheck" that is picked by MSBuild and is an entry point to the check.
+- <CustomCheckName>.csproj file has a custom target `AddNuGetDlls` included for copying 3rd party assemblies in the final package
 
 ### 5. Define Rule Identification
 Key components for making your check discoverable:
@@ -132,13 +131,12 @@ The MSBuild team welcomes:
 
 ## Limitations
 - Performance-conscious checks
-- Consistent configuration required
 - Limited to specific build stages
 
 ## Conclusion
 Custom build checks provide a powerful mechanism to enforce project-specific rules, enhance build quality, and maintain consistent development practices.
 
 ## Getting Help
-- MSBuild documentation
-- Community forums
-- GitHub repository issues
+- [MSBuild documentation](https://github.com/dotnet/msbuild/tree/main/documentation/)
+- [GitHub discussions](https://github.com/dotnet/msbuild/discussions)
+- [GitHub repository issues](https://github.com/dotnet/msbuild/issues)
