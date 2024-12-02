@@ -44,11 +44,18 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     /// </summary>
     private readonly Dictionary<TaskKey, ExecutingTaskData> _tasksBeingExecuted = [];
 
-    internal static Dictionary<string, string> ExtractPropertiesLookup(ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
+    internal static Dictionary<string, string> ExtractEvaluatedPropertiesLookup(
+        ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
+        => ExtractPropertiesLookup(evaluationFinishedEventArgs.Properties);
+
+    private static Dictionary<string, string> ExtractPropertiesLookup(System.Collections.IEnumerable? propertiesFromEventArgs)
     {
         Dictionary<string, string> propertiesLookup = new Dictionary<string, string>();
-        Internal.Utilities.EnumerateProperties(evaluationFinishedEventArgs.Properties, propertiesLookup,
-            static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
+        if (propertiesFromEventArgs != null)
+        {
+            Internal.Utilities.EnumerateProperties(propertiesFromEventArgs, propertiesLookup,
+                static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
+        }
 
         return propertiesLookup;
     }
@@ -61,12 +68,14 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     {
         if (_buildCheckCentralContext.HasEvaluatedPropertiesActions)
         {
-            propertiesLookup ??= ExtractPropertiesLookup(evaluationFinishedEventArgs);
+            propertiesLookup ??= ExtractEvaluatedPropertiesLookup(evaluationFinishedEventArgs);
+            var globalPropertiesLookup = ExtractPropertiesLookup(evaluationFinishedEventArgs.GlobalProperties);
 
             EvaluatedPropertiesCheckData checkData =
                 new(evaluationFinishedEventArgs.ProjectFile!,
                     evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
-                    propertiesLookup!);
+                    propertiesLookup!,
+                    globalPropertiesLookup);
 
             _buildCheckCentralContext.RunEvaluatedPropertiesActions(checkData, checkContext, ReportResult);
         }

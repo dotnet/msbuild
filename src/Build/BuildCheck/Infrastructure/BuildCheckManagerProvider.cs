@@ -150,6 +150,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 new BuiltInCheckFactory([DoubleWritesCheck.SupportedRule.Id], DoubleWritesCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<DoubleWritesCheck>),
                 new BuiltInCheckFactory([NoEnvironmentVariablePropertyCheck.SupportedRule.Id], NoEnvironmentVariablePropertyCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<NoEnvironmentVariablePropertyCheck>),
                 new BuiltInCheckFactory([EmbeddedResourceCheck.SupportedRule.Id], EmbeddedResourceCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<EmbeddedResourceCheck>),
+                new BuiltInCheckFactory([TargetFrameworkConfusionCheck.SupportedRule.Id], TargetFrameworkConfusionCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<TargetFrameworkConfusionCheck>),
             ],
 
             // BuildCheckDataSource.Execution
@@ -397,7 +398,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             if (!IsInProcNode)
             {
                 propertiesLookup =
-                    BuildEventsProcessor.ExtractPropertiesLookup(evaluationFinishedEventArgs);
+                    BuildEventsProcessor.ExtractEvaluatedPropertiesLookup(evaluationFinishedEventArgs);
                 Func<string, string?> getPropertyValue = p =>
                     propertiesLookup.TryGetValue(p, out string? value) ? value : null;
 
