@@ -1,5 +1,5 @@
 ## RAR caching
-
+RAR in this context means resolving of assembly references.
 During every build we need to gather the graph of references and pass
 them to the compiler. This process is highly cacheable as the references
 don’t change all that often. Currently we have some limited caching in
@@ -8,8 +8,9 @@ misses.
 
 ### Goals and motivations
 
-1ES team wants to isolate their File I/O related to the which is causing
-issues to their debugging efforts.
+1ES team wants to isolate their File I/O related to the RAR caching which is causing
+issues to their debugging efforts. This is mostly due to the fact that MSBuild is pulling
+files from all nodes at once which results in a tangled mess of IO that is hard to debug.
 
 Our motivation is a possible performance gain however we’re fine with
 the change as long as the impact is not negative.
@@ -27,7 +28,8 @@ that this balance will be a net positive performance wise.
 
 1ES team will provide the initial cache implementation. We will review
 their PRs and do the performance evaluations. Handover will be
-successful if nothing breaks and we meet our performance requirements.
+successful if nothing breaks and we meet our performance requirements
+(no regression or better still an improvement).
 
 ### Risks
 
@@ -35,6 +37,7 @@ Some time ago Roman Konecny estimated the RAR caching to not be worth it
 performance wise. 1ES team claims to have created an implementation that
 will either improve or not change the performance. We need to validate
 this claim and push back in case we find performance regression.
+Thorough testing will be needed especially 
 
 The risk is having to figure out a different way to help 1ES team to
 isolate their File I/Os if the caching hurts the performance. This could
@@ -52,3 +55,5 @@ Some communication overhead
 
 We review the PR with a special emphasis on the performance side of
 things.
+Then we merge the changes. There is no expected follow up beyond the
+usual maintenance for our codebase.
