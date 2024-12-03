@@ -800,8 +800,9 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            // Trim from the end
-            while (firstSlice <= lastSlice && Char.IsWhiteSpace(arg, lastSliceIdx - 1))
+            // Trim from the end.
+            // Bit of extra logic to avoid trimming whitespace-only string one time too many.
+            while (((firstSlice < lastSlice) || (firstSlice == lastSlice && firstSliceIdx < lastSliceIdx)) && Char.IsWhiteSpace(arg, lastSliceIdx - 1))
             {
                 lastSliceIdx--;
                 if (slices[lastSlice].Item1 > lastSliceIdx && firstSlice < --lastSlice)
@@ -816,6 +817,8 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
+            bool removedQuotes = false;
+
             if ((arg[firstSliceIdx] == '\'' && arg[lastSliceIdx - 1] == '\'') ||
                 (arg[firstSliceIdx] == '`' && arg[lastSliceIdx - 1] == '`') ||
                 (arg[firstSliceIdx] == '`' && arg[lastSliceIdx - 1] == '`') ||
@@ -823,6 +826,7 @@ namespace Microsoft.Build.Evaluation
             {
                 ++firstSliceIdx;
                 --lastSliceIdx;
+                removedQuotes = true;
 
                 // Check yet again if we're still in the correct slice boundaries, this could've changed if we've trimmed.
                 if (firstSliceIdx > slices[firstSlice].Item2 && ++firstSlice < lastSlice)
@@ -849,13 +853,15 @@ namespace Microsoft.Build.Evaluation
             {
                 argValue += arg.Substring(firstSliceIdx, lastSliceIdx - firstSliceIdx);
             }
-            // Note Microoptimization possible, we should be able to read this "null" from the slices without constructing it. It is a minor edge case.
-            if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
+
+            if (!removedQuotes && String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
             {
                 arguments.Add(null);
-                return;
             }
-            arguments.Add(argValue);
+            else
+            {
+                arguments.Add(argValue);
+            }
         }
 
         /// <summary>
