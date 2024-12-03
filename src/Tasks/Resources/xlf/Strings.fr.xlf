@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="AssignCulture.CultureOverwritten">
         <source>MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</source>
-        <target state="new">MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</target>
+        <target state="translated">MSB3002: la culture « {0} » définie explicitement pour l’élément « {1} » a été remplacée par la culture déduite « {2} » ,car la propriété « RespectAlreadyAssignedItemCulture » n’a pas été définie.</target>
         <note>
 	{StrBegin="MSB3002: "}
 	'RespectAlreadyAssignedItemCulture' should not be translated
