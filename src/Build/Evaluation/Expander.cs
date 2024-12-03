@@ -774,6 +774,10 @@ namespace Microsoft.Build.Evaluation
             return expression.IndexOf(quoteChar, index);
         }
 
+        /// <summary>
+        /// Add the argument represented by the slices to the arguments list, handling nulls
+        /// appropriately.
+        /// </summary>
         private static void AddArgumentFromSlices(List<string> arguments, List<Tuple<int, int>> slices, string arg)
         {
             // This shouldn't happen
