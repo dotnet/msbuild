@@ -18,7 +18,7 @@ This document does not cover specific performance improvements, but rather outli
 
 ## Stakeholders
 
-    - Chet Hust (PM) - as a customer advocate
+    - Chet Husk (PM) - as a customer advocate
     - David Kean - as a VS performance expert
 
 ## Risks
