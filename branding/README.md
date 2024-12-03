@@ -2,6 +2,12 @@
 
 This folder contains MSBuild brand images.
 
+## MSBuild-Logo.svg
+
+A vector-based version of the logo that scales to any resolution.
+
+![MSBuild-Logo.svg](MSBuild-Logo.svg?raw=true)
+
 ## MSBuild-Icon.png
 
 A 40x40px version of the MSBuild logo.
