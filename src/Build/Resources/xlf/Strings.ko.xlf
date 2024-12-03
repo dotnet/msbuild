@@ -183,12 +183,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0105_MessageFmt">
         <source>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</source>
-        <target state="new">Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</target>
+        <target state="translated">프로젝트 {0}에서 확장명('{2}')을 나타내는 문화권이 있을 수 있는 'EmbeddedResource' 항목 '{1}'을(를) 지정하지만 명시적인 'Culture' 또는 'WithCulture=false' 메타데이터가 지정되지 않았습니다.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0105_Title">
         <source>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</source>
-        <target state="new">It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</target>
+        <target state="translated">잘못되거나 비결정적인 문화권 추정을 방지하려면 명시적인 'Culture' 메타데이터 또는 'EmbeddedResource' 항목과 함께 'WithCulture=false' 메타데이터를 지정하는 것이 좋습니다.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
