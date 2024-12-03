@@ -16,7 +16,7 @@ A 256x256px version of the MSBuild logo.
 
 ## MSBuild-NuGet-Icon.png
 
-A 64x64px version of the MSBuild logo, intended for use in NuGet packages.
+A 128x128px version of the MSBuild logo, intended for use in NuGet packages.
 
 ![MSBuild-NuGet-Icon from the forwarding link](https://aka.ms/msbuildicon)
 
