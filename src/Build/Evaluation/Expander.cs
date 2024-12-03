@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -839,7 +838,6 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-
             string argValue = "";
 
             while (firstSlice < lastSlice)
@@ -865,50 +863,6 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Add the argument in the StringBuilder to the arguments list, handling nulls
-        /// appropriately.
-        /// </summary>
-        private static void AddArgument(List<string> arguments, SpanBasedStringBuilder argumentBuilder)
-        {
-            // we reached the end of an argument, add the builder's final result
-            // to our arguments.
-            argumentBuilder.Trim();
-            string argValue = argumentBuilder.ToString();
-
-            // We support passing of null through the argument constant value null
-            if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
-            {
-                arguments.Add(null);
-            }
-            else
-            {
-                if (argValue.Length > 0)
-                {
-                    if (argValue[0] == '\'' && argValue[argValue.Length - 1] == '\'')
-                    {
-                        arguments.Add(argValue.Trim(s_singleQuoteChar));
-                    }
-                    else if (argValue[0] == '`' && argValue[argValue.Length - 1] == '`')
-                    {
-                        arguments.Add(argValue.Trim(s_backtickChar));
-                    }
-                    else if (argValue[0] == '"' && argValue[argValue.Length - 1] == '"')
-                    {
-                        arguments.Add(argValue.Trim(s_doubleQuoteChar));
-                    }
-                    else
-                    {
-                        arguments.Add(argValue);
-                    }
-                }
-                else
-                {
-                    arguments.Add(argValue);
-                }
-            }
-        }
-
-        /// <summary>
         /// Extract the first level of arguments from the content.
         /// Splits the content passed in at commas.
         /// Returns an array of unexpanded arguments.
@@ -916,7 +870,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static string[] ExtractFunctionArguments(IElementLocation elementLocation, string expressionFunction, string argumentsString)
         {
-            // Debugger.Launch();
             int argumentsContentLength = argumentsString.Length;
 
             List<string> arguments = new List<string>();
@@ -931,23 +884,6 @@ namespace Microsoft.Build.Evaluation
                     abStart = -1;
                 }
             }
-
-            /*
-            using SpanBasedStringBuilder argumentBuilder = Strings.GetSpanBasedStringBuilder();
-            int? argumentStartIndex = null;
-
-            // We iterate over the string in the for loop below. When we find an argument, instead of adding it to the argument
-            // builder one-character-at-a-time, we remember the start index and then call this function when we find the end of
-            // the argument. This appends the entire {start, end} span to the builder in one call.
-            void FlushCurrentArgumentToArgumentBuilder(int argumentEndIndex)
-            {
-                if (argumentStartIndex.HasValue)
-                {
-                    argumentBuilder.Append(argumentsString, argumentStartIndex.Value, argumentEndIndex - argumentStartIndex.Value);
-                    argumentStartIndex = null;
-                }
-            }
-            */
 
             // Iterate over the contents of the arguments extracting the
             // the individual arguments as we go
@@ -967,9 +903,7 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedParenthesis"));
                     }
 
-                    // FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: nestedPropertyStart);
                     FlushToSlices(nestedPropertyStart);
-                    // argumentBuilder.Append(argumentsString, nestedPropertyStart, (n - nestedPropertyStart) + 1);
                     slices.Add(Tuple.Create(nestedPropertyStart, n + 1));
                 }
                 else if (argumentsString[n] == '`' || argumentsString[n] == '"' || argumentsString[n] == '\'')
@@ -986,21 +920,16 @@ namespace Microsoft.Build.Evaluation
 
                     FlushToSlices(quoteStart);
                     slices.Add(Tuple.Create(quoteStart, n + 1));
-                    // FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: quoteStart);
-                    // argumentBuilder.Append(argumentsString, quoteStart, (n - quoteStart) + 1);
                 }
                 else if (argumentsString[n] == ',')
                 {
-                    // FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: n);
                     FlushToSlices(n);
 
                     // We have reached the end of the current argument, go ahead and add it
                     // to our list
-                    // AddArgument(arguments, argumentBuilder);
                     AddArgumentFromSlices(arguments, slices, argumentsString);
 
                     // Clear out the argument builder ready for the next argument
-                    // argumentBuilder.Clear();
                     slices.Clear();
                 }
                 else
@@ -1014,12 +943,10 @@ namespace Microsoft.Build.Evaluation
             }
 
             // We reached the end of the string but we may have seen the start but not the end of the last (or only) argument so flush it now.
-            // FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: argumentsContentLength);
             FlushToSlices(argumentsContentLength);
 
             // This will either be the one and only argument, or the last one
             // so add it to our list
-            // AddArgumentFromSlices(arguments, argumentBuilder);
             AddArgumentFromSlices(arguments, slices, argumentsString);
 
             return arguments.ToArray();
