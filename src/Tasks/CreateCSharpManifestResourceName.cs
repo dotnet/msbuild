@@ -109,7 +109,7 @@ namespace Microsoft.Build.Tasks
                 {
                     culture = culture,
                     cultureNeutralFilename =
-                        embeddedFileName.RemoveLastInstanceOf("." + culture, StringComparison.OrdinalIgnoreCase)
+                        embeddedFileName.RemoveLastInstanceOf("." + culture, StringComparison.OrdinalIgnoreCase),
                 };
             }
             else
