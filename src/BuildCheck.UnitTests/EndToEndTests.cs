@@ -726,6 +726,35 @@ public class EndToEndTests : IDisposable
         output.ShouldNotContain("BC0103");
     }
 
+#if NET
+    [Fact]
+    public void TestBuildCheckTemplate()
+    {
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+        var nugetTemplateName = "nugetTemplate.config";
+        var nugetTemplatePath = Path.Combine(TestAssetsRootPath, "CheckCandidate", nugetTemplateName);
+        File.Copy(nugetTemplatePath, Path.Combine(workFolder.Path, nugetTemplateName));
+        AddCustomDataSourceToNugetConfig(workFolder.Path);
+
+        var ExecuteDotnetCommand = (string parameters) =>
+        {
+            string output = RunnerUtilities.RunProcessAndGetOutput("dotnet", parameters, out bool success);
+            return output;
+        };
+
+        var buildCheckTemplatePath = Path.Combine(BuildCheckUnitTestsConstants.RepoRoot, "template_feed", "content", "Microsoft.CheckTemplate");
+        var templateShortName = "msbuildcheck";
+        var projectName = "BuildCheck";
+        var installLog = ExecuteDotnetCommand($"new install {buildCheckTemplatePath}");
+        installLog.ShouldContain($"Success: {buildCheckTemplatePath} installed the following templates:");
+        var creationLog = ExecuteDotnetCommand($"new {templateShortName} -n {projectName} --MicrosoftBuildVersion {BuildCheckUnitTestsConstants.MicrosoftBuildPackageVersion} -o {workFolder.Path} ");
+        creationLog.ShouldContain("The template \"MSBuild custom check skeleton project.\" was created successfully.");
+        var buildLog = ExecuteDotnetCommand($"build {workFolder.Path}");
+        buildLog.ShouldContain("Build succeeded.");
+        ExecuteDotnetCommand($"new -u {buildCheckTemplatePath}");
+    }
+#endif
+
     private void AddCustomDataSourceToNugetConfig(string checkCandidatePath)
     {
         var nugetTemplatePath = Path.Combine(checkCandidatePath, "nugetTemplate.config");
