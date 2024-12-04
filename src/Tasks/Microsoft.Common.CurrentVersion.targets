@@ -5331,7 +5331,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       Outputs="@(_SourceItemsToCopyToOutputDirectory->'$(OutDir)%(TargetPath)')">
 
     <!--
-        Not using SkipUnchangedFiles="true" because we anyways copy only the ones with newer timestamp.
+        Not using SkipUnchangedFiles="true" because the items we pass in are already only those that have newer timestampts in the source (determined by _GetCopyToOutputDirectoryItemsFromThisProject).
         -->
     <Copy
         SourceFiles = "@(_SourceItemsToCopyToOutputDirectory)"
