@@ -284,31 +284,34 @@ public class EndToEndTests : IDisposable
         if (skipUnchangedDuringCopy)
         {
             output2.File1AccessUtc.ShouldBeEquivalentTo(output1.File1AccessUtc);
+            output2.File1WriteUtc.ShouldBeEquivalentTo(output1.File1WriteUtc);
         }
         else
         {
-            output2.File1AccessUtc.ShouldBeGreaterThan(output1.File1AccessUtc);
+            output2.File1WriteUtc.ShouldBeEquivalentTo(output1.File1WriteUtc);
         }
         // CopyToOutputDirectory="IfDifferent"
         output2.File2AccessUtc.ShouldBeEquivalentTo(output1.File2AccessUtc);
+        output2.File2WriteUtc.ShouldBeEquivalentTo(output1.File2WriteUtc);
 
         // Change both in output
 
         File.WriteAllLines(output2.File1Path, ["foo"]);
         File.WriteAllLines(output2.File2Path, ["foo"]);
 
-        DateTime file1AccessUtc = File.GetLastAccessTimeUtc(output2.File1Path);
-        DateTime file2AccessUtc = File.GetLastAccessTimeUtc(output2.File2Path);
+        DateTime file1WriteUtc = File.GetLastWriteTimeUtc(output2.File1Path);
+        DateTime file2WriteUtc = File.GetLastWriteTimeUtc(output2.File2Path);
 
-        file1AccessUtc.ShouldBeGreaterThan(output2.File1AccessUtc);
-        file2AccessUtc.ShouldBeGreaterThan(output2.File2AccessUtc);
+        file1WriteUtc.ShouldBeGreaterThan(output2.File1WriteUtc);
+        file2WriteUtc.ShouldBeGreaterThan(output2.File2WriteUtc);
 
         // Run again - both should be copied
 
         var output3 = RunCopyToOutputTest(false, skipUnchangedDuringCopy);
 
-        output3.File1AccessUtc.ShouldBeGreaterThan(file1AccessUtc);
-        output3.File2AccessUtc.ShouldBeGreaterThan(file2AccessUtc);
+        // On copy BCL is keeping the write stamp - s we need to compare to last access time
+        output3.File1AccessUtc.ShouldBeGreaterThan(file1WriteUtc);
+        output3.File2AccessUtc.ShouldBeGreaterThan(file2WriteUtc);
     }
 
 
