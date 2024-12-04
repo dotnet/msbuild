@@ -81,19 +81,19 @@ Examples:
 <a name="BC0106"></a>
 ## BC0106 - CopyToOutputDirectory='Always' should be avoided.
 
-"It is recommended to avoid specifying 'Always' value of metadata 'CopyToOutputDirectory' as this can lead to unnecessary build performance degradation. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying."
+"Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying."
 
-[`CopyToOutputDirectory` metadata](https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-items) has following recognized values:
+[`CopyToOutputDirectory` metadata](https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-items) can take the values:
  * `Never`
  * `Always`
  * `PreserveNewest`
  * `IfDifferent`
 
-The `Always` is not recommended - as it causes the files to be copied always - even if unnecesary.
+`Always` is not recommended, as it causes the files to be copied in every build, even when the destination file content is identical to the source.
 
-This might have been historicaly needed to workaround cases where the destination file could have changed between builds (e.g. a case of asset that can be changed during test run, but needs to be rest by the build). A `IfDifferent` value is currently offered to efficiently cover such scenario.
+Before the introduction of `IfDifferent`, `Always` was needed to work around cases where the destination file could have changed between builds (e.g. an asset that can be changed during test run, but needs to be reset by the build). `IfDifferent` preserves this behavior without unnecessary copying.
 
-In order to avoid a need for change all copy metada, it's now possible to specify `SkipUnchangedFilesOnCopyAlways` property with a value of `'True'` in order to flip all copy behavior of `CopyToOutputDirectory=Always` to behave identicaly as `CopyToOutputDirectory=IfDifferent`:
+In order to avoid the need to change copy metadata for a large number of items, it's now possible to specify the `SkipUnchangedFilesOnCopyAlways` property in order to flip all copy behavior of `CopyToOutputDirectory=Always` to behave identically to `CopyToOutputDirectory=IfDifferent`:
 
 ```xml
 <PropertyGroup>
