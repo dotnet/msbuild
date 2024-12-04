@@ -5,7 +5,7 @@ In the current effort to improve performance of MSBuild, we ideantified the eval
 Current performance state of evaluation is mostly unkown, as it is not measured in any ways by the team. As such, we are unsure which specific areas can be improve. The investigation about this is necessary so we can identify weaknesses, and possible fixes.
 
  - We could do profiling
- - Jit compilation o MSBuild itself. 
+ - Jit compilation of MSBuild itself. 
  - We could cache at eval
 
  Constraint - needs to work as it does today, but fast. We can break some edge cases.
