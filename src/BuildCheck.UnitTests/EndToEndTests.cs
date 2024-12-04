@@ -277,6 +277,7 @@ public class EndToEndTests : IDisposable
         var output1 = RunCopyToOutputTest(true, skipUnchangedDuringCopy);
 
         // Run again - just Always should be copied
+        // Careful - unix based OS might not update access time on writes. 
 
         var output2 = RunCopyToOutputTest(false, skipUnchangedDuringCopy);
 
@@ -309,9 +310,10 @@ public class EndToEndTests : IDisposable
 
         var output3 = RunCopyToOutputTest(false, skipUnchangedDuringCopy);
 
-        // On copy BCL is keeping the write stamp - s we need to compare to last access time
-        output3.File1AccessUtc.ShouldBeGreaterThan(file1WriteUtc);
-        output3.File2AccessUtc.ShouldBeGreaterThan(file2WriteUtc);
+        // We are now overwriting the newer file in output with the older file from sources.
+        // Which is wanted - as we want to copy on any difference.
+        output3.File1WriteUtc.ShouldBeLessThan(file1WriteUtc);
+        output3.File2WriteUtc.ShouldBeLessThan(file2WriteUtc);
     }
 
 
