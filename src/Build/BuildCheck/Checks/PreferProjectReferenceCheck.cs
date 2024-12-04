@@ -70,7 +70,7 @@ internal class PreferProjectReferenceCheck : Check
         {
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,
-                // Populating precise location tracked via https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=58661732
+                // Populating precise location tracked via https://github.com/dotnet/msbuild/issues/10383
                 ElementLocation.EmptyLocation,
                 Path.GetFileName(context.Data.ProjectFilePath),
                 Path.GetFileName(projectProducingOutput.Item1),
@@ -98,7 +98,7 @@ internal class PreferProjectReferenceCheck : Check
             {
                 context.ReportResult(BuildCheckResult.Create(
                     SupportedRule,
-                    // Populating precise location tracked via https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=58661732
+                    // Populating precise location tracked via https://github.com/dotnet/msbuild/issues/10383
                     ElementLocation.EmptyLocation,
                     Path.GetFileName(projectReferencedViaOutput),
                     Path.GetFileName(context.Data.ProjectFilePath),

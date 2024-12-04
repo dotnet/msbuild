@@ -247,10 +247,10 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class ItemNames
     {
-        internal const string Reference = "Reference";
-        internal const string EmbeddedResource = "EmbeddedResource";
         internal const string Compile = "Compile";
         internal const string Content = "Content";
+        internal const string EmbeddedResource = "EmbeddedResource";
         internal const string None = "None";
+        internal const string Reference = "Reference";
     }
 }
