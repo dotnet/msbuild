@@ -40,6 +40,11 @@ using Microsoft.NET.StringTools;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
+#if NETFRAMEWORK
+using static Microsoft.Extensions.Logging.LoggerExtensions;
+using ExtILogger = Microsoft.Extensions.Logging.ILogger;
+#endif
+
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -492,6 +497,13 @@ namespace Microsoft.Build.Execution
                 parameters.DetailedSummary = true;
                 parameters.LogTaskInputs = true;
             }
+#if NETFRAMEWORK
+            Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317");
+            Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "MSBuild");
+            FrameworkTelemetry.Enable();
+            var a = TelemetryHelpers.StartActivity("BeginBuild", new Dictionary<string, object> { { "feature_flag.IsBuildCheckEnabled", parameters.IsBuildCheckEnabled } });
+            a.Dispose();
+#endif
 
             lock (_syncLock)
             {
@@ -1029,6 +1041,7 @@ namespace Microsoft.Build.Execution
             {
                 try
                 {
+                    object TelemetryService = new();
                     ILoggingService? loggingService = ((IBuildComponentHost)this).LoggingService;
 
                     if (loggingService != null)
@@ -1069,8 +1082,13 @@ namespace Microsoft.Build.Execution
                             var sacState = NativeMethodsShared.GetSACState();
                             // The Enforcement would lead to build crash - but let's have the check for completeness sake.
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
-
+                            Debugger.Launch();
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
+#if NETFRAMEWORK
+                            // var telemetryActivity = TelemetryHelpers.StartActivity("endbuild");
+                            FrameworkTelemetry.EndOfBuildTelemetry(_buildTelemetry);
+                            // telemetryActivity.Dispose();
+#endif
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
                         }
