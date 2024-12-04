@@ -794,19 +794,22 @@ namespace Microsoft.Build.Evaluation
             while (firstSlice <= lastSlice && Char.IsWhiteSpace(arg, firstSliceIdx))
             {
                 firstSliceIdx++;
-                if (firstSliceIdx > slices[firstSlice].Item2 && ++firstSlice < lastSlice)
+                if (firstSliceIdx > slices[firstSlice].Item2 && firstSlice < lastSlice)
                 {
+                    firstSlice++;
                     firstSliceIdx = slices[firstSlice].Item1;
                 }
             }
 
             // Trim from the end.
-            // Bit of extra logic to avoid trimming whitespace-only string one time too many.
+            // There is some extra logic here to avoid edge case where we would trim a whitespace only character with
+            // one slice from the start, and then once more from the end, resulting in invalid indices.
             while (((firstSlice < lastSlice) || (firstSlice == lastSlice && firstSliceIdx < lastSliceIdx)) && Char.IsWhiteSpace(arg, lastSliceIdx - 1))
             {
                 lastSliceIdx--;
-                if (slices[lastSlice].Item1 > lastSliceIdx && firstSlice < --lastSlice)
+                if (slices[lastSlice].Item1 > lastSliceIdx && firstSlice < lastSlice)
                 {
+                    lastSlice--;
                     lastSliceIdx = slices[lastSlice].Item2;
                 }
             }
@@ -819,6 +822,7 @@ namespace Microsoft.Build.Evaluation
 
             bool removedQuotes = false;
 
+            // If the argument is in quotes, we want to remove those
             if ((arg[firstSliceIdx] == '\'' && arg[lastSliceIdx - 1] == '\'') ||
                 (arg[firstSliceIdx] == '`' && arg[lastSliceIdx - 1] == '`') ||
                 (arg[firstSliceIdx] == '`' && arg[lastSliceIdx - 1] == '`') ||
@@ -875,14 +879,14 @@ namespace Microsoft.Build.Evaluation
 
             List<string> arguments = new List<string>();
 
-            int abStart = -1;
+            int argumentStartIndex = -1;
             List<Tuple<int, int>> slices = new List<Tuple<int, int>>();
 
             void FlushToSlices(int argumentEndIndex) {
-                if (abStart != -1)
+                if (argumentStartIndex != -1)
                 {
-                    slices.Add(Tuple.Create(abStart, argumentEndIndex));
-                    abStart = -1;
+                    slices.Add(Tuple.Create(argumentStartIndex, argumentEndIndex));
+                    argumentStartIndex = -1;
                 }
             }
 
@@ -936,9 +940,9 @@ namespace Microsoft.Build.Evaluation
                 else
                 {
                     // argumentStartIndex ??= n;
-                    if (abStart == -1)
+                    if (argumentStartIndex == -1)
                     {
-                        abStart = n;
+                        argumentStartIndex = n;
                     }
                 }
             }
