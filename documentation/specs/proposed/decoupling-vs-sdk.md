@@ -5,7 +5,7 @@ The behaviour of an SDK project, when built in Visual Studio and when built in t
 
 We are aiming for:
  - Consistent end-user eperience for build in either DotNet CLI or Visual Studio.
- - Isolating Dotnet SDK build to only their components.
+ - Decoupling the .NET SDK experience from Visual Studio 
  - Decoupling the Dotnet SDK from VS.
 
 
