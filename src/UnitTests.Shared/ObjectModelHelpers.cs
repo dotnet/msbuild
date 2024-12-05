@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -118,7 +119,7 @@ namespace Microsoft.Build.UnitTests
             return items[0];
         }
 
-        public static void AssertItemEvaluationFromProject(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false, bool makeExpectedIncludeAbsolute = false)
+        public static void AssertItemEvaluationFromProject([StringSyntax(StringSyntaxAttribute.Xml)] string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false, bool makeExpectedIncludeAbsolute = false)
         {
             AssertItemEvaluationFromGenericItemEvaluator((p, c) =>
                 {
@@ -135,7 +136,7 @@ namespace Microsoft.Build.UnitTests
             normalizeSlashes);
         }
 
-        public static void AssertItemEvaluationFromGenericItemEvaluator(Func<string, ProjectCollection, IList<ITestItem>> itemEvaluator, string projectContents, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
+        public static void AssertItemEvaluationFromGenericItemEvaluator(Func<string, ProjectCollection, IList<ITestItem>> itemEvaluator, [StringSyntax(StringSyntaxAttribute.Xml)] string projectContents, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
         {
             using (var env = TestEnvironment.Create())
             using (var collection = new ProjectCollection())
@@ -587,7 +588,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectFileContents"></param>
         /// <returns></returns>
-        public static string CleanupFileContents(string projectFileContents)
+        public static string CleanupFileContents([StringSyntax(StringSyntaxAttribute.Xml)] string projectFileContents)
         {
             StringBuilder temp = new (projectFileContents);
 
@@ -602,7 +603,7 @@ namespace Microsoft.Build.UnitTests
             return temp.ToString();
         }
 
-        public static string Cleanup(this string aString)
+        public static string Cleanup([StringSyntax(StringSyntaxAttribute.Xml)] this string aString)
         {
             return CleanupFileContents(aString);
         }
@@ -660,7 +661,7 @@ namespace Microsoft.Build.UnitTests
             return projectFilePath;
         }
 
-        public static ProjectRootElement CreateInMemoryProjectRootElement(string projectContents, ProjectCollection collection = null, bool preserveFormatting = true)
+        public static ProjectRootElement CreateInMemoryProjectRootElement([StringSyntax(StringSyntaxAttribute.Xml)] string projectContents, ProjectCollection collection = null, bool preserveFormatting = true)
         {
             var cleanedProject = CleanupFileContents(projectContents);
 #pragma warning disable CA2000 // The return object depends on the created XML reader and project collection that should not be disposed in this scope.
@@ -716,7 +717,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns>Returns created <see cref="Project"/>.</returns>
         public static Project CreateInMemoryProject(
             ProjectCollection projectCollection,
-            string xml,
+            [StringSyntax(StringSyntaxAttribute.Xml)] string xml,
             string toolsVersion /* may be null */,
             params ILogger[] loggers)
         {
@@ -752,7 +753,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="loggerVerbosity">The required logging verbosity.</param>
         /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
         public static MockLogger BuildProjectExpectSuccess(
-            string projectContents,
+            [StringSyntax(StringSyntaxAttribute.Xml)] string projectContents,
             ITestOutputHelper testOutputHelper = null,
             LoggerVerbosity loggerVerbosity = LoggerVerbosity.Normal)
         {
@@ -768,7 +769,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="projectContents">The project file content in string format.</param>
         /// <param name="loggers">The array of loggers to use.</param>
         public static void BuildProjectExpectSuccess(
-            string projectContents,
+            [StringSyntax(StringSyntaxAttribute.Xml)] string projectContents,
             params ILogger[] loggers)
         {
             using ProjectCollection collection = new();
@@ -782,7 +783,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectContents">The project file content in string format.</param>
         /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
-        public static MockLogger BuildProjectExpectFailure(string projectContents)
+        public static MockLogger BuildProjectExpectFailure([StringSyntax(StringSyntaxAttribute.Xml)] string projectContents)
         {
             MockLogger logger = new MockLogger();
             BuildProjectExpectFailure(projectContents, logger);
@@ -796,7 +797,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="projectContents">The project file content in string format.</param>
         /// <param name="loggers">The array of loggers to use.</param>
         public static void BuildProjectExpectFailure(
-            string projectContents,
+            [StringSyntax(StringSyntaxAttribute.Xml)] string projectContents,
             params ILogger[] loggers)
         {
             using ProjectCollection collection = new();
@@ -812,7 +813,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="newExpectedProjectContents"></param>
         public static void CompareProjectContents(
             Project project,
-            string newExpectedProjectContents)
+            [StringSyntax(StringSyntaxAttribute.Xml)] string newExpectedProjectContents)
         {
             // Get the new XML for the project, normalizing the whitespace.
             string newActualProjectContents = project.Xml.RawXml;
@@ -900,7 +901,7 @@ namespace Microsoft.Build.UnitTests
         /// up the file contents (replacing single-back-quote with double-quote, etc.).
         /// Silently OVERWRITES existing file.
         /// </summary>
-        public static string CreateFileInTempProjectDirectory(string fileRelativePath, string fileContents, Encoding encoding = null)
+        public static string CreateFileInTempProjectDirectory(string fileRelativePath, [StringSyntax(StringSyntaxAttribute.Xml)] string fileContents, Encoding encoding = null)
         {
             Assert.False(string.IsNullOrEmpty(fileRelativePath));
             string fullFilePath = Path.Combine(TempProjectDir, fileRelativePath);
@@ -1080,7 +1081,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Get items of item type "i" with using the item xml fragment passed in
         /// </summary>
-        public static IList<ProjectItem> GetItemsFromFragment(string fragment, bool allItems = false, bool ignoreCondition = false)
+        public static IList<ProjectItem> GetItemsFromFragment([StringSyntax(StringSyntaxAttribute.Xml)] string fragment, bool allItems = false, bool ignoreCondition = false)
         {
             string content = FormatProjectContentsWithItemGroupFragment(fragment);
 
@@ -1096,7 +1097,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Get the items of type "i" in the project provided
         /// </summary>
-        public static IList<ProjectItem> GetItems(string content, bool allItems = false, bool ignoreCondition = false)
+        public static IList<ProjectItem> GetItems([StringSyntax(StringSyntaxAttribute.Xml)] string content, bool allItems = false, bool ignoreCondition = false)
         {
             using ProjectRootElementFromString projectRootElementFromString = new(CleanupFileContents(content));
             ProjectRootElement projectXml = projectRootElementFromString.Project;
@@ -1109,7 +1110,7 @@ namespace Microsoft.Build.UnitTests
             return item;
         }
 
-        public static string FormatProjectContentsWithItemGroupFragment(string fragment)
+        public static string FormatProjectContentsWithItemGroupFragment([StringSyntax(StringSyntaxAttribute.Xml)] string fragment)
         {
             return
                 $@"
@@ -1352,7 +1353,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Build a project in memory using the new OM
         /// </summary>
-        private static void BuildProjectWithNewOM(string content, ref MockLogger logger, out bool result, bool allowTaskCrash, Dictionary<string, string> globalProperties = null)
+        private static void BuildProjectWithNewOM([StringSyntax(StringSyntaxAttribute.Xml)] string content, ref MockLogger logger, out bool result, bool allowTaskCrash, Dictionary<string, string> globalProperties = null)
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
@@ -1367,7 +1368,7 @@ namespace Microsoft.Build.UnitTests
             result = project.Build(loggers);
         }
 
-        public static void BuildProjectWithNewOMAndBinaryLogger(string content, BinaryLogger binaryLogger, out bool result, out string projectDirectory)
+        public static void BuildProjectWithNewOMAndBinaryLogger([StringSyntax(StringSyntaxAttribute.Xml)] string content, BinaryLogger binaryLogger, out bool result, out string projectDirectory)
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
@@ -1382,7 +1383,7 @@ namespace Microsoft.Build.UnitTests
             projectDirectory = project.DirectoryPath;
         }
 
-        public static MockLogger BuildProjectContentUsingBuildManagerExpectResult(string content, BuildResultCode expectedResult)
+        public static MockLogger BuildProjectContentUsingBuildManagerExpectResult([StringSyntax(StringSyntaxAttribute.Xml)] string content, BuildResultCode expectedResult)
         {
             var logger = new MockLogger();
 
@@ -1393,7 +1394,7 @@ namespace Microsoft.Build.UnitTests
             return logger;
         }
 
-        public static BuildResult BuildProjectContentUsingBuildManager(string content, MockLogger logger, BuildParameters parameters = null)
+        public static BuildResult BuildProjectContentUsingBuildManager([StringSyntax(StringSyntaxAttribute.Xml)] string content, MockLogger logger, BuildParameters parameters = null)
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
@@ -1451,7 +1452,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that a drive enumerating wildcard warning is logged or exception is thrown.
         /// </summary>
-        public static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
+        public static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard([StringSyntax(StringSyntaxAttribute.Xml)] string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
         {
             using (var env = TestEnvironment.Create(testOutput))
             {
@@ -1559,7 +1560,9 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="newExpectedProjectContents"></param>
         /// <param name="newActualProjectContents"></param>
-        public static void CompareProjectXml(string newExpectedProjectContents, string newActualProjectContents)
+        public static void CompareProjectXml(
+            [StringSyntax(StringSyntaxAttribute.Xml)] string newExpectedProjectContents,
+            [StringSyntax(StringSyntaxAttribute.Xml)] string newActualProjectContents)
         {
             // Replace single-quotes with double-quotes, and normalize whitespace.
             newExpectedProjectContents =
@@ -1582,7 +1585,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the saved project content matches the provided content
         /// </summary>
-        public static void VerifyAssertProjectContent(string expected, Project project)
+        public static void VerifyAssertProjectContent([StringSyntax(StringSyntaxAttribute.Xml)] string expected, Project project)
         {
             VerifyAssertProjectContent(expected, project.Xml);
         }
@@ -1590,7 +1593,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the saved project content matches the provided content
         /// </summary>
-        public static void VerifyAssertProjectContent(string expected, ProjectRootElement project, bool ignoreFirstLineOfActual = true)
+        public static void VerifyAssertProjectContent([StringSyntax(StringSyntaxAttribute.Xml)] string expected, ProjectRootElement project, bool ignoreFirstLineOfActual = true)
         {
             VerifyAssertLineByLine(expected, project.RawXml, ignoreFirstLineOfActual);
         }
@@ -1607,7 +1610,7 @@ namespace Microsoft.Build.UnitTests
         /// Write the given <see cref="projectContents"/> in a new temp directory and create the given <see cref="files"/> relative to the project
         /// </summary>
         /// <returns>the path to the temp root directory that contains the project and files</returns>
-        public static string CreateProjectInTempDirectoryWithFiles(string projectContents, string[] files, out string createdProjectFile, out string[] createdFiles, string relativePathFromRootToProject = ".")
+        public static string CreateProjectInTempDirectoryWithFiles([StringSyntax(StringSyntaxAttribute.Xml)] string projectContents, string[] files, out string createdProjectFile, out string[] createdFiles, string relativePathFromRootToProject = ".")
         {
             var root = GetTempDirectoryWithGuid();
             Directory.CreateDirectory(root);
