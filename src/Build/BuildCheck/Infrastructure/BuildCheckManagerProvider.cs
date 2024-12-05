@@ -502,6 +502,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly ConcurrentDictionary<int, string> _projectsByInstanceId = new();
         private readonly ConcurrentDictionary<int, string> _projectsByEvaluationId = new();
         // We are receiving project imported data only from the logger events - hence always in a single threaded context
+        //  (https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Logging-Internals.md)
         private readonly Dictionary<int, HashSet<string>> _deferredProjectEvalIdToImportedProjects = new();
 
         /// <summary>
@@ -619,19 +620,17 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly Dictionary<int, List<BuildEventArgs>> _deferredEvalDiagnostics = new();
 
         /// <summary>
-        /// Propagates a newly imported project file to all projects that import the original project file.
-        /// This method ensures that if Project A imports Project B, and Project B now imports Project C,
-        /// then Project A will also show Project C as an import.
+        /// Registers the logic import by a project file.
         /// </summary>
         /// <param name="evaluationId">The evaluation id is associated with the root project path.</param>
-        /// <param name="originalProjectFile">The path of the project file that is importing a new project.</param>
-        /// <param name="newImportedProjectFile">The path of the newly imported project file.</param>
-        private void PropagateImport(int evaluationId, string originalProjectFile, string newImportedProjectFile)
+        /// <param name="importingProjectFile">The path of the project file that is importing a new project.</param>
+        /// <param name="importedFile">The path of the imported project file.</param>
+        private void PropagateImport(int evaluationId, string importingProjectFile, string importedFile)
         {
             if (_deferredProjectEvalIdToImportedProjects.TryGetValue(evaluationId,
                     out HashSet<string>? importedProjects))
             {
-                importedProjects.Add(newImportedProjectFile);
+                importedProjects.Add(importedFile);
             }
         }
 
