@@ -102,11 +102,6 @@ variables:
     value: '$(ArtifactPackagesPath)/Microsoft.NET.StringTools*.nupkg'
   - name: ExternalAPIsPackagePattern
     value: '$(ArtifactPackagesPath)/VS.ExternalAPIs.*.nupkg'
-  # servicing branches until 17.12 also include Microsoft.Build.Engine and Microsoft.Build.Conversion.Core
-  - name: EngineIncludedProps
-    value: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Conversion.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Engine=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
-  - name: NoEngineProps
-    value: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
 
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
@@ -191,28 +186,40 @@ extends:
         steps:
         - task: Powershell@2
           name: PwshMungeExternalAPIsPkgVersion
-          displayName: Munge ExternalAPIs package version
+          displayName: Munge ExternalAPIs package version and set props
           inputs:
             targetType: inline
             script: |
               $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/VS.ExternalAPIs.*.nupkg"
               $packageFile = Get-ChildItem -Path $folder -Filter VS.ExternalAPIs.*.nupkg | Select-Object -First 1
-              $packageVersion = $packageFile.BaseName.TrimStart("VS.ExternalAPIs.MSBuild")
-              Write-Host "Setting MSBuild_ExtApisPackageVersion to '$packageVersion'"
-              Write-Host "##vso[task.setvariable variable=MSBuild_ExtApisPackageVersion]$($packageVersion)"
+              $MSBuild_ExtApisPackageVersion = $packageFile.BaseName.TrimStart("VS.ExternalAPIs.MSBuild")
+              Write-Host "Setting MSBuild_ExtApisPackageVersion to '$MSBuild_ExtApisPackageVersion'"
+              Write-Host "##vso[task.setvariable variable=MSBuild_ExtApisPackageVersion]$($MSBuild_ExtApisPackageVersion)"
               $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.NET.StringTools*.nupkg"
               $packageFile = Get-ChildItem -Path $folder -Filter Microsoft.NET.StringTools*.nupkg | Select-Object -First 1
-              $packageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
-              Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$packageVersion'"
-              Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($packageVersion)"
+              $MicrosoftNETStringToolsPackageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
+              Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$MicrosoftNETStringToolsPackageVersion'"
+              Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($MicrosoftNETStringToolsPackageVersion)"
+              
+              $props = @(
+                      "VS.ExternalAPIs.MSBuild=$MSBuild_ExtApisPackageVersion",
+                      "Microsoft.Build=$MicrosoftNETStringToolsPackageVersion",
+                      "Microsoft.Build.Framework=$MicrosoftNETStringToolsPackageVersion",
+                      "Microsoft.Build.Tasks.Core=$MicrosoftNETStringToolsPackageVersion",
+                      "Microsoft.Build.Utilities.Core=$MicrosoftNETStringToolsPackageVersion",
+                      "Microsoft.NET.StringTools=$MicrosoftNETStringToolsPackageVersion"
+                  )
+              # servicing branches until 17.12 also include Microsoft.Build.Engine and Microsoft.Build.Conversion.Core
               if ("$(InsertTargetBranch)" -in @("vs17.0", "vs17.3", "vs17.6", "vs17.8", "vs17.10", "vs17.11", "vs17.12"))
               {
-                  Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($EngineIncludedProps)"
+                  $props += @(
+                      "Microsoft.Build.Conversion.Core=$MicrosoftNETStringToolsPackageVersion",
+                      "Microsoft.Build.Engine=$MicrosoftNETStringToolsPackageVersion"
+                  )
               }
-              else
-              {
-                  Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($NoEngineProps)"
-              }
+              $propsValue = $props -join ";"
+              Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
+              Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
         - task: 1ES.PublishNuGet@1
           displayName: 'Push MSBuild CoreXT packages'
           inputs:
