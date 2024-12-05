@@ -25,7 +25,6 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ### 17.14
 - [.SLNX support - use the new parser for .sln and .slnx](https://github.com/dotnet/msbuild/pull/10836)
-- [TreatWarningsAsErrors, WarningsAsMessages, WarningsAsErrors, WarningsNotAsErrors are now supported on the engine side of MSBuild](https://github.com/dotnet/msbuild/pull/10942)
 - [Support custom culture in RAR](https://github.com/dotnet/msbuild/pull/11000)
 
 ### 17.12

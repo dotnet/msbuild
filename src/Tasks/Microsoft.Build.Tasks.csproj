@@ -111,6 +111,9 @@
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>FileUtilities.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\StringUtils.cs">
+      <Link>StringUtils.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>EscapingUtilities.cs</Link>
     </Compile>

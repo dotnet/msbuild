@@ -10,6 +10,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0104](#bc0104---projectreference-is-preferred-to-reference) | Warning | N/A | 9.0.200 | ProjectReference is preferred to Reference. |
 | [BC0105](#bc0105---embeddedresource-should-specify-culture-metadata) | Warning | N/A | 9.0.200 | Culture specific EmbeddedResource should specify Culture metadata. |
 | [BC0106](#bc0106---copytooutputdirectoryalways-should-be-avoided) | Warning | N/A | 9.0.200 | CopyToOutputDirectory='Always' should be avoided. |
+| [BC0107](#bc0107---targetframework-and-targetframeworks-specified-together) | Warning | N/A | 9.0.200 | TargetFramework and TargetFrameworks specified together. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
 | [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Project | 9.0.100 | Property declared but never used. |
@@ -107,6 +108,23 @@ In order to avoid the need to change copy metadata for a large number of items, 
 ```
 
 Both items in above example are treated same and no BC0106 diagnostic is issued.
+
+<a name="BC0107"></a>
+## BC0107 - TargetFramework and TargetFrameworks specified together.
+
+"'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time."
+
+When building a .NET project - you can specify target framework of the resulting output (for more info see [the documentation](https://learn.microsoft.com/en-us/dotnet/standard/frameworks#how-to-specify-a-target-framework)).
+
+When using `TargetFrameworks` property - you are instructing the build to produce output per each specified target framework.
+
+If you specify `TargetFramework` you are instructing the build to produce a single output for that particualar target framework. `TargetFramework` gets precedence even if `TargetFrameworks` is specified - which might seem as if `TargetFrameworks` was ignored.
+
+`BC0107` doesn't apply if you explicitly choose to build a single target of multitargeted build:
+
+```
+dotnet build my-multi-target.csproj /p:TargetFramework=net9.0
+```
 
 <a name="BC0201"></a>
 ## BC0201 - Usage of undefined property.

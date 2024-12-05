@@ -359,6 +359,56 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    [Theory]
+    [InlineData("""<TargetFramework>net9.0</TargetFramework>""", "", false)]
+    [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
+    [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", " /p:TargetFramework=net9.0", false)]
+    [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", true)]
+    public void TFMConfusionCheckTest(string tfmString, string cliSuffix, bool shouldTriggerCheck)
+    {
+        const string testAssetsFolderName = "TFMConfusionCheck";
+        const string projectName = testAssetsFolderName;
+        const string templateToReplace = "###TFM";
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+
+        CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
+        ReplaceStringInFile(Path.Combine(workFolder.Path, $"{projectName}.csproj"),
+            templateToReplace, tfmString);
+
+        _env.SetCurrentDirectory(workFolder.Path);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore" + cliSuffix, out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue();
+
+        int expectedWarningsCount = 0;
+        if (shouldTriggerCheck)
+        {
+            expectedWarningsCount = 1;
+            string expectedDiagnostic = "warning BC0107: .* specifies 'TargetFrameworks' property";
+            Regex.Matches(output, expectedDiagnostic).Count.ShouldBe(2);
+        }
+
+        GetWarningsCount(output).ShouldBe(expectedWarningsCount);
+
+        void ReplaceStringInFile(string filePath, string original, string replacement)
+        {
+            File.Exists(filePath).ShouldBeTrue($"File {filePath} expected to exist.");
+            string text = File.ReadAllText(filePath);
+            text = text.Replace(original, replacement);
+            File.WriteAllText(filePath, text);
+        }
+    }
+
+    private static int GetWarningsCount(string output)
+    {
+        Regex regex = new Regex(@"(\d+) Warning\(s\)");
+        Match match = regex.Match(output);
+        match.Success.ShouldBeTrue("Expected Warnings section not found in the build output.");
+        return int.Parse(match.Groups[1].Value);
+    }
+
 
     [Fact]
     public void ConfigChangeReflectedOnReuse()
@@ -537,7 +587,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Fact(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
+    [Fact]
     public void CheckHasAccessToAllConfigs()
     {
         using (var env = TestEnvironment.Create())
@@ -715,7 +765,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
+    [Theory]
     [InlineData("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)
@@ -823,6 +873,35 @@ public class EndToEndTests : IDisposable
         output.ShouldNotContain("BC0102");
         output.ShouldNotContain("BC0103");
     }
+
+#if NET
+    [Fact]
+    public void TestBuildCheckTemplate()
+    {
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+        var nugetTemplateName = "nugetTemplate.config";
+        var nugetTemplatePath = Path.Combine(TestAssetsRootPath, "CheckCandidate", nugetTemplateName);
+        File.Copy(nugetTemplatePath, Path.Combine(workFolder.Path, nugetTemplateName));
+        AddCustomDataSourceToNugetConfig(workFolder.Path);
+
+        var ExecuteDotnetCommand = (string parameters) =>
+        {
+            string output = RunnerUtilities.RunProcessAndGetOutput("dotnet", parameters, out bool success);
+            return output;
+        };
+
+        var buildCheckTemplatePath = Path.Combine(BuildCheckUnitTestsConstants.RepoRoot, "template_feed", "content", "Microsoft.CheckTemplate");
+        var templateShortName = "msbuildcheck";
+        var projectName = "BuildCheck";
+        var installLog = ExecuteDotnetCommand($"new install {buildCheckTemplatePath}");
+        installLog.ShouldContain($"Success: {buildCheckTemplatePath} installed the following templates:");
+        var creationLog = ExecuteDotnetCommand($"new {templateShortName} -n {projectName} --MicrosoftBuildVersion {BuildCheckUnitTestsConstants.MicrosoftBuildPackageVersion} -o {workFolder.Path} ");
+        creationLog.ShouldContain("The template \"MSBuild custom check skeleton project.\" was created successfully.");
+        var buildLog = ExecuteDotnetCommand($"build {workFolder.Path}");
+        buildLog.ShouldContain("Build succeeded.");
+        ExecuteDotnetCommand($"new -u {buildCheckTemplatePath}");
+    }
+#endif
 
     private void AddCustomDataSourceToNugetConfig(string checkCandidatePath)
     {
