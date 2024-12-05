@@ -1105,7 +1105,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
 
-            // We consider this the entrypoint for the project build for purposes of BuildCheck processing
+            // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
             bool isRestoring = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring] is not null;
 
             var buildCheckManager = isRestoring
@@ -1155,7 +1155,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.Request.BuildEventContext);
             }
 
-
+            
             try
             {
                 HandleProjectStarted(buildCheckManager);
@@ -1279,7 +1279,7 @@ namespace Microsoft.Build.BackEnd
             BuildEventContext projectBuildEventContext = _projectLoggingContext?.BuildEventContext;
 
             // We can set the warning as errors and messages only after the project logging context has been created (as it creates the new ProjectContextId)
-            if (loggingService != null && projectBuildEventContext != null)
+            if (buildCheckManager != null && loggingService != null && projectBuildEventContext != null)
             {
                 args.WarningsAsErrors = loggingService.GetWarningsAsErrors(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 args.WarningsAsMessages = loggingService.GetWarningsAsMessages(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
