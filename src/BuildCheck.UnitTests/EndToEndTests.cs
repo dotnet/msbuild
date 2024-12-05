@@ -401,14 +401,6 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    private static int GetWarningsCount(string output)
-    {
-        Regex regex = new Regex(@"(\d+) Warning\(s\)");
-        Match match = regex.Match(output);
-        match.Success.ShouldBeTrue("Expected Warnings section not found in the build output.");
-        return int.Parse(match.Groups[1].Value);
-    }
-
 
     [Fact]
     public void ConfigChangeReflectedOnReuse()
