@@ -26,6 +26,7 @@ namespace Microsoft.Build.BackEnd
             _currentlyBufferedByteCount = 0;
         }
 
+        // Added some comment so I can make a new test commit
         public override bool CanRead { get { return _innerStream.CanRead; } }
 
         public override bool CanSeek { get { return false; } }
