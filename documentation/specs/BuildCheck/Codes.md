@@ -14,14 +14,14 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0203](#bc0203----property-declared-but-never-used) | None | Project | 9.0.100 | Property declared but never used. |
 
 
-Note: What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
-
-To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
-
-_Cmd:_
-```cmd
-dotnet build -bl -check
-```
+Notes: 
+ * What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
+ * How can you alter the default configuration? [Please check the Configuration section of the BuildCheck documentation](./BuildCheck.md#sample-configuration)
+ * To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview
+   _Cmd:_
+   ```cmd
+   dotnet build -bl -check
+   ```
 
 <a name="BC0101"></a>
 ## BC0101 - Shared output path.
@@ -133,4 +133,4 @@ Common cases of false positives:
 <BR/>
 
 ### Related Resources
-* [BuildCheck documentation](https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck.md)
+* [BuildCheck documentation](./BuildCheck.md)
