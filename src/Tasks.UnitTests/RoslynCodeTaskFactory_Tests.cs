@@ -111,8 +111,6 @@ Log.LogError(Alpha.GetString());
                 _testOutputHelper.WriteLine($"AssemblyProj: {assemblyProj.Path}, {assemblyProj.ToString()}");
                 TransientTestFile csFile = env.CreateFile(folder, "Class1.cs", @"
 using System;
-using System.Text.Json;
-using System.Memory;
 
 namespace _5106 {
     public class Class1 {

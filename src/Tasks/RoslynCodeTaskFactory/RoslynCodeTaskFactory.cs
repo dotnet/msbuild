@@ -58,7 +58,11 @@ namespace Microsoft.Build.Tasks
                     "Microsoft.Build.Framework",
                     "Microsoft.Build.Utilities.Core",
                     "mscorlib",
-                    "netstandard"
+                    "netstandard",
+                       #if RUNTIME_TYPE_NETCORE || NETCOREAPP
+            "System.Text.Json",
+            "System.Memory",
+            #endif
                 }
             },
             // CSharp specific assembly references
