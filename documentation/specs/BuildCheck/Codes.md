@@ -12,17 +12,17 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0107](#bc0107---targetframework-and-targetframeworks-specified-together) | Warning | N/A | 9.0.200 | TargetFramework and TargetFrameworks specified together. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
-| [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Project | 9.0.100 | Property declared but never used. |
+| [BC0203](#bc0203----property-declared-but-never-used) | None | Project | 9.0.100 | Property declared but never used. |
 
 
-Note: What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
-
-To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
-
-_Cmd:_
-```cmd
-dotnet build -bl -check
-```
+Notes: 
+ * What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
+ * How can you alter the default configuration? [Please check the Configuration section of the BuildCheck documentation](./BuildCheck.md#sample-configuration)
+ * To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview
+   _Cmd:_
+   ```cmd
+   dotnet build -bl -check
+   ```
 
 <a name="BC0101"></a>
 ## BC0101 - Shared output path.
@@ -138,7 +138,7 @@ If `BC0202` and [BC0201](#BC0201) are both enabled - then `BC0201` reports only 
 
 This check indicates that a property was defined in the observed scope (by default it's the project file only) and it was then not used anywhere in the build.
 
-This is a runtime check, not a static analysis check - so it can have false positives - for this reasons it's currently only suggestion.
+This is a runtime check, not a static analysis check - so it can have false positives - for this reasons it's currently not enabled by defaut.
 
 Common cases of false positives:
  * Property not used in a particular build might be needed in a build with different conditions or a build of a different target (e.g. `dotnet pack /check` or `dotnet build /t:pack /check` accesses some additional properties as compared to ordinary `dotnet build /check`).
@@ -150,4 +150,4 @@ Common cases of false positives:
 <BR/>
 
 ### Related Resources
-* [BuildCheck documentation](https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck.md)
+* [BuildCheck documentation](./BuildCheck.md)
