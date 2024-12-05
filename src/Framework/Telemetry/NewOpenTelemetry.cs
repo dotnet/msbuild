@@ -23,7 +23,7 @@ namespace Microsoft.Build.Framework.Telemetry
     /// <summary>
     /// A static class to instrument telemetry via OpenTelemetry.
     /// </summary>
-    public static class FrameworkTelemetry
+    public static class NewOpenTelemetry
     {
 
         private const string OTelNamespace = "Microsoft.VisualStudio.OpenTelemetry.MSBuild";
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             tracerProvider = Sdk.CreateTracerProviderBuilder()
                 .AddVisualStudioDefaultTraceExporter(defaultExporterSettings)
-                .AddOtlpExporter()
+                .AddOtlpExporter() // see if this looks at any env vars
                 .Build();
             logger = factory.CreateLogger(OTelNamespace);
 
@@ -80,16 +80,16 @@ namespace Microsoft.Build.Framework.Telemetry
                 .AddVisualStudioDefaultMetricExporter(defaultExporterSettings)
                 .Build();
 
+            // this should not happen in VS
             collector = OpenTelemetryCollectorProvider.CreateCollector(collectorSettings);
             collector.StartAsync();
         }
 
-        private const string SamplePropertyPrefix = "VS.MSBuild.Event.";
         internal static void EndOfBuildTelemetry(BuildTelemetry buildTelemetry)
         {
             Enable();
 #pragma warning disable CS8604 // Possible null reference argument.
-            using var telemetryActivity = TelemetryHelpers.StartActivity("build", initialProperties: new
+            using var telemetryActivity = TelemetryHelpers.StartActivity("Build", initialProperties: new
                  Dictionary<string, object>
                 {
                     { "StartAt", buildTelemetry.StartAt?.ToString() },
@@ -97,20 +97,16 @@ namespace Microsoft.Build.Framework.Telemetry
                     { "FinishedAt", buildTelemetry.FinishedAt?.ToString() },
                     { "Success", buildTelemetry.Success },
                     { "Target", buildTelemetry.Target },
-                    { "ServerFallbackReason", buildTelemetry.ServerFallbackReason },
                     { "Version", buildTelemetry.Version?.ToString() },
                     { "DisplayVersion", buildTelemetry.DisplayVersion },
                     { "SAC", buildTelemetry.SACEnabled },
                     { "BuildCheckEnabled", buildTelemetry.BuildCheckEnabled },
+                    { "Host", buildTelemetry.Host },
                 });
 #pragma warning restore CS8604 // Possible null reference argument.
-            telemetryActivity.AddBaggage("baggage", "hey");
-            telemetryActivity.AddEvent(new ActivityEvent("hey2"));
-            telemetryActivity.AddEvent(new ActivityEvent(OTelNamespace + "hey3"));
             telemetryActivity.SetStartTime(buildTelemetry.StartAt ?? DateTime.UtcNow);
             telemetryActivity.Stop();
             telemetryActivity.SetEndTime(buildTelemetry.FinishedAt ?? DateTime.UtcNow);
-            telemetryActivity.SetCustomProperty(SamplePropertyPrefix + "hey", "hello");
             telemetryActivity.Dispose();
         }
 
@@ -148,10 +144,13 @@ namespace Microsoft.Build.Framework.Telemetry
     public static class TelemetryHelpers
     {
 
-        private const string EventPrefix = "VS/MSBuild/Event/";
+        private const string EventPrefix = "MSBuild/";
+        private const string PropertyPrefix = "MSBuild.";
+        // private const string PropertyPrefix = "";
+
         public static Activity StartActivity(string name, IDictionary<string, object> initialProperties)
         {
-            return FrameworkTelemetry.DefaultTelemetrySource
+            return NewOpenTelemetry.DefaultTelemetrySource
                 .StartActivity(EventPrefix + name, ActivityKind.Internal)
                 .WithTags(initialProperties);
         }
@@ -164,7 +163,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             foreach (KeyValuePair<string, object> tag in tags)
             {
-                activity.SetTag(tag.Key, tag.Value);
+                activity.SetTag(PropertyPrefix + tag.Key, tag.Value);
             }
 
             return activity;

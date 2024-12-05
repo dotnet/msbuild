@@ -498,10 +498,10 @@ namespace Microsoft.Build.Execution
                 parameters.LogTaskInputs = true;
             }
 #if NETFRAMEWORK
-            Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317");
-            Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "MSBuild");
-            FrameworkTelemetry.Enable();
-            var a = TelemetryHelpers.StartActivity("BeginBuild", new Dictionary<string, object> { { "feature_flag.IsBuildCheckEnabled", parameters.IsBuildCheckEnabled } });
+            // Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317");
+            // Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "MSBuild");
+            NewOpenTelemetry.Enable();
+            var a = TelemetryHelpers.StartActivity("BeginBuild", new Dictionary<string, object> { { "IsBuildCheckEnabled", parameters.IsBuildCheckEnabled } });
             a.Dispose();
 #endif
 
@@ -1082,11 +1082,11 @@ namespace Microsoft.Build.Execution
                             var sacState = NativeMethodsShared.GetSACState();
                             // The Enforcement would lead to build crash - but let's have the check for completeness sake.
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
-                            Debugger.Launch();
+                            // Debugger.Launch();
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
 #if NETFRAMEWORK
                             // var telemetryActivity = TelemetryHelpers.StartActivity("endbuild");
-                            FrameworkTelemetry.EndOfBuildTelemetry(_buildTelemetry);
+                            NewOpenTelemetry.EndOfBuildTelemetry(_buildTelemetry);
                             // telemetryActivity.Dispose();
 #endif
                             // Clean telemetry to make it ready for next build submission.

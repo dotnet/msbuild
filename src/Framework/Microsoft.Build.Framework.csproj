@@ -45,7 +45,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <Compile Remove="Telemetry\FrameworkTelemetry.cs" />
+    <Compile Remove="Telemetry\NewOpenTelemetry.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -55,7 +55,7 @@
     <PackageReference Include="OpenTelemetry.Exporter.Console" />
     <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
-    <Compile Include="Telemetry\FrameworkTelemetry.cs"/>
+    <Compile Include="Telemetry\NewOpenTelemetry.cs"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
