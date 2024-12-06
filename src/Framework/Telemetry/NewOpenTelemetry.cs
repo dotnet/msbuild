@@ -144,8 +144,8 @@ namespace Microsoft.Build.Framework.Telemetry
     public static class TelemetryHelpers
     {
 
-        private const string EventPrefix = "MSBuild/";
-        private const string PropertyPrefix = "MSBuild.";
+        private const string EventPrefix = "VS/MSBuild/";
+        private const string PropertyPrefix = "VS.MSBuild.";
         // private const string PropertyPrefix = "";
 
         public static Activity StartActivity(string name, IDictionary<string, object> initialProperties)
