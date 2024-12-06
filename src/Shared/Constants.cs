@@ -29,24 +29,29 @@ namespace Microsoft.Build.Shared
         internal const string SdksPath = "MSBuildSDKsPath";
 
         /// <summary>
+        ///  The prefix that was originally used. Now extracted out for the purpose of allowing even the non-prefixed variant.
+        /// </summary>
+        internal const string MSBuildPrefix = "MSBuild";
+
+        /// <summary>
         /// Name of the property that indicates that all warnings should be treated as errors.
         /// </summary>
-        internal const string TreatWarningsAsErrors = "MSBuildTreatWarningsAsErrors";
+        internal const string TreatWarningsAsErrors = "TreatWarningsAsErrors";
 
         /// <summary>
         /// Name of the property that indicates a list of warnings to treat as errors.
         /// </summary>
-        internal const string WarningsAsErrors = "MSBuildWarningsAsErrors";
+        internal const string WarningsAsErrors = "WarningsAsErrors";
 
         /// <summary>
         /// Name of the property that indicates a list of warnings to not treat as errors.
         /// </summary>
-        internal const string WarningsNotAsErrors = "MSBuildWarningsNotAsErrors";
+        internal const string WarningsNotAsErrors = "WarningsNotAsErrors";
 
         /// <summary>
         /// Name of the property that indicates the list of warnings to treat as messages.
         /// </summary>
-        internal const string WarningsAsMessages = "MSBuildWarningsAsMessages";
+        internal const string WarningsAsMessages = "WarningsAsMessages";
 
         /// <summary>
         /// The name of the environment variable that users can specify to override where NuGet assemblies are loaded from in the NuGetSdkResolver.
