@@ -168,8 +168,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
 
         [Fact]
-        // Scenario: we want to test that we solved the race described here: https://github.com/dotnet/msbuild/issues/7927#issuecomment-1232470838
-        public void AssertResolverPopulationRaceNotPresent()
+        // Scenario: we want to test that we solved the contention described here: https://github.com/dotnet/msbuild/issues/7927#issuecomment-1232470838
+        public void AssertResolverPopulationContentionNotPresent()
         {
             s_sdkResolverService.InitializeForTests(new MockLoaderStrategy(includeResolversWithPatterns: true), resolverOnly: true);
            

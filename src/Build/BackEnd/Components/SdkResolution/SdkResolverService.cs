@@ -51,12 +51,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// Stores the list of manifests of specific SDK resolvers which could be loaded.
         /// </summary>
-        private IList<SdkResolverManifest> _specificResolversManifestsRegistry;
+        private IReadOnlyList<SdkResolverManifest> _specificResolversManifestsRegistry;
 
         /// <summary>
         /// Stores the list of manifests of general SDK resolvers which could be loaded.
         /// </summary>
-        private IList<SdkResolverManifest> _generalResolversManifestsRegistry;
+        private IReadOnlyList<SdkResolverManifest> _generalResolversManifestsRegistry;
 
 #if DEBUG
         internal bool _fake_initialization = false;
@@ -273,7 +273,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return new SdkResult(sdk, null, null);
         }
 
-        private List<SdkResolver> GetResolvers(IList<SdkResolverManifest> resolversManifests, LoggingContext loggingContext, ElementLocation sdkReferenceLocation)
+        private List<SdkResolver> GetResolvers(IReadOnlyList<SdkResolverManifest> resolversManifests, LoggingContext loggingContext, ElementLocation sdkReferenceLocation)
         {
             // Create a sorted by priority list of resolvers. Load them if needed.
             List<SdkResolver> resolvers = new List<SdkResolver>();
@@ -517,9 +517,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     }
                 }
 
-                _specificResolversManifestsRegistry = new List<SdkResolverManifest>();
-                _generalResolversManifestsRegistry = new List<SdkResolverManifest>();
+                var _specificResolversManifestsRegistryPlaceholder = new List<SdkResolverManifest>();
+                var _generalResolversManifestsRegistryPlaceholder = new List<SdkResolverManifest>();
 
+                // Break the list of all resolvers manifests into two parts: manifests with specific and general resolvers.
+                // Since the collections are meant to be immutable, we have to only ever assign them when they're complete.
+                // Otherwise race can happen, see https://github.com/dotnet/msbuild/issues/7927
                 foreach (SdkResolverManifest manifest in allResolversManifests)
                 {
 #if DEBUG
@@ -530,17 +533,25 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 #endif
                     if (manifest.ResolvableSdkRegex == null)
                     {
-                        _generalResolversManifestsRegistry.Add(manifest);
+                        _generalResolversManifestsRegistryPlaceholder.Add(manifest);
                     }
                     else
                     {
-                        _specificResolversManifestsRegistry.Add(manifest);
+                        _specificResolversManifestsRegistryPlaceholder.Add(manifest);
                     }
                 }
                 if (sdkDefaultResolversManifest != null)
                 {
-                    _generalResolversManifestsRegistry.Add(sdkDefaultResolversManifest);
+                    _generalResolversManifestsRegistryPlaceholder.Add(sdkDefaultResolversManifest);
                 }
+
+                // Until this is set(and this is under lock), the ResolveSdkUsingResolversWithPatternsFirst will always
+                // enter if branch leaving to this section.
+                // Then it will wait at the lock and return after we release it since the collections we have filled them before releasing the lock.
+                // The collections are never modified after this point.
+                // So I've made them ReadOnly
+                _generalResolversManifestsRegistry = _generalResolversManifestsRegistryPlaceholder.AsReadOnly();
+                _specificResolversManifestsRegistry = _specificResolversManifestsRegistryPlaceholder.AsReadOnly();
             }
         }
 
