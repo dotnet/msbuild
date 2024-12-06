@@ -166,6 +166,8 @@ namespace Microsoft.Build.Tasks
                         {
                             Log.LogWarningWithCodeFromResources("AssignCulture.CultureOverwritten",
                                 existingCulture, AssignedFiles[i].ItemSpec, info.culture);
+
+                            // Here we should have had removed the culture - let's do that behind trait
                         }
 
                         if (!string.IsNullOrEmpty(info.culture))
