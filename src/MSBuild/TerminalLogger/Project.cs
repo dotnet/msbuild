@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Microsoft.Build.Logging.TerminalLogger;
 
@@ -16,8 +17,9 @@ internal sealed class Project
     /// Initialized a new <see cref="Project"/> with the given <paramref name="targetFramework"/>.
     /// </summary>
     /// <param name="targetFramework">The target framework of the project or null if not multi-targeting.</param>
-    public Project(string? targetFramework, StopwatchAbstraction? stopwatch)
+    public Project(string projectFile, string? targetFramework, StopwatchAbstraction? stopwatch)
     {
+        File = projectFile;
         TargetFramework = targetFramework;
 
         if (stopwatch is not null)
@@ -30,6 +32,8 @@ internal sealed class Project
             Stopwatch = SystemStopwatch.StartNew();
         }
     }
+
+    public string File { get; }
 
     /// <summary>
     /// A stopwatch to time the build of the project.
@@ -68,5 +72,16 @@ internal sealed class Project
     {
         BuildMessages ??= new List<BuildMessage>();
         BuildMessages.Add(new BuildMessage(severity, message));
+    }
+
+    /// <summary>
+    /// Filters the build messages to only include errors.
+    /// </summary>
+    /// <returns>A sequence of error build messages.</returns>
+    public IEnumerable<BuildMessage> GetBuildErrorMessages()
+    {
+        return BuildMessages is null ?
+            Enumerable.Empty<BuildMessage>() :
+            BuildMessages.Where(message => message.Severity == MessageSeverity.Error);
     }
 }
