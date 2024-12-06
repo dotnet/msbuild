@@ -35,19 +35,6 @@ namespace Microsoft.Build.Engine.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(GetTestProject(treatAllWarningsAsErrors: false));
         }
 
-        [Fact]
-        public void TreatAllWarningsAsErrorsNoPrefix()
-        {
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(GetTestProject(customProperties: new Dictionary<string, string>
-            {
-                {"TreatWarningsAsErrors", "true"},
-            }));
-
-            VerifyBuildErrorEvent(logger);
-
-            ObjectModelHelpers.BuildProjectExpectSuccess(GetTestProject(treatAllWarningsAsErrors: false));
-        }
-
         /// <summary>
         /// https://github.com/dotnet/msbuild/issues/2667
         /// </summary>
@@ -99,6 +86,22 @@ namespace Microsoft.Build.Engine.UnitTests
                     {
                         {"Foo", "true"},
                         {"MSBuildTreatWarningsAsErrors", "$(Foo)"}
+                    }));
+
+            VerifyBuildErrorEvent(logger);
+        }
+
+        [Fact]
+        public void TreatWarningsAsErrorsWhenSpecifiedThroughAdditiveProperty()
+        {
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(
+                GetTestProject(
+                    customProperties: new List<KeyValuePair<string, string>>
+                    {
+                        new KeyValuePair<string, string>("MSBuildWarningsAsErrors", "123"),
+                        new KeyValuePair<string, string>("MSBuildWarningsAsErrors", $@"$(MSBuildWarningsAsErrors);
+                                                                                       {ExpectedEventCode.ToLowerInvariant()}"),
+                        new KeyValuePair<string, string>("MSBuildWarningsAsErrors", "$(MSBuildWarningsAsErrors);ABC")
                     }));
 
             VerifyBuildErrorEvent(logger);
@@ -174,97 +177,20 @@ namespace Microsoft.Build.Engine.UnitTests
             VerifyBuildMessageEvent(logger);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void TreatWarningsAsMessagesWhenSpecifiedThroughAdditiveProperty(bool usePrefix)
-        {
-            string prefix = usePrefix ? "MSBuild" : "";
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(
-                GetTestProject(
-                    customProperties: new List<KeyValuePair<string, string>>
-                    {
-                        new KeyValuePair<string, string>($"{prefix}WarningsAsMessages", "123"),
-                        new KeyValuePair<string, string>($"{prefix}WarningsAsMessages", $@"$({prefix}WarningsAsMessages);
-                                                                                       {ExpectedEventCode.ToLowerInvariant()}"),
-                        new KeyValuePair<string, string>($"{prefix}WarningsAsMessages", $"$({prefix}WarningsAsMessages);ABC")
-                    }));
-
-            VerifyBuildMessageEvent(logger);
-        }
-
         [Fact]
-        ///
-        /// This is for chaining the properties together via addition.
-        /// Furthermore it is intended to check if the prefix and no prefix variant interacts properly with each other.
-        ///
-        public void TreatWarningsAsMessagesWhenSpecifiedThroughAdditivePropertyCombination()
+        public void TreatWarningsAsMessagesWhenSpecifiedThroughAdditiveProperty()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(
                 GetTestProject(
                     customProperties: new List<KeyValuePair<string, string>>
                     {
                         new KeyValuePair<string, string>("MSBuildWarningsAsMessages", "123"),
-                        new KeyValuePair<string, string>("WarningsAsMessages", $@"$(MSBuildWarningsAsMessages);
+                        new KeyValuePair<string, string>("MSBuildWarningsAsMessages", $@"$(MSBuildWarningsAsMessages);
                                                                                        {ExpectedEventCode.ToLowerInvariant()}"),
-                        new KeyValuePair<string, string>("MSBuildWarningsAsMessages", "$(WarningsAsMessages);ABC")
+                        new KeyValuePair<string, string>("MSBuildWarningsAsMessages", "$(MSBuildWarningsAsMessages);ABC")
                     }));
 
             VerifyBuildMessageEvent(logger);
-        }
-
-        [Fact]
-        public void TreatWarningsNotAsErrorsWhenSpecifiedThroughAdditivePropertyCombination()
-        {
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(
-                GetTestProject(
-                    customProperties: new List<KeyValuePair<string, string>>
-                    {
-                        new KeyValuePair<string, string>("MSBuildWarningsNotAsErrors", "123"),
-                        new KeyValuePair<string, string>("WarningsNotAsErrors", $@"$(MSBuildWarningsNotAsErrors);
-                                                                                       {ExpectedEventCode.ToLowerInvariant()}"),
-                        new KeyValuePair<string, string>("MSBuildWarningsNotAsErrors", "$(WarningsNotAsErrors);ABC")
-                    }),
-                _output);
-
-            VerifyBuildWarningEvent(logger);
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void TreatWarningsAsErrorsWhenSpecifiedThroughAdditiveProperty(bool MSBuildPrefix)
-        {
-            string prefix = MSBuildPrefix ? "MSBuild" : "";
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(
-                GetTestProject(
-                    customProperties: new List<KeyValuePair<string, string>>
-                    {
-                        new KeyValuePair<string, string>($@"{prefix}WarningsAsErrors", "123"),
-                        new KeyValuePair<string, string>($@"{prefix}WarningsAsErrors", $@"$({prefix}WarningsAsErrors);
-                                                                                       {ExpectedEventCode.ToLowerInvariant()}"),
-                        new KeyValuePair<string, string>($@"{prefix}WarningsAsErrors", $@"$({prefix}WarningsAsErrors);ABC")
-                    }),
-                _output);
-
-            VerifyBuildErrorEvent(logger);
-        }
-
-        [Fact]
-        public void TreatWarningsAsErrorsWhenSpecifiedThroughAdditivePropertyCombination()
-        {
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(
-                GetTestProject(
-                    customProperties: new List<KeyValuePair<string, string>>
-                    {
-                        new KeyValuePair<string, string>("WarningsAsErrors", "123"),
-                        new KeyValuePair<string, string>("MSBuildWarningsAsErrors", $@"$(WarningsAsErrors);
-                                                                                       {ExpectedEventCode.ToLowerInvariant()}"),
-                        new KeyValuePair<string, string>("WarningsAsErrors", "$(MSBuildWarningsAsErrors);ABC")
-                    }),
-                _output);
-
-            VerifyBuildErrorEvent(logger);
         }
 
         [Fact]
@@ -276,8 +202,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     {
                         new KeyValuePair<string, string>("MSBuildWarningsAsMessages", "123"),
                         new KeyValuePair<string, string>("MSBuildWarningsAsMessages", "$(MSBuildWarningsAsMessages);ABC")
-                    }),
-                _output);
+                    }));
 
             VerifyBuildWarningEvent(logger);
         }
@@ -348,33 +273,27 @@ namespace Microsoft.Build.Engine.UnitTests
             </Project>";
         }
 
-
         [Theory]
 
         [InlineData("MSB1235", "MSB1234", "MSB1234", "MSB1234", false)] // Log MSB1234, treat as error via MSBuildWarningsAsErrors
         [InlineData("MSB1235", "", "MSB1234", "MSB1234", true)] // Log MSB1234, expect MSB1234 as error via MSBuildTreatWarningsAsErrors
         [InlineData("MSB1234", "MSB1234", "MSB1234", "MSB4181", true)]// Log MSB1234, MSBuildWarningsAsMessages takes priority
-        [InlineData("MSB1235", "MSB1234", "MSB1234", "MSB1234", false, false)] // Log MSB1234, treat as error via BuildWarningsAsErrors
-        [InlineData("MSB1235", "", "MSB1234", "MSB1234", true, false)] // Log MSB1234, expect MSB1234 as error via BuildTreatWarningsAsErrors
-        [InlineData("MSB1234", "MSB1234", "MSB1234", "MSB4181", true, false)]// Log MSB1234, BuildWarningsAsMessages takes priority
         public void WarningsAsErrorsAndMessages_Tests(string WarningsAsMessages,
                                                       string WarningsAsErrors,
                                                       string WarningToLog,
                                                       string LogShouldContain,
-                                                      bool allWarningsAreErrors = false,
-                                                      bool useMSPrefix = true)
+                                                      bool allWarningsAreErrors = false)
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
-                var prefix = useMSPrefix ? "MSBuild" : "";
                 TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
                 <Project>
                     <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
                     <UsingTask TaskName = ""CustomLogAndReturnTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
                     <PropertyGroup>
-                        <{prefix}TreatWarningsAsErrors>{allWarningsAreErrors}</{prefix}TreatWarningsAsErrors>
-                        <{prefix}WarningsAsMessages>{WarningsAsMessages}</{prefix}WarningsAsMessages>
-                        <{prefix}WarningsAsErrors>{WarningsAsErrors}</{prefix}WarningsAsErrors>
+                        <MSBuildTreatWarningsAsErrors>{allWarningsAreErrors}</MSBuildTreatWarningsAsErrors>
+                        <MSBuildWarningsAsMessages>{WarningsAsMessages}</MSBuildWarningsAsMessages>
+                        <MSBuildWarningsAsErrors>{WarningsAsErrors}</MSBuildWarningsAsErrors>
                     </PropertyGroup>
                     <Target Name='Build'>
                         <CustomLogAndReturnTask Return=""true"" ReturnHasLoggedErrors=""true"" WarningCode=""{WarningToLog}""/>
@@ -388,83 +307,6 @@ namespace Microsoft.Build.Engine.UnitTests
                 logger.ErrorCount.ShouldBe(1);
 
                 logger.AssertLogContains(LogShouldContain);
-            }
-        }
-
-        [Theory]
-
-        [InlineData(true)]// Log MSB1234, BuildWarningsNotAsErrors takes priority
-        [InlineData(false)]
-        public void WarningsNotAsErrorsAndMessages_Tests(bool useMSPrefix)
-        {
-            string Warning = "MSB1235";
-            using (TestEnvironment env = TestEnvironment.Create(_output))
-            {
-                string prefix = useMSPrefix ? "MSBuild" : "";
-                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
-                <Project>
-                    <PropertyGroup>
-                        <{prefix}TreatWarningsAsErrors>true</{prefix}TreatWarningsAsErrors>
-                        <{prefix}WarningsNotAsErrors>{Warning}</{prefix}WarningsNotAsErrors>
-                    </PropertyGroup>
-                    <Target Name='Build'>
-                        <Warning Text=""some random text"" Code='{Warning}' />
-                    </Target>
-                </Project>");
-
-                MockLogger logger = proj.BuildProjectExpectSuccess();
-
-                logger.WarningCount.ShouldBe(1);
-                logger.ErrorCount.ShouldBe(0);
-
-                logger.AssertLogContains(Warning);
-            }
-        }
-
-
-
-        [Theory]
-        [InlineData("TreatWarningsAsErrors", "true", false)] // All warnings are treated as errors
-        [InlineData("WarningsAsErrors", "MSB1007", false)]
-        [InlineData("WarningsAsMessages", "MSB1007", false)]
-        [InlineData("WarningsNotAsErrors", "MSB1007", true)]
-        [InlineData("WarningsNotAsErrors", "MSB1007", false)]
-        public void WarningsChangeWaveTest(string property, string propertyData, bool treatWarningsAsErrors)
-        {
-            using (TestEnvironment env = TestEnvironment.Create(_output))
-            {
-                string warningCode = "MSB1007";
-                string treatWarningsAsErrorsCodeProperty = treatWarningsAsErrors ? "<MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>" : "";
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_14.ToString());
-                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
-                <Project>
-                    <PropertyGroup>
-                        {treatWarningsAsErrorsCodeProperty}
-                        <{property}>{propertyData}</{property}>
-                    </PropertyGroup>
-                    <Target Name='Build'>
-                        <Warning Text=""some random text"" Code='{warningCode}' />
-                    </Target>
-                </Project>");
-                if (treatWarningsAsErrors)
-                {
-                    // Since the "no prefix" variations can't do anything with the change wave disabled, this should always fail.
-                    MockLogger logger = proj.BuildProjectExpectFailure();
-                    logger.ErrorCount.ShouldBe(1);
-                    logger.AssertLogContains($"error {warningCode}");
-
-                    logger.AssertLogContains(warningCode);
-                }
-                else
-                {
-                    MockLogger logger = proj.BuildProjectExpectSuccess();
-
-                    logger.WarningCount.ShouldBe(1);
-                    logger.AssertLogContains($"warning {warningCode}");
-                    logger.ErrorCount.ShouldBe(0);
-
-                    logger.AssertLogContains(warningCode);
-                }
             }
         }
 
@@ -529,11 +371,8 @@ namespace Microsoft.Build.Engine.UnitTests
         [Theory]
         [InlineData("MSB1234", false, 1, 1)]
         [InlineData("MSB0000", true, 0, 2)]
-        [InlineData("MSB1234", false, 1, 1, false)]
-        [InlineData("MSB0000", true, 0, 2, false)]
-        public void TaskReturnsTrue_Tests(string warningsAsErrors, bool treatAllWarningsAsErrors, int warningCountShouldBe, int errorCountShouldBe, bool useMSPrefix = true)
+        public void TaskReturnsTrue_Tests(string warningsAsErrors, bool treatAllWarningsAsErrors, int warningCountShouldBe, int errorCountShouldBe)
         {
-            string prefix = useMSPrefix ? "MSBuild" : "";
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
                 TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
@@ -541,8 +380,8 @@ namespace Microsoft.Build.Engine.UnitTests
                     <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
                     <UsingTask TaskName = ""CustomLogAndReturnTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
                     <PropertyGroup>
-                        <{prefix}TreatWarningsAsErrors>{treatAllWarningsAsErrors}</{prefix}TreatWarningsAsErrors>
-                        <{prefix}WarningsAsErrors>{warningsAsErrors}</{prefix}WarningsAsErrors>
+                        <MSBuildTreatWarningsAsErrors>{treatAllWarningsAsErrors}</MSBuildTreatWarningsAsErrors>
+                        <MSBuildWarningsAsErrors>{warningsAsErrors}</MSBuildWarningsAsErrors>
                     </PropertyGroup>
                     <Target Name='Build'>
                         <CustomLogAndReturnTask Return=""true"" WarningCode=""MSB1234""/>
