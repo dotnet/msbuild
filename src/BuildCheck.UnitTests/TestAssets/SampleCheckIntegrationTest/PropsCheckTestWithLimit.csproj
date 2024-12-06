@@ -1,0 +1,32 @@
+<Project DefaultTargets="PrintEnvVar">
+    <PropertyGroup>
+        <MyProp01>$(MyProp01)</MyProp01>
+        <MyProp02>$(MyProp02)</MyProp02>
+        <MyProp03>$(MyProp03)</MyProp03>
+        <MyProp04>$(MyProp04)</MyProp04>
+        <MyProp05>$(MyProp05)</MyProp05>
+        <MyProp06>$(MyProp06)</MyProp06>
+        <MyProp07>$(MyProp07)</MyProp07>
+        <MyProp08>$(MyProp08)</MyProp08>
+        <MyProp09>$(MyProp09)</MyProp09>
+        <MyProp10>$(MyProp10)</MyProp10>
+        <MyProp11>$(MyProp11)</MyProp11>
+        <MyProp12>$(MyProp12)</MyProp12>
+        <MyProp13>$(MyProp13)</MyProp13>
+        <MyProp14>$(MyProp14)</MyProp14>
+        <MyProp15>$(MyProp15)</MyProp15>
+        <MyProp16>$(MyProp16)</MyProp16>
+        <MyProp17>$(MyProp17)</MyProp17>
+        <MyProp18>$(MyProp18)</MyProp18>
+        <MyProp19>$(MyProp19)</MyProp19>
+        <MyProp20>$(MyProp20)</MyProp20>
+        <MyProp21>$(MyProp21)</MyProp21>
+    </PropertyGroup>
+
+    <Target Name="PrintEnvVar">
+        <Message Text="MyPropT2 has value $(MyPropT2)" Importance="High" />
+        <PropertyGroup>
+            <MyPropT2>SomeValue</MyPropT2>
+        </PropertyGroup>
+    </Target>
+</Project>
