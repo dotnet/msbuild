@@ -210,7 +210,8 @@ extends:
                       "Microsoft.NET.StringTools=$MicrosoftNETStringToolsPackageVersion"
                   )
               # servicing branches until 17.12 also include Microsoft.Build.Engine and Microsoft.Build.Conversion.Core
-              if ("$(InsertTargetBranch)" -in @("vs17.0", "vs17.3", "vs17.6", "vs17.8", "vs17.10", "vs17.11", "vs17.12"))
+              if ("$(InsertTargetBranch)" -in @("rel/d17.0", "rel/d17.3", "rel/d17.6", "rel/d17.8", "rel/d17.10", "rel/d17.11", "rel/d17.12"))
+
               {
                   $props += @(
                       "Microsoft.Build.Conversion.Core=$MicrosoftNETStringToolsPackageVersion",
