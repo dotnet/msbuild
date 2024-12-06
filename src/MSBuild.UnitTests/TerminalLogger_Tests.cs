@@ -415,6 +415,25 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public Task PrintBuildSummary_FailedWithErrorsAndDetailedSummary()
+        {
+            string? originalParameters = _terminallogger.Parameters;
+            _terminallogger.Parameters = "SUMMARY";
+            _terminallogger.ParseParameters();
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
+            {
+                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
+            });
+
+            // Restore original parameters
+            _terminallogger.Parameters = originalParameters;
+            _terminallogger.ParseParameters();
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
         public Task PrintBuildSummary_FailedWithErrorsAndWarnings()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
