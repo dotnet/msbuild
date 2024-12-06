@@ -258,12 +258,12 @@ namespace Microsoft.Build.Evaluation
             if (predecessor == null)
             {
                 // If this property had no previous value, then track an initial value.
-                TrackPropertyInitialValueSet(property, source);
+                TrackPropertyInitialValueSet(property, source, location);
             }
             else
             {
                 // There was a previous value, and it might have been changed. Track that.
-                TrackPropertyReassignment(predecessor, property, location?.LocationString);
+                TrackPropertyReassignment(predecessor, property, location);
             }
 
             // If this property was an environment variable but no longer is, track it.
@@ -278,18 +278,26 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="property">The property being set.</param>
         /// <param name="source">The source of the property.</param>
-        private void TrackPropertyInitialValueSet(P property, PropertySource source)
+        /// <param name="location">The exact location of the property. Can be null if comes not form xml.</param>
+        private void TrackPropertyInitialValueSet(P property, PropertySource source, IElementLocation? location)
         {
             if ((_settings & PropertyTrackingSetting.PropertyInitialValueSet) != PropertyTrackingSetting.PropertyInitialValueSet)
             {
                 return;
             }
-
             var args = new PropertyInitialValueSetEventArgs(
-                    property.Name,
-                    property.EvaluatedValue,
-                    source.ToString(),
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", property.Name, property.EvaluatedValue, source));
+                                    property.Name,
+                                    property.EvaluatedValue,
+                                    location?.LocationString ?? source.ToString(),
+                                    location?.File,
+                                    location?.Line ?? 0,
+                                    location?.Column ?? 0,
+                                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                        "PropertyAssignment",
+                                        property.Name,
+                                        property.EvaluatedValue,
+                                        location?.LocationString ?? source.ToString()));
+
             args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
 
             _evaluationLoggingContext.LogBuildEvent(args);
@@ -301,7 +309,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="predecessor">The property's preceding state. Null if none.</param>
         /// <param name="property">The property's current state.</param>
         /// <param name="location">The location of this property's reassignment.</param>
-        private void TrackPropertyReassignment(P? predecessor, P property, string? location)
+        private void TrackPropertyReassignment(P? predecessor, P property, IElementLocation? location)
         {
             if (MSBuildNameIgnoreCaseComparer.Default.Equals(property.Name, "MSBuildAllProjects"))
             {
@@ -326,7 +334,7 @@ namespace Microsoft.Build.Evaluation
                         property.Name,
                         oldValue,
                         newValue,
-                        location,
+                        location?.LocationString,
                         message: null)
                 { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
 
@@ -375,18 +383,18 @@ namespace Microsoft.Build.Evaluation
             Toolset,
             EnvironmentVariable
         }
+    }
 
-        [Flags]
-        private enum PropertyTrackingSetting
-        {
-            None = 0,
+    [Flags]
+    internal enum PropertyTrackingSetting
+    {
+        None = 0,
 
-            PropertyReassignment = 1,
-            PropertyInitialValueSet = 1 << 1,
-            EnvironmentVariableRead = 1 << 2,
-            UninitializedPropertyRead = 1 << 3,
+        PropertyReassignment = 1,
+        PropertyInitialValueSet = 1 << 1,
+        EnvironmentVariableRead = 1 << 2,
+        UninitializedPropertyRead = 1 << 3,
 
-            All = PropertyReassignment | PropertyInitialValueSet | EnvironmentVariableRead | UninitializedPropertyRead
-        }
+        All = PropertyReassignment | PropertyInitialValueSet | EnvironmentVariableRead | UninitializedPropertyRead
     }
 }
