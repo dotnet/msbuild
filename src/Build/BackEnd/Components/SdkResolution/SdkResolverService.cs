@@ -8,6 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+#if DEBUG
+using System.Threading;
+#endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -54,6 +57,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// Stores the list of manifests of general SDK resolvers which could be loaded.
         /// </summary>
         private IList<SdkResolverManifest> _generalResolversManifestsRegistry;
+
+#if DEBUG
+        internal bool _fake_initialization = false;
+        internal IReadOnlyList<SdkResolverManifest> _fakeManifestRegistry;
+#endif
 
         /// <summary>
         /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
@@ -178,6 +186,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             List<SdkResolverManifest> matchingResolversManifests = new();
             foreach (SdkResolverManifest manifest in _specificResolversManifestsRegistry)
             {
+#if DEBUG
+                // If we're checking about the race condition, we should better make sure we would hit it.
+                if (_fake_initialization)
+                {
+                    Thread.Sleep(10);
+                }
+#endif
                 try
                 {
                     if (manifest.ResolvableSdkRegex.IsMatch(sdk.Name))
@@ -392,30 +407,37 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// </summary>
         /// <param name="resolverLoader">An <see cref="SdkResolverLoader"/> to use for loading SDK resolvers.</param>
         /// <param name="resolvers">Explicit set of SdkResolvers to use for all SDK resolution.</param>
-        internal void InitializeForTests(SdkResolverLoader resolverLoader = null, IReadOnlyList<SdkResolver> resolvers = null)
+        /// <param name="resolverOnly"> Debug parameter for initializing only the resolver part</param>
+        internal void InitializeForTests(SdkResolverLoader resolverLoader = null, IReadOnlyList<SdkResolver> resolvers = null, bool resolverOnly = false)
         {
             if (resolverLoader != null)
             {
                 _sdkResolverLoader = resolverLoader;
+                if (resolverOnly)
+                {
+                    return;
+                }
             }
             else
             {
                 _sdkResolverLoader = CachingSdkResolverLoader.Instance;
             }
 
-            _specificResolversManifestsRegistry = null;
-            _generalResolversManifestsRegistry = null;
+            List<SdkResolverManifest> _specificResolversManifestsRegistryPlaceholder = null;
+            List<SdkResolverManifest> _generalResolversManifestsRegistryPlaceholder = null;
             _manifestToResolvers = null;
 
             if (resolvers != null)
             {
-                _specificResolversManifestsRegistry = new List<SdkResolverManifest>();
-                _generalResolversManifestsRegistry = new List<SdkResolverManifest>();
+                _specificResolversManifestsRegistryPlaceholder = new List<SdkResolverManifest>();
+                _generalResolversManifestsRegistryPlaceholder = new List<SdkResolverManifest>();
                 _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
 
                 SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, ResolvableSdkRegex: null);
-                _generalResolversManifestsRegistry.Add(sdkResolverManifest);
+                _generalResolversManifestsRegistryPlaceholder.Add(sdkResolverManifest);
                 _manifestToResolvers[sdkResolverManifest] = resolvers;
+                _generalResolversManifestsRegistry = _generalResolversManifestsRegistryPlaceholder.AsReadOnly();
+                _specificResolversManifestsRegistry = _specificResolversManifestsRegistryPlaceholder.AsReadOnly();
             }
         }
 
@@ -465,10 +487,21 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     return;
                 }
+                IReadOnlyList<SdkResolverManifest> allResolversManifests;
+#if DEBUG
+                if (_fake_initialization)
+                {
+                    allResolversManifests = _fakeManifestRegistry;
+                }
+                else
+                {
+#endif
+                    allResolversManifests = _sdkResolverLoader.GetResolversManifests(location);
+#if DEBUG
+                }
+#endif
 
-                var allResolversManifests = _sdkResolverLoader.GetResolversManifests(location);
-
-                _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
+                    _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
 
                 SdkResolverManifest sdkDefaultResolversManifest = null;
 #if NETCOREAPP
@@ -484,11 +517,17 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     }
                 }
 
-                // Break the list of all resolvers manifests into two parts: manifests with specific and general resolvers.
                 _specificResolversManifestsRegistry = new List<SdkResolverManifest>();
                 _generalResolversManifestsRegistry = new List<SdkResolverManifest>();
+
                 foreach (SdkResolverManifest manifest in allResolversManifests)
                 {
+#if DEBUG
+                    if (_fake_initialization)
+                    {
+                        Thread.Sleep(10);
+                    }
+#endif
                     if (manifest.ResolvableSdkRegex == null)
                     {
                         _generalResolversManifestsRegistry.Add(manifest);
