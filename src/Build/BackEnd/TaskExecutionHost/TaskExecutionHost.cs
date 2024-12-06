@@ -1606,9 +1606,9 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            var previousPropertyValue = ProjectInstance.GetProperty(propertyName);
+            var previousPropertyValue = _projectInstance.GetProperty(propertyName)?.EvaluatedValue;
 
-            if ((_propertyTrackingSettings & PropertyTrackingSetting.PropertyInitialValueSet) == PropertyTrackingSetting.PropertyReassignment)
+            if (previousPropertyValue == null && (_propertyTrackingSettings & PropertyTrackingSetting.PropertyInitialValueSet) == PropertyTrackingSetting.PropertyReassignment)
             {
                 var args = new PropertyInitialValueSetEventArgs(
                     propertyName,
@@ -1626,7 +1626,7 @@ namespace Microsoft.Build.BackEnd
             {
                 var args = new PropertyReassignmentEventArgs(
                     propertyName,
-                    ProjectInstance.GetProperty(propertyName).EvaluatedValue,
+                    previousPropertyValue,
                     propertyValue,
                     location.LocationString,
                     message: null)

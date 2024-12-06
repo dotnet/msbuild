@@ -131,7 +131,8 @@ namespace Microsoft.Build.BackEnd
 
             var previousPropertyValue = Project.GetProperty(property.Name)?.EvaluatedValue;
 
-            if ((_propertyTrackingSettings & PropertyTrackingSetting.PropertyInitialValueSet) == PropertyTrackingSetting.PropertyReassignment)
+            if (previousPropertyValue == null
+                && (_propertyTrackingSettings & PropertyTrackingSetting.PropertyInitialValueSet) == PropertyTrackingSetting.PropertyReassignment)
             {
                 var args = new PropertyInitialValueSetEventArgs(
                     property.Name,
