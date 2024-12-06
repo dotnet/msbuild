@@ -224,7 +224,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Indicates whether to show the build summary.
     /// </summary>
-    private bool? showSummary;
+    private bool? _showSummary;
 
     private uint? _originalConsoleMode;
 
@@ -326,10 +326,10 @@ internal sealed partial class TerminalLogger : INodeLogger
                 TryApplyShowCommandLineParameter(parameterValue);
                 break;
             case "SUMMARY":
-                showSummary = true;
+                _showSummary = true;
                 break;
             case "NOSUMMARY":
-                showSummary = false;
+                _showSummary = false;
                 break;
         }
     }
@@ -444,7 +444,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                     Terminal.WriteLine(string.Join(CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ", summaryAndTotalText, failedText, passedText, skippedText, durationText));
                 }
 
-                if (showSummary == true)
+                if (_showSummary == true)
                 {
                     RenderBuildSummary();
                 }
