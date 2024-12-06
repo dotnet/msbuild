@@ -46,6 +46,15 @@ public static class BuildEventArgsExtensions
         => EnumerateItemsOfType(eventArgs.Items, typeName);
 
     /// <summary>
+    /// Lazy enumerates and partially strong types items from Items property. Only items with any matching type will be returned (case-insensitive, MSBuild valid names only).
+    /// The actual item value is proxied via accessor methods - to be able to provide defined interface
+    /// </summary>
+    /// <returns></returns>
+    public static IEnumerable<ItemData> EnumerateItemsOfTypes(
+        this ProjectEvaluationFinishedEventArgs eventArgs, string[] typeNames)
+        => EnumerateItemsOfTypes(eventArgs.Items, typeNames);
+
+    /// <summary>
     /// Lazy enumerates and strong types items from Items property.
     /// The actual item value is proxied via accessor methods - to be able to provide defined interface
     /// </summary>
@@ -62,6 +71,15 @@ public static class BuildEventArgsExtensions
         this ProjectStartedEventArgs eventArgs, string typeName)
         => EnumerateItemsOfType(eventArgs.Items, typeName);
 
+    /// <summary>
+    /// Lazy enumerates and partially strong types items from Items property. Only items with any matching type will be returned (case-insensitive, MSBuild valid names only).
+    /// The actual item value is proxied via accessor methods - to be able to provide defined interface
+    /// </summary>
+    /// <returns></returns>
+    public static IEnumerable<ItemData> EnumerateItemsOfTypes(
+        this ProjectStartedEventArgs eventArgs, string[] typeNames)
+        => EnumerateItemsOfTypes(eventArgs.Items, typeNames);
+
     private static IEnumerable<PropertyData> EnumerateProperties(IEnumerable? properties)
         => Internal.Utilities.EnumerateProperties(properties);
 
@@ -70,4 +88,7 @@ public static class BuildEventArgsExtensions
 
     private static IEnumerable<ItemData> EnumerateItemsOfType(IEnumerable? items, string typeName)
         => Internal.Utilities.EnumerateItemsOfType(items, typeName);
+
+    private static IEnumerable<ItemData> EnumerateItemsOfTypes(IEnumerable? items, string[] typeNames)
+        => Internal.Utilities.EnumerateItemsOfTypes(items, typeNames);
 }
