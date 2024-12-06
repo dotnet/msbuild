@@ -498,6 +498,8 @@
     <Compile Include="Evaluation\Evaluator.cs" />
     <Compile Include="Evaluation\Expander.cs" />
     <Compile Include="Evaluation\ToolsetProvider.cs" />
+	<Compile Include="Evaluation\Expander\ArgumentParsing.cs" />
+	<Compile Include="Evaluation\Expander\WellKnownFunctions.cs" />
     <Compile Include="Globbing\CompositeGlob.cs" />
     <Compile Include="Globbing\Extensions\MSBuildGlobExtensions.cs" />
     <Compile Include="Globbing\Visitor\GlobVisitor.cs" />
