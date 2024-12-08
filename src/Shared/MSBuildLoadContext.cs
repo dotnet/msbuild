@@ -36,7 +36,7 @@ namespace Microsoft.Build.Shared
         internal static AssemblyLoadContext ThisAssemblyLoadContext => GetLoadContext(typeof(MSBuildLoadContext).Assembly)!;
 
         public MSBuildLoadContext(string assemblyPath)
-            : base($"MSBuild plugin {assemblyPath}")
+            : base($"MSBuild plugin {assemblyPath}", ThisAssemblyLoadContext.IsCollectible)
         {
             _directory = Directory.GetParent(assemblyPath)!.FullName;
 
