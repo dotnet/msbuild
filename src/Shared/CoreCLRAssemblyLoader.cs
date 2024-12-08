@@ -71,7 +71,7 @@ namespace Microsoft.Build.Shared
             {
                 if (!_resolvingHandlerHookedUp)
                 {
-                    AssemblyLoadContext.Default.Resolving += TryResolveAssembly;
+                    MSBuildLoadContext.ThisAssemblyLoadContext.Resolving += TryResolveAssembly;
                     _resolvingHandlerHookedUp = true;
                 }
 
@@ -81,7 +81,7 @@ namespace Microsoft.Build.Shared
                     return assembly;
                 }
 
-                return LoadAndCache(AssemblyLoadContext.Default, fullPath);
+                return LoadAndCache(MSBuildLoadContext.ThisAssemblyLoadContext, fullPath);
             }
         }
 
