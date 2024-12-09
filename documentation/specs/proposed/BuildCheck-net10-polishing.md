@@ -4,9 +4,9 @@ In net 9.0 we delivered initial preview of BuildCheck feature.
  * Spec: https://github.com/dotnet/msbuild/blob/main/documentation/specs/BuildCheck/BuildCheck.md
  * Work track:  https://github.com/orgs/dotnet/projects/373
 
-In addition to that we have item tracking possible improvemnts and extensions of the feature: https://github.com/dotnet/msbuild/issues/10548
+In addition to that we have an item tracking possible improvements and extensions of the feature: https://github.com/dotnet/msbuild/issues/10548
 
-This doc focuses on minimal investment path that would still allow driving some adoption of BuildChecks feature and collecting feedback from real life usage.
+This doc focuses on a minimal investment path that would allow driving adoption of the BuildChecks feature and collecting feedback from real life usage.
 
 ## Goals and Motivation 
 
@@ -17,7 +17,7 @@ This doc focuses on minimal investment path that would still allow driving some 
 
 * MSBuild team has a venue to evangelise best practices for the build.
 * Customers have a tool to formalize and distribute their view of best practices.
-* MSBuild team can be improving builds perf and security via providing new Checks notyfying about problems.
+* MSBuild team can improving end-user build perf and security with high leverage by providing new Checks notifying about problems.
 
 
 ## Stakeholders 
@@ -25,14 +25,14 @@ This doc focuses on minimal investment path that would still allow driving some 
 - Selected internal partner repo owners (details https://github.com/dotnet/msbuild/issues/10726)
 
 ### Successful handover
-- Internal partner teams ideas around BuildChecks collected and considered.
+- Internal partner teams' ideas around BuildChecks collected and considered.
 - Selected internal partner teams are using BuildChecks in their build pipelines.
 - BuildChecks being evangelized externaly, adoption numbers grow up.
 
 ## Risks 
 - Performance degradation is unacceptable on real scale project.
-- There are multiple hard to investigate or/and hard to fix bugs identified during inital adoptions.
-- Unsatisfactory specificity or/and sensitivity - leading to diminishing the valua added and endangering the adoption motivation.
+- There are multiple hard to investigate and/or hard to fix bugs identified during initial adoptions.
+- Unsatisfactory specificity and/or sensitivity - leading to diminishing the perceived value of Checks and endangering the motivation to adopt them.
 - Low perceived value of best practices enforced by the checks.
 - Confusing diagnostics/documentation leading to lowering the educational value.
 
