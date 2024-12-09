@@ -193,12 +193,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0107_MessageFmt">
         <source>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</source>
-        <target state="new">Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</target>
+        <target state="translated">El {0} del proyecto especifica la propiedad 'TargetFrameworks' '{1}' y la propiedad 'TargetFramework' '{2}' al mismo tiempo. Esto hará que se omitió "TargetFrameworks" y la compilación se comportará como de destino único.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0107_Title">
         <source>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</source>
-        <target state="new">'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</target>
+        <target state="translated">Las propiedades 'TargetFramework' (singular) y 'TargetFrameworks' (plural) no deben especificarse en los scripts al mismo tiempo.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
