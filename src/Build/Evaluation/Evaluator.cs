@@ -1264,7 +1264,7 @@ namespace Microsoft.Build.Evaluation
                     _ = _data.SetProperty(
                             globalProperty.Name,
                             ((IProperty)globalProperty).EvaluatedValueEscaped,
-                            isGlobalProperty: false /* it is a global property, but it comes from command line and is tracked separately */,
+                            isGlobalProperty: true /* it is a global property, but it comes from command line and is tracked separately */,
                             false /* may NOT be a reserved name */,
                             loggingContext: _evaluationLoggingContext,
                             isCommandLineProperty: true /* IS coming from command line argument */);

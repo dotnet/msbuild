@@ -97,7 +97,7 @@ namespace Microsoft.Build.Evaluation
             bool isCommandLineProperty = false)
         {
             P? originalProperty = _wrapped.GetProperty(name);
-            P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, _evaluationLoggingContext, isEnvironmentVariable);
+            P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, _evaluationLoggingContext, isEnvironmentVariable, isCommandLineProperty);
 
             this.TrackPropertyWrite(
                 originalProperty,
@@ -292,6 +292,7 @@ namespace Microsoft.Build.Evaluation
             {
                 return;
             }
+
             var args = new PropertyInitialValueSetEventArgs(
                                     property.Name,
                                     property.EvaluatedValue,
@@ -365,10 +366,10 @@ namespace Microsoft.Build.Evaluation
         private PropertySource DeterminePropertySource(bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable, bool isCommandLineProperty) =>
             (isGlobalProperty, mayBeReserved, isEnvironmentVariable, isCommandLineProperty) switch
             {
-                (true, _, _, _) => PropertySource.Global,
+                (true, _, _, false) => PropertySource.Global,
                 (_, true, _, _) => PropertySource.BuiltIn,
                 (_, _, true, _) => PropertySource.EnvironmentVariable,
-                (_, _, _, true) => PropertySource.CommandLine,
+                (true, _, _, true) => PropertySource.CommandLine,
                 _ => PropertySource.Toolset,
             };
 
