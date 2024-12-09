@@ -1,6 +1,6 @@
 ## MSBuild Server
 
-MSBuild server aims to create a persistent entry node for the MSBuild
+MSBuild server aims to create a persistent entry node for the MSBuild process
 that we would communicate with via a thin client. We want to get from
 the current state of “spawn a complete process for every CLI invocation”
 to “we have a server process in the background and we only spawn a small
