@@ -193,12 +193,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0107_MessageFmt">
         <source>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</source>
-        <target state="new">Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</target>
+        <target state="translated">프로젝트 {0} 'TargetFrameworks' 속성 '{1}' 및 'TargetFramework' 속성을 동시에 '{2}' 지정합니다. 이렇게 하면 'TargetFrameworks'가 무시되고 빌드가 단일 대상으로 동작합니다.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0107_Title">
         <source>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</source>
-        <target state="new">'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</target>
+        <target state="translated">스크립트에서 'TargetFramework'(단수) 및 'TargetFrameworks'(plural) 속성을 동시에 지정하면 안 됩니다.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
