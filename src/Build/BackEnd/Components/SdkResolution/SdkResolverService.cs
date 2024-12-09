@@ -494,12 +494,10 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     allResolversManifests = _fakeManifestRegistry;
                 }
                 else
+#endif
                 {
-#endif
                     allResolversManifests = _sdkResolverLoader.GetResolversManifests(location);
-#if DEBUG
                 }
-#endif
 
                     _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
 
