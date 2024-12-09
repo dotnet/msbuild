@@ -75,9 +75,9 @@ internal sealed class Project
     }
 
     /// <summary>
-    /// Filters the build messages to only include errors.
+    /// Filters the build messages to only include errors and warnings.
     /// </summary>
-    /// <returns>A sequence of error build messages.</returns>
+    /// <returns>A sequence of error and warning build messages.</returns>
     public IEnumerable<BuildMessage> GetBuildErrorAndWarningMessages()
     {
         return BuildMessages is null ?
