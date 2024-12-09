@@ -413,7 +413,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             if (resolverLoader != null)
             {
                 _sdkResolverLoader = resolverLoader;
-
+#if DEBUG
                 if (contentionConditionTest)
                 {
                     _fake_initialization = true;
@@ -428,6 +428,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     _fakeManifestRegistry = manifests.AsReadOnly();
                     return;
                 }
+#endif
             }
             else
             {
