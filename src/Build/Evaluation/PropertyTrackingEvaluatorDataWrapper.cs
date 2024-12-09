@@ -87,7 +87,14 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which does not come from the Xml.
         /// </summary>
-        public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false)
+        public P SetProperty(
+            string name,
+            string evaluatedValueEscaped,
+            bool isGlobalProperty,
+            bool mayBeReserved,
+            LoggingContext loggingContext,
+            bool isEnvironmentVariable = false,
+            bool isCommandLineProperty = false)
         {
             P? originalProperty = _wrapped.GetProperty(name);
             P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, _evaluationLoggingContext, isEnvironmentVariable);
@@ -96,7 +103,7 @@ namespace Microsoft.Build.Evaluation
                 originalProperty,
                 newProperty,
                 null,
-                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable),
+                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable, isCommandLineProperty),
                 loggingContext);
 
             return newProperty;
@@ -288,7 +295,7 @@ namespace Microsoft.Build.Evaluation
             var args = new PropertyInitialValueSetEventArgs(
                                     property.Name,
                                     property.EvaluatedValue,
-                                    location?.LocationString ?? source.ToString(),
+                                    source.ToString(),
                                     location?.File,
                                     location?.Line ?? 0,
                                     location?.Column ?? 0,
@@ -355,20 +362,15 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Determines the source of a property given the variables SetProperty arguments provided. This logic follows what's in <see cref="Evaluator{P,I,M,D}"/>.
         /// </summary>
-        private PropertySource DeterminePropertySource(bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable)
-        {
-            if (isEnvironmentVariable)
+        private PropertySource DeterminePropertySource(bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable, bool isCommandLineProperty) =>
+            (isGlobalProperty, mayBeReserved, isEnvironmentVariable, isCommandLineProperty) switch
             {
-                return PropertySource.EnvironmentVariable;
-            }
-
-            if (isGlobalProperty)
-            {
-                return PropertySource.Global;
-            }
-
-            return mayBeReserved ? PropertySource.BuiltIn : PropertySource.Toolset;
-        }
+                (true, _, _, _) => PropertySource.Global,
+                (_, true, _, _) => PropertySource.BuiltIn,
+                (_, _, true, _) => PropertySource.EnvironmentVariable,
+                (_, _, _, true) => PropertySource.CommandLine,
+                _ => PropertySource.Toolset,
+            };
 
         #endregion
 
@@ -381,7 +383,8 @@ namespace Microsoft.Build.Evaluation
             BuiltIn,
             Global,
             Toolset,
-            EnvironmentVariable
+            EnvironmentVariable,
+            CommandLine,
         }
     }
 
