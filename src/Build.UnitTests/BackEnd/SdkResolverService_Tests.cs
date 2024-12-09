@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,16 +27,14 @@ using SdkResultImpl = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
-    public class SdkResolverService_Tests : IDisposable
+    public class SdkResolverService_Tests
     {
         private readonly MockLogger _logger;
         private readonly LoggingContext _loggingContext;
-        private static SdkResolverService s_sdkResolverService;
 
 
         public SdkResolverService_Tests()
         {
-            s_sdkResolverService = new SdkResolverService();
             _logger = new MockLogger();
             ILoggingService loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             loggingService.RegisterLogger(_logger);
@@ -43,12 +42,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _loggingContext = new MockLoggingContext(
                 loggingService,
                 new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
-        }
-
-        public void Dispose()
-        {
-            var service = new SdkResolverService();
-            service.InitializeForTests();
         }
 
         [Fact]
@@ -144,13 +137,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
 #if DEBUG
-        internal void TryResolveSdk(out bool success)
+        internal string TryResolveSdk(SdkResolverService service)
         {
-            success = true;
+            var message = "";
             SdkReference sdk = new SdkReference("2sdkName", "referencedVersion", "minimumVersion");
             try
             {
-                s_sdkResolverService.ResolveSdk(BuildEventContext.InvalidSubmissionId,
+                service.ResolveSdk(BuildEventContext.InvalidSubmissionId,
                                                         sdk,
                                                         _loggingContext,
                                                         new MockElementLocation("file"),
@@ -160,43 +153,32 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                                                         isRunningInVisualStudio: false,
                                                         failOnUnresolvedSdk: true);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                success = false;
+                message = e.ToString();
             }
+            return message;
         }
 
 
         [Fact]
         // Scenario: we want to test that we solved the contention described here: https://github.com/dotnet/msbuild/issues/7927#issuecomment-1232470838
-        public void AssertResolverPopulationContentionNotPresent()
+        public async Task AssertResolverPopulationContentionNotPresent()
         {
-            s_sdkResolverService.InitializeForTests(new MockLoaderStrategy(includeResolversWithPatterns: true), resolverOnly: true);
-           
-            List<SdkResolverManifest> manifests = new List<SdkResolverManifest>();
-            for (int i = 1; i != 20; i++)
-            {
-                var man = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, ResolvableSdkRegex: new Regex("abc"));
-                manifests.Add(man);
-                man = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, null);
-                manifests.Add(man);
-            }
-            s_sdkResolverService._fakeManifestRegistry = manifests.AsReadOnly();
-            s_sdkResolverService._fake_initialization = true;
+            var service = new SdkResolverService();
+            service.InitializeForTests(new MockLoaderStrategy(includeResolversWithPatterns: true), contentionConditionTest: true);
 
             SdkReference sdk = new SdkReference("2sdkName", "referencedVersion", "minimumVersion");
 
-            bool result1 = false;
-            bool result2 = false;
-            Thread thread1 = new Thread(() => TryResolveSdk(out result1));
-            Thread thread2 = new Thread(() => TryResolveSdk(out result2));
-            thread1.Start();
+            var res1 = Task.Run(() => TryResolveSdk(service));
+
             Thread.Sleep(200);
-            thread2.Start();
-            thread2.Join();
-            thread1.Join();
-            Assert.True(result1);
-            Assert.True(result2);
+            var res2 = Task.Run(() => TryResolveSdk(service));
+            string message1 = await res1;
+            string message2 = await res2;
+
+            Assert.Equal("", message1);
+            Assert.Equal("", message2);
         }
 #endif
 
