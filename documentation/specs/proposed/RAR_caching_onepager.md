@@ -37,7 +37,8 @@ Some time ago Roman Konecny estimated the RAR caching to not be worth it
 performance wise. 1ES team claims to have created an implementation that
 will either improve or not change the performance. We need to validate
 this claim and push back in case we find performance regression.
-Thorough testing will be needed especially 
+Thorough testing will be needed especially to ensure the performance
+is not impacted.
 
 The risk is having to figure out a different way to help 1ES team to
 isolate their File I/Os if the caching hurts the performance. This could
