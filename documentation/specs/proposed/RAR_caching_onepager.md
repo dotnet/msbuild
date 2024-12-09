@@ -1,6 +1,6 @@
 ## RAR caching
-RAR in this context means resolving of assembly references.
-During every build we need to gather the graph of references and pass
+RAR(Resolving of Assembly references) is an optimization for the step in 
+every build where we need to gather the graph of assembly references and pass
 them to the compiler. This process is highly cacheable as the references
 don’t change all that often. Currently we have some limited caching in
 place however the way nodes are assigned work results in frequent cache
