@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,7 +30,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         private readonly MockLogger _logger;
         private readonly LoggingContext _loggingContext;
-
 
         public SdkResolverService_Tests()
         {
