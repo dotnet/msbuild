@@ -25,6 +25,7 @@ using Microsoft.Build.Shared;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework.Telemetry;
 
 #nullable disable
 
@@ -333,6 +334,9 @@ namespace Microsoft.Build.BackEnd
 #endif
                     // Create the node process
                     INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
+#if NETFRAMEWORK
+                    var activity = TelemetryHelpers.StartActivity("NodeLaunching", new Dictionary<string, object>() { });
+#endif
                     Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId);
                     _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
 
@@ -342,6 +346,9 @@ namespace Microsoft.Build.BackEnd
 
                     // Now try to connect to it.
                     Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, hostHandshake);
+#if NETFRAMEWORK
+                    activity.Dispose();
+#endif
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
