@@ -258,7 +258,7 @@ namespace Microsoft.Build.Evaluation
             _loadSettings = loadSettings;
             _maxNodeCount = maxNodeCount;
             _environmentProperties = environmentProperties;
-            _propertiesFromCommandLine = propertiesFromCommandLine;
+            _propertiesFromCommandLine = propertiesFromCommandLine ?? [];
             _itemFactory = itemFactory;
             _projectRootElementCache = projectRootElementCache;
             _sdkResolverService = sdkResolverService;
