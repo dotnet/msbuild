@@ -9,14 +9,9 @@
 //  3. Remove the FilePath and receive only the text
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 

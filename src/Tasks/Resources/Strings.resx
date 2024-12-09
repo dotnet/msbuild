@@ -149,6 +149,13 @@
   <data name="AssignCulture.Comment">
     <value>Culture of "{0}" was assigned to file "{1}".</value>
   </data>
+  <data name="AssignCulture.CultureOverwritten">
+    <value>MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</value>
+    <comment>
+	{StrBegin="MSB3002: "}
+	'RespectAlreadyAssignedItemCulture' should not be translated
+	</comment>
+  </data>
   <!--
         The AxImp message bucket is: MSB3656 - MSB3660.
 
@@ -3038,21 +3045,77 @@
   <!--
         MSB9901 - MSB9990   MSBuild common targets messages
   -->
-  <data name="CommonTarget.SpecifiedSeverityDoesNotExist">
+  <data name="CommonSdk.SpecifiedSeverityDoesNotExist">
     <value>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</value>
     <comment>{StrBegin="MSB9901: "}</comment>
   </data>
-  <data name="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
+  <data name="CommonSdk.Prefer32BitAndPreferNativeArm64Enabled">
     <value>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</value>
     <comment>{StrBegin="MSB9902: "}</comment>
   </data>
-  <data name="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
+  <data name="CommonSdk.NoWin32ManifestAndPreferNativeArm64Enabled">
     <value>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</value>
     <comment>{StrBegin="MSB9903: "}</comment>
   </data>
-  <data name="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
+  <data name="CommonSdk.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
     <value>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</value>
     <comment>{StrBegin="MSB9904: "}</comment>
+  </data>
+
+  <data name="CommonSdk.BaseIntermediateOutputPathMismatchWarning">
+    <value>MSB3539: The value of the property &quot;BaseIntermediateOutputPath&quot; was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the &quot;MSBuildProjectExtensionsPath&quot; instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</value>
+    <comment>{StrBegin="MSB3539: "} </comment>
+  </data>
+
+  <data name="CommonSdk.MSBuildProjectExtensionsPathModifiedAfterUse">
+    <value>MSB3540: The value of the property &quot;MSBuildProjectExtensionsPath&quot; was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</value>
+    <comment>{StrBegin="MSB3540: "}</comment>
+  </data>
+
+  <data name="CommonSdk.InvalidConfigurationTextWhenBuildingInsideVisualStudio">
+    <value>The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. This error may also appear if some other project is trying to follow a project-to-project reference to this project, this project has been unloaded or is not included in the solution, and the referencing project does not build using the same or an equivalent Configuration or Platform.</value>
+    <comment>LOCALIZATION:  Do not localize the words "BaseOutputPath/OutputPath", "Configuration" and "Platform"</comment>
+  </data>
+
+  <data name="CommonSdk.InvalidConfigurationTextWhenBuildingOutsideVisualStudio">
+    <value>The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. You may be seeing this message because you are trying to build a project without a solution file, and have specified a non-default Configuration or Platform that doesn't exist for this project.</value>
+    <comment>LOCALIZATION:  Do not localize the words "BaseOutputPath/OutputPath", "Configuration" and "Platform"</comment>
+  </data>
+
+  <data name="CommonSdk.ManifestResourceWithNoCultureWarning">
+    <value>{0}: {1} item type is deprecated. Emit EmbeddedResource items instead, with metadata WithCulture='{2}', Type='{3}', and optional LogicalName.</value>
+  </data>
+
+  <data name="CommonSdk.PropertyWithTrailingSlash">
+    <value>The {0} must end with a trailing slash.</value>
+  </data>
+
+  <data name="CommonSdk.DeploymentUnpublishable">
+    <value>Skipping unpublishable project.</value>
+  </data>
+
+  <data name="CommonSdk.GenerateManifestsOnlyForExe">
+    <value>Publish is only valid for 'Windows Application' or 'Console Application' project types.</value>
+  </data>
+
+  <data name="CommonSdk.SigningKeyRequired">
+    <value>A signing key is required in order to publish this project. Please specify a ManifestKeyFile or ManifestCertificateThumbprint value. Publishing from Visual Studio will automatically configure a signing key for this project.</value>
+  </data>
+
+  <data name="CommonSdk.RunTargetDependsOnMessage">
+    <value>Cannot run '{0}' because project output type is not '.exe'</value>
+  </data>
+
+  <data name="CommonSdk.CrossTargetingGetTargetFrameworks">
+    <value>Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build</value>
+  </data>
+
+  <data name="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage">
+    <value>{0}: {1} item type is deprecated. Use EmbeddedResource items instead.</value>
+  </data>
+
+  <data name="CommonSdk.NonExistentProjectReference">
+    <value>MSB9008: The referenced project {0} does not exist.</value>
   </data>
 
   <!--
@@ -3146,7 +3209,7 @@
 
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)
-            
+
             MSB9901 - MSB9990   MSBuild common targets messages
 
         The following codes are not longer used but have shipped so should not be reused:

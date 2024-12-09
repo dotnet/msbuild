@@ -64,7 +64,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             [
                 // BuildCheckDataSource.EventArgs
                 [
-                    ([TestCheck.SupportedRule.Id], true, () => s_testCheck = new TestCheck()),
+                    new ([TestCheck.SupportedRule.Id], true, () => s_testCheck = new TestCheck()),
                 ],
                 // BuildCheckDataSource.Execution
                 [],

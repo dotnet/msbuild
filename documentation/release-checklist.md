@@ -14,9 +14,9 @@
 ## At release time
 Before starting the process:
 - [ ] If the release is being cut more than a few days before the VS-side snap, run insertions manually OR redirect MSBuild release branch 
-  - [ ]  Disabling automated run of [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) (our {{NEXT_VERSION}} builds don't have a place to go in VS yet) is done by: Edit -> ... -> Triggers -> add a schedule on a dead branch (this overrides the YAML defined once-per-day schedule). Manual pipeline run: select as input resource the inserted "MSBuild" pipeline run on branch `vs{{THIS_RELEASE_VERSION}}` and VS TargetBranch `main`.
+  - [ ]  Disable scheduled run of [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) (our {{NEXT_VERSION}} builds don't have a place to go in VS yet) by: Edit -> ... -> Triggers -> add a schedule on a dead branch (this overrides the YAML defined once-per-day schedule for main). Manual pipeline run: select as input resource the to-be-inserted "MSBuild" pipeline run on branch `vs{{THIS_RELEASE_VERSION}}` and VS TargetBranch `main`.
 OR
-  - [ ]  If the release is being cut more than couple of weeks modify [YAML](https://github.com/dotnet/msbuild/tree/main/azure-pipelines/vs-insertion.yml) (and merge to affected MSBuild branches) of the [VS insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) so that it flows from MSBuild `vs{{THIS_RELEASE_VERSION}}` to VS `main` [in the MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) and keep scheduled insertions to simplify your workflow.
+  - [ ]  If the release is being cut more than couple of weeks modify [YAML](https://github.com/dotnet/msbuild/tree/main/azure-pipelines/vs-insertion.yml) (and merge to affected MSBuild branches) of the [VS insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) so that it schedules insertions from MSBuild `vs{{THIS_RELEASE_VERSION}}` to VS `main`. Keep scheduled daily insertions to simplify your workflow and exclude `vs{{THIS_RELEASE_VERSION}}` from triggering insertion on each commit.
 
 ### Branching from main
 - [ ]  If the new version's branch was created before the Visual Studio fork: fast-forward merge the correct commit (the one that is currently inserted to VS main) to the `vs{{THIS_RELEASE_VERSION}}` branch \
@@ -28,6 +28,7 @@ _(This is for the case where we create the branch too early and want it to be ba
 `dotnet pack MSBuild.Dev.slnf /p:ApiCompatGenerateSuppressionFile=true`. 
   - [ ]  When VS main snaps to {{THIS_RELEASE_VERSION}} and updates its version to {{NEXT_VERSION}}, modify the [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) YAML so that it flows from MSBuild main to VS main.
     - [ ]  Update AutoTargetBranch selection in the [YAML](https://github.com/dotnet/msbuild/tree/main/azure-pipelines/vs-insertion.yml) (add to parameters and make new AutoTargetBranch rule by copying it from existing ones) of the [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) to insert MSBuild `vs{{THIS_RELEASE_VERSION}}` to the corresponding VS branch `rel/d{{THIS_RELEASE_VERSION}}`.
+    - [ ] Set scheduled insertion for main and remove exclusion of `vs{{THIS_RELEASE_VERSION}}` triggering on each commit if added earlier.
 - [ ]  Merge {{NEXT_VERSION}} branding PR
 
 ### Adjust DARC channels and subscriptions
