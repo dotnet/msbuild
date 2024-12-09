@@ -415,7 +415,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public Task PrintBuildSummary_FailedWithErrorsAndDetailedSummary()
+        public Task PrintDetailedBuildSummary_FailedWithErrorAndWarning()
         {
             string? originalParameters = _terminallogger.Parameters;
             _terminallogger.Parameters = "SUMMARY";
@@ -423,6 +423,7 @@ namespace Microsoft.Build.UnitTests
 
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
             {
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
                 ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
             });
 

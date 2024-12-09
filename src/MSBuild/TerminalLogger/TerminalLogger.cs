@@ -484,7 +484,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
     private void RenderBuildSummary()
     {
-        if (!_projects.Any(p => p.Value.GetBuildErrorMessages().Any()))
+        if (!_projects.Any(p => p.Value.GetBuildErrorAndWarningMessages().Any()))
         {
             // No errors to display.
             return;
@@ -492,15 +492,15 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         Terminal.WriteLine(ResourceUtilities.GetResourceString("BuildSummary"));
 
-        foreach (Project project in _projects.Values.Where(p => p.GetBuildErrorMessages().Any()))
+        foreach (Project project in _projects.Values.Where(p => p.GetBuildErrorAndWarningMessages().Any()))
         {
             string projectFileName = Path.GetFileNameWithoutExtension(project.File);
             string? tfm = project.TargetFramework;
             Terminal.WriteLine($"{Indentation}{projectFileName}{(tfm is null ? string.Empty : " ")}{AnsiCodes.Colorize(tfm, TerminalLogger.TargetFrameworkColor)}");
 
-            foreach (BuildMessage errorMessage in project.GetBuildErrorMessages())
+            foreach (BuildMessage buildMessage in project.GetBuildErrorAndWarningMessages())
             {
-                Terminal.WriteLine($"{DoubleIndentation}{errorMessage.Message}");
+                Terminal.WriteLine($"{DoubleIndentation}{buildMessage.Message}");
             }
         }
 

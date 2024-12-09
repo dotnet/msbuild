@@ -78,10 +78,12 @@ internal sealed class Project
     /// Filters the build messages to only include errors.
     /// </summary>
     /// <returns>A sequence of error build messages.</returns>
-    public IEnumerable<BuildMessage> GetBuildErrorMessages()
+    public IEnumerable<BuildMessage> GetBuildErrorAndWarningMessages()
     {
         return BuildMessages is null ?
             Enumerable.Empty<BuildMessage>() :
-            BuildMessages.Where(message => message.Severity == MessageSeverity.Error);
+            BuildMessages.Where(message =>
+                message.Severity == MessageSeverity.Error ||
+                message.Severity == MessageSeverity.Warning);
     }
 }
