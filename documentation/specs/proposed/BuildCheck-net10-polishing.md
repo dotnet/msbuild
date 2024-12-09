@@ -40,8 +40,8 @@ This doc focuses on a minimal investment path that would allow driving adoption 
 ## Scope
 
 ### Goals
-* Running buildchecks on partner repos, identifying and fixing issues
-* Enabling buildchecks on partner repos, providing initial support
+* MSBuild team runs buildchecks on selected partner repos (via private runs), identifying and fixing issues
+* MSBuild team helps selected partner teams to enable buildchecks on their repos (in official runs), and providing initial support
 
 ### Non-Goals
 
@@ -58,7 +58,7 @@ This doc focuses on a minimal investment path that would allow driving adoption 
 
 The below plan is expected with 0.25 Dev / Month investment (except for Month #2, that will realistically need ~0.5-2 Dev / Month)
 
-## Plan 
+## Suggested plan 
 * Month #1 - Running build checks on selected partner repos and identifying issues
 * Month #2 - Resolve identified adoption blockers
 * Month #2 optional - run perf tests and define perf profile for build with Checks.
