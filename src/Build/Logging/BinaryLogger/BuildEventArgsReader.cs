@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -1214,10 +1215,14 @@ namespace Microsoft.Build.Logging
                 propertyName,
                 propertyValue,
                 propertySource,
+                fields.File,
+                fields.LineNumber,
+                fields.ColumnNumber,
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
                 fields.Importance);
+
             SetCommonFields(e, fields);
 
             return e;
