@@ -64,7 +64,7 @@ namespace Microsoft.Build.Utilities
         /// Default constructor -- do not use.
         /// </summary>
         /// <remarks>
-        /// This constructor exists only so that the type is COM-creatable. Prefer <see cref="TaskItem(string)"/>.
+        /// This constructor exists only so that the type is COM-creatable. Prefer <see cref="TaskItem(string, bool)"/>.
         /// </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public TaskItem()
@@ -75,14 +75,23 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// This constructor creates a new task item, given the item spec.
         /// </summary>
-        /// <comments>Assumes the itemspec passed in is escaped.</comments>
+        /// <comments>
+        /// Assumes the itemspec passed in is escaped.
+        /// If tratAsFilePath is set to true, it will try to fix itemSpac backslashes into slashes.
+        /// </comments>
         /// <param name="itemSpec">The item-spec string.</param>
+        /// <param name="treatAsFilePath">If item-spec string is a path or not.</param>
         public TaskItem(
-            string itemSpec)
+            string itemSpec,
+            bool treatAsFilePath = true)
         {
             ErrorUtilities.VerifyThrowArgumentNull(itemSpec);
 
-            _itemSpec = FileUtilities.FixFilePath(itemSpec);
+            if (treatAsFilePath)
+            {
+
+                _itemSpec = FileUtilities.FixFilePath(itemSpec);
+            }
         }
 
         /// <summary>
