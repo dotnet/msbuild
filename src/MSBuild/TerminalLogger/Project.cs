@@ -13,6 +13,8 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// </summary>
 internal sealed class Project
 {
+    private List<BuildMessage>? _buildMessages;
+
     /// <summary>
     /// Initialized a new <see cref="Project"/> with the given <paramref name="targetFramework"/>.
     /// </summary>
@@ -61,17 +63,46 @@ internal sealed class Project
     public bool IsCachePluginProject { get; set; }
 
     /// <summary>
+    /// True if project built successfully; otherwise false.
+    /// </summary>
+    public bool Succeeded { get; set; }
+
+    /// <summary>
+    /// The number of errors raised during the build of the project.
+    /// </summary>
+    public int ErrorCount { get; private set; }
+
+    /// <summary>
+    /// The number of warnings raised during the build of the project.
+    /// </summary>
+    public int WarningCount { get; private set; }
+
+    /// <summary>
+    /// True when the project has error or warning build messages; otherwise false.
+    /// </summary>
+    public bool HasErrorsOrWarnings => ErrorCount > 0 || WarningCount > 0;
+
+    /// <summary>
     /// A lazily initialized list of build messages/warnings/errors raised during the build.
     /// </summary>
-    public List<BuildMessage>? BuildMessages { get; private set; }
+    public IReadOnlyList<BuildMessage>? BuildMessages => _buildMessages;
 
     /// <summary>
     /// Adds a build message of the given severity to <see cref="BuildMessages"/>.
     /// </summary>
     public void AddBuildMessage(MessageSeverity severity, string message)
     {
-        BuildMessages ??= new List<BuildMessage>();
-        BuildMessages.Add(new BuildMessage(severity, message));
+        _buildMessages ??= new List<BuildMessage>();
+        _buildMessages.Add(new BuildMessage(severity, message));
+
+        if (severity == MessageSeverity.Error)
+        {
+            ErrorCount++;
+        }
+        else if (severity == MessageSeverity.Warning)
+        {
+            WarningCount++;
+        }
     }
 
     /// <summary>
