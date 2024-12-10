@@ -79,7 +79,6 @@ namespace Microsoft.Build.Framework
             PropertyName = propertyName;
             PreviousValue = previousValue;
             NewValue = newValue;
-            Location = $"{file} ({line}, {column})";
         }
 
         /// <summary>
@@ -108,7 +107,8 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("PropertyReassignment", PropertyName, NewValue, PreviousValue, Location);
+                    string formattedLocation = File != null ? $"{File} ({LineNumber},{ColumnNumber})" : Location;
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("PropertyReassignment", PropertyName, NewValue, PreviousValue, formattedLocation);
                 }
 
                 return RawMessage;
