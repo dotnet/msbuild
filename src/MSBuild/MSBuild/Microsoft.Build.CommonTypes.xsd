@@ -2365,22 +2365,22 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="TestingPlatformCommandLineArguments" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TestingPlatformCommandLineArguments" _locComment="" -->The command-line arguments to pass for the test executable.</xs:documentation>
+        <xs:documentation><!-- _locID_text="TestingPlatformCommandLineArguments" _locComment="" -->The command-line arguments to pass for the test executable. This is not supported by VSTest.</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="TestingPlatformCaptureOutput" type="msb:bool" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TestingPlatformCaptureOutput" _locComment="" -->This property controls whether all console output that a test executable writes is captured and hidden from the user when you use 'dotnet test' to run 'Microsoft.Testing.Platform' tests. By default, the console output is hidden.</xs:documentation>
+        <xs:documentation><!-- _locID_text="TestingPlatformCaptureOutput" _locComment="" -->This property controls whether all console output that a test executable writes is captured and hidden from the user when you use 'dotnet test' to run 'Microsoft.Testing.Platform' tests. By default, the console output is hidden. This is not supported by VSTest.</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="TestingPlatformDotnetTestSupport" type="msb:bool" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TestingPlatformDotnetTestSupport" _locComment="" -->This property controls whether VSTest is used when you use 'dotnet test' to run tests. If you set this property to 'true', VSTest is disabled and all 'Microsoft.Testing.Platform' tests are run directly.</xs:documentation>
+        <xs:documentation><!-- _locID_text="TestingPlatformDotnetTestSupport" _locComment="" -->This property controls whether VSTest is used when you use 'dotnet test' to run tests. If you set this property to 'true', VSTest is disabled and all 'Microsoft.Testing.Platform' tests are run directly. This is not supported by VSTest.</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="TestingPlatformShowTestsFailure" type="msb:bool" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TestingPlatformShowTestsFailure" _locComment="" -->This property controls whether a single failure or all errors in a failed test are reported when you use `dotnet test` to run tests. By default, test failures are summarized into a log file, and a single failure per test project is reported to MSBuild. To show errors per failed test, set this property to 'true'.</xs:documentation>
+        <xs:documentation><!-- _locID_text="TestingPlatformShowTestsFailure" _locComment="" -->This property controls whether a single failure or all errors in a failed test are reported when you use `dotnet test` to run tests. By default, test failures are summarized into a log file, and a single failure per test project is reported to MSBuild. To show errors per failed test, set this property to 'true'. This is not supported by VSTest.</xs:documentation>
       </xs:annotation>
     </xs:element>
 
