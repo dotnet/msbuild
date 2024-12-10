@@ -27,7 +27,7 @@ internal class PropertiesUsageCheck : WorkerNodeCheck
     private static readonly CheckRule _unusedPropertyRule = new CheckRule("BC0203", "UnusedPropertyDeclared",
         ResourceUtilities.GetResourceString("BuildCheck_BC0203_Title")!,
         ResourceUtilities.GetResourceString("BuildCheck_BC0203_MessageFmt")!,
-        new CheckConfiguration() { RuleId = "BC0203", Severity = CheckResultSeverity.Suggestion, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
+        new CheckConfiguration() { RuleId = "BC0203", Severity = CheckResultSeverity.None, EvaluationCheckScope = EvaluationCheckScope.ProjectFileOnly });
 
     internal static readonly IReadOnlyList<CheckRule> SupportedRulesList = [_usedBeforeInitializedRule, _initializedAfterUsedRule, _unusedPropertyRule];
 
