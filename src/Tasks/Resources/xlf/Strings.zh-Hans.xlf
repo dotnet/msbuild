@@ -156,7 +156,7 @@
       </trans-unit>
       <trans-unit id="CommonSdk.BaseIntermediateOutputPathMismatchWarning">
         <source>MSB3539: The value of the property "BaseIntermediateOutputPath" was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the "MSBuildProjectExtensionsPath" instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</source>
-        <target state="new">MSB3539: The value of the property "BaseIntermediateOutputPath" was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the "MSBuildProjectExtensionsPath" instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</target>
+        <target state="translated">MSB3539: 属性 “BaseIntermediateOutputPath” 的值已在 MSBuild 使用它后进行了修改，这可能会导致意外的生成结果。NuGet 等工具会改为将输出写入由 “MSBuildProjectExtensionsPath” 指定的路径。要设置此属性，必须在导入 Microsoft.Common.props 之前执行此操作，例如使用 Directory.Build.props。有关详细信息，请访问 https://go.microsoft.com/fwlink/?linkid=869650"</target>
         <note>{StrBegin="MSB3539: "} </note>
       </trans-unit>
       <trans-unit id="CommonSdk.CrossTargetingGetTargetFrameworks">
@@ -186,7 +186,7 @@
       </trans-unit>
       <trans-unit id="CommonSdk.MSBuildProjectExtensionsPathModifiedAfterUse">
         <source>MSB3540: The value of the property "MSBuildProjectExtensionsPath" was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</source>
-        <target state="new">MSB3540: The value of the property "MSBuildProjectExtensionsPath" was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</target>
+        <target state="translated">MSB3540: 属性 “MSBuildProjectExtensionsPat” 的值已在 MSBuild 使用它后进行了修改，这可能会导致意外的生成结果。要设置此属性，必须在导入 Microsoft.Common.props 之前执行此操作，例如使用 Directory.Build.props。For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</target>
         <note>{StrBegin="MSB3540: "}</note>
       </trans-unit>
       <trans-unit id="CommonSdk.ManifestResourceWithNoCultureWarning">
@@ -201,7 +201,7 @@
       </trans-unit>
       <trans-unit id="CommonSdk.NonExistentProjectReference">
         <source>MSB9008: The referenced project {0} does not exist.</source>
-        <target state="new">MSB9008: The referenced project {0} does not exist.</target>
+        <target state="translated">MSB9008: 引用的项目 {0} 不存在。</target>
         <note />
       </trans-unit>
       <trans-unit id="CommonSdk.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
