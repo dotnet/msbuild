@@ -171,6 +171,36 @@
         <target state="translated">빌드하는 동안 환경 변수에서 파생된 암시적 속성을 사용하면 안 됩니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_MessageFmt">
+        <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
+        <target state="translated">{0} 프로젝트가 {1} 프로젝트의 출력을 참조합니다. 참조된 경로: {2}. ProjectReference를 대신 사용해야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_Title">
+        <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
+        <target state="translated">프로젝트는 ''Reference''를 통해 출력을 참조하지 말고 ''ProjectReference''를 통해 직접 참조해야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_MessageFmt">
+        <source>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</source>
+        <target state="translated">프로젝트 {0}에서 확장명('{2}')을 나타내는 문화권이 있을 수 있는 'EmbeddedResource' 항목 '{1}'을(를) 지정하지만 명시적인 'Culture' 또는 'WithCulture=false' 메타데이터가 지정되지 않았습니다.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_Title">
+        <source>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</source>
+        <target state="translated">잘못되거나 비결정적인 문화권 추정을 방지하려면 명시적인 'Culture' 메타데이터 또는 'EmbeddedResource' 항목과 함께 'WithCulture=false' 메타데이터를 지정하는 것이 좋습니다.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0107_MessageFmt">
+        <source>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</source>
+        <target state="new">Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0107_Title">
+        <source>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</source>
+        <target state="new">'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">속성: '{0}'에 액세스했지만 초기화되지 않았습니다.</target>
@@ -286,6 +316,11 @@
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
         <target state="translated">지정한 사용자 지정 검사 어셈블리를 찾지 못했습니다. '{0}'. 있는지 확인하세요.</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
+      </trans-unit>
+      <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
+        <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
+        <target state="translated">{1} 매개 변수가 있는 "{0}" 메서드에 오버로드가 여러 개 발견되었습니다. 이는 현재 지원되지 않습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
@@ -1186,8 +1221,8 @@ Errors: {3}</source>
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
-        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: 가져온 프로젝트 "{0}"을(를) 찾을 수 없습니다. Import 선언 "{1}"의 식이 올바르고 디스크에 파일이 있는지 확인하세요.</target>
+        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>
+        <target state="translated">MSB4019: 가져온 프로젝트 "{0}"을(를) 찾을 수 없습니다. "{2}"(으)로 평가된 Import 선언 "{1}의 식이 올바르고 파일이 디스크에 있는지 확인합니다.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
@@ -1574,8 +1609,8 @@ Errors: {3}</source>
         <note />
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeeded">
-        <source>MSB4075: The project file "{0}" must be opened in the Visual Studio IDE and converted to the latest version before it can be built by MSBuild.</source>
-        <target state="translated">MSB4075: 프로젝트 파일 "{0}"을(를) MSBuild로 빌드하려면 파일을 Visual Studio IDE에서 열어 최신 버전으로 변환해야 합니다.</target>
+        <source>MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</source>
+        <target state="translated">MSB4075: 프로젝트 파일 "{0}"을(를) MSBuild로 빌드하려면 이를 지원하는 Visual Studio IDE 버전에서 열고 최신 버전으로 변환해야 합니다. 자세한 정보: https://aka.ms/DeprecatedProjectConversion</target>
         <note>{StrBegin="MSB4075: "}</note>
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeededToVcxProj">

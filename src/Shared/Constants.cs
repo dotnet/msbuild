@@ -142,6 +142,8 @@ namespace Microsoft.Build.Shared
 
         internal const string InnerBuildProperty = nameof(InnerBuildProperty);
         internal const string InnerBuildPropertyValues = nameof(InnerBuildPropertyValues);
+        internal const string TargetFrameworks = nameof(TargetFrameworks);
+        internal const string TargetFramework = nameof(TargetFramework);
     }
 
     // TODO: Remove these when VS gets updated to setup project cache plugins.
@@ -233,5 +235,13 @@ namespace Microsoft.Build.Shared
         internal const string UndefinePropertiesMetadataName = "UndefineProperties";
         internal const string AdditionalPropertiesMetadataName = "AdditionalProperties";
         internal const string ProjectConfigurationDescription = "ProjectConfigurationDescription";
+    }
+
+    /// <summary>
+    /// Constants naming well-known items.
+    /// </summary>
+    internal static class ItemNames
+    {
+        internal const string reference = "Reference";
     }
 }

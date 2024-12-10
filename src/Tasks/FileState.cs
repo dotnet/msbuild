@@ -247,7 +247,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal FileState(string filename)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(filename, nameof(filename));
+            ErrorUtilities.VerifyThrowArgumentLength(filename);
             _filename = filename;
             _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_filename));
         }

@@ -1,15 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
-using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
@@ -37,12 +33,14 @@ internal sealed class SharedOutputPathCheck : Check
 
     internal override bool IsBuiltIn => true;
 
-    private readonly Dictionary<string, string> _projectsPerOutputPath = new(StringComparer.CurrentCultureIgnoreCase);
-    private readonly HashSet<string> _projects = new(StringComparer.CurrentCultureIgnoreCase);
+    private readonly Dictionary<string, string> _projectsPerOutputPath = new(MSBuildNameIgnoreCaseComparer.Default);
+    private readonly HashSet<string> _projectsSeen = new(MSBuildNameIgnoreCaseComparer.Default);
 
     private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
     {
-        if (!_projects.Add(context.Data.ProjectFilePath))
+        // We want to avoid repeated checking of a same project (as it might be evaluated multiple times)
+        //  for this reason we use a hashset with already seen projects
+        if (!_projectsSeen.Add(context.Data.ProjectFilePath))
         {
             return;
         }
@@ -56,8 +54,8 @@ internal sealed class SharedOutputPathCheck : Check
         // Check objPath only if it is different from binPath
         if (
             !string.IsNullOrEmpty(objPath) && !string.IsNullOrEmpty(absoluteBinPath) &&
-            !objPath.Equals(binPath, StringComparison.CurrentCultureIgnoreCase)
-            && !objPath.Equals(absoluteBinPath, StringComparison.CurrentCultureIgnoreCase)
+            !MSBuildNameIgnoreCaseComparer.Default.Equals(objPath, binPath)
+            && !MSBuildNameIgnoreCaseComparer.Default.Equals(objPath, absoluteBinPath)
         )
         {
             CheckAndAddFullOutputPath(objPath, context);
@@ -72,18 +70,11 @@ internal sealed class SharedOutputPathCheck : Check
         }
 
         string projectPath = context.Data.ProjectFilePath;
-
-        if (!Path.IsPathRooted(path))
-        {
-            path = Path.Combine(Path.GetDirectoryName(projectPath)!, path);
-        }
-
-        // Normalize the path to avoid false negatives due to different path representations.
-        path = FileUtilities.NormalizePath(path);
+        path = BuildCheckUtilities.RootEvaluatedPath(path!, projectPath);
 
         if (_projectsPerOutputPath.TryGetValue(path!, out string? conflictingProject))
         {
-            context.ReportResult(BuildCheckResult.Create(
+            context.ReportResult(BuildCheckResult.CreateBuiltIn(
                 SupportedRule,
                 // Populating precise location tracked via https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=58661732
                 ElementLocation.EmptyLocation,

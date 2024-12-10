@@ -244,6 +244,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="BuildSubmissionStartedEventArgs"/>.
         /// </summary>
         BuildSubmissionStartedEvent = 40,
+
+        /// <summary>
+        /// Event is <see cref="BuildCanceledEventArgs"/>
+        /// </summary>
+        BuildCanceledEvent = 41,
     }
     #endregion
 
@@ -656,6 +661,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildCheckTracingEvent => new BuildCheckTracingEventArgs(),
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
                 LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
+                LoggingEventType.BuildCanceledEvent => new BuildCanceledEventArgs("Build canceled."),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -798,6 +804,10 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(BuildSubmissionStartedEventArgs))
             {
                 return LoggingEventType.BuildSubmissionStartedEvent;
+            }
+            else if (eventType == typeof(BuildCanceledEventArgs))
+            {
+                return LoggingEventType.BuildCanceledEvent;
             }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))
@@ -1414,7 +1424,7 @@ namespace Microsoft.Build.Shared
             int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
             if (count == 0)
             {
-                return Enumerable.Empty<DictionaryEntry>();
+                return (DictionaryEntry[])[];
             }
 
             var list = new ArrayList(count);
@@ -1436,7 +1446,7 @@ namespace Microsoft.Build.Shared
             int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
             if (count == 0)
             {
-                return Enumerable.Empty<DictionaryEntry>();
+                return (DictionaryEntry[])[];
             }
 
             var list = new ArrayList(count);
