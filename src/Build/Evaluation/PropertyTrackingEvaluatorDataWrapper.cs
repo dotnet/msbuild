@@ -296,17 +296,14 @@ namespace Microsoft.Build.Evaluation
             var args = new PropertyInitialValueSetEventArgs(
                                     property.Name,
                                     property.EvaluatedValue,
-                                    source.ToString(),
+
+                                    // If the property is from XML, we don't need property source since a full location is available.
+                                    location == null ? EnumUtilities.GetEnumString(source) : string.Empty,
                                     location?.File,
                                     location?.Line ?? 0,
                                     location?.Column ?? 0,
-                                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                                        "PropertyAssignment",
-                                        property.Name,
-                                        property.EvaluatedValue,
-                                        location?.LocationString ?? source.ToString()));
-
-            args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
+                                    ResourceUtilities.GetResourceString("PropertyAssignment"))
+            { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
 
             _evaluationLoggingContext.LogBuildEvent(args);
         }
@@ -343,7 +340,7 @@ namespace Microsoft.Build.Evaluation
                         oldValue,
                         newValue,
                         location?.LocationString,
-                        message: null)
+                        message: ResourceUtilities.GetResourceString("PropertyReassignment"))
                 { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
 
                 _evaluationLoggingContext.LogBuildEvent(args);
@@ -363,15 +360,20 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Determines the source of a property given the variables SetProperty arguments provided. This logic follows what's in <see cref="Evaluator{P,I,M,D}"/>.
         /// </summary>
-        private PropertySource DeterminePropertySource(bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable, bool isCommandLineProperty) =>
-            (isGlobalProperty, mayBeReserved, isEnvironmentVariable, isCommandLineProperty) switch
+        private PropertySource DeterminePropertySource(bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable, bool isCommandLineProperty)
+        {
+            if (isEnvironmentVariable)
             {
-                (true, _, _, false) => PropertySource.Global,
-                (_, true, _, _) => PropertySource.BuiltIn,
-                (_, _, true, _) => PropertySource.EnvironmentVariable,
-                (true, _, _, true) => PropertySource.CommandLine,
-                _ => PropertySource.Toolset,
-            };
+                return PropertySource.EnvironmentVariable;
+            }
+
+            if (isGlobalProperty)
+            {
+                return isCommandLineProperty ? PropertySource.CommandLine : PropertySource.Global;
+            }
+
+            return mayBeReserved ? PropertySource.BuiltIn : PropertySource.Toolset;
+        }
 
         #endregion
 
