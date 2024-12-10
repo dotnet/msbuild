@@ -768,6 +768,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -787,6 +788,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -836,6 +838,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -855,6 +858,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -906,6 +910,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -918,6 +923,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -936,6 +942,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -976,6 +983,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -994,6 +1002,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -1034,6 +1043,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -1052,6 +1062,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -1092,6 +1103,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -1104,6 +1116,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -1144,6 +1157,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
