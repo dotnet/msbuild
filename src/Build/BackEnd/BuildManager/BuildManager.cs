@@ -40,11 +40,6 @@ using Microsoft.NET.StringTools;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
-#if NETFRAMEWORK
-using static Microsoft.Extensions.Logging.LoggerExtensions;
-using ExtILogger = Microsoft.Extensions.Logging.ILogger;
-#endif
-
 namespace Microsoft.Build.Execution
 {
     /// <summary>
@@ -497,13 +492,7 @@ namespace Microsoft.Build.Execution
                 parameters.DetailedSummary = true;
                 parameters.LogTaskInputs = true;
             }
-#if NETFRAMEWORK
-            // Environment.SetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317");
-            // Environment.SetEnvironmentVariable("OTEL_SERVICE_NAME", "MSBuild");
-            NewOpenTelemetry.Enable();
-            var a = TelemetryHelpers.StartActivity("BeginBuild", new Dictionary<string, object> { { "IsBuildCheckEnabled", parameters.IsBuildCheckEnabled } });
-            a.Dispose();
-#endif
+            BuildTelemetryManager.Initialize(false);
 
             lock (_syncLock)
             {
@@ -1084,11 +1073,15 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
                             // Debugger.Launch();
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
-#if NETFRAMEWORK
-                            // var telemetryActivity = TelemetryHelpers.StartActivity("endbuild");
-                            NewOpenTelemetry.EndOfBuildTelemetry(_buildTelemetry);
-                            // telemetryActivity.Dispose();
-#endif
+                            var endOfBuildTelemetry = BuildTelemetryManager.StartActivity(
+                                "Build",
+                                new Dictionary<string, object> {
+                                    { "IsBuildCheckEnabled", _buildTelemetry.BuildCheckEnabled },
+                                    { "Target", _buildTelemetry.Target ?? "" }
+                                });
+                            endOfBuildTelemetry?.Dispose();
+                            BuildTelemetryManager.Shutdown();
+
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
                         }

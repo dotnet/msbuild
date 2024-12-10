@@ -1,173 +1,296 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-#if NETFRAMEWORK
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+#if NETFRAMEWORK
 using Microsoft.VisualStudio.OpenTelemetry.ClientExtensions;
 using Microsoft.VisualStudio.OpenTelemetry.ClientExtensions.Exporters;
 using Microsoft.VisualStudio.OpenTelemetry.Collector.Interfaces;
 using Microsoft.VisualStudio.OpenTelemetry.Collector.Settings;
-
+#endif
 using OpenTelemetry;
-using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
-    /// <summary>
-    /// A static class to instrument telemetry via OpenTelemetry.
-    /// </summary>
-    public static class NewOpenTelemetry
+
+    public static class TelemetryConstants
     {
+        public const string VSNamespace = "Microsoft.VisualStudio.OpenTelemetry.MSBuild";
+        public const string MSBuildSourceName = "Microsoft.Build";
+        public const string EventPrefix = "VS/MSBuild/";
+        public const string PropertyPrefix = "VS.MSBuild.";
+        public const string Version = "1.0.0";
+    }
 
-        private const string OTelNamespace = "Microsoft.VisualStudio.OpenTelemetry.MSBuild";
-        private const string vsMajorVersion = "17.0";
-        private static IOpenTelemetryCollector? collector;
-        private static TracerProvider? tracerProvider;
-        private static MeterProvider? meterProvider;
+    public class TelemetryConfiguration
+    {
+        private static readonly Lazy<TelemetryConfiguration> _instance =
+            new(() => new TelemetryConfiguration());
 
-        private static bool isInitialized;
-        // private static ILoggerFactory? loggerFactory;
-        public static Microsoft.Extensions.Logging.ILogger? logger;
+        public static TelemetryConfiguration Instance => _instance.Value;
 
+        // Will be populated with actual env vars later
+        public const string OptOutEnvVar = "PLACEHOLDER_OPTOUT";
+        public const string VSTelemetryOptOutEnvVar = "PLACEHOLDER_VS_OPTOUT";
+        public const string OTLPExportEnvVar = "PLACEHOLDER_OTLP_ENABLE";
+        public const string NoCollectorsEnvVar = "PLACEHOLDER_NO_COLLECTORS";
 
-        /// <summary>
-        /// Gets an <see cref="ActivitySource"/> that is configured to create <see cref="Activity"/> objects
-        /// that can get reported as a VS telemetry event when disposed.
-        /// </summary>
-        internal static MSBuildActivitySourceWrapper DefaultTelemetrySource { get; } = new();
-
-        /// <summary>
-        /// Configures the <see cref="DefaultTelemetrySource"/> to send telemetry through the Open Telemetry pipeline.
-        /// </summary>
-        /// <remarks>
-        /// This should get called once at the start of the process. Subsequent calls are no-ops.
-        /// If this is not called, then <see cref="Activity"/> objects created from <see cref="DefaultTelemetrySource"/> will always be <see langword="null"/>.
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void Enable()
+        private TelemetryConfiguration()
         {
-            // this relies on single thread being here
-            if (isInitialized)
+            RefreshConfiguration();
+        }
+
+        public bool IsEnabled { get; private set; }
+        public bool IsVSTelemetryEnabled { get; private set; }
+        public bool IsOTLPExportEnabled { get; private set; }
+        public bool ShouldInitializeCollectors { get; private set; }
+
+        public void RefreshConfiguration()
+        {
+            IsEnabled = !IsEnvVarEnabled(OptOutEnvVar);
+            IsVSTelemetryEnabled = IsEnabled && !IsEnvVarEnabled(VSTelemetryOptOutEnvVar);
+            // IsOTLPExportEnabled = IsEnabled && IsEnvVarEnabled(OTLPExportEnvVar);
+#if DEBUG
+            IsOTLPExportEnabled = true;
+#endif
+            ShouldInitializeCollectors = IsEnabled && !IsEnvVarEnabled(NoCollectorsEnvVar);
+        }
+
+        private static bool IsEnvVarEnabled(string name) =>
+            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(name));
+    }
+
+    public static class BuildTelemetryManager
+    {
+        private static ITelemetrySession? _currentSession;
+
+        public static void Initialize(bool isVisualStudioBuild, string? hostName = null)
+        {
+            if (_currentSession != null)
+            {
+                throw new InvalidOperationException("Telemetry session already initialized");
+            }
+
+            _currentSession = TelemetrySessionFactory.Create(isVisualStudioBuild, hostName);
+        }
+
+        public static void Shutdown()
+        {
+            if (_currentSession != null)
+            {
+                _currentSession.Dispose();
+                _currentSession = null;
+            }
+        }
+
+        public static Activity? StartActivity(string name, IDictionary<string, object>? tags = null)
+        {
+            return _currentSession?.StartActivity(
+                $"{TelemetryConstants.EventPrefix}{name}",
+                tags?.ToDictionary(
+                    kvp => $"{TelemetryConstants.PropertyPrefix}{kvp.Key}",
+                    kvp => kvp.Value));
+        }
+    }
+
+    // This would be internal in reality, shown here for completeness
+    internal interface ITelemetrySession : IDisposable
+    {
+        Activity? StartActivity(string name, IDictionary<string, object>? tags = null);
+    }
+    internal static class TelemetrySessionFactory
+    {
+        public static ITelemetrySession Create(bool isVisualStudioBuild, string? hostName)
+        {
+            var session = new TelemetrySession(isVisualStudioBuild, hostName);
+            session.Initialize();
+            return session;
+        }
+    }
+
+    internal class TelemetrySession : ITelemetrySession
+    {
+        private readonly bool _isVisualStudioBuild;
+        private readonly string? _hostName;
+        private readonly MSBuildActivitySource _activitySource;
+        private readonly List<IDisposable> _collectors;
+        private bool _isDisposed;
+
+        public TelemetrySession(bool isVisualStudioBuild, string? hostName)
+        {
+            _isVisualStudioBuild = isVisualStudioBuild;
+            _hostName = hostName;
+            _activitySource = new MSBuildActivitySource();
+            _collectors = new();
+        }
+
+        public void Initialize()
+        {
+            var config = TelemetryConfiguration.Instance;
+
+            if (config.IsOTLPExportEnabled)
+            {
+                _collectors.Add(new OTLPCollector(_activitySource).Initialize());
+            }
+
+#if NETFRAMEWORK
+            if (_isVisualStudioBuild && config.IsVSTelemetryEnabled)
+            {
+                _collectors.Add(new VSCollector(_activitySource).Initialize());
+            }
+#endif
+        }
+
+        public Activity? StartActivity(string name, IDictionary<string, object>? tags = null)
+        {
+            if (_isDisposed)
+            {
+                return null;
+            }
+
+            return _activitySource.StartActivity(name, tags);
+        }
+
+        public void Dispose()
+        {
+            if (_isDisposed)
             {
                 return;
             }
 
-            isInitialized = true;
+            _isDisposed = true;
 
-            IOpenTelemetryExporterSettings defaultExporterSettings = OpenTelemetryExporterSettingsBuilder
-                .CreateVSDefault(vsMajorVersion)
-                .Build();
-            IOpenTelemetryCollectorSettings collectorSettings = OpenTelemetryCollectorSettingsBuilder
-                .CreateVSDefault(vsMajorVersion)
-                .Build();
-
-            using ILoggerFactory factory = LoggerFactory.Create(builder => { builder.AddOpenTelemetry(logging => { logging.AddVisualStudioDefaultLogExporter(defaultExporterSettings); logging.AddOtlpExporter(); }); });
-
-            tracerProvider = Sdk.CreateTracerProviderBuilder()
-                .AddVisualStudioDefaultTraceExporter(defaultExporterSettings)
-                .AddOtlpExporter() // see if this looks at any env vars
-                .Build();
-            logger = factory.CreateLogger(OTelNamespace);
-
-            meterProvider = Sdk.CreateMeterProviderBuilder()
-                .AddVisualStudioDefaultMetricExporter(defaultExporterSettings)
-                .Build();
-
-            // this should not happen in VS
-            collector = OpenTelemetryCollectorProvider.CreateCollector(collectorSettings);
-            collector.StartAsync();
-        }
-
-        internal static void EndOfBuildTelemetry(BuildTelemetry buildTelemetry)
-        {
-            Enable();
-#pragma warning disable CS8604 // Possible null reference argument.
-            using var telemetryActivity = TelemetryHelpers.StartActivity("Build", initialProperties: new
-                 Dictionary<string, object>
-                {
-                    { "StartAt", buildTelemetry.StartAt?.ToString() },
-                    { "InnerStartAt", buildTelemetry.InnerStartAt?.ToString() },
-                    { "FinishedAt", buildTelemetry.FinishedAt?.ToString() },
-                    { "Success", buildTelemetry.Success },
-                    { "Target", buildTelemetry.Target },
-                    { "Version", buildTelemetry.Version?.ToString() },
-                    { "DisplayVersion", buildTelemetry.DisplayVersion },
-                    { "SAC", buildTelemetry.SACEnabled },
-                    { "BuildCheckEnabled", buildTelemetry.BuildCheckEnabled },
-                    { "Host", buildTelemetry.Host },
-                });
-#pragma warning restore CS8604 // Possible null reference argument.
-            telemetryActivity.SetStartTime(buildTelemetry.StartAt ?? DateTime.UtcNow);
-            telemetryActivity.Stop();
-            telemetryActivity.SetEndTime(buildTelemetry.FinishedAt ?? DateTime.UtcNow);
-            telemetryActivity.Dispose();
-        }
-
-        internal class MSBuildActivitySourceWrapper
-        {
-            private const string OTelNamespace = "Microsoft.VisualStudio.OpenTelemetry.MSBuild";
-            internal MSBuildActivitySourceWrapper()
+            foreach (var collector in _collectors)
             {
-                Source = new ActivitySource(OTelNamespace, vsMajorVersion);
+                collector.Dispose();
             }
-            public ActivitySource Source { get; }
 
-            public string Name => Source.Name;
-
-            public string? Version => Source.Version;
-
-
-            public Activity StartActivity(string name = "", ActivityKind kind = ActivityKind.Internal)
-            {
-                // If the current activity has a remote parent, then we should start a child activity with the same parent ID.
-                Activity? activity = Activity.Current?.HasRemoteParent is true
-                    ? Source.StartActivity(name, kind, parentId: Activity.Current.ParentId)
-                    : Source.StartActivity(name);
-
-                if (activity is null)
-                {
-                    activity = new Activity(name);
-                    activity.Start();
-                }
-
-                return activity;
-            }
+            _collectors.Clear();
         }
     }
-    public static class TelemetryHelpers
+
+    internal class MSBuildActivitySource
     {
+        private readonly ActivitySource _source;
 
-        private const string EventPrefix = "VS/MSBuild/";
-        private const string PropertyPrefix = "VS.MSBuild.";
-        // private const string PropertyPrefix = "";
-
-        public static Activity StartActivity(string name, IDictionary<string, object> initialProperties)
+        public MSBuildActivitySource()
         {
-            return NewOpenTelemetry.DefaultTelemetrySource
-                .StartActivity(EventPrefix + name, ActivityKind.Internal)
-                .WithTags(initialProperties);
+            _source = new ActivitySource(
+                TelemetryConstants.MSBuildSourceName,
+                TelemetryConstants.Version);
         }
-        public static Activity WithTags(this Activity activity, IDictionary<string, object> tags)
-        {
-            if (tags is null)
-            {
-                return activity;
-            }
 
-            foreach (KeyValuePair<string, object> tag in tags)
+        public Activity? StartActivity(string name, IDictionary<string, object>? tags)
+        {
+            var activity = Activity.Current?.HasRemoteParent == true
+                ? _source.StartActivity(name, ActivityKind.Internal, parentId: Activity.Current.ParentId)
+                : _source.StartActivity(name);
+
+            if (activity != null && tags != null)
             {
-                activity.SetTag(PropertyPrefix + tag.Key, tag.Value);
+                foreach (var tag in tags)
+                {
+                    activity.SetTag(tag.Key, tag.Value);
+                }
             }
 
             return activity;
         }
     }
-}
+
+    internal class OTLPCollector : IDisposable
+    {
+        private readonly MSBuildActivitySource _activitySource;
+        private TracerProvider? _tracerProvider;
+        private MeterProvider? _meterProvider;
+
+        public OTLPCollector(MSBuildActivitySource activitySource)
+        {
+            _activitySource = activitySource;
+        }
+
+        public OTLPCollector Initialize()
+        {
+            _tracerProvider = Sdk.CreateTracerProviderBuilder()
+                .AddSource(TelemetryConstants.MSBuildSourceName)
+                .AddOtlpExporter()
+                .Build();
+
+            _meterProvider = Sdk.CreateMeterProviderBuilder()
+                .AddMeter(TelemetryConstants.MSBuildSourceName)
+                .Build();
+
+            return this;
+        }
+
+        public void Dispose()
+        {
+            _tracerProvider?.Dispose();
+            _meterProvider?.Dispose();
+        }
+    }
+
+#if NETFRAMEWORK
+    internal class VSCollector : IDisposable
+    {
+        private const string VsMajorVersion = "17.0";
+
+        private readonly MSBuildActivitySource _activitySource;
+        private IOpenTelemetryCollector? _collector;
+        private TracerProvider? _tracerProvider;
+        private MeterProvider? _meterProvider;
+
+        public VSCollector(MSBuildActivitySource activitySource)
+        {
+            _activitySource = activitySource;
+        }
+
+        public VSCollector Initialize()
+        {
+            var exporterSettings = OpenTelemetryExporterSettingsBuilder
+                .CreateVSDefault(VsMajorVersion)
+                .Build();
+
+            var collectorSettings = OpenTelemetryCollectorSettingsBuilder
+                .CreateVSDefault(VsMajorVersion)
+                .Build();
+
+            _tracerProvider = Sdk.CreateTracerProviderBuilder()
+                .AddVisualStudioDefaultTraceExporter(exporterSettings)
+                .AddSource(TelemetryConstants.MSBuildSourceName)
+                .Build();
+
+            _meterProvider = Sdk.CreateMeterProviderBuilder()
+                .AddVisualStudioDefaultMetricExporter(exporterSettings)
+                .AddMeter(TelemetryConstants.MSBuildSourceName)
+                .Build();
+
+            _collector = OpenTelemetryCollectorProvider.CreateCollector(collectorSettings);
+
+            _collector.StartAsync();
+
+            return this;
+        }
+
+        public void Dispose()
+        {
+            if (_collector != null)
+            {
+                _collector.Dispose();
+            }
+            _tracerProvider?.Dispose();
+            _meterProvider?.Dispose();
+        }
+    }
 #endif
+
+}
+
