@@ -141,7 +141,7 @@ namespace Microsoft.Build.BackEnd
                     property.Location.File,
                     property.Location.Line,
                     property.Location.Column,
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", property.Name, evaluatedValue, property.Location.LocationString ?? "Target"))
+                    ResourceUtilities.GetResourceString("PropertyAssignment"))
                 { BuildEventContext = LoggingContext.BuildEventContext };
 
                 LoggingContext.LogBuildEvent(args);
@@ -149,11 +149,13 @@ namespace Microsoft.Build.BackEnd
             else if ((_propertyTrackingSettings & PropertyTrackingSetting.PropertyReassignment) == PropertyTrackingSetting.PropertyReassignment)
             {
                 var args = new PropertyReassignmentEventArgs(
-                           property.Name,
-                           previousPropertyValue,
-                           evaluatedValue,
-                           property.Location.LocationString,
-                           message: null)
+                    property.Name,
+                    previousPropertyValue,
+                    evaluatedValue,
+                    property.Location.File,
+                    property.Location.Line,
+                    property.Location.Column,
+                    message: ResourceUtilities.GetResourceString("PropertyReassignment"))
                 { BuildEventContext = LoggingContext.BuildEventContext, };
 
                 LoggingContext.LogBuildEvent(args);

@@ -91,6 +91,21 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public string PropertySource { get; set; }
 
+        public override string Message
+        {
+            get
+            {
+                if (RawMessage == null)
+                {
+                    var formattedSource = File != null ? $"{File} ({LineNumber}, {ColumnNumber})" : PropertySource;
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", PropertyName, PropertyValue, formattedSource);
+                }
+
+                return RawMessage;
+            }
+        }
+
+
         internal override void WriteToStream(BinaryWriter writer)
         {
             base.WriteToStream(writer);

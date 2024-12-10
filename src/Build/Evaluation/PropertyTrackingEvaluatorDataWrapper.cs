@@ -294,15 +294,15 @@ namespace Microsoft.Build.Evaluation
             }
 
             var args = new PropertyInitialValueSetEventArgs(
-                                    property.Name,
-                                    property.EvaluatedValue,
+                property.Name,
+                property.EvaluatedValue,
 
-                                    // If the property is from XML, we don't need property source since a full location is available.
-                                    location == null ? EnumUtilities.GetEnumString(source) : string.Empty,
-                                    location?.File,
-                                    location?.Line ?? 0,
-                                    location?.Column ?? 0,
-                                    ResourceUtilities.GetResourceString("PropertyAssignment"))
+                // If the property is from XML, we don't need property source since a full location is available.
+                location == null ? EnumUtilities.GetEnumString(source) : string.Empty,
+                location?.File,
+                location?.Line ?? 0,
+                location?.Column ?? 0,
+                ResourceUtilities.GetResourceString("PropertyAssignment"))
             { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
 
             _evaluationLoggingContext.LogBuildEvent(args);
@@ -336,11 +336,13 @@ namespace Microsoft.Build.Evaluation
                 (_settings == 0 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)))
             {
                 var args = new PropertyReassignmentEventArgs(
-                        property.Name,
-                        oldValue,
-                        newValue,
-                        location?.LocationString,
-                        message: ResourceUtilities.GetResourceString("PropertyReassignment"))
+                    property.Name,
+                    oldValue,
+                    newValue,
+                    location?.File,
+                    location?.Line ?? 0,
+                    location?.Column ?? 0,
+                    message: ResourceUtilities.GetResourceString("PropertyReassignment"))
                 { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
 
                 _evaluationLoggingContext.LogBuildEvent(args);

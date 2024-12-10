@@ -1617,7 +1617,7 @@ namespace Microsoft.Build.BackEnd
                     location.File,
                     location.Line,
                     location.Column,
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", propertyName, propertyValue, location?.LocationString ?? "Task"))
+                    ResourceUtilities.GetResourceString("PropertyAssignment"))
                 { BuildEventContext = _targetLoggingContext.BuildEventContext };
 
                 _targetLoggingContext.LogBuildEvent(args);
@@ -1628,8 +1628,10 @@ namespace Microsoft.Build.BackEnd
                     propertyName,
                     previousPropertyValue,
                     propertyValue,
-                    location.LocationString,
-                    message: null)
+                    location.File,
+                    location.Line,
+                    location.Column,
+                    message: ResourceUtilities.GetResourceString("PropertyReassignment"))
                 { BuildEventContext = _targetLoggingContext.BuildEventContext };
 
                 _targetLoggingContext.LogBuildEvent(args);
