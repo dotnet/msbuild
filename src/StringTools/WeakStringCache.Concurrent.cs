@@ -14,6 +14,7 @@ namespace Microsoft.NET.StringTools
     internal sealed partial class WeakStringCache : IDisposable
     {
         private readonly ConcurrentDictionary<int, StringWeakHandle> _stringsByHashCode;
+        private int _count;
 
         public WeakStringCache()
         {
@@ -62,11 +63,15 @@ namespace Microsoft.NET.StringTools
 
             handle = new StringWeakHandle();
             handle.SetString(result);
-            _stringsByHashCode.TryAdd(hashCode, handle);
+            if (_stringsByHashCode.TryAdd(hashCode, handle))
+            {
+                Interlocked.Add(ref _count, 1);
+            }
+            
 
             // Remove unused handles if our heuristic indicates that it would be productive.
             int scavengeThreshold = _scavengeThreshold;
-            if (_stringsByHashCode.Count >= scavengeThreshold)
+            if (_count >= scavengeThreshold)
             {
                 // Before we start scavenging set _scavengeThreshold to a high value to effectively lock other threads from
                 // running Scavenge at the same time.
@@ -81,6 +86,7 @@ namespace Microsoft.NET.StringTools
                     {
                         // And do this again when the number of handles reaches double the current after-scavenge number.
                         _scavengeThreshold = _stringsByHashCode.Count * 2;
+                        _count = _stringsByHashCode.Count;
                     }
                 }
             }
