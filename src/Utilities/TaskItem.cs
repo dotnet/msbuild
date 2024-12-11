@@ -77,21 +77,21 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <comments>
         /// Assumes the itemspec passed in is escaped.
-        /// If tratAsFilePath is set to true, it will try to fix itemSpac backslashes into slashes.
+        /// If <see name="treatAsFilePath" /> is set to <see langword="true" />, the value in <see name="itemSpec" />
+        /// will be fixed up as path by having backslashes replaced with slashes.
         /// </comments>
         /// <param name="itemSpec">The item-spec string.</param>
-        /// <param name="treatAsFilePath">If item-spec string is a path or not.</param>
+        /// <param name="treatAsFilePath">
+        /// Specifies whether or not to treat the value in <see name="itemSpec" />
+        /// as a file path and attempt to normalize it.  Defaults to <see langword="true" />.
+        /// </param>
         public TaskItem(
             string itemSpec,
             bool treatAsFilePath = true)
         {
             ErrorUtilities.VerifyThrowArgumentNull(itemSpec);
 
-            if (treatAsFilePath)
-            {
-
-                _itemSpec = FileUtilities.FixFilePath(itemSpec);
-            }
+            _itemSpec = treatAsFilePath ? FileUtilities.FixFilePath(itemSpec) : itemSpec;
         }
 
         /// <summary>
