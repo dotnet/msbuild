@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -771,33 +772,47 @@ namespace Microsoft.Build.Evaluation
             return expression.IndexOf(quoteChar, index);
         }
 
+        private static StringBuilder s_argumentBuilder = new StringBuilder();
+
+        private struct Slice
+        {
+            internal int Start;
+            internal int End;
+            internal Slice(int start, int end)
+            {
+                Start = start;
+                End = end;
+            }
+        }
+
         /// <summary>
         /// Add the argument represented by the slices to the arguments list, handling nulls
         /// appropriately.
         /// </summary>
-        private static void AddArgumentFromSlices(List<string> arguments, List<Tuple<int, int>> slices, string arg)
+        private static void AddArgumentFromSlices(List<string> arguments, List<Slice> slices, string arg)
         {
-            // This shouldn't happen
             int firstSlice = 0;
             int lastSlice = slices.Count - 1;
+            // This is a basic sanity check for no slices. While it can't happen at this moment, it is a reasonable check to have.
             if (lastSlice == -1)
             {
                 arguments.Add("");
                 return;
             }
+
             // from end
-            int lastSliceIdx = slices[slices.Count - 1].Item2;
+            int lastSliceIdx = slices[slices.Count - 1].End;
             // from start
-            int firstSliceIdx = slices[0].Item1;
+            int firstSliceIdx = slices[0].Start;
 
             // Trim from the start
             while (firstSlice <= lastSlice && Char.IsWhiteSpace(arg, firstSliceIdx))
             {
                 firstSliceIdx++;
-                if (firstSliceIdx > slices[firstSlice].Item2 && firstSlice < lastSlice)
+                if (firstSliceIdx > slices[firstSlice].End && firstSlice < lastSlice)
                 {
                     firstSlice++;
-                    firstSliceIdx = slices[firstSlice].Item1;
+                    firstSliceIdx = slices[firstSlice].Start;
                 }
             }
 
@@ -807,10 +822,10 @@ namespace Microsoft.Build.Evaluation
             while (((firstSlice < lastSlice) || (firstSlice == lastSlice && firstSliceIdx < lastSliceIdx)) && Char.IsWhiteSpace(arg, lastSliceIdx - 1))
             {
                 lastSliceIdx--;
-                if (slices[lastSlice].Item1 > lastSliceIdx && firstSlice < lastSlice)
+                if (slices[lastSlice].Start > lastSliceIdx && firstSlice < lastSlice)
                 {
                     lastSlice--;
-                    lastSliceIdx = slices[lastSlice].Item2;
+                    lastSliceIdx = slices[lastSlice].End;
                 }
             }
 
@@ -833,37 +848,50 @@ namespace Microsoft.Build.Evaluation
                 removedQuotes = true;
 
                 // Check yet again if we're still in the correct slice boundaries, this could've changed if we've trimmed.
-                if (firstSliceIdx > slices[firstSlice].Item2 && ++firstSlice < lastSlice)
+                // This can only happen if the slice was representing exactly one character
+                if (firstSliceIdx == slices[firstSlice].End)
                 {
-                    firstSliceIdx = slices[firstSlice].Item1;
+                    firstSlice++;
+                    // since the trim above removes exactly two characters - even if we remove one of them alongside its slice
+                    // we're guaranteed to have at least one other slice.                    
+                    firstSliceIdx = slices[firstSlice].Start;
                 }
-                if (slices[lastSlice].Item1 > lastSliceIdx && firstSlice < --lastSlice)
+                // Same check for the last slice - was it one character slice that we just deleted?
+                if (slices[lastSlice].Start >= lastSliceIdx)
                 {
-                    lastSliceIdx = slices[lastSlice].Item2;
+                    // If yes, remove it from our "slices of interest"
+                    // Now if we had the case of two slices with one character each,
+                    // this could move lastSliceIdx under firstSliceIdx
+                    lastSlice--;
+
+                    // if we still have at least one slice we update the end index for the last slice since.
+                    // we just removed one.
+                    if (firstSlice <= lastSlice)
+                    {
+                        lastSliceIdx = slices[lastSlice].End;
+                    }
                 }
             }
 
-            string argValue = "";
+            s_argumentBuilder.Clear();
 
-            while (firstSlice < lastSlice)
+            // Using the processed slices (e.g. whitespace and quotes removed) to build the resulting string.
+            while (firstSlice <= lastSlice)
             {
-                argValue += arg.Substring(firstSliceIdx, slices[firstSlice].Item2 - firstSliceIdx);
+                s_argumentBuilder.Append(arg, firstSliceIdx, slices[firstSlice].End - firstSliceIdx);
                 firstSlice++;
-                firstSliceIdx = slices[firstSlice].Item1;
+                if (firstSlice < lastSlice)
+                { firstSliceIdx = slices[firstSlice].Start; }
             }
 
-            if (firstSlice == lastSlice)
-            {
-                argValue += arg.Substring(firstSliceIdx, lastSliceIdx - firstSliceIdx);
-            }
-
-            if (!removedQuotes && String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
+            string argument = s_argumentBuilder.ToString();
+            if (!removedQuotes && String.Equals("null", argument, StringComparison.OrdinalIgnoreCase))
             {
                 arguments.Add(null);
             }
             else
             {
-                arguments.Add(argValue);
+                arguments.Add(argument);
             }
         }
 
@@ -880,12 +908,12 @@ namespace Microsoft.Build.Evaluation
             List<string> arguments = new List<string>();
 
             int argumentStartIndex = -1;
-            List<Tuple<int, int>> slices = new List<Tuple<int, int>>();
+            List<Slice> slices = new List<Slice>();
 
             void FlushToSlices(int argumentEndIndex) {
                 if (argumentStartIndex != -1)
                 {
-                    slices.Add(Tuple.Create(argumentStartIndex, argumentEndIndex));
+                    slices.Add(new Slice(argumentStartIndex, argumentEndIndex));
                     argumentStartIndex = -1;
                 }
             }
@@ -909,7 +937,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     FlushToSlices(nestedPropertyStart);
-                    slices.Add(Tuple.Create(nestedPropertyStart, n + 1));
+                    slices.Add(new Slice(nestedPropertyStart, n + 1));
                 }
                 else if (argumentsString[n] == '`' || argumentsString[n] == '"' || argumentsString[n] == '\'')
                 {
@@ -924,7 +952,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     FlushToSlices(quoteStart);
-                    slices.Add(Tuple.Create(quoteStart, n + 1));
+                    slices.Add(new Slice(quoteStart, n + 1));
                 }
                 else if (argumentsString[n] == ',')
                 {
@@ -939,7 +967,6 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    // argumentStartIndex ??= n;
                     if (argumentStartIndex == -1)
                     {
                         argumentStartIndex = n;
@@ -2063,32 +2090,13 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (expressionCapture.Captures?.Any(capture =>
                         {
-                            if (string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase))
-                            {
-                                return true;
-                            }
-                            if (string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase))
-                            {
-                                return true;
-                            }
-                            return false;
+                            return string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase) ||
+                                   string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase);
                         }) != true)
                     {
                         itemsFromCapture = new List<KeyValuePair<string, S>>();
                         return false;
                     }
-/*
-                    // ... but only if there isn't a function "Count", since that will want to return something (zero) for an empty list
-                    if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)) != true)
-                    {
-                        // ...or a function "AnyHaveMetadataValue", since that will want to return false for an empty list.
-                        if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
-                        {
-                            itemsFromCapture = new List<KeyValuePair<string, S>>();
-                            return false;
-                        }
-                    }
-*/
                 }
 
                 if (expressionCapture.Captures != null)
