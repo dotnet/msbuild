@@ -1,5 +1,5 @@
-## Logging behaviour
-MSBuild has a few different built-in loggers, which have different behaviours depending on verbosity. For more information on loggers you can visit the [Microsoft Learn page](https://learn.microsoft.com/visualstudio/msbuild/obtaining-build-logs-with-msbuild), or take a look at the [high-level overview of MSBuild](https://github.com/dotnet/msbuild/blob/main/documentation/High-level-overview.md#diagnosability--loggers).
+## Logging behavior
+MSBuild has a few different built-in loggers, which have different behaviors depending on verbosity. For more information on loggers you can visit the [Microsoft Learn page](https://learn.microsoft.com/visualstudio/msbuild/obtaining-build-logs-with-msbuild), or take a look at the [high-level overview of MSBuild](https://github.com/dotnet/msbuild/blob/main/documentation/High-level-overview.md#diagnosability--loggers).
 
 If you are expecting to see a certain type of message (like test logs) but are unable to find it in one of our loggers, check if the verbosity is correct and if the message has the correct type and importance.
 
