@@ -95,16 +95,10 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                if (RawMessage == null)
-                {
-                    var formattedSource = File != null ? $"{File} ({LineNumber},{ColumnNumber})" : PropertySource;
-                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", PropertyName, PropertyValue, formattedSource);
-                }
-
-                return RawMessage;
+                var formattedSource = File != null ? $"{File} ({LineNumber},{ColumnNumber})" : PropertySource;
+                return string.Format(RawMessage, PropertyName, PropertyValue, formattedSource);
             }
         }
-
 
         internal override void WriteToStream(BinaryWriter writer)
         {

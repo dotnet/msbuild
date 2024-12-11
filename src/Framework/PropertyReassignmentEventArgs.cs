@@ -105,13 +105,8 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                if (RawMessage == null)
-                {
-                    string formattedLocation = File != null ? $"{File} ({LineNumber},{ColumnNumber})" : Location;
-                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("PropertyReassignment", PropertyName, NewValue, PreviousValue, formattedLocation);
-                }
-
-                return RawMessage;
+                string formattedLocation = File != null ? $"{File} ({LineNumber},{ColumnNumber})" : Location;
+                return string.Format(RawMessage, PropertyName, NewValue, PreviousValue, formattedLocation);
             }
         }
 
