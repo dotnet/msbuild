@@ -43,6 +43,19 @@
       <Link>Shared\IMSBuildElementLocation.cs</Link>
     </Compile>
   </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" />
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+    
+  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <Compile Remove="XamlTypes\**" />
