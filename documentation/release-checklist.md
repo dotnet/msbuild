@@ -30,7 +30,6 @@ _(This is for the case where we create the branch too early and want it to be ba
     - [ ]  Update AutoTargetBranch selection in the [YAML](https://github.com/dotnet/msbuild/tree/main/azure-pipelines/vs-insertion.yml) (add to parameters and make new AutoTargetBranch rule by copying it from existing ones) of the [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) to insert MSBuild `vs{{THIS_RELEASE_VERSION}}` to the corresponding VS branch `rel/d{{THIS_RELEASE_VERSION}}`.
     - [ ] Set scheduled insertion for main and remove exclusion of `vs{{THIS_RELEASE_VERSION}}` triggering on each commit if added earlier.
 - [ ] Merge {{NEXT_VERSION}} branding PR
-- [ ] Create 'Final Branding' PR in vs{{THIS_RELEASE_VERSION}} - add `<DotNetFinalVersionKind>release</DotNetFinalVersionKind>` as a suffix (on same line! - to intentionaly make it merge conflict on flows to main) after the `VersionPrefix` in the Version.props file 
 
 ### Adjust DARC channels and subscriptions
 - [ ]  Remove the `main` to old release channel ({{THIS_RELEASE_VERSION}}) default channel \
@@ -72,7 +71,8 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
 - [ ]  Create and merge a PR in main to update a localization version comment in setting [`EnableReleaseOneLocBuild`](https://github.com/dotnet/msbuild/blob/main/.vsts-dotnet.yml) to set up the merge conflict when this line will be updated in the release branch.
 
 ### Final branding
-- [ ]  Prepare final branding PR for `vs{{THIS_RELEASE_VERSION}}`: {{URL_OF_FINAL_BRANDING_PR}}
+- [ ] Prepare final branding PR for `vs{{THIS_RELEASE_VERSION}}`: {{URL_OF_FINAL_BRANDING_PR}} 
+      Edit Version.props file - add `<DotNetFinalVersionKind>release</DotNetFinalVersionKind>` as a suffix (on same line! - to intentionaly make it merge conflict on flows to main) after the `VersionPrefix`  
 - [ ]  Merge final branding to `vs{{THIS_RELEASE_VERSION}}` branch
 - [ ]  Update perfstar MSBuild insertions configuration: [example PR](https://dev.azure.com/devdiv/DevDiv/_git/dotnet-perfstar/pullrequest/522843): {{URL_OF_PERFSTAR_PR}}
 - [ ] Note down the build (will be helpful for requesting nuget packages publishing): {{URL_OF_BUILD}}
