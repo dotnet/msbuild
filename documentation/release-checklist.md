@@ -29,13 +29,14 @@ _(This is for the case where we create the branch too early and want it to be ba
   - [ ]  When VS main snaps to {{THIS_RELEASE_VERSION}} and updates its version to {{NEXT_VERSION}}, modify the [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) YAML so that it flows from MSBuild main to VS main.
     - [ ]  Update AutoTargetBranch selection in the [YAML](https://github.com/dotnet/msbuild/tree/main/azure-pipelines/vs-insertion.yml) (add to parameters and make new AutoTargetBranch rule by copying it from existing ones) of the [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) to insert MSBuild `vs{{THIS_RELEASE_VERSION}}` to the corresponding VS branch `rel/d{{THIS_RELEASE_VERSION}}`.
     - [ ] Set scheduled insertion for main and remove exclusion of `vs{{THIS_RELEASE_VERSION}}` triggering on each commit if added earlier.
-- [ ]  Merge {{NEXT_VERSION}} branding PR
+- [ ] Merge {{NEXT_VERSION}} branding PR
+- [ ] Create 'Final Branding' PR in vs{{THIS_RELEASE_VERSION}} - add `<DotNetFinalVersionKind>release</DotNetFinalVersionKind>` as a suffix (on same line! - to intentionaly make it merge conflict on flows to main) after the `VersionPrefix` in the Version.props file 
 
 ### Adjust DARC channels and subscriptions
 - [ ]  Remove the `main` to old release channel ({{THIS_RELEASE_VERSION}}) default channel \
 `darc delete-default-channel --repo https://github.com/dotnet/msbuild --branch main --channel "VS {{THIS_RELEASE_VERSION}}"`
 - [ ]  Associate the `main` branch with the next release channel \
-`darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}" --branch main --repo https://github.com/dotnet/msbuild`
+`darc add-default-channel  --channel "VS {{NEXT_VERSION}}" --branch main --repo https://github.com/dotnet/msbuild`
 - [ ]  Check subscriptions for the forward-looking channel `VS {{NEXT_VERSION}}` and update as necessary (for instance, SDK's `main` branch should usually be updated, whereas release branches often should not be \
 `darc get-subscriptions --exact --source-repo https://github.com/dotnet/msbuild --channel "VS {{THIS_RELEASE_VERSION}}"`
 - [ ]  Update channel VS {{THIS_RELEASE_VERSION}} to VS {{NEXT_VERSION}} for the sdk main subscription and any others from the previous step
