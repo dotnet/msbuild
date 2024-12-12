@@ -173,22 +173,22 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0104_MessageFmt">
         <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
-        <target state="translated">El proyecto {0} hace referencia a la salida de un proyecto {1}. Ruta de acceso a la que se hace referencia: {2}. En su lugar, se debe usar ProjectReference.</target>
+        <target state="new">Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0104_Title">
         <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
-        <target state="translated">No se debe hacer referencia a un proyecto a través de "Reference" a su salida, sino directamente a través de "ProjectReference".</target>
+        <target state="new">A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0105_MessageFmt">
         <source>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</source>
-        <target state="translated">El proyecto {0} especifica el elemento "EmbeddedResource" "{1}", que posiblemente tiene una extensión de denotación de referencia cultural ("{2}"), pero no se especifican los metadatos explícitos "Culture" ni "WithCulture=false".</target>
+        <target state="new">Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0105_Title">
         <source>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</source>
-        <target state="translated">Se recomienda especificar metadatos "Culture" explícitos o metadatos "WithCulture=false" con el elemento "EmbeddedResource" para evitar una estimación incorrecta o no determinista de la referencia cultural.</target>
+        <target state="new">It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0107_MessageFmt">
@@ -329,12 +329,12 @@
       </trans-unit>
       <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
         <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
-        <target state="translated">Encontradas múltiples sobrecargas para el método "{0}" con {1} parámetro(s). Esto no se admite actualmente.</target>
+        <target state="new">Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">No se pudo cargar el tipo de comprobación personalizado: "{0}" desde el ensamblado: "{1}". Asegúrese de que hereda la clase base Microsoft.Build.Experimental.BuildCheck.Check. Si no está pensado para ser una comprobación personalizada, no debe exponerse. Más información: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">No se pudo cargar el tipo de comprobación personalizada: "{0}" desde el ensamblado: "{1}". Asegúrese de que hereda la clase base Microsoft.Build.Experimental.BuildCheck.Check. Si no se pretende que sea una comprobación personalizada, no debe exponerse. Más información: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
@@ -420,7 +420,7 @@
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
-        <target state="translated">Hay caracteres no válidos en '{0}' en el elemento {1}.</target>
+        <target state="translated">Hay caracteres no válidos en "{0}" en el elemento {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
@@ -673,7 +673,7 @@
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
 Errors: {3}</source>
-        <target state="translated">El resolvedor "{0}" intentó resolver el SDK "{1}".
+        <target state="translated">El solucionador "{0}" intentó resolver el SDK "{1}".
 Advertencias: {2}
 Errores: {3}</target>
         <note>
@@ -1232,7 +1232,7 @@ Errores: {3}</target>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: No se encontró el proyecto "{0}" importado. Confirme que la expresión de la declaración Import "{1}", que se evaluó como "{2}", es correcta y que el archivo existe en el disco.</target>
+        <target state="new">MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
@@ -1620,7 +1620,7 @@ Errores: {3}</target>
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeeded">
         <source>MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</source>
-        <target state="translated">MSB4075: el archivo de proyecto "{0}" debe abrirse en una versión de IDE de Visual Studio compatible y convertirse a la versión más reciente antes de que MSBuild pueda compilarlo. Más información: https://aka.ms/DeprecatedProjectConversion</target>
+        <target state="new">MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</target>
         <note>{StrBegin="MSB4075: "}</note>
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeededToVcxProj">
