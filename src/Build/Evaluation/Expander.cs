@@ -809,7 +809,7 @@ namespace Microsoft.Build.Evaluation
             while (firstSlice <= lastSlice && Char.IsWhiteSpace(arg, firstSliceIdx))
             {
                 firstSliceIdx++;
-                if (firstSliceIdx > slices[firstSlice].End && firstSlice < lastSlice)
+                if (firstSliceIdx >= slices[firstSlice].End && firstSlice < lastSlice)
                 {
                     firstSlice++;
                     firstSliceIdx = slices[firstSlice].Start;
@@ -876,12 +876,17 @@ namespace Microsoft.Build.Evaluation
             s_argumentBuilder.Clear();
 
             // Using the processed slices (e.g. whitespace and quotes removed) to build the resulting string.
-            while (firstSlice <= lastSlice)
+            while (firstSlice < lastSlice)
             {
                 s_argumentBuilder.Append(arg, firstSliceIdx, slices[firstSlice].End - firstSliceIdx);
                 firstSlice++;
-                if (firstSlice < lastSlice)
-                { firstSliceIdx = slices[firstSlice].Start; }
+                firstSliceIdx = slices[firstSlice].Start;
+            }
+
+            // Now we use the last slice there is.
+            if (firstSlice == lastSlice)
+            {
+                s_argumentBuilder.Append(arg, firstSliceIdx, lastSliceIdx - firstSliceIdx);
             }
 
             string argument = s_argumentBuilder.ToString();
@@ -2091,7 +2096,7 @@ namespace Microsoft.Build.Evaluation
                     if (expressionCapture.Captures?.Any(capture =>
                         {
                             return string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase) ||
-                                   string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase);
+                                   string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase);
                         }) != true)
                     {
                         itemsFromCapture = new List<KeyValuePair<string, S>>();
