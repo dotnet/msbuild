@@ -1,7 +1,7 @@
 name: 😱 Unhandled Exception
 description: Reporting holes in our bug reporting system
 title: "[Unhandled Exception]: "
-labels: ["bug", "needs-triage"]
+labels: ["bug"]
 body:
   - type: textarea
     attributes:

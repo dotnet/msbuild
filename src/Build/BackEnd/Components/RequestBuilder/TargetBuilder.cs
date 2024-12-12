@@ -419,8 +419,8 @@ namespace Microsoft.Build.BackEnd
                         "TargetDoesNotExist",
                         currentTargetEntry.Name);
 
-                        // If we already have results for this target which were not skipped, we can ignore it.  In 
-                        // addition, we can also ignore its before and after targets -- if this target has already run, 
+                        // If we already have results for this target which were not skipped, we can ignore it.  In
+                        // addition, we can also ignore its before and after targets -- if this target has already run,
                         // then so have they.
                         if (!CheckSkipTarget(ref stopProcessingStack, currentTargetEntry))
                         {
@@ -446,7 +446,7 @@ namespace Microsoft.Build.BackEnd
                             IList<TargetSpecification> dependencies = currentTargetEntry.GetDependencies(_projectLoggingContext);
 
                             // Push our before targets now, unconditionally.  If we have marked that we should stop processing the stack here, which can only
-                            // happen if our current target was supposed to stop processing AND we had no after targets, then our last before target should 
+                            // happen if our current target was supposed to stop processing AND we had no after targets, then our last before target should
                             // inherit the stop processing flag and we will reset it.
                             // Our parent is the target before which we run, just like a depends-on target.
                             IList<TargetSpecification> beforeTargets = _requestEntry.RequestConfiguration.Project.GetTargetsWhichRunBefore(currentTargetEntry.Name);
@@ -584,11 +584,11 @@ namespace Microsoft.Build.BackEnd
                     {
                         TargetEntry topEntry = _targetsToBuild.Pop();
 
-                        // If this is a skip because of target failure, we should behave in the same way as we 
-                        // would if this target actually failed -- remove all its dependencies from the stack as 
-                        // well.  Otherwise, we could encounter a situation where a failure target happens in the 
+                        // If this is a skip because of target failure, we should behave in the same way as we
+                        // would if this target actually failed -- remove all its dependencies from the stack as
+                        // well.  Otherwise, we could encounter a situation where a failure target happens in the
                         // middle of execution once, then exits, then a request comes through to build the same
-                        // targets, reaches that target, skips-already-failed, and then continues building. 
+                        // targets, reaches that target, skips-already-failed, and then continues building.
                         PopDependencyTargetsOnTargetFailure(topEntry, targetResult, ref stopProcessingStack);
                     }
 
@@ -663,7 +663,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (buildReason == TargetBuiltReason.BeforeTargets || buildReason == TargetBuiltReason.AfterTargets)
                 {
-                    // Don't build any Before or After targets for which we already have results.  Unlike other targets, 
+                    // Don't build any Before or After targets for which we already have results.  Unlike other targets,
                     // we don't explicitly log a skipped-with-results message because it is not interesting.
                     if (_buildResult.HasResultsForTarget(targetSpecification.TargetName))
                     {

@@ -32,7 +32,7 @@ namespace Microsoft.Build.Shared
                 throw new System.NotSupportedException();
             }
 #endif
-            // wait until the process finishes exiting/getting killed. 
+            // wait until the process finishes exiting/getting killed.
             // We don't want to wait forever here because the task is already supposed to be dieing, we just want to give it long enough
             // to try and flush what it can and stop. If it cannot do that in a reasonable time frame then we will just ignore it.
             process.WaitForExit(timeoutMilliseconds);

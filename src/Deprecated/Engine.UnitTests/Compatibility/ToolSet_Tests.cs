@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// </summary>
         [Test]
         public void ToolsetImportPropertiesNull()
-        {           
+        {
             BuildPropertyGroup buildPropertyGroup = null;
             Toolset toolset = new Toolset("toolversion", "c:\aPath", buildPropertyGroup);
             Assertion.AssertEquals(0, toolset.BuildProperties.Count);
@@ -163,7 +163,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Toolset Test. Get Path (note stripping of the last slash) 
+        /// Toolset Test. Get Path (note stripping of the last slash)
         /// </summary>
         [Test]
         public void ToolPathGetTrailingSlash()
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Toolset Test. Get Path (root path, don't strip slash) 
+        /// Toolset Test. Get Path (root path, don't strip slash)
         /// </summary>
         [Test]
         public void ToolPathGetRootPath()

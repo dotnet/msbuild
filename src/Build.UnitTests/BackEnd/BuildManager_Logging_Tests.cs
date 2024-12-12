@@ -88,7 +88,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [WindowsFullFrameworkOnlyTheory]
         [InlineData("1", true)]
         [InlineData("0", false)]
-        [InlineData(null, false)]
+        [InlineData(null, true)]
         public void Build_WithCustomBuildArgs_Framework(string envVariableValue, bool isWarningExpected) =>
             TestCustomEventWarning<BuildWarningEventArgs>(envVariableValue, isWarningExpected);
 

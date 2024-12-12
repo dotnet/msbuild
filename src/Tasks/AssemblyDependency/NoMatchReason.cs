@@ -26,7 +26,7 @@ namespace Microsoft.Build.Tasks
         FusionNamesDidNotMatch,
 
         /// <summary>
-        /// The file was found, but it didn't have a fusion name. 
+        /// The file was found, but it didn't have a fusion name.
         /// </summary>
         TargetHadNoFusionName,
 

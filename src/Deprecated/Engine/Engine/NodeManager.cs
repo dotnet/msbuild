@@ -218,7 +218,7 @@ namespace Microsoft.Build.BuildEngine
                     // At this point we have nulled out the task execution module and have told our task worker threads to exit
                     // we do not want the engine build loop to continue to do any work becasue the operations of the build loop
                     // require the task execution module in many cases. Before this fix, when the engine build loop was allowed
-                    // to do work after the task execution module we would get random null reference excetpions depending on 
+                    // to do work after the task execution module we would get random null reference excetpions depending on
                     // what was the first line to use the TEM after it was nulled out.
                     parentEngine.SetEngineAbortTo(true);
                 }

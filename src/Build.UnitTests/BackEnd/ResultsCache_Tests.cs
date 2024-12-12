@@ -13,8 +13,6 @@ using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
 
-
-
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -166,7 +164,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// If a result had multiple targets associated with it and we only requested some of their 
+        /// If a result had multiple targets associated with it and we only requested some of their
         /// results, the returned result should only contain the targets we asked for, and the overall
         /// status of the result should reflect the targets we asked for as well.
         /// </summary>

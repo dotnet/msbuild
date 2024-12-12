@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests the TaskName property. 
+        /// Tests the TaskName property.
         /// Should get "CL" back for this specific case.
         /// </summary>
         [Fact]
@@ -235,7 +235,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests a basic non-reversible booleans switch that has a default value set. 
+        /// Tests a basic non-reversible booleans switch that has a default value set.
         /// </summary>
         [Fact]
         public void TestBasicNonReversibleBooleanSwitch_WithDefault()
@@ -286,8 +286,8 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests XamlTaskFactory support for DynamicEnumProperties.  These are primarily of use as a visualization in the property pages; as far as the 
-        /// XamlTaskFactory and XamlDataDrivenToolTask are concerned, they are treated as StringProperties.  
+        /// Tests XamlTaskFactory support for DynamicEnumProperties.  These are primarily of use as a visualization in the property pages; as far as the
+        /// XamlTaskFactory and XamlDataDrivenToolTask are concerned, they are treated as StringProperties.
         /// </summary>
         [Fact]
         public void TestDynamicEnumProperty()
@@ -308,7 +308,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests a simple string property. 
+        /// Tests a simple string property.
         /// </summary>
         [Fact]
         public void TestBasicStringProperty()
@@ -361,7 +361,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests a simple string array property. 
+        /// Tests a simple string array property.
         /// </summary>
         [Fact]
         public void TestBasicStringArrayProperty()
@@ -384,7 +384,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests a simple string array property. 
+        /// Tests a simple string array property.
         /// </summary>
         [Fact]
         public void TestStringArrayPropertyWithDataSource()
@@ -411,7 +411,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests a simple string array property. 
+        /// Tests a simple string array property.
         /// </summary>
         [Fact]
         public void TestStringArrayPropertyWithDataSource_DataSourceIsItem()
@@ -485,7 +485,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                 cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "Microsoft.Build.Framework.dll"));
                 cp.ReferencedAssemblies.Add("System.Data.dll");
 
-                // Generate an executable instead of 
+                // Generate an executable instead of
                 // a class library.
                 cp.GenerateExecutable = false;
                 // Set the assembly file name to generate.
@@ -541,7 +541,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                 cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "Microsoft.Build.Framework.dll"));
                 cp.ReferencedAssemblies.Add("System.Data.dll");
 
-                // Generate an executable instead of 
+                // Generate an executable instead of
                 // a class library.
                 cp.GenerateExecutable = false;
                 // Set the assembly file name to generate.

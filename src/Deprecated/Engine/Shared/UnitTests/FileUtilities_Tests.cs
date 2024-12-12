@@ -266,7 +266,7 @@ namespace Microsoft.Build.UnitTests
             Assertion.Assert("test 57", !FileUtilities.IsItemSpecModifier("createdxxxx"));
             Assertion.Assert("test 58", !FileUtilities.IsItemSpecModifier("Createdxxxx"));
             Assertion.Assert("test 59", !FileUtilities.IsItemSpecModifier("xxxxxxxxxxx"));
-            
+
             Assertion.Assert("test 60", !FileUtilities.IsItemSpecModifier("recursivexxx"));
             Assertion.Assert("test 61", !FileUtilities.IsItemSpecModifier("Recursivexxx"));
             Assertion.Assert("test 62", !FileUtilities.IsItemSpecModifier("accessedxxxx"));
@@ -274,7 +274,7 @@ namespace Microsoft.Build.UnitTests
             Assertion.Assert("test 64", !FileUtilities.IsItemSpecModifier("modifiedxxxx"));
             Assertion.Assert("test 65", !FileUtilities.IsItemSpecModifier("Modifiedxxxx"));
             Assertion.Assert("test 66", !FileUtilities.IsItemSpecModifier("xxxxxxxxxxxx"));
-            
+
             Assertion.Assert("test 67", !FileUtilities.IsItemSpecModifier(null));
         }
 

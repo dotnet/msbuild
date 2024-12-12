@@ -26,7 +26,7 @@ namespace Microsoft.Build.Tasks
     {
         /// <summary>
         /// Flags for MoveFileEx.
-        /// 
+        ///
         /// </summary>
         private const NativeMethods.MoveFileFlags Flags = NativeMethods.MoveFileFlags.MOVEFILE_WRITE_THROUGH |    // Do not return until the Move is complete
                                                           NativeMethods.MoveFileFlags.MOVEFILE_REPLACE_EXISTING | // Replace any existing target
@@ -250,7 +250,7 @@ namespace Microsoft.Build.Tasks
 
             if (!result)
             {
-                // It failed so we need a nice error message. Unfortunately 
+                // It failed so we need a nice error message. Unfortunately
                 // Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error()); and
                 // throw new IOException((new Win32Exception(error)).Message)
                 // do not produce great error messages (eg., "The operation succeeded" (!)).

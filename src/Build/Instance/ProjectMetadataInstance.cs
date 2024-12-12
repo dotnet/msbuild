@@ -99,7 +99,7 @@ namespace Microsoft.Build.Execution
         /// Name of the metadata
         /// </summary>
         /// <remarks>
-        /// This cannot be set, as it is used as the key into 
+        /// This cannot be set, as it is used as the key into
         /// the item's metadata table.
         /// </remarks>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Evaluated value of the metadatum. 
+        /// Evaluated value of the metadatum.
         /// Never null.
         /// </summary>
         public string EvaluatedValue
