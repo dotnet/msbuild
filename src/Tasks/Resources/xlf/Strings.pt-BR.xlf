@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="AssignCulture.CultureOverwritten">
         <source>MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</source>
-        <target state="translated">MSB3002: a cultura "{0}" explicitamente definida para o item "{1}" foi substituída pela cultura inferida "{2}", porque a propriedade "RespectAlreadyAssignedItemCulture" não foi definida.</target>
+        <target state="new">MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</target>
         <note>
 	{StrBegin="MSB3002: "}
 	'RespectAlreadyAssignedItemCulture' should not be translated
@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithTaskElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</source>
-        <target state="translated">MSB3752: o atributo "{0}" do elemento &lt;{1}&gt; na tarefa "{2}" foi definido, mas está vazio. Verifique se o atributo tem um valor adequado.</target>
+        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
@@ -1180,7 +1180,7 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" of type "{1}" may be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/binaryformatter-migration-guide</source>
-        <target state="translated">MSB3825: O recurso "{0}" do tipo "{1}" pode ser desserializado via BinaryFormatter em tempo de execução. O BinaryFormatter foi preterido devido a riscos de segurança conhecidos e foi removido do .NET 9+. Se desejar continuar usando, defina a propriedade "GenerateResourceWarnOnBinaryFormatterUse" como false.
+        <target state="translated">MSB3825: O recurso “{0}” do tipo “{1}” pode ser desserializado por meio do BinaryFormatter em runtime. O BinaryFormatter foi preterido devido a riscos de segurança conhecidos e foi removido do .NET 9+. Se quiser continuar a usá-lo, defina a propriedade “GenerateResourceWarnOnBinaryFormatterUse” como false.
            Mais informações: https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
