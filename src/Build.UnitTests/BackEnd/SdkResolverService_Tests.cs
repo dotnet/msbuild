@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -163,8 +164,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         // Scenario: we want to test that we solved the contention described here: https://github.com/dotnet/msbuild/issues/7927#issuecomment-1232470838
         public async Task AssertResolverPopulationContentionNotPresent()
         {
-            var service = new SdkResolverService();
-            service.InitializeForTests(new MockLoaderStrategy(includeResolversWithPatterns: true), contentionConditionTest: true);
+            var service = new SdkResolverServiceTextExtension();
+            service.InitializeForTests(new MockLoaderStrategy(includeResolversWithPatterns: true));
 
             SdkReference sdk = new SdkReference("2sdkName", "referencedVersion", "minimumVersion");
 
@@ -695,6 +696,44 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 failOnUnresolvedSdk: true);
 
             isRunningInVisualStudio.ShouldBeTrue();
+        }
+
+        internal sealed class SdkResolverServiceTextExtension : SdkResolverService
+        {
+
+            internal bool _fake_initialization = false;
+            internal IReadOnlyList<SdkResolverManifest> _fakeManifestRegistry;
+
+            internal override void WaitIfTestRequires()
+            {
+                if (_fake_initialization)
+                {
+                    Thread.Sleep(10);
+                }
+            }
+            internal override IReadOnlyList<SdkResolverManifest> GetResolverManifests(ElementLocation location)
+            {
+                return _fakeManifestRegistry;
+            }
+
+            internal override void InitializeForTests(SdkResolverLoader resolverLoader = null, IReadOnlyList<SdkResolver> resolvers = null)
+            {
+                if (resolverLoader != null)
+                {
+                    _sdkResolverLoader = resolverLoader;
+                    _fake_initialization = true;
+                    List<SdkResolverManifest> manifests = new List<SdkResolverManifest>();
+                    for (int i = 1; i != 20; i++)
+                    {
+                        var man = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, ResolvableSdkRegex: new Regex("abc"));
+                        manifests.Add(man);
+                        man = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, null);
+                        manifests.Add(man);
+                    }
+                    _fakeManifestRegistry = manifests.AsReadOnly();
+                    return;
+                }
+            }
         }
 
         private sealed class MockLoaderStrategy : SdkResolverLoader
