@@ -9,7 +9,7 @@
     <UsagePattern IdentityGlob="System.Configuration.ConfigurationManager/*9.0.0*" />
     <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*9.0.0*" />
     <UsagePattern IdentityGlob="System.Formats.Asn1/*9.0.0*" />
-    <UsagePattern IdentityGlob="System.Formats.Nbrf/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Formats.Nrbf/*9.0.0*" />
     <UsagePattern IdentityGlob="System.Reflection.Metadata/*9.0.0*" />
     <UsagePattern IdentityGlob="System.Reflection.MetadataLoadContext/*9.0.0*" />
     <UsagePattern IdentityGlob="System.Resources.Extensions/*9.0.0*" />
