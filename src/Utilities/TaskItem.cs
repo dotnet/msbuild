@@ -94,7 +94,7 @@ namespace Microsoft.Build.Utilities
         /// </param>
         public TaskItem(
             string itemSpec,
-            bool treatAsFilePath = true)
+            bool treatAsFilePath)
         {
             ErrorUtilities.VerifyThrowArgumentNull(itemSpec);
 
