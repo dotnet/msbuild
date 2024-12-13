@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 #if DEBUG
 using System.Threading;
+
 #endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
@@ -51,17 +52,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// Stores the list of manifests of specific SDK resolvers which could be loaded.
         /// </summary>
-        private IReadOnlyList<SdkResolverManifest> _specificResolversManifestsRegistry;
+        protected IReadOnlyList<SdkResolverManifest> _specificResolversManifestsRegistry;
 
         /// <summary>
         /// Stores the list of manifests of general SDK resolvers which could be loaded.
         /// </summary>
-        private IReadOnlyList<SdkResolverManifest> _generalResolversManifestsRegistry;
-
-#if DEBUG
-        internal bool _fake_initialization = false;
-        internal IReadOnlyList<SdkResolverManifest> _fakeManifestRegistry;
-#endif
+        protected IReadOnlyList<SdkResolverManifest> _generalResolversManifestsRegistry;
 
         /// <summary>
         /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
@@ -70,7 +66,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// Unless the 17.10 changewave is disabled, we use a singleton instance because the set of SDK resolvers
         /// is not expected to change during the lifetime of the process.
         /// </remarks>
-        private SdkResolverLoader _sdkResolverLoader = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
+        protected SdkResolverLoader _sdkResolverLoader = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
             ? CachingSdkResolverLoader.Instance
             : new SdkResolverLoader();
 
@@ -186,13 +182,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             List<SdkResolverManifest> matchingResolversManifests = new();
             foreach (SdkResolverManifest manifest in _specificResolversManifestsRegistry)
             {
-#if DEBUG
-                // If we're checking about the race condition, we should better make sure we would hit it.
-                if (_fake_initialization)
-                {
-                    Thread.Sleep(10);
-                }
-#endif
+                WaitIfTestRequires(); 
                 try
                 {
                     if (manifest.ResolvableSdkRegex.IsMatch(sdk.Name))
@@ -402,33 +392,20 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return false;
         }
 
+        internal virtual void WaitIfTestRequires() { }
+
+        internal virtual IReadOnlyList<SdkResolverManifest> GetResolverManifests(ElementLocation location) => _sdkResolverLoader.GetResolversManifests(location);
+
         /// <summary>
         /// Used for unit tests only.  This is currently only called through reflection in Microsoft.Build.Engine.UnitTests.TransientSdkResolution.CallResetForTests
         /// </summary>
         /// <param name="resolverLoader">An <see cref="SdkResolverLoader"/> to use for loading SDK resolvers.</param>
         /// <param name="resolvers">Explicit set of SdkResolvers to use for all SDK resolution.</param>
-        /// <param name="contentionConditionTest"> Debug parameter for initializing only the stuff required for the Contention Condition check test.</param>
-        internal void InitializeForTests(SdkResolverLoader resolverLoader = null, IReadOnlyList<SdkResolver> resolvers = null, bool contentionConditionTest = false)
+        internal virtual void InitializeForTests(SdkResolverLoader resolverLoader = null, IReadOnlyList<SdkResolver> resolvers = null)
         {
             if (resolverLoader != null)
             {
                 _sdkResolverLoader = resolverLoader;
-#if DEBUG
-                if (contentionConditionTest)
-                {
-                    _fake_initialization = true;
-                    List<SdkResolverManifest> manifests = new List<SdkResolverManifest>();
-                    for (int i = 1; i != 20; i++)
-                    {
-                        var man = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, ResolvableSdkRegex: new Regex("abc"));
-                        manifests.Add(man);
-                        man = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, null);
-                        manifests.Add(man);
-                    }
-                    _fakeManifestRegistry = manifests.AsReadOnly();
-                    return;
-                }
-#endif
             }
             else
             {
@@ -499,19 +476,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     return;
                 }
-                IReadOnlyList<SdkResolverManifest> allResolversManifests;
-#if DEBUG
-                if (_fake_initialization)
-                {
-                    allResolversManifests = _fakeManifestRegistry;
-                }
-                else
-#endif
-                {
-                    allResolversManifests = _sdkResolverLoader.GetResolversManifests(location);
-                }
 
-                    _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
+                IReadOnlyList<SdkResolverManifest> allResolversManifests = GetResolverManifests(location);
+                _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
 
                 SdkResolverManifest sdkDefaultResolversManifest = null;
 #if NETCOREAPP
@@ -535,12 +502,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 // Otherwise race can happen, see https://github.com/dotnet/msbuild/issues/7927
                 foreach (SdkResolverManifest manifest in allResolversManifests)
                 {
-#if DEBUG
-                    if (_fake_initialization)
-                    {
-                        Thread.Sleep(10);
-                    }
-#endif
+                    WaitIfTestRequires();
+
                     if (manifest.ResolvableSdkRegex == null)
                     {
                         generalResolversManifestsRegistryPlaceholder.Add(manifest);
