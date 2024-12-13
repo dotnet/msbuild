@@ -820,6 +820,13 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Point in time snapshot of all worker processes leveraged by this BuildManager.
+        /// </summary>
+        /// <returns>Enumeration of <see cref="Process"/> objects that were valid during the time of call to this function.</returns>
+        public IEnumerable<Process> GetWorkerProcesses()
+            => (_nodeManager?.GetProcesses() ?? []).Concat(_taskHostNodeManager?.GetProcesses() ?? []);
+
+        /// <summary>
         /// Clears out all of the cached information.
         /// </summary>
         public void ResetCaches()
