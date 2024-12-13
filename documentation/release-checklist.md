@@ -75,9 +75,10 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
       Edit Version.props file - add `<DotNetFinalVersionKind>release</DotNetFinalVersionKind>` as a suffix (on same line! - to intentionaly make it merge conflict on flows to main) after the `VersionPrefix`  
 - [ ]  Merge final branding to `vs{{THIS_RELEASE_VERSION}}` branch
 - [ ]  Update perfstar MSBuild insertions configuration: [example PR](https://dev.azure.com/devdiv/DevDiv/_git/dotnet-perfstar/pullrequest/522843): {{URL_OF_PERFSTAR_PR}}
-- [ ] Note down the build (will be helpful for requesting nuget packages publishing): {{URL_OF_BUILD}}
 - [ ] Get M2 or QB approval as necessary per the VS schedule
 - [ ]  Merge to VS (babysit the automatically generated VS insertion PR https://devdiv.visualstudio.com/DevDiv/_git/VS/pullrequests for the MSBuild commit noted in above step): {{URL_OF_VS_INSERTION}}
+     The PR will be helpful for requesting nuget packages publishing - as it contains the inserted packages versions
+    - [ ] Respond to the 'VS xyz package stabilization' email - with the merged insertion PR (as nowVS is on stable version).
 - [ ] Update the PackageValidationBaselineVersion to the latest released version ({{THIS_RELEASE_VERSION}}.0) - this might require temporary addition of the [build artifacts feed](https://github.com/dotnet/msbuild/blob/29397b577e3ec0fe0c7650c3ab0400909655dc88/NuGet.config#L9) as the new version is not yet added to the official feeds (this is post release). This can trigger a high severity CG error (https://eng.ms/docs/cloud-ai-platform/devdiv/one-engineering-system-1es/1es-docs/secure-supply-chain/how-to-securely-configure-package-source-files) - however it should be fine to keep this temporary feed untill the release.
 - [ ] Update the requested SDK version for bootstrap folder (the `BootstrapSdkVersion` property in [Versions.props](https://github.com/dotnet/msbuild/blob/main/eng/Versions.props)) and buildToolCommand/_InitializeBuildToolCommand values in cibuild_bootstrapped_msbuild scripts if a fresh sdk was released (released runtimes and associated sdk versions can be checked here - https://dotnet.microsoft.com/download/visual-studio-sdks - make sure to always check the details of the appropriate targeted version of .NET for the matching latest version of SDK).
 
@@ -87,7 +88,7 @@ Timing based on the [(Microsoft-internal) release schedule](https://dev.azure.co
 
 - [ ]  Push packages to nuget.org (not currently automated, contact dnceng - search "Publish MSBuild 17.6 to NuGet.org" email subject for template).
 
-  Following packages should be published (`THIS_RELEASE_EXACT_VERSION` is equal to `VersionPrefix` that comes form the eng\Version.props, that were part of the build we are trying to get published):
+  Following packages should be published (`THIS_RELEASE_EXACT_VERSION` is equal to `VersionPrefix` that comes form the eng\Version.props, that were part of the build we are trying to get published, it is as well part of the VS insertion PR noted above):
     - Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
     - Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
     - Microsoft.Build.Framework.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
