@@ -8,10 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-#if DEBUG
-using System.Threading;
-
-#endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -394,6 +390,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         internal virtual void WaitIfTestRequires() { }
 
+        // This is a convenience wrapper that we override for one test so that we don't introduce unnecessary #if DEBUG
+        // segments into the production code.
         internal virtual IReadOnlyList<SdkResolverManifest> GetResolverManifests(ElementLocation location) => _sdkResolverLoader.GetResolversManifests(location);
 
         /// <summary>
