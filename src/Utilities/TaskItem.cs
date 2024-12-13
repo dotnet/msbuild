@@ -77,7 +77,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <comments>Assumes the itemspec passed in is escaped.</comments>
         /// <param name="itemSpec">The item-spec string.</param>
-        public TaskItem(string itemSpec) => new TaskItem(itemSpec, treatAsFilePath: true);
+        public TaskItem(string itemSpec)
+            : this(itemSpec, treatAsFilePath: true) { }
 
         /// <summary>
         /// This constructor creates a new task item, given the item spec.
