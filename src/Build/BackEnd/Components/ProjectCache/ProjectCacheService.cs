@@ -271,23 +271,23 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 }
 
 #if FEATURE_REPORTFILEACCESSES
-            FileAccessManager.HandlerRegistration? handlerRegistration = null;
-            if (_componentHost.BuildParameters.ReportFileAccesses)
-            {
-                handlerRegistration = _fileAccessManager.RegisterHandlers(
-                    (buildRequest, fileAccessData) =>
-                    {
-                        // TODO: Filter out projects which do not configure this plugin
-                        FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
-                        pluginInstance.HandleFileAccess(fileAccessContext, fileAccessData);
-                    },
-                    (buildRequest, processData) =>
-                    {
-                        // TODO: Filter out projects which do not configure this plugin
-                        FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
-                        pluginInstance.HandleProcess(fileAccessContext, processData);
-                    });
-            }
+                FileAccessManager.HandlerRegistration? handlerRegistration = null;
+                if (_componentHost.BuildParameters.ReportFileAccesses)
+                {
+                    handlerRegistration = _fileAccessManager.RegisterHandlers(
+                        (buildRequest, fileAccessData) =>
+                        {
+                            // TODO: Filter out projects which do not configure this plugin
+                            FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
+                            pluginInstance.HandleFileAccess(fileAccessContext, fileAccessData);
+                        },
+                        (buildRequest, processData) =>
+                        {
+                            // TODO: Filter out projects which do not configure this plugin
+                            FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
+                            pluginInstance.HandleProcess(fileAccessContext, processData);
+                        });
+                }
 #endif
 
                 return new ProjectCachePlugin(

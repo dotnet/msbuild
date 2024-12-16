@@ -30,7 +30,8 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             return new EvaluatedPropertiesCheckData(
                 projectFile,
                 null,
-                evaluatedProperties ?? new Dictionary<string, string>());
+                evaluatedProperties ?? new Dictionary<string, string>(),
+                new Dictionary<string, string>());
         }
 
         [Fact]

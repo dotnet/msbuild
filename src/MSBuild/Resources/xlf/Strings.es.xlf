@@ -17,7 +17,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="needs-review-translation">Compilación {0} en {1}s</target>
+        <target state="translated">Compilación {0} en {1}s</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -67,6 +67,13 @@
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
+      <trans-unit id="BuildSummary">
+        <source>Build summary:</source>
+        <target state="new">Build summary:</target>
+        <note>
+      A header used by Terminal Logger to introduce the build summary.
+    </note>
+      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">Argumentos de la línea de comandos: "{0}"</target>
@@ -87,7 +94,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="needs-review-translation">({0:F1}s)</target>
+        <target state="translated">({0:F1}s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
@@ -125,7 +132,7 @@
                      Hace que MSBuild informe de los accesos a los archivos a cualquier
                      complemento de caché de proyectos.
 
-                     Esta marca es experimental y puede que no funcione según lo previsto.
+Esta marca es experimental y puede que no funcione según lo previsto.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -320,10 +327,10 @@
                      BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="needs-review-translation">  -check
+        <target state="translated">  -check
                      Habilita BuildChecks durante la compilación.
-                     BuildCheck permite evaluar reglas para garantizar que las propiedades 
-                     de la compilación. Para obtener más información, consulte aka.ms/buildcheck
+                     BuildCheck permite evaluar reglas para garantizar que las propiedades
+                     de la compilación. Para obtener más información, consulta aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -798,14 +805,18 @@
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
         <target state="translated">  -logger:&lt;registrador&gt;   Use este registrador para registrar eventos
-                     de MSBuild. Para especificar varios registradores, especifique cada uno de ellos por separado.
+                     de MSBuild. Para especificar varios registradores, especifique
+                     cada uno de ellos por separado.
                      La sintaxis de &lt;registrador&gt; es:
-                       [&lt;clase&gt;,]&lt;assembly&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
+                       [&lt;clase&gt;,]&lt;ensamblado&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
                      La sintaxis de &lt;clase del registrador&gt; es:
-                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de clase del registrador&gt;
-                       La sintaxis de &lt;ensamblado del registrador&gt; es:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                     Las opciones del registrador especifican cómo crea MSBuild el registrador.
+                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de
+                       clase del registrador&gt;
+                     La sintaxis de &lt;ensamblado del registrador&gt; es:
+                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo
+                       de ensamblado&gt;}
+                     Las opciones del registrador especifican cómo crea MSBuild
+                     el registrador.
                      Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador tal como se escriben. (Forma corta: -l)
                      Ejemplos:
@@ -1082,12 +1093,15 @@
                      Para especificar varios registradores, especifique cada uno
                      de ellos por separado. (Forma corta: -dl)
                      La sintaxis de &lt;registrador&gt; es:
-                       [&lt;clase&gt;,]&lt;assembly&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
+                       [&lt;clase&gt;,]&lt;ensamblado&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
                      La sintaxis de &lt;clase del registrador&gt; es:
-                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de la clase del registrador&gt;
+                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre
+                       de la clase del registrador&gt;
                      La sintaxis de &lt;ensamblado del registrador&gt; es:
-                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
-                     Las opciones del registrador especifican cómo crea MSBuild el registrador.
+                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo
+                      de ensamblado&gt;}
+                     Las opciones del registrador especifican cómo crea MSBuild
+                     el registrador.
                      Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador tal como se escriben. (Forma corta: -l)
                      Ejemplos:
@@ -1730,7 +1744,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} ({3}s)</target>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1750,7 +1764,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} {3} ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1810,7 +1824,7 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="needs-review-translation">Restauración completada ({0}s)</target>
+        <target state="translated">Restauración completada ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
@@ -1818,7 +1832,7 @@
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="needs-review-translation">Restaurar {0} en {1}s</target>
+        <target state="translated">Restaurar {0} en {1}s</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1912,7 +1926,7 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="needs-review-translation">{0}{1} prueba{2} ({3}s)</target>
+        <target state="translated">{0}{1} prueba{2} ({3}s)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1924,7 +1938,7 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} {3} prueba ({4}s)</target>
+        <target state="translated">{0}{1} {2} {3} prueba ({4}s)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1942,7 +1956,7 @@
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="needs-review-translation">duración: {0} s</target>
+        <target state="translated">duración: {0} s</target>
         <note>
       {0} whole number
       's' should reflect the localized abbreviation for seconds

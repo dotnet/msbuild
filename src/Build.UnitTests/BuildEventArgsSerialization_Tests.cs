@@ -341,7 +341,7 @@ namespace Microsoft.Build.UnitTests
                 DateTime.Parse("9/1/2021 12:02:07 PM"),
                 withOptionalData ? new object[] { "argument0" } : null)
             {
-                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
                 ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
                 BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
             };
@@ -413,11 +413,11 @@ namespace Microsoft.Build.UnitTests
                 "SenderName",
                 DateTime.Parse("9/1/2021 12:02:07 PM"),
                 withOptionalData ? new object[] { "argument0" } : null)
-                {
-                    ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
-                    ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
-                    BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
-                };
+            {
+                ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
+                ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
+                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            };
 
             Roundtrip(args,
                 e => e.Code,
@@ -490,7 +490,7 @@ namespace Microsoft.Build.UnitTests
                 DateTime.Parse("12/12/2015 06:11:56 PM"),
                 withOptionalData ? new object[] { "argument0" } : null)
             {
-                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
                 ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
                 BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
             };
@@ -578,7 +578,7 @@ namespace Microsoft.Build.UnitTests
                 eventTimestamp: withOptionalData ? DateTime.Parse("3/1/2017 11:11:56 AM") : DateTime.Now,
                 messageArgs: withOptionalData ? new object[] { "arg0val", "arg1val" } : null)
             {
-                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
                 ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
                 BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
             };
@@ -673,7 +673,7 @@ namespace Microsoft.Build.UnitTests
                 DateTime.Parse("12/12/2015 06:11:56 PM"),
                 withOptionalData ? new object[] { "argument0" } : null)
             {
-                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+                ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
                 ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
                 BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
             };
@@ -1048,7 +1048,7 @@ namespace Microsoft.Build.UnitTests
             memoryStream.Position = 0;
 
             // some future type that is not known in current version
-            BinaryLogRecordKind unknownType = (BinaryLogRecordKind) Enum.GetValues(typeof(BinaryLogRecordKind)).Cast<BinaryLogRecordKind>().Select(e => (int)e).Max() + 2;
+            BinaryLogRecordKind unknownType = (BinaryLogRecordKind)Enum.GetValues(typeof(BinaryLogRecordKind)).Cast<BinaryLogRecordKind>().Select(e => (int)e).Max() + 2;
             Microsoft.Build.Shared.BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, (int)unknownType);
             memoryStream.Position.ShouldBe(eventSizePos, "The event type need to be overwritten in place - without overwriting any bytes after the type info");
             memoryStream.Position = positionAfterFirstEvent;

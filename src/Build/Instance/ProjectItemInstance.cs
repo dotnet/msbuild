@@ -37,7 +37,8 @@ namespace Microsoft.Build.Execution
         IMetadataTable,
         ITranslatable,
         IMetadataContainer,
-        IItemTypeDefinition
+        IItemTypeDefinition,
+        IItemData
     {
         /// <summary>
         /// The project instance to which this item belongs.
@@ -184,10 +185,11 @@ namespace Microsoft.Build.Execution
             { return _itemType; }
         }
 
-        /// <summary>
+        /// <inheritdoc cref="IItemData.EvaluatedInclude"/>
+        /// <remarks>
         /// Evaluated include value.
         /// May be empty string.
-        /// </summary>
+        /// </remarks>
         public string EvaluatedInclude
         {
             [DebuggerStepThrough]
@@ -300,6 +302,9 @@ namespace Microsoft.Build.Execution
                 EvaluatedInclude = value;
             }
         }
+
+        /// <inheritdoc cref="IItemData.EnumerateMetadata"/>
+        IEnumerable<KeyValuePair<string, string>> IItemData.EnumerateMetadata() => ((IMetadataContainer)this).EnumerateMetadata();
 
         /// <summary>
         /// ITaskItem implementation
@@ -828,8 +833,8 @@ namespace Microsoft.Build.Execution
                               bool immutable,
                               string definingFileEscaped) // the actual project file (or import) that defines this item.
             {
-                ErrorUtilities.VerifyThrowArgumentLength(includeEscaped, nameof(includeEscaped));
-                ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped, nameof(includeBeforeWildcardExpansionEscaped));
+                ErrorUtilities.VerifyThrowArgumentLength(includeEscaped);
+                ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped);
 
                 _includeEscaped = FileUtilities.FixFilePath(includeEscaped);
                 _includeBeforeWildcardExpansionEscaped = FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
@@ -1312,7 +1317,7 @@ namespace Microsoft.Build.Execution
             {
                 if (string.IsNullOrEmpty(metadataName))
                 {
-                    ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
+                    ErrorUtilities.VerifyThrowArgumentLength(metadataName);
                 }
 
                 if (_directMetadata != null)
@@ -1406,7 +1411,7 @@ namespace Microsoft.Build.Execution
             /// </param>
             public void CopyMetadataTo(ITaskItem destinationItem, bool addOriginalItemSpec)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
+                ErrorUtilities.VerifyThrowArgumentNull(destinationItem);
 
                 string originalItemSpec = null;
                 if (addOriginalItemSpec)
@@ -2070,7 +2075,7 @@ namespace Microsoft.Build.Execution
                 private ProjectItemInstance CreateItem(string includeEscaped, string includeBeforeWildcardExpansionEscaped, ProjectItemInstance source, string definingProject)
                 {
                     ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
-                    ErrorUtilities.VerifyThrowInternalNull(source, nameof(source));
+                    ErrorUtilities.VerifyThrowInternalNull(source);
 
                     // The new item inherits any metadata originating in item definitions, which
                     // takes precedence over its own item definition metadata.

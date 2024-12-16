@@ -126,8 +126,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public SchedulableRequest(SchedulingData collection, BuildRequest request, SchedulableRequest parent)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(collection, nameof(collection));
-            ErrorUtilities.VerifyThrowArgumentNull(request, nameof(request));
+            ErrorUtilities.VerifyThrowArgumentNull(collection);
+            ErrorUtilities.VerifyThrowArgumentNull(request);
             ErrorUtilities.VerifyThrow((parent == null) || (parent._schedulingData == collection), "Parent request does not belong to the same collection.");
 
             _schedulingData = collection;
@@ -311,7 +311,7 @@ namespace Microsoft.Build.BackEnd
         public void Yield(string[] activeTargets)
         {
             VerifyState(SchedulableRequestState.Executing);
-            ErrorUtilities.VerifyThrowArgumentNull(activeTargets, nameof(activeTargets));
+            ErrorUtilities.VerifyThrowArgumentNull(activeTargets);
             _activeTargetsWhenBlocked = activeTargets;
             ChangeToState(SchedulableRequestState.Yielding);
         }
@@ -335,8 +335,8 @@ namespace Microsoft.Build.BackEnd
         public void BlockByRequest(SchedulableRequest blockingRequest, string[] activeTargets, string blockingTarget = null)
         {
             VerifyOneOfStates([SchedulableRequestState.Blocked, SchedulableRequestState.Executing]);
-            ErrorUtilities.VerifyThrowArgumentNull(blockingRequest, nameof(blockingRequest));
-            ErrorUtilities.VerifyThrowArgumentNull(activeTargets, nameof(activeTargets));
+            ErrorUtilities.VerifyThrowArgumentNull(blockingRequest);
+            ErrorUtilities.VerifyThrowArgumentNull(activeTargets);
             ErrorUtilities.VerifyThrow(BlockingTarget == null, "Cannot block again if we're already blocked on a target");
 
             // Note that the blocking request will typically be our parent UNLESS it is a request we blocked on because it was executing a target we wanted to execute.
@@ -372,7 +372,7 @@ namespace Microsoft.Build.BackEnd
         public void UnblockWithPartialResultForBlockingTarget(BuildResult result)
         {
             VerifyOneOfStates([SchedulableRequestState.Blocked, SchedulableRequestState.Unscheduled]);
-            ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
+            ErrorUtilities.VerifyThrowArgumentNull(result);
 
             BlockingRequestKey key = new BlockingRequestKey(result);
             DisconnectRequestWeAreBlockedBy(key);
@@ -385,7 +385,7 @@ namespace Microsoft.Build.BackEnd
         public void UnblockWithResult(BuildResult result)
         {
             VerifyOneOfStates([SchedulableRequestState.Blocked, SchedulableRequestState.Unscheduled]);
-            ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
+            ErrorUtilities.VerifyThrowArgumentNull(result);
 
             BlockingRequestKey key = new BlockingRequestKey(result);
             DisconnectRequestWeAreBlockedBy(key);

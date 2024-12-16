@@ -31,7 +31,7 @@ namespace Microsoft.Build.Construction
         internal ProjectOutputElement(XmlElement xmlElement, ProjectTaskElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(value));
+                ErrorUtilities.VerifyThrowArgumentLength(value);
                 SetOrRemoveAttribute(XMakeAttributes.taskParameter, value, "Set Output TaskParameter {0}", value);
             }
         }

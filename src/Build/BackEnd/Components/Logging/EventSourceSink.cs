@@ -229,7 +229,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     RaiseEvent(buildMessageEvent, args => MessageRaised?.Invoke(null, args), RaiseAnyEvent);
                     break;
                 case TaskStartedEventArgs taskStartedEvent:
-                    ArgsHandler<TaskStartedEventArgs> taskStartedFollowUp = args => RaiseEvent(args, args=> StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
+                    ArgsHandler<TaskStartedEventArgs> taskStartedFollowUp = args => RaiseEvent(args, args => StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
                     RaiseEvent(taskStartedEvent, args => TaskStarted?.Invoke(null, args), taskStartedFollowUp);
                     break;
                 case TaskFinishedEventArgs taskFinishedEvent:

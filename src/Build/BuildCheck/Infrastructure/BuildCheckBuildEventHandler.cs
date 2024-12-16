@@ -91,6 +91,7 @@ internal class BuildCheckBuildEventHandler
                 eventArgs.ProjectFile!);
 
             _buildCheckManager.ProcessProjectEvaluationStarted(
+                BuildCheckDataSource.EventArgs,
                 checkContext,
                 eventArgs.ProjectFile!);
         }
@@ -159,7 +160,7 @@ internal class BuildCheckBuildEventHandler
 
     private void LogCheckStats(ICheckContext checkContext)
     {
-        Dictionary<string, TimeSpan>  infraStats = _tracingData.InfrastructureTracingData;
+        Dictionary<string, TimeSpan> infraStats = _tracingData.InfrastructureTracingData;
         // Stats are per rule, while runtime is per check - and check can have multiple rules.
         // In case of multi-rule check, the runtime stats are duplicated for each rule.
         Dictionary<string, TimeSpan> checkStats = _tracingData.ExtractCheckStats();

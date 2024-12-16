@@ -17,7 +17,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="needs-review-translation">在 {1} 秒内生成 {0}</target>
+        <target state="translated">在 {1} 秒内生成 {0}</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -67,6 +67,13 @@
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
+      <trans-unit id="BuildSummary">
+        <source>Build summary:</source>
+        <target state="new">Build summary:</target>
+        <note>
+      A header used by Terminal Logger to introduce the build summary.
+    </note>
+      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">命令行参数 = "{0}"</target>
@@ -87,7 +94,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="needs-review-translation">({0:F1}s)</target>
+        <target state="translated">({0:F1}s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
@@ -140,11 +147,11 @@
                      used, write out the values after the build.
     </source>
         <target state="translated">  -getProperty:propertyName,...
-                     在计算后写出一个或多个指定属性的值，
-                     但不执行生成，或者如果使用的是
-                     -targets 选项或 -getTargetResult 选项，
-                     则在生成后写出这些值。
-    </target>
+                    在计算后写出一个或多个指定属性的值，
+                    但不执行生成，或者如果使用的是
+                    -targets 选项或 -getTargetResult 选项，
+                    则在生成后写出这些值。
+   </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -159,12 +166,12 @@
                      the values after the build.
     </source>
         <target state="translated">  -getItem:itemName,...
-                     在计算后写出一个或多个指定项的值及其
-                     关联的元数据，但不
-                     执行生成，或者如果使用的是 -targets 选项
-                     或 -getTargetResult 选项，则在生成后写出
-                     这些值。
-    </target>
+                    在计算后写出一个或多个指定项的值及其
+                    关联的元数据，但不
+                    执行生成，或者如果使用的是 -targets 选项
+                    或 -getTargetResult 选项，则在生成后写出
+                    这些值。
+   </target>
         <note>
       LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -176,9 +183,9 @@
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                     写出一个或多个目标的输出值，
-                     并且将执行指定的目标。
-    </target>
+                    写出一个或多个目标的输出值，
+                    并且将执行指定的目标。
+   </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -201,20 +208,20 @@
                      (Short form: -fa)
     </source>
         <target state="translated">  -featureAvailability:featureName,...
-                     检查功能可用性。结果是以下字符串之一:
-                     "Undefined"、"Available"、"NotAvailable" 和
-                     "Preview"。
-                     - Undefined - 未定义功能的可用性
-                     (功能可用性检查器不知道
-                     该功能名称)
-                     - NotAvailable - 功能不可用(不同于
-                     Undefined，功能可用性检查器知道
-                     该功能名称，并且还知道该功能不
-                     受当前 MSBuild 引擎支持)
-                     - Available - 功能可用
-                     - Preview - 功能处于预览状态(不稳定)
-                     (缩写: -fa)
-    </target>
+                    检查功能可用性。结果是以下字符串之一:
+                    "Undefined"、"Available"、"NotAvailable" 和
+                    "Preview"。
+                    - Undefined - 未定义功能的可用性
+                    (功能可用性检查器不知道
+                    该功能名称)
+                    - NotAvailable - 功能不可用(不同于
+                    Undefined，功能可用性检查器知道
+                    该功能名称，并且还知道该功能不
+                    受当前 MSBuild 引擎支持)
+                    - Available - 功能可用
+                    - Preview - 功能处于预览状态(不稳定)
+                    (缩写: -fa)
+   </target>
         <note>
       LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -234,17 +241,17 @@
                      (Short form: -tl)
     </source>
         <target state="translated">  -terminalLogger[:auto,on,off]
-                     启用或禁用终端记录器。终端记录器
-                     在控制台上实时提供增强的生成输出，
-                     这些输出在逻辑上按项目进行整理，旨在突出显示
-                     可操作信息。指定 auto (或使用
-                     不带参数的选项)，仅在标准输出未重定向的情况下
-                     使用终端记录器。不要分析输出，
-                     也不要依赖于它在将来的版本中保持
-                     不变。此选项在 MSBuild 17.8 和
-                     更高版本中提供。
-                     (缩写: -tl)
-    </target>
+                    启用或禁用终端记录器。终端记录器
+                    在控制台上实时提供增强的生成输出，
+                    这些输出在逻辑上按项目进行整理，旨在突出显示
+                    可操作信息。指定 auto (或使用
+                    不带参数的选项)，仅在标准输出未重定向的情况下
+                    使用终端记录器。不要分析输出，
+                    也不要依赖于它在将来的版本中保持
+                    不变。此选项在 MSBuild 17.8 和
+                    更高版本中提供。
+                    (缩写: -tl)
+   </target>
         <note>
       LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -271,24 +278,24 @@
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                     终端记录器的参数。(缩写: -tlp)
-                     可用参数。
-                        default - 指定终端
-                        记录器的默认行为。它需要以下值之一:
-                           - `on`、`true` 可强制使用 TerminalLogger，
-                            即使它已禁用也是如此。
-                           - `off`、`false` 可强制不使用 TerminalLogger，
-                            即使它已启用也是如此。
-                           - `auto` 可在终端支持 TerminalLogger
-                            且会话没有重定向的 stdout/stderr 时
-                            启用 TerminalLogger
-                        verbosity - 替代此记录器的 -verbosity
-                        设置
-                        showCommandLine - 显示 TaskCommandLineEvent 消息
+                    终端记录器的参数。(缩写: -tlp)
+                    可用参数。
+                       default - 指定终端
+                       记录器的默认行为。它需要以下值之一:
+                          - `on`、`true` 可强制使用 TerminalLogger，
+                           即使它已禁用也是如此。
+                          - `off`、`false` 可强制不使用 TerminalLogger，
+                           即使它已启用也是如此。
+                          - `auto` 可在终端支持 TerminalLogger
+                           且会话没有重定向的 stdout/stderr 时
+                           启用 TerminalLogger
+                       verbosity - 替代此记录器的 -verbosity
+                       设置
+                       showCommandLine - 显示 TaskCommandLineEvent 消息
 
-                      示例:
-                        -tlp:default=auto;verbosity=diag;shownCommandLine
-    </target>
+                     示例:
+                       -tlp:default=auto;verbosity=diag;shownCommandLine
+   </target>
         <note>
       LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -303,12 +310,12 @@
                      This writes the value of property Bar into Biz.txt.
     </source>
         <target state="translated">  -getResultOutputFile:file
-                     将 get* 的输出重定向到文件中。
+                    将 get* 的输出重定向到文件中。
 
-                     示例:
-                     -getProperty:Bar -getResultOutputFile:Biz.txt
-                     这会将属性 Bar 的值写入 Biz.txt。
-    </target>
+                    示例:
+                    -getProperty:Bar -getResultOutputFile:Biz.txt
+                    这会将属性 Bar 的值写入 Biz.txt。
+   </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -320,7 +327,7 @@
                      BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="needs-review-translation">  -check
+        <target state="translated">  -check
                      在生成中启用 BuildChecks。
                      BuildCheck 允许评估规则以确保生成的
                      属性。有关详细信息，请参阅 aka.ms/buildcheck
@@ -901,9 +908,9 @@
             WarningsOnly -- 仅显示警告。
             NoItemAndPropertyList -- 在开始生成每个项目时不显示
               项和属性的列表。
-            ShowCommandLine -- 显示 TaskCommandLineEvent 消息
+            ShowCommandLine -- 显示 TaskCommandLineEvent 消息 
             ShowTimestamp -- 将时间戳作为所有消息的前缀
-              显示。
+              显示。                      
             ShowEventId -- 显示已开始事件、已完成事件和消息
               的事件 ID。
             ForceNoAlign -- 不将文本与控制台缓冲区的大小
@@ -960,10 +967,10 @@
                      Example:
                        -validate:MyExtendedBuildSchema.xsd
 </source>
-        <target state="translated">  -validate     依据默认架构验证项目。(缩写:
+        <target state="translated">  -validate     依据默认架构验证项目。(缩写: 
            -val)
 
- -validate:&lt;schema&gt; 依据指定的架构验证项目。(缩写:
+ -validate:&lt;schema&gt; 依据指定的架构验证项目。(缩写: 
            -val)
            示例:
             -validate:MyExtendedBuildSchema.xsd
@@ -1141,7 +1148,7 @@
         <target state="translated">  -toolsversion:&lt;version&gt;
            要在生成过程中使用的 MSBuild 工具集
            (任务、目标等)的版本。此版本将重写
-           各个项目指定的版本。(缩写:
+           各个项目指定的版本。(缩写: 
            -tv)
            示例:
             -toolsversion:3.5
@@ -1197,17 +1204,17 @@
                      template and append the node id to this fileName to
                      create a log file for each node.
     </source>
-        <target state="translated">  -distributedFileLogger
+        <target state="translated">  -distributedFileLogger                            
            将生成输出记录到多个日志文件，每个 MSBuild 节点
            一个日志文件。这些文件的初始位置为
            当前目录。默认情况下，这些文件名为
            “MSBuild&lt;nodeid&gt;.log”。可通过添加
-           “-fileLoggerParameters”开关来指定
+           “-fileLoggerParameters”开关来指定 
            这些文件的位置和 fileLogger 的其他参数。
 
            如果日志文件名是通过 fileLoggerParameters
            开关设置的，分布式记录器将使用 fileName 作为
-           模板并将节点 ID 附加到此 fileName
+           模板并将节点 ID 附加到此 fileName 
            以便为每个节点创建一个日志文件。
     </target>
         <note>
@@ -1249,12 +1256,12 @@
                        -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </source>
-        <target state="translated">  -fileloggerparameters[n]:&lt;parameters&gt;
+        <target state="translated">  -fileloggerparameters[n]:&lt;parameters&gt;                
            为文件记录器提供任何额外的参数。
            存在此开关意味着
            存在对应的 -filelogger[n] 开关。
           “n”(如果存在)可以为 1-9 的数字。
-           任何分布式文件记录器也可以使用
+           任何分布式文件记录器也可以使用 
            -fileloggerparameters，具体可参阅 -distributedFileLogger 的说明。
            (缩写: -flp[n])
            为控制台记录器列出的相同参数
@@ -1274,8 +1281,8 @@
             -fileLoggerParameters:LogFile=MyLog.log;Append;
                       Verbosity=diagnostic;Encoding=UTF-8
 
-            -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
-            -flp1:warningsonly;logfile=msbuild.wrn
+            -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
+            -flp1:warningsonly;logfile=msbuild.wrn 
             -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1730,7 +1737,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_NoTF">
         <source>{0}{1} {2} ({3}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} ({3} 秒)</target>
+        <target state="translated">{0}{1} {2} ({3} 秒)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1750,7 +1757,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTF">
         <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="needs-review-translation">{0}{1} {2} {3} ({4} 秒)</target>
+        <target state="translated">{0}{1} {2} {3} ({4} 秒)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1810,7 +1817,7 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="needs-review-translation">还原完成({0} 秒)</target>
+        <target state="translated">还原完成({0} 秒)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
@@ -1818,7 +1825,7 @@
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="needs-review-translation">在 {1} 秒内还原 {0}</target>
+        <target state="translated">在 {1} 秒内还原 {0}</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -1912,7 +1919,7 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
-        <target state="needs-review-translation">{0}{1} 测试 {2} ({3} 秒)</target>
+        <target state="translated">{0}{1} 测试 {2} ({3} 秒)</target>
         <note>
       Project finished summary.
       {0}: indentation - few spaces to visually indent row
@@ -1924,7 +1931,7 @@
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
         <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="needs-review-translation">{0}{1} 测试 {2} {3} ({4} 秒)</target>
+        <target state="translated">{0}{1} 测试 {2} {3} ({4} 秒)</target>
         <note>
       Project finished summary including target framework information.
       {0}: indentation - few spaces to visually indent row
@@ -1942,7 +1949,7 @@
       </trans-unit>
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
-        <target state="needs-review-translation">持续时间: {0} 秒</target>
+        <target state="translated">持续时间: {0} 秒</target>
         <note>
       {0} whole number
       's' should reflect the localized abbreviation for seconds

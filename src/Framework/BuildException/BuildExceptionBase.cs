@@ -89,7 +89,7 @@ public abstract class BuildExceptionBase : Exception
 #if NET || NET45_OR_GREATER
         int? hresult = exception.HResult;
 #else
-            int? hresult = null;
+        int? hresult = null;
 #endif
         writer.WriteOptionalInt32(hresult);
 

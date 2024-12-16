@@ -461,7 +461,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string NormalizePath(string path)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentLength(path);
             string fullPath = GetFullPath(path);
             return FixFilePath(fullPath);
         }
@@ -1132,8 +1132,8 @@ namespace Microsoft.Build.Shared
         /// <returns>relative path (can be the full path)</returns>
         internal static string MakeRelative(string basePath, string path)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(basePath, nameof(basePath));
-            ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
+            ErrorUtilities.VerifyThrowArgumentNull(basePath);
+            ErrorUtilities.VerifyThrowArgumentLength(path);
 
             string fullBase = Path.GetFullPath(basePath);
             string fullPath = Path.GetFullPath(path);
@@ -1270,8 +1270,8 @@ namespace Microsoft.Build.Shared
         /// <returns>Combined path.</returns>
         internal static string CombinePaths(string root, params string[] paths)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(root, nameof(root));
-            ErrorUtilities.VerifyThrowArgumentNull(paths, nameof(paths));
+            ErrorUtilities.VerifyThrowArgumentNull(root);
+            ErrorUtilities.VerifyThrowArgumentNull(paths);
 
             return paths.Aggregate(root, Path.Combine);
         }
