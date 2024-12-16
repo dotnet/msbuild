@@ -19,6 +19,8 @@ OR
   - [ ]  If the release is being cut more than couple of weeks modify [YAML](https://github.com/dotnet/msbuild/tree/main/azure-pipelines/vs-insertion.yml) (and merge to affected MSBuild branches) of the [VS insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) so that it schedules insertions from MSBuild `vs{{THIS_RELEASE_VERSION}}` to VS `main`. Keep scheduled daily insertions to simplify your workflow and exclude `vs{{THIS_RELEASE_VERSION}}` from triggering insertion on each commit.
 
 ### Branching from main
+- [ ]  Associate the `vs{{THIS_RELEASE_VERSION}}` branch with the next VS {{THIS_RELEASE_VERSION}} release channel \
+`darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild`
 - [ ]  If the new version's branch was created before the Visual Studio fork: fast-forward merge the correct commit (the one that is currently inserted to VS main) to the `vs{{THIS_RELEASE_VERSION}}` branch \
 e.g.: `git push upstream 2e6f2ff7ea311214255b6b2ca5cc0554fba1b345:refs/heads/vs17.10` \
 _(This is for the case where we create the branch too early and want it to be based actually on a different commit. If you waited until a good point in time with `main` in a clean state, just branch off and you are done. The branch should point to a good, recent spot, so the final-branding PR goes in on top of the right set of commits.)_
