@@ -1661,6 +1661,12 @@
       's' should reflect the localized abbreviation for seconds
     </comment>
   </data>
+  <data name="BuildSummary" xml:space="preserve">
+    <value>Build summary:</value>
+    <comment>
+      A header used by Terminal Logger to introduce the build summary.
+    </comment>
+  </data>
   <data name="BuildResult_FailedWithErrors" xml:space="preserve">
     <value>failed with {0} error(s)</value>
     <comment>
