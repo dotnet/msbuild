@@ -408,6 +408,7 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.TaskName);
             WriteDeduplicatedString(e.ProjectFile);
             WriteDeduplicatedString(e.TaskFile);
+            WriteDeduplicatedString(e.TaskAssemblyLocation);
 
             return BinaryLogRecordKind.TaskStarted;
         }
@@ -570,6 +571,8 @@ namespace Microsoft.Build.Logging
             Write((int)e.Kind);
             WriteDeduplicatedString(e.ItemType);
             WriteTaskItemList(e.Items, e.LogItemMetadata);
+            WriteDeduplicatedString(e.ParameterName);
+            WriteDeduplicatedString(e.PropertyName);
             if (e.Kind == TaskParameterMessageKind.AddItem
                || e.Kind == TaskParameterMessageKind.TaskOutput)
             {
