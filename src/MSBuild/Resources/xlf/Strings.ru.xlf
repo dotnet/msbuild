@@ -69,7 +69,7 @@
       </trans-unit>
       <trans-unit id="BuildSummary">
         <source>Build summary:</source>
-        <target state="new">Build summary:</target>
+        <target state="translated">Сводка сборки:</target>
         <note>
       A header used by Terminal Logger to introduce the build summary.
     </note>
