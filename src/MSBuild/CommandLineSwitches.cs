@@ -120,6 +120,7 @@ namespace Microsoft.Build.CommandLine
             GetTargetResult,
             GetResultOutputFile,
             FeatureAvailability,
+            EnableRarService,
             // This has to be kept as last enum value
             NumberOfParameterizedSwitches,
         }
@@ -296,6 +297,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  ["getItem"],                           ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",                 true,   false,   "HelpMessage_44_GetItemSwitch"),
             new ParameterizedSwitchInfo(  ["getTargetResult"],                   ParameterizedSwitch.GetTargetResult,            null,                           true,           "MissingGetTargetResultError",         true,   false,   "HelpMessage_45_GetTargetResultSwitch"),
             new ParameterizedSwitchInfo(  ["getResultOutputFile"],               ParameterizedSwitch.GetResultOutputFile,        null,                           true,           "MissingGetResultFileError",           true,   false,   "HelpMessage_51_GetResultOutputFileSwitch"),
+            new ParameterizedSwitchInfo(  ["enableRarService"],                  ParameterizedSwitch.EnableRarService,           null,                           true,            null,                                 true,   false,   "HelpMessage_53_EnableRarServiceSwitch"),
             new ParameterizedSwitchInfo(  ["featureAvailability", "fa"],         ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false,   "HelpMessage_46_FeatureAvailabilitySwitch")
         };
 

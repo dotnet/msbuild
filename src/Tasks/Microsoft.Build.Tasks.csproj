@@ -34,6 +34,11 @@
     <!-- Binary serialization by ITranslatable -->
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
+
+    <!-- Node communication -->
+    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
+    <Compile Include="..\Shared\INodePacket.cs" />
+    <Compile Include="..\Shared\NamedPipeUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -66,9 +71,26 @@
     </Compile>
     <Compile Include="AssemblyDependency\AssemblyAttributes.cs" />
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
+    <Compile Include="AssemblyDependency\Client\ResolveAssemblyReferenceClient.cs" />
+    <Compile Include="AssemblyDependency\Serialization\RarBuildEventArgsType.cs" />
+    <Compile Include="AssemblyDependency\Serialization\RarBuildEventArgs.cs" />
+    <Compile Include="AssemblyDependency\Serialization\RarInternedMetadata.cs" />
+    <Compile Include="AssemblyDependency\Serialization\RarInternedMetadataCache.cs" />
+    <Compile Include="AssemblyDependency\Serialization\RarSerializableMessageBase.cs" />
+    <Compile Include="AssemblyDependency\Serialization\RarTaskItemBase.cs" />
+    <Compile Include="AssemblyDependency\Serialization\RarTaskItemInput.cs" />
+    <Compile Include="AssemblyDependency\Serialization\RarTaskItemOutput.cs" />
+    <Compile Include="AssemblyDependency\Serialization\RarExecutionRequest.cs" />
+    <Compile Include="AssemblyDependency\Serialization\RarExecutionResponse.cs" />
+    <Compile Include="AssemblyDependency\Service\EventQueueBuildEngine.cs" />
+    <Compile Include="AssemblyDependency\Service\RarExecutionCache.cs" />
+    <Compile Include="AssemblyDependency\Service\ResolveAssemblyReferenceNodeBase.cs" />
+    <Compile Include="AssemblyDependency\Service\ResolveAssemblyReferenceService.cs" />
+    <Compile Include="AssemblyDependency\Service\ResolveAssemblyReferenceServiceWorker.cs" />
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
     <Compile Include="ConvertToAbsolutePath.cs" />
+    <Compile Include="..\Shared\BuiltInMetadata.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\ExtensionFoldersRegistryKey.cs">
       <Link>ExtensionFoldersRegistryKey.cs</Link>
@@ -711,5 +733,10 @@
       to include third party notices.
     -->
     <Content Update="@(Content)" Pack="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.IO.Hashing" />
+    <PackageReference Include="System.Threading.Channels" />
   </ItemGroup>
 </Project>

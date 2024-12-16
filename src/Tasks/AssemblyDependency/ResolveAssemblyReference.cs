@@ -14,6 +14,7 @@ using System.Xml.Linq;
 
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
@@ -57,7 +58,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Cache of system state information, used to optimize performance.
         /// </summary>
-        internal SystemState _cache = null;
+        internal SystemState Cache { get; set; }
 
         /// <summary>
         /// Construct
@@ -193,6 +194,7 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _scatterFiles = Array.Empty<TaskItem>();
         private ITaskItem[] _copyLocalFiles = Array.Empty<TaskItem>();
         private ITaskItem[] _suggestedRedirects = Array.Empty<TaskItem>();
+        private List<ITaskItem> _filesWritten = new();
         private List<ITaskItem> _unresolvedConflicts = new List<ITaskItem>();
         private string[] _targetFrameworkSubsets = [];
         private string[] _fullTargetFrameworkSubsetNames = [];
@@ -898,6 +900,10 @@ namespace Microsoft.Build.Tasks
 
         public bool FailIfNotIncremental { get; set; }
 
+        public bool ShouldExecuteOutOfProcess { get; set; }
+
+        public string TargetPath { get; set; }
+
         /// <summary>
         /// This is a list of all primary references resolved to full paths.
         ///     bool CopyLocal - whether the given reference should be copied to the output directory.
@@ -913,7 +919,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ResolvedFiles
         {
-            get { return _resolvedFiles; }
+            get => _resolvedFiles;
+            internal set => _resolvedFiles = value;
         }
 
         /// <summary>
@@ -932,7 +939,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ResolvedDependencyFiles
         {
-            get { return _resolvedDependencyFiles; }
+            get => _resolvedDependencyFiles;
+            internal set => _resolvedDependencyFiles = value;
         }
 
         /// <summary>
@@ -944,7 +952,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] RelatedFiles
         {
-            get { return _relatedFiles; }
+            get => _relatedFiles;
+            internal set => _relatedFiles = value;
         }
 
         /// <summary>
@@ -957,7 +966,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] SatelliteFiles
         {
-            get { return _satelliteFiles; }
+            get => _satelliteFiles;
+            internal set => _satelliteFiles = value;
         }
 
         /// <summary>
@@ -968,7 +978,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] SerializationAssemblyFiles
         {
-            get { return _serializationAssemblyFiles; }
+            get => _serializationAssemblyFiles;
+            internal set => _serializationAssemblyFiles = value;
         }
 
         /// <summary>
@@ -978,7 +989,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ScatterFiles
         {
-            get { return _scatterFiles; }
+            get => _scatterFiles;
+            internal set => _scatterFiles = value;
         }
 
         /// <summary>
@@ -989,7 +1001,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] CopyLocalFiles
         {
-            get { return _copyLocalFiles; }
+            get => _copyLocalFiles;
+            internal set => _copyLocalFiles = value;
         }
 
         /// <summary>
@@ -1004,13 +1017,9 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] SuggestedRedirects
         {
-            get { return _suggestedRedirects; }
+            get => _suggestedRedirects;
+            internal set => _suggestedRedirects = value;
         }
-
-        /// <summary>
-        /// Storage for names of all files writen to disk.
-        /// </summary>
-        private List<ITaskItem> _filesWritten = new List<ITaskItem>();
 
         /// <summary>
         /// The names of all files written to disk.
@@ -1018,8 +1027,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] FilesWritten
         {
-            set { /*Do Nothing, Inputs not Allowed*/ }
-            get { return _filesWritten.ToArray(); }
+            get => _filesWritten.ToArray();
+            internal set => _filesWritten = new(value);
         }
 
         /// <summary>
@@ -1029,7 +1038,7 @@ namespace Microsoft.Build.Tasks
         public String DependsOnSystemRuntime
         {
             get;
-            private set;
+            internal set;
         }
 
         /// <summary>
@@ -1039,7 +1048,7 @@ namespace Microsoft.Build.Tasks
         public String DependsOnNETStandard
         {
             get;
-            private set;
+            internal set;
         }
 
         /// <summary>
@@ -1047,7 +1056,11 @@ namespace Microsoft.Build.Tasks
         /// been outputted in MSB3277. Otherwise empty.
         /// </summary>
         [Output]
-        public ITaskItem[] UnresolvedAssemblyConflicts => _unresolvedConflicts.ToArray();
+        public ITaskItem[] UnresolvedAssemblyConflicts
+        {
+            get => [.. _unresolvedConflicts];
+            internal set => _unresolvedConflicts = new(value);
+        }
 
         #endregion
         #region Logging
@@ -2049,17 +2062,17 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void ReadStateFile(FileExists fileExists)
         {
-            _cache = SystemState.DeserializeCache<SystemState>(_stateFile, Log);
+            Cache = SystemState.DeserializeCache<SystemState>(_stateFile, Log);
 
             // Construct the cache only if we can't find any caches.
-            if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
+            if (Cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
             {
-                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths, Log, fileExists);
+                Cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths, Log, fileExists);
             }
 
-            if (_cache == null)
+            if (Cache == null)
             {
-                _cache = new SystemState();
+                Cache = new SystemState();
             }
         }
 
@@ -2070,13 +2083,13 @@ namespace Microsoft.Build.Tasks
         {
             if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {
-                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
+                Cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
             }
-            else if (!string.IsNullOrEmpty(_stateFile) && (_cache.IsDirty || _cache.instanceLocalOutgoingFileStateCache.Count < _cache.instanceLocalFileStateCache.Count))
+            else if (!string.IsNullOrEmpty(_stateFile) && (Cache.IsDirty || Cache.instanceLocalOutgoingFileStateCache.Count < Cache.instanceLocalFileStateCache.Count))
             {
                 // Either the cache is dirty (we added or updated an item) or the number of items actually used is less than what
                 // we got by reading the state file prior to execution. Serialize the cache into the state file.
-                _cache.SerializeCache(_stateFile, Log);
+                Cache.SerializeCache(_stateFile, Log);
             }
         }
         #endregion
@@ -2305,18 +2318,18 @@ namespace Microsoft.Build.Tasks
 
                     // Load any prior saved state.
                     ReadStateFile(fileExists);
-                    _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
+                    Cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
 
                     // Cache delegates.
-                    getAssemblyMetadata = _cache.CacheDelegate(getAssemblyMetadata);
-                    fileExists = _cache.CacheDelegate();
-                    directoryExists = _cache.CacheDelegate(directoryExists);
-                    getDirectories = _cache.CacheDelegate(getDirectories);
+                    getAssemblyMetadata = Cache.CacheDelegate(getAssemblyMetadata);
+                    fileExists = Cache.CacheDelegate();
+                    directoryExists = Cache.CacheDelegate(directoryExists);
+                    getDirectories = Cache.CacheDelegate(getDirectories);
 
                     ReferenceTable dependencyTable = null;
 
                     // Wrap the GetLastWriteTime callback with a check for SDK/immutable files.
-                    _cache.SetGetLastWriteTime(path =>
+                    Cache.SetGetLastWriteTime(path =>
                     {
                         if (dependencyTable?.IsImmutableFile(path) == true)
                         {
@@ -2329,14 +2342,14 @@ namespace Microsoft.Build.Tasks
 
                     // Wrap the GetAssemblyName and GetRuntimeVersion callbacks with a check for SDK/immutable files.
                     GetAssemblyName originalGetAssemblyName = getAssemblyName;
-                    getAssemblyName = _cache.CacheDelegate(path =>
+                    getAssemblyName = Cache.CacheDelegate(path =>
                     {
                         AssemblyNameExtension assemblyName = dependencyTable?.GetImmutableFileAssemblyName(path);
                         return assemblyName ?? originalGetAssemblyName(path);
                     });
 
                     GetAssemblyRuntimeVersion originalGetRuntimeVersion = getRuntimeVersion;
-                    getRuntimeVersion = _cache.CacheDelegate(path =>
+                    getRuntimeVersion = Cache.CacheDelegate(path =>
                     {
                         if (dependencyTable?.IsImmutableFile(path) == true)
                         {
@@ -3206,6 +3219,24 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
+            if (ShouldExecuteOutOfProcess)
+            {
+                try
+                {
+                    return ExecuteOutOfProcess();
+                }
+                catch (TimeoutException)
+                {
+                    // If the out-of-proc connection timed out, fall back to in-proc.
+                    Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.OutOfProcConnectionTimeout");
+                }
+            }
+
+            return ExecuteInProcess();
+        }
+
+        public bool ExecuteInProcess()
+        {
             return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
                 p => FileUtilities.DirectoryExistsNoThrow(p),
@@ -3227,6 +3258,13 @@ namespace Microsoft.Build.Tasks
                 (string fullPath, GetAssemblyRuntimeVersion getAssemblyRuntimeVersion, FileExists fileExists, out string imageRuntimeVersion, out bool isManagedWinmd)
                     => AssemblyInformation.IsWinMDFile(fullPath, getAssemblyRuntimeVersion, fileExists, out imageRuntimeVersion, out isManagedWinmd),
                 p => ReferenceTable.ReadMachineTypeFromPEHeader(p));
+        }
+
+        private bool ExecuteOutOfProcess()
+        {
+            using ResolveAssemblyReferenceClient client = new();
+
+            return client.Execute(this);
         }
 
         #endregion

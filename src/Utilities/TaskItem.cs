@@ -13,6 +13,7 @@ using System.Security;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+using System.IO;
 
 #nullable disable
 
@@ -138,6 +139,7 @@ namespace Microsoft.Build.Utilities
                 _definingProject = sourceItemAsITaskItem2.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
             }
 
+            _metadata = new CopyOnWriteDictionary<string>(MSBuildNameIgnoreCaseComparer.Default);
             sourceItem.CopyMetadataTo(this);
         }
 

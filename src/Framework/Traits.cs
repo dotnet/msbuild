@@ -127,6 +127,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
 
+        /// <summary>
+        /// Internally set if ResolveAssemblyReference tasks should forward requests to the out-of-proc node.
+        /// </summary>
+        public const string ExecuteRAROutOFProcessEnvVarName = "MSBUILDEXECUTERAROUTOFPROC";
+
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;

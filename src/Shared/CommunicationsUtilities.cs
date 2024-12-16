@@ -187,6 +187,53 @@ namespace Microsoft.Build.Internal
         }
     }
 
+    // TODO: Created this to remove handshake salt when testing RAR out-of-proc.
+    // TODO: Otherwise RarTest.exe ends up resolving MSBuild tools directory to the VS install, so we get a hash mismatch.
+    // TODO: Needed since we're using RarTest.exe as a baseline for out-of-proc perf vs the node-launched version.
+    internal sealed class RarNodeHandshake : Handshake
+    {
+        private string _computedHash = null;
+
+        public override byte? ExpectedVersionInFirstByte => null;
+
+        internal RarNodeHandshake(HandshakeOptions nodeType)
+            : base(nodeType)
+        {
+        }
+
+        public override int[] RetrieveHandshakeComponents()
+        {
+            return
+            [
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(options),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild),
+                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
+            ];
+        }
+
+        public override string GetKey()
+        {
+            return $"{options} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate}"
+                .ToString(CultureInfo.InvariantCulture);
+        }
+
+        public string ComputeHash()
+        {
+            if (_computedHash == null)
+            {
+                var input = GetKey();
+                using var sha = SHA256.Create();
+                var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+                _computedHash = Convert.ToBase64String(bytes)
+                    .Replace("/", "_")
+                    .Replace("=", string.Empty);
+            }
+            return _computedHash;
+        }
+    }
+
     /// <summary>
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>

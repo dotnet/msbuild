@@ -19,6 +19,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Client;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -35,6 +37,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Tasks.AssemblyDependency;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using FileLogger = Microsoft.Build.Logging.FileLogger;
@@ -728,6 +731,7 @@ namespace Microsoft.Build.CommandLine
                 string outputResultsCache = null;
                 bool question = false;
                 bool isBuildCheckEnabled = false;
+                bool enableRarService = false;
                 string[] getProperty = [];
                 string[] getItem = [];
                 string[] getTargetResult = [];
@@ -780,6 +784,7 @@ namespace Microsoft.Build.CommandLine
                                             ref getItem,
                                             ref getTargetResult,
                                             ref getResultOutputFile,
+                                            ref enableRarService,
                                             recursing: false,
 #if FEATURE_GET_COMMANDLINE
                                             commandLine);
@@ -889,6 +894,7 @@ namespace Microsoft.Build.CommandLine
                                     lowPriority,
                                     question,
                                     isBuildCheckEnabled,
+                                    enableRarService,
                                     inputResultsCaches,
                                     outputResultsCache,
                                     saveProjectResult: outputPropertiesItemsOrTargetResults,
@@ -1288,6 +1294,7 @@ namespace Microsoft.Build.CommandLine
             bool lowPriority,
             bool question,
             bool isBuildCheckEnabled,
+            bool enableRarService,
             string[] inputResultsCaches,
             string outputResultsCache,
             bool saveProjectResult,
@@ -1550,6 +1557,15 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
+                    Task launchRarServerTask = null;
+
+                    if (enableRarService)
+                    {
+                        // We don't need to wait for the RAR server to setup before starting the build.
+                        // If any RAR task is started before the server is ready, we will execute the task in-proc.
+                        launchRarServerTask = Task.Run(RarNodeLauncher.LaunchServer);
+                    }
+
                     buildManager.BeginBuild(parameters, messagesToLogInBuildLoggers);
 
                     Exception exception = null;
@@ -1642,6 +1658,17 @@ namespace Microsoft.Build.CommandLine
                     {
                         exception = ex;
                         success = false;
+                    }
+
+                    try
+                    {
+                        // Failure to launch the RAR service is non-critical, so wait to log until after the build is
+                        // completed / failed, but before internal errors are thrown.
+                        launchRarServerTask?.GetAwaiter().GetResult();
+                    }
+                    catch (Exception ex)
+                    {
+                        CommunicationsUtilities.Trace("Failed to launch the RAR server: {0}", ex);
                     }
 
                     if (exception != null)
@@ -2513,6 +2540,7 @@ namespace Microsoft.Build.CommandLine
             ref string[] getItem,
             ref string[] getTargetResult,
             ref string getResultOutputFile,
+            ref bool enableRarService,
             bool recursing,
             string commandLine)
         {
@@ -2649,6 +2677,7 @@ namespace Microsoft.Build.CommandLine
                                                            ref getItem,
                                                            ref getTargetResult,
                                                            ref getResultOutputFile,
+                                                           ref enableRarService,
                                                            recursing: true,
                                                            commandLine);
                     }
@@ -2726,6 +2755,11 @@ namespace Microsoft.Build.CommandLine
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GraphBuild))
                     {
                         graphBuild = ProcessGraphBuildSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GraphBuild]);
+                    }
+
+                    if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.EnableRarService))
+                    {
+                        enableRarService = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.EnableRarService], defaultValue: true, resourceName: "InvalidRarServiceValue");
                     }
 
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
@@ -3419,6 +3453,20 @@ namespace Microsoft.Build.CommandLine
                     // whatever our priority is is correct.
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                     shutdownReason = node.Run(out nodeException);
+                }
+                else if (nodeModeNumber == 3)
+                {
+                    try
+                    {
+                        // The RAR service node persists between builds, and will continue to process requests until terminated.
+                        using ResolveAssemblyReferenceService rarService = new(Environment.ProcessorCount);
+                        rarService.ExecuteAsync().GetAwaiter().GetResult();
+                    }
+                    catch (Exception ex)
+                    {
+                        nodeException = ex;
+                        shutdownReason = NodeEngineShutdownReason.Error;
+                    }
                 }
                 else if (nodeModeNumber == 8)
                 {

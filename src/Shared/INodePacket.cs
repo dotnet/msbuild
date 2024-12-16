@@ -200,6 +200,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         ProcessReport,
 
+        // TODO: Remove if using own named pipe implementation?
+        RarNodeExecutionRequest,
+
+        RarNodeExecutionResponse,
+
         /// <summary>
         /// Command in form of MSBuild command line for server node - MSBuild Server.
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI

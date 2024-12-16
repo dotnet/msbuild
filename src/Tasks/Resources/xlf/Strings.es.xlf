@@ -1731,6 +1731,11 @@
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.OutOfProcConnectionTimeout">
+        <source>Connecting to out-of-proc named pipe failed. Falling back to executing in-proc.</source>
+        <target state="new">Connecting to out-of-proc named pipe failed. Falling back to executing in-proc.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
         <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
         <target state="translated">Para SearchPath "{0}" (agregado por el ensamblado de referencia "{1}").</target>

@@ -875,6 +875,8 @@ namespace Microsoft.Build.Tasks
                 AssemblyNameExtension assemblyName = NameAssemblyFileReference(
                     reference,
                     itemSpec);  // Contains the assembly file name.
+                // TODO: Don't know where this line change came from? Maybe after a rebase.
+                reference.ReferenceVersion = assemblyName.Version;
 
                 // Embed Interop Types aka "NOPIAs" support is not available for Fx < 4.0
                 // So, we just ignore this setting on down-level platforms
@@ -2724,7 +2726,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            referenceItem.SetMetadata(ItemMetadataNames.version, reference.ReferenceVersion == null ? string.Empty : reference.ReferenceVersion.ToString());
+            referenceItem.SetMetadata(ItemMetadataNames.version, assemblyName.Version?.ToString());
 
             // Unset fusionName so we don't have to unset it later.
             referenceItem.RemoveMetadata(ItemMetadataNames.fusionName);

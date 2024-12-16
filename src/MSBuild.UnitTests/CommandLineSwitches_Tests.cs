@@ -1186,6 +1186,7 @@ namespace Microsoft.Build.UnitTests
                                         lowPriority: false,
                                         question: false,
                                         isBuildCheckEnabled: false,
+                                        enableRarService: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
                                         saveProjectResult: false,

@@ -2373,6 +2373,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ResolveAssemblyReferencesStateFile Condition="'$(DisableRarCache)'!='true' and '$(ResolveAssemblyReferencesStateFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectFile).AssemblyReference.cache</ResolveAssemblyReferencesStateFile>
     </PropertyGroup>
 
+    <PropertyGroup>
+      <ResolveAssemblyReferencesOutOfProcess Condition="'$(ResolveAssemblyReferencesOutOfProcess)' == ''">false</ResolveAssemblyReferencesOutOfProcess>
+    </PropertyGroup>
+
     <!-- Make an App.Config item that exists when AutoUnify is false. -->
     <ItemGroup>
       <_ResolveAssemblyReferencesApplicationConfigFileForExes Include="@(AppConfigWithTargetPath)" Condition="'$(AutoGenerateBindingRedirects)'=='true' or '$(AutoUnifyAssemblyReferences)'=='false'"/>
@@ -2453,6 +2457,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         FindDependenciesOfExternallyResolvedReferences="$(FindDependenciesOfExternallyResolvedReferences)"
         ContinueOnError="$(ContinueOnError)"
         OutputUnresolvedAssemblyConflicts="$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)"
+        ShouldExecuteOutOfProcess="$(ResolveAssemblyReferencesOutOfProcess)"
+        TargetPath="$(TargetPath)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >
 
