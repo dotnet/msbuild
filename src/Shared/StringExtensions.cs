@@ -92,5 +92,22 @@ namespace Microsoft.Build.Shared
             writer.WriteLine(buffer.ToString());
         }
 #endif
+
+        /// <summary>
+        /// Converts a string to a bool.  We consider "true/false", "on/off", and
+        /// "yes/no" to be valid boolean representations in the XML. The '!' prefix for negation is allowed as well.
+        /// Unrecognized values lead to exception
+        /// </summary>
+        /// <exception cref="ArgumentException">Thrown when given argument is unrecognized MSBuild boolean string.</exception>
+        public static bool IsMSBuildTrueString(this string msbuildString) =>
+            ConversionUtilities.ConvertStringToBool(msbuildString, nullOrWhitespaceIsFalse: true);
+
+        /// <summary>
+        /// Converts a string to a bool.  We consider "true/false", "on/off", and
+        /// "yes/no" to be valid boolean representations in the XML. The '!' prefix for negation is allowed as well.
+        /// Unrecognized values lead to exception
+        /// </summary>
+        /// <exception cref="ArgumentException">Thrown when given argument is unrecognized MSBuild boolean string.</exception>
+        public static bool IsMSBuildFalseString(this string msbuildString) => !IsMSBuildTrueString(msbuildString);
     }
 }

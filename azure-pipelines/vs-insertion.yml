@@ -1,32 +1,46 @@
-# Create a VS insertion (DotNet-MSBuild-Trusted -> VS) from a build artifact on main or any servicing branch. 
+# Create a VS insertion (DotNet-MSBuild-Trusted -> VS) from a CI run on main or any servicing branch.
+# To achieve insertion automation, this pipeline definition yml has to be on servicing branches and main.
+
+
+# Runs in 3 modes: 
+# 1. daily main insertion from latest main CI.
+#   - can be disabled in the UI by adding a custom schedule for any branch. 
+# 2. trigger insert as a followup to a servicing CI run.
+#   - can be disabled in the UI by adding a custom CI trigger.
+# 3. manual insertion - select manually the TargetBranch and inserted CI run.
 trigger: none
+pr: none
 name: $(Date:yyyyMMdd).$(Rev:r)
+
+schedules:
+  - cron: '0 3 * * 1-5' # Runs every weekday at 3AM UTC
+    displayName: Daily VS insertion main
+    branches:
+      include:
+        - main
+    always: false # Don't run if there are no code changes
 
 resources:
   pipelines:
   - pipeline: 'MSBuild'
     project: 'DevDiv'
     source: 'MSBuild'
+    branch: main # for daily main scheduled insertion
+    trigger:
+      branches:
+        include: # trigger as a followup to servicing CI
+          - vs*
   repositories:
   - repository: 1ESPipelineTemplates
     type: git
     name: 1ESPipelineTemplates/1ESPipelineTemplates
     ref: refs/tags/release
 
-schedules:
-  - cron: '0 3 * * *'   # Runs every day at 3AM UTC
-    displayName: Daily VS insertion
-    branches:
-      include:
-        - main
-        - vs*
-    always: false # Don't run if there are no code changes
-
 parameters:
   - name: TargetBranch
     default: auto
     type: string
-    displayName: 'Insertion Target Branch (recommended to use `auto`)'
+    displayName: 'Insertion Target Branch (select for manual insertion)'
     values:
       - auto
       - main
@@ -172,20 +186,41 @@ extends:
         steps:
         - task: Powershell@2
           name: PwshMungeExternalAPIsPkgVersion
-          displayName: Munge ExternalAPIs package version
+          displayName: Munge ExternalAPIs package version and set props
           inputs:
             targetType: inline
             script: |
               $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/VS.ExternalAPIs.*.nupkg"
               $packageFile = Get-ChildItem -Path $folder -Filter VS.ExternalAPIs.*.nupkg | Select-Object -First 1
-              $packageVersion = $packageFile.BaseName.TrimStart("VS.ExternalAPIs.MSBuild")
-              Write-Host "Setting MSBuild_ExtApisPackageVersion to '$packageVersion'"
-              Write-Host "##vso[task.setvariable variable=MSBuild_ExtApisPackageVersion]$($packageVersion)"
+              $MSBuild_ExtApisPackageVersion = $packageFile.BaseName.TrimStart("VS.ExternalAPIs.MSBuild")
+              Write-Host "Setting MSBuild_ExtApisPackageVersion to '$MSBuild_ExtApisPackageVersion'"
+              Write-Host "##vso[task.setvariable variable=MSBuild_ExtApisPackageVersion]$($MSBuild_ExtApisPackageVersion)"
               $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.NET.StringTools*.nupkg"
               $packageFile = Get-ChildItem -Path $folder -Filter Microsoft.NET.StringTools*.nupkg | Select-Object -First 1
-              $packageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
-              Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$packageVersion'"
-              Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($packageVersion)"
+              $MicrosoftNETStringToolsPackageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
+              Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$MicrosoftNETStringToolsPackageVersion'"
+              Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($MicrosoftNETStringToolsPackageVersion)"
+              
+              $props = @(
+                      "VS.ExternalAPIs.MSBuild=$MSBuild_ExtApisPackageVersion",
+                      "Microsoft.Build=$MicrosoftNETStringToolsPackageVersion",
+                      "Microsoft.Build.Framework=$MicrosoftNETStringToolsPackageVersion",
+                      "Microsoft.Build.Tasks.Core=$MicrosoftNETStringToolsPackageVersion",
+                      "Microsoft.Build.Utilities.Core=$MicrosoftNETStringToolsPackageVersion",
+                      "Microsoft.NET.StringTools=$MicrosoftNETStringToolsPackageVersion"
+                  )
+              # servicing branches until 17.12 also include Microsoft.Build.Engine and Microsoft.Build.Conversion.Core
+              if ("$(InsertTargetBranch)" -in @("rel/d17.0", "rel/d17.3", "rel/d17.6", "rel/d17.8", "rel/d17.10", "rel/d17.11", "rel/d17.12"))
+
+              {
+                  $props += @(
+                      "Microsoft.Build.Conversion.Core=$MicrosoftNETStringToolsPackageVersion",
+                      "Microsoft.Build.Engine=$MicrosoftNETStringToolsPackageVersion"
+                  )
+              }
+              $propsValue = $props -join ";"
+              Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
+              Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
         - task: 1ES.PublishNuGet@1
           displayName: 'Push MSBuild CoreXT packages'
           inputs:
@@ -221,11 +256,7 @@ extends:
             TeamEmail: $(TeamEmail)
             TargetBranch: $(InsertTargetBranch)
             InsertionPayloadName: $(InsertPayloadName)
-            # servicing branches until 17.12 also include Microsoft.Build.Engine and Microsoft.Build.Conversion.Core
-            ${{ if or(eq(variables['Build.SourceBranchName'], 'vs17.0'),  eq(variables['Build.SourceBranchName'], 'vs17.3'), eq(variables['Build.SourceBranchName'], 'vs17.6'),  eq(variables['Build.SourceBranchName'], 'vs17.8'), eq(variables['Build.SourceBranchName'], 'vs17.10'), eq(variables['Build.SourceBranchName'], 'vs17.11'), eq(variables['Build.SourceBranchName'], 'vs17.12')) }}: 
-              PackagePropsValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Conversion.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Engine=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
-            ${{ else }}:
-              PackagePropsValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
+            PackagePropsValues: $(InsertPackagePropsValues)
             InsertionDescription: $(InsertDescription)
             ComponentJsonValues: $(InsertJsonValues)
             DefaultConfigValues: $(InsertConfigValues)

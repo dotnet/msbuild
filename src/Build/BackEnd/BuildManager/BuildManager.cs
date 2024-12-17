@@ -1985,7 +1985,12 @@ namespace Microsoft.Build.Execution
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode,
             GraphBuildRequestData graphBuildRequestData)
         {
-            using var waitHandle = new AutoResetEvent(true);
+            // The handle is used within captured async scope. If error occurs during the build
+            //  and we return from the function before async call signals - it causes unhandled ObjectDisposedException
+            //  upon attempt to signal the handle (and hence unfinished logs).
+#pragma warning disable CA2000
+            var waitHandle = new AutoResetEvent(true);
+#pragma warning restore CA2000
             var graphBuildStateLock = new object();
 
             var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
