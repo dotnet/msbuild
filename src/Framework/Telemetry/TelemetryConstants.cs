@@ -21,5 +21,4 @@ internal static class TelemetryConstants
     public const string DotnetOptOut = "DOTNET_CLI_TELEMETRY_OPTOUT";
     public const string MSBuildFxOptout = "MSBUILD_TELEMETRY_OPTOUT";
     public const string MSBuildCoreOptin = "MSBUILD_TELEMETRY_OPTIN";
-
 }
