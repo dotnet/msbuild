@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" />
     <PackageReference Include="Microsoft.CodeAnalysis.Collections" PrivateAssets="all" />
   </ItemGroup>
 

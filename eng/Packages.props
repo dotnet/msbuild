@@ -39,6 +39,7 @@
     <PackageVersion Include="OpenTelemetry" Version="1.10.0" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="9.0.0" />
     <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Primitives" Version="9.0.0" />
 
   </ItemGroup>
 </Project>
