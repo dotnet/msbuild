@@ -16,9 +16,9 @@ using Microsoft.VisualStudio.OpenTelemetry.Collector.Settings;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
 #endif
-#if DEBUG && NETFRAMEWORK
-using OpenTelemetry.Exporter;
-#endif
+// #if DEBUG && NETFRAMEWORK
+// using OpenTelemetry.Exporter;
+// #endif
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -63,10 +63,12 @@ namespace Microsoft.Build.Framework.Telemetry
 
                 s_tracerProvider =
                     tracerProviderBuilder
+                        /*
 #if DEBUG
                         .AddOtlpExporter()
 #endif
-                       .Build();
+                        */
+                        .Build();
 
                 // create collector if not in vs
                 if (isStandalone)
@@ -207,7 +209,7 @@ namespace Microsoft.Build.Framework.Telemetry
             activity.SetTag($"{TelemetryConstants.PropertyPrefix}{name}", hashed ? value.GetHashCode() : value);
             return activity;
         }
-        
+
         public static Activity WithStartTime(this Activity activity, DateTime? startTime)
         {
             if (startTime.HasValue)
