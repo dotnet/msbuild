@@ -1,0 +1,210 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+
+#if NETFRAMEWORK
+using Microsoft.VisualStudio.OpenTelemetry.ClientExtensions;
+using Microsoft.VisualStudio.OpenTelemetry.ClientExtensions.Exporters;
+using Microsoft.VisualStudio.OpenTelemetry.Collector.Interfaces;
+using Microsoft.VisualStudio.OpenTelemetry.Collector.Settings;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
+#endif
+#if DEBUG && NETFRAMEWORK
+using OpenTelemetry.Exporter;
+#endif
+
+namespace Microsoft.Build.Framework.Telemetry
+{
+
+    /// <summary>
+    /// Class for configuring and managing the telemetry infrastructure with System.Diagnostics.Activity, OpenTelemetry SDK and VS OpenTelemetry Collector.
+    /// </summary>
+    internal static class OpenTelemetryManager
+    {
+        private static bool _initialized = false;
+        private static readonly object s_initialize_lock = new();
+
+#if NETFRAMEWORK
+        private static TracerProvider? s_tracerProvider;
+        private static IOpenTelemetryCollector? s_collector;
+#endif
+
+        public static MSBuildActivitySource? DefaultActivitySource { get; set; }
+
+        public static void Initialize(bool isStandalone)
+        {
+            lock (s_initialize_lock)
+            {
+                if (!ShouldInitialize())
+                {
+                    return;
+                }
+
+                // create activity source
+                DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
+
+                // create trace exporter in framework
+#if NETFRAMEWORK
+                var exporterSettings = OpenTelemetryExporterSettingsBuilder
+                    .CreateVSDefault(TelemetryConstants.VSMajorVersion)
+                    .Build();
+
+                TracerProviderBuilder tracerProviderBuilder = OpenTelemetry.Sdk
+                    .CreateTracerProviderBuilder()
+                    .AddSource(TelemetryConstants.DefaultActivitySourceNamespace)
+                    .AddVisualStudioDefaultTraceExporter(exporterSettings);
+
+                s_tracerProvider =
+                    tracerProviderBuilder
+#if DEBUG
+                        .AddOtlpExporter()
+#endif
+                       .Build();
+
+                // create collector if not in vs
+                if (isStandalone)
+                {
+                    IOpenTelemetryCollectorSettings collectorSettings = OpenTelemetryCollectorSettingsBuilder
+                        .CreateVSDefault(TelemetryConstants.VSMajorVersion)
+                        .Build();
+
+                    s_collector = OpenTelemetryCollectorProvider
+                        .CreateCollector(collectorSettings);
+                    s_collector.StartAsync().Wait();
+                }
+#endif
+                _initialized = true;
+            }
+        }
+
+        public static void ForceFlush()
+        {
+            lock (s_initialize_lock)
+            {
+                if (_initialized)
+                {
+#if NETFRAMEWORK
+                    s_tracerProvider?.ForceFlush();
+#endif
+                }
+            }
+        }
+        private static bool ShouldInitialize()
+        {
+            // only initialize once
+            if (_initialized)
+            {
+                return false;
+            }
+
+            string? dotnetCliOptout = Environment.GetEnvironmentVariable(TelemetryConstants.DotnetOptOut);
+            if (dotnetCliOptout == "1" || dotnetCliOptout == "true")
+            {
+                return false;
+            }
+
+            string? msbuildCliOptout = Environment.GetEnvironmentVariable(TelemetryConstants.MSBuildOptout);
+            if (msbuildCliOptout == "1" || msbuildCliOptout == "true")
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static void Shutdown()
+        {
+            lock (s_initialize_lock)
+            {
+                if (_initialized)
+                {
+#if NETFRAMEWORK
+                    s_tracerProvider?.Shutdown();
+                    s_collector?.Dispose();
+#endif
+                }
+            }
+        }
+    }
+
+    internal class MSBuildActivitySource
+    {
+        private readonly ActivitySource _source;
+
+        public MSBuildActivitySource(string name)
+        {
+            _source = new ActivitySource(name);
+        }
+
+        public Activity? StartActivity(string name)
+        {
+            var activity = Activity.Current?.HasRemoteParent == true
+                ? _source.StartActivity($"{TelemetryConstants.EventPrefix}{name}", ActivityKind.Internal, parentId: Activity.Current.ParentId)
+                : _source.StartActivity($"{TelemetryConstants.EventPrefix}{name}");
+            return activity;
+        }
+    }
+
+    internal static class ActivityExtensions
+    {
+        public static Activity WithTags(this Activity activity, IActivityTelemetryDataHolder dataHolder)
+        {
+            if (dataHolder != null)
+            {
+                foreach ((string name, object value, bool hashed) in dataHolder.GetActivityProperties())
+                {
+                    object? hashedValue = null;
+                    if (hashed)
+                    {
+                        // TODO: make this work
+                        hashedValue = value;
+
+                        // Hash the value via Visual Studio mechanism in Framework & same algo as in core telemetry hashing
+                        // https://github.com/dotnet/sdk/blob/8bd19a2390a6bba4aa80d1ac3b6c5385527cc311/src/Cli/Microsoft.DotNet.Cli.Utils/Sha256Hasher.cs
+#if NETFRAMEWORK
+                        // hashedValue = new Microsoft.VisualStudio.Telemetry.TelemetryHashedProperty(value
+#endif
+                    }
+
+                    activity.SetTag($"{TelemetryConstants.PropertyPrefix}{name}", hashed ? hashedValue : value);
+                }
+            }
+            return activity;
+        }
+
+        public static Activity WithTags(this Activity activity, IDictionary<string, object>? tags)
+        {
+            if (tags != null)
+            {
+                foreach (var tag in tags)
+                {
+                    activity.SetTag($"{TelemetryConstants.PropertyPrefix}{tag.Key}", tag.Value);
+                }
+            }
+
+            return activity;
+        }
+
+        public static Activity WithTag(this Activity activity, string name, object value, bool hashed = false)
+        {
+            activity.SetTag($"{TelemetryConstants.PropertyPrefix}{name}", hashed ? value.GetHashCode() : value);
+            return activity;
+        }
+        
+        public static Activity WithStartTime(this Activity activity, DateTime? startTime)
+        {
+            if (startTime.HasValue)
+            {
+                activity.SetStartTime(startTime.Value);
+            }
+            return activity;
+        }
+    }
+}

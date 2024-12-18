@@ -492,7 +492,7 @@ namespace Microsoft.Build.Execution
                 parameters.DetailedSummary = true;
                 parameters.LogTaskInputs = true;
             }
-            BuildTelemetryManager.Initialize(false);
+            OpenTelemetryManager.Initialize(false);
 
             lock (_syncLock)
             {
@@ -1030,7 +1030,6 @@ namespace Microsoft.Build.Execution
             {
                 try
                 {
-                    object TelemetryService = new();
                     ILoggingService? loggingService = ((IBuildComponentHost)this).LoggingService;
 
                     if (loggingService != null)
@@ -1071,16 +1070,15 @@ namespace Microsoft.Build.Execution
                             var sacState = NativeMethodsShared.GetSACState();
                             // The Enforcement would lead to build crash - but let's have the check for completeness sake.
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
-                            // Debugger.Launch();
+
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
-                            var endOfBuildTelemetry = BuildTelemetryManager.StartActivity(
-                                "Build",
-                                new Dictionary<string, object> {
-                                    { "IsBuildCheckEnabled", _buildTelemetry.BuildCheckEnabled },
-                                    { "Target", _buildTelemetry.Target ?? "" }
-                                });
+                            Activity? endOfBuildTelemetry = OpenTelemetryManager.DefaultActivitySource?
+                                .StartActivity("Build")?
+                                .WithTags(_buildTelemetry)
+                                .WithStartTime(_buildTelemetry.InnerStartAt);
+
                             endOfBuildTelemetry?.Dispose();
-                            BuildTelemetryManager.Shutdown();
+                            OpenTelemetryManager.ForceFlush();
 
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;

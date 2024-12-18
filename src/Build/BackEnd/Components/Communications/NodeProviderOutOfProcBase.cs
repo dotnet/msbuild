@@ -334,7 +334,7 @@ namespace Microsoft.Build.BackEnd
 #endif
                     // Create the node process
                     INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
-                    var activity = BuildTelemetryManager.StartActivity("NodeLaunching", new Dictionary<string, object>() { });
+                    var activity = OpenTelemetryManager.DefaultActivitySource.StartActivity("NodeLaunching");
                     Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId);
                     _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
 
@@ -344,7 +344,7 @@ namespace Microsoft.Build.BackEnd
 
                     // Now try to connect to it.
                     Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, hostHandshake);
-                    activity.Dispose();
+                    activity?.Dispose();
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
