@@ -14,6 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="Microsoft.CodeAnalysis.Collections" PrivateAssets="all" />
   </ItemGroup>
 
@@ -23,7 +24,6 @@
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
     <Reference Include="System.Xaml" />
     <!-- Telemetry in Framework-->
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" />
     <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" />
     <PackageReference Include="OpenTelemetry" />
