@@ -104,19 +104,29 @@ namespace Microsoft.Build.Framework.Telemetry
                 return false;
             }
 
-            string? dotnetCliOptout = Environment.GetEnvironmentVariable(TelemetryConstants.DotnetOptOut);
-            if (dotnetCliOptout == "1" || dotnetCliOptout == "true")
+            string? dotnetCliTelemetryOptOut = Environment.GetEnvironmentVariable(TelemetryConstants.DotnetOptOut);
+            if (dotnetCliTelemetryOptOut == "1" || dotnetCliTelemetryOptOut == "true")
             {
                 return false;
             }
-
-            string? msbuildCliOptout = Environment.GetEnvironmentVariable(TelemetryConstants.MSBuildOptout);
-            if (msbuildCliOptout == "1" || msbuildCliOptout == "true")
+#if NETFRAMEWORK
+            string? telemetryMSBuildOptOut = Environment.GetEnvironmentVariable(TelemetryConstants.MSBuildFxOptout);
+            if (telemetryMSBuildOptOut == "1" || telemetryMSBuildOptOut == "true")
             {
                 return false;
             }
-
             return true;
+#else
+            string? telemetryOptIn = Environment.GetEnvironmentVariable(TelemetryConstants.MSBuildCoreOptin);
+            if (telemetryOptIn == "1" || telemetryOptIn == "true")
+            {
+                return true;
+            }
+            return false;   
+            
+
+#endif
+
         }
 
         public static void Shutdown()

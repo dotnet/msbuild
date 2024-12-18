@@ -334,7 +334,7 @@ namespace Microsoft.Build.BackEnd
 #endif
                     // Create the node process
                     INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
-                    var activity = OpenTelemetryManager.DefaultActivitySource.StartActivity("NodeLaunching");
+                    var activity = OpenTelemetryManager.DefaultActivitySource?.StartActivity("NodeLaunching");
                     Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId);
                     _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
 
