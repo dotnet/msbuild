@@ -14,6 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" />
     <PackageReference Include="Microsoft.CodeAnalysis.Collections" PrivateAssets="all" />
   </ItemGroup>
 
@@ -22,6 +24,15 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
     <Reference Include="System.Xaml" />
+    <!-- Telemetry in Framework-->
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" />
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" />
+    <PackageReference Include="OpenTelemetry" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' AND '$(Configuration)' == 'Debug'">
+    <!-- Exporter that works with .NET aspire only for debugging. Release should use hooked exporter. -->
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
@@ -43,6 +54,7 @@
       <Link>Shared\IMSBuildElementLocation.cs</Link>
     </Compile>
   </ItemGroup>
+  
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <Compile Remove="XamlTypes\**" />
