@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="AssignCulture.CultureOverwritten">
         <source>MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</source>
-        <target state="translated">MSB3002: La cultura "{0}" impostata in maniera esplicita per l'elemento "{1}" è stata sovrascritta con la cultura dedotta "{2}" perché la proprietà 'RespectAlreadyAssignedItemCulture' non è stata impostata.</target>
+        <target state="new">MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</target>
         <note>
 	{StrBegin="MSB3002: "}
 	'RespectAlreadyAssignedItemCulture' should not be translated
@@ -141,17 +141,17 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithTaskElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</source>
-        <target state="translated">MSB3752: l'attributo "{0}" dell'elemento &lt;{1}&gt; nell‘attività "{2}" è stato impostato ma è vuoto. Verificare che l'attributo abbia un valore corretto.</target>
+        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
         <source>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</source>
-        <target state="translated">MSB3991: '{0}' non è impostato o è vuoto. Quando {1} è false, assicurarsi di impostare un valore non vuoto per '{0}'.</target>
+        <target state="translated">MSB3991: “{0}” non è impostato o è vuoto. Quando {1} è false, assicurarsi di impostare un valore non vuoto per "{0}".</target>
         <note>{StrBegin="MSB3991: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullRootElementName">
         <source>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</source>
-        <target state="translated">MSB3992: '{0}' non è impostato. Quando {1} è true, assicurarsi di impostare un valore per '{0}'.</target>
+        <target state="translated">MSB3992: "{0}" non impostato. Quando {1} è true, assicurarsi di impostare un valore per "{0}".</target>
         <note>{StrBegin="MSB3992: "}</note>
       </trans-unit>
       <trans-unit id="CommonSdk.BaseIntermediateOutputPathMismatchWarning">

@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="AssignCulture.CultureOverwritten">
         <source>MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</source>
-        <target state="translated">MSB3002: 由于未正确设置 “RespectAlreadyAssignedItemCulture” 属性，因此已使用推断的区域性 "{0}" 覆盖项 "{1}" 的显式设置区域性 "{2}"。</target>
+        <target state="new">MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</target>
         <note>
 	{StrBegin="MSB3002: "}
 	'RespectAlreadyAssignedItemCulture' should not be translated
@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithTaskElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</source>
-        <target state="translated">MSB3752: 任务“{2}”中 &lt;{1}&gt; 元素的“{0}”属性已设置，但为空。请确保该属性具有正确的值。</target>
+        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
@@ -1180,8 +1180,8 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" of type "{1}" may be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/binaryformatter-migration-guide</source>
-        <target state="translated">MSB3825: 可在运行时通过 BinaryFormatter 反序列化类型为“{1}”的资源“{0}”。由于已知的安全风险，BinaryFormatter 已被弃用，并从 .NET 9+ 中删除。如果要继续使用它，请将属性“GenerateResourceWarnOnBinaryFormatterUse”设置为 false。
-           有关详细信息，请参阅：https://aka.ms/binaryformatter-migration-guide</target>
+        <target state="translated">MSB3825: 可在运行时通过 BinaryFormatter 反序列化类型为“{1}”的资源“{0}”。由于已知的安全风险，BinaryFormatter 已被弃用，并从 .NET 9+ 中删除。如果要继续使用它，请将属性 "GenerateResourceWarnOnBinaryFormatterUse" 设置为 false。
+           有关详细信息，请参阅:https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">

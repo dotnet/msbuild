@@ -39,7 +39,7 @@
       </trans-unit>
       <trans-unit id="AssignCulture.CultureOverwritten">
         <source>MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</source>
-        <target state="translated">MSB3002: 'RespectAlreadyAssignedItemCulture' プロパティが設定されていなかったため、アイテム "{0}" の明示的に設定されたカルチャ "{1}" は、推定カルチャ "{2}" で上書きされました。</target>
+        <target state="new">MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</target>
         <note>
 	{StrBegin="MSB3002: "}
 	'RespectAlreadyAssignedItemCulture' should not be translated
@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithTaskElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</source>
-        <target state="translated">MSB3752: タスク "{2}" の &lt;{1}&gt; 要素の "{0}" 属性が設定されていますが、空です。属性に適切な値があることを確認します。</target>
+        <target state="new">MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
