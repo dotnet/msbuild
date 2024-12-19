@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -273,9 +274,6 @@ namespace Microsoft.Build.Evaluation
         /// Enabled by ExpanderOptions.Truncate.
         /// </summary>
         private const int ItemLimitPerExpansion = 3;
-        private static readonly char[] s_singleQuoteChar = { '\'' };
-        private static readonly char[] s_backtickChar = { '`' };
-        private static readonly char[] s_doubleQuoteChar = { '"' };
 
         /// <summary>
         /// Those characters which indicate that an expression may contain expandable
@@ -774,47 +772,131 @@ namespace Microsoft.Build.Evaluation
             return expression.IndexOf(quoteChar, index);
         }
 
+        private static StringBuilder s_argumentBuilder = new StringBuilder();
+
+        private struct Slice
+        {
+            internal int Start;
+            internal int End;
+            internal Slice(int start, int end)
+            {
+                Start = start;
+                End = end;
+            }
+        }
+
         /// <summary>
-        /// Add the argument in the StringBuilder to the arguments list, handling nulls
+        /// Add the argument represented by the slices to the arguments list, handling nulls
         /// appropriately.
         /// </summary>
-        private static void AddArgument(List<string> arguments, SpanBasedStringBuilder argumentBuilder)
+        private static void AddArgumentFromSlices(List<string> arguments, List<Slice> slices, string arg)
         {
-            // we reached the end of an argument, add the builder's final result
-            // to our arguments.
-            argumentBuilder.Trim();
-            string argValue = argumentBuilder.ToString();
+            int firstSlice = 0;
+            int lastSlice = slices.Count - 1;
+            // This is a basic sanity check for no slices. While it can't happen at this moment, it is a reasonable check to have.
+            if (lastSlice == -1)
+            {
+                arguments.Add("");
+                return;
+            }
 
-            // We support passing of null through the argument constant value null
-            if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
+            // from end
+            int lastSliceIdx = slices[slices.Count - 1].End;
+            // from start
+            int firstSliceIdx = slices[0].Start;
+
+            // Trim from the start
+            while (firstSlice <= lastSlice && Char.IsWhiteSpace(arg, firstSliceIdx))
+            {
+                firstSliceIdx++;
+                if (firstSliceIdx >= slices[firstSlice].End && firstSlice < lastSlice)
+                {
+                    firstSlice++;
+                    firstSliceIdx = slices[firstSlice].Start;
+                }
+            }
+
+            // Trim from the end.
+            // There is some extra logic here to avoid edge case where we would trim a whitespace only character with
+            // one slice from the start, and then once more from the end, resulting in invalid indices.
+            while (((firstSlice < lastSlice) || (firstSlice == lastSlice && firstSliceIdx < lastSliceIdx)) && Char.IsWhiteSpace(arg, lastSliceIdx - 1))
+            {
+                lastSliceIdx--;
+                if (slices[lastSlice].Start > lastSliceIdx && firstSlice < lastSlice)
+                {
+                    lastSlice--;
+                    lastSliceIdx = slices[lastSlice].End;
+                }
+            }
+
+            if (firstSliceIdx == lastSliceIdx)
+            {
+                arguments.Add("");
+                return;
+            }
+
+            bool removedQuotes = false;
+
+            // If the argument is in quotes, we want to remove those
+            if ((arg[firstSliceIdx] == '\'' && arg[lastSliceIdx - 1] == '\'') ||
+                (arg[firstSliceIdx] == '`' && arg[lastSliceIdx - 1] == '`') ||
+                (arg[firstSliceIdx] == '`' && arg[lastSliceIdx - 1] == '`') ||
+                (arg[firstSliceIdx] == '"' && arg[lastSliceIdx - 1] == '"'))
+            {
+                ++firstSliceIdx;
+                --lastSliceIdx;
+                removedQuotes = true;
+
+                // Check yet again if we're still in the correct slice boundaries, this could've changed if we've trimmed.
+                // This can only happen if the slice was representing exactly one character
+                if (firstSliceIdx == slices[firstSlice].End)
+                {
+                    firstSlice++;
+                    // since the trim above removes exactly two characters - even if we remove one of them alongside its slice
+                    // we're guaranteed to have at least one other slice.                    
+                    firstSliceIdx = slices[firstSlice].Start;
+                }
+                // Same check for the last slice - was it one character slice that we just deleted?
+                if (slices[lastSlice].Start >= lastSliceIdx)
+                {
+                    // If yes, remove it from our "slices of interest"
+                    // Now if we had the case of two slices with one character each,
+                    // this could move lastSliceIdx under firstSliceIdx
+                    lastSlice--;
+
+                    // if we still have at least one slice we update the end index for the last slice since.
+                    // we just removed one.
+                    if (firstSlice <= lastSlice)
+                    {
+                        lastSliceIdx = slices[lastSlice].End;
+                    }
+                }
+            }
+
+            s_argumentBuilder.Clear();
+
+            // Using the processed slices (e.g. whitespace and quotes removed) to build the resulting string.
+            while (firstSlice < lastSlice)
+            {
+                s_argumentBuilder.Append(arg, firstSliceIdx, slices[firstSlice].End - firstSliceIdx);
+                firstSlice++;
+                firstSliceIdx = slices[firstSlice].Start;
+            }
+
+            // Now we use the last slice there is.
+            if (firstSlice == lastSlice)
+            {
+                s_argumentBuilder.Append(arg, firstSliceIdx, lastSliceIdx - firstSliceIdx);
+            }
+
+            string argument = s_argumentBuilder.ToString();
+            if (!removedQuotes && String.Equals("null", argument, StringComparison.OrdinalIgnoreCase))
             {
                 arguments.Add(null);
             }
             else
             {
-                if (argValue.Length > 0)
-                {
-                    if (argValue[0] == '\'' && argValue[argValue.Length - 1] == '\'')
-                    {
-                        arguments.Add(argValue.Trim(s_singleQuoteChar));
-                    }
-                    else if (argValue[0] == '`' && argValue[argValue.Length - 1] == '`')
-                    {
-                        arguments.Add(argValue.Trim(s_backtickChar));
-                    }
-                    else if (argValue[0] == '"' && argValue[argValue.Length - 1] == '"')
-                    {
-                        arguments.Add(argValue.Trim(s_doubleQuoteChar));
-                    }
-                    else
-                    {
-                        arguments.Add(argValue);
-                    }
-                }
-                else
-                {
-                    arguments.Add(argValue);
-                }
+                arguments.Add(argument);
             }
         }
 
@@ -830,18 +912,14 @@ namespace Microsoft.Build.Evaluation
 
             List<string> arguments = new List<string>();
 
-            using SpanBasedStringBuilder argumentBuilder = Strings.GetSpanBasedStringBuilder();
-            int? argumentStartIndex = null;
+            int argumentStartIndex = -1;
+            List<Slice> slices = new List<Slice>();
 
-            // We iterate over the string in the for loop below. When we find an argument, instead of adding it to the argument
-            // builder one-character-at-a-time, we remember the start index and then call this function when we find the end of
-            // the argument. This appends the entire {start, end} span to the builder in one call.
-            void FlushCurrentArgumentToArgumentBuilder(int argumentEndIndex)
-            {
-                if (argumentStartIndex.HasValue)
+            void FlushToSlices(int argumentEndIndex) {
+                if (argumentStartIndex != -1)
                 {
-                    argumentBuilder.Append(argumentsString, argumentStartIndex.Value, argumentEndIndex - argumentStartIndex.Value);
-                    argumentStartIndex = null;
+                    slices.Add(new Slice(argumentStartIndex, argumentEndIndex));
+                    argumentStartIndex = -1;
                 }
             }
 
@@ -863,8 +941,8 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedParenthesis"));
                     }
 
-                    FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: nestedPropertyStart);
-                    argumentBuilder.Append(argumentsString, nestedPropertyStart, (n - nestedPropertyStart) + 1);
+                    FlushToSlices(nestedPropertyStart);
+                    slices.Add(new Slice(nestedPropertyStart, n + 1));
                 }
                 else if (argumentsString[n] == '`' || argumentsString[n] == '"' || argumentsString[n] == '\'')
                 {
@@ -878,32 +956,35 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedQuote"));
                     }
 
-                    FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: quoteStart);
-                    argumentBuilder.Append(argumentsString, quoteStart, (n - quoteStart) + 1);
+                    FlushToSlices(quoteStart);
+                    slices.Add(new Slice(quoteStart, n + 1));
                 }
                 else if (argumentsString[n] == ',')
                 {
-                    FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: n);
+                    FlushToSlices(n);
 
                     // We have reached the end of the current argument, go ahead and add it
                     // to our list
-                    AddArgument(arguments, argumentBuilder);
+                    AddArgumentFromSlices(arguments, slices, argumentsString);
 
                     // Clear out the argument builder ready for the next argument
-                    argumentBuilder.Clear();
+                    slices.Clear();
                 }
                 else
                 {
-                    argumentStartIndex ??= n;
+                    if (argumentStartIndex == -1)
+                    {
+                        argumentStartIndex = n;
+                    }
                 }
             }
 
             // We reached the end of the string but we may have seen the start but not the end of the last (or only) argument so flush it now.
-            FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: argumentsContentLength);
+            FlushToSlices(argumentsContentLength);
 
             // This will either be the one and only argument, or the last one
             // so add it to our list
-            AddArgument(arguments, argumentBuilder);
+            AddArgumentFromSlices(arguments, slices, argumentsString);
 
             return arguments.ToArray();
         }
@@ -2012,15 +2093,14 @@ namespace Microsoft.Build.Evaluation
                 // If there are no items of the given type, then bail out early
                 if (itemsOfType.Count == 0)
                 {
-                    // ... but only if there isn't a function "Count", since that will want to return something (zero) for an empty list
-                    if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)) != true)
-                    {
-                        // ...or a function "AnyHaveMetadataValue", since that will want to return false for an empty list.
-                        if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
+                    if (expressionCapture.Captures?.Any(capture =>
                         {
-                            itemsFromCapture = new List<KeyValuePair<string, S>>();
-                            return false;
-                        }
+                            return string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase) ||
+                                   string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase);
+                        }) != true)
+                    {
+                        itemsFromCapture = new List<KeyValuePair<string, S>>();
+                        return false;
                     }
                 }
 
