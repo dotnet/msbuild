@@ -118,7 +118,7 @@ extends:
             LinkWorkItemsToPR: true
             TeamName: $(TeamName)
             TeamEmail: $(TeamEmail)
-            TargetBranch: main
+            TargetBranch: rel/d17.13
             InsertionPayloadName: $(InsertPayloadName)
             PackagePropsValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
             InsertionDescription: $(InsertDescription)
