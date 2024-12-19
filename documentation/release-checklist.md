@@ -40,8 +40,8 @@ _(This is for the case where we create the branch too early and want it to be ba
 `darc add-default-channel  --channel "VS {{NEXT_VERSION}}" --branch main --repo https://github.com/dotnet/msbuild`
 - [ ]  Check subscriptions for the forward-looking channel `VS {{NEXT_VERSION}}` and update as necessary (for instance, SDK's `main` branch should usually be updated, whereas release branches often should not be \
 `darc get-subscriptions --exact --source-repo https://github.com/dotnet/msbuild --channel "VS {{THIS_RELEASE_VERSION}}"`
-- [ ]  Update channel VS {{THIS_RELEASE_VERSION}} to VS {{NEXT_VERSION}} for the sdk main subscription and any others from the previous step
-`darc update-subscription --id sdk_main_branch_id`
+   - [ ]  Update channel VS {{THIS_RELEASE_VERSION}} to VS {{NEXT_VERSION}} for the sdk main subscription and any others from the previous step
+     `darc update-subscription --id <subscription_id_of_msbuild_main_to_sdk_main> --channel "VS {{NEXT_VERSION}}"`
 - [ ]  Ensure that the current release channel `VS {{THIS_RELEASE_VERSION}}` is associated with the correct release branch\
 `darc get-default-channels --source-repo https://github.com/dotnet/msbuild --branch vs{{THIS_RELEASE_VERSION}}` \
 if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild`
@@ -58,6 +58,7 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
   - [ ] Arcade:
     - Based on .NET version channel--does not change every MSBuild release
     - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`
+- [ ] Make sure the non-infrastructure dependencies (currently Roslyn and Nuget) are set to 'disabled' - we do not want to automatically bump them. The version updates should be explicitly driven by SDK or VS.
 
 ### Adjust pipelines / releases
 - [ ]  Fix OptProf data flow for the new vs{{THIS_RELEASE_VERSION}} branch
