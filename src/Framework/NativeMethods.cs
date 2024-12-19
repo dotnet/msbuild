@@ -7,6 +7,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+#if NETFRAMEWORK && !TASKHOST
+using System.Management;
+#endif
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -744,6 +747,116 @@ internal static class NativeMethods
         NotApplicable
     }
 
+    private const int OS_ANYSERVER = 29;
+
+    [DllImport("shlwapi.dll", SetLastError = true, EntryPoint = "#437")]
+    [SupportedOSPlatform("windows")]
+    private static extern bool IsOS(int os);
+
+    [SupportedOSPlatform("windows")]
+    private static bool IsWindowsServer()
+    {
+        return IsOS(OS_ANYSERVER);
+    }
+
+    internal enum AV_State
+    {
+        Unknown_NonWindows,
+        Unknown_Core,
+        Unknown_ServerOS,
+        Unknown_QueryFailure,
+        NotPresent,
+        Disabled,
+        EnabledSingle,
+        EnabledMultiple
+    }
+
+    internal readonly record struct AntivirusInfo(string DisplayName, string ReportingExe);
+
+    internal static AV_State GetAntivirusState(out List<AntivirusInfo> antivirusInfos)
+    {
+        antivirusInfos = null;
+
+        if (!IsWindows)
+        {
+            return AV_State.Unknown_NonWindows;
+        }
+
+        try
+        {
+#if NETFRAMEWORK && !TASKHOST
+            return GetAntivirusStateInternal(out antivirusInfos);
+#else
+            return AV_State.Unknown_Core;
+#endif
+        }
+        catch (Exception)
+        {
+            return AV_State.Unknown_QueryFailure;
+        }
+    }
+
+#if NETFRAMEWORK && !TASKHOST
+    [SupportedOSPlatform("windows")]
+    internal static AV_State GetAntivirusStateInternal(out List<AntivirusInfo> antivirusInfos)
+    {
+        antivirusInfos = new List<AntivirusInfo>();
+        AV_State avState = AV_State.NotPresent;
+
+        string wmipathstr = @"\\" + Environment.MachineName + @"\root\SecurityCenter2";
+        const int avIsEnabled = 0x1000;
+
+        using ManagementObjectSearcher searcher = new ManagementObjectSearcher(wmipathstr, "SELECT * FROM AntivirusProduct");
+        ManagementObjectCollection instances = searcher.Get();
+
+        foreach (ManagementBaseObject inst in instances)
+        {
+            // AntivirusInfo antiVirusInfo = new AntiVirusInfo();
+            string displayName = string.Empty, reportingExe = string.Empty;
+            bool? enabled = null;
+
+            foreach (System.Management.PropertyData prop in inst.Properties)
+            {
+                if (prop.Name == "displayName") // Example: "Windows Defender".
+                {
+                    displayName = prop.Value != null ? prop.Value.ToString() : string.Empty;
+                }
+                else if (prop.Name == "pathToSignedReportingExe")    // Example: "MsMpeng.exe".
+                {
+                    reportingExe = prop.Value != null ? Path.GetFileName(prop.Value.ToString()) : string.Empty;
+                }
+                else if (prop.Name == "productState")
+                {
+                    // Based on SecurityCenter codebase: https://microsoft.visualstudio.com/OS/_git/os?path=%2famcore%2fAntimalware%2fSource%2fTest%2fAppLayer%2fCommon%2fMicrosoft.Morro.Test.Utils%2fWsc%2fSecurityCenter.cs&_a=contents&version=GBofficial%2frs_xbox_release
+                    enabled = ((uint)prop.Value & avIsEnabled) == avIsEnabled;
+                }
+            }
+
+            if (enabled.HasValue)
+            {
+                if (enabled.Value)
+                {
+                    antivirusInfos.Add(new AntivirusInfo(displayName, reportingExe));
+                    if (avState == AV_State.EnabledSingle)
+                    {
+                        avState = AV_State.EnabledMultiple;
+                    }
+                    else
+                    {
+                        avState = AV_State.EnabledSingle;
+                    }
+                }
+                else if(avState == AV_State.NotPresent)
+                {
+                    avState = AV_State.Disabled;
+                }
+            }
+        }
+
+        return avState;
+    }
+#endif
+
     /// <summary>
     /// Cached value for IsUnixLike (this method is called frequently during evaluation).
     /// </summary>
@@ -958,7 +1071,7 @@ internal static class NativeMethods
     /// </summary>
     internal static ProcessorArchitectures ProcessorArchitectureNative => SystemInformation.ProcessorArchitectureTypeNative;
 
-    #endregion
+#endregion
 
     #region Wrapper methods
 

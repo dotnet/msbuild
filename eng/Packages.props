@@ -20,7 +20,8 @@
     <PackageVersion Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="$(SystemConfigurationConfigurationManagerVersion)" />
     <PackageVersion Include="System.Formats.Asn1" Version="$(SystemFormatsAsn1Version)" />
-    <PackageVersion Include="System.Memory" Version="$(SystemMemoryVersion)" />
+    <PackageVersion Include="System.Management" Version="$(SystemManagementVersion)" />
+	<PackageVersion Include="System.Memory" Version="$(SystemMemoryVersion)" />
     <PackageVersion Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
     <PackageVersion Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />

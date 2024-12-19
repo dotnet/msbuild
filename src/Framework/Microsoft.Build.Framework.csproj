@@ -21,6 +21,7 @@
     <!-- Promote CompilerServices.Unsafe from the old version we get from System.Memory on net472. -->
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
+    <PackageReference Include="System.Management" />
     <Reference Include="System.Xaml" />
   </ItemGroup>
 
