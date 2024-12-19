@@ -821,6 +821,15 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Point in time snapshot of all worker processes leveraged by this BuildManager.
+        /// This is meant to be used by VS. External users should not this is only best-effort, point-in-time functionality
+        ///  without guarantee of 100% correctness and safety.
+        /// </summary>
+        /// <returns>Enumeration of <see cref="Process"/> objects that were valid during the time of call to this function.</returns>
+        public IEnumerable<Process> GetWorkerProcesses()
+            => (_nodeManager?.GetProcesses() ?? []).Concat(_taskHostNodeManager?.GetProcesses() ?? []);
+
+        /// <summary>
         /// Clears out all of the cached information.
         /// </summary>
         public void ResetCaches()
