@@ -3,10 +3,9 @@
 VS OTel provide packages compatible with ingesting data to their backend if we instrument it via OpenTelemetry traces (System.Diagnostics.Activity).
 VS OTel packages are not open source so we need to conditionally include them in our build only for VS and MSBuild.exe
 
-Onepager: [telemetry onepager by JanProvaznik · Pull Request #11013 · dotnet/msbuild](https://github.com/dotnet/msbuild/pull/11013)
+[Onepager](https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/telemetry-onepager.md)
 
 ## Requirements
-
 
 ### Performance
 
@@ -74,6 +73,12 @@ The design allows for easy instrumentation of additional data points.
 
 ## Implementation and MSBuild developer experience
 
+### Sampling
+
+- We need to sample before initalizing infrastructure to avoid overhead.
+- Enables opt-in and opt-out for guaranteed sample or not sampled.
+- nullable ActivitySource, using `?` when working with them, we can be initialized but not sampled -> it will not reinitialize but not collect telemetry.
+
 ### Initialization at entrypoints
 
 - There are 2 entrypoints:
@@ -81,6 +86,7 @@ The design allows for easy instrumentation of additional data points.
     - for standalone in Xmake.cs Main
 
 ### Exiting
+
 Force flush TracerProvider's exporter in BuildManager.EndBuild.
 Dispose collector in Xmake.cs at the end of Main.
 
@@ -91,7 +97,9 @@ Dispose collector in Xmake.cs at the end of Main.
 
 ### Instrumenting
 
-Instrument areas in code running in the main process.
+2 ways of instrumenting:
+
+#### Instrument areas in code running in the main process
 
 ```csharp
 using (Activity? myActivity = OpenTelemetryManager.DefaultActivitySource?.StartActivity(TelemetryConstants.NameFromAConstantToAvoidAllocation))
@@ -111,6 +119,10 @@ IActivityTelemetryDataHolder data = new SomeData();
 myActivity?.WithTags(data);
 ```
 
+#### Add data to activity in EndBuild
+
+- this activity would always be created at the same point when sdk telemetry is sent in Core and we can add data to it
+
 ## Looking ahead
 
 - Create a way of using a "HighPrioActivitySource" which would override sampling and initialize Collector in MSBuild.exe scenario/tracerprovider in VS.
@@ -121,3 +133,6 @@ myActivity?.WithTags(data);
 - Configuring tail sampling in VS telemetry server side infrastructure to not overflow them with data.
 - How much head sampling.
 - In standalone we could start the collector async without waiting which would potentially miss some earlier traces (unlikely to miss the important end of build trace though) but would degrade performance less than waiting for it's startup. The performance and utility tradeoff is not clear.
+- Can we make collector startup faster?
+- We could let users configure sample rate via env variable.
+- Do we want to send antivirus state? It seems slow.
