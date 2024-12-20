@@ -33,13 +33,11 @@
     <PackageVersion Include="System.Threading.Channels" Version="$(SystemThreadingChannelsVersion)" />
     <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="$(SystemThreadingTasksDataflowVersion)" />
     <PackageVersion Include="xunit.console" Version="$(XUnitVersion)" />
-    <PackageVersion Include="Microsoft.VisualStudio.OpenTelemetry.Collector" Version="0.1.700-beta" />
-    <PackageVersion Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" Version="0.1.700-beta" />
-    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.10.0" />
-    <PackageVersion Include="OpenTelemetry" Version="1.10.0" />
-    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Primitives" Version="9.0.0" />
-
+    <PackageVersion Include="Microsoft.VisualStudio.OpenTelemetry.Collector" Version="$(MicrosoftVisualStudioOpenTelemetryVersion)" />
+    <PackageVersion Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" Version="$(MicrosoftVisualStudioOpenTelemetryVersion)" />
+    <PackageVersion Include="OpenTelemetry" Version="$(OpenTelemetryVersion)" />
+    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="$(SystemDiagnosticsDiagnosticSourceVersion)" />
+    <PackageVersion Include="Microsoft.Bcl.AsyncInterfaces" Version="$(MicrosoftBclAsyncInterfacesVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.Primitives" Version="$(MicrosoftExtensionsPrimitivesVersion)" />
   </ItemGroup>
 </Project>
