@@ -33,8 +33,6 @@
       <_PackagesToPack Remove="@(_PackagesToPack)" Condition="'%(_PackagesToPack.IncludeInPackage)' != 'true'" />
     </ItemGroup>
 
-    <Message Importance="High" Text="Adding DLLs from the following packages: @(_PackagesToPack->'%(NuGetPackageId)')" />
-
     <ItemGroup>
       <!-- Update the collection of items to pack with the DLLs from the NuGet packages -->
       <None Include="@(_PackagesToPack)" Pack="true" PackagePath="build" Visible="false" />
