@@ -1973,7 +1973,9 @@ namespace Microsoft.Build.CommandLine
 #else
             string[] commandLine,
 #endif
-            out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile, out string fullCommandLine)
+            out CommandLineSwitches switchesFromAutoResponseFile,
+            out CommandLineSwitches switchesNotFromAutoResponseFile,
+            out string fullCommandLine)
         {
             ResetGatheringSwitchesState();
 
@@ -2011,12 +2013,17 @@ namespace Microsoft.Build.CommandLine
             switchesNotFromAutoResponseFile = new CommandLineSwitches();
             GatherCommandLineSwitches(commandLineArgs, switchesNotFromAutoResponseFile, fullCommandLine);
 
-            // parse the auto-response file (if "/noautoresponse" is not specified), and combine those switches with the
-            // switches on the command line
             switchesFromAutoResponseFile = new CommandLineSwitches();
-            if (!switchesNotFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
+
+            // Response files should NOT be used on the worker nodes.
+            if (!commandLineArgs.Any(cla => cla.Contains("nodemode:") || cla.Contains("nmode:")))
             {
-                GatherAutoResponseFileSwitches(s_exePath, switchesFromAutoResponseFile, fullCommandLine);
+                // parse the auto-response file (if "/noautoresponse" is not specified), and combine those switches with the
+                // switches on the command line
+                if (!switchesNotFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
+                {
+                    GatherAutoResponseFileSwitches(s_exePath, switchesFromAutoResponseFile, fullCommandLine);
+                }
             }
         }
 
