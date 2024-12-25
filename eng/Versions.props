@@ -2,8 +2,8 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>17.13.2</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
-    <PackageValidationBaselineVersion>17.12.6</PackageValidationBaselineVersion>
+    <VersionPrefix>17.14.0</VersionPrefix>
+    <PackageValidationBaselineVersion>17.13.0-preview-24611-01</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
@@ -62,8 +62,8 @@
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.24572.2</MicrosoftDotNetXUnitExtensionsVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.13.0-3.24607.3</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.13.0-rc.93</NuGetBuildTasksVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.13.0-3.24614.4</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.13.0-rc.105</NuGetBuildTasksVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
     <BootstrapSdkVersion>9.0.200-preview.0.24603.3</BootstrapSdkVersion>
