@@ -419,6 +419,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal async Task ExecuteTarget(ITaskBuilder taskBuilder, BuildRequestEntry requestEntry, ProjectLoggingContext projectLoggingContext, CancellationToken cancellationToken)
         {
+            // TODO: here for target stats
+
             try
             {
                 VerifyState(_state, TargetEntryState.Execution);

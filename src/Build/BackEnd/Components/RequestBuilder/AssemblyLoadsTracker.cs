@@ -86,7 +86,7 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
             StopTracking();
         }
 
-        private static bool IsBuiltinType(string? typeName)
+        internal static bool IsBuiltinType(string? typeName)
         {
             if (string.IsNullOrEmpty(typeName))
             {
@@ -95,7 +95,8 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
 
             return typeName!.StartsWith("Microsoft.Build", StringComparison.Ordinal) ||
                    typeName.StartsWith("Microsoft.NET.Build", StringComparison.Ordinal) ||
-                   typeName.StartsWith("Microsoft.NET.Sdk", StringComparison.Ordinal);
+                   typeName.StartsWith("Microsoft.NET.Sdk", StringComparison.Ordinal) ||
+                   typeName.StartsWith("Microsoft.Activities.Build", StringComparison.Ordinal);
         }
 
         private static IDisposable StartTracking(

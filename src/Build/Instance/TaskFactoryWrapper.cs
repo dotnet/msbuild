@@ -73,6 +73,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private IDictionary<string, string> _factoryIdentityParameters;
 
+        internal TaskRegistry.RegisteredTaskRecord.Stats? Statistics;
+
         #endregion
 
         #region Constructors
@@ -80,7 +82,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates an instance of this class for the given type.
         /// </summary>
-        internal TaskFactoryWrapper(ITaskFactory taskFactory, LoadedType taskFactoryLoadInfo, string taskName, IDictionary<string, string> factoryIdentityParameters)
+        internal TaskFactoryWrapper(
+            ITaskFactory taskFactory,
+            LoadedType taskFactoryLoadInfo,
+            string taskName,
+            IDictionary<string, string> factoryIdentityParameters,
+            TaskRegistry.RegisteredTaskRecord.Stats? statistics = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(taskFactory);
             ErrorUtilities.VerifyThrowArgumentLength(taskName);
@@ -89,6 +96,7 @@ namespace Microsoft.Build.Execution
             TaskFactoryLoadedType = taskFactoryLoadInfo;
             _factoryIdentityParameters = factoryIdentityParameters;
             _propertyData = new Lazy<PropertyData>(PopulatePropertyInfo);
+            Statistics = statistics;
         }
 
         #endregion

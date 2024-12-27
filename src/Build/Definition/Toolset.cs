@@ -163,12 +163,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// holds all the default tasks we know about and the assemblies they exist in
         /// </summary>
-        private TaskRegistry _defaultTaskRegistry;
+        internal TaskRegistry _defaultTaskRegistry;
 
         /// <summary>
         /// holds all the override tasks we know about and the assemblies they exist in
         /// </summary>
-        private TaskRegistry _overrideTaskRegistry;
+        internal TaskRegistry _overrideTaskRegistry;
 
         /// <summary>
         /// Delegate to retrieving files.  For unit testing only.

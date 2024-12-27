@@ -870,6 +870,18 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        ////public class ProjectBuildStats
+        ////{
+        ////    public int TotalTasksCount { get; set; }
+        ////    public int CustomTasksCount { get; set; }
+        ////    public int TotalExecutedTasksCount { get; set; }
+        ////    public int ExecutedCustomTasksCount { get; set; }
+        ////    public TimeSpan TotalTasksExecution { get; set; }
+        ////    public TimeSpan TotalCustomTasksExecution { get; set; }
+
+        ////    // todo top N tasks - names (unhashed if not custom) and time
+        ////}
+
         /// <summary>
         /// Reports this result to the engine and cleans up.
         /// </summary>
@@ -879,7 +891,47 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
-                    _projectLoggingContext.LogProjectFinished(result.OverallResult == BuildResultCode.Success);
+                    TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
+                    ProjectBuildStats stats = new();
+                    CollectTasksStats(taskReg, stats);
+
+                    // Custom tasks count
+                    // Total tasks count
+                    // Executed tasks count (+ number of executions and total time of execution?)
+                    // Custom tasks executed count
+                    // Top tasks execution cumulative. Top tasks execution without aggregation
+                    // And similarly for Targets - custom vs builtin
+
+                    void CollectTasksStats(TaskRegistry taskRegistry, ProjectBuildStats projectBuildStats)
+                    {
+                        if (taskRegistry == null)
+                        {
+                            return;
+                        }
+
+                        foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
+                        {
+                            // registeredTaskRecord.TaskIdentity.Name
+
+                            projectBuildStats.TotalTasksCount++;
+                            projectBuildStats.TotalTasksExecution += registeredTaskRecord.Statistics.ExecutedTime;
+                            projectBuildStats.TotalExecutedTasksCount += registeredTaskRecord.Statistics.ExecutedCount;
+
+                            if (registeredTaskRecord.Statistics.IsCustom)
+                            {
+                                projectBuildStats.CustomTasksCount++;
+                                projectBuildStats.TotalCustomTasksExecution += registeredTaskRecord.Statistics.ExecutedTime;
+                                projectBuildStats.ExecutedCustomTasksCount +=
+                                    registeredTaskRecord.Statistics.ExecutedCount;
+                            }
+                        }
+
+                        CollectTasksStats(taskRegistry.Toolset?._defaultTaskRegistry, projectBuildStats);
+                        CollectTasksStats(taskRegistry.Toolset?._overrideTaskRegistry, projectBuildStats);
+                    }
+
+
+                    _projectLoggingContext.LogProjectFinished(result.OverallResult == BuildResultCode.Success, stats);
                 }
                 catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
@@ -1225,6 +1277,37 @@ namespace Microsoft.Build.BackEnd
                 buildCheckManager?.EndProjectRequest(
                     new CheckLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext),
                     _requestEntry.RequestConfiguration.ProjectFullPath);
+
+                TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
+                int tasksCount = GetTasksRegistrationsCount(taskReg);
+
+                // Custom tasks count
+                // Total tasks count
+                // Executed tasks count (+ number of executions and total time of execution?)
+                // Custom tasks executed count
+                // Top tasks execution cumulative. Top tasks execution without aggregation
+                // And similarly for Targets - custom vs builtin
+
+
+                int GetTasksRegistrationsCount(TaskRegistry taskRegistry)
+                {
+                    if (taskRegistry == null)
+                    {
+                        return 0;
+                    }
+
+                    // This is proper - account for a situation where multiple tasks with same name, but from different assemblies are registered.
+                    // int registrationsCount = taskRegistry.TaskRegistrations.Values.Sum(v => v.Count);
+                    // But - let's make it fast and simple
+                    int registrationsCount = taskRegistry.TaskRegistrations.Count;
+
+                    // taskRegistry.TaskRegistrations.Values.First().First().Statistics
+
+                    return
+                        registrationsCount +
+                        GetTasksRegistrationsCount(taskRegistry.Toolset?._defaultTaskRegistry) +
+                        GetTasksRegistrationsCount(taskRegistry.Toolset?._overrideTaskRegistry);
+                }
             }
 
             BuildResult CopyTargetResultsFromProxyTargetsToRealTargets(BuildResult resultFromTargetBuilder)

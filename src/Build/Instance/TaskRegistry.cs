@@ -9,8 +9,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Threading;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -441,7 +443,30 @@ namespace Microsoft.Build.Execution
                 taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
-            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord, loggingContext, projectUsingTaskXml, ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
+            bool isCustomTask =
+                ((!string.IsNullOrEmpty(taskFactory)) ||
+                (!string.IsNullOrEmpty(assemblyName) && !AssemblyLoadsTracker.IsBuiltinType(assemblyName)) ||
+                (!string.IsNullOrEmpty(assemblyFile) && !AssemblyLoadsTracker.IsBuiltinType(Path.GetFileName(assemblyFile)) && !FileClassifier.Shared.IsBuiltInLogic(assemblyFile)))
+                // and let's consider all tasks imported by common targets as non custom logic.
+                && !FileClassifier.Shared.IsBuiltInLogic(projectUsingTaskXml.ContainingProject.FullPath);
+
+            // TODO: We might want to decide this post-hoc (on project done), based on TaskRegistration.AssemblyLoadInfo
+            //  as only then we might better know the location of dotnet install root
+            if (isCustomTask)
+            {
+                Debugger.Launch();
+            }
+
+            taskRegistry.RegisterTask(
+                taskName,
+                AssemblyLoadInfo.Create(assemblyName, assemblyFile),
+                taskFactory,
+                taskFactoryParameters,
+                parameterGroupAndTaskElementRecord,
+                loggingContext,
+                projectUsingTaskXml,
+                ConversionUtilities.ValidBooleanTrue(overrideUsingTask),
+                isCustomTask);
         }
 
         private static Dictionary<string, string> CreateTaskFactoryParametersDictionary(int? initialCount = null)
@@ -686,7 +711,8 @@ namespace Microsoft.Build.Execution
             RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord,
             LoggingContext loggingContext,
             ProjectUsingTaskElement projectUsingTaskInXml,
-            bool overrideTask = false)
+            bool overrideTask,
+            bool isCustom)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo);
@@ -713,7 +739,8 @@ namespace Microsoft.Build.Execution
                 taskFactory,
                 taskFactoryParameters,
                 inlineTaskRecord,
-                Interlocked.Increment(ref _nextRegistrationOrderId));
+                Interlocked.Increment(ref _nextRegistrationOrderId),
+                isCustom);
 
             if (overrideTask)
             {
@@ -1158,10 +1185,39 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private int _registrationOrderId;
 
+            internal Stats Statistics = new Stats();
+
+            internal class Stats
+            {
+                public bool IsCustom { get; set; }
+                public short ExecutedCount { get; private set; }
+                private readonly Stopwatch _executedSw  = new Stopwatch();
+
+                public TimeSpan ExecutedTime => _executedSw.Elapsed;
+
+                public void ExecutionStarted()
+                {
+                    _executedSw.Start();
+                    ExecutedCount++;
+                }
+
+                public void ExecutionStoped()
+                {
+                    _executedSw.Stop();
+                }
+            }
+
             /// <summary>
             /// Constructor
             /// </summary>
-            internal RegisteredTaskRecord(string registeredName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, ParameterGroupAndTaskElementRecord inlineTask, int registrationOrderId)
+            internal RegisteredTaskRecord(
+                string registeredName,
+                AssemblyLoadInfo assemblyLoadInfo,
+                string taskFactory,
+                Dictionary<string, string> taskFactoryParameters,
+                ParameterGroupAndTaskElementRecord inlineTask,
+                int registrationOrderId,
+                bool isCustom)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(assemblyLoadInfo, "AssemblyLoadInfo");
                 _registeredName = registeredName;
@@ -1189,6 +1245,8 @@ namespace Microsoft.Build.Execution
                 {
                     _parameterGroupAndTaskBody = new ParameterGroupAndTaskElementRecord();
                 }
+
+                Statistics.IsCustom = isCustom;
             }
 
             private RegisteredTaskRecord()
@@ -1546,7 +1604,7 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters);
+                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters, Statistics);
                 }
 
                 return true;

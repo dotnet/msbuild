@@ -7,6 +7,18 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
+    public class ProjectBuildStats
+    {
+        public short TotalTasksCount { get; set; }
+        public short CustomTasksCount { get; set; }
+        public short TotalExecutedTasksCount { get; set; }
+        public short ExecutedCustomTasksCount { get; set; }
+        public TimeSpan TotalTasksExecution { get; set; }
+        public TimeSpan TotalCustomTasksExecution { get; set; }
+
+        // todo top N tasks - names (unhashed if not custom) and time
+    }
+
     /// <summary>
     /// Arguments for project finished events
     /// </summary>
@@ -80,6 +92,22 @@ namespace Microsoft.Build.Framework
 
             writer.WriteOptionalString(projectFile);
             writer.Write(succeeded);
+
+            if (ProjectBuildStats != null)
+            {
+                writer.Write((byte)1);
+                writer.Write(ProjectBuildStats.TotalTasksCount);
+                writer.Write(ProjectBuildStats.CustomTasksCount);
+                writer.Write(ProjectBuildStats.TotalExecutedTasksCount);
+                writer.Write(ProjectBuildStats.ExecutedCustomTasksCount);
+
+                writer.Write(ProjectBuildStats.TotalTasksExecution.Ticks);
+                writer.Write(ProjectBuildStats.TotalCustomTasksExecution.Ticks);
+            }
+            else
+            {
+                writer.Write((byte)0);
+            }
         }
 
         /// <summary>
@@ -93,6 +121,19 @@ namespace Microsoft.Build.Framework
 
             projectFile = reader.ReadByte() == 0 ? null : reader.ReadString();
             succeeded = reader.ReadBoolean();
+
+            if (reader.ReadByte() == 1)
+            {
+                ProjectBuildStats = new ProjectBuildStats()
+                {
+                    TotalTasksCount = reader.ReadInt16(),
+                    CustomTasksCount = reader.ReadInt16(),
+                    TotalExecutedTasksCount = reader.ReadInt16(),
+                    ExecutedCustomTasksCount = reader.ReadInt16(),
+                    TotalTasksExecution = TimeSpan.FromTicks(reader.ReadInt64()),
+                    TotalCustomTasksExecution = TimeSpan.FromTicks(reader.ReadInt64()),
+                };
+            }
         }
         #endregion
 
@@ -118,5 +159,9 @@ namespace Microsoft.Build.Framework
                 return RawMessage;
             }
         }
+
+        // public int Foo1 { get; set; }
+
+        public ProjectBuildStats? ProjectBuildStats { get; set; }
     }
 }

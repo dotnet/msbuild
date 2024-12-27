@@ -163,6 +163,11 @@ namespace Microsoft.Build.BackEnd
 
             // Now process the targets
             ITaskBuilder taskBuilder = _componentHost.GetComponent(BuildComponentType.TaskBuilder) as ITaskBuilder;
+
+            ////((TaskBuilder)taskBuilder).ShutdownComponent();
+            ////TaskExecutionHost te;
+            ////te.
+
             try
             {
                 await ProcessTargetStack(taskBuilder);

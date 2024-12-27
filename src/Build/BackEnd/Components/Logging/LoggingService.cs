@@ -1676,6 +1676,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
             {
+                FlushProjStats(projectFinishedEvent);
                 WarningsConfigKey key = GetWarningsConfigKey(projectFinishedEvent);
                 _warningsAsErrorsByProject?.Remove(key);
                 _warningsNotAsErrorsByProject?.Remove(key);
@@ -1696,6 +1697,31 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 RouteBuildEvent(loggingEventKeyValuePair);
             }
+        }
+
+        private void FlushProjStats(ProjectFinishedEventArgs finsEventArgs)
+        {
+            ProjectBuildStats stats = finsEventArgs.ProjectBuildStats;
+
+            if (stats == null)
+            {
+                return;
+            }
+
+            string suffix = finsEventArgs.BuildEventContext != null
+                ? $"InstId: {finsEventArgs.BuildEventContext.ProjectInstanceId}, CtxId: {finsEventArgs.BuildEventContext.ProjectContextId}"
+                : "No_Context";
+
+            Console.WriteLine("=================================================");
+            Console.WriteLine($"Stats for [{finsEventArgs.ProjectFile}, {suffix}");
+            Console.WriteLine($"Total Defined  Tasks: {stats.TotalTasksCount}");
+            Console.WriteLine($"Total Executed Tasks: {stats.TotalExecutedTasksCount}");
+            Console.WriteLine($"Total task exec time: {stats.TotalTasksExecution:mm\\:ss\\.fff}");
+            Console.WriteLine();
+            Console.WriteLine($"Defined  Custom Tasks: {stats.CustomTasksCount}");
+            Console.WriteLine($"Executed Custom Tasks: {stats.ExecutedCustomTasksCount}");
+            Console.WriteLine($"Custom task exec time: {stats.TotalCustomTasksExecution:mm\\:ss\\.fff}");
+            Console.WriteLine("=================================================");
         }
 
         /// <summary>
