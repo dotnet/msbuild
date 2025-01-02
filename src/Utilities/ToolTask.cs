@@ -862,7 +862,7 @@ namespace Microsoft.Build.Utilities
 
                 // Warn only -- occasionally temp files fail to delete because of virus checkers; we
                 // don't want the build to fail in such cases
-                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", fileName, e.Message + " Processes: " + lockedFileMessage);
+                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", fileName, e.Message, lockedFileMessage);
             }
         }
 
