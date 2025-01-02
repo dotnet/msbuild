@@ -2568,6 +2568,24 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <AppConfig Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">$(_GenerateBindingRedirectsIntermediateAppConfig)</AppConfig>
     </PropertyGroup>
 
+    <PropertyGroup>
+      <ConfigFileExists Condition="Exists('@(AppConfigWithTargetPath->'$(OutDir)%(TargetPath)')')">true</ConfigFileExists>
+      <HasNoBindingRedirects Condition="'@(SuggestedBindingRedirects)' == ''">true</HasNoBindingRedirects>
+    </PropertyGroup>
+
+    <!-- Overwrites .config file with a App.config content if RAR returned empty @(SuggestedBindingRedirects). -->
+    <Copy
+      SourceFiles="@(AppConfigWithTargetPath->'%(FullPath)')"
+      DestinationFiles="$(_GenerateBindingRedirectsIntermediateAppConfig)"
+      SkipUnchangedFiles="true"
+      Condition="'$(ConfigFileExists)' == 'true' and '$(HasNoBindingRedirects)' == 'true'">
+      <Output TaskParameter="CopiedFiles" ItemName="FileWrites"/>
+    </Copy>
+    <Touch
+      Files="$(_GenerateBindingRedirectsIntermediateAppConfig)"
+      AlwaysCreate="true"
+      Condition="'$(ConfigFileExists)' == 'true' and '$(HasNoBindingRedirects)' == 'true'"/>
+
     <ItemGroup Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">
       <AppConfigWithTargetPath Remove="@(AppConfigWithTargetPath)" />
       <AppConfigWithTargetPath Include="$(AppConfig)">
