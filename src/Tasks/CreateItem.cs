@@ -178,7 +178,11 @@ namespace Microsoft.Build.Tasks
                         }
                         else if (isLegalFileSpec)
                         {
-                            (files, action, _) = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
+                            (files, action, _, BuildMessageEventArgs globFailure) = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
+                            if (globFailure != null)
+                            {
+                                BuildEngine.LogMessageEvent(globFailure);
+                            }
 
                             foreach (string file in files)
                             {

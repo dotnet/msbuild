@@ -1904,7 +1904,7 @@ namespace Microsoft.Build.Shared
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <returns>The search action, array of files, and Exclude file spec (if applicable).</returns>
-        internal (string[] FileList, SearchAction Action, string ExcludeFileSpec) GetFiles(
+        internal (string[] FileList, SearchAction Action, string ExcludeFileSpec, BuildMessageEventArgs globFailure) GetFiles(
             string projectDirectoryUnescaped,
             string filespecUnescaped,
             List<string> excludeSpecsUnescaped = null)
@@ -1912,7 +1912,7 @@ namespace Microsoft.Build.Shared
             // For performance. Short-circuit iff there is no wildcard.
             if (!HasWildcards(filespecUnescaped))
             {
-                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), SearchAction.None, string.Empty);
+                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), SearchAction.None, string.Empty, null);
             }
 
             if (_cachedGlobExpansions == null)
@@ -1929,6 +1929,7 @@ namespace Microsoft.Build.Shared
             string[] fileList;
             SearchAction action = SearchAction.None;
             string excludeFileSpec = string.Empty;
+            BuildMessageEventArgs globFailure = null;
             if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
             {
                 // avoid parallel evaluations of the same wildcard by using a unique lock for each wildcard
@@ -1941,7 +1942,7 @@ namespace Microsoft.Build.Shared
                                 enumerationKey,
                                 (_) =>
                                 {
-                                    (fileList, action, excludeFileSpec) = GetFilesImplementation(
+                                    (fileList, action, excludeFileSpec, globFailure) = GetFilesImplementation(
                                         projectDirectoryUnescaped,
                                         filespecUnescaped,
                                         excludeSpecsUnescaped);
@@ -1955,7 +1956,7 @@ namespace Microsoft.Build.Shared
             // Copy the file enumerations to prevent outside modifications of the cache (e.g. sorting, escaping) and to maintain the original method contract that a new array is created on each call.
             var filesToReturn = files.ToArray();
 
-            return (filesToReturn, action, excludeFileSpec);
+            return (filesToReturn, action, excludeFileSpec, globFailure);
         }
 
         private static string ComputeFileEnumerationCacheKey(string projectDirectoryUnescaped, string filespecUnescaped, List<string> excludes)
@@ -2362,7 +2363,7 @@ namespace Microsoft.Build.Shared
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <returns>The search action, array of files, and Exclude file spec (if applicable).</returns>
-        private (string[] FileList, SearchAction Action, string ExcludeFileSpec) GetFilesImplementation(
+        private (string[] FileList, SearchAction Action, string ExcludeFileSpec, BuildMessageEventArgs globFailureEvent) GetFilesImplementation(
             string projectDirectoryUnescaped,
             string filespecUnescaped,
             List<string> excludeSpecsUnescaped)
@@ -2377,15 +2378,15 @@ namespace Microsoft.Build.Shared
 
             if (action == SearchAction.ReturnEmptyList)
             {
-                return ([], action, string.Empty);
+                return ([], action, string.Empty, null);
             }
             else if (action == SearchAction.ReturnFileSpec)
             {
-                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), action, string.Empty);
+                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), action, string.Empty, null);
             }
             else if (action == SearchAction.FailOnDriveEnumeratingWildcard)
             {
-                return ([], action, string.Empty);
+                return ([], action, string.Empty, null);
             }
             else if ((action != SearchAction.RunSearch) && (action != SearchAction.LogDriveEnumeratingWildcard))
             {
@@ -2430,7 +2431,7 @@ namespace Microsoft.Build.Shared
                     }
                     else if (excludeAction == SearchAction.FailOnDriveEnumeratingWildcard)
                     {
-                        return ([], excludeAction, excludeSpec);
+                        return ([], excludeAction, excludeSpec, null);
                     }
                     else if (excludeAction == SearchAction.LogDriveEnumeratingWildcard)
                     {
@@ -2594,14 +2595,29 @@ namespace Microsoft.Build.Shared
                 // Flatten to get exceptions than are thrown inside a nested Parallel.ForEach
                 if (ex.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException))
                 {
-                    return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), trackSearchAction, trackExcludeFileSpec);
+                var globFailureMessageEvent = new BuildMessageEventArgs(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("An exception occurred while expanding a fileSpec with globs: fileSpec: \"{0}\", Trace: \"{1}\"",
+                    filespecUnescaped),
+                    null,
+                    "FileMatcher",
+                    MessageImportance.Low);
+                    return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped),
+                        trackSearchAction,
+                        trackExcludeFileSpec,
+                        globFailureMessageEvent);
                 }
                 throw;
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                // Assume it's not meant to be a path
-                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), trackSearchAction, trackExcludeFileSpec);
+                var globFailureMessageEvent = new BuildMessageEventArgs(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("An exception occurred while expanding a fileSpec with globs: fileSpec: \"{0}\", Trace: \"{1}\"",
+                    filespecUnescaped),
+                    null,
+                    "FileMatcher",
+                    MessageImportance.Low);
+                // Assume it's not meant to be a path, but log the failure to expand
+                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), trackSearchAction, trackExcludeFileSpec, globFailureMessageEvent);
             }
 
             /*
@@ -2610,8 +2626,7 @@ namespace Microsoft.Build.Shared
             var files = resultsToExclude != null
                 ? listOfFiles.SelectMany(list => list).Where(f => !resultsToExclude.Contains(f)).ToArray()
                 : listOfFiles.SelectMany(list => list).ToArray();
-
-            return (files, trackSearchAction, trackExcludeFileSpec);
+            return (files, trackSearchAction, trackExcludeFileSpec, null);
         }
 
         private bool InnerExceptionsAreAllIoRelated(AggregateException ex)

@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -23,8 +24,9 @@ namespace Microsoft.Build.Utilities
         /// Expand wildcards in the item list.
         /// </summary>
         /// <param name="expand"></param>
+        /// <param name="logMessageFunction">For logging glob failures.</param>
         /// <returns>Array of items expanded</returns>
-        public static ITaskItem[] ExpandWildcards(ITaskItem[] expand)
+        public static ITaskItem[] ExpandWildcards(ITaskItem[] expand, Action<BuildMessageEventArgs> logMessageFunction)
         {
             if (expand == null)
             {
@@ -49,7 +51,11 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-                        files = FileMatcher.Default.GetFiles(null, item.ItemSpec).FileList;
+                        (files, _, _, BuildMessageEventArgs globFailure) = FileMatcher.Default.GetFiles(null, item.ItemSpec);
+                        if (globFailure != null)
+                        {
+                            logMessageFunction(globFailure);
+                        }
                     }
 
                     foreach (string file in files)

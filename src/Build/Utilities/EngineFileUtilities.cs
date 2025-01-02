@@ -332,7 +332,28 @@ namespace Microsoft.Build.Internal
                     // as a relative path, we will get back a bunch of relative paths.
                     // If the filespec started out as an absolute path, we will get
                     // back a bunch of absolute paths
-                    (fileList, _, _) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+                    // IEnumerable<BuildMessageEventArgs> events;
+                    (fileList, _, _, BuildMessageEventArgs globFailure) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+
+                    // log globbing failure with the present logging mechanism
+                    if (globFailure != null)
+                    {
+                        switch (loggingMechanism)
+                        {
+                            case TargetLoggingContext targetLoggingContext:
+                                targetLoggingContext.LogCommentFromText(globFailure.Importance, globFailure.Message);
+                                break;
+                            case ILoggingService loggingService:
+                                loggingService.LogCommentFromText(buildEventContext, globFailure.Importance, globFailure.Message);
+                                break;
+                            case EvaluationLoggingContext evaluationLoggingContext:
+                                evaluationLoggingContext.LogCommentFromText(globFailure.Importance, globFailure.Message);
+                                break;
+                            default:
+                                throw new InternalErrorException($"Logging type {loggingMechanism.GetType()} is not understood by {nameof(GetFileList)}.");
+                        }
+                    }
+
 
                     ErrorUtilities.VerifyThrow(fileList != null, "We must have a list of files here, even if it's empty.");
 
