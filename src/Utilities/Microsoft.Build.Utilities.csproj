@@ -138,7 +138,6 @@
     <Compile Include="..\Shared\ToolsetElement.cs">
       <Link>Shared\ToolsetElement.cs</Link>
     </Compile>
-    <Compile Include="..\Tasks\LockCheck.cs" />
   </ItemGroup>
 
   <ItemGroup>

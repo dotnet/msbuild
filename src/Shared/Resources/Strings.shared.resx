@@ -188,7 +188,7 @@
     <comment>{StrBegin="MSB5003: "}</comment>
   </data>
   <data name="Shared.FailedDeletingTempFile" xml:space="preserve">
-    <value>MSB5018: Failed to delete the temporary file "{0}". {1}</value>
+    <value>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</value>
     <comment>{StrBegin="MSB5018: "}</comment>
   </data>
   <data name="Shared.InvalidFilespecForTransform" xml:space="preserve">
