@@ -8,7 +8,7 @@ using System.IO;
 using System.Security;
 using System.Text;
 using System.Xml;
-#if !NETFRAMEWORK || MONO
+#if !NETFRAMEWORK
 using Microsoft.Build.Shared;
 #endif
 
@@ -107,7 +107,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The project configuration in given solution configuration
         /// K: full solution configuration name (cfg + platform)
-        /// V: project configuration 
+        /// V: project configuration
         /// </summary>
         private readonly Dictionary<string, ProjectConfigurationInSolution> _projectConfigurations;
         private IReadOnlyDictionary<string, ProjectConfigurationInSolution> _projectConfigurationsReadOnly;
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Construction
 
             internal set
             {
-#if NETFRAMEWORK && !MONO
+#if NETFRAMEWORK
                 // Avoid loading System.Runtime.InteropServices.RuntimeInformation in full-framework
                 // cases. It caused https://github.com/NuGet/Home/issues/6918.
                 _relativePath = value;
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Construction
                     {
                         try
                         {
-#if NETFRAMEWORK && !MONO
+#if NETFRAMEWORK
                             _absolutePath = Path.GetFullPath(_absolutePath);
 #else
                             _absolutePath = FileUtilities.NormalizePath(_absolutePath);
@@ -208,14 +208,14 @@ namespace Microsoft.Build.Construction
         public string ProjectGuid { get; internal set; }
 
         /// <summary>
-        /// The guid, in "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" form, of this project's 
-        /// parent project, if any. 
+        /// The guid, in "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" form, of this project's
+        /// parent project, if any.
         /// </summary>
         public string ParentProjectGuid { get; internal set; }
 
         /// <summary>
-        /// List of guids, in "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" form, mapping to projects 
-        /// that this project has a build order dependency on, as defined in the solution file. 
+        /// List of guids, in "{XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}" form, mapping to projects
+        /// that this project has a build order dependency on, as defined in the solution file.
         /// </summary>
         public IReadOnlyList<string> Dependencies => _dependenciesAsReadonly ?? (_dependenciesAsReadonly = _dependencies.AsReadOnly());
 
@@ -239,9 +239,9 @@ namespace Microsoft.Build.Construction
         public SolutionProjectType ProjectType { get; set; }
 
         /// <summary>
-        /// Only applies to websites -- for other project types, references are 
+        /// Only applies to websites -- for other project types, references are
         /// either specified as Dependencies above, or as ProjectReferences in the
-        /// project file, which the solution doesn't have insight into. 
+        /// project file, which the solution doesn't have insight into.
         /// </summary>
         internal List<string> ProjectReferences { get; } = new List<string>();
 
@@ -270,7 +270,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Set the requested project configuration. 
+        /// Set the requested project configuration.
         /// </summary>
         internal void SetProjectConfiguration(string configurationName, ProjectConfigurationInSolution configuration)
         {
@@ -305,7 +305,7 @@ namespace Microsoft.Build.Construction
                 FileStream fs = File.OpenRead(AbsolutePath);
                 using (XmlReader xmlReader = XmlReader.Create(fs, xrSettings))
                 {
-                    // Load the project file and get the first node    
+                    // Load the project file and get the first node
                     projectDocument.Load(xmlReader);
                 }
 
@@ -406,13 +406,18 @@ namespace Microsoft.Build.Construction
 
                     if (ParentProjectGuid != null)
                     {
-                        if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out ProjectInSolution proj))
+                        ProjectInSolution proj = null;
+                        ProjectInSolution solutionFolder = null;
+
+                        // For the new parser, solution folders are not saved in ProjectsByGuid but in the SolutionFoldersByGuid.
+                        if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out proj) &&
+                            !ParentSolution.SolutionFoldersByGuid.TryGetValue(ParentProjectGuid, out solutionFolder))
                         {
-                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null, "SubCategoryForSolutionParsingErrors",
+                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null || solutionFolder != null, "SubCategoryForSolutionParsingErrors",
                                 new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectErrorWithNameAndGuid", ProjectName, ProjectGuid, ParentProjectGuid);
                         }
 
-                        uniqueName = proj.GetUniqueProjectName() + "\\";
+                        uniqueName = (proj != null ? proj.GetUniqueProjectName() : solutionFolder.GetUniqueProjectName()) + "\\";
                     }
 
                     // Now tack on our own project name, and cache it in the ProjectInSolution object for future quick access.
@@ -442,16 +447,19 @@ namespace Microsoft.Build.Construction
                     // If this project has a parent SLN folder, first get the full project name for the SLN folder,
                     // and tack on trailing backslash.
                     string projectName = String.Empty;
+                    ProjectInSolution proj = null;
+                    ProjectInSolution solutionFolder = null;
 
                     if (ParentProjectGuid != null)
                     {
-                        if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out ProjectInSolution parent))
+                        if (!ParentSolution.ProjectsByGuid.TryGetValue(ParentProjectGuid, out proj) &&
+                            !ParentSolution.SolutionFoldersByGuid.TryGetValue(ParentProjectGuid, out solutionFolder))
                         {
-                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(parent != null, "SubCategoryForSolutionParsingErrors",
+                            ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj != null || solutionFolder != null, "SubCategoryForSolutionParsingErrors",
                                 new BuildEventFileInfo(ParentSolution.FullPath), "SolutionParseNestedProjectErrorWithNameAndGuid", ProjectName, ProjectGuid, ParentProjectGuid);
                         }
 
-                        projectName = parent.GetOriginalProjectName() + "\\";
+                        projectName = (proj != null ? proj.GetOriginalProjectName() : solutionFolder.GetOriginalProjectName()) + "\\";
                     }
 
                     // Now tack on our own project name, and cache it in the ProjectInSolution object for future quick access.
@@ -469,7 +477,7 @@ namespace Microsoft.Build.Construction
                 return null;
             }
 
-            return ProjectGuid.Trim(new char[] { '{', '}' });
+            return ProjectGuid.Trim(['{', '}']);
         }
 
         /// <summary>
@@ -477,7 +485,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal void UpdateUniqueProjectName(string newUniqueName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newUniqueName, nameof(newUniqueName));
+            ErrorUtilities.VerifyThrowArgumentLength(newUniqueName);
 
             _uniqueProjectName = newUniqueName;
         }
@@ -502,7 +510,7 @@ namespace Microsoft.Build.Construction
             // This is where we're going to work on the final string to return to the caller.
             var cleanProjectName = new StringBuilder(projectName);
 
-            // Replace each unclean character with a clean one            
+            // Replace each unclean character with a clean one
             foreach (char uncleanChar in s_charsToCleanse)
             {
                 cleanProjectName.Replace(uncleanChar, cleanCharacter);

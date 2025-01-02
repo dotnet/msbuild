@@ -31,7 +31,7 @@ namespace Microsoft.Build.Construction
         internal ProjectItemDefinitionElement(XmlElement xmlElement, ProjectItemDefinitionGroupElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -72,8 +72,8 @@ namespace Microsoft.Build.Construction
         /// </param>
         public ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
 
             if (expressAsAttribute)
             {
@@ -99,7 +99,7 @@ namespace Microsoft.Build.Construction
 
             // Orcas inadvertently did not check for reserved item types (like "Choose") in item definitions,
             // as we do for item types in item groups. So we do not have a check here.
-            // Although we could perhaps add one, as such item definitions couldn't be used 
+            // Although we could perhaps add one, as such item definitions couldn't be used
             // since no items can have the reserved itemType.
             XmlElementWithLocation element = containingProject.CreateElement(itemType);
 

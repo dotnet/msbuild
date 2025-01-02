@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
                                               <StringProperty Name=`BasicFileWOSwitch` />
                                               <StringProperty Name=`BasicDirectory` />
                                               <DynamicEnumProperty Name=`BasicDynamicEnum` />
-                                              
+
                                               <!-- More Complex types -->
                                               <BoolProperty Name=`ComplexReversible` Switch=`/Cr:CT` ReverseSwitch=`/Cr:CF` Separator=`:` />
                                               <BoolProperty Name=`ComplexNonreversibleWArgument` Switch=`/Cnrwa`>
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests
                                               <IntProperty Name=`ComplexInteger` Switch=`/Ci` MinValue=`64` MaxValue=`255` />
 
                                               <!-- Dependencies, fallbacks, and so on -->
-                                              <BoolProperty Name=`OtherNonreversible` Switch=`/Onr`> 
+                                              <BoolProperty Name=`OtherNonreversible` Switch=`/Onr`>
                                                 <Argument IsRequired=`true` Property=`ComplexFileNoDefault` />
                                               </BoolProperty>
                                               <StringProperty Name=`ComplexDirectory` />
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests
         private static string s_pathToMSBuildBinaries = null;
 
         /// <summary>
-        /// Returns the path to the MSBuild binaries 
+        /// Returns the path to the MSBuild binaries
         /// </summary>
         public static string PathToMSBuildBinaries
         {
@@ -121,12 +121,12 @@ namespace Microsoft.Build.UnitTests
             }
             catch (XamlParseException)
             {
-                Assert.True(false, "Parse of FakeTask XML failed");
+                Assert.Fail("Parse of FakeTask XML failed");
             }
 
             TaskGenerator tg = new TaskGenerator(tp);
             CodeCompileUnit compileUnit = tg.GenerateCode();
-            CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
+            using CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
 
             using (StringWriter sw = new StringWriter(CultureInfo.CurrentCulture))
             {
@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests
                 options.BracingStyle = "C";
 
                 codeGenerator.GenerateCodeFromCompileUnit(compileUnit, sw, options);
-                CSharpCodeProvider provider = new CSharpCodeProvider();
+                using CSharpCodeProvider provider = new CSharpCodeProvider();
                 // Build the parameters for source compilation.
                 CompilerParameters cp = new CompilerParameters();
 
@@ -147,7 +147,7 @@ namespace Microsoft.Build.UnitTests
                 cp.ReferencedAssemblies.Add(Path.Combine(PathToMSBuildBinaries, "Microsoft.Build.Utilities.Core.dll"));
                 cp.ReferencedAssemblies.Add(Path.Combine(PathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll"));
 
-                // Generate an executable instead of 
+                // Generate an executable instead of
                 // a class library.
                 cp.GenerateExecutable = false;
                 // Set the assembly file name to generate.

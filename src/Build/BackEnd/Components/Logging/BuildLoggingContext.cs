@@ -36,7 +36,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <inheritdoc cref="LoggingContext"/>
-        protected BuildLoggingContext(BuildLoggingContext baseContext) : base(baseContext)
+        protected BuildLoggingContext(BuildLoggingContext baseContext, BuildEventContext newEventContext) : base(baseContext, newEventContext)
         {
             _isInProcNode = baseContext._isInProcNode;
         }
@@ -59,7 +59,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="taskName">The task in which the error occurred</param>
         internal void LogFatalTaskError(Exception exception, BuildEventFileInfo file, string taskName)
         {
-            ErrorUtilities.VerifyThrow(IsValid, "must be valid");
+            CheckValidity();
             LoggingService.LogFatalTaskError(BuildEventContext, exception, file, taskName);
             _hasLoggedErrors = true;
         }

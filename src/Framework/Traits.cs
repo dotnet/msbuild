@@ -13,7 +13,7 @@ namespace Microsoft.Build.Framework
     /// </summary>
     internal class Traits
     {
-        private static readonly Traits _instance = new Traits();
+        private static Traits _instance = new Traits();
         public static Traits Instance
         {
             get
@@ -30,7 +30,7 @@ namespace Microsoft.Build.Framework
         {
             EscapeHatches = new EscapeHatches();
 
-            DebugScheduler = DebugEngine || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER"));
+            DebugScheduler = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER"));
             DebugNodeCommunication = DebugEngine || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"));
         }
 
@@ -110,11 +110,8 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Log all environment variables whether or not they are used in a build in the binary log.
         /// </summary>
-        public static bool LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"))
-#if !TASKHOST
-            && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4)
-#endif
-            ;
+        public static bool LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"));
+
         /// <summary>
         /// Log property tracking information.
         /// </summary>
@@ -133,8 +130,18 @@ namespace Microsoft.Build.Framework
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;
+        public readonly bool DebugUnitTests = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugUnitTests"));
 
         public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
+
+        public static void UpdateFromEnvironment()
+        {
+            // Re-create Traits instance to update values in Traits according to current environment.
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            {
+                _instance = new Traits();
+            }
+        }
 
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
@@ -317,11 +324,6 @@ namespace Microsoft.Build.Framework
         public readonly bool DisableSdkResolutionCache = Environment.GetEnvironmentVariable("MSBUILDDISABLESDKCACHE") == "1";
 
         /// <summary>
-        /// Disable the NuGet-based SDK resolver.
-        /// </summary>
-        public readonly bool DisableNuGetSdkResolver = Environment.GetEnvironmentVariable("MSBUILDDISABLENUGETSDKRESOLVER") == "1";
-
-        /// <summary>
         /// Don't delete TargetPath metadata from associated files found by RAR.
         /// </summary>
         public readonly bool TargetPathForRelatedFiles = Environment.GetEnvironmentVariable("MSBUILDTARGETPATHFORRELATEDFILES") == "1";
@@ -353,6 +355,19 @@ namespace Microsoft.Build.Framework
         /// Escape hatch for problems arising from https://github.com/dotnet/msbuild/pull/4420.
         /// </remarks>
         public readonly bool UseMinimalResxParsingInCoreScenarios = Environment.GetEnvironmentVariable("MSBUILDUSEMINIMALRESX") == "1";
+
+        /// <summary>
+        /// Escape hatch to ensure msbuild produces the compatible build results cache without versioning.
+        /// </summary>
+        /// <remarks>
+        /// Escape hatch for problems arising from https://github.com/dotnet/msbuild/issues/10208.
+        /// </remarks>
+        public readonly bool DoNotVersionBuildResult = Environment.GetEnvironmentVariable("MSBUILDDONOTVERSIONBUILDRESULT") == "1";
+
+        /// <summary>
+        /// Escape hatch to ensure build check does not limit amount of results.
+        /// </summary>
+        public readonly bool DoNotLimitBuildCheckResultsNumber = Environment.GetEnvironmentVariable("MSBUILDDONOTLIMITBUILDCHECKRESULTSNUMBER") == "1";
 
         private bool _sdkReferencePropertyExpansionInitialized;
         private SdkReferencePropertyExpansionMode? _sdkReferencePropertyExpansionValue;
@@ -392,7 +407,7 @@ namespace Microsoft.Build.Framework
 #if RUNTIME_TYPE_NETCORE
                     return true;
 #else
-                    return false;
+                    return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
 #endif
                 }
 
@@ -400,23 +415,11 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        private bool? _isBinaryFormatterSerializationAllowed;
-        public bool IsBinaryFormatterSerializationAllowed
+        public bool UnquoteTargetSwitchParameters
         {
             get
             {
-                if (!_isBinaryFormatterSerializationAllowed.HasValue)
-                {
-#if RUNTIME_TYPE_NETCORE
-                    AppContext.TryGetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization",
-                        out bool enabled);
-                    _isBinaryFormatterSerializationAllowed = enabled;
-#else
-                    _isBinaryFormatterSerializationAllowed = true;
-#endif
-                }
-
-                return _isBinaryFormatterSerializationAllowed.Value;
+                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
             }
         }
 
@@ -543,10 +546,10 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Formats the given string using the variable arguments passed in.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
-        /// 
+        ///
         /// Thread safe.
         /// </summary>
         /// <param name="unformatted">The string to format.</param>
@@ -563,7 +566,7 @@ namespace Microsoft.Build.Framework
             if ((args?.Length > 0))
             {
 #if DEBUG
-                // If you accidentally pass some random type in that can't be converted to a string, 
+                // If you accidentally pass some random type in that can't be converted to a string,
                 // FormatResourceString calls ToString() which returns the full name of the type!
                 foreach (object param in args)
                 {

@@ -448,6 +448,59 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
+        [Fact]
+        public void QuestionOutOfDateByDeletion()
+        {
+            var folder = _env.CreateFolder();
+            string resxFileInput = Utilities.WriteTestResX(false, null, null, _env.CreateFile(folder, ".resx").Path);
+            TaskItem stateFile = new TaskItem(_env.GetTempFile(".cache").Path);
+            ITaskItem[] sources = new ITaskItem[] { new TaskItem(resxFileInput) };
+            ITaskItem[] output;
+
+            GenerateResource t1 = Utilities.CreateTask(_output);
+            t1.Sources = sources;
+            t1.StateFile = stateFile;
+            Utilities.ExecuteTask(t1);
+
+            Utilities.AssertLogContainsResource(t1, "GenerateResource.OutputDoesntExist", t1.OutputResources[0].ItemSpec);
+
+            output = t1.OutputResources;
+
+            // Run again to ensure all files are up to date.
+            GenerateResource t2 = Utilities.CreateTask(_output);
+            t2.Sources = sources;
+            t2.StateFile = stateFile;
+            t2.FailIfNotIncremental = true;
+            Utilities.ExecuteTask(t2);
+
+            // Delete the file and verify that FailIfNotIncremental will print the missing file
+            GenerateResource t3 = Utilities.CreateTask(_output);
+            t3.StateFile = stateFile;
+            t3.Sources = sources;
+            t3.FailIfNotIncremental = true;
+
+            // Delete the output
+            File.Delete(output[0].ItemSpec);
+
+            t3.Execute().ShouldBeFalse();
+
+            Utilities.AssertLogContainsResource(t3, "GenerateResource.ProcessingFile", sources[0].ItemSpec, output[0].ItemSpec);
+
+            GenerateResource t4 = Utilities.CreateTask(_output);
+            t4.Sources = sources;
+            t4.StateFile = stateFile;
+            Utilities.ExecuteTask(t4);
+
+            Utilities.AssertLogContainsResource(t4, "GenerateResource.OutputDoesntExist", t4.OutputResources[0].ItemSpec);
+
+            // Run again to ensure all files are up to date.
+            GenerateResource t5 = Utilities.CreateTask(_output);
+            t5.Sources = sources;
+            t5.StateFile = stateFile;
+            t5.FailIfNotIncremental = true;
+            Utilities.ExecuteTask(t5);
+        }
+
         [Theory]
         [InlineData(false, false)]
         [InlineData(false, true)]

@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Will provide location information for an event, this is especially 
+    /// Will provide location information for an event, this is especially
     /// needed in a multi processor environment
     /// </summary>
     [Serializable]
@@ -15,7 +15,7 @@ namespace Microsoft.Build.Framework
         #region Data
 
         /// <summary>
-        /// Node event was in 
+        /// Node event was in
         /// </summary>
         private readonly int _nodeId;
 
@@ -115,6 +115,16 @@ namespace Microsoft.Build.Framework
         }
 
         #endregion
+        internal BuildEventContext WithInstanceIdAndContextId(int projectInstanceId, int projectContextId)
+        {
+            return new BuildEventContext(_submissionId, _nodeId, _evaluationId, projectInstanceId, projectContextId,
+                _targetId, _taskId);
+        }
+
+        internal BuildEventContext WithInstanceIdAndContextId(BuildEventContext other)
+        {
+            return WithInstanceIdAndContextId(other.ProjectInstanceId, other.ProjectContextId);
+        }
 
         #region Properties
 
@@ -219,9 +229,9 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Compare a BuildEventContext with this BuildEventContext. 
+        /// Compare a BuildEventContext with this BuildEventContext.
         /// A build event context is compared in the following way.
-        /// 
+        ///
         /// 1. If the object references are the same the contexts are equivalent
         /// 2. If the object type is the same and the Id values in the context are the same, the contexts are equivalent
         /// </summary>

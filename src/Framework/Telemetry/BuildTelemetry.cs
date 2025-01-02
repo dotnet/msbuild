@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Microsoft.Build.Framework.Telemetry
@@ -74,6 +75,16 @@ namespace Microsoft.Build.Framework.Telemetry
         public string? Host { get; set; }
 
         /// <summary>
+        /// True if buildcheck was used.
+        /// </summary>
+        public bool? BuildCheckEnabled { get; set; }
+
+        /// <summary>
+        /// True if Smart Application Control was enabled.
+        /// </summary>
+        public bool? SACEnabled { get; set; }
+
+        /// <summary>
         /// State of MSBuild server process before this build.
         /// One of 'cold', 'hot', null (if not run as server)
         /// </summary>
@@ -84,62 +95,77 @@ namespace Microsoft.Build.Framework.Telemetry
         /// </summary>
         public string? FrameworkName { get; set; }
 
-        public override void UpdateEventProperties()
+        public override IDictionary<string, string> GetProperties()
         {
+            var properties = new Dictionary<string, string>();
+
+            // populate property values
             if (DisplayVersion != null)
             {
-                Properties["BuildEngineDisplayVersion"] = DisplayVersion;
+                properties["BuildEngineDisplayVersion"] = DisplayVersion;
             }
 
             if (StartAt.HasValue && FinishedAt.HasValue)
             {
-                Properties["BuildDurationInMilliseconds"] = (FinishedAt.Value - StartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+                properties["BuildDurationInMilliseconds"] = (FinishedAt.Value - StartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
             }
 
             if (InnerStartAt.HasValue && FinishedAt.HasValue)
             {
-                Properties["InnerBuildDurationInMilliseconds"] = (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+                properties["InnerBuildDurationInMilliseconds"] = (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
             }
 
             if (FrameworkName != null)
             {
-                Properties["BuildEngineFrameworkName"] = FrameworkName;
+                properties["BuildEngineFrameworkName"] = FrameworkName;
             }
 
             if (Host != null)
             {
-                Properties["BuildEngineHost"] = Host;
+                properties["BuildEngineHost"] = Host;
             }
 
             if (InitialServerState != null)
             {
-                Properties["InitialMSBuildServerState"] = InitialServerState;
+                properties["InitialMSBuildServerState"] = InitialServerState;
             }
 
             if (Project != null)
             {
-                Properties["ProjectPath"] = Project;
+                properties["ProjectPath"] = Project;
             }
 
             if (ServerFallbackReason != null)
             {
-                Properties["ServerFallbackReason"] = ServerFallbackReason;
+                properties["ServerFallbackReason"] = ServerFallbackReason;
             }
 
             if (Success.HasValue)
             {
-                Properties["BuildSuccess"] = Success.HasValue.ToString(CultureInfo.InvariantCulture);
+                properties["BuildSuccess"] = Success.HasValue.ToString(CultureInfo.InvariantCulture);
             }
 
             if (Target != null)
             {
-                Properties["BuildTarget"] = Target;
+                properties["BuildTarget"] = Target;
             }
 
             if (Version != null)
             {
-                Properties["BuildEngineVersion"] = Version.ToString();
+                properties["BuildEngineVersion"] = Version.ToString();
             }
+
+            if (BuildCheckEnabled != null)
+            {
+                properties["BuildCheckEnabled"] = BuildCheckEnabled.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (SACEnabled != null)
+            {
+                properties["SACEnabled"] = SACEnabled.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
+            return properties;
         }
     }
 }

@@ -31,7 +31,7 @@ namespace Microsoft.Build.Construction
         internal ProjectMetadataElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement project)
             : base(xmlElement, parent, project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the unevaluated value. 
+        /// Gets or sets the unevaluated value.
         /// Returns empty string if it is not present.
         /// </summary>
         public string Value
@@ -89,7 +89,7 @@ namespace Microsoft.Build.Construction
                     return;
                 }
 
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(Value));
+                ErrorUtilities.VerifyThrowArgumentNull(value);
                 Internal.Utilities.SetXmlNodeInnerContents(XmlElement, value);
                 Parent?.UpdateElementValue(this);
                 MarkDirty("Set metadata Value {0}", value);
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ChangeName(string newName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newName, nameof(newName));
+            ErrorUtilities.VerifyThrowArgumentLength(newName);
             XmlUtilities.VerifyThrowArgumentValidElementName(newName);
             ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newName), "CannotModifyReservedItemMetadata", newName);
 
@@ -134,11 +134,14 @@ namespace Microsoft.Build.Construction
                 ValidateValidMetadataAsAttributeName(newName, Parent.ElementName, Parent.Location);
             }
 
+            string oldName = XmlElement.Name;
+
             // Because the element was created from our special XmlDocument, we know it's
             // an XmlElementWithLocation.
             XmlElementWithLocation newElement = XmlUtilities.RenameXmlElement(XmlElement, newName, XmlElement.NamespaceURI);
 
             ReplaceElement(newElement);
+            Parent.UpdateElementName(this, oldName);
         }
 
         internal static void ValidateValidMetadataAsAttributeName(string name, string parentName, IElementLocation parentLocation)

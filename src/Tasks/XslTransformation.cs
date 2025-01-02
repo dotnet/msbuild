@@ -292,7 +292,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     XmlMode = XmlModes.Xml;
-                    _data = new[] { xml };
+                    _data = [xml];
                 }
             }
 
@@ -350,7 +350,7 @@ namespace Microsoft.Build.Tasks
             private readonly XslModes _xslMode;
 
             /// <summary>
-            /// Contains the raw XSLT 
+            /// Contains the raw XSLT
             /// or the path to XSLT file
             /// or the path to compiled XSLT dll.
             /// </summary>
@@ -451,8 +451,12 @@ namespace Microsoft.Build.Tasks
                 switch (_xslMode)
                 {
                     case XslModes.Xslt:
-                        xslct.Load(XmlReader.Create(new StringReader(_data)), settings, new XmlUrlResolver());
-                        break;
+                        {
+                            using var sr = new StringReader(_data);
+                            using var xmlReader = XmlReader.Create(sr);
+                            xslct.Load(xmlReader, settings, new XmlUrlResolver());
+                            break;
+                        }
                     case XslModes.XsltFile:
                         if (useTrustedSettings)
                         {

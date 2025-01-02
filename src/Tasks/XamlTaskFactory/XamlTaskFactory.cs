@@ -84,8 +84,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskName, nameof(taskName));
-            ErrorUtilities.VerifyThrowArgumentNull(taskParameters, nameof(taskParameters));
+            ErrorUtilities.VerifyThrowArgumentNull(taskName);
+            ErrorUtilities.VerifyThrowArgumentNull(taskParameters);
 
             var log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
             {
@@ -115,23 +115,22 @@ namespace Microsoft.Build.Tasks
             // MSBuildToolsDirectoryRoot is the canonical location for MSBuild dll's.
             string pathToMSBuildBinaries = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
-            // create the code generator options    
+            // create the code generator options
             // Since we are running msbuild 12.0 these had better load.
             var compilerParameters = new CompilerParameters(
-                new[]
-                {
+                [
                     "System.dll",
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Framework.dll"),
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Utilities.Core.dll"),
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll")
-                })
+                ])
             {
                 GenerateInMemory = true,
                 TreatWarningsAsErrors = false
             };
 
             // create the code provider
-            var codegenerator = CodeDomProvider.CreateProvider("cs");
+            using var codegenerator = CodeDomProvider.CreateProvider("cs");
             CompilerResults results;
             bool debugXamlTask = Environment.GetEnvironmentVariable("MSBUILDWRITEXAMLTASK") == "1";
             if (debugXamlTask)
@@ -211,7 +210,7 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
+            ErrorUtilities.VerifyThrowArgumentNull(task);
         }
 
         /// <summary>

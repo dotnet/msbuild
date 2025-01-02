@@ -553,17 +553,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 {
                     // The version of System.Xml.dll in C:\MyProject is an older version.
                     // This version is not a match. When want the current version which should have been in a different directory.
-                    Assert.True(false, "Wrong version of System.Xml.dll matched--version was wrong");
+                    Assert.Fail("Wrong version of System.Xml.dll matched--version was wrong");
                 }
                 else if (String.Equals(item.ItemSpec, Path.Combine(s_myProjectPath, "System.Data.dll"), StringComparison.OrdinalIgnoreCase))
                 {
                     // The version of System.Data.dll in C:\MyProject has an incorrect PKT
                     // This version is not a match.
-                    Assert.True(false, "Wrong version of System.Data.dll matched--public key token was wrong");
+                    Assert.Fail("Wrong version of System.Data.dll matched--public key token was wrong");
                 }
                 else
                 {
-                    Assert.True(false, String.Format("A new resolved file called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
+                    Assert.Fail(String.Format("A new resolved file called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
                 }
             }
 
@@ -593,14 +593,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
                 else
                 {
-                    Assert.True(false, String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
+                    Assert.Fail(String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
                 }
             }
 
             // Process the related files.
             foreach (ITaskItem item in t.RelatedFiles)
             {
-                Assert.True(false, String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
+                Assert.Fail(String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
             }
 
             // Process the satellites.
@@ -622,7 +622,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
                 else
                 {
-                    Assert.True(false, String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
+                    Assert.Fail(String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
                 }
             }
 
@@ -786,7 +786,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                     if (j == assembliesCount)
                     {
-                        Assert.True(false, String.Format("{0}: A new resolved file called '{1}' was found. If this is intentional, then add unittests above.", fxVersion, item.ItemSpec));
+                        Assert.Fail(String.Format("{0}: A new resolved file called '{1}' was found. If this is intentional, then add unittests above.", fxVersion, item.ItemSpec));
                     }
                 }
 
@@ -3237,7 +3237,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ParentAssemblyResolvedFromAForGac()
         {
-            var parentReferenceFolders = new List<string>();
+            var parentReferenceFolders = new List<DirectoryWithParentAssembly>();
             var referenceList = new List<Reference>();
 
             var taskItem = new TaskItem("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
@@ -3266,7 +3266,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             Assert.Single(parentReferenceFolders);
-            Assert.Equal(reference2.ResolvedSearchPath, parentReferenceFolders[0]);
+            Assert.Equal(reference2.ResolvedSearchPath, parentReferenceFolders[0].Directory);
         }
 
         /// <summary>
@@ -4888,37 +4888,28 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress314573_VeryLongPaths()
         {
-            string veryLongPath = @"C:\" + new String('a', 260);
-            string veryLongFile = veryLongPath + "\\A.dll";
+            string veryLongPath = @"C:\" + new string('a', 260);
+            string veryLongFile = veryLongPath + @"\A.dll";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine(_output);
+            MockEngine e = new (_output);
             t.BuildEngine = e;
 
-            t.Assemblies = new ITaskItem[]
-            {
-                new TaskItem("A")                    // Resolved by HintPath
-            };
+            t.Assemblies = [new TaskItem("A")]; // Resolved by HintPath
             t.Assemblies[0].SetMetadata(
                 "HintPath",
                 veryLongFile);
 
-            t.SearchPaths = new string[]
-            {
-                "{HintPathFromItem}"
-            };
+            t.SearchPaths = ["{HintPathFromItem}"];
 
-            t.AssemblyFiles = new ITaskItem[]
-            {
-                new TaskItem(veryLongFile)            // Resolved as File Reference
-            };
+            t.AssemblyFiles = [new TaskItem(veryLongFile)]; // Resolved as File Reference
 
-            Execute(t);
-
-            Assert.Equal(1, e.Warnings); // "One warning expected in this scenario." // Couldn't find dependencies for {HintPathFromItem}-resolved item.
-            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Empty(t.ResolvedFiles);  // This test used to have 1 here. But that was because the mock GetAssemblyName was not accurately throwing an exception for non-existent files.
+            e.ShouldSatisfyAllConditions(
+                () => Execute(t).ShouldBeTrue(),
+                () => e.Warnings.ShouldBe(1, "One warning expected in this scenario."), // Couldn't find dependencies for {HintPathFromItem}-resolved item.
+                () => e.Errors.ShouldBe(0, "No errors expected in this scenario."),
+                () => t.ResolvedFiles.ShouldBeEmpty());
         }
 
         /// <summary>
@@ -8621,6 +8612,29 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // The reference is not worth persisting in the per-instance cache.
             rar._cache.IsDirty.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void LogsParentAssemblyForEveryConsideredAndRejectedSearchPath()
+        {
+            InitializeRARwithMockEngine(_output, out MockEngine mockEngine, out ResolveAssemblyReference rar);
+
+            rar.Assemblies = new ITaskItem[]
+            {
+                new TaskItem(@"C:\DirectoryTest\A.dll"),
+                new TaskItem("B"),
+            };
+
+            rar.SearchPaths = new string[]
+            {
+                "{RawFileName}",
+            };
+
+            Execute(rar).ShouldBeTrue();
+
+            mockEngine.AssertLogContains(rar.Log.FormatResourceString("ResolveAssemblyReference.SearchPathAddedByParentAssembly",
+                @"C:\DirectoryTest",
+                @"C:\DirectoryTest\A.dll"));
         }
 
         [Fact]

@@ -214,6 +214,13 @@ elementFormDefault="qualified">
                   </xs:documentation>
                 </xs:annotation>
               </xs:element>
+              <xs:element name="VersionOverride">
+                <xs:annotation>
+                  <xs:documentation>
+                    <!-- _locID_text="PackageReference_VersionOverride" _locComment="" -->When using Central Package Management (CPM), overrides the centrally defined version for this package.  If the project is not using CPM, this element has no effect.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
             </xs:choice>
           </xs:sequence>
           <xs:attribute name="Include" type="xs:string">
@@ -262,6 +269,13 @@ elementFormDefault="qualified">
             <xs:annotation>
               <xs:documentation>
                 <!-- _locID_text="PackageReference_Attribute_GeneratePathProperty" _locComment="" -->Set to true to generate a Pkg* property that points to the restored location of the NuGet package contents
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="VersionOverride" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="PackageReference_Attribute_VersionOverride" _locComment="" -->When using Central Package Management (CPM), overrides the centrally defined version for this package.  If the project is not using CPM, this attribute has no effect.
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
@@ -754,6 +768,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -773,6 +788,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -822,6 +838,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -841,6 +858,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -892,6 +910,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -904,6 +923,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -922,6 +942,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -962,6 +983,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -980,6 +1002,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -1020,6 +1043,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -1038,6 +1062,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -1078,6 +1103,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -1090,6 +1116,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -1130,6 +1157,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -1146,7 +1174,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="Folder" type="msb:SimpleItemType" substitutionGroup="msb:Item">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="Folder" _locComment="" -->Folder on disk</xs:documentation>
+            <xs:documentation><!-- _locID_text="Folder" _locComment="" -->Used by Visual Studio to identify an empty folder.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="Import" type="msb:SimpleItemType" substitutionGroup="msb:Item">
@@ -1849,14 +1877,15 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="IsAotCompatible" _locComment="" -->Indicates whether a class library is compatible with native AOT. Setting to true will enable analyzers for trimming, single file, and AOT.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="IsWebBootstrapper" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="IsWebBootstrapper" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="JCPA" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="Keyword" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="LangVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="VBRuntime" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="Prefer32Bit" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="HighEntropyVA" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="LinkIncremental" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="Prefer32Bit" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="PreferNativeArm64" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="HighEntropyVA" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="LinkIncremental" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestCertificateThumbprint" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestKeyFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="MapFileExtensions" type="msb:boolean" substitutionGroup="msb:Property">
@@ -1946,6 +1975,16 @@ elementFormDefault="qualified">
     <xs:element name="OutputType" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OutputType" _locComment="" -->Type of output to generate (WinExe, Exe, or Library)</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="UseArtifactsOutput" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UseArtifactsOutput" _locComment="" -->Use a centralized location for all outputs of this project. The location of the centralized outputs is set by the ArtifactsPath property. Project outputs are grouped by kind, then by project. See https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output for complete details.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ArtifactsPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="ArtifactsPath" _locComment="" -->The path to use for the centralized outputs - if set, UseArtifactsOutput will be defaulted to true. Project outputs will be placed under this path grouped by kind, then by project. See https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output for complete details.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="PackageOutputPath" substitutionGroup="msb:Property">
@@ -2050,12 +2089,12 @@ elementFormDefault="qualified">
     <xs:element name="RootNamespace" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="RuntimeIdentifier" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="RuntimeIdentifier" _locComment="" -->Runtime identifier supported by the project (e.g. win10-x64)</xs:documentation>
+        <xs:documentation><!-- _locID_text="RuntimeIdentifier" _locComment="" -->Runtime identifier supported by the project (e.g. win-x64)</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="RuntimeIdentifiers" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="RuntimeIdentifiers" _locComment="" -->Semi-colon separated list of runtime identifiers supported by the project (e.g. win10-x64;osx.10.11-x64;ubuntu.16.04-x64)</xs:documentation>
+        <xs:documentation><!-- _locID_text="RuntimeIdentifiers" _locComment="" -->Semi-colon separated list of runtime identifiers supported by the project (e.g. win-x64;osx-x64;linux-x64)</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="SccProjectName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -2099,12 +2138,12 @@ elementFormDefault="qualified">
     <xs:element name="TargetCulture" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetFramework" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TargetFramework" _locComment="" -->Framework that this project targets. Must be a Target Framework Moniker (e.g. netcoreapp1.0)</xs:documentation>
+        <xs:documentation><!-- _locID_text="TargetFramework" _locComment="" -->Framework that this project targets. Must be a Target Framework Moniker (e.g. net8.0)</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="TargetFrameworks" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TargetFrameworks" _locComment="" -->Semi-colon separated list of frameworks that this project targets. Must be a Target Framework Moniker (e.g. netcoreapp1.0;net461)</xs:documentation>
+        <xs:documentation><!-- _locID_text="TargetFrameworks" _locComment="" -->Semi-colon separated list of frameworks that this project targets. Must be a Target Framework Moniker (e.g. net8.0;net461)</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="TargetFrameworkVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -2160,7 +2199,7 @@ elementFormDefault="qualified">
     <xs:element name="UseWindowsForms" type="msb:boolean" substitutionGroup="msb:Property" />
     <xs:element name="UseWPF" type="msb:boolean" substitutionGroup="msb:Property" />
     <xs:element name="UseVSHostingProcess" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="UTF8OutPut" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="UTF8Output" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="VCTargetsPath" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="VSTO_TrustAssembliesLocation" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="WarningLevel" type="msb:StringPropertyType" substitutionGroup="msb:Property">

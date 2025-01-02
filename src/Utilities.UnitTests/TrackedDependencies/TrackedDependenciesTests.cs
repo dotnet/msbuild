@@ -75,9 +75,9 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         }
 
         /// <summary>
-        /// Tests DependencyTableCache.FormatNormalizedTlogRootingMarker, which should do effectively the same 
+        /// Tests DependencyTableCache.FormatNormalizedTlogRootingMarker, which should do effectively the same
         /// thing as FileTracker.FormatRootingMarker, except with some extra initial normalization to get rid of
-        /// pesky PIDs and TIDs in the tlog names. 
+        /// pesky PIDs and TIDs in the tlog names.
         /// </summary>
         [Fact]
         public void FormatNormalizedRootingMarkerTests()
@@ -2076,7 +2076,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                                     new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "eight.cpp"))),
                                     new TaskItem(Path.GetFullPath(Path.Combine("TestFiles", "three.cpp"))) };
 
-            // Do note sources2Match and source2 is missing three.cpp.  It is to test if the RootContainsAllSubRootComponents can handle the case. 
+            // Do note sources2Match and source2 is missing three.cpp.  It is to test if the RootContainsAllSubRootComponents can handle the case.
 
             // Prepare files
             Thread.Sleep(_sleepTimeMilliseconds); // need to wait since the timestamp check needs some time to register
@@ -3431,7 +3431,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
         {
             Console.WriteLine("Test: FlatTrackingExcludeDirectories");
 
-            // Prepare files 
+            // Prepare files
             if (!Directory.Exists(Path.Combine("TestFiles", "ToBeExcluded")))
             {
                 Directory.CreateDirectory(Path.Combine("TestFiles", "ToBeExcluded"));

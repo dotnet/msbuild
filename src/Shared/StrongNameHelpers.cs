@@ -45,11 +45,10 @@ namespace Microsoft.Runtime.Hosting
                     if (s_GetRuntimeInterfaceAsObjectMethod != null)
                     {
                         s_StrongName = (IClrStrongName)s_GetRuntimeInterfaceAsObjectMethod.Invoke(null,
-                            new object[]
-                            {
+                            [
                                 new Guid("B79B0ACD-F5CD-409b-B5A5-A16244610B92"),
                                 new Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")
-                            });
+                            ]);
                     }
                 }
                 return s_StrongName;
@@ -521,12 +520,12 @@ namespace Microsoft.Runtime.Hosting
 
     /// <summary>
     /// This is a managed wrapper for the IClrStrongName interface defined in metahost.idl
-    /// This is very similar to the standard RCWs provided in 
+    /// This is very similar to the standard RCWs provided in
     /// ndp/fx/src/hosting/interop/microsoft/runtime/hosting/interop, but we don't want to
     /// reference that assembly (part of the SDK only, not .NET redist).  Also, our version
     /// is designed specifically for easy migration from the old mscoree APIs, for example
     /// all APIs return HResults rather than throw exceptions.
-    /// </summary> 
+    /// </summary>
     [System.Security.SecurityCritical]
     [ComImport]
     [ComConversionLoss]

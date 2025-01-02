@@ -634,8 +634,8 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Returns true if the character at the specified index 
-        /// is the specified char. 
+        /// Returns true if the character at the specified index
+        /// is the specified char.
         /// Leaves index one past the character.
         /// </summary>
         private static bool Sink(string expression, ref int i, char c)

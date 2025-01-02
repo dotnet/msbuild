@@ -73,7 +73,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="config">The configuration to add.</param>
         public void AddConfiguration(BuildRequestConfiguration config)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
+            ErrorUtilities.VerifyThrowArgumentNull(config);
             ErrorUtilities.VerifyThrow(config.ConfigurationId != 0, "Invalid configuration ID");
 
             lock (_lockObject)
@@ -107,7 +107,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A matching configuration if one exists, null otherwise.</returns>
         public BuildRequestConfiguration GetMatchingConfiguration(BuildRequestConfiguration config)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
+            ErrorUtilities.VerifyThrowArgumentNull(config);
             return GetMatchingConfiguration(new ConfigurationMetadata(config));
         }
 
@@ -118,7 +118,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A matching configuration if one exists, null otherwise.</returns>
         public BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(configMetadata, nameof(configMetadata));
+            ErrorUtilities.VerifyThrowArgumentNull(configMetadata);
             lock (_lockObject)
             {
                 if (!_configurationIdsByMetadata.TryGetValue(configMetadata, out int configId))
@@ -148,7 +148,7 @@ namespace Microsoft.Build.BackEnd
                 else if (loadProject)
                 {
                     // We already had a configuration, load the project
-                    // If it exists but it cached, retrieve it 
+                    // If it exists but it cached, retrieve it
                     if (configuration.IsCached)
                     {
                         configuration.RetrieveFromCache();
@@ -341,7 +341,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The build component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
         }
 
         /// <summary>

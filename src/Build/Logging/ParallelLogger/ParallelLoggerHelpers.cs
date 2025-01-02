@@ -146,7 +146,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // or the event is raised before the project started event
             if (startedEvent == null)
             {
-                return Array.Empty<string>();
+                return [];
             }
 
             List<ProjectStartedEventMinimumFields> projectStackTrace = GetProjectCallStack(e);
@@ -272,7 +272,7 @@ namespace Microsoft.Build.BackEnd.Logging
     }
 
     /// <summary>
-    /// This class stands in for a full project started event because it contains only the 
+    /// This class stands in for a full project started event because it contains only the
     /// minimum amount of inforomation needed for the logger
     /// </summary>
     internal class ProjectStartedEventMinimumFields
@@ -410,7 +410,7 @@ namespace Microsoft.Build.BackEnd.Logging
     }
 
     /// <summary>
-    /// This class stands in for a full target started event because it contains only the 
+    /// This class stands in for a full target started event because it contains only the
     /// minimum amount of inforomation needed for the logger
     /// </summary>
     internal class TargetStartedEventMinimumFields
@@ -530,7 +530,7 @@ namespace Microsoft.Build.BackEnd.Logging
     }
 
     /// <summary>
-    /// This class is used as a key to group warnings and errors by the project entry point and the target they 
+    /// This class is used as a key to group warnings and errors by the project entry point and the target they
     /// error or warning was in
     /// </summary>
     internal class ErrorWarningSummaryDictionaryKey

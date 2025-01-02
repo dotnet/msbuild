@@ -29,9 +29,14 @@ namespace Microsoft.Build.Execution
         private string _name;
 
         /// <summary>
-        /// Evaluated value: stored escaped. 
+        /// Evaluated value: stored escaped.
         /// </summary>
         private string _escapedValue;
+
+        /// <summary>
+        /// Property location in xml file. Can be empty.
+        /// </summary>
+        private (string File, int Line, int Column) _location;
 
         /// <summary>
         /// Private constructor
@@ -46,7 +51,7 @@ namespace Microsoft.Build.Execution
         /// Name of the property
         /// </summary>
         /// <remarks>
-        /// This cannot be set, as it is used as the key into 
+        /// This cannot be set, as it is used as the key into
         /// the project's properties table.
         /// </remarks>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -69,7 +74,7 @@ namespace Microsoft.Build.Execution
             set
             {
                 ProjectInstance.VerifyThrowNotImmutable(IsImmutable);
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(value));
+                ErrorUtilities.VerifyThrowArgumentNull(value);
                 _escapedValue = EscapingUtilities.Escape(value);
             }
         }
@@ -79,6 +84,11 @@ namespace Microsoft.Build.Execution
         /// An immutable object can not be made mutable.
         /// </summary>
         public virtual bool IsImmutable => false;
+
+        /// <summary>
+        /// Gets or sets object's location in xml file.
+        /// </summary>
+        public (string File, int Line, int Column) Location { get => _location; }
 
         /// <summary>
         /// Evaluated value of the property, escaped as necessary.
@@ -91,7 +101,7 @@ namespace Microsoft.Build.Execution
             {
                 if (this is EnvironmentDerivedProjectPropertyInstance envProperty && envProperty.loggingContext?.IsValid == true && !envProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
                 {
-                    EnvironmentVariableReadEventArgs args = new(Name, _escapedValue);
+                    EnvironmentVariableReadEventArgs args = new(Name, _escapedValue, string.Empty, 0, 0);
                     args.BuildEventContext = envProperty.loggingContext.BuildEventContext;
                     envProperty.loggingContext.LogBuildEvent(args);
                     envProperty._loggedEnvProperty = true;
@@ -100,8 +110,25 @@ namespace Microsoft.Build.Execution
                 return _escapedValue;
             }
         }
+
+        string IProperty.GetEvaluatedValueEscaped(IElementLocation location)
+        {
+            if (this is EnvironmentDerivedProjectPropertyInstance envProperty && envProperty.loggingContext?.IsValid == true && !envProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
+            {
+                EnvironmentVariableReadEventArgs args = new(Name, _escapedValue, location.File, location.Line, location.Column);
+                args.BuildEventContext = envProperty.loggingContext.BuildEventContext;
+                envProperty.loggingContext.LogBuildEvent(args);
+                envProperty._loggedEnvProperty = true;
+            }
+
+            // the location is handy in BuildCheck messages.
+            _location = (location.File, location.Line, location.Column);
+
+            return _escapedValue;
+        }
+
         /// <summary>
-        /// Implementation of IKeyed exposing the property name
+        /// Implementation of IKeyed exposing the property name.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         string IKeyed.Key => Name;
@@ -163,7 +190,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Called before the build when virtual properties are added, 
+        /// Called before the build when virtual properties are added,
         /// and during the build when tasks emit properties.
         /// If name is invalid or reserved, throws ArgumentException.
         /// Creates mutable object.
@@ -177,7 +204,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Called before the build when virtual properties are added, 
+        /// Called before the build when virtual properties are added,
         /// and during the build when tasks emit properties.
         /// If name is invalid or reserved, throws ArgumentException.
         /// Creates mutable object.
@@ -295,7 +322,7 @@ namespace Microsoft.Build.Execution
         private static ProjectPropertyInstance Create(string name, string escapedValue, bool mayBeReserved, ElementLocation location, bool isImmutable, bool isEnvironmentProperty = false, LoggingContext loggingContext = null)
         {
             // Does not check immutability as this is only called during build (which is already protected) or evaluation
-            ErrorUtilities.VerifyThrowArgumentNull(escapedValue, nameof(escapedValue));
+            ErrorUtilities.VerifyThrowArgumentNull(escapedValue);
             if (location == null)
             {
                 ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(name), "OM_ReservedName", name);

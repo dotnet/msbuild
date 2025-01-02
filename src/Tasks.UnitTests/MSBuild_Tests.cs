@@ -39,15 +39,12 @@ namespace Microsoft.Build.UnitTests
         /// throw a path too long exception
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4247")]
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
             try
             {
                 Directory.SetCurrentDirectory(Path.GetTempPath());
-
-                string tempPath = Path.GetTempPath();
 
                 string tempProject = ObjectModelHelpers.CreateTempFileOnDisk(@"
                 <Project DefaultTargets=`TargetA; TargetB; TargetC` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -70,10 +67,10 @@ namespace Microsoft.Build.UnitTests
                     projectFile1 += "..\\";
                 }
 
-                int rootLength = Path.GetPathRoot(tempPath).Length;
-                string tempPathNoRoot = tempPath.Substring(rootLength);
+                int rootLength = Path.GetPathRoot(tempProject).Length;
+                string tempPathNoRoot = tempProject.Substring(rootLength);
 
-                projectFile1 += Path.Combine(tempPathNoRoot, fileName);
+                projectFile1 += tempPathNoRoot;
                 try
                 {
                     MSBuild msbuildTask = new MSBuild
@@ -498,7 +495,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -556,7 +553,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -612,7 +609,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -667,7 +664,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -716,7 +713,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyPropG)'=='1'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyPropA)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -771,7 +768,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyPropG)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyPropA)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -829,7 +826,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyPropG)'=='1'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyPropA)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -1375,7 +1372,7 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             string projectFile2 = ObjectModelHelpers.CreateTempFileOnDisk(@"
-                <Project DefaultTargets=`t` xmlns=`msbuildnamespace` ToolsVersion=`msbuilddefaulttoolsversion`>                  
+                <Project DefaultTargets=`t` xmlns=`msbuildnamespace` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Target Name=`t`>
                         <MSBuild Projects=`" + projectFile1 + @"` Targets=`BUILD`>
                             <Output TaskParameter=`TargetOutputs` ItemName=`out`/>
@@ -1468,7 +1465,7 @@ namespace Microsoft.Build.UnitTests
                 <Project>
                     <Target Name=`Build`>
                         <MSBuild Projects=`" + projectFile1 + @"` Targets=`Build` />
-                    </Target>	
+                    </Target>
                 </Project>");
 
             try

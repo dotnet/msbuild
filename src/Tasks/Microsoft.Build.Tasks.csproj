@@ -11,7 +11,9 @@
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_TASKS</DefineConstants>
-    <CreateTlb>true</CreateTlb>
+    <!-- Do not create Tlbs when building in .NET product mode. The packages are not shipped to VS,
+         only their contents redisted within the SDK. -->
+    <CreateTlb Condition="'$(DotNetBuild)' != 'true'">true</CreateTlb>
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which implements the commonly used tasks of MSBuild.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
@@ -62,6 +64,7 @@
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>CanonicalError.cs</Link>
     </Compile>
+    <Compile Include="AssemblyDependency\AssemblyAttributes.cs" />
     <Compile Include="AssemblyDependency\AssemblyMetadata.cs" />
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
@@ -107,6 +110,9 @@
     </Compile>
     <Compile Include="..\Shared\FileUtilities.cs">
       <Link>FileUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\StringUtils.cs">
+      <Link>StringUtils.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>EscapingUtilities.cs</Link>
@@ -223,12 +229,12 @@
     <Compile Include="FileIO\ReadLinesFromFile.cs" />
     <Compile Include="FileIO\WriteLinesToFile.cs" />
     <Compile Include="FindInList.cs" />
-    <Compile Include="FormatUrl.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="FormatUrl.cs" />
     <Compile Include="FormatVersion.cs" />
-    <Compile Include="GenerateApplicationManifest.cs" Condition="'$(MonoBuild)' != 'true'" />
-    <Compile Include="GenerateDeploymentManifest.cs" Condition="'$(MonoBuild)' != 'true'" />
-    <Compile Include="GenerateLauncher.cs" Condition="'$(MonoBuild)' != 'true'" />
-    <Compile Include="GenerateManifestBase.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="GenerateApplicationManifest.cs" />
+    <Compile Include="GenerateDeploymentManifest.cs" />
+    <Compile Include="GenerateLauncher.cs" />
+    <Compile Include="GenerateManifestBase.cs" />
     <Compile Include="GenerateResource.cs" />
     <Compile Include="GetAssemblyIdentity.cs" />
     <Compile Include="GetInstalledSDKLocations.cs" />
@@ -245,23 +251,24 @@
     <Compile Include="IVbcHostObject5.cs" />
     <Compile Include="IVbcHostObjectFreeThreaded.cs" />
     <Compile Include="InvalidParameterValueException.cs" />
-    <Compile Include="LC.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="LC.cs" />
     <Compile Include="ListOperators\FindUnderPath.cs" />
     <Compile Include="ListOperators\RemoveDuplicates.cs" />
-    <Compile Include="LockCheck.cs" />
     <Compile Include="MakeDir.cs" />
-    <Compile Include="ManifestUtil\*.cs" Exclude="ManifestUtil\CngLightup.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="ManifestUtil\*.cs" Exclude="ManifestUtil\CngLightup.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="Move.cs" />
     <Compile Include="MSBuild.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="MSBuildInternalMessage.cs" />
     <Compile Include="ParserState.cs" />
+    <Compile Include="AddToWin32Manifest.cs" />
     <Compile Include="RedistList.cs" />
     <Compile Include="RemoveDir.cs" />
     <Compile Include="ResGenDependencies.cs" />
     <Compile Include="ResolveCodeAnalysisRuleSet.cs" />
     <Compile Include="ResolveKeySource.cs" />
-    <Compile Include="ResolveManifestFiles.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="ResolveManifestFiles.cs" />
     <Compile Include="ResolveNonMSBuildProjectOutput.cs" />
     <Compile Include="ResolveProjectBase.cs" />
     <Compile Include="ResolveSDKReference.cs" />
@@ -271,8 +278,8 @@
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryCompilers.cs" />
     <Compile Include="RoslynCodeTaskFactory\RoslynCodeTaskFactoryTaskInfo.cs" />
     <Compile Include="SdkToolsPathUtility.cs" />
-    <Compile Include="SGen.cs" Condition="'$(MonoBuild)' != 'true'" />
-    <Compile Include="SignFile.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="SGen.cs" />
+    <Compile Include="SignFile.cs" />
     <Compile Include="System.Design.cs" />
     <Compile Include="system.design\stronglytypedresourcebuilder.cs" />
     <Compile Include="TaskExtension.cs" />
@@ -303,13 +310,13 @@
     <Compile Include="Al.cs" />
     <Compile Include="AspNetCompiler.cs" />
     <Compile Include="GenerateBootstrapper.cs" />
-    <Compile Include="GenerateTrustInfo.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="GenerateTrustInfo.cs" />
     <Compile Include="GetFrameworkSDKPath.cs" />
     <Compile Include="RegisterAssembly.cs" />
     <Compile Include="ResolveComReference.cs" />
-    <Compile Include="ResolveNativeReference.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="ResolveNativeReference.cs" />
     <Compile Include="UnregisterAssembly.cs" />
-    <Compile Include="UpdateManifest.cs" Condition="'$(MonoBuild)' != 'true'" />
+    <Compile Include="UpdateManifest.cs" />
     <Compile Include="WinMDExp.cs" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFrameworkIdentifier) == '.NETFramework'">
@@ -321,6 +328,7 @@
     <Compile Include="AxReference.cs" />
     <Compile Include="AxTlbBaseReference.cs" />
     <Compile Include="AxTlbBaseTask.cs" />
+    <Compile Include="GetAssembliesMetadata.cs" />
     <Compile Include="ComDependencyWalker.cs" />
     <Compile Include="ComReference.cs" />
     <Compile Include="ComReferenceInfo.cs" />
@@ -427,13 +435,10 @@
     <Content Include="Microsoft.Common.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <!-- For .NET Core, Microsoft.Common.props needs to be in version subfolder for bootstrap build, but in MSBuild exe
-         path for some tests.  So include it twice. -->
-    <Content Include="Microsoft.Common.props" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Link>Current\Microsoft.Common.props</Link>
-    </Content>
     <Content Include="Microsoft.Common.tasks">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Microsoft.Common.Test.targets">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Microsoft.NET.props">
@@ -477,6 +482,8 @@
       <LogicalName>$(AssemblyName).Strings.ManifestUtilities.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <!-- The manifest is needed when PreferNativeArm64 is enabled in Unix environments. -->
+    <EmbeddedResource Include="Resources\default.win32manifest" />
     <!-- Other Source Files -->
     <EmbeddedResource Include="ManifestUtil\manifest.xml">
       <LogicalName>Microsoft.Build.Tasks.Deployment.ManifestUtilities.manifest.xml</LogicalName>
@@ -648,6 +655,9 @@
     <Reference Include="System.Xaml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\default.win32manifest" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
@@ -670,15 +680,15 @@
   <!-- Tasks need to mimic redistributing the compilers, so add references to both full framework and .net core -->
   <ItemGroup>
     <!-- Reference this package to get binaries at runtime even when Arcade is not adding compiler references -->
-    <PackageReference Include="Microsoft.Net.Compilers.Toolset" ExcludeAssets="all" Condition="'$(UsingToolMicrosoftNetCompilers)' == 'false'" />
+    <PackageDownload Include="Microsoft.Net.Compilers.Toolset" Version="[$(MicrosoftNetCompilersToolsetVersion)]" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildFromSource)' != 'true'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\net472\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
@@ -697,9 +707,6 @@
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\netcore\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(MonoBuild)' == 'true'">
-    <PackageReference Include="System.Reflection.Metadata" />
-  </ItemGroup>
   <ItemGroup>
     <!--
       Content items in this project are used to copy files to the output directory but we don't

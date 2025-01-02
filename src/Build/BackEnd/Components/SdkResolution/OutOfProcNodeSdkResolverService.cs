@@ -20,7 +20,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// sends requests to the main node that SDK resolution is handled in a central location.  This instance is registered in <see cref="Microsoft.Build.Execution.OutOfProcNode"/>
     /// using a factory so that parameters can be passed to the constructor.  This service caches responses for a given build so that it can avoid sending
     /// a packet where possible.  The cache is always in effect here because the out-of-proc node is only used for builds.
-    /// 
+    ///
     /// Since this object is a registered <see cref="IBuildComponent"/>, it is a singleton for the main process.  To get an instance of it, you
     /// must have access to an <see cref="IBuildComponentHost"/> and call <see cref="IBuildComponentHost.GetComponent"/> and pass <see cref="BuildComponentType.SdkResolverService"/>.
     /// </summary>
@@ -47,7 +47,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <param name="sendPacket">A <see cref="Action{INodePacket}"/> to use when sending packets to the main node.</param>
         public OutOfProcNodeSdkResolverService(Action<INodePacket> sendPacket)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sendPacket, nameof(sendPacket));
+            ErrorUtilities.VerifyThrowArgumentNull(sendPacket);
 
             SendPacket = sendPacket;
         }
@@ -126,7 +126,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             SendPacket(packet);
 
             // Wait for either the response or a shutdown event.  Either event means this thread should return
-            WaitHandle.WaitAny(new WaitHandle[] { _responseReceivedEvent, ShutdownEvent });
+            WaitHandle.WaitAny([_responseReceivedEvent, ShutdownEvent]);
 
             // Keep track of the element location of the reference
             _lastResponse.ElementLocation = sdkReferenceLocation;

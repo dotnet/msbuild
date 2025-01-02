@@ -68,7 +68,7 @@ namespace Microsoft.Build.Execution
         private string _taskName;
 
         /// <summary>
-        /// The set of special parameters that, along with the name, contribute to the identity of 
+        /// The set of special parameters that, along with the name, contribute to the identity of
         /// this factory.
         /// </summary>
         private IDictionary<string, string> _factoryIdentityParameters;
@@ -82,8 +82,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal TaskFactoryWrapper(ITaskFactory taskFactory, LoadedType taskFactoryLoadInfo, string taskName, IDictionary<string, string> factoryIdentityParameters)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskFactory, nameof(taskFactory));
-            ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowArgumentNull(taskFactory);
+            ErrorUtilities.VerifyThrowArgumentLength(taskName);
             _taskFactory = taskFactory;
             _taskName = taskName;
             TaskFactoryLoadedType = taskFactoryLoadInfo;
@@ -153,8 +153,8 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// The set of task identity parameters that were set on 
-        /// this particular factory's UsingTask statement. 
+        /// The set of task identity parameters that were set on
+        /// this particular factory's UsingTask statement.
         /// </summary>
         public IDictionary<string, string> FactoryIdentityParameters
         {
@@ -197,8 +197,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void SetPropertyValue(ITask task, TaskPropertyInfo property, object value)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
-            ErrorUtilities.VerifyThrowArgumentNull(property, nameof(property));
+            ErrorUtilities.VerifyThrowArgumentNull(task);
+            ErrorUtilities.VerifyThrowArgumentNull(property);
 
             IGeneratedTask? generatedTask = task as IGeneratedTask;
             if (generatedTask != null)
@@ -217,8 +217,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal object? GetPropertyValue(ITask task, TaskPropertyInfo property)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
-            ErrorUtilities.VerifyThrowArgumentNull(property, nameof(property));
+            ErrorUtilities.VerifyThrowArgumentNull(task);
+            ErrorUtilities.VerifyThrowArgumentNull(property);
 
             IGeneratedTask? generatedTask = task as IGeneratedTask;
             if (generatedTask != null)

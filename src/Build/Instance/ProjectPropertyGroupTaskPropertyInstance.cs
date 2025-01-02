@@ -15,7 +15,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_name}={Value} Condition={_condition}")]
-    public class ProjectPropertyGroupTaskPropertyInstance : ITranslatable
+    public class ProjectPropertyGroupTaskPropertyInstance : ITranslatable, IPropertyElementWithLocation
     {
         /// <summary>
         /// Name of the property
@@ -47,10 +47,10 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectPropertyGroupTaskPropertyInstance(string name, string value, string condition, ElementLocation location, ElementLocation conditionLocation)
         {
-            ErrorUtilities.VerifyThrowInternalNull(name, nameof(name));
-            ErrorUtilities.VerifyThrowInternalNull(value, nameof(value));
-            ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
-            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
+            ErrorUtilities.VerifyThrowInternalNull(name);
+            ErrorUtilities.VerifyThrowInternalNull(value);
+            ErrorUtilities.VerifyThrowInternalNull(condition);
+            ErrorUtilities.VerifyThrowInternalNull(location);
 
             _name = name;
             _value = value;

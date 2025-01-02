@@ -25,7 +25,7 @@ namespace Microsoft.Build.BackEnd
         Schedule,
 
         /// <summary>
-        /// The response indicates that the request should be send to the specified node, 
+        /// The response indicates that the request should be send to the specified node,
         /// along with the configuration for the request.
         /// </summary>
         ScheduleWithConfiguration,

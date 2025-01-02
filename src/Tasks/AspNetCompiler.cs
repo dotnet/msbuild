@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks
             -keycontainer Specifies a strong name key container.
             -aptca        If specified, the strong-name assembly will allow partially
                           trusted callers.
-            -delaysign    If specified, the assemblly is not fully signed when created. 
+            -delaysign    If specified, the assemblly is not fully signed when created.
             -fixednames   If specified, the compiled assemblies will be given fixed names.
             -nologo       Suppress compiler copyright message.
 
@@ -79,7 +79,7 @@ namespace Microsoft.Build.Tasks
         public bool AllowPartiallyTrustedCallers { get; set; }
 
         /// <summary>
-        /// If specified, the assemblly is not fully signed when created. 
+        /// If specified, the assemblly is not fully signed when created.
         /// </summary>
         public bool DelaySign { get; set; }
 
@@ -107,7 +107,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The full IIS metabase path of the application. This switch 
+        /// The full IIS metabase path of the application. This switch
         /// cannot be combined with the virtualPath or PhysicalDir option.
         /// </summary>
         public string MetabasePath
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// The physical path to which the application is compiled. If not
-        /// specified, the application is precompiled in-place. 
+        /// specified, the application is precompiled in-place.
         /// </summary>
         public string TargetPath
         {
@@ -173,8 +173,8 @@ namespace Microsoft.Build.Tasks
         public bool Clean { get; set; }
 
         /// <summary>
-        /// The TargetFrameworkMoniker indicating which .NET Framework version of 
-        /// aspnet_compiler.exe should be used.  Only accepts .NET Framework monikers. 
+        /// The TargetFrameworkMoniker indicating which .NET Framework version of
+        /// aspnet_compiler.exe should be used.  Only accepts .NET Framework monikers.
         /// </summary>
         public string TargetFrameworkMoniker
         {

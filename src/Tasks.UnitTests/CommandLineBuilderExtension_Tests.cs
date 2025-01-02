@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
         /*
         * Method:   AppendItemWithInvalidBooleanAttribute
         *
-        * When appending an ITaskItem[] where some of the flags are 'bool', it's possible that 
+        * When appending an ITaskItem[] where some of the flags are 'bool', it's possible that
         * the boolean flag has a string value that cannot be converted to a boolean. In this
         * case we expect an exception.
         */
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 catch (ArgumentException e)
                 {
-                    Assert.True(false, "Got an unexpected exception:" + e.Message);
+                    Assert.Fail("Got an unexpected exception:" + e.Message);
                 }
 
                 // Now try a bogus boolean.

@@ -113,7 +113,7 @@ namespace Microsoft.Build.Logging
         /// <param name="pruneSmallItems">Whether small items should be pruned. This is called with false on some tests since the result may vary depending on the evaluator speed</param>
         /// <remarks>
         /// Not thread safe. After this method is called, the assumption is that no new ProjectEvaluationFinishedEventArgs will arrive.
-        /// In the regular code path, this method is called only once per build. But some test cases may call it multiple times to validate 
+        /// In the regular code path, this method is called only once per build. But some test cases may call it multiple times to validate
         /// the aggregated data.
         /// </remarks>
         internal ProfilerResult GetAggregatedResult(bool pruneSmallItems = true)
@@ -278,7 +278,7 @@ namespace Microsoft.Build.Logging
         /// Pretty prints the aggregated results and saves it to disk.
         /// </summary>
         /// <remarks>
-        /// If the extension of the file to log is 'md', markdown content is generated. Otherwise, it falls 
+        /// If the extension of the file to log is 'md', markdown content is generated. Otherwise, it falls
         /// back to a tab separated format.
         /// </remarks>
         private void GenerateProfilerReport()
@@ -297,19 +297,12 @@ namespace Microsoft.Build.Logging
 
                 Console.WriteLine(ResourceUtilities.GetResourceString("WritingProfilerReportDone"));
             }
-            catch (DirectoryNotFoundException ex)
-            {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
-            }
-            catch (IOException ex)
-            {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
-            }
-            catch (SecurityException ex)
+            catch (Exception ex) when (ex is
+                DirectoryNotFoundException or
+                IOException or
+                UnauthorizedAccessException or
+                SecurityException or
+                ArgumentException)
             {
                 Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
             }

@@ -80,7 +80,7 @@ namespace Microsoft.Build.Exceptions
         #region Serialization (update when adding new class members)
 
         /// <summary>
-        /// Protected constructor used for (de)serialization. 
+        /// Protected constructor used for (de)serialization.
         /// If we ever add new members to this class, we'll need to update this.
         /// </summary>
         /// <param name="info"></param>
@@ -215,8 +215,8 @@ namespace Microsoft.Build.Exceptions
             string helpKeyword,
             Exception innerException) : base(message, innerException)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
-            ErrorUtilities.VerifyThrowArgumentLength(message, nameof(message));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile);
+            ErrorUtilities.VerifyThrowArgumentLength(message);
 
             // Try to helpfully provide a full path if possible, but do so robustly.
             // This exception might be because the path was invalid!
@@ -370,7 +370,7 @@ namespace Microsoft.Build.Exceptions
         }
 
         /// <summary>
-        /// Whether the exception has already been logged. Allows the exception to be logged at the 
+        /// Whether the exception has already been logged. Allows the exception to be logged at the
         /// most appropriate location, but continue to be propagated.
         /// </summary>
         public bool HasBeenLogged

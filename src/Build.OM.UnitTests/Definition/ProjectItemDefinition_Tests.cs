@@ -211,7 +211,8 @@ ObjectModelHelpers.CleanupFileContents(
   </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             List<ILogger> loggers = new List<ILogger>() { logger };
@@ -241,7 +242,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
             Assert.Equal("b", item.GetMetadataValue("m"));
@@ -267,7 +269,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
             Assert.Equal("b.ext", item.GetMetadataValue("m"));
@@ -293,7 +296,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
             Assert.Equal("b.l1", item.GetMetadataValue("m"));
@@ -323,7 +327,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
             Assert.Equal("b.n1", item.GetMetadataValue("m"));
@@ -350,7 +355,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
 
@@ -379,7 +385,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
             Assert.Equal(".bar", item.GetMetadataValue("m"));
@@ -406,7 +413,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
             Assert.Equal(".foo", item.EvaluatedInclude);
@@ -440,7 +448,8 @@ ObjectModelHelpers.CleanupFileContents(
   </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectInstance instance = project.CreateProjectInstance();
             MockLogger l = new MockLogger();
@@ -456,7 +465,7 @@ ObjectModelHelpers.CleanupFileContents(
 
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
-        /// Ideally it would also be late evaluated, but that's too difficult. 
+        /// Ideally it would also be late evaluated, but that's too difficult.
         /// </summary>
         [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_BuiltInProhibitedOnItemDefinitionMetadataCondition()
@@ -478,7 +487,7 @@ ObjectModelHelpers.CleanupFileContents(
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
-        /// Ideally it would also be late evaluated, but that's too difficult. 
+        /// Ideally it would also be late evaluated, but that's too difficult.
         /// </summary>
         [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_UnquotedBuiltInProhibitedOnItemDefinitionMetadataCondition()
@@ -500,7 +509,7 @@ ObjectModelHelpers.CleanupFileContents(
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
-        /// Ideally it would also be late evaluated, but that's too difficult. 
+        /// Ideally it would also be late evaluated, but that's too difficult.
         /// </summary>
         [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_BuiltInProhibitedOnItemDefinitionCondition()
@@ -522,7 +531,7 @@ ObjectModelHelpers.CleanupFileContents(
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
-        /// Ideally it would also be late evaluated, but that's too difficult. 
+        /// Ideally it would also be late evaluated, but that's too difficult.
         /// </summary>
         [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_BuiltInProhibitedOnItemDefinitionGroupCondition()
@@ -544,7 +553,7 @@ ObjectModelHelpers.CleanupFileContents(
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
-        /// Ideally it would also be late evaluated, but that's too difficult. 
+        /// Ideally it would also be late evaluated, but that's too difficult.
         /// </summary>
         [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_QualifiedBuiltInProhibitedOnItemDefinitionMetadataCondition()
@@ -566,7 +575,7 @@ ObjectModelHelpers.CleanupFileContents(
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
-        /// Ideally it would also be late evaluated, but that's too difficult. 
+        /// Ideally it would also be late evaluated, but that's too difficult.
         /// </summary>
         [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_QualifiedBuiltInProhibitedOnItemDefinitionCondition()
@@ -588,7 +597,7 @@ ObjectModelHelpers.CleanupFileContents(
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
-        /// Ideally it would also be late evaluated, but that's too difficult. 
+        /// Ideally it would also be late evaluated, but that's too difficult.
         /// </summary>
         [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_QualifiedBuiltInProhibitedOnItemDefinitionGroupCondition()
@@ -610,7 +619,7 @@ ObjectModelHelpers.CleanupFileContents(
         }
         /// <summary>
         /// Built-in metadata is prohibited in item definition conditions.
-        /// Ideally it would also be late evaluated, but that's too difficult. 
+        /// Ideally it would also be late evaluated, but that's too difficult.
         /// </summary>
         [Fact]
         public void ExpandBuiltInMetadataAtPointOfUse_UnquotedQualifiedBuiltInProhibitedOnItemDefinitionCondition()
@@ -646,7 +655,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemDefinitionGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));  // No exception
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;  // No exception
         }
     }
 }

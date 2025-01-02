@@ -24,7 +24,7 @@ namespace Microsoft.Build.Utilities
     ///
     /// Ignores leading and trailing whitespace, but does not tolerate whitespace
     /// between components, unlike System.Version.
-    /// 
+    ///
     /// Also unlike System.Version, '+' is ignored as semver metadata as described
     /// above, not tolerated as positive sign of integer component.
     /// </summary>
@@ -125,7 +125,7 @@ namespace Microsoft.Build.Utilities
             return new SimpleVersion(major, minor, build, revision);
         }
 
-        private static readonly char[] s_semverSeparators = new char[] { '-', '+' };
+        private static readonly char[] s_semverSeparators = ['-', '+'];
 
         private static ReadOnlySpan<char> RemoveTrivia(string input)
         {

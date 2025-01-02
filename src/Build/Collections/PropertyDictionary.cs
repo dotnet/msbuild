@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -21,35 +22,35 @@ namespace Microsoft.Build.Collections
     ///     - default enumerator is over values
     ///     - (marginal) enforces the correct key comparer
     ///     - potentially makes copy on write possible
-    /// 
+    ///
     /// Really a Dictionary&lt;string, T&gt; where the key (the name) is obtained from IKeyed.Key.
-    /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and 
+    /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and
     /// either not expose this collection or expose it through a readonly wrapper.
     /// At various places in this class locks are taken on the backing collection.  The reason for this is to allow
-    /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will 
+    /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will
     /// lock the backing collection when it does its deep cloning.  This prevents asynchronous access from corrupting
     /// the state of the enumeration until the collection has been fully copied.
-    /// 
-    /// Since we use the mutable ignore case comparer we need to make sure that we lock our self before we call the comparer since the comparer can call back 
+    ///
+    /// Since we use the mutable ignore case comparer we need to make sure that we lock our self before we call the comparer since the comparer can call back
     /// into this dictionary which could cause a deadlock if another thread is also accessing another method in the dictionary.
     /// </remarks>
     /// <typeparam name="T">Property or Metadata class type to store</typeparam>
     [DebuggerDisplay("#Entries={Count}")]
-    internal sealed class PropertyDictionary<T> : IEnumerable<T>, IEquatable<PropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>
+    internal sealed class PropertyDictionary<T> : IEnumerable<T>, IEquatable<PropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>, IConstrainableDictionary<T>
         where T : class, IKeyed, IValued, IEquatable<T>
     {
         /// <summary>
         /// Backing dictionary
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        private readonly RetrievableEntryHashSet<T> _properties;
+        private readonly IRetrievableValuedEntryHashSet<T> _properties;
 
         /// <summary>
         /// Creates empty dictionary
         /// </summary>
         public PropertyDictionary()
         {
-            _properties = new RetrievableEntryHashSet<T>(MSBuildNameIgnoreCaseComparer.Default);
+            _properties = new RetrievableValuedEntryHashSet<T>(MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal PropertyDictionary(int capacity)
         {
-            _properties = new RetrievableEntryHashSet<T>(capacity, MSBuildNameIgnoreCaseComparer.Default);
+            _properties = new RetrievableValuedEntryHashSet<T>(capacity, MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
@@ -77,7 +78,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal PropertyDictionary(MSBuildNameIgnoreCaseComparer comparer)
         {
-            _properties = new RetrievableEntryHashSet<T>(comparer);
+            _properties = new RetrievableValuedEntryHashSet<T>(comparer);
         }
 
         /// <summary>
@@ -90,6 +91,15 @@ namespace Microsoft.Build.Collections
             {
                 Set(element);
             }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PropertyDictionary{T}"/> class.
+        /// </summary>
+        /// <param name="propertiesHashSet">The collection of properties to use.</param>
+        internal PropertyDictionary(IRetrievableValuedEntryHashSet<T> propertiesHashSet)
+        {
+            _properties = propertiesHashSet;
         }
 
         /// <summary>
@@ -126,16 +136,7 @@ namespace Microsoft.Build.Collections
         /// Returns the number of properties in the collection
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        int ICollection<KeyValuePair<string, T>>.Count
-        {
-            get
-            {
-                lock (_properties)
-                {
-                    return _properties.Count;
-                }
-            }
-        }
+        int ICollection<KeyValuePair<string, T>>.Count => Count;
 
         /// <summary>
         /// Whether the collection is read-only.
@@ -146,13 +147,13 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns the number of property in the collection.
         /// </summary>
-        internal int Count
+        public int Count
         {
             get
             {
                 lock (_properties)
                 {
-                    return _properties.Count;
+                    return ((ICollection<T>)_properties).Count;
                 }
             }
         }
@@ -228,7 +229,7 @@ namespace Microsoft.Build.Collections
         {
             lock (_properties)
             {
-                _properties.Clear();
+                ((ICollection<T>)_properties).Clear();
             }
         }
 
@@ -316,6 +317,30 @@ namespace Microsoft.Build.Collections
             {
                 return _properties.Get(name, startIndex, endIndex - startIndex + 1);
             }
+        }
+
+        /// <inheritdoc />
+        public T Get(string keyString, int startIndex, int endIndex)
+        {
+            return GetProperty(keyString, startIndex, endIndex);
+        }
+
+        /// <summary>
+        /// Gets the unescaped value of a particular property.
+        /// </summary>
+        /// <param name="propertyName">The name of the property whose value is sought.</param>
+        /// <param name="unescapedValue">The out parameter by which a successfully retrieved value is returned.</param>
+        /// <returns>True if a property with a matching name was found. False otherwise.</returns>
+        public bool TryGetPropertyUnescapedValue(string propertyName, out string unescapedValue)
+        {
+            if (_properties.TryGetEscapedValue(propertyName, out string escapedValue) && escapedValue != null)
+            {
+                unescapedValue = EscapingUtilities.UnescapeAll(escapedValue);
+                return true;
+            }
+
+            unescapedValue = null;
+            return false;
         }
 
         #region IDictionary<string,T> Members
@@ -424,13 +449,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IEnumerator<KeyValuePair<string, T>> IEnumerable<KeyValuePair<string, T>>.GetEnumerator()
         {
-            lock (_properties)
-            {
-                foreach (var entry in _properties)
-                {
-                    yield return new KeyValuePair<string, T>(entry.Key, entry);
-                }
-            }
+            return ((IEnumerable<KeyValuePair<string, T>>)_properties).GetEnumerator();
         }
 
         #endregion
@@ -441,7 +460,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool Remove(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             lock (_properties)
             {
@@ -457,7 +476,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal void Set(T projectProperty)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectProperty, nameof(projectProperty));
+            ErrorUtilities.VerifyThrowArgumentNull(projectProperty);
 
             lock (_properties)
             {
@@ -500,7 +519,7 @@ namespace Microsoft.Build.Collections
         {
             lock (_properties)
             {
-                var dictionary = new Dictionary<string, string>(_properties.Count, MSBuildNameIgnoreCaseComparer.Default);
+                var dictionary = new Dictionary<string, string>(((ICollection<T>)_properties).Count, MSBuildNameIgnoreCaseComparer.Default);
 
                 foreach (T property in this)
                 {
@@ -511,14 +530,22 @@ namespace Microsoft.Build.Collections
             }
         }
 
-        internal void Enumerate(Action<string, string> keyValueCallback)
+        internal IEnumerable<PropertyData> Enumerate()
         {
             lock (_properties)
             {
-                foreach (var kvp in _properties)
+                foreach (var kvp in (ICollection<T>)_properties)
                 {
-                    keyValueCallback(kvp.Key, EscapingUtilities.UnescapeAll(kvp.EscapedValue));
+                    yield return new(kvp.Key, EscapingUtilities.UnescapeAll(kvp.EscapedValue));
                 }
+            }
+        }
+
+        internal void Enumerate(Action<string, string> keyValueCallback)
+        {
+            foreach (var property in Enumerate())
+            {
+                keyValueCallback(property.Name, property.Value);
             }
         }
 
@@ -527,7 +554,7 @@ namespace Microsoft.Build.Collections
             List<TResult> result = new();
             lock (_properties)
             {
-                foreach (T property in _properties)
+                foreach (T property in (ICollection<T>)_properties)
                 {
                     if (filter(property))
                     {

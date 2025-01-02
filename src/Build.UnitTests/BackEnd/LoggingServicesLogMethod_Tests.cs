@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
@@ -461,9 +462,11 @@ namespace Microsoft.Build.UnitTests.Logging
             try
             {
                 Directory.CreateDirectory(testTempPath);
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectfileContent)));
+                using ProjectRootElementFromString projectRootElementFromString = new(projectfileContent);
+                ProjectRootElement project = projectRootElementFromString.Project;
                 project.Save(projectFile);
-                project = ProjectRootElement.Create(XmlReader.Create(new StringReader(targetsfileContent)));
+                using ProjectRootElementFromString projectRootElementFromtargetString = new(targetsfileContent);
+                project = projectRootElementFromtargetString.Project;
                 project.Save(targetsFile);
                 Project msbuildProject = new Project(projectFile);
                 msbuildProject.Build(mockLogger);
@@ -998,39 +1001,23 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Make sure we can log a build started event correctly.
         /// Test both the LogOnlyCriticalEvents true and false
         /// </summary>
-        [Fact]
-        public void LogBuildStarted()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void LogBuildStarted(bool onlyLogCriticalEvents)
         {
             ProcessBuildEventHelper service =
                 (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-
+            service.OnlyLogCriticalEvents = onlyLogCriticalEvents;
             service.LogBuildStarted();
+
+            string message = onlyLogCriticalEvents ? string.Empty : ResourceUtilities.GetResourceString("BuildStarted");
 
             BuildStartedEventArgs buildEvent =
                 new BuildStartedEventArgs(
-                    ResourceUtilities.GetResourceString("BuildStarted"),
+                    message,
                     null /* no help keyword */,
                     service.ProcessedBuildEvent.Timestamp);
-
-            Assert.IsType<BuildStartedEventArgs>(service.ProcessedBuildEvent);
-            Assert.Equal(buildEvent, (BuildStartedEventArgs)service.ProcessedBuildEvent,
-                new EventArgsEqualityComparer<BuildStartedEventArgs>());
-        }
-
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/437")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        public void LogBuildStartedCriticalOnly()
-        {
-            ProcessBuildEventHelper service =
-                (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.OnlyLogCriticalEvents = true;
-            service.LogBuildStarted();
-
-            BuildStartedEventArgs buildEvent =
-                new BuildStartedEventArgs(
-                    string.Empty,
-                    null /* no help keyword */);
 
             Assert.IsType<BuildStartedEventArgs>(service.ProcessedBuildEvent);
             Assert.Equal(buildEvent, (BuildStartedEventArgs)service.ProcessedBuildEvent,
@@ -1061,6 +1048,24 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.True(((BuildFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
         }
 
+        [Fact]
+        public void LogBuildCanceled()
+        {
+            ProcessBuildEventHelper service =
+                (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+            service.LogBuildCanceled();
+
+
+            BuildCanceledEventArgs buildEvent =
+                new BuildCanceledEventArgs(
+                    ResourceUtilities.GetResourceString("AbortingBuild"),
+                    service.ProcessedBuildEvent.Timestamp);
+
+            Assert.IsType<BuildCanceledEventArgs>(service.ProcessedBuildEvent);
+            Assert.Equal(buildEvent, (BuildCanceledEventArgs)service.ProcessedBuildEvent,
+                new EventArgsEqualityComparer<BuildCanceledEventArgs>());
+        }
+
         /// <summary>
         ///  Exercise Asynchronous code path, this method should return right away as there are no events to process.
         ///  This will be further tested in the LoggingService_Tests class.
@@ -1089,7 +1094,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.LogTaskStarted(null, "MyTask", "ProjectFile", "ProjectFileOfTask");
+                service.LogTaskStarted(taskBuildEventContext: null, "MyTask", "ProjectFile", "ProjectFileOfTask", taskAssemblyLocation: null);
             });
         }
 
@@ -1443,14 +1448,15 @@ namespace Microsoft.Build.UnitTests.Logging
         private void TestTaskStartedEvent(string taskName, string projectFile, string projectFileOfTask)
         {
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskStarted", taskName);
+            string taskAssemblyLocation = Assembly.GetExecutingAssembly().Location;
 
             ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask);
-            VerifyTaskStartedEvent(taskName, projectFile, projectFileOfTask, message, service);
+            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask, taskAssemblyLocation);
+            VerifyTaskStartedEvent(taskName, projectFile, projectFileOfTask, message, service, taskAssemblyLocation);
 
             service.ResetProcessedBuildEvent();
             service.OnlyLogCriticalEvents = true;
-            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask);
+            service.LogTaskStarted(s_buildEventContext, taskName, projectFile, projectFileOfTask, taskAssemblyLocation);
             Assert.Null(service.ProcessedBuildEvent);
         }
 
@@ -1631,7 +1637,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <param name="projectFileOfTask">ProjectFileOfTask to create the comparison event with.</param>
         /// <param name="message">Message to create the comparison event with.</param>
         /// <param name="service">LoggingService mock object which overrides ProcessBuildEvent and can provide a ProcessedBuildEvent (the event which would have been sent to the loggers)</param>
-        private void VerifyTaskStartedEvent(string taskName, string projectFile, string projectFileOfTask, string message, ProcessBuildEventHelper service)
+        private void VerifyTaskStartedEvent(string taskName, string projectFile, string projectFileOfTask, string message, ProcessBuildEventHelper service, string taskAssemblyLocation)
         {
             TaskStartedEventArgs taskEvent = new TaskStartedEventArgs(
                  message,
@@ -1639,7 +1645,8 @@ namespace Microsoft.Build.UnitTests.Logging
                   projectFile,
                   projectFileOfTask,
                   taskName,
-                  service.ProcessedBuildEvent.Timestamp);
+                  service.ProcessedBuildEvent.Timestamp,
+                  taskAssemblyLocation);
             taskEvent.BuildEventContext = s_buildEventContext;
             Assert.True(((TaskStartedEventArgs)service.ProcessedBuildEvent).IsEquivalent(taskEvent));
         }
@@ -1846,7 +1853,7 @@ namespace Microsoft.Build.UnitTests.Logging
             /// Override the method to log which event was processed so it can be verified in a test
             /// </summary>
             /// <param name="buildEvent">Build event which was asked to be processed</param>
-            internal override void ProcessLoggingEvent(object buildEvent)
+            protected internal override void ProcessLoggingEvent(object buildEvent)
             {
                 if (buildEvent is BuildEventArgs buildEventArgs)
                 {

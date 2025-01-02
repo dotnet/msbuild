@@ -127,7 +127,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="useMinimalRebuildOptimization">WARNING: Minimal rebuild optimization requires 100% accurate computed outputs to be specified!</param>
         /// <param name="maintainCompositeRootingMarkers">True to keep composite rooting markers around (many-to-one case) or false to shred them (one-to-one or one-to-many case)</param>
         public CanonicalTrackedInputFiles(ITask ownerTask, ITaskItem[] tlogFiles, ITaskItem sourceFile, ITaskItem[] excludedInputPaths, CanonicalTrackedOutputFiles outputs, bool useMinimalRebuildOptimization, bool maintainCompositeRootingMarkers)
-            => InternalConstruct(ownerTask, tlogFiles, new[] { sourceFile }, null, excludedInputPaths, outputs, useMinimalRebuildOptimization, maintainCompositeRootingMarkers);
+            => InternalConstruct(ownerTask, tlogFiles, [sourceFile], null, excludedInputPaths, outputs, useMinimalRebuildOptimization, maintainCompositeRootingMarkers);
 
         /// <summary>
         /// Common internal constructor
@@ -930,7 +930,7 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Source that should be removed from the graph</param>
-        public void RemoveEntriesForSource(ITaskItem source) => RemoveEntriesForSource(new[] { source });
+        public void RemoveEntriesForSource(ITaskItem source) => RemoveEntriesForSource([source]);
 
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs
@@ -952,8 +952,8 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Remove the entry in the input dependency graph corresponding to the rooting marker 
-        /// passed in. 
+        /// Remove the entry in the input dependency graph corresponding to the rooting marker
+        /// passed in.
         /// </summary>
         /// <param name="rootingMarker">The root to remove</param>
         public void RemoveEntryForSourceRoot(string rootingMarker) => DependencyTable.Remove(rootingMarker);
@@ -1002,14 +1002,14 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Source that should be removed from the graph</param>
-        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source) => RemoveDependenciesFromEntryIfMissing(new ITaskItem[] { source }, null);
+        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source) => RemoveDependenciesFromEntryIfMissing([source], null);
 
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Source that should be removed from the graph</param>
         /// <param name="correspondingOutput">Output that correspond ot the sources (used for same file processing)</param>
-        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source, ITaskItem correspondingOutput) => RemoveDependenciesFromEntryIfMissing(new[] { source }, new[] { correspondingOutput });
+        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source, ITaskItem correspondingOutput) => RemoveDependenciesFromEntryIfMissing([source], [correspondingOutput]);
 
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs

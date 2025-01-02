@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 else
                 {
-                    Assert.True(false);
+                    Assert.Fail();
                 }
 
                 // Make sure the pointer passed back for the method is not null
@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verifies that NativeMethodsShared.SetCurrentDirectory(), when called on a nonexistent
-        /// directory, will not set the current directory to that location. 
+        /// directory, will not set the current directory to that location.
         /// </summary>
         [Fact]
         public void SetCurrentDirectoryDoesNotSetNonexistentFolder()

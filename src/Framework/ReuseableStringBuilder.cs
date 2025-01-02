@@ -245,7 +245,7 @@ namespace Microsoft.Build.Framework
 
             /// <summary>
             /// Obtains a string builder which may or may not already
-            /// have been used. 
+            /// have been used.
             /// Never returns null.
             /// </summary>
             internal static StringBuilder Get(int capacity)
@@ -298,9 +298,9 @@ namespace Microsoft.Build.Framework
                 int balance = Interlocked.Decrement(ref s_getVsReleaseBalance);
                 Debug.Assert(balance == 0, "Unbalanced Get vs Release. Either forgotten Release or used from multiple threads concurrently.");
 #endif
-                FrameworkErrorUtilities.VerifyThrowInternalNull(returning._borrowedBuilder, nameof(returning._borrowedBuilder));
+                FrameworkErrorUtilities.VerifyThrowInternalNull(returning._borrowedBuilder);
 
-                StringBuilder returningBuilder = returning._borrowedBuilder!;
+                StringBuilder returningBuilder = returning._borrowedBuilder;
                 int returningLength = returningBuilder.Length;
 
                 // It's possible for someone to cause the builder to
@@ -310,7 +310,7 @@ namespace Microsoft.Build.Framework
                 //
                 // If some code has a bug and forgets to return their builder
                 // (or we refuse it here because it's too big) the next user will
-                // get given a new one, and then return it soon after. 
+                // get given a new one, and then return it soon after.
                 // So the shared builder will be "replaced".
                 if (returningBuilder.Capacity > MaxBuilderSizeCapacity)
                 {

@@ -19,12 +19,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
 #if FEATURE_APPDOMAIN
         /// <summary>
-        /// Test serialization / deserialization of the AppDomainSetup instance. 
+        /// Test serialization / deserialization of the AppDomainSetup instance.
         /// </summary>
         [Theory]
         [InlineData(new byte[] { 1, 2, 3 })]
         [InlineData(null)]
-        public void TestTranslationWithAppDomainSetup(byte[] configBytes)
+        public void TestTranslationWithAppDomainSetup(byte[]? configBytes)
         {
             AppDomainSetup setup = new AppDomainSetup();
 

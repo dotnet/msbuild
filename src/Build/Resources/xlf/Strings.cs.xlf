@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../Strings.resx">
     <body>
+      <trans-unit id="AbortingBuild">
+        <source>Attempting to cancel the build...</source>
+        <target state="translated">Pokus o zrušení sestavování...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
         <source>MSB4001: The "{0}" task has more than one parameter called "{1}".</source>
         <target state="translated">MSB4001: Úloha {0} má více než jeden parametr s názvem {1}.</target>
@@ -25,6 +30,226 @@
         <target state="translated">MSB4003: {0} je vyhrazený atribut elementu &lt;{1}&gt; a jeho název musí být správně zadán s rozlišením velkých a malých písmen. Tento atribut nelze použít jako parametr úlohy {2}.</target>
         <note>{StrBegin="MSB4003: "}UE: Tasks are not allowed to use incorrect case for reserved attributes on the task nodes e.g. "continueonerror"
     instead of the "ContinueOnError".</note>
+      </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_AcquiredAsStream">
+        <source>Content already acquired as StreamReader via GetContentReader.</source>
+        <target state="translated">Obsah se už získal jako StreamReader přes GetContentReader.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_AcquiredAsString">
+        <source>Content already acquired as string via GetContent or initialized as string only.</source>
+        <target state="translated">Obsah se už získal jako řetězec přes GetContent nebo se inicializoval jenom jako řetězec.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ArchiveFile_NotSetAfterAcquire">
+        <source>ArchiveFile was obtained, but the final edited version was not set.</source>
+        <target state="translated">Byla získána hodnota ArchiveFile, nebyla ale nastavena konečná upravená verze.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_FwdCompatUnsupported">
+        <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
+        <target state="translated">Čtení s dopřednou kompatibilitou není podporováno pro formát souboru verze {0} (musí být &gt;= 18).</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting version.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ImportFileSizeError">
+        <source>Imported files archive exceeded 2GB limit and it's not embedded.</source>
+        <target state="translated">Archiv importovaných souborů překročil limit 2 GB a není vložený.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_MissingRecoverableErrorSubscribeError">
+        <source>Subscription to RecoverableReadError is mandatory during forward compatible reading.</source>
+        <target state="translated">Odběr události RecoverableReadError je při čtení s dopřednou kompatibilitou povinný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderMismatchedRead">
+        <source>BuildEvent record number {0} (serialized size: {1}) attempted to perform disallowed reads (details: {2}: {3}).</source>
+        <target state="translated">Záznam BuildEvent s číslem {0} (serializovaná velikost: {1}) se pokusil provést nepovolené čtení (podrobnosti: {2}: {3}).</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an exception type and {3} the exception message string.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderSkippingRecord">
+        <source>Skipping the record.</source>
+        <target state="translated">Záznam se přeskakuje.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderUnderRead">
+        <source>BuildEvent record number {0} was expected to read exactly {1} bytes from the stream, but read {2} instead.</source>
+        <target state="translated">Bylo očekáváno, že záznam BuildEvent s číslem {0} přečte ze streamu přesně {1} bajtů, ale místo toho přečetl: {2}.</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is an integer value indicating number of bytes.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_ReaderUnknownType">
+        <source>BuildEvent record number {0} (serialized size: {1}) is of unsupported type: {2}.</source>
+        <target state="translated">Záznam BuildEvent s číslem {0} (serializovaná velikost: {1}) má nepodporovaný typ: {2}.</target>
+        <note>
+      LOCALIZATION: {0} is an integer number denoting order. {1} is an integer denoting size. {2} is a string or integer value indicating type.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_Source_MissingSubscribeError">
+        <source>No subscribers for any events.</source>
+        <target state="translated">Žádní odběratelé pro žádné události</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_Source_MultiSubscribeError">
+        <source>Structured events and raw events cannot be replayed at the same time.</source>
+        <target state="translated">Strukturované události a nezpracované události nelze opětovně přehrát současně.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_Source_VersionUninitialized">
+        <source>Version info not yet initialized. Replay must be called first.</source>
+        <target state="translated">Informace o verzi se ještě neinicializovaly. Jako první se musí volat opětovné přehrání (Replay).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_MustBeReadable">
+        <source>Stream must be readable.</source>
+        <target state="translated">Stream musí být čitelný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_SeekNonOrigin">
+        <source>Only seeking from SeekOrigin.Current is supported.</source>
+        <target state="translated">Podporuje se jenom hledání ze SeekOrigin.Current.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_SetLengthUnsupported">
+        <source>Changing the stream length is not supported.</source>
+        <target state="translated">Změna délky streamu není podporována.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_UnsupportedSkipOffset">
+        <source>Attempt to skip {0} bytes, only non-negative offset up to int.MaxValue is allowed.</source>
+        <target state="translated">Došlo k pokusu o přeskočení {0} bajtů. Je povolen pouze nezáporný posun až do hodnoty int.MaxValue.</target>
+        <note>
+      LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
+    </note>
+      </trans-unit>
+      <trans-unit id="Binlog_StreamUtils_WriteUnsupported">
+        <source>Writing is not supported.</source>
+        <target state="translated">Zápis není podporován.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheckEnabled">
+        <source>The BuildCheck is enabled for this build.</source>
+        <target state="translated">Pro tento build je povolena funkce BuildCheck.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0101_MessageFmt">
+        <source>Projects {0} and {1} have conflicting output paths: {2}.</source>
+        <target state="translated">Projekty {0} a {1} mají konfliktní výstupní cesty: {2}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0101_Title">
+        <source>Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</source>
+        <target state="translated">Dva projekty by neměly sdílet své umístění OutputPath ani IntermediateOutputPath.</target>
+        <note>'OutputPath' and 'IntermediateOutputPath' not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0102_MessageFmt">
+        <source>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</source>
+        <target state="translated">Úlohy {0} a {1} z projektů {2} a {3} zapisují do stejného souboru: {4}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0102_Title">
+        <source>Two tasks should not write the same file.</source>
+        <target state="translated">Dvě úlohy by neměly zapisovat do stejného souboru.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0103_MessageAddendum">
+        <source>'{0}' with value: '{1}'</source>
+        <target state="translated">{0} s hodnotou {1}</target>
+        <note>Will be used as a parameter {0} in previous message.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0103_MessageFmt">
+        <source>Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</source>
+        <target state="translated">Vlastnost je odvozena z proměnné prostředí: {0}. Vlastnosti by měly být předány explicitně pomocí parametru /p.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0103_Title">
+        <source>No implicit property derived from an environment variable should be used during the build.</source>
+        <target state="translated">Během sestavování by se neměla používat žádná implicitní vlastnost odvozená z proměnné prostředí.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_MessageFmt">
+        <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
+        <target state="translated">Projekt {0} odkazuje na výstup projektu {1}. Odkazovaná cesta: {2}. Místo toho by se měla použít položka ProjectReference.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_Title">
+        <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
+        <target state="translated">Na projekt by se nemělo odkazovat přes Reference na jeho výstup, ale přímo přes ProjectReference.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_MessageFmt">
+        <source>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</source>
+        <target state="translated">Projekt {0} určuje položku EmbeddedResource {1}, která má pravděpodobně příponu určující jazykovou verzi ({2}), ale nejsou zadána explicitní metadata Culture ani WithCulture=false.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_Title">
+        <source>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</source>
+        <target state="translated">Doporučujeme u položky EmbeddedResource zadat explicitní metadata Culture nebo metadata WithCulture=false, aby se zabránilo chybnému nebo nedeterministickému odhadu jazykové verze.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0107_MessageFmt">
+        <source>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</source>
+        <target state="translated">{0} projektu určuje vlastnost TargetFrameworks '{1}' a vlastnost TargetFramework '{2}' současně. To způsobí, že se TargetFrameworks bude ignorovat a sestavení se bude chovat jako jednocílový.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0107_Title">
+        <source>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</source>
+        <target state="translated">Vlastnosti TargetFramework (singular) a TargetFrameworks (plural) by se neměly zadává ve skriptech současně.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0106_MessageFmt">
+        <source>Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</source>
+        <target state="translated">{0} projektu určuje '{1}' položku '{2}', která má Vlastnost CopyToOutputDirectory nastavenou na hodnotu Always. Změňte metadata nebo použijte vlastnost CopyToOutputDirectory.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0106_Title">
+        <source>Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</source>
+        <target state="translated">Nezadávejte always pro CopyToOutputDirectory, protože to může způsobit nepotřebné operace kopírování během sestavování. Pokud chcete používat efektivnější kopírování, použijte hodnotu metadat PreserveNeexport nebo IfDifferent, nebo nastavte vlastnost SkipUnchangedFilesOnCopyAlways na true.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0201_MessageFmt">
+        <source>Property: '{0}' was accessed, but it was never initialized.</source>
+        <target state="translated">K vlastnosti: {0} bylo přistupováno, ale nebyla nikdy inicializována.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0201_Title">
+        <source>A property that is accessed should be declared first.</source>
+        <target state="translated">Vlastnost, ke které se přistupuje, by se měla nejdříve deklarovat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0202_MessageFmt">
+        <source>Property: '{0}' first declared/initialized at {1} used before it was initialized.</source>
+        <target state="translated">Vlastnost: {0} poprvé deklarována/inicializována v {1} byla použita dříve, než byla inicializována.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0202_Title">
+        <source>A property should be declared before it is first used.</source>
+        <target state="translated">Vlastnost by měla být před prvním použitím deklarována.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0203_MessageFmt">
+        <source>Property: '{0}' was declared/initialized, but it was never used.</source>
+        <target state="translated">Vlastnost: {0} byla deklarována nebo inicializována, ale nebyla nikdy použita.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0203_Title">
+        <source>A property that is not used should not be declared.</source>
+        <target state="translated">Vlastnost, která se nepoužívá, by se neměla deklarovat.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildFinishedQuestionFailure">
+        <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
+        <target state="translated">Vytvoření otázky SELHALO. Vytváření bylo předčasně ukončeno, protože se při něm narazilo na cíl nebo úlohu, které nebyly aktuální.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildFinishedQuestionSuccess">
+        <source>Question build succeeded. Up-to-date checks passed.</source>
+        <target state="translated">Otázka byla úspěšně vytvořena. Kontroly aktuálnosti proběhly úspěšně.</target>
+        <note />
       </trans-unit>
       <trans-unit id="BuildInProgress">
         <source>The operation cannot be completed because a build is already in progress.</source>
@@ -97,6 +322,41 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="CustomCheckAssemblyNotExist">
+        <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
+        <target state="translated">Nepodařilo se najít zadané sestavení vlastní kontroly: {0}. Zkontrolujte prosím, jestli existuje.</target>
+        <note>The message is emitted when the custom check assembly can not be found.</note>
+      </trans-unit>
+      <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
+        <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
+        <target state="translated">Bylo nalezeno více přetížení pro metodu {0} s tímto počtem parametrů: {1}. To v současné době není podporováno.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CustomCheckBaseTypeNotAssignable">
+        <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
+        <target state="translated">Nepodařilo se načíst typ vlastní kontroly: {0} ze sestavení: {1}. Ujistěte se, že dědí základní třídu Microsoft.Build.Experimental.BuildCheck.Check. Pokud se nemá jednat o vlastní kontrolu, neměl by být exponovaný. Další informace: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
+      </trans-unit>
+      <trans-unit id="CustomCheckFailedAcquisition">
+        <source>Failed to register the custom check: '{0}'.</source>
+        <target state="translated">Nepodařilo se zaregistrovat vlastní kontrolu: {0}.</target>
+        <note>The message is emitted on failed loading of the custom check in process.</note>
+      </trans-unit>
+      <trans-unit id="CustomCheckFailedRuleLoading">
+        <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
+        <target state="translated">Nepovedlo se vytvořit instanci pravidla vlastní kontroly s následující výjimkou: {0}.</target>
+        <note>The message is emitted on failed loading of the custom check rule in process.</note>
+      </trans-unit>
+      <trans-unit id="CustomCheckRegistered">
+        <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
+        <target state="translated">Vlastní kontrola {0} je pro build zaregistrován z umístění: {1}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CustomCheckSuccessfulAcquisition">
+        <source>Custom check rule: '{0}' has been registered successfully.</source>
+        <target state="translated">Pravidlo vlastní kontroly: {0} se úspěšně zaregistrovalo.</target>
+        <note>The message is emitted on successful loading of the custom check rule in process.</note>
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: Výchozí překladač sady SDK nedokázal přeložit sadu SDK „{0}“, protože adresář „{1}“ neexistoval.</target>
@@ -139,6 +399,15 @@
   {1}</target>
         <note />
       </trans-unit>
+      <trans-unit id="FatalErrorWhileLoggingWithInnerException">
+        <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
+    {0}</source>
+        <target state="translated">MSB4017: Sestavování bylo neočekávaně zastaveno z důvodu neočekávané chyby protokolovacího nástroje.
+    {0}</target>
+        <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
+    likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
+    special exception to abort the build.</note>
+      </trans-unit>
       <trans-unit id="General.TwoVectorsMustHaveSameLength">
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: Položka {2} odkazuje na {0} položek a položka {3} odkazuje na {1} položek. Musí mít stejný počet položek.</target>
@@ -148,6 +417,16 @@
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: Na pozici {1} podmínky {0} je neočekávaná mezera. Nezapomněli jste ji odebrat?</target>
         <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
+      <trans-unit id="IllegalCharactersInFileOrDirectory">
+        <source>There are illegal characters in '{0}' in the {1} item.</source>
+        <target state="translated">V položce {1} jsou v „{0}“ neplatné znaky.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ImportedProjectFromVSDistribution">
+        <source>MSB4278: The imported file "{0}" does not exist and appears to be part of a Visual Studio component. This file may require MSBuild.exe in order to be imported successfully, and so may fail to build in the dotnet CLI. </source>
+        <target state="translated">MSB4278: Importovaný soubor „{0}“ neexistuje a zdá se, že je součástí komponenty Visual Studia. Tento soubor může vyžadovat MSBuild.exe, aby se mohl úspěšně importovat, a proto se nemusí podařit sestavit v rozhraní příkazového řádku dotnet. </target>
+        <note>{StrBegin="MSB4278: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="InputCacheFilesDoNotExist">
         <source>MSB4255: The following input result cache files do not exist: "{0}"</source>
@@ -160,8 +439,8 @@
         <note />
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
-        <source>EvaluationContext objects created with SharingPolicy.Isolated do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="translated">Objekty EvaluationContext vytvořené pomocí SharingPolicy.Isolated nepodporují předávání souborového systému MSBuildFileSystemBase.</target>
+        <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
+        <target state="translated">Objekty EvaluationContext vytvořené pomocí SharingPolicy.Isolated nebo SharingPolicy.SharedSDKCache nepodporují předávání systému souborů MSBuildFileSystemBase.</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
@@ -212,8 +491,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
-        <source>A required NuGet assembly was not found. Expected Path: {0}</source>
-        <target state="translated">Požadované sestavení NuGet se nenašlo. Očekávaná cesta: {0}</target>
+        <source>A required NuGet assembly '{0}' could not be loaded.</source>
+        <target state="translated">Nepovedlo se načíst požadované sestavení NuGet {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="NullReferenceFromProjectInstanceFactory">
@@ -247,6 +526,11 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">Metoda {0} se nedá zavolat s kolekcí, která obsahuje prázdné cílové názvy nebo názvy null.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OutputPropertyLogMessagePrefix">
+        <source>Output Property: </source>
+        <target state="translated">Výstupní vlastnost: </target>
         <note />
       </trans-unit>
       <trans-unit id="OverrideUsingTaskElementCreated">
@@ -360,6 +644,11 @@
         <target state="translated">{1} neimportoval projekt {0} v ({2},{3}), protože se výraz vyhodnocuje na prázdný řetězec.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectImportsCollectorFileIOFail">
+        <source>An exception occurred when adding the file '{0}', Exception: '{1}'</source>
+        <target state="translated">Při přidávání souboru {0} došlo k výjimce. Výjimka:{1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PropertyAssignment">
         <source>Property initial value: $({0})="{1}" Source: {2}</source>
         <target state="translated">Počáteční hodnota vlastnosti: $({0})={1} Zdroj: {2}</target>
@@ -380,6 +669,17 @@
         <target state="translated">Přístupy k souborům sestav se v současné době podporují jenom pomocí varianty x64 nástroje MSBuild.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverAttempt">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}".
+Warnings: {2}
+Errors: {3}</source>
+        <target state="translated">Překladač {0} se pokusil přeložit sadu SDK {1}.
+Upozornění: {2}
+Chyby: {3}</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverCriticalFailure">
         <source>MSB4242: SDK Resolver Failure: "{0}"</source>
         <target state="translated">MSB4242: Selhání překladače sady SDK: {0}</target>
@@ -389,6 +689,13 @@
         <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
         <target state="translated">Překladač sady SDK {0} selhal při pokusu o překlad sady SDK {1}. Výjimka: {2}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverNullMessage">
+        <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
+        <target state="translated">Překladač {0} se pokusil přeložit sadu SDK {1} a vrátil hodnotu null jako řetězec v seznamu upozornění nebo chyb.</target>
+        <note>
+      LOCALIZATION: Do not localize the word SDK.
+    </note>
       </trans-unit>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
@@ -441,6 +748,11 @@
       LOCALIZATION: {0} is a file, {1} and {2} are semicolon delimited lists of messages
     </note>
       </trans-unit>
+      <trans-unit id="SucceededToResolveSDK">
+        <source>The SDK "{0}" was successfully resolved by the "{1}" resolver to location "{2}" and version "{3}".</source>
+        <target state="translated">Sada SDK {0} byla úspěšně přeložena překladačem {1} na umístění {2} a verzi {3}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskAcquiredCores">
         <source>Task "{0}" requested {1} cores, acquired {2} cores, and now holds {3} cores total.</source>
         <target state="translated">Úloha {0} požadovala tento počet jader: {1}. Získala tento počet jader: {2}. Teď používá celkem tento počet jader: {3}</target>
@@ -454,6 +766,11 @@
       <trans-unit id="TaskAssemblyLoadedWithAssemblyLoadContext">
         <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AssemblyLoadContext: {5})</source>
         <target state="translated">Sestavení načteno během {0}{1}: {2} (umístění: {3}, MVID: {4}, AssemblyLoadContext: {5})</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TaskAssemblyLocationMismatch">
+        <source>Task assembly was loaded from '{0}' while the desired location was '{1}'.</source>
+        <target state="translated">Sestavení úlohy bylo načteno z{0}, ale požadované umístění bylo{1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskReleasedCores">
@@ -914,8 +1231,8 @@
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
-        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: Importovaný projekt {0} se nenašel. Ověřte, jestli je výraz v deklaraci Import {1} správný a jestli soubor existuje na disku.</target>
+        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>
+        <target state="translated">MSB4019: Importovaný projekt {0} se nenašel. Ověřte, jestli je výraz v deklaraci Import {1}, který se vyhodnotil na {2}, správný a jestli soubor existuje na disku.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
@@ -1302,8 +1619,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeeded">
-        <source>MSB4075: The project file "{0}" must be opened in the Visual Studio IDE and converted to the latest version before it can be built by MSBuild.</source>
-        <target state="translated">MSB4075: Před sestavením pomocí nástroje MSBuild musí být soubor projektu {0} otevřen v prostředí Visual Studio IDE a převeden na nejnovější verzi.</target>
+        <source>MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</source>
+        <target state="translated">MSB4075: Soubor projektu {0} musí být otevřen ve verzi integrovaného vývojového prostředí (IDE) sady Visual Studio, která ho podporuje, a převeden na nejnovější verzi, aby ho bylo možné sestavit pomocí nástroje MSBuild. Další informace: https://aka.ms/DeprecatedProjectConversion</target>
         <note>{StrBegin="MSB4075: "}</note>
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeededToVcxProj">
@@ -2480,8 +2797,8 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <note>{StrBegin="MSB4238: "}</note>
       </trans-unit>
       <trans-unit id="UnsupportedLogFileFormat">
-        <source>MSB4235: The log file format version is {0}, whereas this version of MSBuild only supports versions up to {1}.</source>
-        <target state="translated">MSB4235: Verze formátu souboru protokolu je {0}, ale tato verze nástroje MSBuild podporuje jenom verze do {1}.</target>
+        <source>MSB4235: The log file format version is {0} with minimum required reader version {1}, whereas this version of MSBuild only supports versions up to {2}.</source>
+        <target state="translated">MSB4235: Verze formátu souboru protokolu je {0} s minimální požadovanou verzí čtečky {1}, zatímco tato verze nástroje MSBuild podporuje pouze verze do {2}.</target>
         <note>{StrBegin="MSB4235: "}</note>
       </trans-unit>
       <trans-unit id="ProjectEvaluationPerformanceSummary">
@@ -2570,13 +2887,6 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <source>MSB4241: The SDK reference "{0}" version "{1}" was resolved to version "{2}" instead.  You could be using a different version than expected if you do not update the referenced version to match.</source>
         <target state="translated">MSB4241: Odkaz na sadu SDK {0} verze {1} byl místo toho přeložen na verzi {2}. Pokud neaktualizujete odkazovanou verzi tak, aby se shodovala, může se používat jiná verze, než kterou očekáváte.</target>
         <note>{StrBegin="MSB4241: "}
-      LOCALIZATION:  Do not localize the word SDK.
-    </note>
-      </trans-unit>
-      <trans-unit id="SdkResolving">
-        <source>Resolving SDK '{0}'...</source>
-        <target state="translated">Překládá se sada SDK {0}...</target>
-        <note>
       LOCALIZATION:  Do not localize the word SDK.
     </note>
       </trans-unit>

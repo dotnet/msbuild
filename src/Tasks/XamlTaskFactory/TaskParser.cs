@@ -89,8 +89,8 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public bool Parse(string contentOrFile, string desiredRule)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(contentOrFile, nameof(contentOrFile));
-            ErrorUtilities.VerifyThrowArgumentLength(desiredRule, nameof(desiredRule));
+            ErrorUtilities.VerifyThrowArgumentLength(contentOrFile);
+            ErrorUtilities.VerifyThrowArgumentLength(desiredRule);
 
             bool parseSuccessful = ParseAsContentOrFile(contentOrFile, desiredRule);
             if (!parseSuccessful)
@@ -144,7 +144,9 @@ namespace Microsoft.Build.Tasks.Xaml
                     throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Xaml.RuleFileNotFound", contentOrFile));
                 }
 
-                return ParseXamlDocument(new StreamReader(contentOrFile), desiredRule);
+                using var sr = new StreamReader(contentOrFile);
+
+                return ParseXamlDocument(sr, desiredRule);
             }
 
             // On Windows, xml content string is not a valid path, so, maybeFullPath == null
@@ -158,7 +160,9 @@ namespace Microsoft.Build.Tasks.Xaml
             if (FileSystems.Default.FileExists(maybeFullPath))
             {
                 // file found, parse as a file
-                return ParseXamlDocument(new StreamReader(maybeFullPath), desiredRule);
+                using var sr = new StreamReader(maybeFullPath);
+
+                return ParseXamlDocument(sr, desiredRule);
             }
 
             // @maybeFullPath is either:
@@ -182,8 +186,8 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         internal bool ParseXamlDocument(TextReader reader, string desiredRule)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(reader, nameof(reader));
-            ErrorUtilities.VerifyThrowArgumentLength(desiredRule, nameof(desiredRule));
+            ErrorUtilities.VerifyThrowArgumentNull(reader);
+            ErrorUtilities.VerifyThrowArgumentLength(desiredRule);
 
             object rootObject = XamlServices.Load(reader);
             if (rootObject != null)
@@ -401,14 +405,14 @@ namespace Microsoft.Build.Tasks.Xaml
                 argumentDependencyLookup.Add(propertyToAdd.Name, propertyToAdd);
             }
 
-            // We've read any enumerated values and any dependencies, so we just 
+            // We've read any enumerated values and any dependencies, so we just
             // have to add the property
             propertyList.AddLast(propertyToAdd);
             return true;
         }
 
         /// <summary>
-        /// Gets all the attributes assigned in the xml file for this parameter or all of the nested switches for 
+        /// Gets all the attributes assigned in the xml file for this parameter or all of the nested switches for
         /// this parameter group
         /// </summary>
         private static Property ObtainAttributes(XamlTypes.BaseProperty baseProperty, Property parameterGroup)
