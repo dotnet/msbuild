@@ -9,19 +9,21 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0103](#bc0103---used-environment-variable) | Suggestion | Project | 9.0.100 | Used environment variable. |
 | [BC0104](#bc0104---projectreference-is-preferred-to-reference) | Warning | N/A | 9.0.200 | ProjectReference is preferred to Reference. |
 | [BC0105](#bc0105---embeddedresource-should-specify-culture-metadata) | Warning | N/A | 9.0.200 | Culture specific EmbeddedResource should specify Culture metadata. |
+| [BC0106](#bc0106---copytooutputdirectoryalways-should-be-avoided) | Warning | N/A | 9.0.200 | CopyToOutputDirectory='Always' should be avoided. |
+| [BC0107](#bc0107---targetframework-and-targetframeworks-specified-together) | Warning | N/A | 9.0.200 | TargetFramework and TargetFrameworks specified together. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
-| [BC0203](#bc0203----property-declared-but-never-used) | Suggestion | Project | 9.0.100 | Property declared but never used. |
+| [BC0203](#bc0203----property-declared-but-never-used) | None | Project | 9.0.100 | Property declared but never used. |
 
 
-Note: What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
-
-To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
-
-_Cmd:_
-```cmd
-dotnet build -bl -check
-```
+Notes: 
+ * What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
+ * How can you alter the default configuration? [Please check the Configuration section of the BuildCheck documentation](./BuildCheck.md#sample-configuration)
+ * To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview
+   _Cmd:_
+   ```cmd
+   dotnet build -bl -check
+   ```
 
 <a name="BC0101"></a>
 ## BC0101 - Shared output path.
@@ -76,7 +78,53 @@ Examples:
 
 <a name="RespectAlreadyAssignedItemCulture"></a>
 **Note:** In Full Framework version of MSBuild (msbuild.exe, Visual Studio) and in .NET SDK prior 9.0 a global or project specific property `RespectAlreadyAssignedItemCulture` needs to be set to `'true'` in order for the explicit `Culture` metadata to be respected. Otherwise the explicit culture will be overwritten by MSBuild engine and if different from the extension - a `MSB3002` warning is emitted (`"MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set."`)
- 
+
+<a name="BC0106"></a>
+## BC0106 - CopyToOutputDirectory='Always' should be avoided.
+
+"Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying."
+
+[`CopyToOutputDirectory` metadata](https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-items) can take the values:
+ * `Never`
+ * `Always`
+ * `PreserveNewest`
+ * `IfDifferent`
+
+`Always` is not recommended, as it causes the files to be copied in every build, even when the destination file content is identical to the source.
+
+Before the introduction of `IfDifferent`, `Always` was needed to work around cases where the destination file could have changed between builds (e.g. an asset that can be changed during test run, but needs to be reset by the build). `IfDifferent` preserves this behavior without unnecessary copying.
+
+In order to avoid the need to change copy metadata for a large number of items, it's now possible to specify the `SkipUnchangedFilesOnCopyAlways` property in order to flip all copy behavior of `CopyToOutputDirectory=Always` to behave identically to `CopyToOutputDirectory=IfDifferent`:
+
+```xml
+<PropertyGroup>
+    <SkipUnchangedFilesOnCopyAlways>True</SkipUnchangedFilesOnCopyAlways>
+</PropertyGroup>
+
+<ItemGroup>
+    <None Include="File1.txt" CopyToOutputDirectory="Always" />
+    <None Include="File2.txt" CopyToOutputDirectory="IfDifferent" />
+</ItemGroup>
+```
+
+Both items in above example are treated same and no BC0106 diagnostic is issued.
+
+<a name="BC0107"></a>
+## BC0107 - TargetFramework and TargetFrameworks specified together.
+
+"'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time."
+
+When building a .NET project - you can specify target framework of the resulting output (for more info see [the documentation](https://learn.microsoft.com/en-us/dotnet/standard/frameworks#how-to-specify-a-target-framework)).
+
+When using `TargetFrameworks` property - you are instructing the build to produce output per each specified target framework.
+
+If you specify `TargetFramework` you are instructing the build to produce a single output for that particualar target framework. `TargetFramework` gets precedence even if `TargetFrameworks` is specified - which might seem as if `TargetFrameworks` was ignored.
+
+`BC0107` doesn't apply if you explicitly choose to build a single target of multitargeted build:
+
+```
+dotnet build my-multi-target.csproj /p:TargetFramework=net9.0
+```
 
 <a name="BC0201"></a>
 ## BC0201 - Usage of undefined property.
@@ -121,7 +169,7 @@ If `BC0202` and [BC0201](#BC0201) are both enabled - then `BC0201` reports only 
 
 This check indicates that a property was defined in the observed scope (by default it's the project file only) and it was then not used anywhere in the build.
 
-This is a runtime check, not a static analysis check - so it can have false positives - for this reasons it's currently only suggestion.
+This is a runtime check, not a static analysis check - so it can have false positives - for this reasons it's currently not enabled by defaut.
 
 Common cases of false positives:
  * Property not used in a particular build might be needed in a build with different conditions or a build of a different target (e.g. `dotnet pack /check` or `dotnet build /t:pack /check` accesses some additional properties as compared to ordinary `dotnet build /check`).
@@ -133,4 +181,4 @@ Common cases of false positives:
 <BR/>
 
 ### Related Resources
-* [BuildCheck documentation](https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck.md)
+* [BuildCheck documentation](./BuildCheck.md)

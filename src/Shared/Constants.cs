@@ -142,6 +142,8 @@ namespace Microsoft.Build.Shared
 
         internal const string InnerBuildProperty = nameof(InnerBuildProperty);
         internal const string InnerBuildPropertyValues = nameof(InnerBuildPropertyValues);
+        internal const string TargetFrameworks = nameof(TargetFrameworks);
+        internal const string TargetFramework = nameof(TargetFramework);
     }
 
     // TODO: Remove these when VS gets updated to setup project cache plugins.
@@ -205,6 +207,8 @@ namespace Microsoft.Build.Shared
         internal const string publicKeyToken = "PublicKeyToken";
         internal const string culture = "Culture";
         internal const string withCulture = "WithCulture";
+        internal const string copyToOutputDirectory = "CopyToOutputDirectory";
+        internal const string copyAlways = "Always";
 
         /// <summary>
         /// The output path for a given item.
@@ -240,6 +244,10 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class ItemNames
     {
-        internal const string reference = "Reference";
+        internal const string Compile = "Compile";
+        internal const string Content = "Content";
+        internal const string EmbeddedResource = "EmbeddedResource";
+        internal const string None = "None";
+        internal const string Reference = "Reference";
     }
 }

@@ -74,7 +74,7 @@ internal interface IBuildCheckManager
     //  - but we still need to know about it, hence the dedicated event.
     void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, ICheckContext analysisContext, string projectFullPath);
 
-    void ProcessProjectEvaluationStarted(ICheckContext checksContext, string projectFullPath);
+    void ProcessProjectEvaluationStarted(BuildCheckDataSource buildCheckDataSource, ICheckContext checksContext, string projectFullPath);
 
     void EndProjectEvaluation(BuildEventContext buildEventContext);
 
