@@ -363,7 +363,7 @@ namespace Microsoft.Build.Eventing
 
         /// <param name="targetName">The name of the target being executed.</param>
         /// <param name="result">Target stop result.</param>
-        [Event(44, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 2)]
+        [Event(44, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
         public void TargetStop(string targetName, string result)
         {
             WriteEvent(44, targetName, result);
