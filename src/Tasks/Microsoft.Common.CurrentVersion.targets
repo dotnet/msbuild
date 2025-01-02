@@ -2566,6 +2566,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Copy
       SourceFiles="@(AppConfigWithTargetPath->'%(FullPath)')"
       DestinationFiles="$(_GenerateBindingRedirectsIntermediateAppConfig)"
+      SkipUnchangedFiles="true"
       Condition="'$(ConfigFileExists)' == 'true' and '$(HasNoBindingRedirects)' == 'true'">
       <Output TaskParameter="CopiedFiles" ItemName="FileWrites"/>
     </Copy>
