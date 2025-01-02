@@ -55,7 +55,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The awaiter.</returns>
         internal static TaskAwaiter GetAwaiter(this WaitHandle handle)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(handle, nameof(handle));
+            ErrorUtilities.VerifyThrowArgumentNull(handle);
             return handle.ToTask().GetAwaiter();
         }
 
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// A class which acts as a task scheduler and ensures each scheduled task gets its 
+        /// A class which acts as a task scheduler and ensures each scheduled task gets its
         /// own STA thread.
         /// </summary>
         private class OneSTAThreadPerTaskScheduler : TaskScheduler

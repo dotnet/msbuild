@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 #nullable disable
 
@@ -102,12 +103,12 @@ namespace Microsoft.Build.Framework
             int columnNumber,
             int endLineNumber,
             int endColumnNumber,
-            string message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             string helpKeyword,
             string senderName,
             DateTime eventTimestamp,
             params object[] messageArgs)
-            //// Force importance to High. 
+            //// Force importance to High.
             : base(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, MessageImportance.High, eventTimestamp, messageArgs)
         {
             // do nothing

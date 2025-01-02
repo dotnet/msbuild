@@ -32,7 +32,7 @@ namespace Microsoft.Build.Construction
         internal ProjectChooseElement(XmlElement xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Condition should never be set, but the getter returns null instead of throwing 
+        /// Condition should never be set, but the getter returns null instead of throwing
         /// because a nonexistent condition is implicitly true
         /// </summary>
         public override string Condition
@@ -92,7 +92,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ProjectChooseElement CreateDisconnected(ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrow(containingProject.Link == null, "External project");
+            ErrorUtilities.VerifyThrow(containingProject.Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.choose);
             return new ProjectChooseElement(element, containingProject);

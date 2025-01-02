@@ -148,8 +148,8 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// List the supported .net versions.
         /// </summary>
-        private static DotNetFrameworkSpec[] DotNetFrameworkSpecs() => new DotNetFrameworkSpec[]
-        {
+        private static DotNetFrameworkSpec[] DotNetFrameworkSpecs() =>
+        [
             // v1.1
             new DotNetFrameworkSpecLegacy(
                 dotNetFrameworkVersion11,
@@ -223,7 +223,7 @@ namespace Microsoft.Build.Shared
 
             // v4.8.1
             CreateDotNetFrameworkSpecForV4(dotNetFrameworkVersion481, visualStudioVersion170),
-        };
+        ];
 
         /// <summary>
         /// List the supported visual studio versions.
@@ -231,30 +231,30 @@ namespace Microsoft.Build.Shared
         /// <remarks>
         /// The items must be ordered by the version, because some methods depend on that fact to find the previous visual studio version.
         /// </remarks>
-        private static readonly Lazy<VisualStudioSpec[]> VisualStudioSpecs = new(() => new VisualStudioSpec[]
-        {
+        private static readonly Lazy<VisualStudioSpec[]> VisualStudioSpecs = new(() =>
+        [
             // VS10
-            new VisualStudioSpec(visualStudioVersion100, "Windows\\v7.0A", null, null, new []
-            {
+            new VisualStudioSpec(visualStudioVersion100, "Windows\\v7.0A", null, null,
+            [
                 dotNetFrameworkVersion11,
                 dotNetFrameworkVersion20,
                 dotNetFrameworkVersion35,
                 dotNetFrameworkVersion40,
-            }),
+            ]),
 
             // VS11
-            new VisualStudioSpec(visualStudioVersion110, "Windows\\v8.0A", "v8.0", "InstallationFolder", new []
-            {
+            new VisualStudioSpec(visualStudioVersion110, "Windows\\v8.0A", "v8.0", "InstallationFolder",
+            [
                 dotNetFrameworkVersion11,
                 dotNetFrameworkVersion20,
                 dotNetFrameworkVersion35,
                 dotNetFrameworkVersion40,
                 dotNetFrameworkVersion45,
-            }),
+            ]),
 
             // VS12
-            new VisualStudioSpec(visualStudioVersion120, "Windows\\v8.1A", "v8.1", "InstallationFolder", new []
-            {
+            new VisualStudioSpec(visualStudioVersion120, "Windows\\v8.1A", "v8.1", "InstallationFolder",
+            [
                 dotNetFrameworkVersion11,
                 dotNetFrameworkVersion20,
                 dotNetFrameworkVersion35,
@@ -262,11 +262,11 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion45,
                 dotNetFrameworkVersion451,
                 dotNetFrameworkVersion452,
-            }),
+            ]),
 
             // VS14
-            new VisualStudioSpec(visualStudioVersion140, "NETFXSDK\\{0}", "v8.1", "InstallationFolder", new []
-            {
+            new VisualStudioSpec(visualStudioVersion140, "NETFXSDK\\{0}", "v8.1", "InstallationFolder",
+            [
                 dotNetFrameworkVersion11,
                 dotNetFrameworkVersion20,
                 dotNetFrameworkVersion35,
@@ -276,11 +276,11 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion452,
                 dotNetFrameworkVersion46,
                 dotNetFrameworkVersion461,
-            }),
+            ]),
 
             // VS15
-            new VisualStudioSpec(visualStudioVersion150, "NETFXSDK\\{0}", "v8.1", "InstallationFolder", new []
-            {
+            new VisualStudioSpec(visualStudioVersion150, "NETFXSDK\\{0}", "v8.1", "InstallationFolder",
+            [
                 dotNetFrameworkVersion11,
                 dotNetFrameworkVersion20,
                 dotNetFrameworkVersion35,
@@ -295,11 +295,11 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion471,
                 dotNetFrameworkVersion472,
                 dotNetFrameworkVersion48,
-            }),
+            ]),
 
             // VS16
-            new VisualStudioSpec(visualStudioVersion160, "NETFXSDK\\{0}", "v10.0", "InstallationFolder", new []
-            {
+            new VisualStudioSpec(visualStudioVersion160, "NETFXSDK\\{0}", "v10.0", "InstallationFolder",
+            [
                 dotNetFrameworkVersion11,
                 dotNetFrameworkVersion20,
                 dotNetFrameworkVersion35,
@@ -314,11 +314,11 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion471,
                 dotNetFrameworkVersion472,
                 dotNetFrameworkVersion48,
-            }),
+            ]),
 
             // VS17
-            new VisualStudioSpec(visualStudioVersion170, "NETFXSDK\\{0}", "v10.0", "InstallationFolder", new []
-            {
+            new VisualStudioSpec(visualStudioVersion170, "NETFXSDK\\{0}", "v10.0", "InstallationFolder",
+            [
                 dotNetFrameworkVersion11,
                 dotNetFrameworkVersion20,
                 dotNetFrameworkVersion35,
@@ -334,8 +334,8 @@ namespace Microsoft.Build.Shared
                 dotNetFrameworkVersion472,
                 dotNetFrameworkVersion48,
                 dotNetFrameworkVersion481,
-            }),
-        });
+            ]),
+        ]);
 
 #if FEATURE_WIN32_REGISTRY
         /// <summary>
@@ -873,12 +873,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GenerateProgramFiles32()
         {
-            // With Mono, all we look for in Files32 should be found in the below location
-            if (!NativeMethodsShared.IsWindows && NativeMethodsShared.IsMono)
-            {
-                return Path.Combine(NativeMethodsShared.FrameworkBasePath, "xbuild");
-            }
-
             // On a 64 bit machine we always want to use the program files x86.  If we are running as a 64 bit process then this variable will be set correctly
             // If we are on a 32 bit machine or running as a 32 bit process then this variable will be null and the programFiles variable will be correct.
             string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
@@ -897,12 +891,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GenerateProgramFiles64()
         {
-            // With Mono, all we look for in Files32 should be found in the below location
-            if (!NativeMethodsShared.IsWindows && NativeMethodsShared.IsMono)
-            {
-                return Path.Combine(NativeMethodsShared.FrameworkBasePath, "xbuild");
-            }
-
             string programFilesX64;
             if (string.Equals(programFiles, programFiles32))
             {
@@ -984,8 +972,8 @@ namespace Microsoft.Build.Shared
         /// <returns>The path to the reference assembly location</returns>
         internal static string GenerateReferenceAssemblyPath(string targetFrameworkRootPath, FrameworkName frameworkName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkRootPath, nameof(targetFrameworkRootPath));
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkName, nameof(frameworkName));
+            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkRootPath);
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkName);
 
             try
             {

@@ -250,7 +250,7 @@ namespace Microsoft.Build.Execution
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 
-            var waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent };
+            WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent];
 
             // Get the current directory before doing any work. We need this so we can restore the directory when the node shutsdown.
             while (true)
@@ -302,6 +302,9 @@ namespace Microsoft.Build.Execution
         {
             return _componentFactories.GetComponent(type);
         }
+
+        TComponent IBuildComponentHost.GetComponent<TComponent>(BuildComponentType type)
+            => (TComponent)((IBuildComponentHost)this).GetComponent(type);
 
         #endregion
 
@@ -472,24 +475,20 @@ namespace Microsoft.Build.Execution
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
-            // Restore the original environment.
+            // Restore the original environment, best effort.
             // If the node was never configured, this will be null.
             if (_savedEnvironment != null)
             {
-                foreach (KeyValuePair<string, string> entry in CommunicationsUtilities.GetEnvironmentVariables())
+                try
                 {
-                    if (!_savedEnvironment.ContainsKey(entry.Key))
-                    {
-                        Environment.SetEnvironmentVariable(entry.Key, null);
-                    }
+                    CommunicationsUtilities.SetEnvironment(_savedEnvironment);
                 }
-
-                foreach (KeyValuePair<string, string> entry in _savedEnvironment)
+                catch (Exception ex)
                 {
-                    Environment.SetEnvironmentVariable(entry.Key, entry.Value);
+                    CommunicationsUtilities.Trace("Failed to restore the original environment: {0}.", ex);
                 }
+                Traits.UpdateFromEnvironment();
             }
-
             try
             {
                 // Shut down logging, which will cause all queued logging messages to be sent.
@@ -586,9 +585,7 @@ namespace Microsoft.Build.Execution
             {
 #if RUNTIME_TYPE_NETCORE
                 if (packet is LogMessagePacketBase logMessage
-                    && logMessage.EventType == LoggingEventType.CustomEvent 
-                    &&
-                    (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
+                    && logMessage.EventType == LoggingEventType.CustomEvent
                     && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
                 {
                     BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
@@ -722,14 +719,16 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            // Now set the new environment
+            // Now set the new environment and update Traits class accordingly
             foreach (KeyValuePair<string, string> environmentPair in _buildParameters.BuildProcessEnvironment)
             {
                 Environment.SetEnvironmentVariable(environmentPair.Key, environmentPair.Value);
             }
 
+            Traits.UpdateFromEnvironment();
+
             // We want to make sure the global project collection has the toolsets which were defined on the parent
-            // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are 
+            // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are
             // executed on the child node.
             ICollection<Toolset> parentToolSets = _buildParameters.ToolsetProvider.Toolsets;
             if (parentToolSets != null)
@@ -780,9 +779,12 @@ namespace Microsoft.Build.Execution
                 _loggingService.IncludeTaskInputs = true;
             }
 
-            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItems)
+            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent)
             {
-                _loggingService.IncludeEvaluationPropertiesAndItems = true;
+                _loggingService.SetIncludeEvaluationPropertiesAndItemsInEvents(
+                    configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
+                    configuration.LoggingNodeConfiguration
+                        .IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent);
             }
 
             try

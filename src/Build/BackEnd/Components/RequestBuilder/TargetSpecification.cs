@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
@@ -18,18 +19,22 @@ namespace Microsoft.Build.BackEnd
         private string _targetName;
         private ElementLocation _referenceLocation;
 
+        internal TargetBuiltReason _targetBuiltReason;
+
         /// <summary>
         /// Construct a target specification.
         /// </summary>
         /// <param name="targetName">The name of the target</param>
         /// <param name="referenceLocation">The location from which it was referred.</param>
-        internal TargetSpecification(string targetName, ElementLocation referenceLocation)
+        /// <param name="targetBuiltReason">Reason the target is being built</param>
+        internal TargetSpecification(string targetName, ElementLocation referenceLocation, TargetBuiltReason targetBuiltReason = TargetBuiltReason.None)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(targetName, nameof(targetName));
-            ErrorUtilities.VerifyThrowArgumentNull(referenceLocation, nameof(referenceLocation));
+            ErrorUtilities.VerifyThrowArgumentLength(targetName);
+            ErrorUtilities.VerifyThrowArgumentNull(referenceLocation);
 
             this._targetName = targetName;
             this._referenceLocation = referenceLocation;
+            this._targetBuiltReason = targetBuiltReason;
         }
 
         private TargetSpecification()
@@ -37,9 +42,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Gets or sets the target name            
+        /// Gets or sets the target name
         /// </summary>
         public string TargetName => _targetName;
+
+        public TargetBuiltReason TargetBuiltReason => _targetBuiltReason;
 
         /// <summary>
         /// Gets or sets the reference location

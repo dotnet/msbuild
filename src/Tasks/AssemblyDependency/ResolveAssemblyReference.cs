@@ -15,6 +15,7 @@ using System.Xml.Linq;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 
@@ -102,6 +103,7 @@ namespace Microsoft.Build.Tasks
             public static string ResolvedFrom;
             public static string SearchedAssemblyFoldersEx;
             public static string SearchPath;
+            public static string SearchPathAddedByParentAssembly;
             public static string TargetedProcessorArchitectureDoesNotMatch;
             public static string UnificationByAppConfig;
             public static string UnificationByAutoUnify;
@@ -152,7 +154,8 @@ namespace Microsoft.Build.Tasks
                 Resolved = GetResourceFourSpaces("ResolveAssemblyReference.Resolved");
                 ResolvedFrom = GetResourceFourSpaces("ResolveAssemblyReference.ResolvedFrom");
                 SearchedAssemblyFoldersEx = GetResourceEightSpaces("ResolveAssemblyReference.SearchedAssemblyFoldersEx");
-                SearchPath = EightSpaces + GetResource("ResolveAssemblyReference.SearchPath");
+                SearchPath = GetResourceEightSpaces("ResolveAssemblyReference.SearchPath");
+                SearchPathAddedByParentAssembly = GetResourceEightSpaces("ResolveAssemblyReference.SearchPathAddedByParentAssembly");
                 TargetedProcessorArchitectureDoesNotMatch = GetResourceEightSpaces("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch");
                 UnificationByAppConfig = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAppConfig");
                 UnificationByAutoUnify = GetResourceFourSpaces("ResolveAssemblyReference.UnificationByAutoUnify");
@@ -172,11 +175,11 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _resolvedSDKReferences = Array.Empty<TaskItem>();
         private bool _ignoreDefaultInstalledAssemblyTables = false;
         private bool _ignoreDefaultInstalledAssemblySubsetTables = false;
-        private string[] _candidateAssemblyFiles = Array.Empty<string>();
-        private string[] _targetFrameworkDirectories = Array.Empty<string>();
-        private string[] _searchPaths = Array.Empty<string>();
-        private string[] _allowedAssemblyExtensions = new string[] { ".winmd", ".dll", ".exe" };
-        private string[] _relatedFileExtensions = new string[] { ".pdb", ".xml", ".pri" };
+        private string[] _candidateAssemblyFiles = [];
+        private string[] _targetFrameworkDirectories = [];
+        private string[] _searchPaths = [];
+        private string[] _allowedAssemblyExtensions = [".winmd", ".dll", ".exe"];
+        private string[] _relatedFileExtensions = [".pdb", ".xml", ".pri"];
         private string _appConfigFile = null;
         private bool _supportsBindingRedirectGeneration;
         private bool _autoUnify = false;
@@ -191,8 +194,8 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _copyLocalFiles = Array.Empty<TaskItem>();
         private ITaskItem[] _suggestedRedirects = Array.Empty<TaskItem>();
         private List<ITaskItem> _unresolvedConflicts = new List<ITaskItem>();
-        private string[] _targetFrameworkSubsets = Array.Empty<string>();
-        private string[] _fullTargetFrameworkSubsetNames = Array.Empty<string>();
+        private string[] _targetFrameworkSubsets = [];
+        private string[] _fullTargetFrameworkSubsetNames = [];
         private string _targetedFrameworkMoniker = String.Empty;
 
         private bool _findDependencies = true;
@@ -208,8 +211,8 @@ namespace Microsoft.Build.Tasks
         private string _targetProcessorArchitecture = null;
 
         private string _profileName = String.Empty;
-        private string[] _fullFrameworkFolders = Array.Empty<string>();
-        private string[] _latestTargetFrameworkDirectories = Array.Empty<string>();
+        private string[] _fullFrameworkFolders = [];
+        private string[] _latestTargetFrameworkDirectories = [];
         private bool _copyLocalDependenciesWhenParentReferenceInGac = true;
         private Dictionary<string, MessageImportance> _showAssemblyFoldersExLocations = new Dictionary<string, MessageImportance>(StringComparer.OrdinalIgnoreCase);
         private bool _logVerboseSearchResults = false;
@@ -1322,7 +1325,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void LogReferenceDependenciesAndSourceItemsToStringBuilder(string fusionName, Reference conflictCandidate, StringBuilder log, bool referenceIsUnified = false)
         {
-            ErrorUtilities.VerifyThrowInternalNull(conflictCandidate, nameof(conflictCandidate));
+            ErrorUtilities.VerifyThrowInternalNull(conflictCandidate);
             log.Append(Strings.FourSpaces);
 
             string resource = referenceIsUnified ? "ResolveAssemblyReference.UnifiedReferenceDependsOn" : "ResolveAssemblyReference.ReferenceDependsOn";
@@ -1743,7 +1746,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="importance">The importance of the message.</param>
         private void LogFullName(Reference reference, MessageImportance importance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(reference, nameof(reference));
+            ErrorUtilities.VerifyThrowArgumentNull(reference);
 
             if (reference.IsResolved)
             {
@@ -1791,7 +1794,14 @@ namespace Microsoft.Build.Tasks
                     if (lastSearchPath != location.SearchPath)
                     {
                         lastSearchPath = location.SearchPath;
-                        Log.LogMessage(importance, Strings.SearchPath, lastSearchPath);
+                        if (location.ParentAssembly != null)
+                        {
+                            Log.LogMessage(importance, Strings.SearchPathAddedByParentAssembly, lastSearchPath, location.ParentAssembly);
+                        }
+                        else
+                        {
+                            Log.LogMessage(importance, Strings.SearchPath, lastSearchPath);
+                        }
                         if (logAssemblyFoldersMinimal)
                         {
                             Log.LogMessage(importance, Strings.SearchedAssemblyFoldersEx);
@@ -2066,12 +2076,6 @@ namespace Microsoft.Build.Tasks
             {
                 // Either the cache is dirty (we added or updated an item) or the number of items actually used is less than what
                 // we got by reading the state file prior to execution. Serialize the cache into the state file.
-                if (FailIfNotIncremental)
-                {
-                    Log.LogErrorFromResources("ResolveAssemblyReference.WritingCacheFile", _stateFile);
-                    return;
-                }
-
                 _cache.SerializeCache(_stateFile, Log);
             }
         }
@@ -3205,7 +3209,7 @@ namespace Microsoft.Build.Tasks
             return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
                 p => FileUtilities.DirectoryExistsNoThrow(p),
-                (p, searchPattern) => Directory.GetDirectories(p, searchPattern),
+                (p, searchPattern) => FileSystems.Default.EnumerateDirectories(p, searchPattern).ToArray(),
                 p => AssemblyNameExtension.GetAssemblyNameEx(p),
                 (string path, ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache, out AssemblyNameExtension[] dependencies, out string[] scatterFiles, out FrameworkNameVersioning frameworkName)
                     => AssemblyInformation.GetAssemblyMetadata(path, assemblyMetadataCache, out dependencies, out scatterFiles, out frameworkName),

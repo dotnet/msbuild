@@ -3,8 +3,6 @@
 
 using System.Runtime.InteropServices;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -14,7 +12,7 @@ namespace Microsoft.Build.Framework
     /// The level of detail (i.e. verbosity) of an event log is entirely controlled by the logger generating the log -- a logger
     /// will be directed to keep its verbosity at a certain level, based on user preferences, but a logger is free to choose the
     /// events it logs for each verbosity level.
-    /// 
+    ///
     /// LOGGING GUIDELINES FOR EACH VERBOSITY LEVEL:
     /// 1) Quiet -- only display a summary at the end of build
     /// 2) Minimal -- only display errors, warnings, high importance events and a build summary
@@ -22,9 +20,9 @@ namespace Microsoft.Build.Framework
     /// 4) Detailed -- display all errors, warnings, high and normal importance events, all status events, and a build summary
     /// 5) Diagnostic -- display all events, and a build summary
     /// </remarks>
-    // 
+    //
     // WARNING: VS Automation code for the Tools/Options MSBuild build verbosity setting will be broken
-    // by changes to this enum (not to mention existing MSBuild clients and vsproject code). 
+    // by changes to this enum (not to mention existing MSBuild clients and vsproject code).
     // Please make sure to talk to automation devs before changing it.
     [ComVisible(true)]
     public enum LoggerVerbosity
@@ -75,7 +73,7 @@ namespace Microsoft.Build.Framework
         /// to defaults. If a logger does not take parameters, it can ignore this property.
         /// </summary>
         /// <value>The parameter string (can be null).</value>
-        string Parameters { get; set; }
+        string? Parameters { get; set; }
 
         /// <summary>
         /// Called by the build engine to allow loggers to subscribe to the events they desire.

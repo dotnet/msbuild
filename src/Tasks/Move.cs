@@ -26,7 +26,7 @@ namespace Microsoft.Build.Tasks
     {
         /// <summary>
         /// Flags for MoveFileEx.
-        /// 
+        ///
         /// </summary>
         private const NativeMethods.MoveFileFlags Flags = NativeMethods.MoveFileFlags.MOVEFILE_WRITE_THROUGH |    // Do not return until the Move is complete
                                                           NativeMethods.MoveFileFlags.MOVEFILE_REPLACE_EXISTING | // Replace any existing target
@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (ArgumentException e)
                     {
-                        Log.LogErrorWithCodeFromResources("Move.Error", SourceFiles[i].ItemSpec, DestinationFolder.ItemSpec, e.Message);
+                        Log.LogErrorWithCodeFromResources("Move.Error", SourceFiles[i].ItemSpec, DestinationFolder.ItemSpec, e.Message, string.Empty);
 
                         // Clear the outputs.
                         DestinationFiles = Array.Empty<ITaskItem>();
@@ -169,7 +169,8 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    Log.LogErrorWithCodeFromResources("Move.Error", sourceFile, destinationFile, e.Message);
+                    string lockedFileMessage = LockCheck.GetLockedFileMessage(sourceFile);
+                    Log.LogErrorWithCodeFromResources("Move.Error", sourceFile, destinationFile, e.Message, lockedFileMessage);
                     success = false;
 
                     // Continue with the rest of the list
@@ -250,7 +251,7 @@ namespace Microsoft.Build.Tasks
 
             if (!result)
             {
-                // It failed so we need a nice error message. Unfortunately 
+                // It failed so we need a nice error message. Unfortunately
                 // Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error()); and
                 // throw new IOException((new Win32Exception(error)).Message)
                 // do not produce great error messages (eg., "The operation succeeded" (!)).

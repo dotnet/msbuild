@@ -18,7 +18,7 @@ public sealed class ExtendedCriticalBuildMessageEventArgs : CriticalBuildMessage
     public string ExtendedType { get; set; }
 
     /// <inheritdoc />
-    public IDictionary<string, string?>? ExtendedMetadata { get; set; }
+    public Dictionary<string, string?>? ExtendedMetadata { get; set; }
 
     /// <inheritdoc />
     public string? ExtendedData { get; set; }
@@ -117,7 +117,7 @@ public sealed class ExtendedCriticalBuildMessageEventArgs : CriticalBuildMessage
         string? senderName,
         DateTime eventTimestamp,
         params object[]? messageArgs)
-        //// Force importance to High. 
+        //// Force importance to High.
         : base(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, eventTimestamp, messageArgs) => ExtendedType = type;
 
     /// <summary>

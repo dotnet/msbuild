@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         /// <summary>
         /// Get the item of type "i" using the item Xml fragment provided.
-        /// If there is more than one, fail. 
+        /// If there is more than one, fail.
         /// </summary>
         private static ProjectItem GetOneItemFromFragment(string fragment)
         {
@@ -77,7 +77,9 @@ namespace Microsoft.Build.UnitTests.Definition
         /// </summary>
         private static IList<ProjectItem> GetItems(string content)
         {
-            ProjectRootElement projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement projectXml = projectRootElementFromString.Project;
+
             Project project = new Project(projectXml);
             IList<ProjectItem> item = Helpers.MakeList(project.GetItems("i"));
 

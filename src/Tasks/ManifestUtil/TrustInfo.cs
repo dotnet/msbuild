@@ -203,7 +203,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             // <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
             //      <!--
             //          UAC Manifest Options
-            //          If you want to change the Windows User Account Control level replace the 
+            //          If you want to change the Windows User Account Control level replace the
             //          requestedExecutionLevel node with one of the following .
             //          <requestedExecutionLevel  level="asInvoker" />
             //          <requestedExecutionLevel  level="requireAdministrator" />
@@ -234,8 +234,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             //
             if (inputRequestedPrivilegeElement == null)
             {
-                // If UAC requestedPrivilege node is missing (possibly due to upgraded project) then automatically 
-                //  add a default UAC requestedPrivilege node with a default requestedExecutionLevel node set to 
+                // If UAC requestedPrivilege node is missing (possibly due to upgraded project) then automatically
+                //  add a default UAC requestedPrivilege node with a default requestedExecutionLevel node set to
                 //  the expected ClickOnce level (asInvoker) with uiAccess as false
                 //
                 executionLevelString = Constants.UACAsInvoker;
@@ -500,7 +500,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             // Partial trust is not supported on .NET Core.
             // Fail if loaded manifest does not specify full-trust.
             // It can happen if manifest is manually modifed.
-            if (unrestrictedAttribute == null || (false == Boolean.Parse(unrestrictedAttribute.Value)))
+            if (unrestrictedAttribute == null || (!Boolean.Parse(unrestrictedAttribute.Value)))
             {
                 throw new ArgumentException("Partial trust is not supported.");
             }
@@ -534,7 +534,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var m = new MemoryStream();
             Write(m);
             m.Position = 0;
-            var r = new StreamReader(m);
+            using var r = new StreamReader(m);
+
             return r.ReadToEnd();
         }
 

@@ -78,7 +78,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory factory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
+            ErrorUtilities.VerifyThrowArgumentNull(factory);
 
             // This can run concurrently. To be properly detect internal bug when we create more nodes than allowed
             //   we add into _nodeContexts premise of future node and verify that it will not cross limits.

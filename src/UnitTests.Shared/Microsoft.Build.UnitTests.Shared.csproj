@@ -1,69 +1,47 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build">
-  <Import Project="..\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{E1ADB824-2B34-4920-953F-746DFD6DB3C1}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Microsoft.Build.UnitTests.Shared</RootNamespace>
+    <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <AssemblyName>Microsoft.Build.UnitTests.Shared</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DoNotLocalizeProject>true</DoNotLocalizeProject>
     <IsShipping>false</IsShipping>
+    <IsTestProject>false</IsTestProject>
+    <IsTestLibrary>true</IsTestLibrary>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-MONO|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-MONO|AnyCPU'" />
-  <ItemGroup Condition="'$(NetCoreBuild)' != 'true'">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml" />
+  <ItemGroup>
+    <!-- Implicit references to xunit.core and xunit.assert in test projects by Arcade
+         cause restore failures if PackageVersion is in the normal .props file. -->
+    <PackageReference Include="xunit.assert" VersionOverride="$(XUnitVersion)" />
+    <PackageReference Include="xunit.core" VersionOverride="$(XUnitVersion)" />
+    <PackageReference Include="Shouldly" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
-      <Link>BuildEnvironmentHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Compat\SafeHandleZeroOrMinusOneIsInvalid.cs"  Condition="'$(NetCoreBuild)' == 'true'">
-      <Link>SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Constants.cs">
-      <Link>Constants.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ErrorUtilities.cs">
-      <Link>ErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>EscapingUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ExceptionHandling.cs">
-      <Link>ExceptionHandling.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>FileUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
-      <Link>FileUtilitiesRegex.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ResourceUtilities.cs">
-      <Link>ResourceUtilities.cs</Link>
-    </Compile>
-    <Compile Include="AssemblyResources.cs" />
-    <Compile Include="RunnerUtilities.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj">
-      <Project>{828566ee-6f6a-4ef4-98b0-513f7df9c628}</Project>
-      <Name>Microsoft.Build.Utilities</Name>
+    <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
+    <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
+    <ProjectReference Include="..\MSBuild.Bootstrap\MSBuild.Bootstrap.csproj">
+      <Private>false</Private>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="project.json" />
+    <Compile Include="..\Shared\IsExternalInit.cs" />
   </ItemGroup>
-  <Import Project="..\dir.targets" />
+
+  <Import Project="..\..\eng\BootStrapMsBuild.props" />
+
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <TestBootstrapBinaryDestination>$(BootstrapDestination)Current\Bin</TestBootstrapBinaryDestination>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+    <TestBootstrapBinaryDestination>$(ArtifactsBinDir)bootstrap\core</TestBootstrapBinaryDestination>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="Microsoft.Build.UnitTests.Shared.BootstrapLocationAttribute">
+      <_Parameter1>$(TestBootstrapBinaryDestination)</_Parameter1>
+      <_Parameter2>$(BootstrapSdkVersion)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
 </Project>

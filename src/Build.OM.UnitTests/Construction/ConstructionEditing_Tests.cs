@@ -2313,14 +2313,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void Dirtying_ItemCondition()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var projectFileContents = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <i Include=""i1"" />
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             ProjectItem item = Helpers.GetFirst(project.Items);
 
             item.Xml.Condition = "false";
@@ -2338,16 +2339,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void Dirtying_MetadataCondition()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <i Include=""i1"">
       <m>m1</m>
     </i>
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
             ProjectMetadata metadatum = Helpers.GetFirst(project.Items).GetMetadata("m");
 
             metadatum.Xml.Condition = "false";
@@ -3131,6 +3133,44 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     </i3>
   </ItemGroup>
 </Project>");
+
+            Helpers.VerifyAssertProjectContent(expected, project);
+        }
+
+        [Fact]
+        public void SetMetadataName()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup = project.AddItemGroup();
+
+            var item = itemGroup.AddItem("i1", "i");
+            var attributeMetadata = item.AddMetadata("A", "value_a", expressAsAttribute: true);
+            var elementMetadata = item.AddMetadata("B", "value_b", expressAsAttribute: false);
+
+            string expected = """
+                <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+                  <ItemGroup>
+                    <i1 Include="i" A="value_a">
+                      <B>value_b</B>
+                    </i1>
+                  </ItemGroup>
+                </Project>
+                """;
+
+            Helpers.VerifyAssertProjectContent(expected, project);
+
+            attributeMetadata.Name = "A2";
+            elementMetadata.Name = "B2";
+
+            expected = """
+                <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+                  <ItemGroup>
+                    <i1 Include="i" A2="value_a">
+                      <B2>value_b</B2>
+                    </i1>
+                  </ItemGroup>
+                </Project>
+                """;
 
             Helpers.VerifyAssertProjectContent(expected, project);
         }

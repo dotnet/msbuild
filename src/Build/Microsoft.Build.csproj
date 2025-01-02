@@ -1,11 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
     <TargetFrameworks>$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
 
@@ -15,7 +14,9 @@
     <EnableDefaultItems>false</EnableDefaultItems>
 
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
-    <CreateTlb>true</CreateTlb>
+    <!-- Do not create Tlbs when building in .NET product mode. The packages are not shipped to VS,
+         only their contents redisted within the SDK. -->
+    <CreateTlb Condition="'$(DotNetBuild)' != 'true'">true</CreateTlb>
     <IsPackable>true</IsPackable>
     <PackageDescription>This package contains the $(MSBuildProjectName) assembly which is used to create, edit, and evaluate MSBuild projects.</PackageDescription>
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
@@ -29,27 +30,26 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
-
-    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
-    <PackageReference Include="System.Security.Principal.Windows" />
-    <PackageReference Include="System.Threading.Tasks.Dataflow" />
 
-    <PackageReference Include="System.Reflection.Metadata" Condition="'$(MonoBuild)' == 'true'" />
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
 
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
   </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildFromSource)' != 'true'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
+  
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System.IO.Compression" />
     <PackageReference Include="System.Memory" />
+    <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
@@ -88,6 +88,9 @@
     <Compile Include="..\Shared\StringExtensions.cs">
       <Link>SharedUtilities\StringExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\StringUtils.cs">
+      <Link>SharedUtilities\StringUtils.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
     </Compile>
@@ -120,6 +123,9 @@
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IsExternalInit.cs">
+      <Link>BuildCheck\Utilities\IsExternalInit.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
@@ -130,8 +136,11 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
+    <Compile Include="BackEnd\BuildManager\BuildRequestDataBase.cs" />
+    <Compile Include="BackEnd\BuildManager\BuildSubmissionBase.cs" />
     <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\BuildManager\GlobalPropertiesLookup.cs" />
     <Compile Include="BackEnd\BuildManager\ProjectIsolationMode.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientPacketPump.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientExitType.cs" />
@@ -149,21 +158,23 @@
     <Compile Include="BackEnd\Components\FileAccesses\FileAccessReport.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\OutOfProcNodeFileAccessManager.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\ProcessReport.cs" />
+    <Compile Include="BackEnd\Shared\EventsCreatorHelper.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\AssemblyLoadsTracker.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\TranslationHelpers.cs" />
     <Compile Include="FileSystem\*.cs" />
+    <Compile Include="BackEnd\Shared\BuildResultBase.cs" />
+    <Compile Include="BuildCheck\**\*.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
+    <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />
     <Compile Include="FileAccess\FlagsAndAttributes.cs" />
     <Compile Include="FileAccess\ProcessData.cs" />
     <Compile Include="FileAccess\ReportedFileOperation.cs" />
     <Compile Include="FileAccess\RequestedAccess.cs" />
-    <Compile Include="Logging\BinaryLogger\ExtendedDataFields.cs" />
-    <Compile Include="Logging\BinaryLogger\IBuildEventArgsReaderNotifications.cs" />
-    <Compile Include="Logging\BinaryLogger\IBuildEventStringsReader.cs" />
-    <Compile Include="Logging\BinaryLogger\StringReadEventArgs.cs" />
+    <Compile Include="Instance\IPropertyElementWithLocation.cs" />
+    <Compile Include="Logging\BuildEventArgsExtensions.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
@@ -226,6 +237,7 @@
     <Compile Include="BackEnd\Components\Scheduler\SchedulerCircularDependencyException.cs" />
     <Compile Include="BackEnd\Components\Scheduler\ScheduleTimeRecord.cs" />
     <Compile Include="BackEnd\Components\Scheduler\SchedulingPlan.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\CachingSdkResolverLoader.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\DefaultSdkResolver.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\ISdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverService.cs" />
@@ -243,13 +255,6 @@
     <Compile Include="BackEnd\Components\SdkResolution\SdkResultFactory.cs" />
     <Compile Include="BackEnd\Node\LoggingNodeConfiguration.cs" />
     <Compile Include="BackEnd\Shared\ConfigurationMetadata.cs" />
-    <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
-    <Compile Include="Collections\ConcurrentStackExtensions.cs" />
-    <Compile Include="Collections\LookasideStringInterner.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\HashSet.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs" />
-    <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs" />
     <Compile Include="Construction\ImplicitImportLocation.cs" />
     <Compile Include="Construction\ProjectSdkElement.cs" />
     <Compile Include="Definition\ProjectOptions.cs" />
@@ -356,10 +361,12 @@
     <Compile Include="BackEnd\Components\Scheduler\ScheduleResponse.cs" />
     <Compile Include="BackEnd\Node\INode.cs" />
     <!-- ########################## -->
-    <Compile Include="BackEnd\TaskExecutionHost\AddInParts\ITaskExecutionHost.cs" />
     <Compile Include="BackEnd\TaskExecutionHost\TaskExecutionHost.cs" />
     <!-- #### COLLECTIONS ### -->
     <Compile Include="..\Shared\CollectionHelpers.cs" />
+    <Compile Include="Collections\ArrayDictionary.cs" />
+    <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
+    <Compile Include="Collections\ConcurrentStackExtensions.cs" />
     <Compile Include="Collections\ConvertingEnumerable.cs" />
     <Compile Include="Collections\CopyOnReadEnumerable.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
@@ -368,16 +375,26 @@
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
+    <Compile Include="Collections\IConstrainableDictionary.cs" />
+    <Compile Include="Collections\ICopyOnWritePropertyDictionary.cs" />
+    <Compile Include="Collections\IItemDictionary.cs" />
+    <Compile Include="Collections\IMultiDictionary.cs" />
     <Compile Include="Collections\ItemDictionary.cs" />
     <Compile Include="Collections\IImmutable.cs" />
     <Compile Include="Collections\MultiDictionary.cs" />
     <Compile Include="Collections\IValued.cs" />
+    <Compile Include="Collections\LookasideStringInterner.cs" />
     <Compile Include="Collections\PropertyDictionary.cs" />
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
     <Compile Include="Collections\ReadOnlyConvertingDictionary.cs" />
-    <!-- ######################## -->
+    <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\HashHelpers.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableEntryHashSet.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableValuedEntryHashSet.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\RetrievableEntryHashSet.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\RetrievableValuedEntryHashSet.cs" />
     <Compile Include="Collections\WeakValueDictionary.cs" />
-    <Compile Include="Collections\ArrayDictionary.cs" />
     <!-- #### CONSTRUCTION MODEL ### -->
     <Compile Include="Construction\ProjectElement.cs" />
     <Compile Include="Construction\ProjectElementContainer.cs" />
@@ -475,7 +492,6 @@
     <Compile Include="Evaluation\ProjectRootElementCacheBase.cs" />
     <Compile Include="Evaluation\ProjectRootElementCache.cs" />
     <Compile Include="Evaluation\SimpleProjectRootElementCache.cs" />
-    <Compile Include="Evaluation\ProjectStringCache.cs" />
     <Compile Include="Evaluation\SemiColonTokenizer.cs" />
     <Compile Include="Evaluation\StringMetadataTable.cs" />
     <Compile Include="Evaluation\ExpressionShredder.cs" />
@@ -490,6 +506,15 @@
     <Compile Include="Globbing\IMSBuildGlob.cs" />
     <Compile Include="Globbing\Visitor\ParsedGlobCollector.cs" />
     <!-- #### INSTANCE MODEL ### -->
+    <Compile Include="Instance\IImmutableInstanceProvider.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableElementCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableGlobalPropertiesCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDefinitionsListConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDictionary.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableLinkedMultiDictionaryConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutablePropertyCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableStringValuedListConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableValuedElementCollectionConverter.cs" />
     <Compile Include="Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="Instance\HostServices.cs" />
     <Compile Include="Instance\ProjectTargetInstanceChild.cs" />
@@ -520,12 +545,14 @@
     <Compile Include="Logging\BinaryLogger\BinaryLogger.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogRecordKind.cs" />
     <Compile Include="Logging\BinaryLogger\BinaryLogReplayEventSource.cs" />
-    <Compile Include="Logging\BinaryLogger\BuildEventArgsDispatcher.cs" />
+    <Compile Include="Logging\BinaryLogger\EventArgsDispatcher.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsFieldFlags.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsFields.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsReader.cs" />
     <Compile Include="Logging\BinaryLogger\BuildEventArgsWriter.cs" />
     <Compile Include="Logging\BinaryLogger\ProjectImportsCollector.cs" />
+    <Compile Include="Logging\BinaryLogger\ExtendedDataFields.cs" />
+    <Compile Include="Logging\BinaryLogger\Postprocessing\*.cs" />
     <Compile Include="Logging\ConsoleLogger.cs" />
     <Compile Include="Logging\DistributedLoggers\DistributedFileLogger.cs" />
     <Compile Include="Logging\DistributedLoggers\ConfigurableForwardingLogger.cs" />
@@ -669,4 +696,52 @@
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
+
+  <PropertyGroup>
+    <NuGetFrameworkWrapperRedirects_FilePath>$(IntermediateOutputPath)NuGetFrameworkWrapper.redirects.cs</NuGetFrameworkWrapperRedirects_FilePath>
+  </PropertyGroup>
+
+  <!-- Extract binding redirects for MSBuild and dependencies from MSBuild.exe.config into a source file.
+       This allows us to create secondary AppDomains with the same redirects at run-time, see
+       https://github.com/dotnet/msbuild/blob/main/documentation/NETFramework-NGEN.md#nugetframeworks -->
+  <Target Name="GenerateAppDomainConfig" Inputs="..\MSBuild\app.config;..\MSBuild\app.amd64.config;$(MSBuildThisFileFullPath)" Outputs="$(NuGetFrameworkWrapperRedirects_FilePath)" BeforeTargets="CoreCompile" Condition="'$(FeatureAppDomain)' == 'true'">
+    <PropertyGroup>
+      <BindingRedirectNamespace>&lt;Namespace Prefix='ns' Uri='urn:schemas-microsoft-com:asm.v1' /&gt;</BindingRedirectNamespace>
+      <BindingRedirectXPath>/configuration/runtime/ns:assemblyBinding/*</BindingRedirectXPath>
+    </PropertyGroup>
+
+    <XmlPeek XmlInputPath="..\MSBuild\app.config" Query="$(BindingRedirectXPath)" Namespaces="$(BindingRedirectNamespace)">
+      <Output TaskParameter="Result" ItemName="BindingRedirects32" />
+    </XmlPeek>
+    <XmlPeek XmlInputPath="..\MSBuild\app.amd64.config" Query="$(BindingRedirectXPath)" Namespaces="$(BindingRedirectNamespace)">
+      <Output TaskParameter="Result" ItemName="BindingRedirects64" />
+    </XmlPeek>
+
+    <PropertyGroup>
+      <NuGetFrameworkWrapperRedirects_Content><![CDATA[
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace Microsoft.Build.Evaluation%3B;
+
+[System.CodeDom.Compiler.GeneratedCode("GenerateAppDomainConfig", "1.0")]
+internal sealed partial class NuGetFrameworkWrapper
+{
+    private const string _bindingRedirects32 = """;@(BindingRedirects32);"""%3B;
+    private const string _bindingRedirects64 = """;@(BindingRedirects64);"""%3B;
+}
+]]>
+      </NuGetFrameworkWrapperRedirects_Content>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(NuGetFrameworkWrapperRedirects_FilePath)" Overwrite="true" WriteOnlyWhenDifferent="true" Lines="$(NuGetFrameworkWrapperRedirects_Content)" />
+
+    <ItemGroup>
+      <Compile Remove="$(NuGetFrameworkWrapperRedirects_FilePath)" />
+      <Compile Include="$(NuGetFrameworkWrapperRedirects_FilePath)">
+        <Link>Utilities\NuGetFrameworkWrapper.redirects.cs</Link>
+      </Compile>
+      <FileWrites Include="$(NuGetFrameworkWrapperRedirects_FilePath)" />
+    </ItemGroup>
+  </Target>
 </Project>

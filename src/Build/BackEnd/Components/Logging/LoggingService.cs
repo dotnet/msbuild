@@ -10,10 +10,12 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
+using Microsoft.Build.Experimental.BuildCheck;
 
 #nullable disable
 
@@ -68,7 +70,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// Logging services is used as a helper class to assist logging messages in getting to the correct loggers.
     /// </summary>
-    internal partial class LoggingService : ILoggingService, INodePacketHandler, IBuildComponent
+    internal partial class LoggingService : ILoggingService, INodePacketHandler
     {
         /// <summary>
         /// The default maximum size for the logging event queue.
@@ -200,12 +202,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool? _includeEvaluationProfile;
 
         /// <summary>
-        /// Whether properties and items should be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>.
-        /// </summary>
-        private bool? _includeEvaluationPropertiesAndItems;
-
-        /// <summary>
         /// Whether to include task inputs in task events.
         /// </summary>
         private bool? _includeTaskInputs;
@@ -214,6 +210,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// A list of build submission IDs that have logged errors.  If an error is logged outside of a submission, the submission ID is <see cref="BuildEventContext.InvalidSubmissionId"/>.
         /// </summary>
         private readonly ISet<int> _buildSubmissionIdsThatHaveLoggedErrors = new HashSet<int>();
+
+        /// <summary>
+        /// A list of build submission IDs that have logged errors through buildcheck.  If an error is logged outside of a submission, the submission ID is <see cref="BuildEventContext.InvalidSubmissionId"/>.
+        /// </summary>
+        private readonly ISet<int> _buildSubmissionIdsThatHaveLoggedBuildcheckErrors = new HashSet<int>();
 
         /// <summary>
         /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext"/>.  If an empty set, all warnings are treated as errors.
@@ -356,6 +357,11 @@ namespace Microsoft.Build.BackEnd.Logging
         #region Properties
 
         /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        public IBuildEngineDataRouter BuildEngineDataRouter => this;
+
+        /// <summary>
         /// Properties we need to serialize from the child node
         /// </summary>
         public string[] PropertiesToSerialize
@@ -463,6 +469,11 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Gets or sets a value that will error when the build process fails an up-to-date check.
+        /// </summary>
+        public bool Question { get; set; }
+
+        /// <summary>
         /// The list of descriptions which describe how to create forwarding loggers on a node.
         /// This is used by the node provider to get a list of registered descriptions so that
         /// they can be transmitted to child nodes.
@@ -534,33 +545,77 @@ namespace Microsoft.Build.BackEnd.Logging
             set => _includeTaskInputs = value;
         }
 
-        /// <summary>
-        /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>?
-        /// </summary>
-        public bool IncludeEvaluationPropertiesAndItems
+        /// <inheritdoc cref="ILoggingService.SetIncludeEvaluationPropertiesAndItemsInEvents"/>
+        public void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent, bool inEvaluationFinishedEvent)
+        {
+            _evalDataBehaviorSet = true;
+            IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = inEvaluationFinishedEvent;
+            IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = inProjectStartedEvent;
+        }
+
+        private bool _evalDataBehaviorSet;
+        private bool _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
+        private bool _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
+        private void InferEvalDataBehavior()
+        {
+            if (_evalDataBehaviorSet)
+            {
+                return;
+            }
+            // Set this right away - to prevent SO exception in case of any future refactoring
+            //  that would refer to the IncludeEvaluation... properties here
+            _evalDataBehaviorSet = true;
+
+            bool? escapeHatch = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation;
+            if (escapeHatch.HasValue)
+            {
+                IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = escapeHatch.Value;
+                IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !escapeHatch.Value;
+            }
+            else
+            {
+                var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>().ToList();
+
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                {
+                    // If any logger requested the data - we need to emit them
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
+                        sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
+                    // If any logger didn't request the data - hence it's likely legacy logger
+                    //  - we need to populate the data in legacy way
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
+                        sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
+                }
+                else
+                {
+                    bool allSinksIncludeEvalData = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = allSinksIncludeEvalData;
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !allSinksIncludeEvalData;
+                }
+            }
+        }
+
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
         {
             get
             {
-                if (_includeEvaluationPropertiesAndItems == null)
-                {
-                    var escapeHatch = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation;
-                    if (escapeHatch.HasValue)
-                    {
-                        _includeEvaluationPropertiesAndItems = escapeHatch.Value;
-                    }
-                    else
-                    {
-                        var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>();
-                        // .All() on an empty list defaults to true, we want to default to false
-                        _includeEvaluationPropertiesAndItems = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
-                    }
-                }
-
-                return _includeEvaluationPropertiesAndItems ?? false;
+                InferEvalDataBehavior();
+                return _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
             }
+            private set => _includeEvaluationPropertiesAndItemsInProjectStartedEvent = value;
+        }
 
-            set => _includeEvaluationPropertiesAndItems = value;
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
+        {
+            get
+            {
+                InferEvalDataBehavior();
+                return _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
+            }
+            private set => _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = value;
         }
 
         /// <summary>
@@ -570,6 +625,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns><code>true</code> if the build submission logged an errors, otherwise <code>false</code>.</returns>
         public bool HasBuildSubmissionLoggedErrors(int submissionId)
         {
+            if (_buildSubmissionIdsThatHaveLoggedBuildcheckErrors.Contains(submissionId))
+            {
+                return true;
+            }
+
             // Warnings as errors are not tracked if the user did not specify to do so
             if (WarningsAsErrors == null && _warningsAsErrorsByProject == null)
             {
@@ -680,6 +740,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="codes">Codes to add</param>
         private void AddWarningsAsMessagesOrErrors(ref IDictionary<WarningsConfigKey, ISet<string>> warningsByProject, BuildEventContext buildEventContext, ISet<string> codes)
         {
+            if (codes == null)
+            {
+                return;
+            }
+
             lock (_lockObject)
             {
                 WarningsConfigKey key = GetWarningsConfigKey(buildEventContext);
@@ -797,11 +862,15 @@ namespace Microsoft.Build.BackEnd.Logging
                 // this information default to 1
                 _maxCPUCount = buildComponentHost.BuildParameters.MaxNodeCount;
 
+                Question = buildComponentHost.BuildParameters.Question;
+
                 // Ask the component host if onlyLogCriticalEvents is true or false. If the host does
                 // not have this information default to false.
                 _onlyLogCriticalEvents = buildComponentHost.BuildParameters.OnlyLogCriticalEvents;
 
                 _serviceState = LoggingServiceState.Initialized;
+
+                _buildEngineDataRouter = (buildComponentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)?.BuildEngineDataRouter;
             }
         }
 
@@ -915,7 +984,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private void WarnOnDeprecatedCustomArgsSerialization(LogMessagePacket loggingPacket)
         {
             if (loggingPacket.EventType == LoggingEventType.CustomEvent
-                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8)
                 && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
             {
                 BuildEventArgs buildEvent = loggingPacket.NodeBuildEvent.Value.Value;
@@ -998,13 +1066,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
                     // Get the Id of the eventSourceSink which was created for the first logger.
                     // We keep a reference to this Id so that all other central loggers registered on this logging service (from registerLogger)
-                    // will be attached to that eventSource sink so that they get all of the events forwarded by 
+                    // will be attached to that eventSource sink so that they get all of the events forwarded by
                     // forwarded by the CentralForwardingLogger
                     _centralForwardingLoggerSinkId = centralForwardingLoggerDescription.LoggerId;
                 }
                 else
                 {
-                    // We have already create a forwarding logger and have a single eventSink which 
+                    // We have already create a forwarding logger and have a single eventSink which
                     // a logger can listen to inorder to get all events in the system
                     EventSourceSink eventSource = (EventSourceSink)_eventSinkDictionary[_centralForwardingLoggerSinkId];
 
@@ -1035,7 +1103,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            // UNDONE: (Logging) This should re-initialize this logging service. 
+            // UNDONE: (Logging) This should re-initialize this logging service.
         }
 
         /// <summary>
@@ -1225,7 +1293,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs to process</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
-        internal virtual void ProcessLoggingEvent(object buildEvent)
+        protected internal virtual void ProcessLoggingEvent(object buildEvent)
         {
             ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
@@ -1275,8 +1343,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (loggingPacket?.NodeBuildEvent != null && _componentHost != null)
             {
-                var projectStartedEventArgs = loggingPacket.NodeBuildEvent.Value.Value as ProjectStartedEventArgs;
-                if (projectStartedEventArgs != null && _configCache.Value != null)
+                if (loggingPacket.NodeBuildEvent.Value.Value is ProjectStartedEventArgs projectStartedEventArgs && _configCache.Value != null)
                 {
                     ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(projectStartedEventArgs.ProjectId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
                     BuildRequestConfiguration buildRequestConfiguration = _configCache.Value[projectStartedEventArgs.ProjectId];
@@ -1287,6 +1354,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     s_projectStartedEventArgsGlobalProperties.Value.SetValue(projectStartedEventArgs, buildRequestConfiguration.GlobalProperties.ToDictionary(), index: null);
 
                     s_projectStartedEventArgsToolsVersion.Value.SetValue(projectStartedEventArgs, buildRequestConfiguration.ToolsVersion, null);
+
+                    // When logging happens out of process, we need to map the project context id to the project file on the receiving side.
+                    if (!_projectFileMap.ContainsKey(projectStartedEventArgs.BuildEventContext.ProjectContextId))
+                    {
+                        _projectFileMap[projectStartedEventArgs.BuildEventContext.ProjectContextId] = projectStartedEventArgs.ProjectFile;
+                    }
                 }
             }
         }
@@ -1580,8 +1653,25 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (buildEventArgs is BuildErrorEventArgs errorEvent)
             {
-                // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
-                _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
+                int submissionId = errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId;
+
+                if (buildEventArgs is BuildCheckResultError)
+                {
+                    _buildSubmissionIdsThatHaveLoggedBuildcheckErrors.Add(submissionId);
+                }
+                else
+                {
+                    // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
+                    _buildSubmissionIdsThatHaveLoggedErrors.Add(submissionId);
+                }
+            }
+
+            // Respect warning-promotion properties from the remote project
+            if (buildEventArgs is ProjectStartedEventArgs projectStartedEvent)
+            {
+                AddWarningsAsErrors(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsAsErrors);
+                AddWarningsAsMessages(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsAsMessages);
+                AddWarningsNotAsErrors(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsNotAsErrors);
             }
 
             if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
@@ -1641,10 +1731,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 // them.
                 _filterEventSource.Consume(eventArg);
 
-                // Now that the forwarding loggers have been given the chance to log the build started and finished events we need to check the 
+                // Now that the forwarding loggers have been given the chance to log the build started and finished events we need to check the
                 // central logger sinks to see if they have received the events or not. If the sink has not received the event we need to send it to the
                 // logger for backwards compatibility with orcas.
-                // In addition we need to make sure we manually forward the events because in orcas the forwarding loggers were not allowed to 
+                // In addition we need to make sure we manually forward the events because in orcas the forwarding loggers were not allowed to
                 // forward build started or build finished events. In the new OM we allow the loggers to forward the events. However since orcas did not forward them
                 // we need to support loggers which cannot forward the events.
                 if (eventArg is BuildStartedEventArgs)
@@ -1751,8 +1841,16 @@ namespace Microsoft.Build.BackEnd.Logging
                 Build.Logging.ConsoleLogger consoleLogger => consoleLogger.GetMinimumMessageImportance(),
                 Build.Logging.ConfigurableForwardingLogger forwardingLogger => forwardingLogger.GetMinimumMessageImportance(),
 
-                // Central forwarding loggers are used in worker nodes if logging verbosity could not be optimized, i.e. in cases
-                // where we must log everything. They can be ignored in inproc nodes.
+                // The BuildCheck connector logger consumes only high priority messages.
+                BuildCheckForwardingLogger => MessageImportance.High,
+                BuildCheckConnectorLogger => MessageImportance.High,
+
+                // If this is not an OutOfProc node, we can ignore the central forwarding logger, because we'll be
+                // setting the message importance to accurate level based on the exact needs of the central logger.
+                // That will happen in separate call to this method, with the central logger itself. This is because in the
+                // inproc case, we register the central loggers (that are the destination for the logging),
+                // wherease in the out-of-proc case, we register the forwarding loggers only - and those need to make sure
+                // to forward at minimum what is required by the central logger.
                 CentralForwardingLogger => (_nodeId > 1 ? MessageImportance.Low : null),
 
                 // The null logger has no effect on minimum verbosity.

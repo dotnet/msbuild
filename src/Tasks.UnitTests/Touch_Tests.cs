@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests
             {
                 return true;
             }
-            Assert.True(false, "Unexpected file exists: " + path);
+            Assert.Fail("Unexpected file exists: " + path);
 
             return true;
         }
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests
             }
 
 
-            Assert.True(false, "Unexpected file create: " + path);
+            Assert.Fail("Unexpected file create: " + path);
             return null;
         }
 
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests
                 return System.IO.FileAttributes.ReadOnly;
             }
 
-            Assert.True(false, "Unexpected file attributes: " + path);
+            Assert.Fail("Unexpected file attributes: " + path);
             return a;
         }
 
@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests
             {
                 return;
             }
-            Assert.True(false, "Unexpected set file attributes: " + path);
+            Assert.Fail("Unexpected set file attributes: " + path);
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests
                 throw new IOException();
             }
 
-            Assert.True(false, "Unexpected set last access time: " + path);
+            Assert.Fail("Unexpected set last access time: " + path);
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace Microsoft.Build.UnitTests
             }
 
 
-            Assert.True(false, "Unexpected set last write time: " + path);
+            Assert.Fail("Unexpected set last write time: " + path);
         }
 
         [Fact]
@@ -377,7 +377,7 @@ namespace Microsoft.Build.UnitTests
 
             bool success = Execute(t);
 
-            Assert.False(success);
+            Assert.True(success);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.CreatingFile"), mynonexisting_txt, "AlwaysCreate"),
@@ -401,7 +401,7 @@ namespace Microsoft.Build.UnitTests
 
             bool success = Execute(t);
 
-            Assert.False(success);
+            Assert.True(success);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt),

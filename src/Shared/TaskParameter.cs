@@ -238,24 +238,10 @@ namespace Microsoft.Build.BackEnd
                     TranslatePrimitiveTypeArray(translator);
                     break;
                 case TaskParameterType.ValueType:
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
-                    {
-                        TranslateValueType(translator);
-                    }
-                    else
-                    {
-                        translator.TranslateDotNet(ref _wrappedParameter);
-                    }
+                    TranslateValueType(translator);
                     break;
                 case TaskParameterType.ValueTypeArray:
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
-                    {
-                        TranslateValueTypeArray(translator);
-                    }
-                    else
-                    {
-                        translator.TranslateDotNet(ref _wrappedParameter);
-                    }
+                    TranslateValueTypeArray(translator);
                     break;
                 case TaskParameterType.ITaskItem:
                     TranslateITaskItem(translator);
@@ -768,7 +754,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public TaskParameterTaskItem(string escapedItemSpec, string escapedDefiningProject, Dictionary<string, string> escapedMetadata)
             {
-                ErrorUtilities.VerifyThrowInternalNull(escapedItemSpec, nameof(escapedItemSpec));
+                ErrorUtilities.VerifyThrowInternalNull(escapedItemSpec);
 
                 _escapedItemSpec = escapedItemSpec;
                 _escapedDefiningProject = escapedDefiningProject;
@@ -859,7 +845,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="metadataValue">The metadata value.</param>
             public void SetMetadata(string metadataName, string metadataValue)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
+                ErrorUtilities.VerifyThrowArgumentLength(metadataName);
 
                 // Non-derivable metadata can only be set at construction time.
                 // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
@@ -876,7 +862,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="metadataName">The name of the metadata to remove.</param>
             public void RemoveMetadata(string metadataName)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
+                ErrorUtilities.VerifyThrowArgumentNull(metadataName);
                 ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
 
                 if (_customEscapedMetadata == null)
@@ -899,7 +885,7 @@ namespace Microsoft.Build.BackEnd
             /// <param name="destinationItem">The item to copy metadata to.</param>
             public void CopyMetadataTo(ITaskItem destinationItem)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
+                ErrorUtilities.VerifyThrowArgumentNull(destinationItem);
 
                 // also copy the original item-spec under a "magic" metadata -- this is useful for tasks that forward metadata
                 // between items, and need to know the source item where the metadata came from
@@ -966,7 +952,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             string ITaskItem2.GetMetadataValueEscaped(string metadataName)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
+                ErrorUtilities.VerifyThrowArgumentNull(metadataName);
 
                 string metadataValue = null;
 
@@ -1017,12 +1003,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_customEscapedMetadata == null || _customEscapedMetadata.Count == 0)
                 {
-#if TASKHOST
-                    // MSBuildTaskHost.dll compiles against .NET 3.5 which doesn't have Enumerable.Empty()
-                    return new KeyValuePair<string, string>[0];
-#else
-                    return Enumerable.Empty<KeyValuePair<string, string>>();
-#endif
+                    return [];
                 }
 
                 var result = new KeyValuePair<string, string>[_customEscapedMetadata.Count];

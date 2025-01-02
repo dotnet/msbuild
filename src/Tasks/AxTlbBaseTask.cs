@@ -17,9 +17,9 @@ namespace Microsoft.Build.Tasks
         #region Private Data
 
         /// <summary>
-        /// True if the keyfile only contains the public key data, and thus 
+        /// True if the keyfile only contains the public key data, and thus
         /// we should pass the file using the /publickey: parameter instead of
-        /// /keyfile. 
+        /// /keyfile.
         /// </summary>
         private bool _delaySigningAndKeyFileOnlyContainsPublicKey;
 
@@ -68,7 +68,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Returns the name of the tool to execute.  AxTlbBaseTask is not
-        /// executable, so return null for the ToolName -- And make sure that 
+        /// executable, so return null for the ToolName -- And make sure that
         /// Execute() logs an error!
         /// </summary>
         protected override string ToolName { get; } = null;
@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Adds commands for the tool being executed, that cannot be put in a response file.  
+        /// Adds commands for the tool being executed, that cannot be put in a response file.
         /// </summary>
         /// <param name="commandLine">The CommandLineBuilderExtension to add the commands to</param>
         protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
@@ -123,7 +123,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if parameters are valid</returns>
         protected override bool ValidateParameters()
         {
-            // Verify that a path for the tool exists -- if the tool doesn't exist in it 
+            // Verify that a path for the tool exists -- if the tool doesn't exist in it
             // we'll worry about that later
             if ((String.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(ToolPath)) &&
                 (String.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(SdkToolsPath)))
@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks
 
             if (ValidateStrongNameParameters())
             {
-                // Allow the base class to do any validation it thinks necessary -- as far 
+                // Allow the base class to do any validation it thinks necessary -- as far
                 // as we're concerned, parameters check out properly
                 return base.ValidateParameters();
             }
@@ -142,7 +142,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Adds options involving strong name signing -- syntax is the same between 
+        /// Adds options involving strong name signing -- syntax is the same between
         /// AxImp and TlbImp
         /// </summary>
         /// <param name="commandLine">The command line to add options to</param>
@@ -151,10 +151,10 @@ namespace Microsoft.Build.Tasks
             commandLine.AppendWhenTrue("/delaysign", Bag, "DelaySign");
 
             // If we're delay-signing, we only need the public key, but if we use the /publickey
-            // switch, it will consume the entire key file, assume that's just the public key, and 
+            // switch, it will consume the entire key file, assume that's just the public key, and
             // throw an error.
-            // 
-            // So use /publickey if that's all our KeyFile contains, but KeyFile otherwise. 
+            //
+            // So use /publickey if that's all our KeyFile contains, but KeyFile otherwise.
             if (_delaySigningAndKeyFileOnlyContainsPublicKey)
             {
                 commandLine.AppendSwitchIfNotNull("/publickey:", KeyFile);
@@ -207,7 +207,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // If KeyFile or KeyContainer is specified, verify that a key pair exists (or if delay-signed, 
+            // If KeyFile or KeyContainer is specified, verify that a key pair exists (or if delay-signed,
             // even just a public key)
             if (keyFileExists || keyContainerSpecified)
             {

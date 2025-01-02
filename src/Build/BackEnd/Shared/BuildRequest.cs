@@ -119,6 +119,11 @@ namespace Microsoft.Build.BackEnd
             _nodeRequestId = nodeRequestId;
             _buildRequestDataFlags = buildRequestDataFlags;
             _requestedProjectState = requestedProjectState;
+
+            if (_requestedProjectState != null)
+            {
+                _buildRequestDataFlags |= BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild;
+            }
         }
 
         /// <summary>
@@ -180,7 +185,7 @@ namespace Microsoft.Build.BackEnd
         : this(submissionId, nodeRequestId, configurationId, hostServices, buildRequestDataFlags, requestedProjectState, projectContextId)
         {
             ErrorUtilities.VerifyThrowArgumentNull(escapedTargets, "targets");
-            ErrorUtilities.VerifyThrowArgumentNull(parentBuildEventContext, nameof(parentBuildEventContext));
+            ErrorUtilities.VerifyThrowArgumentNull(parentBuildEventContext);
 
             // When targets come into a build request, we unescape them.
             _targets = new List<string>(escapedTargets.Count);

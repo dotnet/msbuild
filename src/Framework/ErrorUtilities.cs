@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-
-#nullable disable
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Framework
 {
@@ -22,11 +22,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="condition"></param>
         /// <param name="unformattedMessage"></param>
-        internal static void VerifyThrow(bool condition, string unformattedMessage)
+        internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage)
         {
             if (!condition)
             {
-                ThrowInternalError(unformattedMessage, null, null);
+                ThrowInternalError(unformattedMessage, innerException: null, args: null);
             }
         }
 
@@ -37,9 +37,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="parameter">The value of the argument.</param>
         /// <param name="parameterName">Parameter that should not be null.</param>
-        internal static void VerifyThrowInternalNull(object parameter, string parameterName)
+        internal static void VerifyThrowInternalNull([NotNull] object? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
         {
-            if (parameter == null)
+            if (parameter is null)
             {
                 ThrowInternalError("{0} unexpectedly null", innerException: null, args: parameterName);
             }
@@ -49,9 +49,14 @@ namespace Microsoft.Build.Framework
         /// Throws InternalErrorException.
         /// This is only for situations that would mean that there is a bug in MSBuild itself.
         /// </summary>
-        internal static void ThrowInternalError(string message, Exception innerException, params object[] args)
+        [DoesNotReturn]
+        internal static void ThrowInternalError(string message, Exception? innerException, params object?[]? args)
         {
-            throw new InternalErrorException(string.Format(message, args), innerException);
+            throw new InternalErrorException(
+                args is null ?
+                    message :
+                    string.Format(message, args),
+                innerException);
         }
     }
 }

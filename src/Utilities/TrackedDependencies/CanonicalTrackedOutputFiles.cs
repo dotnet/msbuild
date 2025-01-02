@@ -259,35 +259,35 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Given a set of sources, removes from the dependency graph any roots that share
-        /// the same outputs as the rooting marker constructed from the given set of sources. 
+        /// the same outputs as the rooting marker constructed from the given set of sources.
         /// </summary>
         /// <comment>
-        /// Used when there's a possibility that more than one set of inputs may produce the 
-        /// same output -- this is a way to invalidate any other roots that produce that same 
-        /// outputs, so that the next time the task is run with that other set of inputs, it 
-        /// won't incorrectly believe that it is up-to-date.  
+        /// Used when there's a possibility that more than one set of inputs may produce the
+        /// same output -- this is a way to invalidate any other roots that produce that same
+        /// outputs, so that the next time the task is run with that other set of inputs, it
+        /// won't incorrectly believe that it is up-to-date.
         /// </comment>
         /// <param name="sources">The set of sources that form the rooting marker whose outputs
         /// should not be shared by any other rooting marker.</param>
         /// <returns>An array of the rooting markers that were removed.</returns>
         public string[] RemoveRootsWithSharedOutputs(ITaskItem[] sources)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sources, nameof(sources));
+            ErrorUtilities.VerifyThrowArgumentNull(sources);
 
             var removedMarkers = new List<string>();
             string currentRoot = FileTracker.FormatRootingMarker(sources);
 
             if (DependencyTable.TryGetValue(currentRoot, out Dictionary<string, DateTime> currentOutputs))
             {
-                // This is O(n*m), but in most cases, both n (the number of roots in the file) and m (the number 
-                // of outputs per root) should be fairly small. 
+                // This is O(n*m), but in most cases, both n (the number of roots in the file) and m (the number
+                // of outputs per root) should be fairly small.
                 // UNDONE: Can we make this faster?
                 foreach (KeyValuePair<string, Dictionary<string, DateTime>> root in DependencyTable)
                 {
                     if (!currentRoot.Equals(root.Key, StringComparison.Ordinal))
                     {
-                        // If the current entry contains any of the outputs of the rooting marker we have sources for, 
-                        // then we want to remove it from the dependency table. 
+                        // If the current entry contains any of the outputs of the rooting marker we have sources for,
+                        // then we want to remove it from the dependency table.
                         foreach (string output in currentOutputs.Keys)
                         {
                             if (root.Value.ContainsKey(output))
@@ -299,7 +299,7 @@ namespace Microsoft.Build.Utilities
                     }
                 }
 
-                // Now actually remove the markers that we intend to remove. 
+                // Now actually remove the markers that we intend to remove.
                 foreach (string removedMarker in removedMarkers)
                 {
                     DependencyTable.Remove(removedMarker);
@@ -617,14 +617,14 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Sources that should be removed from the graph</param>
-        public void RemoveEntriesForSource(ITaskItem source) => RemoveEntriesForSource(new[] { source }, null);
+        public void RemoveEntriesForSource(ITaskItem source) => RemoveEntriesForSource([source], null);
 
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Sources that should be removed from the graph</param>
         /// <param name="correspondingOutput">Outputs that correspond ot the sources (used for same file processing)</param>
-        public void RemoveEntriesForSource(ITaskItem source, ITaskItem correspondingOutput) => RemoveEntriesForSource(new[] { source }, new[] { correspondingOutput });
+        public void RemoveEntriesForSource(ITaskItem source, ITaskItem correspondingOutput) => RemoveEntriesForSource([source], [correspondingOutput]);
 
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs
@@ -696,14 +696,14 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Source that should be removed from the graph</param>
-        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source) => RemoveDependenciesFromEntryIfMissing(new[] { source }, null);
+        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source) => RemoveDependenciesFromEntryIfMissing([source], null);
 
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Source that should be removed from the graph</param>
         /// <param name="correspondingOutput">Output that correspond ot the sources (used for same file processing)</param>
-        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source, ITaskItem correspondingOutput) => RemoveDependenciesFromEntryIfMissing(new[] { source }, new[] { correspondingOutput });
+        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source, ITaskItem correspondingOutput) => RemoveDependenciesFromEntryIfMissing([source], [correspondingOutput]);
 
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs

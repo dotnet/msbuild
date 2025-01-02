@@ -157,23 +157,21 @@ namespace Microsoft.Build.Evaluation
         /// <param name="itemSpecLocation">The xml location the itemspec comes from</param>
         /// <param name="projectDirectory">The directory that the project is in.</param>
         /// <param name="expandProperties">Expand properties before breaking down fragments. Defaults to true</param>
-        /// <param name="loggingContext">Context in which to log</param>
         public ItemSpec(
             string itemSpec,
             Expander<P, I> expander,
             IElementLocation itemSpecLocation,
             string projectDirectory,
-            bool expandProperties = true,
-            LoggingContext loggingContext = null)
+            bool expandProperties = true)
         {
             ItemSpecString = itemSpec;
             Expander = expander;
             ItemSpecLocation = itemSpecLocation;
 
-            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties, loggingContext);
+            Fragments = BuildItemFragments(itemSpecLocation, projectDirectory, expandProperties);
         }
 
-        private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties, LoggingContext loggingContext)
+        private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
         {
             // Code corresponds to Evaluator.CreateItemsFromInclude
             var evaluatedItemspecEscaped = ItemSpecString;
@@ -189,8 +187,7 @@ namespace Microsoft.Build.Evaluation
                 evaluatedItemspecEscaped = Expander.ExpandIntoStringLeaveEscaped(
                     ItemSpecString,
                     ExpanderOptions.ExpandProperties,
-                    itemSpecLocation,
-                    loggingContext);
+                    itemSpecLocation);
             }
 
             var semicolonCount = 0;
@@ -372,7 +369,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            return matches ?? Array.Empty<string>();
+            return matches ?? [];
         }
 
         /// <summary>
@@ -572,7 +569,9 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     /// <typeparam name="P">Property type</typeparam>
     /// <typeparam name="I">Item type</typeparam>
-    internal sealed class MetadataTrie<P, I> where P : class, IProperty where I : class, IItem, IMetadataTable
+    internal sealed class MetadataTrie<P, I>
+        where P : class, IProperty
+        where I : class, IItem, IMetadataTable
     {
         private readonly Dictionary<string, MetadataTrie<P, I>> _children;
         private readonly Func<string, string> _normalize;

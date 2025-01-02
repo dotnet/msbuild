@@ -20,7 +20,6 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-#if !MONO
     /// <summary>
     /// These tests run. The temporary output folder for this test is Path.Combine(Path.GetTempPath(), DateTime.Now.Ticks.ToString())
     /// 1. When combination of (xml, xmlfile) x (xsl, xslfile).
@@ -127,7 +126,7 @@ namespace Microsoft.Build.UnitTests
                             t.XmlInputPaths = (TaskItem[])xmlValue;
                             break;
                         default:
-                            Assert.True(false, "Test error");
+                            Assert.Fail("Test error");
                             break;
                     }
 
@@ -143,7 +142,7 @@ namespace Microsoft.Build.UnitTests
                             t.XslCompiledDllPath = (TaskItem)xslValue;
                             break;
                         default:
-                            Assert.True(false, "Test error");
+                            Assert.Fail("Test error");
                             break;
                     }
 
@@ -188,7 +187,7 @@ namespace Microsoft.Build.UnitTests
                         t.XmlInputPaths = (TaskItem[])xmlValue;
                         break;
                     default:
-                        Assert.True(false, "Test error");
+                        Assert.Fail("Test error");
                         break;
                 }
 
@@ -237,7 +236,7 @@ namespace Microsoft.Build.UnitTests
                         t.XslCompiledDllPath = (TaskItem)xslValue;
                         break;
                     default:
-                        Assert.True(false, "Test error");
+                        Assert.Fail("Test error");
                         break;
                 }
 
@@ -1213,7 +1212,7 @@ namespace Microsoft.Build.UnitTests
             }
             catch (Exception e)
             {
-                Assert.True(false, "Compiler didn't work" + e.ToString());
+                Assert.Fail("Compiler didn't work" + e.ToString());
             }
 
             asmBldr.Save(Path.GetFileName(outputFile), PortableExecutableKinds.ILOnly, ImageFileMachine.I386);
@@ -1259,5 +1258,4 @@ namespace Microsoft.Build.UnitTests
 #endif
         #endregion
     }
-#endif
 }

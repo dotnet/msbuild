@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -107,10 +108,11 @@ namespace Microsoft.Build.Graph.UnitTests
                     (projectPath, globalProperties, projectCollection) =>
                     {
                         factoryCalled = true;
-                        return ProjectGraph.DefaultProjectInstanceFactory(
+                        return ProjectGraph.StaticProjectInstanceFactory(
                             projectPath,
                             globalProperties,
-                            projectCollection);
+                            projectCollection,
+                            EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated));
                     });
                 projectGraph.ProjectNodes.Count.ShouldBe(1);
                 projectGraph.ProjectNodes.First().ProjectInstance.FullPath.ShouldBe(entryProject.Path);
@@ -678,11 +680,19 @@ namespace Microsoft.Build.Graph.UnitTests
         [Fact]
         public void ConstructGraphWithSolution()
         {
-            // This test exercises two key features of solution-based builds from AssignProjectConfiguration:
-            // 1. Adding synthetic project references
-            // 2. Resolving project configuration based on the sln
-            // 3. Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=true
-            // 4. Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=false
+            /*
+             * This test exercises various key features of solution-based builds:
+             *      From AssignProjectConfiguration:
+             *          Adding synthetic project references (defined both before and after the depending project)
+             *          Resolving project configuration based on the sln
+             *          Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=true
+             *          Handling unresolved project references with ShouldUnsetParentConfigurationAndPlatform=false
+             *      Project types other than "well-known" MSBuild project types:
+             *          Buildable project (wapproj)
+             *          Solution folder
+             *      Project not included in build (also has solution dependencies as a regression test)
+             * 
+             */
             using (var env = TestEnvironment.Create())
             {
                 const string SolutionFileContents = """
@@ -690,14 +700,29 @@ namespace Microsoft.Build.Graph.UnitTests
                     # Visual Studio Version 17
                     VisualStudioVersion = 17.0.31903.59
                     MinimumVisualStudioVersion = 17.0.31903.59
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project8", "Project8.csproj", "{2022C11A-1405-4983-BEC2-3A8B0233108F}"
+                    EndProject
                     Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "Project1.csproj", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
                         ProjectSection(ProjectDependencies) = postProject
                             {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98} = {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F} = {2022C11A-1405-4983-BEC2-3A8B0233108F}
                         EndProjectSection
                     EndProject
                     Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Project2", "Project2.vcxproj", "{D638A8EF-3A48-45F2-913C-88B29FED03CB}"
                     EndProject
                     Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "Project3", "Project3.vcxproj", "{52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}"
+                    EndProject
+                    Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Project6", "Project6.wapproj", "{CA5CAD1A-224A-4171-B13A-F16E576FDD12}"
+                    EndProject
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project7", "Project7.csproj", "{28C7025E-2AB6-4962-A001-1E5B2271837C}"
+                        ProjectSection(ProjectDependencies) = postProject
+                            {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98} = {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}
+                        EndProjectSection
+                    EndProject
+                    Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0392E290-973E-4086-A58E-F927AAA65B9A}"
+                        ProjectSection(SolutionItems) = preProject
+                            SomeSolutionItemsFile = SomeSolutionItemsFile
+                        EndProjectSection
                     EndProject
                     Global
                         GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -709,6 +734,18 @@ namespace Microsoft.Build.Graph.UnitTests
                             Release|x86 = Release|x86
                         EndGlobalSection
                         GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|Win32.ActiveCfg = Debug|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|Win32.Build.0 = Debug|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|x64.ActiveCfg = Debug|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|x64.Build.0 = Debug|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|x86.ActiveCfg = Debug|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|x86.Build.0 = Debug|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|Win32.ActiveCfg = Release|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|Win32.Build.0 = Release|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|x64.ActiveCfg = Release|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|x64.Build.0 = Release|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|x86.ActiveCfg = Release|x86
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|x86.Build.0 = Release|x86
                             {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|Win32.ActiveCfg = Debug|x86
                             {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|Win32.Build.0 = Debug|x86
                             {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
@@ -753,6 +790,24 @@ namespace Microsoft.Build.Graph.UnitTests
                             {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x64.Build.0 = Release|x64
                             {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x86.ActiveCfg = Release|Win32
                             {52B2ED64-1CFC-401B-8C5B-6D1E1DEADF98}.Release|x86.Build.0 = Release|Win32
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|Win32.ActiveCfg = Debug|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|Win32.Build.0 = Debug|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|Win32.Deploy.0 = Debug|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x64.ActiveCfg = Debug|x64
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x64.Build.0 = Debug|x64
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x64.Deploy.0 = Debug|x64
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x86.ActiveCfg = Debug|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x86.Build.0 = Debug|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Debug|x86.Deploy.0 = Debug|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|Win32.ActiveCfg = Release|x86
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x64.ActiveCfg = Release|x64
+                            {CA5CAD1A-224A-4171-B13A-F16E576FDD12}.Release|x86.ActiveCfg = Release|x86
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Debug|Win32.ActiveCfg = Debug|x86
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Debug|x64.ActiveCfg = Debug|x64
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Debug|x86.ActiveCfg = Debug|x86
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Release|Win32.ActiveCfg = Release|x86
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Release|x64.ActiveCfg = Release|x64
+                            {28C7025E-2AB6-4962-A001-1E5B2271837C}.Release|x86.ActiveCfg = Release|x86
                         EndGlobalSection
                         GlobalSection(SolutionProperties) = preSolution
                             HideSolutionNode = FALSE
@@ -764,7 +819,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 ProjectRootElement project1Xml = ProjectRootElement.Create();
 
-                // Project 1 depends on Project 2 using ProjectReference but there is a sln-based dependency defined on Project 3 as well.
+                // Project 1 depends on Project 2 using ProjectReference but there is a sln-based dependency defined on Project 3 and 8 as well.
                 project1Xml.AddItem("ProjectReference", "Project2.vcxproj");
 
                 ProjectRootElement project2Xml = ProjectRootElement.Create();
@@ -781,39 +836,52 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 ProjectRootElement project4Xml = ProjectRootElement.Create();
                 ProjectRootElement project5Xml = ProjectRootElement.Create();
+                ProjectRootElement project6Xml = ProjectRootElement.Create();
+                ProjectRootElement project7Xml = ProjectRootElement.Create();
+                ProjectRootElement project8Xml = ProjectRootElement.Create();
 
                 string project1Path = Path.Combine(env.DefaultTestDirectory.Path, "Project1.csproj");
                 string project2Path = Path.Combine(env.DefaultTestDirectory.Path, "Project2.vcxproj");
                 string project3Path = Path.Combine(env.DefaultTestDirectory.Path, "Project3.vcxproj");
                 string project4Path = Path.Combine(env.DefaultTestDirectory.Path, "Project4.vcxproj");
                 string project5Path = Path.Combine(env.DefaultTestDirectory.Path, "Project5.vcxproj");
+                string project6Path = Path.Combine(env.DefaultTestDirectory.Path, "Project6.wapproj");
+                string project7Path = Path.Combine(env.DefaultTestDirectory.Path, "Project7.csproj");
+                string project8Path = Path.Combine(env.DefaultTestDirectory.Path, "Project8.csproj");
 
                 project1Xml.Save(project1Path);
                 project2Xml.Save(project2Path);
                 project3Xml.Save(project3Path);
                 project4Xml.Save(project4Path);
                 project5Xml.Save(project5Path);
+                project6Xml.Save(project6Path);
+                project7Xml.Save(project7Path);
+                project8Xml.Save(project8Path);
 
                 var projectGraph = new ProjectGraph(slnFile.Path);
-                projectGraph.EntryPointNodes.Count.ShouldBe(3);
-                projectGraph.GraphRoots.Count.ShouldBe(1);
-                projectGraph.GraphRoots.First().ProjectInstance.FullPath.ShouldBe(project1Path);
-                projectGraph.ProjectNodes.Count.ShouldBe(5);
+                projectGraph.EntryPointNodes.Count.ShouldBe(5);
+                projectGraph.EntryPointNodes.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project1Path, project2Path, project3Path, project6Path, project8Path }, ignoreOrder: true);
+                projectGraph.GraphRoots.Count.ShouldBe(2);
+                projectGraph.GraphRoots.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project1Path, project6Path }, ignoreOrder: true);
+                projectGraph.ProjectNodes.Count.ShouldBe(7);
 
                 ProjectGraphNode project1Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project1Path);
                 project1Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project1Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
-                project1Node.ProjectReferences.Count.ShouldBe(2);
+                project1Node.ProjectReferences.Count.ShouldBe(3);
+                project1Node.ProjectReferences.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project2Path, project3Path, project8Path }, ignoreOrder: true);
 
                 ProjectGraphNode project2Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project2Path);
                 project2Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project2Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
                 project2Node.ProjectReferences.Count.ShouldBe(1);
+                project2Node.ProjectReferences.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project4Path }, ignoreOrder: true);
 
                 ProjectGraphNode project3Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project3Path);
                 project3Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project3Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
                 project3Node.ProjectReferences.Count.ShouldBe(1);
+                project3Node.ProjectReferences.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project5Path }, ignoreOrder: true);
 
                 // Configuration and Platform get unset
                 ProjectGraphNode project4Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project4Path);
@@ -826,6 +894,20 @@ namespace Microsoft.Build.Graph.UnitTests
                 project5Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
                 project5Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("Win32");
                 project5Node.ProjectReferences.Count.ShouldBe(0);
+
+                // Project type other than "well-known" MSBuild project types.
+                ProjectGraphNode project6Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project6Path);
+                project6Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project6Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+                project6Node.ProjectReferences.Count.ShouldBe(0);
+
+                // Project not included in the build
+                Assert.DoesNotContain(projectGraph.ProjectNodes, node => node.ProjectInstance.FullPath == project7Path);
+
+                ProjectGraphNode project8Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project8Path);
+                project8Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
+                project8Node.ProjectInstance.GlobalProperties["Platform"].ShouldBe("x86");
+                project8Node.ProjectReferences.Count.ShouldBe(0);
             }
         }
 
@@ -2053,7 +2135,7 @@ $@"
 
             graph.ProjectNodes.Count.ShouldBe(4);
 
-            var outerBuild = graph.GraphRoots.First(IsOuterBuild);
+            var outerBuild = graph.GraphRoots.First(i => i.ProjectType == ProjectInterpretation.ProjectType.OuterBuild);
 
             AssertOuterBuild(outerBuild, graph, additionalGlobalProperties);
             AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 2), additionalGlobalProperties);
@@ -2135,7 +2217,7 @@ $@"
 
             AssertOuterBuild(outerBuild1, graph, additionalGlobalProperties);
 
-            var innerBuild1WithReferenceToInnerBuild2 = outerBuild1.ProjectReferences.FirstOrDefault(n => IsInnerBuild(n) && n.ProjectInstance.GlobalProperties[InnerBuildPropertyName] == "a");
+            var innerBuild1WithReferenceToInnerBuild2 = outerBuild1.ProjectReferences.FirstOrDefault(n => n.ProjectType == ProjectInterpretation.ProjectType.InnerBuild && n.ProjectInstance.GlobalProperties[InnerBuildPropertyName] == "a");
             innerBuild1WithReferenceToInnerBuild2.ShouldNotBeNull();
 
             var outerBuild2 = GetOuterBuild(graph, 2);
@@ -2725,6 +2807,119 @@ $@"
             {
                 // GetTargetFrameworks actually shouldn't be here...
                 targetLists[inner].ShouldBe(new[] { "GetTargetFrameworks", "GetTargetPath", "GetNativeManifest", "GetTargetFrameworksWithPlatformForSingleTargetFramework" });
+            }
+        }
+
+        [Theory]
+        // Built-in targets
+        [InlineData(new string[0], new[] { "Project1Default" }, new[] { "Project2Default" })]
+        [InlineData(new[] { "Build" }, new[] { "Project1Default" }, new[] { "Project2Default" })]
+        [InlineData(new[] { "Rebuild" }, new[] { "Rebuild" }, new[] { "Rebuild" })]
+        [InlineData(new[] { "Clean" }, new[] { "Clean" }, new[] { "Clean" })]
+        [InlineData(new[] { "Publish" }, new[] { "Publish" }, new[] { "Publish" })]
+        // Traversal targets
+        [InlineData(new[] { "Project1" }, new[] { "Project1Default" }, new string[0])]
+        [InlineData(new[] { "Project2" }, new string[0], new[] { "Project2Default" })]
+        [InlineData(new[] { "Project1", "Project2" }, new[] { "Project1Default" }, new[] { "Project2Default" })]
+        [InlineData(new[] { "Project1:Rebuild" }, new[] { "Rebuild" }, new string[0])]
+        [InlineData(new[] { "Project2:Rebuild" }, new string[0], new[] { "Rebuild" })]
+        [InlineData(new[] { "Project1:Rebuild", "Project2:Clean" }, new[] { "Rebuild" }, new[] { "Clean" })]
+        [InlineData(new[] { "CustomTarget" }, new[] { "CustomTarget" }, new[] { "CustomTarget" })]
+        [InlineData(new[] { "Project1:CustomTarget" }, new[] { "CustomTarget" }, new string[0])]
+        [InlineData(new[] { "Project2:CustomTarget" }, new string[0], new[] { "CustomTarget" })]
+        [InlineData(new[] { "Project1:CustomTarget", "Project2:CustomTarget" }, new[] { "CustomTarget" }, new[] { "CustomTarget" })]
+        public void GetTargetListsWithSolution(string[] entryTargets, string[] expectedProject1Targets, string[] expectedProject2Targets)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                const string ExtraContent = """
+                    <Target Name="CustomTarget" />
+                    """;
+                TransientTestFile project1File = CreateProjectFile(env: env, projectNumber: 1, defaultTargets: "Project1Default", extraContent: ExtraContent);
+                TransientTestFile project2File = CreateProjectFile(env: env, projectNumber: 2, defaultTargets: "Project2Default", extraContent: ExtraContent);
+
+                string solutionFileContents = $$"""
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    VisualStudioVersion = 17.0.31903.59
+                    MinimumVisualStudioVersion = 17.0.31903.59
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{project1File.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                    EndProject
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project2", "{{project2File.Path}}", "{2022C11A-1405-4983-BEC2-3A8B0233108F}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|x64 = Debug|x64
+                            Release|x64 = Release|x64
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x64.ActiveCfg = Release|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x64.Build.0 = Release|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|x64.ActiveCfg = Debug|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|x64.Build.0 = Debug|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|x64.ActiveCfg = Release|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|x64.Build.0 = Release|x64
+                        EndGlobalSection
+                        GlobalSection(SolutionProperties) = preSolution
+                            HideSolutionNode = FALSE
+                        EndGlobalSection
+                    EndGlobal
+                    """;
+                TransientTestFile slnFile = env.CreateFile(@"Solution.sln", solutionFileContents);
+                SolutionFile solutionFile = SolutionFile.Parse(slnFile.Path);
+
+                ProjectGraph projectGraph = new(slnFile.Path);
+                ProjectGraphNode project1Node = GetFirstNodeWithProjectNumber(projectGraph, 1);
+                ProjectGraphNode project2Node = GetFirstNodeWithProjectNumber(projectGraph, 2);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(entryTargets);
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[project1Node].ShouldBe(expectedProject1Targets);
+                targetLists[project2Node].ShouldBe(expectedProject2Targets);
+            }
+        }
+
+        [Theory]
+        [InlineData("Project1:Build")]
+        [InlineData("Project1:")]
+        public void GetTargetListsWithSolutionInvalidTargets(string entryTarget)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile project1File = CreateProjectFile(env: env, projectNumber: 1);
+                string solutionFileContents = $$"""
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    VisualStudioVersion = 17.0.31903.59
+                    MinimumVisualStudioVersion = 17.0.31903.59
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{project1File.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|x64 = Debug|x64
+                            Release|x64 = Release|x64
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x64.ActiveCfg = Release|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x64.Build.0 = Release|x64
+                        EndGlobalSection
+                        GlobalSection(SolutionProperties) = preSolution
+                            HideSolutionNode = FALSE
+                        EndGlobalSection
+                    EndGlobal
+                    """;
+                TransientTestFile slnFile = env.CreateFile(@"Solution.sln", solutionFileContents);
+                SolutionFile solutionFile = SolutionFile.Parse(slnFile.Path);
+
+                ProjectGraph projectGraph = new(slnFile.Path);
+
+                var getTargetListsFunc = (() => projectGraph.GetTargetLists([entryTarget]));
+                InvalidProjectFileException exception = getTargetListsFunc.ShouldThrow<InvalidProjectFileException>();
+                exception.Message.ShouldContain($"The target \"{entryTarget}\" does not exist in the project.");
             }
         }
 

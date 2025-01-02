@@ -51,31 +51,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify different Items and properties are not taken into account in the equals comparison. They should 
-        /// not be considered as part of the equals evaluation
-        /// </summary>
-        [Fact]
-        public void ItemsAndPropertiesDifferentEquals()
-        {
-            ArrayList itemsList = new ArrayList();
-            ArrayList propertiesList = new ArrayList();
-            ProjectStartedEventArgs differentItemsAndProperties = new ProjectStartedEventArgs(
-                  s_baseProjectStartedEvent.ProjectId,
-                  s_baseProjectStartedEvent.Message,
-                  s_baseProjectStartedEvent.HelpKeyword,
-                  s_baseProjectStartedEvent.ProjectFile,
-                  s_baseProjectStartedEvent.TargetNames,
-                  propertiesList,
-                  itemsList,
-                  s_baseProjectStartedEvent.ParentProjectBuildEventContext,
-                  s_baseProjectStartedEvent.Timestamp);
-
-            s_baseProjectStartedEvent.Properties.ShouldNotBe(propertiesList);
-            s_baseProjectStartedEvent.Items.ShouldNotBe(itemsList);
-        }
-
-        /// <summary>
-        /// Create a derived class so that we can test the default constructor in order to increase code coverage and 
+        /// Create a derived class so that we can test the default constructor in order to increase code coverage and
         /// verify this code path does not cause any exceptions.
         /// </summary>
         private sealed class ProjectStartedEventArgs2 : ProjectStartedEventArgs

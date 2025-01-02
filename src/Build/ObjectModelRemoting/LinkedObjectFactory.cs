@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -233,15 +235,26 @@ namespace Microsoft.Build.ObjectModelRemoting
 
         #region Linked classes helpers
         // Using the pattern with overloaded classes that provide "Link" object so we ensure we do not increase the
-        // memory storage of original items (with the Link field) while it is small, some of the MSbuild items can be created
+        // memory storage of original items (with the Link field) while it is small, some of the MSBuild items can be created
         // in millions so it does adds up otherwise.
 
-        private class LinkedProjectItem : ProjectItem, ILinkableObject
+        private class LinkedProjectItem : ProjectItem, ILinkableObject, IImmutableInstanceProvider<ProjectItemInstance>
         {
+            private ProjectItemInstance _immutableInstance;
+
             internal LinkedProjectItem(ProjectItemElement xml, Project project, ProjectItemLink link)
                 : base(xml, project)
             {
-                this.Link = link;
+                Link = link;
+            }
+
+            public ProjectItemInstance ImmutableInstance => _immutableInstance;
+
+            public ProjectItemInstance GetOrSetImmutableInstance(ProjectItemInstance instance)
+            {
+                Interlocked.CompareExchange(ref _immutableInstance, instance, null);
+
+                return _immutableInstance;
             }
 
             internal override ProjectItemLink Link { get; }
@@ -249,32 +262,56 @@ namespace Microsoft.Build.ObjectModelRemoting
             object ILinkableObject.Link => Link;
         }
 
-        private class LinkedProjectItemDefinition : ProjectItemDefinition, ILinkableObject
+        private class LinkedProjectItemDefinition : ProjectItemDefinition, ILinkableObject, IImmutableInstanceProvider<ProjectItemDefinitionInstance>
         {
+            private ProjectItemDefinitionInstance _immutableInstance;
+
             internal LinkedProjectItemDefinition(ProjectItemDefinitionLink link, Project project, string itemType)
                 : base(project, itemType)
             {
                 Link = link;
             }
 
+            public ProjectItemDefinitionInstance ImmutableInstance => _immutableInstance;
+
+            public ProjectItemDefinitionInstance GetOrSetImmutableInstance(ProjectItemDefinitionInstance instance)
+            {
+                Interlocked.CompareExchange(ref _immutableInstance, instance, null);
+
+                return _immutableInstance;
+            }
+
             internal override ProjectItemDefinitionLink Link { get; }
             object ILinkableObject.Link => Link;
         }
 
-        private class LinkedProjectMetadata : ProjectMetadata, ILinkableObject
+        private class LinkedProjectMetadata : ProjectMetadata, ILinkableObject, IImmutableInstanceProvider<ProjectMetadataInstance>
         {
+            private ProjectMetadataInstance _immutableInstance;
+
             internal LinkedProjectMetadata(object parent, ProjectMetadataLink link)
                 : base(parent, link.Xml)
             {
                 Link = link;
             }
 
+            public ProjectMetadataInstance ImmutableInstance => _immutableInstance;
+
+            public ProjectMetadataInstance GetOrSetImmutableInstance(ProjectMetadataInstance instance)
+            {
+                Interlocked.CompareExchange(ref _immutableInstance, instance, null);
+
+                return _immutableInstance;
+            }
+
             internal override ProjectMetadataLink Link { get; }
             object ILinkableObject.Link => Link;
         }
 
-        private class LinkedProjectProperty : ProjectProperty, ILinkableObject
+        private class LinkedProjectProperty : ProjectProperty, ILinkableObject, IImmutableInstanceProvider<ProjectPropertyInstance>
         {
+            private ProjectPropertyInstance _immutableInstance;
+
             internal ProjectPropertyLink Link { get; }
             object ILinkableObject.Link => Link;
 
@@ -288,6 +325,15 @@ namespace Microsoft.Build.ObjectModelRemoting
                 : base(project)
             {
                 Link = link;
+            }
+
+            public ProjectPropertyInstance ImmutableInstance => _immutableInstance;
+
+            public ProjectPropertyInstance GetOrSetImmutableInstance(ProjectPropertyInstance instance)
+            {
+                Interlocked.CompareExchange(ref _immutableInstance, instance, null);
+
+                return _immutableInstance;
             }
 
             public override string Name => Link.Name;

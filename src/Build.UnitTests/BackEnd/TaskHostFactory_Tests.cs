@@ -61,30 +61,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [DotNetOnlyTheory]
-        [InlineData(false)]
-        // [InlineData(true)] <-- explicitly opting out on core will lead to node crash
-        public void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost_NetCore(
-            bool testLegacyImplementation)
-            => VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost(testLegacyImplementation);
-
-        [WindowsFullFrameworkOnlyTheory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost_Framework(
-            bool testLegacyImplementation)
-            => VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost(testLegacyImplementation);
-
-        private void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost(bool testLegacyImplementation)
+        [Fact]
+        private void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-
-            ChangeWaves.ResetStateForTests();
-            if (testLegacyImplementation)
-            {
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_6.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-            }
 
             string boolParam = "True";
             string boolArrayParam = "False;True;False";

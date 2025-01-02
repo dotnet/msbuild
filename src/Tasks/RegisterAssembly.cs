@@ -192,7 +192,7 @@ namespace Microsoft.Build.Tasks
         /// </comment>
         public object ResolveRef(Assembly assemblyToResolve)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyToResolve, nameof(assemblyToResolve));
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyToResolve);
 
             Log.LogErrorWithCodeFromResources("RegisterAssembly.AssemblyNotRegisteredForComInterop", assemblyToResolve.GetName().FullName);
             _typeLibExportFailed = true;
@@ -208,7 +208,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool Register(string assemblyPath, string typeLibPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath, nameof(typeLibPath));
+            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath);
 
             Log.LogMessageFromResources(MessageImportance.Low, "RegisterAssembly.RegisteringAssembly", assemblyPath);
 
@@ -222,7 +222,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                // Load the specified assembly. 
+                // Load the specified assembly.
                 Assembly asm = Assembly.UnsafeLoadFrom(assemblyPath);
 
                 var comRegistrar = new RegistrationServices();
@@ -230,8 +230,8 @@ namespace Microsoft.Build.Tasks
                 // Register the assembly
                 if (!comRegistrar.RegisterAssembly(asm, CreateCodeBase ? AssemblyRegistrationFlags.SetCodeBase : AssemblyRegistrationFlags.None))
                 {
-                    // If the assembly doesn't contain any types that could be registered for COM interop, 
-                    // warn the user about it.  
+                    // If the assembly doesn't contain any types that could be registered for COM interop,
+                    // warn the user about it.
                     Log.LogWarningWithCodeFromResources("RegisterAssembly.NoValidTypes", assemblyPath);
                 }
 

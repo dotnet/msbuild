@@ -209,7 +209,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string GetEmbeddedResourceString(string name)
         {
             Stream s = GetEmbeddedResourceStream(name);
-            StreamReader r = new StreamReader(s);
+            using StreamReader r = new StreamReader(s);
             return r.ReadToEnd();
         }
 
@@ -238,14 +238,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             length = fi.Length;
 
             Stream s = null;
+            HashAlgorithm hashAlg = null;
             try
             {
                 s = fi.OpenRead();
-                HashAlgorithm hashAlg;
 
                 if (string.IsNullOrEmpty(targetFrameWorkVersion) || CompareFrameworkVersions(targetFrameWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
                 {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                    // codeql[cs/weak-crypto] .NET 4.0 and earlier versions cannot parse SHA-2. Newer Frameworks use SHA256. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/139025
                     hashAlg = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA1CryptoServiceProvider"
@@ -269,6 +270,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             finally
             {
                 s?.Close();
+                hashAlg?.Dispose();
             }
         }
 
@@ -473,7 +475,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static void WriteFile(string path, Stream s)
         {
-            StreamReader r = new StreamReader(s);
+            using StreamReader r = new StreamReader(s);
             WriteFile(path, r.ReadToEnd());
         }
 
@@ -520,7 +522,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
 
             string path = Path.Combine(logPath, filename);
-            StreamReader r = new StreamReader(s);
+            using var r = new StreamReader(s, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, 1024, leaveOpen: true);
             string text = r.ReadToEnd();
             try
             {
@@ -538,6 +540,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             catch (SecurityException)
             {
             }
+
             s.Position = 0;
         }
 
@@ -599,7 +602,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return path;
         }
 
-        #region ItemComparer 
+        #region ItemComparer
         private static readonly ItemComparer s_itemComparer = new ItemComparer();
         private class ItemComparer : IComparer
         {

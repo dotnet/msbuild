@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Microsoft.Build.Shared;
 
@@ -149,7 +150,7 @@ namespace Microsoft.Build.Framework
             int columnNumber,
             int endLineNumber,
             int endColumnNumber,
-            string message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             string helpKeyword,
             string senderName,
             DateTime eventTimestamp,
@@ -183,10 +184,10 @@ namespace Microsoft.Build.Framework
             int columnNumber,
             int endLineNumber,
             int endColumnNumber,
-            string message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             string helpKeyword,
             string senderName,
-            string helpLink,
+            [StringSyntax(StringSyntaxAttribute.Uri)] string helpLink,
             DateTime eventTimestamp,
             params object[] messageArgs)
             : base(message, helpKeyword, senderName, eventTimestamp, messageArgs)
@@ -199,6 +200,28 @@ namespace Microsoft.Build.Framework
             this.endLineNumber = endLineNumber;
             this.endColumnNumber = endColumnNumber;
             this.helpLink = helpLink;
+        }
+
+        /// <summary>
+        /// This constructor allows event data without ends to be initialized.
+        /// </summary>
+        /// <param name="code">event code</param>
+        /// <param name="file">file associated with the event</param>
+        /// <param name="lineNumber">line number (0 if not applicable)</param>
+        /// <param name="columnNumber">column number (0 if not applicable)</param>
+        /// <param name="message">text message</param>
+        protected BuildErrorEventArgs(
+           string code,
+           string message,
+           string file,
+           int lineNumber,
+           int columnNumber)
+            : base(message, helpKeyword: null, senderName: null)
+        {
+            this.code = code;
+            this.file = file;
+            this.lineNumber = lineNumber;
+            this.columnNumber = columnNumber;
         }
 
         /// <summary>

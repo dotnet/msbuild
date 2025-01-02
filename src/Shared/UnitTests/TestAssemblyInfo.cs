@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -40,6 +41,12 @@ namespace Microsoft.Build.UnitTests
             var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             runningTestsField.SetValue(null, true);
 
+            // Set the field in BuildEnvironmentState - as it might have been already preintialized by the data preparation of data driven tests
+            testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.BuildEnvironmentState");
+            runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            runningTestsField.SetValue(null, true);
+
+
             // Note: build error files will be initialized in test environments for particular tests, also we don't have output to report error files into anyway...
             _testEnvironment = TestEnvironment.Create(output: null, ignoreBuildErrorFiles: true);
 
@@ -48,11 +55,11 @@ namespace Microsoft.Build.UnitTests
             // Reset the VisualStudioVersion environment variable.  This will be set if tests are run from a VS command prompt.  However,
             //  if the environment variable is set, it will interfere with tests which set the SubToolsetVersion
             //  (VerifySubToolsetVersionSetByConstructorOverridable), as the environment variable would take precedence.
-            _testEnvironment.SetEnvironmentVariable("VisualStudioVersion", string.Empty);
+            _testEnvironment.SetEnvironmentVariable("VisualStudioVersion", null);
 
             // Prevent test assemblies from logging any performance info.
             // https://github.com/dotnet/msbuild/pull/6274
-            _testEnvironment.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", string.Empty);
+            _testEnvironment.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", null);
 
             SetDotnetHostPath(_testEnvironment);
 
@@ -103,7 +110,13 @@ namespace Microsoft.Build.UnitTests
                 string potentialVersionsPropsPath = Path.Combine(currentFolder, "build", "Versions.props");
                 if (FileSystems.Default.FileExists(potentialVersionsPropsPath))
                 {
-                    var doc = XDocument.Load(potentialVersionsPropsPath);
+                    XDocument doc = null;
+                    var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
+                    using (XmlReader xr = XmlReader.Create(File.OpenRead(potentialVersionsPropsPath), xrs))
+                    {
+                        doc = XDocument.Load(xr);
+                    }
+
                     var ns = doc.Root.Name.Namespace;
                     var cliVersionElement = doc.Root.Elements(ns + "PropertyGroup").Elements(ns + "DotNetCliVersion").FirstOrDefault();
                     if (cliVersionElement != null)

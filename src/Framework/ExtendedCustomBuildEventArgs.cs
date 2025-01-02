@@ -18,7 +18,7 @@ public sealed class ExtendedCustomBuildEventArgs : CustomBuildEventArgs, IExtend
     public string ExtendedType { get; set; }
 
     /// <inheritdoc />
-    public IDictionary<string, string?>? ExtendedMetadata { get; set; }
+    public Dictionary<string, string?>? ExtendedMetadata { get; set; }
 
     /// <inheritdoc />
     public string? ExtendedData { get; set; }
@@ -27,7 +27,9 @@ public sealed class ExtendedCustomBuildEventArgs : CustomBuildEventArgs, IExtend
     /// This constructor allows event data to be initialized.
     /// </summary>
     /// <seealso cref="IExtendedBuildEventArgs.ExtendedType"/>
-    internal ExtendedCustomBuildEventArgs() : this("undefined") {}
+    internal ExtendedCustomBuildEventArgs()
+        : this("undefined")
+    { }
 
     /// <summary>
     /// This constructor allows event data to be initialized.

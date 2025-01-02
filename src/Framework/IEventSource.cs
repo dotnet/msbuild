@@ -3,6 +3,8 @@
 
 #nullable disable
 
+using Microsoft.Build.Experimental.BuildCheck;
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -34,6 +36,11 @@ namespace Microsoft.Build.Framework
     /// Type of handler for BuildFinishedEvent events
     /// </summary>
     public delegate void BuildFinishedEventHandler(object sender, BuildFinishedEventArgs e);
+
+    /// <summary>
+    /// Type of handler for BuildCanceledEvent events
+    /// </summary>
+    public delegate void BuildCanceledEventHandler(object sender, BuildCanceledEventArgs e);
 
     /// <summary>
     /// Type of handler for ProjectStarted events
@@ -75,7 +82,12 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public delegate void AnyEventHandler(object sender, BuildEventArgs e);
 
-    /// <summary> 
+    /// <summary>
+    /// Type of handler for BuildCheckEventRaised events
+    /// </summary>
+    internal delegate void BuildCheckEventHandler(object sender, BuildCheckEventArgs e);
+
+    /// <summary>
     /// This interface defines the events raised by the build engine.
     /// Loggers use this interface to subscribe to the events they
     /// are interested in receiving.
@@ -151,5 +163,166 @@ namespace Microsoft.Build.Framework
         /// this event is raised to log any build event.  These events do not include telemetry.  To receive telemetry, you must attach to the <see cref="IEventSource2.TelemetryLogged"/> event.
         /// </summary>
         event AnyEventHandler AnyEventRaised;
+    }
+
+    /// <summary>
+    /// Helper methods for <see cref="IEventSource"/> interface.
+    /// </summary>
+    public static class EventSourceExtensions
+    {
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.MessageRaised"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleMessageRaised(this IEventSource eventSource, BuildMessageEventHandler handler)
+        {
+            eventSource.MessageRaised -= handler;
+            eventSource.MessageRaised += handler;
+        }
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.ErrorRaised"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleErrorRaised(this IEventSource eventSource, BuildErrorEventHandler handler)
+        {
+            eventSource.ErrorRaised -= handler;
+            eventSource.ErrorRaised += handler;
+        }
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.WarningRaised"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleWarningRaised(this IEventSource eventSource, BuildWarningEventHandler handler)
+        {
+            eventSource.WarningRaised -= handler;
+            eventSource.WarningRaised += handler;
+        }
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.BuildStarted"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleBuildStarted(this IEventSource eventSource, BuildStartedEventHandler handler)
+        {
+            eventSource.BuildStarted -= handler;
+            eventSource.BuildStarted += handler;
+        }
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.BuildFinished"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleBuildFinished(this IEventSource eventSource, BuildFinishedEventHandler handler)
+        {
+            eventSource.BuildFinished -= handler;
+            eventSource.BuildFinished += handler;
+        }
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.ProjectStarted"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleProjectStarted(this IEventSource eventSource, ProjectStartedEventHandler handler)
+        {
+            eventSource.ProjectStarted -= handler;
+            eventSource.ProjectStarted += handler;
+        }
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.ProjectFinished"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleProjectFinished(this IEventSource eventSource, ProjectFinishedEventHandler handler)
+        {
+            eventSource.ProjectFinished -= handler;
+            eventSource.ProjectFinished += handler;
+        }
+
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.TargetStarted"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleTargetStarted(this IEventSource eventSource, TargetStartedEventHandler handler)
+        {
+            eventSource.TargetStarted -= handler;
+            eventSource.TargetStarted += handler;
+        }
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.TargetFinished"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleTargetFinished(this IEventSource eventSource, TargetFinishedEventHandler handler)
+        {
+            eventSource.TargetFinished -= handler;
+            eventSource.TargetFinished += handler;
+        }
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.TaskStarted"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleTaskStarted(this IEventSource eventSource, TaskStartedEventHandler handler)
+        {
+            eventSource.TaskStarted -= handler;
+            eventSource.TaskStarted += handler;
+        }
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.TaskFinished"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleTaskFinished(this IEventSource eventSource, TaskFinishedEventHandler handler)
+        {
+            eventSource.TaskFinished -= handler;
+            eventSource.TaskFinished += handler;
+        }
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.CustomEventRaised"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleCustomEventRaised(this IEventSource eventSource, CustomBuildEventHandler handler)
+        {
+            eventSource.CustomEventRaised -= handler;
+            eventSource.CustomEventRaised += handler;
+        }
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.StatusEventRaised"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleStatusEventRaised(this IEventSource eventSource, BuildStatusEventHandler handler)
+        {
+            eventSource.StatusEventRaised -= handler;
+            eventSource.StatusEventRaised += handler;
+        }
+
+        /// <summary>
+        /// Helper method ensuring single deduplicated subscription to the <see cref="IEventSource.AnyEventRaised"/> event.
+        /// </summary>
+        /// <param name="eventSource"></param>
+        /// <param name="handler">Handler to the event. If this handler is already subscribed, single subscription will be ensured.</param>
+        public static void HandleAnyEventRaised(this IEventSource eventSource, AnyEventHandler handler)
+        {
+            eventSource.AnyEventRaised -= handler;
+            eventSource.AnyEventRaised += handler;
+        }
     }
 }

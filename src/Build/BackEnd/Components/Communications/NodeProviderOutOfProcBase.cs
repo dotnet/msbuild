@@ -95,7 +95,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         protected void SendData(NodeContext context, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
+            ErrorUtilities.VerifyThrowArgumentNull(packet);
             context.SendData(packet);
         }
 
@@ -152,7 +152,7 @@ namespace Microsoft.Build.BackEnd
             string msbuildtaskhostExeName = NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost;
 
             // Search for all instances of msbuildtaskhost process and add them to the process list
-            nodeProcesses.AddRange(new List<Process>(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildtaskhostExeName))));
+            nodeProcesses.AddRange(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildtaskhostExeName)));
 
             // For all processes in the list, send signal to terminate if able to connect
             foreach (Process nodeProcess in nodeProcesses)
@@ -490,7 +490,7 @@ namespace Microsoft.Build.BackEnd
             nodeStream.Connect(timeout);
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-            if (NativeMethodsShared.IsWindows && !NativeMethodsShared.IsMono)
+            if (NativeMethodsShared.IsWindows)
             {
                 // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
                 // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
@@ -514,7 +514,7 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
 
-#if NETCOREAPP2_1_OR_GREATER || MONO
+#if NETCOREAPP2_1_OR_GREATER
             nodeStream.ReadEndOfHandshakeSignal(true, timeout);
 #else
             nodeStream.ReadEndOfHandshakeSignal(true);

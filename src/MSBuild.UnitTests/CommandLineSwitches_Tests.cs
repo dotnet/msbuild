@@ -576,6 +576,26 @@ namespace Microsoft.Build.UnitTests
             emptyParametersAllowed.ShouldBeFalse();
         }
 
+        [Theory]
+        [InlineData("featureavailability")]
+        [InlineData("fa")]
+        public void FeatureAvailibilitySwitchIdentificationTest(string switchName)
+        {
+            CommandLineSwitches.IsParameterizedSwitch(
+                switchName,
+                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
+                out string duplicateSwitchErrorMessage,
+                out bool multipleParametersAllowed,
+                out string missingParametersErrorMessage,
+                out _,
+                out _);
+
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.FeatureAvailability);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldNotBeNullOrEmpty();
+        }
+
         [Fact]
         public void TargetsSwitchParameter()
         {
@@ -1055,6 +1075,44 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("build", parameters[2]);
         }
 
+        /// <summary>
+        /// Verifies that the Target property is unquoted and parsed properly.
+        /// This will remove the possibility to have the ';' in the target name. 
+        /// </summary>
+        [Theory]
+        [InlineData("/t:Clean;Build", "\"Clean;Build\"")]
+        [InlineData("/t:Clean;Build", "Clean;Build")]
+        public void ParameterizedSwitchTargetQuotedTest(string commandLineArg, string switchParameters)
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+            switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Target, commandLineArg, switchParameters, true, true, false);
+            switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target).ShouldBeTrue();
+
+            switches[CommandLineSwitches.ParameterizedSwitch.Target].Length.ShouldBe(2);
+            switches[CommandLineSwitches.ParameterizedSwitch.Target][0].ShouldBe("Clean");
+            switches[CommandLineSwitches.ParameterizedSwitch.Target][1].ShouldBe("Build");
+            switches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Target).ShouldBe(commandLineArg);
+        }
+
+        /// <summary>
+        /// Verifies that the parsing behavior of quoted target properties is not changed when ChangeWave configured.
+        /// </summary>
+        [Fact]
+        public void ParameterizedSwitchTargetQuotedChangeWaveTest()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "17.10");
+
+                CommandLineSwitches switches = new CommandLineSwitches();
+                switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Target, "/t:Clean;Build", "\"Clean;Build\"", true, true, false);
+                switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target).ShouldBeTrue();
+
+                switches[CommandLineSwitches.ParameterizedSwitch.Target].Length.ShouldBe(1);
+                switches[CommandLineSwitches.ParameterizedSwitch.Target][0].ShouldBe("Clean;Build");
+            }
+        }
+
         [Fact]
         public void AppendParameterizedSwitchesTests3()
         {
@@ -1127,6 +1185,7 @@ namespace Microsoft.Build.UnitTests
                                         graphBuildOptions: null,
                                         lowPriority: false,
                                         question: false,
+                                        isBuildCheckEnabled: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
                                         saveProjectResult: false,
@@ -1470,25 +1529,6 @@ namespace Microsoft.Build.UnitTests
 #else
             MSBuildApp.Execute(new[] { @"msbuild.exe", project, "/t:foo.bar" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
 #endif
-        }
-
-        /// <summary>
-        /// Verifies that when the /profileevaluation switch is used with invalid filenames an error is shown.
-        /// </summary>
-        [MemberData(nameof(GetInvalidFilenames))]
-        [WindowsFullFrameworkOnlyTheory(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
-        public void ProcessProfileEvaluationInvalidFilename(string filename)
-        {
-            bool enableProfiler = false;
-            Should.Throw(
-                () => MSBuildApp.ProcessProfileEvaluationSwitch(new[] { filename }, new List<ILogger>(), out enableProfiler),
-                typeof(CommandLineSwitchException));
-        }
-
-        public static IEnumerable<object[]> GetInvalidFilenames()
-        {
-            yield return new object[] { $"a_file_with${Path.GetInvalidFileNameChars().First()}invalid_chars" };
-            yield return new object[] { $"C:\\a_path\\with{Path.GetInvalidPathChars().First()}invalid\\chars" };
         }
 
         /// <summary>

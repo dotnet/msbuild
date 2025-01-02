@@ -83,9 +83,9 @@ namespace Microsoft.Build.UnitTests
             m.Flush();
             m.Seek(0, SeekOrigin.Begin);
 #if FEATURE_ENCODING_DEFAULT
-            StreamReader r = new StreamReader(m, System.Text.Encoding.Default, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
+            using StreamReader r = new StreamReader(m, System.Text.Encoding.Default, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
 #else
-            StreamReader r = new StreamReader(m, System.Text.Encoding.ASCII, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
+            using StreamReader r = new StreamReader(m, System.Text.Encoding.ASCII, true); // HIGHCHAR: Test reads ANSI because that's the scenario.
 #endif
             string className = r.ReadToEnd();
 
@@ -756,7 +756,7 @@ namespace ClassLibrary2
 namespace ClassLibrary3
 #endif
 {
-    class MyForm 
+    class MyForm
     {
     }
 }"),
@@ -780,7 +780,7 @@ namespace ClassLibrary3
             {
                 return StreamHelpers.StringToStream("namespace MyStuff.Namespace { class Class {} }");
             }
-            Assert.True(false, String.Format("Encountered a new path {0}, needs unittesting support", path));
+            Assert.Fail(String.Format("Encountered a new path {0}, needs unittesting support", path));
             return null;
         }
 

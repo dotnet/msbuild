@@ -9,6 +9,8 @@ using System.Text;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -562,8 +564,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
 <Project>
    <Import Project=`foo/*.props`/>
    <ItemGroup>
-      <i Include=`**/foo/**/*.cs`/>
-      <i2 Include=`**/bar/**/*.cs`/>
+      <i Include=`**/foo/**/*.cs` />
+      <i2 Include=`**/bar/**/*.cs` />
+      <i3 Include=`**/yyy/**/*.cs` Exclude=`mock-value` />
    </ItemGroup>
 
    <ItemGroup>
@@ -584,11 +587,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 ".Cleanup();
             using (var env = TestEnvironment.Create())
             {
-                var projectFiles = env.CreateTestProjectWithFiles(content, new[] { "foo/extra.props", "foo/a.cs", "foo/b.cs", "bar/c.cs", "bar/d.cs" });
+                var projectFiles = env.CreateTestProjectWithFiles(content, new[] { "foo/extra.props", "foo/a.cs", "foo/b.cs", "bar/c.cs", "bar/d.cs", "yyy/d.cs" });
 
                 File.WriteAllText(projectFiles.CreatedFiles[0], import);
 
-                env.SetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes", ".*foo.*");
+                env.SetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes", ".*foo.*;.*yyy*.");
 
                 EngineFileUtilities.CaptureLazyWildcardRegexes();
 
@@ -596,6 +599,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 Assert.Equal("true", project.GetPropertyValue("FromImport"));
                 Assert.Equal("**/foo/**/*.cs", project.GetConcatenatedItemsOfType("i"));
+                Assert.Equal("**/yyy/**/*.cs", project.GetConcatenatedItemsOfType("i3"));
 
                 var expectedItems = "bar\\c.cs;bar\\d.cs";
 
@@ -620,6 +624,41 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 // recursive dir does not work with lazy wildcards
                 Assert.Equal(string.Empty, project.GetConcatenatedItemsOfType("RecursiveDir"));
             }
+        }
+
+        [Fact]
+        public void DoesNotCrashWhenUnEvaluatedWildCardLooksLikeUNC()
+        {
+            var content = """
+                <Project>
+
+                  <PropertyGroup>
+                    <A>$(B)\</A>
+                  </PropertyGroup>
+
+                  <ItemGroup>
+                    <None Include="$(A)\csc.*" />
+                    <None Update="2.txt">
+                      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+                    </None>
+                  </ItemGroup>
+
+                  <Target Name="a" />
+
+                </Project>
+                """.Cleanup();
+
+            using var env = TestEnvironment.Create();
+
+            var projectFiles = env.CreateTestProjectWithFiles(content);
+
+            env.SetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes", ".*");
+
+            EngineFileUtilities.CaptureLazyWildcardRegexes();
+
+            Project project = Should.NotThrow(() => new Project(projectFiles.ProjectFile));
+
+            project.GetConcatenatedItemsOfType("None").ShouldContain("csc.*");
         }
 
         [Theory]

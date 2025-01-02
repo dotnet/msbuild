@@ -115,7 +115,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The task execution host for in-proc tasks.
         /// </summary>
-        private ITaskExecutionHost _taskExecutionHost;
+        private TaskExecutionHost _taskExecutionHost;
 
         /// <summary>
         /// The object used to synchronize access to the task execution host.
@@ -293,7 +293,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>true, if successful</returns>
         private async Task<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(lookup, nameof(lookup));
+            ErrorUtilities.VerifyThrowArgumentNull(lookup);
 
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             TaskHost taskHost = null;
@@ -313,7 +313,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 List<string> taskParameterValues = CreateListOfParameterValues();
-                buckets = BatchingEngine.PrepareBatchingBuckets(taskParameterValues, lookup, _targetChildInstance.Location);
+                buckets = BatchingEngine.PrepareBatchingBuckets(taskParameterValues, lookup, _targetChildInstance.Location, _targetLoggingContext);
 
                 Dictionary<string, string> lookupHash = null;
 
@@ -347,7 +347,7 @@ namespace Microsoft.Build.BackEnd
 
                 taskHost?.MarkAsInactive();
 
-                // Now all task batches are done, apply all item adds to the outer 
+                // Now all task batches are done, apply all item adds to the outer
                 // target batch; we do this even if the task wasn't found (in that case,
                 // no items or properties will have been added to the scope)
                 if (buckets != null)
@@ -379,8 +379,6 @@ namespace Microsoft.Build.BackEnd
                 ExpanderOptions.ExpandAll,
                 _buildRequestEntry.ProjectRootDirectory,
                 _targetChildInstance.ConditionLocation,
-                _targetLoggingContext.LoggingService,
-                _targetLoggingContext.BuildEventContext,
                 FileSystems.Default,
                 loggingContext: _targetLoggingContext);
 
@@ -414,19 +412,21 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Change to the project root directory.
                     // If that directory does not exist, do nothing. (Do not check first as it is almost always there and it is slow)
-                    // This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project. 
+                    // This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
                     // No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
                     NativeMethodsShared.SetCurrentDirectory(_buildRequestEntry.ProjectRootDirectory);
                 }
 
                 if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)
                 {
-                    // We need to find the task before logging the task started event so that the using task statement comes before the task started event 
+                    // We need to find the task before logging the task started event so that the using task statement comes before the task started event
                     IDictionary<string, string> taskIdentityParameters = GatherTaskIdentityParameters(bucket.Expander);
-                    TaskRequirements? requirements = _taskExecutionHost.FindTask(taskIdentityParameters);
+                    (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) = _taskExecutionHost.FindTask(taskIdentityParameters);
+                    string taskAssemblyLocation = taskFactoryWrapper?.TaskFactoryLoadedType?.Path;
+
                     if (requirements != null)
                     {
-                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance);
+                        TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance, taskAssemblyLocation);
                         MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
                         _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
 
@@ -519,15 +519,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private IDictionary<string, string> GatherTaskIdentityParameters(Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
-            ErrorUtilities.VerifyThrowInternalNull(_taskNode, "taskNode"); // taskNode should never be null when we're calling this method. 
+            ErrorUtilities.VerifyThrowInternalNull(_taskNode, "taskNode"); // taskNode should never be null when we're calling this method.
 
             string msbuildArchitecture = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildArchitecture ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildArchitectureLocation ?? ElementLocation.EmptyLocation);
             string msbuildRuntime = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildRuntime ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildRuntimeLocation ?? ElementLocation.EmptyLocation);
 
             IDictionary<string, string> taskIdentityParameters = null;
 
-            // only bother to create a task identity parameter set if we're putting anything in there -- otherwise, 
-            // a null set will be treated as equivalent to all parameters being "don't care". 
+            // only bother to create a task identity parameter set if we're putting anything in there -- otherwise,
+            // a null set will be treated as equivalent to all parameters being "don't care".
             if (msbuildRuntime != String.Empty || msbuildArchitecture != String.Empty)
             {
                 taskIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -612,7 +612,7 @@ namespace Microsoft.Build.BackEnd
                     if (!_targetLoggingContext.LoggingService.OnlyLogCriticalEvents)
                     {
                         // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
-                        string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _targetChildInstance.ConditionLocation, loggingContext: _targetLoggingContext);
+                        string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _targetChildInstance.ConditionLocation);
 
                         // Whilst we are within the processing of the task, we haven't actually started executing it, so
                         // our skip task message needs to be in the context of the target. However any errors should be reported
@@ -652,7 +652,7 @@ namespace Microsoft.Build.BackEnd
                 ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
             }
 
-            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, (_taskExecutionHost as TaskExecutionHost)?.TaskInstance?.GetType());
+            using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _taskExecutionHost?.TaskInstance?.GetType());
 
             try
             {
@@ -734,7 +734,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="bucket">The batching bucket</param>
         /// <param name="howToExecuteTask">The task execution mode</param>
         /// <returns>The result of running the task.</returns>
-        private async Task<WorkUnitResult> ExecuteInstantiatedTask(ITaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
+        private async Task<WorkUnitResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
         {
             UpdateContinueOnError(bucket, taskHost);
 
@@ -754,20 +754,13 @@ namespace Microsoft.Build.BackEnd
                 Exception taskException = null;
 
                 // If this is the MSBuild task, we need to execute it's special internal method.
-                TaskExecutionHost host = taskExecutionHost as TaskExecutionHost;
-                Type taskType = host.TaskInstance.GetType();
-
                 try
                 {
-                    if (taskType == typeof(MSBuild))
+                    if (taskExecutionHost.TaskInstance is MSBuild msbuildTask)
                     {
-                        MSBuild msbuildTask = host.TaskInstance as MSBuild;
-
-                        ErrorUtilities.VerifyThrow(msbuildTask != null, "Unexpected MSBuild internal task.");
-
                         var undeclaredProjects = GetUndeclaredProjects(msbuildTask);
 
-                        if (undeclaredProjects != null && undeclaredProjects.Count != 0)
+                        if (undeclaredProjects?.Count > 0)
                         {
                             _continueOnError = ContinueOnError.ErrorAndStop;
 
@@ -799,9 +792,8 @@ namespace Microsoft.Build.BackEnd
                             }
                         }
                     }
-                    else if (taskType == typeof(CallTarget))
+                    else if (taskExecutionHost.TaskInstance is CallTarget callTargetTask)
                     {
-                        CallTarget callTargetTask = host.TaskInstance as CallTarget;
                         taskResult = await callTargetTask.ExecuteInternal();
                     }
                     else
@@ -814,8 +806,18 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
                 }
-                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") != "1")
+                catch (Exception ex)
                 {
+                    if (ExceptionHandling.IsCriticalException(ex) || Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1")
+                    {
+                        taskLoggingContext.LogFatalTaskError(
+                            ex,
+                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            _taskNode.Name);
+
+                        throw new CriticalTaskException(ex);
+                    }
+
                     taskException = ex;
                 }
 
@@ -825,7 +827,7 @@ namespace Microsoft.Build.BackEnd
 
                     // Set the property "MSBuildLastTaskResult" to reflect whether the task succeeded or not.
                     // The main use of this is if ContinueOnError is true -- so that the next task can consult the result.
-                    // So we want it to be "false" even if ContinueOnError is true. 
+                    // So we want it to be "false" even if ContinueOnError is true.
                     // The constants "true" and "false" should NOT be localized. They become property values.
                     bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, taskResult ? "true" : "false", true/* may be reserved */, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
                 }
@@ -894,7 +896,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else if (type == typeof(Exception) || type.GetTypeInfo().IsSubclassOf(typeof(Exception)))
                     {
-                        // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with 
+                        // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with
                         // a debugger attached to break on 2nd chance exceptions.
                         // That requires that there needs to be a way to not catch here, by setting an environment variable.
                         if (ExceptionHandling.IsCriticalException(taskException) || (Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1"))
@@ -941,7 +943,7 @@ namespace Microsoft.Build.BackEnd
                 // When a task fails it must log an error. If a task fails to do so,
                 // that is logged as an error. MSBuild tasks are an exception because
                 // errors are not logged directly from them, but the tasks spawned by them.
-                IBuildEngine be = host.TaskInstance.BuildEngine;
+                IBuildEngine be = taskExecutionHost.TaskInstance.BuildEngine;
                 if (taskReturned // if the task returned
                     && !taskResult // and it returned false
                     && !taskLoggingContext.HasLoggedErrors // and it didn't log any errors
@@ -1062,7 +1064,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="howToExecuteTask">The task execution mode</param>
         /// <param name="bucket">The bucket to which the task execution belongs.</param>
         /// <returns>true, if successful</returns>
-        private bool GatherTaskOutputs(ITaskExecutionHost taskExecutionHost, TaskExecutionMode howToExecuteTask, ItemBucket bucket)
+        private bool GatherTaskOutputs(TaskExecutionHost taskExecutionHost, TaskExecutionMode howToExecuteTask, ItemBucket bucket)
         {
             bool gatheredTaskOutputsSuccessfully = true;
 
@@ -1076,9 +1078,8 @@ namespace Microsoft.Build.BackEnd
                     ExpanderOptions.ExpandAll,
                     _buildRequestEntry.ProjectRootDirectory,
                     taskOutputSpecification.ConditionLocation,
-                    _targetLoggingContext.LoggingService,
-                    _targetLoggingContext.BuildEventContext,
-                    FileSystems.Default);
+                    FileSystems.Default,
+                    _targetLoggingContext);
 
                 if (condition)
                 {
