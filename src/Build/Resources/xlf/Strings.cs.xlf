@@ -193,22 +193,22 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0107_MessageFmt">
         <source>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</source>
-        <target state="new">Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</target>
+        <target state="translated">{0} projektu určuje vlastnost TargetFrameworks '{1}' a vlastnost TargetFramework '{2}' současně. To způsobí, že se TargetFrameworks bude ignorovat a sestavení se bude chovat jako jednocílový.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0107_Title">
         <source>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</source>
-        <target state="new">'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</target>
+        <target state="translated">Vlastnosti TargetFramework (singular) a TargetFrameworks (plural) by se neměly zadává ve skriptech současně.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0106_MessageFmt">
         <source>Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</source>
-        <target state="new">Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</target>
+        <target state="translated">{0} projektu určuje '{1}' položku '{2}', která má Vlastnost CopyToOutputDirectory nastavenou na hodnotu Always. Změňte metadata nebo použijte vlastnost CopyToOutputDirectory.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0106_Title">
         <source>Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</source>
-        <target state="new">Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</target>
+        <target state="translated">Nezadávejte always pro CopyToOutputDirectory, protože to může způsobit nepotřebné operace kopírování během sestavování. Pokud chcete používat efektivnější kopírování, použijte hodnotu metadat PreserveNeexport nebo IfDifferent, nebo nastavte vlastnost SkipUnchangedFilesOnCopyAlways na true.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
