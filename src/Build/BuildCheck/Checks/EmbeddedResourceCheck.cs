@@ -43,7 +43,7 @@ internal class EmbeddedResourceCheck : Check
             return;
         }
 
-        foreach (ItemData itemData in context.Data.EnumerateItemsOfType("EmbeddedResource"))
+        foreach (ItemData itemData in context.Data.EnumerateItemsOfType(ItemNames.EmbeddedResource))
         {
             string evaluatedEmbedItem = itemData.EvaluatedInclude;
             bool hasDoubleExtension = HasDoubleExtension(evaluatedEmbedItem);
@@ -74,7 +74,7 @@ internal class EmbeddedResourceCheck : Check
             {
                 context.ReportResult(BuildCheckResult.Create(
                     SupportedRule,
-                    // Populating precise location tracked via https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=58661732
+                    // Populating precise location tracked via https://github.com/dotnet/msbuild/issues/10383
                     ElementLocation.EmptyLocation,
                     Path.GetFileName(context.Data.ProjectFilePath),
                     evaluatedEmbedItem,
