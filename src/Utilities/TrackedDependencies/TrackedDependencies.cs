@@ -20,7 +20,7 @@ namespace Microsoft.Build.Utilities
 #pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Methods
         /// <summary>
-        /// Expand wildcards in the item list.
+        /// Expand wildcards in the item list and log glob failures.
         /// </summary>
         /// <param name="expand"></param>
         /// <param name="log">For logging glob failures.</param>
@@ -69,6 +69,13 @@ namespace Microsoft.Build.Utilities
             }
             return expanded.ToArray();
         }
+
+        /// <summary>
+        /// Expand wildcards in the item list.
+        /// </summary>
+        /// <param name="expand"></param>
+        /// <returns>Array of items expanded</returns>
+        public static ITaskItem[] ExpandWildcards(ITaskItem[] expand) => ExpandWildcards(expand, null);
 
         /// <summary>
         /// This method checks that all the files exist
