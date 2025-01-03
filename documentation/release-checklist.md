@@ -67,7 +67,8 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
   - [ ] Arcade:
     - Based on .NET version channel--does not change every MSBuild release
     - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`
-- [ ] Make sure the non-infrastructure dependencies (currently Roslyn and Nuget) are set to 'disabled' - we do not want to automatically bump them. The version updates should be explicitly driven by SDK or VS.
+- [ ] Make sure the non-infrastructure dependencies (currently Roslyn and Nuget) are set to 'disabled' (`  - Enabled: False` in the `darc get-subscriptions` output) - we do not want to automatically bump them. The version updates should be explicitly driven by SDK or VS.
+- [ ] Any missing subscription need to be added via `darc add-subscription` command, any misconfigured subscription needs to be edit via `darc update-subscription` command (for additional required and optional parameters run with `--help`)
 
 ### Adjust pipelines / releases
 - [ ]  Fix OptProf data flow for the new vs{{THIS_RELEASE_VERSION}} branch
@@ -83,8 +84,9 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
 - [ ]  Create and merge a PR in main to update a localization version comment in setting [`EnableReleaseOneLocBuild`](https://github.com/dotnet/msbuild/blob/main/.vsts-dotnet.yml) to set up the merge conflict when this line will be updated in the release branch.
 
 ### Final branding
-- [ ] Prepare final branding PR for `vs{{THIS_RELEASE_VERSION}}`: {{URL_OF_FINAL_BRANDING_PR}} 
-      Edit Version.props file - add `<DotNetFinalVersionKind>release</DotNetFinalVersionKind>` as a suffix (on same line! - to intentionaly make it merge conflict on flows to main) after the `VersionPrefix`  
+- [ ] Prepare final branding PR for `vs{{THIS_RELEASE_VERSION}}`: {{URL_OF_FINAL_BRANDING_PR}} \
+      Edit Version.props file - add `<DotNetFinalVersionKind>release</DotNetFinalVersionKind>` as a suffix (on same line! - to intentionaly make it merge conflict on flows to main) after the `VersionPrefix`  \
+      e.g.: #11130, #10697
 - [ ]  Merge final branding to `vs{{THIS_RELEASE_VERSION}}` branch
 - [ ]  Update perfstar MSBuild insertions configuration: [example PR](https://dev.azure.com/devdiv/DevDiv/_git/dotnet-perfstar/pullrequest/522843): {{URL_OF_PERFSTAR_PR}}
 - [ ] Get M2 or QB approval as necessary per the VS schedule
