@@ -332,22 +332,21 @@ namespace Microsoft.Build.Internal
                     // as a relative path, we will get back a bunch of relative paths.
                     // If the filespec started out as an absolute path, we will get
                     // back a bunch of absolute paths
-                    // IEnumerable<BuildMessageEventArgs> events;
-                    (fileList, _, _, BuildMessageEventArgs globFailure) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+                    (fileList, _, _, string globFailure) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
-                    // log globbing failure with the present logging mechanism
+                    // log globing failure with the present logging mechanism
                     if (globFailure != null)
                     {
                         switch (loggingMechanism)
                         {
                             case TargetLoggingContext targetLoggingContext:
-                                targetLoggingContext.LogCommentFromText(globFailure.Importance, globFailure.Message);
+                                targetLoggingContext.LogCommentFromText(MessageImportance.Low, globFailure);
                                 break;
                             case ILoggingService loggingService:
-                                loggingService.LogCommentFromText(buildEventContext, globFailure.Importance, globFailure.Message);
+                                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, globFailure);
                                 break;
                             case EvaluationLoggingContext evaluationLoggingContext:
-                                evaluationLoggingContext.LogCommentFromText(globFailure.Importance, globFailure.Message);
+                                evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, globFailure);
                                 break;
                             default:
                                 throw new InternalErrorException($"Logging type {loggingMechanism.GetType()} is not understood by {nameof(GetFileList)}.");

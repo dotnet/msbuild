@@ -754,10 +754,10 @@ namespace Microsoft.Build.Tasks
                         string src = FileUtilities.NormalizePath(sourceFolder.ItemSpec);
                         string srcName = Path.GetFileName(src);
 
-                        (string[] filesInFolder, _, _, BuildMessageEventArgs globFailure) = FileMatcher.Default.GetFiles(src, "**");
+                        (string[] filesInFolder, _, _, string globFailure) = FileMatcher.Default.GetFiles(src, "**");
                         if (globFailure != null)
                         {
-                            BuildEngine.LogMessageEvent(globFailure);
+                            Log.LogMessage(MessageImportance.Low, globFailure);
                         }
 
                         foreach (string file in filesInFolder)

@@ -1903,8 +1903,8 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
-        /// <returns>The search action, array of files, and Exclude file spec (if applicable).</returns>
-        internal (string[] FileList, SearchAction Action, string ExcludeFileSpec, BuildMessageEventArgs globFailure) GetFiles(
+        /// <returns>The search action, array of files, Exclude file spec (if applicable), and glob failure message (if applicable) .</returns>
+        internal (string[] FileList, SearchAction Action, string ExcludeFileSpec, string GlobFailure) GetFiles(
             string projectDirectoryUnescaped,
             string filespecUnescaped,
             List<string> excludeSpecsUnescaped = null)
@@ -1929,7 +1929,7 @@ namespace Microsoft.Build.Shared
             string[] fileList;
             SearchAction action = SearchAction.None;
             string excludeFileSpec = string.Empty;
-            BuildMessageEventArgs globFailure = null;
+            string globFailure = null;
             if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
             {
                 // avoid parallel evaluations of the same wildcard by using a unique lock for each wildcard
@@ -2363,7 +2363,7 @@ namespace Microsoft.Build.Shared
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <returns>The search action, array of files, and Exclude file spec (if applicable).</returns>
-        private (string[] FileList, SearchAction Action, string ExcludeFileSpec, BuildMessageEventArgs globFailureEvent) GetFilesImplementation(
+        private (string[] FileList, SearchAction Action, string ExcludeFileSpec, string globFailureEvent) GetFilesImplementation(
             string projectDirectoryUnescaped,
             string filespecUnescaped,
             List<string> excludeSpecsUnescaped)
@@ -2595,29 +2595,23 @@ namespace Microsoft.Build.Shared
                 // Flatten to get exceptions than are thrown inside a nested Parallel.ForEach
                 if (ex.Flatten().InnerExceptions.All(ExceptionHandling.IsIoRelatedException))
                 {
-                var globFailureMessageEvent = new BuildMessageEventArgs(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("An exception occurred while expanding a fileSpec with globs: fileSpec: \"{0}\", Trace: \"{1}\"",
-                    filespecUnescaped),
-                    null,
-                    "FileMatcher",
-                    MessageImportance.Low);
-                    return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped),
+                    return (
+                        CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped),
                         trackSearchAction,
                         trackExcludeFileSpec,
-                        globFailureMessageEvent);
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("GlobExpansionFailed", filespecUnescaped, ex.ToString()));
                 }
+
                 throw;
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                var globFailureMessageEvent = new BuildMessageEventArgs(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("An exception occurred while expanding a fileSpec with globs: fileSpec: \"{0}\", Trace: \"{1}\"",
-                    filespecUnescaped),
-                    null,
-                    "FileMatcher",
-                    MessageImportance.Low);
-                // Assume it's not meant to be a path, but log the failure to expand
-                return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), trackSearchAction, trackExcludeFileSpec, globFailureMessageEvent);
+                // Assume it's not meant to be a path, but pass the information about the failure to expand
+                return (
+                    CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped),
+                    trackSearchAction,
+                    trackExcludeFileSpec,
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("GlobExpansionFailed", filespecUnescaped, ex.ToString()));
             }
 
             /*

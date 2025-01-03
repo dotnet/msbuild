@@ -24,9 +24,9 @@ namespace Microsoft.Build.Utilities
         /// Expand wildcards in the item list.
         /// </summary>
         /// <param name="expand"></param>
-        /// <param name="logMessageFunction">For logging glob failures.</param>
+        /// <param name="log">For logging glob failures.</param>
         /// <returns>Array of items expanded</returns>
-        public static ITaskItem[] ExpandWildcards(ITaskItem[] expand, Action<BuildMessageEventArgs> logMessageFunction)
+        public static ITaskItem[] ExpandWildcards(ITaskItem[] expand, TaskLoggingHelper log)
         {
             if (expand == null)
             {
@@ -51,10 +51,10 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-                        (files, _, _, BuildMessageEventArgs globFailure) = FileMatcher.Default.GetFiles(null, item.ItemSpec);
-                        if (globFailure != null)
+                        (files, _, _, var globFailure) = FileMatcher.Default.GetFiles(null, item.ItemSpec);
+                        if (globFailure != null && log != null)
                         {
-                            logMessageFunction(globFailure);
+                            log.LogMessage(MessageImportance.Low, globFailure);
                         }
                     }
 
