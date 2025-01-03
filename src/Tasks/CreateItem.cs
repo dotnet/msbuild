@@ -181,7 +181,7 @@ namespace Microsoft.Build.Tasks
                             (files, action, _, string globFailure) = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
                             if (globFailure != null)
                             {
-                                Log.LogMessage(globFailure);
+                                Log.LogMessage(MessageImportance.Low, globFailure);
                             }
 
                             foreach (string file in files)
