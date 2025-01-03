@@ -2219,6 +2219,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="GlobExpansionFailed" xml:space="preserve">
     <value>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</value>
   </data>
+  <data name="UnknownLoggingType" xml:space="preserve">
+    <value>Logging type {0} is not understood by {1}.</value>
+  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 

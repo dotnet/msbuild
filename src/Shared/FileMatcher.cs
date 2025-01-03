@@ -1896,6 +1896,7 @@ namespace Microsoft.Build.Shared
             public int MaxTasksPerIteration;
         }
 
+#nullable enable
         /// <summary>
         /// Given a filespec, find the files that match.
         /// Will never throw IO exceptions: if there is no match, returns the input verbatim.
@@ -1904,10 +1905,10 @@ namespace Microsoft.Build.Shared
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
         /// <returns>The search action, array of files, Exclude file spec (if applicable), and glob failure message (if applicable) .</returns>
-        internal (string[] FileList, SearchAction Action, string ExcludeFileSpec, string GlobFailure) GetFiles(
-            string projectDirectoryUnescaped,
+        internal (string[] FileList, SearchAction Action, string ExcludeFileSpec, string? GlobFailure) GetFiles(
+            string? projectDirectoryUnescaped,
             string filespecUnescaped,
-            List<string> excludeSpecsUnescaped = null)
+            List<string>? excludeSpecsUnescaped = null)
         {
             // For performance. Short-circuit iff there is no wildcard.
             if (!HasWildcards(filespecUnescaped))
@@ -1925,11 +1926,11 @@ namespace Microsoft.Build.Shared
 
             var enumerationKey = ComputeFileEnumerationCacheKey(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
-            IReadOnlyList<string> files;
+            IReadOnlyList<string>? files;
             string[] fileList;
             SearchAction action = SearchAction.None;
             string excludeFileSpec = string.Empty;
-            string globFailure = null;
+            string? globFailure = null;
             if (!_cachedGlobExpansions.TryGetValue(enumerationKey, out files))
             {
                 // avoid parallel evaluations of the same wildcard by using a unique lock for each wildcard
@@ -1958,6 +1959,7 @@ namespace Microsoft.Build.Shared
 
             return (filesToReturn, action, excludeFileSpec, globFailure);
         }
+#nullable disable
 
         private static string ComputeFileEnumerationCacheKey(string projectDirectoryUnescaped, string filespecUnescaped, List<string> excludes)
         {
@@ -2355,6 +2357,7 @@ namespace Microsoft.Build.Shared
             return [filespecUnescaped];
         }
 
+#nullable enable
         /// <summary>
         /// Given a filespec, find the files that match.
         /// Will never throw IO exceptions: if there is no match, returns the input verbatim.
@@ -2362,11 +2365,11 @@ namespace Microsoft.Build.Shared
         /// <param name="projectDirectoryUnescaped">The project directory.</param>
         /// <param name="filespecUnescaped">Get files that match the given file spec.</param>
         /// <param name="excludeSpecsUnescaped">Exclude files that match this file spec.</param>
-        /// <returns>The search action, array of files, and Exclude file spec (if applicable).</returns>
-        private (string[] FileList, SearchAction Action, string ExcludeFileSpec, string globFailureEvent) GetFilesImplementation(
-            string projectDirectoryUnescaped,
+        /// <returns>The search action, array of files, Exclude file spec (if applicable), and glob failure message (if applicable).</returns>
+        private (string[] FileList, SearchAction Action, string ExcludeFileSpec, string? globFailureEvent) GetFilesImplementation(
+            string? projectDirectoryUnescaped,
             string filespecUnescaped,
-            List<string> excludeSpecsUnescaped)
+            List<string>? excludeSpecsUnescaped)
         {
             // UNDONE (perf): Short circuit the complex processing when we only have a path and a wildcarded filename
 
@@ -2394,17 +2397,17 @@ namespace Microsoft.Build.Shared
                 throw new NotSupportedException(action.ToString());
             }
 
-            List<RecursionState> searchesToExclude = null;
+            List<RecursionState>? searchesToExclude = null;
 
             // Exclude searches which will become active when the recursive search reaches their BaseDirectory.
             //  The BaseDirectory of the exclude search is the key for this dictionary.
-            Dictionary<string, List<RecursionState>> searchesToExcludeInSubdirs = null;
+            Dictionary<string, List<RecursionState>>? searchesToExcludeInSubdirs = null;
 
             // Track the search action and exclude file spec for proper detection and logging of drive enumerating wildcards.
             SearchAction trackSearchAction = action;
             string trackExcludeFileSpec = string.Empty;
 
-            HashSet<string> resultsToExclude = null;
+            HashSet<string>? resultsToExclude = null;
             if (excludeSpecsUnescaped != null)
             {
                 searchesToExclude = new List<RecursionState>();
@@ -2478,7 +2481,7 @@ namespace Microsoft.Build.Shared
                             {
                                 searchesToExcludeInSubdirs = new Dictionary<string, List<RecursionState>>(StringComparer.OrdinalIgnoreCase);
                             }
-                            List<RecursionState> listForSubdir;
+                            List<RecursionState>? listForSubdir;
                             if (!searchesToExcludeInSubdirs.TryGetValue(excludeBaseDirectory, out listForSubdir))
                             {
                                 listForSubdir = new List<RecursionState>();
@@ -2622,6 +2625,7 @@ namespace Microsoft.Build.Shared
                 : listOfFiles.SelectMany(list => list).ToArray();
             return (files, trackSearchAction, trackExcludeFileSpec, null);
         }
+#nullable disable
 
         private bool InnerExceptionsAreAllIoRelated(AggregateException ex)
         {

@@ -813,6 +813,11 @@ Erros: {3}</target>
         <target state="translated">Ler a propriedade não inicializada "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="UnknownLoggingType">
+        <source>Logging type {0} is not understood by {1}.</source>
+        <target state="new">Logging type {0} is not understood by {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>
         <target state="translated">Usando caches de resultados de build de entrada: {0}</target>

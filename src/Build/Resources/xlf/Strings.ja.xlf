@@ -813,6 +813,11 @@ Errors: {3}</source>
         <target state="translated">初期化されていないプロパティ "{0}" の読み取り</target>
         <note />
       </trans-unit>
+      <trans-unit id="UnknownLoggingType">
+        <source>Logging type {0} is not understood by {1}.</source>
+        <target state="new">Logging type {0} is not understood by {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>
         <target state="translated">次の入力ビルド結果キャッシュを使用しています: {0}</target>

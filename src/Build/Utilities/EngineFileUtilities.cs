@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -284,7 +284,10 @@ namespace Microsoft.Build.Internal
                             break;
 
                         default:
-                            throw new InternalErrorException($"Logging type {loggingMechanism.GetType()} is not understood by {nameof(GetFileList)}.");
+                            throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "UnknownLoggingType",
+                                loggingMechanism.GetType(),
+                                nameof(GetFileList)));
                     }
                 }
 
@@ -322,7 +325,10 @@ namespace Microsoft.Build.Internal
                             break;
 
                         default:
-                            throw new InternalErrorException($"Logging type {loggingMechanism.GetType()} is not understood by {nameof(GetFileList)}.");
+                            throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "UnknownLoggingType",
+                                loggingMechanism.GetType(),
+                                nameof(GetFileList)));
                     }
                 }
                 else
@@ -349,7 +355,10 @@ namespace Microsoft.Build.Internal
                                 evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, globFailure);
                                 break;
                             default:
-                                throw new InternalErrorException($"Logging type {loggingMechanism.GetType()} is not understood by {nameof(GetFileList)}.");
+                                throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                    "UnknownLoggingType",
+                                    loggingMechanism.GetType(),
+                                    nameof(GetFileList)));
                         }
                     }
 

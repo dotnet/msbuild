@@ -813,6 +813,11 @@ Errors: {3}</source>
         <target state="translated">读取未初始化的属性“{0}”</target>
         <note />
       </trans-unit>
+      <trans-unit id="UnknownLoggingType">
+        <source>Logging type {0} is not understood by {1}.</source>
+        <target state="new">Logging type {0} is not understood by {1}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="UsingInputCaches">
         <source>Using input build results caches: {0}</source>
         <target state="translated">Using 输入生成结果缓存: {0}</target>
