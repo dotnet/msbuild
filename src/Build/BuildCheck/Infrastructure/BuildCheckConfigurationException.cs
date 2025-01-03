@@ -13,7 +13,7 @@ internal sealed class BuildCheckConfigurationException : Exception
 {
     /// <summary>
     /// Exception to communicate issues with user specified configuration - unsupported scenarios, malformations, etc.
-    /// This exception usually leads to defuncting the particular analyzer for the rest of the build (even if issue occured with a single project).
+    /// This exception usually leads to defuncting the particular check for the rest of the build (even if issue occured with a single project).
     /// </summary>
     internal BuildCheckConfigurationErrorScope buildCheckConfigurationErrorScope;
 
@@ -26,4 +26,7 @@ internal sealed class BuildCheckConfigurationException : Exception
     {
         this.buildCheckConfigurationErrorScope = buildCheckConfigurationErrorScope;
     }
+
+    public BuildCheckConfigurationException(string message, Exception innerException) : base(message, innerException)
+    { }
 }

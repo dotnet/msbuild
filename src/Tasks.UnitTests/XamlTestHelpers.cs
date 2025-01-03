@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
             }
             catch (XamlParseException)
             {
-                Assert.True(false, "Parse of FakeTask XML failed");
+                Assert.Fail("Parse of FakeTask XML failed");
             }
 
             TaskGenerator tg = new TaskGenerator(tp);
