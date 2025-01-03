@@ -579,7 +579,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Fact(Skip = "To unblock: https://github.com/dotnet/msbuild/issues/11090")]
+    [Fact]
     public void CheckHasAccessToAllConfigs()
     {
         using (var env = TestEnvironment.Create())
@@ -757,7 +757,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "To unblock: https://github.com/dotnet/msbuild/issues/11090")]
+    [Theory]
     [InlineData("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)
@@ -790,7 +790,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "To unblock: https://github.com/dotnet/msbuild/issues/11090")]
+    [Theory]
     [InlineData("CheckCandidate", "X01234", "error", "error X01234: http://samplelink.com/X01234")]
     [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234: http://samplelink.com/X01234")]
     public void CustomCheckTest_WithEditorConfig(string checkCandidate, string ruleId, string severity, string expectedMessage)
@@ -817,7 +817,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "To unblock: https://github.com/dotnet/msbuild/issues/11090")]
+    [Theory]
     [InlineData("X01236", "ErrorOnInitializeCheck", "Something went wrong initializing")]
     [InlineData("X01237", "ErrorOnRegisteredAction", "something went wrong when executing registered action")]
     [InlineData("X01238", "ErrorWhenRegisteringActions", "something went wrong when registering actions")]
@@ -867,7 +867,7 @@ public class EndToEndTests : IDisposable
     }
 
 #if NET
-    [Fact(Skip = "To unblock: https://github.com/dotnet/msbuild/issues/11090")]
+    [Fact]
     public void TestBuildCheckTemplate()
     {
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
@@ -907,7 +907,10 @@ public class EndToEndTests : IDisposable
 
             // The test packages are generated during the test project build and saved in CustomChecks folder.
             string checksPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.Parent?.FullName ?? string.Empty, "CustomChecks");
-            AddPackageSource(doc, packageSourcesNode, "Key", checksPackagesPath);
+            AddPackageSource(doc, packageSourcesNode, "CustomCheckSource", checksPackagesPath);
+
+            // MSBuild packages are placed in a separate folder, so we need to add it as a package source.
+            AddPackageSource(doc, packageSourcesNode, "MSBuildTestPackagesSource", RunnerUtilities.ArtifactsLocationAttribute.ArtifactsLocation);
 
             doc.Save(Path.Combine(checkCandidatePath, "nuget.config"));
         }

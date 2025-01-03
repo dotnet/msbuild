@@ -38,7 +38,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         public void TestTwoProjectsWithSameRelativeOutputPath()
         {
             // Full output and intermediate paths are different: "C:/fake1/bin/Debug" and "C:/fake1/obj/Debug".
-            string projectFile1 = NativeMethodsShared.IsWindows ? "C:\\fake1\\project1.proj" : "/fake1/project1.proj";
+            string projectFile1 = Framework.NativeMethods.IsWindows ? "C:\\fake1\\project1.proj" : "/fake1/project1.proj";
             _registrationContext.TriggerEvaluatedPropertiesAction(MakeEvaluatedPropertiesAction(
                 projectFile1,
                 new Dictionary<string, string> {
@@ -48,7 +48,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
                 null));
 
             // Full output and intermediate paths are different: "C:/fake2/bin/Debug" and "C:/fake2/obj/Debug".
-            string projectFile2 = NativeMethodsShared.IsWindows ? "C:\\fake2\\project2.proj" : "/fake2/project2.proj";
+            string projectFile2 = Framework.NativeMethods.IsWindows ? "C:\\fake2\\project2.proj" : "/fake2/project2.proj";
             _registrationContext.TriggerEvaluatedPropertiesAction(MakeEvaluatedPropertiesAction(
                 projectFile2,
                 new Dictionary<string, string> {
@@ -65,8 +65,8 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         public void TestProjectsWithDifferentPathsSeparators()
         {
             // Paths separators are messed up.
-            string projectFile1 = NativeMethodsShared.IsWindows ? "C:\\fake\\project1.proj" : "/fake/project1.proj";
-            string projectFile2 = NativeMethodsShared.IsWindows ? "C:\\fake\\project2.proj" : "/fake/project2.proj";
+            string projectFile1 = Framework.NativeMethods.IsWindows ? "C:\\fake\\project1.proj" : "/fake/project1.proj";
+            string projectFile2 = Framework.NativeMethods.IsWindows ? "C:\\fake\\project2.proj" : "/fake/project2.proj";
 
             _registrationContext.TriggerEvaluatedPropertiesAction(MakeEvaluatedPropertiesAction(
                 projectFile1,
@@ -90,7 +90,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             _registrationContext.Results[1].CheckRule.Id.ShouldBe("BC0101");
 
             // Check that paths are formed with correct paths separators
-            string wrongPathSeparator = NativeMethodsShared.IsWindows ? "/" : "\\";
+            string wrongPathSeparator = Framework.NativeMethods.IsWindows ? "/" : "\\";
 
             foreach (string path in _registrationContext.Results[0].MessageArgs)
             {
@@ -105,7 +105,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         [Fact]
         public void TestThreeProjectsWithSameOutputPath()
         {
-            string projectFolder = NativeMethodsShared.IsWindows ? "C:\\fake\\" : "/fake/";
+            string projectFolder = Framework.NativeMethods.IsWindows ? "C:\\fake\\" : "/fake/";
             string projectFile1 = $"{projectFolder}project1.proj";
             string projectFile2 = $"{projectFolder}project2.proj";
             string projectFile3 = $"{projectFolder}project3.proj";
