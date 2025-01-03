@@ -5,6 +5,18 @@ VS OTel packages are not open source so we need to conditionally include them in
 
 [Onepager](https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/telemetry-onepager.md)
 
+## Concepts
+
+It's a bit confusing how things are named in OpenTelemetry and .NET and VS Telemetry and what they do.
+
+| OTel concept | .NET/VS | Description |
+| --- | --- | --- |
+| Span/Trace | System.Diagnostics.Activity |  Trace is a tree of Spans. Activities can be nested.|
+| Tracer | System.Diagnostics.ActivitySource | Creates and listens to activites.  |
+| Processor/Exporter | VS OTel provided default config | filters and saves telemetry as files in a desired format |
+| TracerProvider | OTel SDK TracerProvider | Singleton that is aware of processors, exporters and Tracers (in .NET a bit looser relationship because it does not create Tracers just hooks to them) |
+| Collector | VS OTel Collector | Sends to VS backend, expensive to initialize and finalize |
+
 ## Requirements
 
 ### Performance
@@ -20,8 +32,8 @@ VS OTel packages are not open source so we need to conditionally include them in
 
 ### Security
 
-- Providing a method for creating a hook in Framework MSBuild
-- document the security implications of hooking custom telemetry Exporters/Collectors in Framework
+- Providing or/and documenting a method for creating a hook in Framework MSBuild
+- If custom hooking solution will be used - document the security implications of hooking custom telemetry Exporters/Collectors in Framework
 - other security requirements (transportation, rate limiting, sanitization, data access) are implemented by VS Telemetry library or the backend
 
 ### Data handling
@@ -47,14 +59,14 @@ The data sent via VS OpenTelemetry is neither a subset neither a superset of wha
 
 ##### Features
 
-- BuildCheck enabled?
+- BuildCheck enabled
 
 The design allows for easy instrumentation of additional data points.
 
 ## Core `dotnet build` scenario
 
 - Telemetry should not be collected via VS OpenTelemetry mechanism because it's already collected in sdk.
-- There should be an opt in to initialize the ActivitySource to avoid degrading performance.
+- opt in to initialize the ActivitySource to avoid degrading performance.
 - [baronfel/otel-startup-hook: A .NET CLR Startup Hook that exports OpenTelemetry metrics via the OTLP Exporter to an OpenTelemetry Collector](https://github.com/baronfel/otel-startup-hook/) and similar enable collecting telemetry data locally by listening to the ActivitySource name defined in MSBuild.
 
 ## Standalone MSBuild.exe scenario
@@ -73,9 +85,19 @@ The design allows for easy instrumentation of additional data points.
 
 ## Implementation and MSBuild developer experience
 
+### ActivitySource names
+
+...
+
 ### Sampling
 
-- We need to sample before initalizing infrastructure to avoid overhead.
+Our estimation from VS and SDK data is that there are 10M-100M build events per day.
+For proportion estimation (of fairly common occurence in the builds), with not very strict confidnece (95%) and margin for error (5%) sampling 1:25000 would be enough.
+
+- this would apply for the DefaultActivitySource
+- other ActivitySources could be sampled more frequently to get enough data
+- Collecting has a cost, especially in standalone scenario where we have to start the collector. We might decide to undersample in standalone to avoid performance frequent impact.
+- We want to avoid that cost when not sampled, therefore we prefer head sampling.
 - Enables opt-in and opt-out for guaranteed sample or not sampled.
 - nullable ActivitySource, using `?` when working with them, we can be initialized but not sampled -> it will not reinitialize but not collect telemetry.
 
@@ -119,20 +141,31 @@ IActivityTelemetryDataHolder data = new SomeData();
 myActivity?.WithTags(data);
 ```
 
-#### Add data to activity in EndBuild
+#### Default Build activity in EndBuild
 
-- this activity would always be created at the same point when sdk telemetry is sent in Core and we can add data to it
+- this activity would always be created at the same point when sdk telemetry is sent in Core
+- we can add data to it that we want in general builds
+- the desired count of data from this should control the sample rate of DefaultActivitySource
 
-## Looking ahead
+#### Multiple Activity Sources
+
+We can create ActivitySources with different sample rates. Ultimately this is limited by the need to initialize a collector.
+
+We potentially want apart from the Default ActivitySource:
+
+1. Other activity sources with different sample rates (in order to get significant data for rarer events such as custom tasks).
+2. a way to override sampling decision - ad hoc starting telemetry infrastructure to catch rare events
 
 - Create a way of using a "HighPrioActivitySource" which would override sampling and initialize Collector in MSBuild.exe scenario/tracerprovider in VS.
-    - this would enable us to catch rare events
+- this would enable us to catch rare events
+
 
 ## Uncertainties
 
-- Configuring tail sampling in VS telemetry server side infrastructure to not overflow them with data.
-- How much head sampling.
+- Configuring tail sampling in VS telemetry server side infrastructure.
+- Sampling rare events details.
 - In standalone we could start the collector async without waiting which would potentially miss some earlier traces (unlikely to miss the important end of build trace though) but would degrade performance less than waiting for it's startup. The performance and utility tradeoff is not clear.
-- Can we make collector startup faster?
-- We could let users configure sample rate via env variable.
-- Do we want to send antivirus state? It seems slow.
+- Can collector startup/shutdown be faster?
+- We could let users configure sample rate via env variable, VS profile
+- Do we want to send antivirus state? Figuring it out is expensive: https://github.com/dotnet/msbuild/compare/main...proto/get-av ~100ms
+- ability to configure the overal and per-namespace sampling from server side (e.g. storing it in the .msbuild folder in user profile if different then default values set from server side - this would obviously have a delay of the default sample rate # of executions)
