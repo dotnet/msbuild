@@ -197,6 +197,7 @@ namespace Microsoft.Build.BuildEngine
                     // of that error.
                     RegistryView view = (RegistryView)Enum.Parse(typeof(RegistryView), viewAsString, true);
 
+#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed as a false positive.
                     using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out subKeyName))
                     {
                         if (key != null)
@@ -217,6 +218,7 @@ namespace Microsoft.Build.BuildEngine
                             }
                         }
                     }
+#pragma warning restore CA2000 // Dispose objects before losing scope
                 }
             }
 

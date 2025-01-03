@@ -274,7 +274,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
@@ -327,7 +328,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
@@ -361,7 +363,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
