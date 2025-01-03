@@ -17,6 +17,23 @@ resources:
     name: 1ESPipelineTemplates/1ESPipelineTemplates
     ref: refs/tags/release
 
+parameters:
+  - name: TargetBranch
+    type: string
+    default: main
+    displayName: 'Insertion Target Branch (select for manual insertion)'
+    values:
+      - main
+      - rel/d17.14
+      - rel/d17.13
+      - rel/d17.12
+      - rel/d17.11
+      - rel/d17.10
+      - rel/d17.8
+      - rel/d17.6
+      - rel/d17.3
+      - rel/d17.0
+
 variables:
   - name: TeamName
     value: msbuild
@@ -29,7 +46,7 @@ variables:
   - name: ArtifactPackagesPath
     value: $(Build.ArtifactStagingDirectory)/PackageArtifacts
 
-  - name: MSBuildPackagePattern 
+  - name: MSBuildPackagePattern
     value: '$(ArtifactPackagesPath)/Microsoft.Build.*.nupkg'
   - name: StringToolsPackagePattern
     value: '$(ArtifactPackagesPath)/Microsoft.NET.StringTools*.nupkg'
@@ -118,7 +135,7 @@ extends:
             LinkWorkItemsToPR: true
             TeamName: $(TeamName)
             TeamEmail: $(TeamEmail)
-            TargetBranch: main
+            TargetBranch: ${{ parameters.TargetBranch }}
             InsertionPayloadName: $(InsertPayloadName)
             PackagePropsValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
             InsertionDescription: $(InsertDescription)
