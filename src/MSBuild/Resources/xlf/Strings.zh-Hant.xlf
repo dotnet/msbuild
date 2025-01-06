@@ -67,6 +67,13 @@
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
+      <trans-unit id="BuildSummary">
+        <source>Build summary:</source>
+        <target state="translated">組建摘要:</target>
+        <note>
+      A header used by Terminal Logger to introduce the build summary.
+    </note>
+      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">命令列引數 = "{0}"</target>

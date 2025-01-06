@@ -34,7 +34,7 @@ variables:
     - name: SourceBranch
       value: ''
   - name: EnableReleaseOneLocBuild
-    value: true # Enable loc for vs17.13
+    value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
     value: true
 
