@@ -30,7 +30,7 @@ namespace Microsoft.Build.Framework
         {
             EscapeHatches = new EscapeHatches();
 
-            DebugScheduler = DebugEngine || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER"));
+            DebugScheduler = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER"));
             DebugNodeCommunication = DebugEngine || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"));
         }
 
@@ -420,26 +420,6 @@ namespace Microsoft.Build.Framework
             get
             {
                 return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
-            }
-        }
-
-        private bool? _isBinaryFormatterSerializationAllowed;
-        public bool IsBinaryFormatterSerializationAllowed
-        {
-            get
-            {
-                if (!_isBinaryFormatterSerializationAllowed.HasValue)
-                {
-#if RUNTIME_TYPE_NETCORE
-                    AppContext.TryGetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization",
-                        out bool enabled);
-                    _isBinaryFormatterSerializationAllowed = enabled;
-#else
-                    _isBinaryFormatterSerializationAllowed = true;
-#endif
-                }
-
-                return _isBinaryFormatterSerializationAllowed.Value;
             }
         }
 

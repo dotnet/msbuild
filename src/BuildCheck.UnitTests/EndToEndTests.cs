@@ -5,12 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -63,6 +65,257 @@ public class EndToEndTests : IDisposable
         Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(2);
     }
 
+    [Theory]
+    // The culture is not set explicitly, but the extension is a known culture
+    //  - a buildcheck warning will occur, but otherwise works
+    [InlineData(
+        "cs",
+        "cs",
+        """<EmbeddedResource Update = "Resource1.cs.resx" />""",
+        false,
+        "warning BC0105: .* 'Resource1\\.cs\\.resx'",
+        true)]
+    // The culture is not set explicitly, and is not a known culture
+    //  - a buildcheck warning will occur, and resource is not recognized as culture specific - won't be copied around
+    [InlineData(
+        "xyz",
+        "xyz",
+        """<EmbeddedResource Update = "Resource1.xyz.resx" />""",
+        false,
+        "warning BC0105: .* 'Resource1\\.xyz\\.resx'",
+        false)]
+    // The culture is explicitly set, and it is not a known culture, but $(RespectAlreadyAssignedItemCulture) is set to true
+    //  - no warning will occur, and resource is recognized as culture specific - and copied around
+    [InlineData(
+        "xyz",
+        "xyz",
+        """<EmbeddedResource Update = "Resource1.xyz.resx" Culture="xyz" />""",
+        true,
+        "",
+        true)]
+    // The culture is explicitly set, and it is not a known culture and $(RespectAlreadyAssignedItemCulture) is not set to true
+    //  - so culture is overwritten, and resource is not recognized as culture specific - won't be copied around
+    [InlineData(
+        "xyz",
+        "zyx",
+        """<EmbeddedResource Update = "Resource1.zyx.resx" Culture="xyz" />""",
+        false,
+        "warning MSB3002: Explicitly set culture .* was overwritten",
+        false)]
+    // The culture is explicitly set, and it is not a known culture, but $(RespectAlreadyAssignedItemCulture) is set to true
+    //  - no warning will occur, and resource is recognized as culture specific - and copied around
+    [InlineData(
+        "xyz",
+        "zyx",
+        """<EmbeddedResource Update = "Resource1.zyx.resx" Culture="xyz" />""",
+        true,
+        "",
+        true)]
+    public void EmbeddedResourceCheckTest(
+        string culture,
+        string resourceExtension,
+        string resourceElement,
+        bool respectAssignedCulturePropSet,
+        string expectedDiagnostic,
+        bool resourceExpectedToBeRecognizedAsSatelite)
+    {
+        EmbedResourceTestOutput output = RunEmbeddedResourceTest(resourceElement, resourceExtension, respectAssignedCulturePropSet);
+
+        int expectedWarningsCount = 0;
+        // each finding should be found just once - but reported twice, due to summary
+        if (!string.IsNullOrEmpty(expectedDiagnostic))
+        {
+            Regex.Matches(output.LogOutput, expectedDiagnostic).Count.ShouldBe(2);
+            expectedWarningsCount = 1;
+        }
+
+        AssertHasResourceForCulture("en", true);
+        AssertHasResourceForCulture(culture, resourceExpectedToBeRecognizedAsSatelite);
+        output.DepsJsonResources.Count.ShouldBe(resourceExpectedToBeRecognizedAsSatelite ? 2 : 1);
+        GetWarningsCount(output.LogOutput).ShouldBe(expectedWarningsCount);
+
+        void AssertHasResourceForCulture(string culture, bool isResourceExpected)
+        {
+            KeyValuePair<string, JsonNode?> resource = output.DepsJsonResources.FirstOrDefault(
+                o => o.Value?["locale"]?.ToString().Equals(culture, StringComparison.Ordinal) ?? false);
+            // if not found - the KVP will be default
+            resource.Equals(default(KeyValuePair<string, JsonNode?>)).ShouldBe(!isResourceExpected,
+                $"Resource for culture {culture} was {(isResourceExpected ? "not " : "")}found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");
+
+            if (isResourceExpected)
+            {
+                resource.Key.ShouldBeEquivalentTo($"{culture}/ReferencedProject.resources.dll",
+                    $"Unexpected resource for culture {culture} was found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");
+            }
+        }
+    }
+
+    private readonly record struct EmbedResourceTestOutput(String LogOutput, JsonObject DepsJsonResources);
+
+    private EmbedResourceTestOutput RunEmbeddedResourceTest(string resourceXmlToAdd, string resourceExtension, bool respectCulture)
+    {
+        string testAssetsFolderName = "EmbeddedResourceTest";
+        const string entryProjectName = "EntryProject";
+        const string referencedProjectName = "ReferencedProject";
+        const string templateToReplace = "###EmbeddedResourceToAdd";
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+
+        CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
+        ReplaceStringInFile(Path.Combine(workFolder.Path, referencedProjectName, $"{referencedProjectName}.csproj"),
+            templateToReplace, resourceXmlToAdd);
+        File.Copy(
+            Path.Combine(workFolder.Path, referencedProjectName, "Resource1.resx"),
+            Path.Combine(workFolder.Path, referencedProjectName, $"Resource1.{resourceExtension}.resx"));
+
+        _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue();
+
+        string[] depsFiles = Directory.GetFiles(Path.Combine(workFolder.Path, entryProjectName), $"{entryProjectName}.deps.json", SearchOption.AllDirectories);
+        depsFiles.Length.ShouldBe(1);
+
+        JsonNode? depsJson = JsonObject.Parse(File.ReadAllText(depsFiles[0]));
+
+        depsJson.ShouldNotBeNull("Valid deps.json file expected");
+
+        var resources = depsJson!["targets"]?.AsObject().First().Value?[$"{referencedProjectName}/1.0.0"]?["resources"]?.AsObject();
+
+        resources.ShouldNotBeNull("Expected deps.json with 'resources' section");
+
+        return new(output, resources);
+
+        void ReplaceStringInFile(string filePath, string original, string replacement)
+        {
+            File.Exists(filePath).ShouldBeTrue($"File {filePath} expected to exist.");
+            string text = File.ReadAllText(filePath);
+            text = text.Replace(original, replacement);
+            File.WriteAllText(filePath, text);
+        }
+    }
+
+    private static void CopyFilesRecursively(string sourcePath, string targetPath)
+    {
+        // First Create all directories
+        foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+        {
+            Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+        }
+
+        // Then copy all the files & Replaces any files with the same name
+        foreach (string newPath in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
+        {
+            File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
+        }
+    }
+
+    private static int GetWarningsCount(string output)
+    {
+        Regex regex = new Regex(@"(\d+) Warning\(s\)");
+        Match match = regex.Match(output);
+        match.Success.ShouldBeTrue("Expected Warnings section not found in the build output.");
+        return int.Parse(match.Groups[1].Value);
+    }
+
+    private readonly record struct CopyTestOutput(
+        String LogOutput,
+        string File1Path,
+        string File2Path,
+        DateTime File1WriteUtc,
+        DateTime File2WriteUtc,
+        DateTime File1AccessUtc,
+        DateTime File2AccessUtc);
+
+    private CopyTestOutput RunCopyToOutputTest(bool restore, bool skipUnchangedDuringCopy)
+    {
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check {(restore ? "-restore" : null)} /p:SkipUnchanged={(skipUnchangedDuringCopy ? "True" : "\"\"")}", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue();
+
+        // We should get warning only if we didn't opted-into the new behavior
+        if (!skipUnchangedDuringCopy)
+        {
+            string expectedDiagnostic = "warning BC0106: .* that has 'CopyToOutputDirectory' set as 'Always'";
+            Regex.Matches(output, expectedDiagnostic).Count.ShouldBe(2);
+        }
+
+        GetWarningsCount(output).ShouldBe(skipUnchangedDuringCopy ? 0 : 1);
+
+        string[] outFile1 = Directory.GetFiles(".", "File1.txt", SearchOption.AllDirectories);
+        outFile1.Length.ShouldBe(1);
+
+        string[] outFile2 = Directory.GetFiles(".", "File2.txt", SearchOption.AllDirectories);
+        outFile2.Length.ShouldBe(1);
+
+        // File.Copy does reuse LastWriteTime of source file
+        return new(
+            output,
+            outFile1[0],
+            outFile2[0],
+            File.GetLastWriteTimeUtc(outFile1[0]),
+            File.GetLastWriteTimeUtc(outFile2[0]),
+            File.GetLastAccessTimeUtc(outFile1[0]),
+            File.GetLastAccessTimeUtc(outFile2[0]));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CopyToOutputTest(bool skipUnchangedDuringCopy)
+    {
+        string testAssetsFolderName = "CopyAlwaysTest";
+        const string entryProjectName = "EntryProject";
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+
+        CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
+
+        _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
+
+        var output1 = RunCopyToOutputTest(true, skipUnchangedDuringCopy);
+
+        // Run again - just Always should be copied
+        // Careful - unix based OS might not update access time on writes. 
+
+        var output2 = RunCopyToOutputTest(false, skipUnchangedDuringCopy);
+
+        // CopyToOutputDirectory="Always"
+        if (skipUnchangedDuringCopy)
+        {
+            output2.File1AccessUtc.ShouldBeEquivalentTo(output1.File1AccessUtc);
+            output2.File1WriteUtc.ShouldBeEquivalentTo(output1.File1WriteUtc);
+        }
+        else
+        {
+            output2.File1WriteUtc.ShouldBeEquivalentTo(output1.File1WriteUtc);
+        }
+        // CopyToOutputDirectory="IfDifferent"
+        output2.File2AccessUtc.ShouldBeEquivalentTo(output1.File2AccessUtc);
+        output2.File2WriteUtc.ShouldBeEquivalentTo(output1.File2WriteUtc);
+
+        // Change both in output
+
+        File.WriteAllLines(output2.File1Path, ["foo"]);
+        File.WriteAllLines(output2.File2Path, ["foo"]);
+
+        DateTime file1WriteUtc = File.GetLastWriteTimeUtc(output2.File1Path);
+        DateTime file2WriteUtc = File.GetLastWriteTimeUtc(output2.File2Path);
+
+        file1WriteUtc.ShouldBeGreaterThan(output2.File1WriteUtc);
+        file2WriteUtc.ShouldBeGreaterThan(output2.File2WriteUtc);
+
+        // Run again - both should be copied
+
+        var output3 = RunCopyToOutputTest(false, skipUnchangedDuringCopy);
+
+        // We are now overwriting the newer file in output with the older file from sources.
+        // Which is wanted - as we want to copy on any difference.
+        output3.File1WriteUtc.ShouldBeLessThan(file1WriteUtc);
+        output3.File2WriteUtc.ShouldBeLessThan(file2WriteUtc);
+    }
+
 
     [Theory]
     [InlineData(true, true)]
@@ -91,7 +344,7 @@ public class EndToEndTests : IDisposable
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
 
-        
+
         // each finding should be found just once - but reported twice, due to summary
         if (limitReportsCount)
         {
@@ -103,6 +356,48 @@ public class EndToEndTests : IDisposable
         {
             Regex.Matches(output, "BC0202: .* Property").Count.ShouldBe(2);
             Regex.Matches(output, "BC0203: .* Property").Count.ShouldBe(42);
+        }
+    }
+
+    [Theory]
+    [InlineData("""<TargetFramework>net9.0</TargetFramework>""", "", false)]
+    [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
+    [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", " /p:TargetFramework=net9.0", false)]
+    [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", true)]
+    public void TFMConfusionCheckTest(string tfmString, string cliSuffix, bool shouldTriggerCheck)
+    {
+        const string testAssetsFolderName = "TFMConfusionCheck";
+        const string projectName = testAssetsFolderName;
+        const string templateToReplace = "###TFM";
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+
+        CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
+        ReplaceStringInFile(Path.Combine(workFolder.Path, $"{projectName}.csproj"),
+            templateToReplace, tfmString);
+
+        _env.SetCurrentDirectory(workFolder.Path);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore" + cliSuffix, out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue();
+
+        int expectedWarningsCount = 0;
+        if (shouldTriggerCheck)
+        {
+            expectedWarningsCount = 1;
+            string expectedDiagnostic = "warning BC0107: .* specifies 'TargetFrameworks' property";
+            Regex.Matches(output, expectedDiagnostic).Count.ShouldBe(2);
+        }
+
+        GetWarningsCount(output).ShouldBe(expectedWarningsCount);
+
+        void ReplaceStringInFile(string filePath, string original, string replacement)
+        {
+            File.Exists(filePath).ShouldBeTrue($"File {filePath} expected to exist.");
+            string text = File.ReadAllText(filePath);
+            text = text.Replace(original, replacement);
+            File.WriteAllText(filePath, text);
         }
     }
 
@@ -187,12 +482,14 @@ public class EndToEndTests : IDisposable
             output.ShouldContain("BC0101");
             output.ShouldContain("BC0102");
             output.ShouldContain("BC0103");
+            output.ShouldContain("BC0104");
         }
         else
         {
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
             output.ShouldNotContain("BC0103");
+            output.ShouldNotContain("BC0104");
         }
     }
 
@@ -234,7 +531,7 @@ public class EndToEndTests : IDisposable
         // The conflicting outputs warning appears - but only if check was requested
         if (checkRequested)
         {
-            output.ShouldContain("BC0101");
+            output.ShouldContain(FormatExpectedDiagOutput("BC0101", BC0101Severity));
             output.ShouldContain("BC0102");
             output.ShouldContain("BC0103");
         }
@@ -243,6 +540,12 @@ public class EndToEndTests : IDisposable
             output.ShouldNotContain("BC0101");
             output.ShouldNotContain("BC0102");
             output.ShouldNotContain("BC0103");
+        }
+
+        string FormatExpectedDiagOutput(string code, string severity)
+        {
+            string msbuildSeverity = severity.Equals("suggestion") ? "message" : severity;
+            return $"{msbuildSeverity} {code}: https://aka.ms/buildcheck/codes#{code}";
         }
     }
 
@@ -276,7 +579,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Fact(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
+    [Fact]
     public void CheckHasAccessToAllConfigs()
     {
         using (var env = TestEnvironment.Create())
@@ -349,9 +652,9 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData(null, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." } )]
+    [InlineData(null, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." })]
     [InlineData(true, new[] { "Property is derived from environment variable: 'TestFromTarget' with value: 'FromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation' with value: 'FromEvaluation'." })]
-    [InlineData(false, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." } )]
+    [InlineData(false, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." })]
     public void NoEnvironmentVariableProperty_Test(bool? customConfigEnabled, string[] expectedMessages)
     {
         List<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? customConfigData = null;
@@ -409,7 +712,7 @@ public class EndToEndTests : IDisposable
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output);
 
-        if(scope == EvaluationCheckScope.ProjectFileOnly)
+        if (scope == EvaluationCheckScope.ProjectFileOnly)
         {
             output.ShouldNotContain("Property is derived from environment variable: 'TestImported'. Properties should be passed explicitly using the /p option.");
         }
@@ -454,7 +757,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
+    [Theory]
     [InlineData("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)
@@ -487,9 +790,9 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
-    [InlineData("CheckCandidate", "X01234", "error", "error X01234")]
-    [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234")]
+    [Theory]
+    [InlineData("CheckCandidate", "X01234", "error", "error X01234: http://samplelink.com/X01234")]
+    [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234: http://samplelink.com/X01234")]
     public void CustomCheckTest_WithEditorConfig(string checkCandidate, string ruleId, string severity, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())
@@ -514,13 +817,11 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "https://github.com/dotnet/msbuild/issues/10702")]
-    [InlineData("X01236", "Something went wrong initializing")]
-    // These tests are for failure one different points, will be addressed in a different PR
-    // https://github.com/dotnet/msbuild/issues/10522
-    // [InlineData("X01237", "message")]
-    // [InlineData("X01238", "message")]
-    public void CustomChecksFailGracefully(string ruleId, string expectedMessage)
+    [Theory]
+    [InlineData("X01236", "ErrorOnInitializeCheck", "Something went wrong initializing")]
+    [InlineData("X01237", "ErrorOnRegisteredAction", "something went wrong when executing registered action")]
+    [InlineData("X01238", "ErrorWhenRegisteringActions", "something went wrong when registering actions")]
+    public void CustomChecksFailGracefully(string ruleId, string friendlyName, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())
         {
@@ -541,6 +842,7 @@ public class EndToEndTests : IDisposable
             success.ShouldBeTrue();
             projectCheckBuildLog.ShouldContain(expectedMessage);
             projectCheckBuildLog.ShouldNotContain("This check should have been disabled");
+            projectCheckBuildLog.ShouldContain($"Dismounting check '{friendlyName}'");
 
             // Cleanup
             File.Delete(editorConfigName);
@@ -563,6 +865,35 @@ public class EndToEndTests : IDisposable
         output.ShouldNotContain("BC0102");
         output.ShouldNotContain("BC0103");
     }
+
+#if NET
+    [Fact]
+    public void TestBuildCheckTemplate()
+    {
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+        var nugetTemplateName = "nugetTemplate.config";
+        var nugetTemplatePath = Path.Combine(TestAssetsRootPath, "CheckCandidate", nugetTemplateName);
+        File.Copy(nugetTemplatePath, Path.Combine(workFolder.Path, nugetTemplateName));
+        AddCustomDataSourceToNugetConfig(workFolder.Path);
+
+        var ExecuteDotnetCommand = (string parameters) =>
+        {
+            string output = RunnerUtilities.RunProcessAndGetOutput("dotnet", parameters, out bool success);
+            return output;
+        };
+
+        var buildCheckTemplatePath = Path.Combine(BuildCheckUnitTestsConstants.RepoRoot, "template_feed", "content", "Microsoft.CheckTemplate");
+        var templateShortName = "msbuildcheck";
+        var projectName = "BuildCheck";
+        var installLog = ExecuteDotnetCommand($"new install {buildCheckTemplatePath}");
+        installLog.ShouldContain($"Success: {buildCheckTemplatePath} installed the following templates:");
+        var creationLog = ExecuteDotnetCommand($"new {templateShortName} -n {projectName} --MicrosoftBuildVersion {BuildCheckUnitTestsConstants.MicrosoftBuildPackageVersion} -o {workFolder.Path} ");
+        creationLog.ShouldContain("The template \"MSBuild custom check skeleton project.\" was created successfully.");
+        var buildLog = ExecuteDotnetCommand($"build {workFolder.Path}");
+        buildLog.ShouldContain("Build succeeded.");
+        ExecuteDotnetCommand($"new -u {buildCheckTemplatePath}");
+    }
+#endif
 
     private void AddCustomDataSourceToNugetConfig(string checkCandidatePath)
     {
@@ -633,7 +964,6 @@ public class EndToEndTests : IDisposable
         _env.SetCurrentDirectory(Path.GetDirectoryName(projectFile.Path));
 
         _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", buildInOutOfProcessNode ? "1" : "0");
-        _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "1");
 
         // Needed for testing check BC0103
         _env.SetEnvironmentVariable("TestFromTarget", "FromTarget");

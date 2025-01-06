@@ -270,7 +270,7 @@ namespace Microsoft.Build.UnitTests
 
             BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
         }
-        
+
         private void InvokeLoggerCallbacksForTwoProjects(bool succeeded, Action additionalCallbacks, Action additionalCallbacks2)
         {
             BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
@@ -410,6 +410,26 @@ namespace Microsoft.Build.UnitTests
             {
                 ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
             });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintDetailedBuildSummary_FailedWithErrorAndWarning()
+        {
+            string? originalParameters = _terminallogger.Parameters;
+            _terminallogger.Parameters = "SUMMARY";
+            _terminallogger.ParseParameters();
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
+            {
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
+                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
+            });
+
+            // Restore original parameters
+            _terminallogger.Parameters = originalParameters;
+            _terminallogger.ParseParameters();
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }

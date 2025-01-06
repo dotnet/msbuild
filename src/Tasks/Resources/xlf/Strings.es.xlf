@@ -37,6 +37,14 @@
         <target state="translated">Error al analizar el atributo newVersion. {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="AssignCulture.CultureOverwritten">
+        <source>MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</source>
+        <target state="translated">MSB3002: Establecer explícitamente la referencia cultural "{0}" para el elemento "{1}" se sobrescribió con la referencia cultural deducida "{2}", porque no se estableció la propiedad 'RespectAlreadyAssignedItemCulture'.</target>
+        <note>
+	{StrBegin="MSB3002: "}
+	'RespectAlreadyAssignedItemCulture' should not be translated
+	</note>
+      </trans-unit>
       <trans-unit id="AssignProjectConfiguration.IllegalMappingString">
         <source>The platform mapping "{0}" in the platform mapping list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "foo=bar;foo2=bar2".</source>
         <target state="translated">El formato de la asignación de plataforma "{0}" de la lista de asignaciones de plataforma "{1}" es incorrecto.  Pase solamente una lista de valores de cadena constantes delimitados por signos de punto y coma y separados por "=", p. ej., "foo=bar;foo2=bar2".</target>
@@ -128,8 +136,13 @@
       </trans-unit>
       <trans-unit id="AxTlbBaseTask.StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3654: Delay signing requires that at least a public key be specified.  Please either supply a public key using the KeyFile or KeyContainer properties, or disable delay signing.</source>
-        <target state="translated">MSB3654: La firma retrasada requiere que se especifique al menos una clave pública.  Proporcione una clave pública mediante las propiedades KeyFile o KeyContainer, o deshabilite la firma retrasada.</target>
+        <target state="translated">MSB3654: La firma retardada requiere que se especifique al menos una clave pública.  Proporcione una clave pública mediante las propiedades KeyFile o KeyContainer, o deshabilite la firma retardada.</target>
         <note>{StrBegin="MSB3654: "}</note>
+      </trans-unit>
+      <trans-unit id="CodeTaskFactory.AttributeEmptyWithTaskElement">
+        <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</source>
+        <target state="translated">MSB3752: el atributo "{0}" del elemento &lt;{1}&gt; de la tarea "{2}" se ha establecido, pero está vacío. Asegúrese de que el atributo tiene un valor correcto.</target>
+        <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
         <source>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</source>
@@ -141,25 +154,90 @@
         <target state="translated">MSB3992: "{0}" no se ha establecido. Cuando {1} sea true, asegúrese de establecer un valor para "{0}".</target>
         <note>{StrBegin="MSB3992: "}</note>
       </trans-unit>
-      <trans-unit id="CommonTarget.NoWin32ManifestAndPreferNativeArm64Enabled">
+      <trans-unit id="CommonSdk.BaseIntermediateOutputPathMismatchWarning">
+        <source>MSB3539: The value of the property "BaseIntermediateOutputPath" was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the "MSBuildProjectExtensionsPath" instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</source>
+        <target state="new">MSB3539: The value of the property "BaseIntermediateOutputPath" was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the "MSBuildProjectExtensionsPath" instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</target>
+        <note>{StrBegin="MSB3539: "} </note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.CrossTargetingGetTargetFrameworks">
+        <source>Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build</source>
+        <target state="new">Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.DeploymentUnpublishable">
+        <source>Skipping unpublishable project.</source>
+        <target state="new">Skipping unpublishable project.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.GenerateManifestsOnlyForExe">
+        <source>Publish is only valid for 'Windows Application' or 'Console Application' project types.</source>
+        <target state="new">Publish is only valid for 'Windows Application' or 'Console Application' project types.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.InvalidConfigurationTextWhenBuildingInsideVisualStudio">
+        <source>The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. This error may also appear if some other project is trying to follow a project-to-project reference to this project, this project has been unloaded or is not included in the solution, and the referencing project does not build using the same or an equivalent Configuration or Platform.</source>
+        <target state="new">The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. This error may also appear if some other project is trying to follow a project-to-project reference to this project, this project has been unloaded or is not included in the solution, and the referencing project does not build using the same or an equivalent Configuration or Platform.</target>
+        <note>LOCALIZATION:  Do not localize the words "BaseOutputPath/OutputPath", "Configuration" and "Platform"</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.InvalidConfigurationTextWhenBuildingOutsideVisualStudio">
+        <source>The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. You may be seeing this message because you are trying to build a project without a solution file, and have specified a non-default Configuration or Platform that doesn't exist for this project.</source>
+        <target state="new">The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. You may be seeing this message because you are trying to build a project without a solution file, and have specified a non-default Configuration or Platform that doesn't exist for this project.</target>
+        <note>LOCALIZATION:  Do not localize the words "BaseOutputPath/OutputPath", "Configuration" and "Platform"</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.MSBuildProjectExtensionsPathModifiedAfterUse">
+        <source>MSB3540: The value of the property "MSBuildProjectExtensionsPath" was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</source>
+        <target state="new">MSB3540: The value of the property "MSBuildProjectExtensionsPath" was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</target>
+        <note>{StrBegin="MSB3540: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.ManifestResourceWithNoCultureWarning">
+        <source>{0}: {1} item type is deprecated. Emit EmbeddedResource items instead, with metadata WithCulture='{2}', Type='{3}', and optional LogicalName.</source>
+        <target state="new">{0}: {1} item type is deprecated. Emit EmbeddedResource items instead, with metadata WithCulture='{2}', Type='{3}', and optional LogicalName.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.NoWin32ManifestAndPreferNativeArm64Enabled">
         <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
-        <target state="translated">MSB9903: PreferNativeArm64 requiere un manifiesto de aplicación Win32 y se excluye mutuamente con NoWin32Manifest.</target>
+        <target state="new">MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</target>
         <note>{StrBegin="MSB9903: "}</note>
       </trans-unit>
-      <trans-unit id="CommonTarget.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
+      <trans-unit id="CommonSdk.NonExistentProjectReference">
+        <source>MSB9008: The referenced project {0} does not exist.</source>
+        <target state="new">MSB9008: The referenced project {0} does not exist.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
         <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
-        <target state="translated">MSB9904: cuando PreferNativeArm64 esté habilitado, asegúrese de que la plataforma está establecida en AnyCPU. Plataforma actual: {0}.</target>
+        <target state="new">MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</target>
         <note>{StrBegin="MSB9904: "}</note>
       </trans-unit>
-      <trans-unit id="CommonTarget.Prefer32BitAndPreferNativeArm64Enabled">
+      <trans-unit id="CommonSdk.Prefer32BitAndPreferNativeArm64Enabled">
         <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
-        <target state="translated">MSB9902: las opciones Prefer32Bit y PreferNativeArm64 se excluyen mutuamente. Habilite solo una.</target>
+        <target state="new">MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</target>
         <note>{StrBegin="MSB9902: "}</note>
       </trans-unit>
-      <trans-unit id="CommonTarget.SpecifiedSeverityDoesNotExist">
+      <trans-unit id="CommonSdk.PropertyWithTrailingSlash">
+        <source>The {0} must end with a trailing slash.</source>
+        <target state="new">The {0} must end with a trailing slash.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.RunTargetDependsOnMessage">
+        <source>Cannot run '{0}' because project output type is not '.exe'</source>
+        <target state="new">Cannot run '{0}' because project output type is not '.exe'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.SigningKeyRequired">
+        <source>A signing key is required in order to publish this project. Please specify a ManifestKeyFile or ManifestCertificateThumbprint value. Publishing from Visual Studio will automatically configure a signing key for this project.</source>
+        <target state="new">A signing key is required in order to publish this project. Please specify a ManifestKeyFile or ManifestCertificateThumbprint value. Publishing from Visual Studio will automatically configure a signing key for this project.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.SpecifiedSeverityDoesNotExist">
         <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
-        <target state="translated">MSB9901: la gravedad especificada no es relevante: '{0}' para el mensaje: '{1}'.</target>
+        <target state="new">MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</target>
         <note>{StrBegin="MSB9901: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage">
+        <source>{0}: {1} item type is deprecated. Use EmbeddedResource items instead.</source>
+        <target state="new">{0}: {1} item type is deprecated. Use EmbeddedResource items instead.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
@@ -358,7 +436,7 @@
       </trans-unit>
       <trans-unit id="Delete.Error">
         <source>MSB3061: Unable to delete file "{0}". {1} {2}</source>
-        <target state="translated">MSB3061: no se puede eliminar el archivo "{0}". {1} {2}</target>
+        <target state="translated">MSB3061: No se puede eliminar el archivo "{0}". {1} {2}</target>
         <note>{StrBegin="MSB3061: "}</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
@@ -373,7 +451,7 @@
       </trans-unit>
       <trans-unit id="Delete.Retrying">
         <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</source>
-        <target state="translated">MSB3062: no se pudo eliminar el archivo "{0}". Iniciando el reintento {1} en {2} ms. {3} {4}</target>
+        <target state="translated">MSB3062: No se pudo eliminar el archivo "{0}". Iniciando reintento{1} en {2}ms. {3} {4}</target>
         <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message, {4} is message from LockCheck.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
@@ -1520,7 +1598,7 @@
       </trans-unit>
       <trans-unit id="Move.Error">
         <source>MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</source>
-        <target state="translated">MSB3677: no es posible mover el archivo "{0}" a "{1}". {2} {3}</target>
+        <target state="translated">MSB3677: No se puede mover el archivo "{0}" a "{1}". {2} {3}</target>
         <note>{StrBegin="MSB3677: "}</note>
       </trans-unit>
       <trans-unit id="Move.ExactlyOneTypeOfDestination">
@@ -2352,7 +2430,7 @@
       </trans-unit>
       <trans-unit id="ResolveComReference.LoadingDelaySignedAssemblyWithStrongNameVerificationEnabled">
         <source>MSB3295: Failed to load an assembly. Please make sure you have disabled strong name verification for your public key if you want to generate delay signed wrappers. {0}</source>
-        <target state="translated">MSB3295: No se pudo cargar un ensamblado. Asegúrese de que deshabilitó la comprobación de nombres seguros para su clave pública si desea generar contenedores de firma con retraso. {0}</target>
+        <target state="translated">MSB3295: No se pudo cargar un ensamblado. Asegúrese de que deshabilitó la comprobación de nombres seguros para su clave pública si desea generar contenedores de firma retardada. {0}</target>
         <note>{StrBegin="MSB3295: "}</note>
       </trans-unit>
       <trans-unit id="ResolveComReference.MissingOrUnknownComReferenceAttribute">
@@ -2561,7 +2639,7 @@
       </trans-unit>
       <trans-unit id="StrongNameUtils.NoPublicKeySpecified">
         <source>MSB3353: Public key necessary for delay signing was not specified.</source>
-        <target state="translated">MSB3353: No se especificó la clave pública necesaria para la firma con retraso.</target>
+        <target state="translated">MSB3353: No se especificó la clave pública necesaria para la firma retardada.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
@@ -2586,7 +2664,7 @@
       </trans-unit>
       <trans-unit id="Touch.CannotMakeFileWritable">
         <source>MSB3372: The file "{0}" cannot be made writable. {1} {2}</source>
-        <target state="translated">MSB3372: el archivo "{0}" no se puede hacer grabable. {1} {2}</target>
+        <target state="translated">MSB3372: El archivo "{0}" no se puede escribir. {1} {2}</target>
         <note>{StrBegin="MSB3372: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotRestoreAttributes">
@@ -2596,7 +2674,7 @@
       </trans-unit>
       <trans-unit id="Touch.CannotTouch">
         <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</source>
-        <target state="translated">MSB3374: no se puede establecer la hora de último acceso o última escritura en el archivo "{0}". {1} {2}</target>
+        <target state="translated">MSB3374: No se puede establecer la hora de último acceso o última escritura en el archivo "{0}". {1} {2}</target>
         <note>{StrBegin="MSB3374: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CreatingFile">
@@ -2691,7 +2769,7 @@
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
         <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
-        <target state="translated">MSB3935: no se pudo descomprimir el archivo "{0}" porque el archivo de destino "{1}" es de solo lectura y no se pudo hacer grabable.  {2} {3}</target>
+        <target state="translated">MSB3935: No se pudo descomprimir el archivo "{0}" porque el archivo de destino "{1}" es de solo lectura y no se pudo escribir.  {2} {3}</target>
         <note>{StrBegin="MSB3935: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotOpenFile">
@@ -2776,7 +2854,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
-        <target state="translated">MSB3491: no se pudieron escribir líneas en el archivo "{0}". {1} {2}</target>
+        <target state="translated">MSB3491: No se pudieron escribir líneas en el archivo "{0}". {1} {2}</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
@@ -3046,7 +3124,7 @@
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotWriteOutput">
         <source>MSB3713: The file "{0}" could not be created. {1} {2}</source>
-        <target state="translated">MSB3713: no se pudo crear el archivo "{0}". {1} {2}</target>
+        <target state="translated">MSB3713: No se pudo crear el archivo "{0}". {1} {2}</target>
         <note>{StrBegin="MSB3713: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.SkippedNumberedParameter">
@@ -3496,7 +3574,7 @@
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFailed">
         <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</source>
-        <target state="translated">MSB3943: no se pudo comprimir el directorio "{0}" en el archivo "{1}".  {2} {3}</target>
+        <target state="translated">MSB3943: No se pudo comprimir el directorio "{0}" en el archivo "{1}".  {2} {3}</target>
         <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFileExists">
