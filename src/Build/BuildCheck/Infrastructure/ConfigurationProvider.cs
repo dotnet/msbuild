@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
-using Microsoft.Build.Experimental.BuildCheck;
 using System.Collections.Concurrent;
 using Microsoft.Build.Experimental.BuildCheck.Utilities;
 using Microsoft.Build.BuildCheck.Infrastructure;

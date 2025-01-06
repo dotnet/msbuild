@@ -13,19 +13,23 @@
 
 ## At release time
 Before starting the process:
-- [ ] If the release is being cut more than a few days before the VS-side snap, do these two steps. Otherwise check them off.
-  - [ ]  Modify the VS insertion so that it flows from MSBuild `vs{{THIS_RELEASE_VERSION}}` to VS `main` [in the MSBuild-release-branch release definition](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=1319&view=mine&_a=releases). Alternatively, if the release being cut no more than couple of weeks, disable the scheduled releases and create releases from `vs{{THIS_RELEASE_VERSION}}` manually until the VS-side snap: Edit -> Schedule set under Artifacts -> disable toggle
-AND
-  - [ ]  Disable automated run of [the MSBuild-main-branch release definition](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=2153&view=mine&_a=releases) (because our {{NEXT_VERSION}} builds don't have a place to go in VS yet)
+- [ ] If the release is being cut more than a few days before the VS-side snap, run insertions manually OR redirect MSBuild release branch
+  - [ ]  Disable scheduled run of [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) (our {{NEXT_VERSION}} builds don't have a place to go in VS yet) by: Edit -> ... -> Triggers -> add a schedule on a dead branch (this overrides the YAML defined once-per-day schedule for main). Manual pipeline run: select as input resource the to-be-inserted "MSBuild" pipeline run on branch `vs{{THIS_RELEASE_VERSION}}` and VS TargetBranch `main`.
+OR
+  - [ ]  If the release is being cut more than couple of weeks modify [YAML](https://github.com/dotnet/msbuild/tree/main/azure-pipelines/vs-insertion.yml) (and merge to affected MSBuild branches) of the [VS insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) so that it schedules insertions from MSBuild `vs{{THIS_RELEASE_VERSION}}` to VS `main`. Keep scheduled daily insertions to simplify your workflow and exclude `vs{{THIS_RELEASE_VERSION}}` from triggering insertion on each commit.
 
 ### Branching from main
 - [ ]  If the new version's branch was created before the Visual Studio fork: fast-forward merge the correct commit (the one that is currently inserted to VS main) to the `vs{{THIS_RELEASE_VERSION}}` branch \
 e.g.: `git push upstream 2e6f2ff7ea311214255b6b2ca5cc0554fba1b345:refs/heads/vs17.10` \
 _(This is for the case where we create the branch too early and want it to be based actually on a different commit. If you waited until a good point in time with `main` in a clean state, just branch off and you are done. The branch should point to a good, recent spot, so the final-branding PR goes in on top of the right set of commits.)_
 - [ ]  Update the branch merge flow in `.config/git-merge-flow-config.jsonc` file to have the currently-in-servicing branches.
-- [ ]  Create {{NEXT_VERSION}} branding PR (in main) including public API baseline package version change: {{URL_OF_NEXT_VERSION_BRANDING_PR}}. 
+- [ ]  Create {{NEXT_VERSION}} branding PR (in main) including public API baseline package version change: {{URL_OF_NEXT_VERSION_BRANDING_PR}}.
   - In the file `eng/Versions.props` Update the `VersionPrefix` to `{{NEXT_VERSION}}` and `PackageValidationBaselineVersion` set to a latest internally available {{THIS_RELEASE_VERSION}} preview version in the [internal dnceng dotnet-tools feed](https://dev.azure.com/dnceng/internal/_artifacts/feed/dotnet-tools-internal). It might be needed to update `CompatibilitySuppressions.xml` files. See [this documentation](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/overview) for more details. You can update `CompatibilitySuppressions.xml` files by running
-`dotnet pack MSBuild.Dev.slnf /p:ApiCompatGenerateSuppressionFile=true`. 
+`dotnet pack MSBuild.Dev.slnf /p:ApiCompatGenerateSuppressionFile=true`.
+  - [ ]  When VS main snaps to {{THIS_RELEASE_VERSION}} and updates its version to {{NEXT_VERSION}}, modify the [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) YAML so that it flows from MSBuild main to VS main.
+    - [ ]  Update AutoTargetBranch selection in the [YAML](../azure-pipelines/vs-insertion.yml) (add to parameters and make new AutoTargetBranch rule by copying it from existing ones) of the [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) to insert MSBuild `vs{{THIS_RELEASE_VERSION}}` to the corresponding VS branch `rel/d{{THIS_RELEASE_VERSION}}`.
+    - [ ] Add `rel/d{{THIS_RELEASE_VERSION}}` case to TargetBranch parameter in [Experimental insertion](../azure-pipelines/vs-insertion-experimental.yml)
+    - [ ] Set scheduled insertion for main and remove exclusion of `vs{{THIS_RELEASE_VERSION}}` triggering on each commit if added earlier.
 - [ ]  Merge {{NEXT_VERSION}} branding PR
 
 ### Adjust DARC channels and subscriptions
@@ -56,12 +60,10 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
 
 ### Adjust pipelines / releases
 - [ ]  Fix OptProf data flow for the new vs{{THIS_RELEASE_VERSION}} branch
-  - [ ] Run the [official build](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) for vs{{THIS_RELEASE_VERSION}} without OptProf (set `SkipApplyOptimizationData` variable in 'Advanced options' section of the 'Run pipeline' menu to `true`) or alternatively with the latest Opt-Prof collected for the main branch (set `Optional OptProfDrop Override` to the drop path of the collected data, which could be found in the logs of the pipeline: Windows_NT -> Build -> search for `OptimizationData`). 
+  - [ ] Run the [official build](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) for vs{{THIS_RELEASE_VERSION}} without OptProf (set `SkipApplyOptimizationData` variable in 'Advanced options' section of the 'Run pipeline' menu to `true`) or alternatively with the latest Opt-Prof collected for the main branch (set `Optional OptProfDrop Override` to the drop path of the collected data, which could be found in the logs of the pipeline: Windows_NT -> Build -> search for `OptimizationData`).
   - [ ] Check that the [OptProf data collection](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=17389) pipeline run is triggered for vs{{THIS_RELEASE_VERSION}}. If not, run manually ('Run pipeline' in upper right)
   - [ ] Run the [official build](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) for vs{{THIS_RELEASE_VERSION}} with no extra customization - OptProf should succeed now
-- [ ]  When VS main snaps to {{THIS_RELEASE_VERSION}} and updates its version to {{NEXT_VERSION}}, turn on / modify the VS insertion so that it flows from MSBuild main to VS main.
-  - [ ]  Update the [release-branch insertion release definition](https://dev.azure.com/devdiv/DevDiv/_releaseDefinition?definitionId=2153&_a=definition-variables) to have `InsertTargetBranch` `rel/d{{THIS_RELEASE_VERSION}}`.
-- [ ]  Turn [the release pipeline](https://dev.azure.com/devdiv/DevDiv/_release?definitionId=2153&view=mine&_a=releases) back on.
+- [ ] Restore [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) to the default [YAML](https://github.com/dotnet/msbuild/tree/main/azure-pipelines/vs-insertion.yml) defined schedule, by removing all triggers from Edit -> ... -> Triggers.
 
 ### Configure localization
 - [ ]  Create {{THIS_RELEASE_VERSION}} localization ticket: https://aka.ms/ceChangeLocConfig (requesting to switch localization from {{PREVIOUS_RELEASE_VERSION}} to {{THIS_RELEASE_VERSION}}): {{URL_OF_LOCALIZATION_TICKET}}
@@ -93,7 +95,7 @@ Timing based on the [(Microsoft-internal) release schedule](https://dev.azure.co
     - Microsoft.Build.Tasks.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
     - Microsoft.NET.StringTools.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
     - Microsoft.Build.Templates.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
-     
+
   **Note:** Microsoft.Build.Conversion.Core and Microsoft.Build.Engine are **not** part of the list. Microsoft.Build.Templates **is** part of the list. Those 3 packages are a difference to the historic publishing list.
 
 - [ ]  Publish docs: submit reference request at https://aka.ms/publishondocs

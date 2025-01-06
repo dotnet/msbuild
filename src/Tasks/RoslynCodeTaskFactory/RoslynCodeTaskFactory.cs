@@ -350,7 +350,7 @@ namespace Microsoft.Build.Tasks
                             if (String.IsNullOrWhiteSpace(includeAttribute?.Value))
                             {
                                 // A <Reference Include="" /> is not allowed.
-                                log.LogErrorWithCodeFromResources("CodeTaskFactory.AttributeEmptyWithElement", "Include", "Reference");
+                                log.LogErrorWithCodeFromResources("CodeTaskFactory.AttributeEmptyWithTaskElement", "Include", "Reference", taskName);
                                 return false;
                             }
 

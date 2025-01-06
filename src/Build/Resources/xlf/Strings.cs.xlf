@@ -171,6 +171,46 @@
         <target state="translated">Během sestavování by se neměla používat žádná implicitní vlastnost odvozená z proměnné prostředí.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_MessageFmt">
+        <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
+        <target state="translated">Projekt {0} odkazuje na výstup projektu {1}. Odkazovaná cesta: {2}. Místo toho by se měla použít položka ProjectReference.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_Title">
+        <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
+        <target state="translated">Na projekt by se nemělo odkazovat přes Reference na jeho výstup, ale přímo přes ProjectReference.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_MessageFmt">
+        <source>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</source>
+        <target state="translated">Projekt {0} určuje položku EmbeddedResource {1}, která má pravděpodobně příponu určující jazykovou verzi ({2}), ale nejsou zadána explicitní metadata Culture ani WithCulture=false.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_Title">
+        <source>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</source>
+        <target state="translated">Doporučujeme u položky EmbeddedResource zadat explicitní metadata Culture nebo metadata WithCulture=false, aby se zabránilo chybnému nebo nedeterministickému odhadu jazykové verze.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0107_MessageFmt">
+        <source>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</source>
+        <target state="translated">{0} projektu určuje vlastnost TargetFrameworks '{1}' a vlastnost TargetFramework '{2}' současně. To způsobí, že se TargetFrameworks bude ignorovat a sestavení se bude chovat jako jednocílový.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0107_Title">
+        <source>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</source>
+        <target state="translated">Vlastnosti TargetFramework (singular) a TargetFrameworks (plural) by se neměly zadává ve skriptech současně.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0106_MessageFmt">
+        <source>Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</source>
+        <target state="translated">{0} projektu určuje '{1}' položku '{2}', která má Vlastnost CopyToOutputDirectory nastavenou na hodnotu Always. Změňte metadata nebo použijte vlastnost CopyToOutputDirectory.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0106_Title">
+        <source>Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</source>
+        <target state="translated">Nezadávejte always pro CopyToOutputDirectory, protože to může způsobit nepotřebné operace kopírování během sestavování. Pokud chcete používat efektivnější kopírování, použijte hodnotu metadat PreserveNeexport nebo IfDifferent, nebo nastavte vlastnost SkipUnchangedFilesOnCopyAlways na true.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">K vlastnosti: {0} bylo přistupováno, ale nebyla nikdy inicializována.</target>
@@ -289,7 +329,7 @@
       </trans-unit>
       <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
         <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
-        <target state="new">Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</target>
+        <target state="translated">Bylo nalezeno více přetížení pro metodu {0} s tímto počtem parametrů: {1}. To v současné době není podporováno.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
@@ -1191,8 +1231,8 @@ Chyby: {3}</target>
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
-        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: Importovaný projekt {0} se nenašel. Ověřte, jestli je výraz v deklaraci Import {1} správný a jestli soubor existuje na disku.</target>
+        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>
+        <target state="translated">MSB4019: Importovaný projekt {0} se nenašel. Ověřte, jestli je výraz v deklaraci Import {1}, který se vyhodnotil na {2}, správný a jestli soubor existuje na disku.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">

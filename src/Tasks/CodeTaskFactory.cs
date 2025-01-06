@@ -436,9 +436,9 @@ namespace Microsoft.Build.Tasks
                     return null;
                 }
 
-                if (attribute == null || attribute.Value.Length == 0)
+                if (string.IsNullOrWhiteSpace(attribute?.Value))
                 {
-                    _log.LogErrorWithCodeFromResources("CodeTaskFactory.AttributeEmpty", "Include");
+                    _log.LogErrorWithCodeFromResources("CodeTaskFactory.AttributeEmptyWithTaskElement", "Include", "Reference", _nameOfTask);
                     return null;
                 }
 
