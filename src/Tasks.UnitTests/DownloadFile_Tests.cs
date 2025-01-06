@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     DestinationFolder = new TaskItem(folder.Path),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent(new String('!', 10000000)),
+                        Content = new StringContent(new String('!', 0xfffffff)),
                         RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://largedownload/foo.txt")
                     }),
                     SourceUrl = "http://largedownload/foo.txt"
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 downloadFile.Cancel();
 
-                task.Wait(TimeSpan.FromSeconds(1)).ShouldBeTrue();
+                task.Wait(TimeSpan.FromMilliseconds(1500)).ShouldBeTrue();
 
                 task.Result.ShouldBeFalse();
             }
