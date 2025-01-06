@@ -136,6 +136,21 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        public string TargetResultCodeToString()
+        {
+            switch (ResultCode)
+            {
+                case TargetResultCode.Failure:
+                    return "Failure";
+                case TargetResultCode.Skipped:
+                    return "Skipped";
+                case TargetResultCode.Success:
+                    return "Success";
+                default:
+                    return "";
+            }
+        }
+
         /// <summary>
         /// Returns the internal result for the target.
         /// </summary>
