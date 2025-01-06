@@ -1259,25 +1259,13 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectPropertyInstance globalProperty in _data.GlobalPropertiesDictionary)
             {
-                if ( _propertiesFromCommandLine.Contains(globalProperty.Name))
-                {
-                    _ = _data.SetProperty(
-                            globalProperty.Name,
-                            ((IProperty)globalProperty).EvaluatedValueEscaped,
-                            isGlobalProperty: true /* it is a global property, but it comes from command line and is tracked separately */,
-                            false /* may NOT be a reserved name */,
-                            loggingContext: _evaluationLoggingContext,
-                            isCommandLineProperty: true /* IS coming from command line argument */);
-                }
-                else
-                {
-                    _ = _data.SetProperty(
-                            globalProperty.Name,
-                            ((IProperty)globalProperty).EvaluatedValueEscaped,
-                            isGlobalProperty: true /* IS global property */,
-                            false /* may NOT be a reserved name */,
-                            loggingContext: _evaluationLoggingContext);
-                }
+                  _ = _data.SetProperty(
+                          globalProperty.Name,
+                          ((IProperty)globalProperty).EvaluatedValueEscaped,
+                          isGlobalProperty: true /* it is a global property, but it comes from command line and is tracked separately */,
+                          false /* may NOT be a reserved name */,
+                          loggingContext: _evaluationLoggingContext,
+                          isCommandLineProperty: _propertiesFromCommandLine.Contains(globalProperty.Name) /* IS coming from command line argument */);
             }
 
             return _data.GlobalPropertiesDictionary.Count;
