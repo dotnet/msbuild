@@ -23,13 +23,46 @@ using OpenTelemetry.Trace;
 namespace Microsoft.Build.Framework.Telemetry
 {
 
+    internal enum TelemetryState
+    {
+        Uninitialized,
+
+        /// <summary>
+        /// Opt out of telemetry.
+        /// </summary>
+        OptOut,
+
+        /// <summary>
+        /// Run not sampled for telemetry.
+        /// </summary>
+        Unsampled,
+
+        /// <summary>
+        /// For core hook, only ActivitySource is created.
+        /// </summary>
+        CoreInitialized,
+
+        /// <summary>
+        /// ActivitySource, OTel TracerProvider are initialized.
+        /// </summary>
+        VSInitialized,
+
+        /// <summary>
+        /// ActivitySource, OTel TracerProvider, VS OpenTelemetry Collector are initialized.
+        /// </summary>
+        StandaloneInitialized,
+
+        Disposed
+    }
+
     /// <summary>
     /// Class for configuring and managing the telemetry infrastructure with System.Diagnostics.Activity, OpenTelemetry SDK and VS OpenTelemetry Collector.
     /// </summary>
     internal static class OpenTelemetryManager
     {
-        private static bool _initialized = false;
+        private static TelemetryState _telemetryState = TelemetryState.Uninitialized;
         private static readonly object s_initialize_lock = new();
+        private static double _sampleRate = TelemetryConstants.DefaultSampleRate;
 
 #if NETFRAMEWORK
         private static TracerProvider? s_tracerProvider;
@@ -37,6 +70,13 @@ namespace Microsoft.Build.Framework.Telemetry
 #endif
 
         public static MSBuildActivitySource? DefaultActivitySource { get; set; }
+        
+        // unsampled -> initialized or unsampled again
+        public static bool ResampleInitialize()
+        {
+            return false;
+        }
+
 
         public static void Initialize(bool isStandalone)
         {
@@ -46,8 +86,8 @@ namespace Microsoft.Build.Framework.Telemetry
                 {
                     return;
                 }
-
-                // create activity source
+                
+                // create activity sources
                 DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
 
                 // create trace exporter in framework
@@ -82,7 +122,7 @@ namespace Microsoft.Build.Framework.Telemetry
                     s_collector.StartAsync().Wait();
                 }
 #endif
-                _initialized = true;
+                _telemetryState = TelemetryState.VSInitialized;
             }
         }
 
@@ -90,18 +130,20 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             lock (s_initialize_lock)
             {
-                if (_initialized)
+                if (_telemetryState == TelemetryState.VSInitialized)
                 {
 #if NETFRAMEWORK
                     s_tracerProvider?.ForceFlush();
+                    // s_collector.
 #endif
                 }
             }
         }
+
         private static bool ShouldInitialize()
         {
             // only initialize once
-            if (_initialized)
+            if (_telemetryState != TelemetryState.Uninitialized )
             {
                 return false;
             }
@@ -135,7 +177,7 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             lock (s_initialize_lock)
             {
-                if (_initialized)
+                if (_telemetryState == TelemetryState.VSInitialized)
                 {
 #if NETFRAMEWORK
                     s_tracerProvider?.Shutdown();
@@ -181,7 +223,7 @@ namespace Microsoft.Build.Framework.Telemetry
                         // Hash the value via Visual Studio mechanism in Framework & same algo as in core telemetry hashing
                         // https://github.com/dotnet/sdk/blob/8bd19a2390a6bba4aa80d1ac3b6c5385527cc311/src/Cli/Microsoft.DotNet.Cli.Utils/Sha256Hasher.cs
 #if NETFRAMEWORK
-                        // hashedValue = new Microsoft.VisualStudio.Telemetry.TelemetryHashedProperty(value
+                        // hashedValue = new Microsoft.VisualStudio.Telemetry.TelemetryHashedProperty(value);
 #endif
                     }
 
