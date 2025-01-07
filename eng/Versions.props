@@ -10,6 +10,7 @@
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
     <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
+    <SystemDiagnosticsDiagnosticsSourceVersion>9.0.0</SystemDiagnosticsDiagnosticsSourceVersion>
   </PropertyGroup>
   <!-- Repo Toolset Features -->
   <PropertyGroup>
