@@ -1175,6 +1175,9 @@ namespace Microsoft.Build.Evaluation
 
             using (_locker.EnterDisposableWriteLock())
             {
+                // We can only work on this Collection.
+                projectOptions.ProjectCollection = this;
+
                 if (projectOptions.GlobalProperties == null)
                 {
                     projectOptions.GlobalProperties = GlobalProperties;
