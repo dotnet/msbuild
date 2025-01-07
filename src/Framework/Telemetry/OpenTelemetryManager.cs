@@ -62,7 +62,7 @@ namespace Microsoft.Build.Framework.Telemetry
     {
         private static TelemetryState _telemetryState = TelemetryState.Uninitialized;
         private static readonly object s_initialize_lock = new();
-        private static double _sampleRate = TelemetryConstants.DefaultSampleRate;
+        // private static double _sampleRate = TelemetryConstants.DefaultSampleRate;
 
 #if NETFRAMEWORK
         private static TracerProvider? s_tracerProvider;
