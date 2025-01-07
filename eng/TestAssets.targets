@@ -23,12 +23,15 @@
           Inputs="@(ProjectsToPack);@(SourceFilesForPacking)"
           Outputs="$(ArtifactsNonShippingPackagesDir)\Microsoft.Build.$(Version).nupkg;$(ArtifactsNonShippingPackagesDir)\Microsoft.Build.Framework.$(Version).nupkg;$(ArtifactsNonShippingPackagesDir)\Microsoft.NET.StringTools.$(Version).nupkg">
     
-    <MSBuild Projects="@(ProjectsToPack)"
+<!--
+  Temporarily disabling the packing within bootstrap build, until #11090 is resolved
+<MSBuild Projects="@(ProjectsToPack)"
              Targets="Pack"
              Properties="PackageOutputPath=$(ArtifactsNonShippingPackagesDir);PackageVersion=$(PackageVersion)"
              BuildInParallel="true">
       <Output TaskParameter="TargetOutputs" ItemName="PackageOutputs" />
     </MSBuild>
+-->
     
   </Target>
 </Project>

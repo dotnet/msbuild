@@ -221,6 +221,11 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private bool _showCommandLine = false;
 
+    /// <summary>
+    /// Indicates whether to show the build summary.
+    /// </summary>
+    private bool? _showSummary;
+
     private uint? _originalConsoleMode;
 
     /// <summary>
@@ -320,6 +325,12 @@ internal sealed partial class TerminalLogger : INodeLogger
             case "SHOWCOMMANDLINE":
                 TryApplyShowCommandLineParameter(parameterValue);
                 break;
+            case "SUMMARY":
+                _showSummary = true;
+                break;
+            case "NOSUMMARY":
+                _showSummary = false;
+                break;
         }
     }
 
@@ -334,9 +345,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
         else
         {
-            string errorCode;
-            string helpKeyword;
-            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidVerbosity", parameterValue);
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, "InvalidVerbosity", parameterValue);
             throw new LoggerException(message, null, errorCode, helpKeyword);
         }
     }
@@ -401,15 +410,13 @@ internal sealed partial class TerminalLogger : INodeLogger
         _cts.Cancel();
         _refresher?.Join();
 
-        _projects.Clear();
-
         Terminal.BeginUpdate();
         try
         {
             if (Verbosity > LoggerVerbosity.Quiet)
             {
                 string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
-                string buildResult = RenderBuildResult(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
+                string buildResult = GetBuildResultString(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
 
                 Terminal.WriteLine("");
                 if (_testRunSummaries.Any())
@@ -437,6 +444,11 @@ internal sealed partial class TerminalLogger : INodeLogger
                     Terminal.WriteLine(string.Join(CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ", summaryAndTotalText, failedText, passedText, skippedText, durationText));
                 }
 
+                if (_showSummary == true)
+                {
+                    RenderBuildSummary();
+                }
+
                 if (_restoreFailed)
                 {
                     Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
@@ -461,12 +473,40 @@ internal sealed partial class TerminalLogger : INodeLogger
             Terminal.EndUpdate();
         }
 
+        _projects.Clear();
         _testRunSummaries.Clear();
         _buildErrorsCount = 0;
         _buildWarningsCount = 0;
         _restoreFailed = false;
         _testStartTime = null;
         _testEndTime = null;
+    }
+
+    private void RenderBuildSummary()
+    {
+        if (_buildErrorsCount == 0 && _buildWarningsCount == 0)
+        {
+            // No errors/warnings to display.
+            return;
+        }
+
+        Terminal.WriteLine(ResourceUtilities.GetResourceString("BuildSummary"));
+
+        foreach (Project project in _projects.Values.Where(p => p.HasErrorsOrWarnings))
+        {
+            string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
+            string buildResult = GetBuildResultString(project.Succeeded, project.ErrorCount, project.WarningCount);
+            string projectHeader = GetProjectFinishedHeader(project, buildResult, duration);
+
+            Terminal.WriteLine(projectHeader);
+
+            foreach (BuildMessage buildMessage in project.GetBuildErrorAndWarningMessages())
+            {
+                Terminal.WriteLine($"{DoubleIndentation}{buildMessage.Message}");
+            }
+        }
+
+        Terminal.WriteLine(string.Empty);
     }
 
     private void StatusEventRaised(object sender, BuildStatusEventArgs e)
@@ -496,7 +536,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 targetFramework = null;
             }
-            _projects[c] = new(targetFramework, CreateStopwatch?.Invoke());
+            _projects[c] = new(e.ProjectFile!, targetFramework, CreateStopwatch?.Invoke());
 
             // First ever restore in the build is starting.
             if (e.TargetNames == "Restore" && !_restoreFinished)
@@ -535,6 +575,8 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         if (_projects.TryGetValue(c, out Project? project))
         {
+            project.Succeeded = e.Succeeded;
+            project.Stopwatch.Stop();
             lock (_lock)
             {
                 Terminal.BeginUpdate();
@@ -545,26 +587,16 @@ internal sealed partial class TerminalLogger : INodeLogger
                     string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
                     ReadOnlyMemory<char>? outputPath = project.OutputPath;
 
-                    string projectFile = e.ProjectFile is not null ?
-                        Path.GetFileNameWithoutExtension(e.ProjectFile) :
-                        string.Empty;
-
                     // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
                     // reported during build.
-                    int countErrors = project.BuildMessages?.Count(m => m.Severity == MessageSeverity.Error) ?? 0;
-                    int countWarnings = project.BuildMessages?.Count(m => m.Severity == MessageSeverity.Warning) ?? 0;
-
-                    string buildResult = RenderBuildResult(e.Succeeded, countErrors, countWarnings);
-
-                    bool haveErrors = countErrors > 0;
-                    bool haveWarnings = countWarnings > 0;
+                    string buildResult = GetBuildResultString(project.Succeeded, project.ErrorCount, project.WarningCount);
 
                     // Check if we're done restoring.
                     if (c == _restoreContext)
                     {
                         if (e.Succeeded)
                         {
-                            if (haveErrors || haveWarnings)
+                            if (project.HasErrorsOrWarnings)
                             {
                                 Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
                                     buildResult,
@@ -591,46 +623,8 @@ internal sealed partial class TerminalLogger : INodeLogger
                     else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
                     {
                         // Show project build complete and its output
-                        if (project.IsTestProject)
-                        {
-                            if (string.IsNullOrEmpty(project.TargetFramework))
-                            {
-                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
-                                    Indentation,
-                                    projectFile,
-                                    buildResult,
-                                    duration));
-                            }
-                            else
-                            {
-                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
-                                    Indentation,
-                                    projectFile,
-                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
-                                    buildResult,
-                                    duration));
-                            }
-                        }
-                        else
-                        {
-                            if (string.IsNullOrEmpty(project.TargetFramework))
-                            {
-                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
-                                    Indentation,
-                                    projectFile,
-                                    buildResult,
-                                    duration));
-                            }
-                            else
-                            {
-                                Terminal.Write(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
-                                    Indentation,
-                                    projectFile,
-                                    AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
-                                    buildResult,
-                                    duration));
-                            }
-                        }
+                        string projectFinishedHeader = GetProjectFinishedHeader(project, buildResult, duration);
+                        Terminal.Write(projectFinishedHeader);
 
                         // Print the output path as a link if we have it.
                         if (outputPath is not null)
@@ -685,8 +679,8 @@ internal sealed partial class TerminalLogger : INodeLogger
                         }
                     }
 
-                    _buildErrorsCount += countErrors;
-                    _buildWarningsCount += countWarnings;
+                    _buildErrorsCount += project.ErrorCount;
+                    _buildWarningsCount += project.WarningCount;
 
                     DisplayNodes();
                 }
@@ -695,6 +689,35 @@ internal sealed partial class TerminalLogger : INodeLogger
                     Terminal.EndUpdate();
                 }
             }
+        }
+    }
+
+    private static string GetProjectFinishedHeader(Project project, string buildResult, string duration)
+    {
+        string projectFile = project.File is not null ?
+            Path.GetFileNameWithoutExtension(project.File) :
+            string.Empty;
+
+        if (string.IsNullOrEmpty(project.TargetFramework))
+        {
+            string resourceName = project.IsTestProject ? "TestProjectFinished_NoTF" : "ProjectFinished_NoTF";
+
+            return ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(resourceName,
+                Indentation,
+                projectFile,
+                buildResult,
+                duration);
+        }
+        else
+        {
+            string resourceName = project.IsTestProject ? "TestProjectFinished_WithTF" : "ProjectFinished_WithTF";
+
+            return ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(resourceName,
+                Indentation,
+                projectFile,
+                AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                buildResult,
+                duration);
         }
     }
 
@@ -1051,12 +1074,12 @@ internal sealed partial class TerminalLogger : INodeLogger
     #region Helpers
 
     /// <summary>
-    /// Print a build result summary to the output.
+    /// Construct a build result summary string.
     /// </summary>
     /// <param name="succeeded">True if the build completed with success.</param>
     /// <param name="hasError">True if the build has logged at least one error.</param>
     /// <param name="hasWarning">True if the build has logged at least one warning.</param>
-    private string RenderBuildResult(bool succeeded, int countErrors, int countWarnings)
+    private static string GetBuildResultString(bool succeeded, int countErrors, int countWarnings)
     {
         if (!succeeded)
         {
