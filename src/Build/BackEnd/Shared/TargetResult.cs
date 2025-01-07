@@ -141,11 +141,11 @@ namespace Microsoft.Build.Execution
             switch (ResultCode)
             {
                 case TargetResultCode.Failure:
-                    return "Failure";
+                    return nameof(TargetResultCode.Failure);
                 case TargetResultCode.Skipped:
-                    return "Skipped";
+                    return nameof(TargetResultCode.Skipped);
                 case TargetResultCode.Success:
-                    return "Success";
+                    return nameof(TargetResultCode.Success);
                 default:
                     return "";
             }
