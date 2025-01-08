@@ -86,6 +86,11 @@ namespace Microsoft.NET.StringTools
                     {
                         // And do this again when the number of handles reaches double the current after-scavenge number.
                         _scavengeThreshold = _stringsByHashCode.Count * 2;
+
+                        // This count is not exact, since there can be some Interlocked.Increment(ref _count);
+                        // calls happening due to this not being behind a lock.
+                        // e.g. code checks if (_stringsByHashCode.TryAdd(hashCode, handle)), we set the _count here and the code increments
+                        // however since this is just a threshold to scavenge, it should be fine to be off by few even if that happens.
                         _count = _stringsByHashCode.Count;
                     }
                 }
