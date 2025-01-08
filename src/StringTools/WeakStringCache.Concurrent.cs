@@ -65,7 +65,7 @@ namespace Microsoft.NET.StringTools
             handle.SetString(result);
             if (_stringsByHashCode.TryAdd(hashCode, handle))
             {
-                Interlocked.Add(ref _count, 1);
+                Interlocked.Increment(ref _count);
             }
 
 
