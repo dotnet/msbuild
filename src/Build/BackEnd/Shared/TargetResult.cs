@@ -147,7 +147,8 @@ namespace Microsoft.Build.Execution
                 case TargetResultCode.Success:
                     return nameof(TargetResultCode.Success);
                 default:
-                    return "";
+                    Debug.Fail($"Unknown enum value: {ResultCode}");
+                    return ResultCode.ToString();
             }
         }
 
