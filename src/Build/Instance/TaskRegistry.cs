@@ -450,13 +450,6 @@ namespace Microsoft.Build.Execution
                 // and let's consider all tasks imported by common targets as non custom logic.
                 && !FileClassifier.Shared.IsBuiltInLogic(projectUsingTaskXml.ContainingProject.FullPath);
 
-            // TODO: We might want to decide this post-hoc (on project done), based on TaskRegistration.AssemblyLoadInfo
-            //  as only then we might better know the location of dotnet install root
-            if (isCustomTask)
-            {
-                Debugger.Launch();
-            }
-
             taskRegistry.RegisterTask(
                 taskName,
                 AssemblyLoadInfo.Create(assemblyName, assemblyFile),
@@ -466,7 +459,7 @@ namespace Microsoft.Build.Execution
                 loggingContext,
                 projectUsingTaskXml,
                 ConversionUtilities.ValidBooleanTrue(overrideUsingTask),
-                isCustomTask);
+                projectUsingTaskXml.ContainingProject.FullPath);
         }
 
         private static Dictionary<string, string> CreateTaskFactoryParametersDictionary(int? initialCount = null)
@@ -712,7 +705,7 @@ namespace Microsoft.Build.Execution
             LoggingContext loggingContext,
             ProjectUsingTaskElement projectUsingTaskInXml,
             bool overrideTask,
-            bool isCustom)
+            string containingFileFullPath)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo);
@@ -740,7 +733,7 @@ namespace Microsoft.Build.Execution
                 taskFactoryParameters,
                 inlineTaskRecord,
                 Interlocked.Increment(ref _nextRegistrationOrderId),
-                isCustom);
+                containingFileFullPath);
 
             if (overrideTask)
             {
@@ -1185,13 +1178,27 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private int _registrationOrderId;
 
-            internal Stats Statistics = new Stats();
+            internal Stats Statistics { get; private init; } = new Stats();
+
+            public bool GetIsCustom()
+            {
+                return
+                (
+                    // TODO: some taskfactories are used within our common targets - but we should flag it somehow as well
+                    (!string.IsNullOrEmpty(_taskFactory)) ||
+
+                 (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyName) && !AssemblyLoadsTracker.IsBuiltinType(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
+                 (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyFile) && !AssemblyLoadsTracker.IsBuiltinType(Path.GetFileName(_taskFactoryAssemblyLoadInfo.AssemblyFile)) && !FileClassifier.Shared.IsBuiltInLogic(_taskFactoryAssemblyLoadInfo.AssemblyFile)))
+                    // and let's consider all tasks imported by common targets as non custom logic.
+                    && !FileClassifier.Shared.IsBuiltInLogic(Statistics?.ContainingFileFullPath);
+            }
 
             internal class Stats
             {
-                public bool IsCustom { get; set; }
                 public short ExecutedCount { get; private set; }
                 private readonly Stopwatch _executedSw  = new Stopwatch();
+
+                public string ContainingFileFullPath { get; set; }
 
                 public TimeSpan ExecutedTime => _executedSw.Elapsed;
 
@@ -1205,6 +1212,12 @@ namespace Microsoft.Build.Execution
                 {
                     _executedSw.Stop();
                 }
+
+                public void Reset()
+                {
+                    ExecutedCount = 0;
+                    _executedSw.Reset();
+                }
             }
 
             /// <summary>
@@ -1217,7 +1230,7 @@ namespace Microsoft.Build.Execution
                 Dictionary<string, string> taskFactoryParameters,
                 ParameterGroupAndTaskElementRecord inlineTask,
                 int registrationOrderId,
-                bool isCustom)
+                string containingFileFullPath)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(assemblyLoadInfo, "AssemblyLoadInfo");
                 _registeredName = registeredName;
@@ -1246,7 +1259,7 @@ namespace Microsoft.Build.Execution
                     _parameterGroupAndTaskBody = new ParameterGroupAndTaskElementRecord();
                 }
 
-                Statistics.IsCustom = isCustom;
+                Statistics.ContainingFileFullPath = containingFileFullPath;
             }
 
             private RegisteredTaskRecord()

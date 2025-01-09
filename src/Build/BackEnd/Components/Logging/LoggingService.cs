@@ -1715,12 +1715,28 @@ namespace Microsoft.Build.BackEnd.Logging
             Console.WriteLine("=================================================");
             Console.WriteLine($"Stats for [{finsEventArgs.ProjectFile}, {suffix}");
             Console.WriteLine($"Total Defined  Tasks: {stats.TotalTasksCount}");
+            Console.WriteLine($"Total Tasks Executions: {stats.TotalTasksExecutionsCount}");
             Console.WriteLine($"Total Executed Tasks: {stats.TotalExecutedTasksCount}");
             Console.WriteLine($"Total task exec time: {stats.TotalTasksExecution:mm\\:ss\\.fff}");
             Console.WriteLine();
             Console.WriteLine($"Defined  Custom Tasks: {stats.CustomTasksCount}");
+            Console.WriteLine($"Custom Tasks Executions: {stats.CustomTasksExecutionsCount}");
             Console.WriteLine($"Executed Custom Tasks: {stats.ExecutedCustomTasksCount}");
             Console.WriteLine($"Custom task exec time: {stats.TotalCustomTasksExecution:mm\\:ss\\.fff}");
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine($"Total Defined  Targets: {stats.TotalTargetsCount}");
+            Console.WriteLine($"Total Targets Executions: {stats.TotalTargetsExecutionsCount}");
+            Console.WriteLine();
+            Console.WriteLine($"Defined  Custom Targets: {stats.CustomTargetsCount}");
+            Console.WriteLine($"Executed Custom Targets: {stats.ExecutedCustomTargetsCount}");
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Top tasks by cumulative execution time:");
+            foreach (var pair in stats.TopTasksByCumulativeExecution)
+            {
+                Console.WriteLine($"{pair.Value}: {pair.Key}");
+            }
             Console.WriteLine("=================================================");
         }
 
