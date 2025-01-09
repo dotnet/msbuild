@@ -701,6 +701,16 @@ namespace Microsoft.Build.Internal
                     }
                 });
             }
+            else if (items is IEnumerable<DictionaryEntry> dictionaryEntryEnumerable)
+            {
+                foreach (DictionaryEntry dictionaryEntry in dictionaryEntryEnumerable)
+                {
+                    if (dictionaryEntry.Key is string key && key.Length > 0)
+                    {
+                        callback(new DictionaryEntry(key, dictionaryEntry.Value));
+                    }
+                }
+            }
             else
             {
                 foreach (var item in items)

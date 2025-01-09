@@ -259,7 +259,7 @@ namespace Microsoft.Build.BackEnd
                             if (items != null)
                             {
                                 // Loop through all the items in the BuildItemGroup.
-                                foreach (ProjectItemInstance item in items)
+                                foreach (ProjectItemInstance item in items.GetStructEnumerable())
                                 {
                                     ProjectErrorUtilities.VerifyThrowInvalidProject(
                                         item.HasMetadata(consumedMetadataReference.MetadataName),
@@ -319,7 +319,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (items != null)
                 {
-                    foreach (ProjectItemInstance item in items)
+                    foreach (ProjectItemInstance item in items.GetStructEnumerable())
                     {
                         // Get this item's values for all the metadata consumed by the batchable object.
                         Dictionary<string, string> itemMetadataValues = GetItemMetadataValues(item, consumedMetadataReferences, elementLocation);

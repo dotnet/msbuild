@@ -77,6 +77,33 @@ namespace Microsoft.NET.StringTools
             }
         }
 
+        public char this[int index]
+        {
+            get
+            {
+                if ((uint)index >= (uint)Length)
+                {
+                    throw new IndexOutOfRangeException(nameof(index));
+                }
+
+                int currentIndex = index;
+                for (int spanIdx = 0; spanIdx < _spans.Count; spanIdx++)
+                {
+                    ReadOnlySpan<char> span = _spans[spanIdx].Span;
+                    if (currentIndex < span.Length)
+                    {
+                        return span[currentIndex];
+                    }
+                    else
+                    {
+                        currentIndex -= span.Length;
+                    }
+                }
+
+                throw new IndexOutOfRangeException(nameof(index));
+            }
+        }
+
         /// <summary>
         /// Spans making up the rope.
         /// </summary>
@@ -227,6 +254,31 @@ namespace Microsoft.NET.StringTools
         }
 
         /// <summary>
+        /// Removes leading white-space characters from the string.
+        /// </summary>
+        public void TrimStart(char c)
+        {
+            for (int spanIdx = 0; spanIdx < _spans.Count; spanIdx++)
+            {
+                ReadOnlySpan<char> span = _spans[spanIdx].Span;
+                int i = 0;
+                while (i < span.Length && span[i] == c)
+                {
+                    i++;
+                }
+                if (i > 0)
+                {
+                    _spans[spanIdx] = _spans[spanIdx].Slice(i);
+                    Length -= i;
+                }
+                if (!_spans[spanIdx].IsEmpty)
+                {
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
         /// Removes trailing white-space characters from the string.
         /// </summary>
         public void TrimEnd()
@@ -252,12 +304,46 @@ namespace Microsoft.NET.StringTools
         }
 
         /// <summary>
+        /// Removes trailing characters from the string.
+        /// </summary>
+        public void TrimEnd(char c)
+        {
+            for (int spanIdx = _spans.Count - 1; spanIdx >= 0; spanIdx--)
+            {
+                ReadOnlySpan<char> span = _spans[spanIdx].Span;
+                int i = span.Length - 1;
+                while (i >= 0 && span[i] == c)
+                {
+                    i--;
+                }
+                if (i + 1 < span.Length)
+                {
+                    _spans[spanIdx] = _spans[spanIdx].Slice(0, i + 1);
+                    Length -= span.Length - (i + 1);
+                }
+                if (!_spans[spanIdx].IsEmpty)
+                {
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
         /// Removes leading and trailing white-space characters from the string.
         /// </summary>
         public void Trim()
         {
             TrimStart();
             TrimEnd();
+        }
+
+        /// <summary>
+        /// Removes leading and trailing characters from the string.
+        /// </summary>
+        public void Trim(char c)
+        {
+            TrimStart(c);
+            TrimEnd(c);
         }
 
         /// <summary>
