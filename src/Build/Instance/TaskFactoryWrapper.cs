@@ -73,7 +73,10 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private IDictionary<string, string> _factoryIdentityParameters;
 
-        internal TaskRegistry.RegisteredTaskRecord.Stats? Statistics;
+        /// <summary>
+        /// An execution statistics holder.
+        /// </summary>
+        internal TaskRegistry.RegisteredTaskRecord.Stats? Statistics { get; private init; }
 
         #endregion
 
