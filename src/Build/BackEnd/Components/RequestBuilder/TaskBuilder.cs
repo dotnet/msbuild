@@ -428,7 +428,9 @@ namespace Microsoft.Build.BackEnd
                     {
                         TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance, taskAssemblyLocation);
                         MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
+                        // Can be condition with _componentHost.BuildParameters.IsTelemetryEnabled) - but it's a cheap call
                         taskFactoryWrapper?.Statistics?.ExecutionStarted();
+
                         _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
 
                         try

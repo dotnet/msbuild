@@ -163,12 +163,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// holds all the default tasks we know about and the assemblies they exist in
         /// </summary>
-        internal TaskRegistry _defaultTaskRegistry;
+        private TaskRegistry _defaultTaskRegistry;
 
         /// <summary>
         /// holds all the override tasks we know about and the assemblies they exist in
         /// </summary>
-        internal TaskRegistry _overrideTaskRegistry;
+        private TaskRegistry _overrideTaskRegistry;
 
         /// <summary>
         /// Delegate to retrieving files.  For unit testing only.
@@ -363,6 +363,15 @@ namespace Microsoft.Build.Evaluation
         private Toolset(ITranslator translator)
         {
             ((ITranslatable)this).Translate(translator);
+        }
+
+        /// <summary>
+        /// Helper for inspecting internal task registries that might or might not be initialized at this point.
+        /// </summary>
+        internal void InspectInternalTaskRegistry(Action<TaskRegistry> visitor)
+        {
+            visitor(_defaultTaskRegistry);
+            visitor(_overrideTaskRegistry);
         }
 
         /// <summary>

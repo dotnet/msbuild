@@ -9,7 +9,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
@@ -443,13 +442,6 @@ namespace Microsoft.Build.Execution
                 taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
-            bool isCustomTask =
-                ((!string.IsNullOrEmpty(taskFactory)) ||
-                (!string.IsNullOrEmpty(assemblyName) && !AssemblyLoadsTracker.IsBuiltinType(assemblyName)) ||
-                (!string.IsNullOrEmpty(assemblyFile) && !AssemblyLoadsTracker.IsBuiltinType(Path.GetFileName(assemblyFile)) && !FileClassifier.Shared.IsBuiltInLogic(assemblyFile)))
-                // and let's consider all tasks imported by common targets as non custom logic.
-                && !FileClassifier.Shared.IsBuiltInLogic(projectUsingTaskXml.ContainingProject.FullPath);
-
             taskRegistry.RegisterTask(
                 taskName,
                 AssemblyLoadInfo.Create(assemblyName, assemblyFile),
@@ -458,8 +450,7 @@ namespace Microsoft.Build.Execution
                 parameterGroupAndTaskElementRecord,
                 loggingContext,
                 projectUsingTaskXml,
-                ConversionUtilities.ValidBooleanTrue(overrideUsingTask),
-                projectUsingTaskXml.ContainingProject.FullPath);
+                ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
         }
 
         private static Dictionary<string, string> CreateTaskFactoryParametersDictionary(int? initialCount = null)
@@ -704,8 +695,7 @@ namespace Microsoft.Build.Execution
             RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord,
             LoggingContext loggingContext,
             ProjectUsingTaskElement projectUsingTaskInXml,
-            bool overrideTask,
-            string containingFileFullPath)
+            bool overrideTask)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo);
@@ -733,7 +723,7 @@ namespace Microsoft.Build.Execution
                 taskFactoryParameters,
                 inlineTaskRecord,
                 Interlocked.Increment(ref _nextRegistrationOrderId),
-                containingFileFullPath);
+                projectUsingTaskInXml.ContainingProject.FullPath);
 
             if (overrideTask)
             {
@@ -1178,27 +1168,21 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private int _registrationOrderId;
 
+            /// <summary>
+            /// Full path to the file that contains definition of this task.
+            /// </summary>
+            private string _definingFileFullPath;
+
+            /// <summary>
+            /// Execution statistics for the tasks.
+            /// Not translatable - the statistics are anyway expected to be reset after each project request.
+            /// </summary>
             internal Stats Statistics { get; private init; } = new Stats();
 
-            public bool GetIsCustom()
+            internal struct Stats()
             {
-                return
-                (
-                    // TODO: some taskfactories are used within our common targets - but we should flag it somehow as well
-                    (!string.IsNullOrEmpty(_taskFactory)) ||
-
-                 (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyName) && !AssemblyLoadsTracker.IsBuiltinType(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
-                 (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyFile) && !AssemblyLoadsTracker.IsBuiltinType(Path.GetFileName(_taskFactoryAssemblyLoadInfo.AssemblyFile)) && !FileClassifier.Shared.IsBuiltInLogic(_taskFactoryAssemblyLoadInfo.AssemblyFile)))
-                    // and let's consider all tasks imported by common targets as non custom logic.
-                    && !FileClassifier.Shared.IsBuiltInLogic(Statistics?.ContainingFileFullPath);
-            }
-
-            internal class Stats
-            {
-                public short ExecutedCount { get; private set; }
+                public short ExecutedCount { get; private set; } = 0;
                 private readonly Stopwatch _executedSw  = new Stopwatch();
-
-                public string ContainingFileFullPath { get; set; }
 
                 public TimeSpan ExecutedTime => _executedSw.Elapsed;
 
@@ -1259,11 +1243,26 @@ namespace Microsoft.Build.Execution
                     _parameterGroupAndTaskBody = new ParameterGroupAndTaskElementRecord();
                 }
 
-                Statistics.ContainingFileFullPath = containingFileFullPath;
+                _definingFileFullPath = containingFileFullPath;
             }
 
             private RegisteredTaskRecord()
             {
+            }
+
+            public bool GetIsCustom()
+            {
+                return
+                    (
+                        // Some taskfactories are used within our common targets - but we should flag it somehow as well
+                        (!string.IsNullOrEmpty(_taskFactory)) ||
+                        (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyName) &&
+                         !AssemblyLoadsTracker.IsBuiltinType(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
+                        (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyFile) &&
+                         !AssemblyLoadsTracker.IsBuiltinType(Path.GetFileName(_taskFactoryAssemblyLoadInfo.AssemblyFile)) &&
+                         !FileClassifier.Shared.IsBuiltInLogic(_taskFactoryAssemblyLoadInfo.AssemblyFile)))
+                    // and let's consider all tasks imported by common targets as non custom logic.
+                    && !FileClassifier.Shared.IsBuiltInLogic(_definingFileFullPath);
             }
 
             /// <summary>
@@ -1886,6 +1885,7 @@ namespace Microsoft.Build.Execution
                 translator.Translate(ref _taskFactory);
                 translator.Translate(ref _parameterGroupAndTaskBody);
                 translator.Translate(ref _registrationOrderId);
+                translator.Translate(ref _definingFileFullPath);
 
                 IDictionary<string, string> localParameters = _taskFactoryParameters;
                 translator.TranslateDictionary(ref localParameters, count => CreateTaskFactoryParametersDictionary(count));

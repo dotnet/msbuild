@@ -5,10 +5,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 #if !RUNTIME_TYPE_NETCORE
 using System.Diagnostics;
-using System.Linq;
 using System.Text.RegularExpressions;
 #endif
 
@@ -219,14 +219,11 @@ namespace Microsoft.Build.Framework
                 {
                     _knownImmutableDirectoriesSnapshot = new List<string>(_knownImmutableDirectories.Values);
 
-                    // Add the location to the build in logic locations
-                    // TODO: add more readable way
+                    // Add the location to the build in logic locations - but create a new readonly destination
                     if (!isCustomLogicLocation)
                     {
-                        string[] tmp = new string[_knownBuiltInLogicDirectoriesSnapshot.Count + 1];
-                        Array.Copy((string[])_knownBuiltInLogicDirectoriesSnapshot, tmp, tmp.Length - 1);
-                        tmp[tmp.Length - 1] = directory;
-                        _knownBuiltInLogicDirectoriesSnapshot = tmp;
+                        _knownBuiltInLogicDirectoriesSnapshot =
+                            _knownBuiltInLogicDirectoriesSnapshot.Append(d).ToArray();
                     }
                 }
             }

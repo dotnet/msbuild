@@ -1338,8 +1338,7 @@ namespace Microsoft.Build.BackEnd
                     registeredTaskRecord.Statistics.Reset();
                 }
 
-                CollectTasksStats(taskRegistry.Toolset?._defaultTaskRegistry, projectBuildStats);
-                CollectTasksStats(taskRegistry.Toolset?._overrideTaskRegistry, projectBuildStats);
+                taskRegistry.Toolset?.InspectInternalTaskRegistry(tr => CollectTasksStats(tr, projectBuildStats));
             }
         }
 
