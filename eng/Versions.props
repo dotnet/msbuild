@@ -40,7 +40,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
-    <MicrosoftVisualStudioSolutionPersistenceVersion>1.0.9</MicrosoftVisualStudioSolutionPersistenceVersion>
+    <MicrosoftVisualStudioSolutionPersistenceVersion>1.0.28</MicrosoftVisualStudioSolutionPersistenceVersion>
     <SystemCollectionsImmutableVersion>8.0.0</SystemCollectionsImmutableVersion>
     <SystemConfigurationConfigurationManagerVersion>8.0.0</SystemConfigurationConfigurationManagerVersion>
     <SystemFormatsAsn1Version>8.0.1</SystemFormatsAsn1Version>
