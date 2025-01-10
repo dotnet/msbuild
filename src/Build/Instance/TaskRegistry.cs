@@ -1179,7 +1179,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             internal Stats Statistics { get; private init; } = new Stats();
 
-            internal struct Stats()
+            internal class Stats()
             {
                 public short ExecutedCount { get; private set; } = 0;
                 private readonly Stopwatch _executedSw  = new Stopwatch();
@@ -1254,8 +1254,9 @@ namespace Microsoft.Build.Execution
             {
                 return
                     (
-                        // Some taskfactories are used within our common targets - but we should flag it somehow as well
-                        (!string.IsNullOrEmpty(_taskFactory)) ||
+                        // There are occurrences of inline tasks within common targets (VS - SetEnvironmentVariable),
+                        //  so we need to check file as well (the very last condition).
+                        !string.IsNullOrEmpty(_parameterGroupAndTaskBody?.InlineTaskXmlBody) ||
                         (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyName) &&
                          !AssemblyLoadsTracker.IsBuiltinType(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
                         (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyFile) &&

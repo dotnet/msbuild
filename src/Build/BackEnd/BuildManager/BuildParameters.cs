@@ -211,7 +211,7 @@ namespace Microsoft.Build.Execution
 
         private bool _isBuildCheckEnabled;
 
-        private bool _isTelemetryEnabled = true;
+        private bool _isTelemetryEnabled;
 
         /// <summary>
         /// The settings used to load the project under build
@@ -316,6 +316,7 @@ namespace Microsoft.Build.Execution
             LowPriority = other.LowPriority;
             Question = other.Question;
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
+            IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
