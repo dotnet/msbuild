@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     DestinationFolder = new TaskItem(folder.Path),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent(new String('!', 0xfffffff)),
+                        Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(new String('!', 0xfffffff)))),
                         RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://largedownload/foo.txt")
                     }),
                     SourceUrl = "http://largedownload/foo.txt"
