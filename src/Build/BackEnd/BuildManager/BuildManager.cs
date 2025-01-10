@@ -453,6 +453,7 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
+            OpenTelemetryManager.Instance.Initialize(isStandalone: false); 
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -1081,6 +1082,12 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
+                            OpenTelemetryManager.Instance.DefaultActivitySource?
+                                .StartActivity("Build")?
+                                .WithTags(_buildTelemetry)
+                                .WithStartTime(_buildTelemetry.InnerStartAt);
+                            OpenTelemetryManager.Instance.ForceFlush();
+
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
                         }

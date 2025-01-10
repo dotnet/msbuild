@@ -248,6 +248,8 @@ namespace Microsoft.Build.CommandLine
 
             // Initialize new build telemetry and record start of this build.
             KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
+            // Initialize OpenTelemetry infrastructure
+            OpenTelemetryManager.Instance.Initialize(isStandalone: true);
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -295,6 +297,9 @@ namespace Microsoft.Build.CommandLine
             {
                 DumpCounters(false /* log to console */);
             }
+
+            // Send OpenTelemetry before exiting
+            OpenTelemetryManager.Instance.Shutdown();
 
             return exitCode;
         }
