@@ -13,7 +13,7 @@ using OpenTelemetry.Trace;
 using System;
 using System.Diagnostics;
 using System.Threading;
-using Microsoft.Build.Shared;
+using System.Globalization;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             string? sampleRateString =
                 Environment.GetEnvironmentVariable(name);
-            return ConversionUtilities.TryConvertDecimalOrHexToDouble(sampleRateString, out double result) ? result : null;
+            return double.TryParse(sampleRateString, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture.NumberFormat, out double result) ? result : null;
         }
 
         /// <summary>
