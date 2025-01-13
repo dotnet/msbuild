@@ -211,7 +211,7 @@ namespace Microsoft.Build.Execution
 
         private bool _isBuildCheckEnabled;
 
-        private bool _isTelemetryEnabled;
+        private bool _isTelemetryEnabled = true;
 
         /// <summary>
         /// The settings used to load the project under build
