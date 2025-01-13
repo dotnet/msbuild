@@ -415,7 +415,7 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="new">An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</target>
+        <target state="translated">Ausnahme beim Erweitern einer fileSpec mit globs: fileSpec: "{0}", vorausgesetzt, es handelt sich um einen Dateinamen. Ausnahme: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -815,7 +815,7 @@ Fehler: {3}</target>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="new">Logging type {0} is not understood by {1}.</target>
+        <target state="translated">Der Protokollierungstyp {0} wird von {1} nicht erkannt.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
