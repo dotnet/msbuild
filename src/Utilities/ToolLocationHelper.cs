@@ -3584,7 +3584,7 @@ namespace Microsoft.Build.Utilities
             {
                 toolPath = Path.Combine(toolPath, fileName);
 
-                if (!FileSystems.Default.FileExists(toolPath))
+                if (!File.Exists(toolPath))
                 {
                     toolPath = null;
                 }
