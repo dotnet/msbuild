@@ -453,7 +453,7 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
-            OpenTelemetryManager.Instance.Initialize(isStandalone: false); 
+            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -1085,7 +1085,8 @@ namespace Microsoft.Build.Execution
                             OpenTelemetryManager.Instance.DefaultActivitySource?
                                 .StartActivity("Build")?
                                 .WithTags(_buildTelemetry)
-                                .WithStartTime(_buildTelemetry.InnerStartAt);
+                                .WithStartTime(_buildTelemetry.InnerStartAt)
+                                .Dispose();
                             OpenTelemetryManager.Instance.ForceFlush();
 
                             // Clean telemetry to make it ready for next build submission.
