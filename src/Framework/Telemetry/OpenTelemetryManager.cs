@@ -12,10 +12,8 @@ using OpenTelemetry.Trace;
 #endif
 using System;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
-
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -123,6 +121,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
 #if NETFRAMEWORK
                 InitializeTracerProvider();
+
                 // TODO: Enable commented logic when Collector is present in VS
                 // if (isStandalone)
                 InitializeCollector();
@@ -195,22 +194,9 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Determines if the user has explicitly opted out of telemetry.
         /// </summary>
-        private bool IsOptOut()
-        {
-            if (IsEnvVarTrue(TelemetryConstants.TelemetryFxOptoutEnvVarName))
-            {
-                return true;
-            }
-
-            if (IsEnvVarTrue(TelemetryConstants.DotnetOptOut))
-            {
-                return true;
-            }
-
-            /* VS OTel manages opt outs by not sending data. */
-
-            return false;
-        }
+        private bool IsOptOut() =>
+            IsEnvVarTrue(TelemetryConstants.TelemetryFxOptoutEnvVarName) ||
+            IsEnvVarTrue(TelemetryConstants.DotnetOptOut);
 
         /// <summary>
         /// Determines if telemetry should be initialized based on sampling and environment variable overrides.
@@ -242,13 +228,7 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             string? sampleRateString =
                 Environment.GetEnvironmentVariable(name);
-
-            if (double.TryParse(sampleRateString, out double result))
-            {
-                return result;
-            }
-
-            return null;
+            return ConversionUtilities.TryConvertDecimalOrHexToDouble(sampleRateString, out double result) ? result : null;
         }
 
         /// <summary>

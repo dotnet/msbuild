@@ -57,6 +57,9 @@
     <Compile Include="..\Shared\IMSBuildElementLocation.cs">
       <Link>Shared\IMSBuildElementLocation.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\ConversionUtilities.cs">
+      <Link>Shared\ConversionUtilities.cs</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">

@@ -911,8 +911,8 @@ namespace Microsoft.Build.Execution
                 {
                     // Project graph can have multiple entry points, for purposes of identifying event for same build project,
                     // we believe that including only one entry point will provide enough precision.
-                    _buildTelemetry.Project ??= requestData.EntryProjectsFullPath.FirstOrDefault();
-                    _buildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
+                    _buildTelemetry.ProjectPath ??= requestData.EntryProjectsFullPath.FirstOrDefault();
+                    _buildTelemetry.BuildTarget ??= string.Join(",", requestData.TargetNames);
                 }
 
                 _buildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
@@ -1056,10 +1056,10 @@ namespace Microsoft.Build.Execution
                         if (_buildTelemetry != null)
                         {
                             _buildTelemetry.FinishedAt = DateTime.UtcNow;
-                            _buildTelemetry.Success = _overallBuildSuccess;
-                            _buildTelemetry.Version = ProjectCollection.Version;
-                            _buildTelemetry.DisplayVersion = ProjectCollection.DisplayVersion;
-                            _buildTelemetry.FrameworkName = NativeMethodsShared.FrameworkName;
+                            _buildTelemetry.BuildSuccess = _overallBuildSuccess;
+                            _buildTelemetry.BuildEngineVersion = ProjectCollection.Version;
+                            _buildTelemetry.BuildEngineDisplayVersion = ProjectCollection.DisplayVersion;
+                            _buildTelemetry.BuildEngineFrameworkName = NativeMethodsShared.FrameworkName;
 
                             string? host = null;
                             if (BuildEnvironmentState.s_runningInVisualStudio)
@@ -1074,7 +1074,7 @@ namespace Microsoft.Build.Execution
                             {
                                 host = "VSCode";
                             }
-                            _buildTelemetry.Host = host;
+                            _buildTelemetry.BuildEngineHost = host;
 
                             _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
                             var sacState = NativeMethodsShared.GetSACState();

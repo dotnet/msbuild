@@ -1,10 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
 #if NETFRAMEWORK
 extern alias clientext;   // for Microsoft.VisualStudio.OpenTelemetry.ClientExtensions
-
-using clientext::Microsoft.VisualStudio.OpenTelemetry.ClientExtensions;
-using clientext::Microsoft.VisualStudio.OpenTelemetry.ClientExtensions.Exporters;
 #else
 using System.Security.Cryptography;
 using System.Text;
@@ -12,24 +10,26 @@ using System.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
-
-
 
 namespace Microsoft.Build.Framework.Telemetry
 {
-
+    /// <summary>
+    /// Extension methods for <see cref="Activity"/>. usage in VS OpenTelemetry.
+    /// </summary>
     internal static class ActivityExtensions
     {
+        /// <summary>
+        /// Add tags to the activity from a <see cref="IActivityTelemetryDataHolder"/>.
+        /// </summary>
         public static Activity WithTags(this Activity activity, IActivityTelemetryDataHolder dataHolder)
         {
             activity.WithTags(dataHolder.GetActivityProperties());
             return activity;
         }
 
+        /// <summary>
+        /// Add tags to the activity from a list of TelemetryItems.
+        /// </summary>
         public static Activity WithTags(this Activity activity, IList<TelemetryItem> tags)
         {
             foreach (var tag in tags)
@@ -38,7 +38,9 @@ namespace Microsoft.Build.Framework.Telemetry
             }
             return activity;
         }
-
+        /// <summary>
+        /// Add a tag to the activity from a <see cref="TelemetryItem"/>.
+        /// </summary>
         public static Activity WithTag(this Activity activity, TelemetryItem item)
         {
             object value = item.Hashed ? GetHashed(item.Value) : item.Value;
@@ -46,6 +48,9 @@ namespace Microsoft.Build.Framework.Telemetry
             return activity;
         }
 
+        /// <summary>
+        /// Set the start time of the activity.
+        /// </summary>
         public static Activity WithStartTime(this Activity activity, DateTime? startTime)
         {
             if (startTime.HasValue)
@@ -55,10 +60,13 @@ namespace Microsoft.Build.Framework.Telemetry
             return activity;
         }
 
+        /// <summary>
+        /// Depending on the platform, hash the value using an available mechanism.
+        /// </summary>
         private static object GetHashed(object value)
         {
 #if NETFRAMEWORK
-                        return new clientext::Microsoft.VisualStudio.Telemetry.TelemetryHashedProperty(value);
+            return new clientext::Microsoft.VisualStudio.Telemetry.TelemetryHashedProperty(value);
 #else
             return Sha256Hasher.Hash(value.ToString() ?? "");
 #endif
