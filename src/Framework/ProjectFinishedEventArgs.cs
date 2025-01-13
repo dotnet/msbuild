@@ -19,6 +19,9 @@ namespace Microsoft.Build.Framework
         // Future: These might be configurable e.g. via telemetry sensitivity level?
         internal static TimeSpan DurationThresholdForTopN { get; set; } = TimeSpan.FromMilliseconds(100);
         private const int TopNTasksToReport = 5;
+        internal static bool CollectCustomTaskNames { get; set; } = false;
+        private const int MaxCustomTasksCsvLength = 400;
+        private const int MaxSingleTaskNameLength = 40;
 
         public ProjectBuildStats(bool isDeserialized)
         {
@@ -62,6 +65,11 @@ namespace Microsoft.Build.Framework
                 if (executionsCount > 0)
                 {
                     ExecutedCustomTasksCount++;
+                }
+
+                if (CollectCustomTaskNames && CustomTasksCsv?.Length < MaxCustomTasksCsvLength)
+                {
+                    CustomTasksCsv += "," + name.Substring(Math.Max(0, name.Length - MaxSingleTaskNameLength));
                 }
             }
         }
@@ -125,6 +133,11 @@ namespace Microsoft.Build.Framework
         /// Subset of <see cref="TotalTargetsExecutionsCount"/> for executions that were not regarded to be produced by Microsoft.
         /// </summary>
         public short ExecutedCustomTargetsCount { get; set; }
+
+        /// <summary>
+        /// Csv list of names of custom tasks.
+        /// </summary>
+        public string? CustomTasksCsv { get; set; }
 
         /// <summary>
         /// Top N (<see cref="TopNTasksToReport"/>) tasks by cumulative execution time.
@@ -233,6 +246,7 @@ namespace Microsoft.Build.Framework
                 writer.Write7BitEncodedInt(ProjectBuildStats.CustomTargetsCount);
                 writer.Write7BitEncodedInt(ProjectBuildStats.TotalTargetsExecutionsCount);
                 writer.Write7BitEncodedInt(ProjectBuildStats.ExecutedCustomTargetsCount);
+                writer.WriteOptionalString(ProjectBuildStats.CustomTasksCsv);
 
                 writer.Write7BitEncodedInt(ProjectBuildStats.TopTasksByCumulativeExecution.Count);
                 foreach (var pair in ProjectBuildStats.TopTasksByCumulativeExecution)
@@ -276,6 +290,7 @@ namespace Microsoft.Build.Framework
                     CustomTargetsCount = (short)reader.Read7BitEncodedInt(),
                     TotalTargetsExecutionsCount = (short)reader.Read7BitEncodedInt(),
                     ExecutedCustomTargetsCount = (short)reader.Read7BitEncodedInt(),
+                    CustomTasksCsv = reader.ReadOptionalString(),
                 };
 
                 ProjectBuildStats.SetDeserializedTopN(ReadTaskStats(reader));

@@ -1254,17 +1254,20 @@ namespace Microsoft.Build.Execution
             {
                 return
                     (
-                        // There are occurrences of inline tasks within common targets (VS - SetEnvironmentVariable),
+                        // There are occurrences of inline tasks within common targets (Microsoft.CodeAnalysis.Targets - SetEnvironmentVariable),
                         //  so we need to check file as well (the very last condition).
                         !string.IsNullOrEmpty(_parameterGroupAndTaskBody?.InlineTaskXmlBody) ||
                         (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyName) &&
-                         !AssemblyLoadsTracker.IsBuiltinType(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
+                         !IsMicrosoftAssembly(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
                         (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyFile) &&
-                         !AssemblyLoadsTracker.IsBuiltinType(Path.GetFileName(_taskFactoryAssemblyLoadInfo.AssemblyFile)) &&
+                         !IsMicrosoftAssembly(Path.GetFileName(_taskFactoryAssemblyLoadInfo.AssemblyFile)) &&
                          !FileClassifier.Shared.IsBuiltInLogic(_taskFactoryAssemblyLoadInfo.AssemblyFile)))
                     // and let's consider all tasks imported by common targets as non custom logic.
                     && !FileClassifier.Shared.IsBuiltInLogic(_definingFileFullPath);
             }
+
+            private static bool IsMicrosoftAssembly(string assemblyName)
+                => assemblyName.StartsWith("Microsoft.", StringComparison.Ordinal);
 
             /// <summary>
             /// Gets the task name this record was registered with.
