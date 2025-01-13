@@ -129,7 +129,7 @@ namespace Microsoft.Build.Evaluation
     /// </remarks>
     /// <typeparam name="P">Type of the properties used.</typeparam>
     /// <typeparam name="I">Type of the items used.</typeparam>
-    internal class Expander<P, I>
+    internal partial class Expander<P, I>
         where P : class, IProperty
         where I : class, IItem
     {
@@ -952,7 +952,7 @@ namespace Microsoft.Build.Evaluation
                         // if there are no item vectors in the string
                         // run a simpler Regex to find item metadata references
                         MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
-                        result = RegularExpressions.ItemMetadataPattern.Value.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                        result = RegularExpressions.ItemMetadataRegex.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
                     }
                     else
                     {
@@ -983,7 +983,7 @@ namespace Microsoft.Build.Evaluation
                                 // Extract the part of the expression that appears before the item vector expression
                                 // e.g. the ABC in ABC@(foo->'%(FullPath)')
                                 string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
-                                string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                                string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
 
                                 // Append the metadata replacement
                                 finalResultBuilder.Append(replacementResult);
@@ -991,7 +991,7 @@ namespace Microsoft.Build.Evaluation
                                 // Expand any metadata that appears in the item vector expression's separator
                                 if (itemVectorExpressions[n].Separator != null)
                                 {
-                                    vectorExpression = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
+                                    vectorExpression = RegularExpressions.NonTransformItemMetadataRegex.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
                                 }
 
                                 // Append the item vector expression as is
@@ -1008,7 +1008,7 @@ namespace Microsoft.Build.Evaluation
                         if (start < expression.Length)
                         {
                             string subExpressionToReplaceIn = expression.Substring(start);
-                            string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                            string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
 
                             finalResultBuilder.Append(replacementResult);
                         }
@@ -2719,7 +2719,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             matchEvaluator = new MetadataMatchEvaluator(item.Key, item.Value, elementLocation);
 
-                            include = RegularExpressions.ItemMetadataPattern.Value.Replace(arguments[0], matchEvaluator.GetMetadataValueFromMatch);
+                            include = RegularExpressions.ItemMetadataRegex.Replace(arguments[0], matchEvaluator.GetMetadataValueFromMatch);
                         }
 
                         // Include may be empty. Historically we have created items with empty include
@@ -3086,13 +3086,19 @@ namespace Microsoft.Build.Evaluation
         /// Regular expressions used by the expander.
         /// The expander currently uses regular expressions rather than a parser to do its work.
         /// </summary>
-        private static class RegularExpressions
+        private static partial class RegularExpressions
         {
             /**************************************************************************************************************************
             * WARNING: The regular expressions below MUST be kept in sync with the expressions in the ProjectWriter class -- if the
             * description of an item vector changes, the expressions must be updated in both places.
             *************************************************************************************************************************/
 
+
+
+#if NET7_0_OR_GREATER
+            [GeneratedRegex(ItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
+            internal static partial Regex ItemMetadataPattern();
+#else
             /// <summary>
             /// Regular expression used to match item metadata references embedded in strings.
             /// For example, %(Compile.DependsOn) or %(DependsOn).
@@ -3100,10 +3106,23 @@ namespace Microsoft.Build.Evaluation
             internal static readonly Lazy<Regex> ItemMetadataPattern = new Lazy<Regex>(
                 () => new Regex(ItemMetadataSpecification,
                     RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+#endif
 
-            /// <summary>
-            /// Name of the group matching the "name" of a metadatum.
-            /// </summary>
+            internal static Regex ItemMetadataRegex
+            {
+                get
+                {
+#if NET7_0_OR_GREATER
+                    return ItemMetadataPattern();
+#else
+                    return ItemMetadataPattern.Value;
+#endif
+                }
+            }
+
+                /// <summary>
+                /// Name of the group matching the "name" of a metadatum.
+                /// </summary>
             internal const string NameGroup = "NAME";
 
             /// <summary>
@@ -3116,18 +3135,35 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal const string ItemTypeGroup = "ITEM_TYPE";
 
+            internal const string NonTransformItemMetadataSpecification = @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
+                                                                ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" +
+                                                                ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" +
+                                                                ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
+                                                                ItemVectorWithTransformRHS + @"))";
+
+#if NET7_0_OR_GREATER
+            [GeneratedRegex(NonTransformItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
+            internal static partial Regex NonTransformItemMetadataPattern();
+#else
             /// <summary>
             /// regular expression used to match item metadata references outside of item vector transforms.
             /// </summary>
             /// <remarks>PERF WARNING: this Regex is complex and tends to run slowly.</remarks>
             internal static readonly Lazy<Regex> NonTransformItemMetadataPattern = new Lazy<Regex>(
-                () => new Regex(
-                    @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
-                    ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" +
-                    ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" +
-                    ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
-                    ItemVectorWithTransformRHS + @"))",
-                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+                () => new Regex(NonTransformItemMetadataSpecification,
+                                RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+#endif
+            internal static Regex NonTransformItemMetadataRegex
+            {
+                get
+                {
+#if NET7_0_OR_GREATER
+                    return NonTransformItemMetadataPattern();
+#else
+                    return NonTransformItemMetadataPattern.Value;
+#endif
+                }
+            }
 
             /// <summary>
             /// Complete description of an item metadata reference, including the optional qualifying item type.
