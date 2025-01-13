@@ -64,7 +64,6 @@ namespace Microsoft.Build.Framework.Telemetry
 #endif
         }
 
-
         // https://github.com/dotnet/sdk/blob/8bd19a2390a6bba4aa80d1ac3b6c5385527cc311/src/Cli/Microsoft.DotNet.Cli.Utils/Sha256Hasher.cs + workaround for netstandard2.0
 #if NET || NETSTANDARD2_0_OR_GREATER
         private static class Sha256Hasher

@@ -15,16 +15,16 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
     public class OpenTelemetryManagerTests : IDisposable
     {
         // Store original environment variables so we can restore after each test
-        private readonly string _originalDotnetOptOut;
-        private readonly string _originalMsBuildTelemetryOptOut;
-        private readonly string _originalSampleRateOverride;
+        private readonly string? _originalDotnetOptOut;
+        private readonly string? _originalMsBuildTelemetryOptOut;
+        private readonly string? _originalSampleRateOverride;
 
         public OpenTelemetryManagerTests()
         {
             // Capture existing env vars
-            _originalDotnetOptOut = Environment.GetEnvironmentVariable(TelemetryConstants.DotnetOptOut) ?? "";
-            _originalMsBuildTelemetryOptOut = Environment.GetEnvironmentVariable(TelemetryConstants.TelemetryFxOptoutEnvVarName) ?? "";
-            _originalSampleRateOverride = Environment.GetEnvironmentVariable(TelemetryConstants.TelemetrySampleRateOverrideEnvVarName) ?? "";
+            _originalDotnetOptOut = Environment.GetEnvironmentVariable(TelemetryConstants.DotnetOptOut);
+            _originalMsBuildTelemetryOptOut = Environment.GetEnvironmentVariable(TelemetryConstants.TelemetryFxOptoutEnvVarName);
+            _originalSampleRateOverride = Environment.GetEnvironmentVariable(TelemetryConstants.TelemetrySampleRateOverrideEnvVarName);
 
             // Ensure a clean manager state before each test
             ResetManagerState();
@@ -78,6 +78,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             OpenTelemetryManager.Instance.DefaultActivitySource.ShouldBeNull();
         }
 #endif
+        
         [WindowsFullFrameworkOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]
