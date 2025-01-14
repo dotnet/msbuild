@@ -1401,29 +1401,43 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 do
                 {
-                    if (_eventQueue.TryDequeue(out object ev))
+                    lock (_lockObject)
                     {
-                        LoggingEventProcessor(ev);
-                        _dequeueEvent?.Set();
-                    }
-                    else
-                    {
-                        _emptyQueueEvent?.Set();
-
-                        // Wait for next event, or finish.
-                        if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
+                        if (_eventQueue.TryDequeue(out object ev))
                         {
-                            WaitHandle.WaitAny(waitHandlesForNextEvent);
+                            LoggingEventProcessor(ev);
+                            _dequeueEvent?.Set();
                         }
-
-                        lock (_lockObject)
+                        else
                         {
-                            _emptyQueueEvent?.Reset();
+                            _emptyQueueEvent?.Set();
+
+                            // Release lock before potentially long wait
+                            Monitor.Exit(_lockObject);
+                            try
+                            {
+                                // Only wait if we still need to
+                                if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
+                                {
+                                    WaitHandle.WaitAny(waitHandlesForNextEvent);
+                                }
+                            }
+                            finally
+                            {
+                                // Reacquire lock
+                                Monitor.Enter(_lockObject);
+
+                                // Reset the event if we are not shutting down
+                                _emptyQueueEvent?.Reset();
+                            }
                         }
                     }
                 } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
-                _emptyQueueEvent?.Set();
+                lock (_lockObject)
+                {
+                    _emptyQueueEvent?.Set();
+                }
             }
         }
 
