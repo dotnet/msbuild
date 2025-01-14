@@ -10,12 +10,12 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
-using Microsoft.Build.Experimental.BuildCheck;
 
 #nullable disable
 
@@ -1398,22 +1398,31 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 var completeAdding = _loggingEventProcessingCancellation.Token;
                 WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEvent };
+
                 lock (_lockObject)
                 {
-                    if (_eventQueue.TryDequeue(out object ev))
+                    do
                     {
-                        LoggingEventProcessor(ev);
-                        _dequeueEvent?.Set();
-                    }
-                    else
-                    {
-                        _emptyQueueEvent?.Set();
-                        if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
+                        if (_eventQueue.TryDequeue(out object ev))
                         {
-                            WaitHandle.WaitAny(waitHandlesForNextEvent);
+                            LoggingEventProcessor(ev);
+                            _dequeueEvent.Set();
                         }
-                        _emptyQueueEvent?.Reset();
-                    }
+                        else
+                        {
+                            _emptyQueueEvent.Set();
+
+                            // Wait for next event, or finish.
+                            if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
+                            {
+                                WaitHandle.WaitAny(waitHandlesForNextEvent);
+                            }
+
+                            _emptyQueueEvent.Reset();
+                        }
+                    } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+
+                    _emptyQueueEvent.Set();
                 }
             }
         }
