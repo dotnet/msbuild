@@ -2,18 +2,14 @@
 In the current effort to improve performance of MSBuild, we identified evaluation as one of the focus areas of this effort. Evaluation is the first step when loading or building, and it determines references, how projects are connected and what needs to be build. Because of this it runs in every MSBuild scenario, from solution load and design-time builds in Visual Studio, to up-to-date builds or full builds in VS or on the command line.
 
 ## Description
-Current performance state of evaluation is mostly unkown, as it is not measured in any ways by the team. As such, we are unsure which specific areas can be improve. The investigation about this is necessary so we can identify weaknesses, and possible fixes.
-
- - We could do profiling
- - Jit compilation of MSBuild itself. 
- - We could cache at eval
-
-Constraint - needs to work as it does today, but faster. We may be able to break some edge cases.
+Current performance state of evaluation is mostly unkown, we have a few measures but no easy way of accessing and assessing them. As such, we are unsure which specific areas can be improve. 
 
 ## Goals and Motivation
 We are trying to make evaluation phase of the build more performant, since it is almost always executed any performance gain becomes noticeable. A performant evaluation phase would decrease build times in general, in CI cases it frees up resources, and in individual cases it can increase dev-loop performance by making up-to-date and incremental builds go faster.
 
-In this moment we are still in investigation phase, the obejective is to add code markers, so we can idetentify low hanging fixes, and improvement areas when testing builds within PerfStar.
+In this moment we are still in investigation phase, the objective is to make the markers we have in code more accessible to the team, so we can idetentify low hanging fixes, and improvement areas when testing builds within PerfStar.
+
+Constraint - needs to work as it does today, but faster. We may be able to break some edge cases.
 
 ## Risks
 One of the big risks is accidentally changing the current behaviour of evaluation. One of the constraints of improvement is that evaluation has the same behavior, with the exception of edge cases where we can sometimes change it.
