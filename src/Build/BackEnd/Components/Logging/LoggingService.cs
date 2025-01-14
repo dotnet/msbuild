@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1398,37 +1398,22 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 var completeAdding = _loggingEventProcessingCancellation.Token;
                 WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEvent };
-                do
+                lock (_lockObject)
                 {
                     if (_eventQueue.TryDequeue(out object ev))
                     {
                         LoggingEventProcessor(ev);
-                        lock (_lockObject)
-                        {
-                            _dequeueEvent?.Set();
-                        }
+                        _dequeueEvent?.Set();
                     }
                     else
                     {
-                        lock (_lockObject)
-                        {
-                            _emptyQueueEvent?.Set();
-                        }
-                        // Wait for next event, or finish.
+                        _emptyQueueEvent?.Set();
                         if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
                         {
                             WaitHandle.WaitAny(waitHandlesForNextEvent);
                         }
-                        lock (_lockObject)
-                        {
-                            _emptyQueueEvent?.Reset();
-                        }
+                        _emptyQueueEvent?.Reset();
                     }
-                } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
-
-                lock (_lockObject)
-                {
-                    _emptyQueueEvent?.Set();
                 }
             }
         }
