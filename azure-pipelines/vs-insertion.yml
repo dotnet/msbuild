@@ -225,6 +225,16 @@ extends:
               $propsValue = $props -join ";"
               Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
               Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
+              
+              # autocomplete main
+              $autocomplete = "false"
+              if ("$(InsertTargetBranch)" -eq "main")
+              {
+                  $autocomplete = "true"
+              }
+              Write-Host "Setting AutoCompleteEnabled to '$autocomplete'"
+              Write-Host "##vso[task.setvariable variable=AutoCompleteEnabled]$($autocomplete)"
+
         - task: 1ES.PublishNuGet@1
           displayName: 'Push MSBuild CoreXT packages'
           condition: ${{ eq(parameters.SkipUploadingPackages, false) }}
@@ -268,6 +278,6 @@ extends:
             DefaultConfigValues: $(InsertConfigValues)
             InsertionReviewers: MSBuild,VS ProTools
             CustomScriptExecutionCommand: $(InsertCustomScriptExecutionCommand)
-            AutoCompletePR: true
+            AutoCompletePR: $(AutoCompleteEnabled)
             AutoCompleteMergeStrategy: Squash
             InsertionBuildPolicy: Request Perf DDRITs
