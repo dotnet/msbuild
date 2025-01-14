@@ -46,6 +46,7 @@ This doc focuses on a minimal investment path that would allow driving adoption 
 ### Non-Goals
 
 * Measuring and defining the perf impact, detecting the sources of it
+  This doc doesn't cover the perf measurement and analysis - see [the PerfStar one page for this topic](https://github.com/dotnet/msbuild/pull/11045/files#diff-dcbd46135c1492f7b8f0c1221118a6ec7c241b86e6493d5a93f2c2f83b50b7bfR21)
 * Providing additional helpful low-hanging-fruit checks
 
 ### Out of scope
