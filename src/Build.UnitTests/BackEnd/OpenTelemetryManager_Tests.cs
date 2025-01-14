@@ -19,12 +19,16 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         private readonly string? _originalMsBuildTelemetryOptOut;
         private readonly string? _originalSampleRateOverride;
 
+        private const string TelemetryFxOptoutEnvVarName = "MSBUILD_TELEMETRY_OPTOUT";
+        private const string DotnetOptOut = "DOTNET_CLI_TELEMETRY_OPTOUT";
+        private const string TelemetrySampleRateOverrideEnvVarName = "MSBUILD_TELEMETRY_SAMPLE_RATE";
+
         public OpenTelemetryManagerTests()
         {
             // Capture existing env vars
-            _originalDotnetOptOut = Environment.GetEnvironmentVariable(TelemetryConstants.DotnetOptOut);
-            _originalMsBuildTelemetryOptOut = Environment.GetEnvironmentVariable(TelemetryConstants.TelemetryFxOptoutEnvVarName);
-            _originalSampleRateOverride = Environment.GetEnvironmentVariable(TelemetryConstants.TelemetrySampleRateOverrideEnvVarName);
+            _originalDotnetOptOut = Environment.GetEnvironmentVariable(DotnetOptOut);
+            _originalMsBuildTelemetryOptOut = Environment.GetEnvironmentVariable(TelemetryFxOptoutEnvVarName);
+            _originalSampleRateOverride = Environment.GetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName);
 
             // Ensure a clean manager state before each test
             ResetManagerState();
@@ -33,19 +37,19 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         public void Dispose()
         {
             // Restore environment variables
-            Environment.SetEnvironmentVariable(TelemetryConstants.DotnetOptOut, _originalDotnetOptOut);
-            Environment.SetEnvironmentVariable(TelemetryConstants.TelemetryFxOptoutEnvVarName, _originalMsBuildTelemetryOptOut);
-            Environment.SetEnvironmentVariable(TelemetryConstants.TelemetrySampleRateOverrideEnvVarName, _originalSampleRateOverride);
+            Environment.SetEnvironmentVariable(DotnetOptOut, _originalDotnetOptOut);
+            Environment.SetEnvironmentVariable(TelemetryFxOptoutEnvVarName, _originalMsBuildTelemetryOptOut);
+            Environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, _originalSampleRateOverride);
 
             // Ensure manager is reset after each test
             ResetManagerState();
         }
 
         [Theory]
-        [InlineData(TelemetryConstants.DotnetOptOut, "true")]
-        [InlineData(TelemetryConstants.TelemetryFxOptoutEnvVarName, "true")]
-        [InlineData(TelemetryConstants.DotnetOptOut, "1")]
-        [InlineData(TelemetryConstants.TelemetryFxOptoutEnvVarName, "1")]
+        [InlineData(DotnetOptOut, "true")]
+        [InlineData(TelemetryFxOptoutEnvVarName, "true")]
+        [InlineData(DotnetOptOut, "1")]
+        [InlineData(TelemetryFxOptoutEnvVarName, "1")]
         public void Initialize_ShouldSetStateToOptOut_WhenOptOutEnvVarIsTrue(string optoutvar, string value)
         {
             // Arrange
@@ -65,11 +69,11 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         {
 
             // Clear any override that might have existed
-            Environment.SetEnvironmentVariable(TelemetryConstants.TelemetrySampleRateOverrideEnvVarName, null);
+            Environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, null);
 
             // Also ensure we are not opting out
-            Environment.SetEnvironmentVariable(TelemetryConstants.DotnetOptOut, "false");
-            Environment.SetEnvironmentVariable(TelemetryConstants.TelemetryFxOptoutEnvVarName, "false");
+            Environment.SetEnvironmentVariable(DotnetOptOut, "false");
+            Environment.SetEnvironmentVariable(TelemetryFxOptoutEnvVarName, "false");
 
             OpenTelemetryManager.Instance.Initialize(isStandalone: false);
 
@@ -86,9 +90,9 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         {
 
             // Arrange
-            Environment.SetEnvironmentVariable(TelemetryConstants.TelemetryFxOptoutEnvVarName, "false");
-            Environment.SetEnvironmentVariable(TelemetryConstants.DotnetOptOut, "false");
-            Environment.SetEnvironmentVariable(TelemetryConstants.TelemetrySampleRateOverrideEnvVarName, "1.0");
+            Environment.SetEnvironmentVariable(TelemetryFxOptoutEnvVarName, "false");
+            Environment.SetEnvironmentVariable(DotnetOptOut, "false");
+            Environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, "1.0");
 
             // Act
             OpenTelemetryManager.Instance.Initialize(isStandalone: standalone);
@@ -123,7 +127,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         public void Initialize_ShouldNoOp_WhenCalledMultipleTimes()
         {
             // Arrange
-            Environment.SetEnvironmentVariable(TelemetryConstants.DotnetOptOut, "true");
+            Environment.SetEnvironmentVariable(DotnetOptOut, "true");
 
             // Act #1
             OpenTelemetryManager.Instance.Initialize(isStandalone: true);
@@ -131,7 +135,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
 
             // Act #2
             // Try to re-initialize with different env var settings
-            Environment.SetEnvironmentVariable(TelemetryConstants.DotnetOptOut, null);
+            Environment.SetEnvironmentVariable(DotnetOptOut, null);
             OpenTelemetryManager.Instance.Initialize(isStandalone: true);
             var secondState = GetTelemetryState(OpenTelemetryManager.Instance);
 

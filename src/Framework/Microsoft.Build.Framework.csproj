@@ -26,10 +26,7 @@
     
     <!-- Telemetry in Framework-->
     <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector"/>
-    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions">
-      <!-- Give the client extensions package a custom alias to avoid VS Telemetry collisions. -->
-      <Aliases>clientext</Aliases>
-    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions"/>
     <PackageReference Include="OpenTelemetry" />
     <PackageReference Include="Microsoft.Extensions.Primitives" />
   </ItemGroup>

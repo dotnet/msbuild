@@ -1,10 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #if NETFRAMEWORK
-extern alias clientext;
-
-using clientext::Microsoft.VisualStudio.OpenTelemetry.ClientExtensions;
-using clientext::Microsoft.VisualStudio.OpenTelemetry.ClientExtensions.Exporters;
+using Microsoft.VisualStudio.OpenTelemetry.ClientExtensions;
+using Microsoft.VisualStudio.OpenTelemetry.ClientExtensions.Exporters;
 using Microsoft.VisualStudio.OpenTelemetry.Collector.Interfaces;
 using Microsoft.VisualStudio.OpenTelemetry.Collector.Settings;
 using OpenTelemetry;
@@ -194,16 +192,14 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Determines if the user has explicitly opted out of telemetry.
         /// </summary>
-        private bool IsOptOut() =>
-            IsEnvVarTrue(TelemetryConstants.TelemetryFxOptoutEnvVarName) ||
-            IsEnvVarTrue(TelemetryConstants.DotnetOptOut);
+        private bool IsOptOut() => Traits.Instance.FrameworkTelemetryOptOut || Traits.Instance.SdkTelemetryOptOut;
 
         /// <summary>
         /// Determines if telemetry should be initialized based on sampling and environment variable overrides.
         /// </summary>
         private bool IsSampled()
         {
-            double? overrideRate = ReadDoubleEnvVar(TelemetryConstants.TelemetrySampleRateOverrideEnvVarName);
+            double? overrideRate = Traits.Instance.TelemetrySampleRateOverride;
             if (overrideRate.HasValue)
             {
                 _sampleRate = overrideRate.Value;
@@ -216,30 +212,9 @@ namespace Microsoft.Build.Framework.Telemetry
 #endif
             }
 
-            // Simple random sampling, this method is called 
+            // Simple random sampling, this method is called once, no need to save the Random instance.
             Random random = new();
             return random.NextDouble() < _sampleRate;
-        }
-
-        /// <summary>
-        /// Parses a double environment variable, if present.
-        /// </summary>
-        private double? ReadDoubleEnvVar(string name)
-        {
-            string? sampleRateString =
-                Environment.GetEnvironmentVariable(name);
-            return double.TryParse(sampleRateString, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture.NumberFormat, out double result) ? result : null;
-        }
-
-        /// <summary>
-        /// Evaluates if an environment variable is set to "1" or "true".
-        /// </summary>
-        private bool IsEnvVarTrue(string name)
-        {
-            string? value = Environment.GetEnvironmentVariable(name);
-            return value != null &&
-                   (value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
-                    value.Equals("true", StringComparison.OrdinalIgnoreCase));
         }
     }
 }

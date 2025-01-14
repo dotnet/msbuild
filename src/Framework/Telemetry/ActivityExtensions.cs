@@ -1,12 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if NETFRAMEWORK
-extern alias clientext;   // for Microsoft.VisualStudio.OpenTelemetry.ClientExtensions
-#else
 using System.Security.Cryptography;
 using System.Text;
-#endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -65,15 +61,10 @@ namespace Microsoft.Build.Framework.Telemetry
         /// </summary>
         private static object GetHashed(object value)
         {
-#if NETFRAMEWORK
-            return new clientext::Microsoft.VisualStudio.Telemetry.TelemetryHashedProperty(value);
-#else
             return Sha256Hasher.Hash(value.ToString() ?? "");
-#endif
         }
 
         // https://github.com/dotnet/sdk/blob/8bd19a2390a6bba4aa80d1ac3b6c5385527cc311/src/Cli/Microsoft.DotNet.Cli.Utils/Sha256Hasher.cs + workaround for netstandard2.0
-#if NET || NETSTANDARD2_0_OR_GREATER
         private static class Sha256Hasher
         {
             /// <summary>
@@ -113,6 +104,5 @@ namespace Microsoft.Build.Framework.Telemetry
                 return Hash(text.ToUpperInvariant());
             }
         }
-#endif
     }
 }
