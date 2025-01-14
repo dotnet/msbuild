@@ -18,14 +18,14 @@ This document does not cover specific performance improvements, but rather outli
 
 ## Stakeholders
 
-    - Chet Hust (PM) - as a customer advocate
-    - David Kean - as a VS performance expert
+ - Chet Hust (PM) - as a customer advocate
+ - David Kean - as a VS performance expert
 
 ## Risks
 
-    - Performance improvements might not be as significant as expected.
-    - We can break existing functionality while making changes.
-    - Some ideas and performance measurement findings might need to be skipped due to technical limitations or complexity/improvements ratio.
+ - Performance improvements might not be as significant as expected.
+ - We can break existing functionality while making changes.
+ - Some ideas and performance measurement findings might need to be skipped due to technical limitations or complexity/improvements ratio.
 
 ## Cost
 
@@ -36,6 +36,6 @@ Our goal in this scope is to find small and medium size opprotunities (Achievabl
 
 ## Plan
     
-    - Collect data on the current performance bottlenecks.
-    - Identify opportunities for improvements.
-    - Implement improvements in time-boxed iterations.
+ - Collect data on the current performance bottlenecks.
+ - Identify opportunities for improvements.
+ - Implement improvements in time-boxed iterations.
