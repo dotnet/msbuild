@@ -1660,7 +1660,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
         }
 
-        [DotNetOnlyFact("The netfx bootstrap layout created with 'dotnet build' is incomplete")]
+        [Fact]
         /// <summary>
         /// https://github.com/dotnet/msbuild/issues/5334
         /// </summary>
