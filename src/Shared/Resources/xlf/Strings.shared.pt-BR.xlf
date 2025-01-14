@@ -127,7 +127,7 @@
       </trans-unit>
       <trans-unit id="Shared.FailedDeletingTempFile">
         <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
-        <target state="new">MSB5018: Failed to delete the temporary file "{0}". {1} {2}</target>
+        <target state="translated">MSB5018: falha ao excluir o arquivo temporário "{0}". {1} {2}</target>
         <note>{StrBegin="MSB5018: "}</note>
       </trans-unit>
       <trans-unit id="Shared.InvalidFilespecForTransform">
