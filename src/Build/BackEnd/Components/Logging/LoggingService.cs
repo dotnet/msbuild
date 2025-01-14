@@ -1417,7 +1417,16 @@ namespace Microsoft.Build.BackEnd.Logging
                             WaitHandle.WaitAny(waitHandlesForNextEvent);
                         }
 
-                        _emptyQueueEvent.Reset();
+                        try 
+                        {
+                            _emptyQueueEvent.Reset();
+                        }
+                        catch (IOException)
+                        {
+                            // The handle has been invalidated or closed
+                            // Since we're likely in shutdown, just continue
+                            continue;
+                        }
                     }
                 } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
