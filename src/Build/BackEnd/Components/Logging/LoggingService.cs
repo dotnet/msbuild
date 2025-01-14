@@ -1399,31 +1399,31 @@ namespace Microsoft.Build.BackEnd.Logging
                 var completeAdding = _loggingEventProcessingCancellation.Token;
                 WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEvent };
 
-                lock (_lockObject)
+                do
                 {
-                    do
+                    if (_eventQueue.TryDequeue(out object ev))
                     {
-                        if (_eventQueue.TryDequeue(out object ev))
+                        LoggingEventProcessor(ev);
+                        _dequeueEvent?.Set();
+                    }
+                    else
+                    {
+                        _emptyQueueEvent?.Set();
+
+                        // Wait for next event, or finish.
+                        if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
                         {
-                            LoggingEventProcessor(ev);
-                            _dequeueEvent.Set();
+                            WaitHandle.WaitAny(waitHandlesForNextEvent);
                         }
-                        else
+
+                        lock (_lockObject)
                         {
-                            _emptyQueueEvent.Set();
-
-                            // Wait for next event, or finish.
-                            if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
-                            {
-                                WaitHandle.WaitAny(waitHandlesForNextEvent);
-                            }
-
-                            _emptyQueueEvent.Reset();
+                            _emptyQueueEvent?.Reset();
                         }
-                    } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+                    }
+                } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
-                    _emptyQueueEvent.Set();
-                }
+                _emptyQueueEvent?.Set();
             }
         }
 
