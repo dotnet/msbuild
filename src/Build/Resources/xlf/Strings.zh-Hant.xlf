@@ -211,6 +211,16 @@
         <target state="translated">避免為 'CopyToOutputDirectory' 指定 'Always'，因為這可能會在建置期間導致不必要的複製作業。請使用 『PreserveNewest』 或 'IfDifferent' 元數據值，或將 'SkipUnchangedFilesOnCopyAlways' 属性設定為 true，以採用較有效的複製。</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_MessageFmt">
+        <source>Project {0} specifies 'TargetFramework(s)' property '{1}', while it's not SDK-style project. Those properties are not understood by legacy-style projects and have no impact.</source>
+        <target state="new">Project {0} specifies 'TargetFramework(s)' property '{1}', while it's not SDK-style project. Those properties are not understood by legacy-style projects and have no impact.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_Title">
+        <source>'TargetFramework' nor 'TargetFrameworks' property should not be specified in non-SDK style projects.</source>
+        <target state="new">'TargetFramework' nor 'TargetFrameworks' property should not be specified in non-SDK style projects.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">已存取屬性: '{0}'，但從未初始化。</target>
