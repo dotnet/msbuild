@@ -1389,7 +1389,6 @@ namespace Microsoft.Build.BackEnd.Logging
             _emptyQueueEvent = new ManualResetEvent(false);
             _enqueueEvent = new AutoResetEvent(false);
             _loggingEventProcessingCancellation = new CancellationTokenSource();
-
             _loggingEventProcessingThread = new Thread(LoggingEventProc);
             _loggingEventProcessingThread.Name = $"MSBuild LoggingService events queue pump: {this.GetHashCode()}";
             _loggingEventProcessingThread.IsBackground = true;
@@ -1399,41 +1398,40 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 var completeAdding = _loggingEventProcessingCancellation.Token;
                 WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEvent };
-
                 do
                 {
                     if (_eventQueue.TryDequeue(out object ev))
                     {
                         LoggingEventProcessor(ev);
-                        _dequeueEvent.Set();
+                        lock (_lockObject)
+                        {
+                            _dequeueEvent?.Set();
+                        }
                     }
                     else
                     {
-                        _emptyQueueEvent.Set();
-
+                        lock (_lockObject)
+                        {
+                            _emptyQueueEvent?.Set();
+                        }
                         // Wait for next event, or finish.
                         if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
                         {
                             WaitHandle.WaitAny(waitHandlesForNextEvent);
                         }
-
-                        try 
+                        lock (_lockObject)
                         {
-                            _emptyQueueEvent.Reset();
-                        }
-                        catch (IOException)
-                        {
-                            // The handle has been invalidated or closed
-                            // Since we're likely in shutdown, just continue
-                            continue;
+                            _emptyQueueEvent?.Reset();
                         }
                     }
                 } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
-                _emptyQueueEvent.Set();
+                lock (_lockObject)
+                {
+                    _emptyQueueEvent?.Set();
+                }
             }
         }
-
 
         /// <summary>
         /// Clean resources used for logging event processing queue.
