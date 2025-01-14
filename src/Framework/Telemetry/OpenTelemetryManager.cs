@@ -159,7 +159,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 .Build();
 
             _collector = OpenTelemetryCollectorProvider.CreateCollector(collectorSettings);
-            _collector.StartAsync();
+            _collector.StartAsync().GetAwaiter().GetResult();
 
             _telemetryState = TelemetryState.CollectorInitialized;
         }
@@ -183,6 +183,7 @@ namespace Microsoft.Build.Framework.Telemetry
             {
 #if NETFRAMEWORK
                 _tracerProvider?.Shutdown();
+                // Dispose stops the collector, with a drain timeout of 10s
                 _collector?.Dispose();
 #endif
                 _telemetryState = TelemetryState.Disposed;

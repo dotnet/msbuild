@@ -56,10 +56,9 @@
     <SystemThreadingTasksDataflowVersion>8.0.0</SystemThreadingTasksDataflowVersion>
     <SystemDiagnosticsDiagnosticSourceVersion>9.0.0</SystemDiagnosticsDiagnosticSourceVersion>
     <MicrosoftVisualStudioOpenTelemetryVersion>0.1.700-beta</MicrosoftVisualStudioOpenTelemetryVersion>
-    <OpenTelemetryVersion>1.10.0</OpenTelemetryVersion>
-    <SystemDiagnosticsDiagnosticSourceVersion>9.0.0</SystemDiagnosticsDiagnosticSourceVersion>
-    <MicrosoftBclAsyncInterfacesVersion>9.0.0</MicrosoftBclAsyncInterfacesVersion>
-    <MicrosoftExtensionsPrimitivesVersion>9.0.0</MicrosoftExtensionsPrimitivesVersion>
+    <OpenTelemetryVersion>1.9.0</OpenTelemetryVersion>
+    <MicrosoftBclAsyncInterfacesVersion>8.0.0</MicrosoftBclAsyncInterfacesVersion>
+    <MicrosoftExtensionsPrimitivesVersion>8.0.0</MicrosoftExtensionsPrimitivesVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
