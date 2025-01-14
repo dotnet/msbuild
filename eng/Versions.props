@@ -10,7 +10,6 @@
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
     <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
-    <SystemDiagnosticsDiagnosticsSourceVersion>9.0.0</SystemDiagnosticsDiagnosticsSourceVersion>
   </PropertyGroup>
   <!-- Repo Toolset Features -->
   <PropertyGroup>
@@ -56,10 +55,10 @@
     <SystemThreadingChannelsVersion>8.0.0</SystemThreadingChannelsVersion>
     <SystemThreadingTasksDataflowVersion>8.0.0</SystemThreadingTasksDataflowVersion>
     <MicrosoftVisualStudioOpenTelemetryVersion>0.1.700-beta</MicrosoftVisualStudioOpenTelemetryVersion>
-    <OpenTelemetryVersion>1.10.0</OpenTelemetryVersion>
+    <OpenTelemetryVersion>1.9.0</OpenTelemetryVersion>
     <SystemDiagnosticsDiagnosticSourceVersion>9.0.0</SystemDiagnosticsDiagnosticSourceVersion>
-    <MicrosoftBclAsyncInterfacesVersion>9.0.0</MicrosoftBclAsyncInterfacesVersion>
-    <MicrosoftExtensionsPrimitivesVersion>9.0.0</MicrosoftExtensionsPrimitivesVersion>
+    <MicrosoftBclAsyncInterfacesVersion>8.0.0</MicrosoftBclAsyncInterfacesVersion>
+    <MicrosoftExtensionsPrimitivesVersion>8.0.0</MicrosoftExtensionsPrimitivesVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
