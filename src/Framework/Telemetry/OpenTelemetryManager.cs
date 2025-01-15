@@ -141,9 +141,8 @@ namespace Microsoft.Build.Framework.Telemetry
 
             TracerProviderBuilder tracerProviderBuilder = Sdk
                 .CreateTracerProviderBuilder()
-                // register all ActivitySources that should be listened to
-                .AddSource(TelemetryConstants.DefaultActivitySourceNamespace)
-                .AddVisualStudioDefaultTraceExporter(exporterSettings);
+                // this adds listeners to ActivitySources with the prefix "Microsoft.VisualStudio.OpenTelemetry."
+                                .AddVisualStudioDefaultTraceExporter(exporterSettings);
 
             _tracerProvider = tracerProviderBuilder.Build();
             _telemetryState = TelemetryState.ExporterInitialized;
