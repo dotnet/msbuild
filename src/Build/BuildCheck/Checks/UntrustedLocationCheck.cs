@@ -53,18 +53,34 @@ internal sealed class UntrustedLocationCheck : Check
     {
         public static readonly string Downloads = GetDownloadsPath();
 
+        /// <summary>
+        /// Returns the current Downloads location. Makes sure the path doesn't end with directory separator
+        ///   (to prevent false negatives during matching)
+        /// </summary>
         private static string GetDownloadsPath()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                try
+                // Unsupported on pre-vista
+                if (Environment.OSVersion.Version.Major >= 6)
                 {
-                    // based on doc - a final slash is not added
-                    return SHGetKnownFolderPath(new Guid("374DE290-123F-4565-9164-39C4925E467B"), 0, IntPtr.Zero);
+                    try
+                    {
+                        // based on doc - a final slash is not added
+                        return SHGetKnownFolderPath(new Guid("374DE290-123F-4565-9164-39C4925E467B"), 0, IntPtr.Zero);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
-                catch
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                string? locationFromEnv = Environment.GetEnvironmentVariable("XDG_DOWNLOAD_DIR");
+                if (locationFromEnv != null && Directory.Exists(locationFromEnv))
                 {
-                    // ignored
+                    return locationFromEnv.TrimEnd(['\\','/']);
                 }
             }
 
