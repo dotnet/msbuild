@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks
         private readonly Dictionary<string, AssemblyNameExtension> _externallyResolvedImmutableFiles = new Dictionary<string, AssemblyNameExtension>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>The table of remapped assemblies. Used for Unification.</summary>
-        private IEnumerable<DependentAssembly> _remappedAssemblies = Enumerable.Empty<DependentAssembly>();
+        private IEnumerable<DependentAssembly> _remappedAssemblies = [];
 
         /// <summary>If true, then search for dependencies.</summary>
         private readonly bool _findDependencies;
@@ -817,7 +817,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
             position += component.Length + 1;
-            int nextDelimiter = fusionName.IndexOfAny(new[] { ',', ' ' }, position);
+            int nextDelimiter = fusionName.IndexOfAny([',', ' '], position);
             if (nextDelimiter == -1)
             {
                 value = fusionName.Substring(position);
@@ -971,7 +971,8 @@ namespace Microsoft.Build.Tasks
                     // Is there a candidate satellite in that folder?
                     string cultureName = Path.GetFileName(subDirectory);
 
-                    if (CultureInfoCache.IsValidCultureString(cultureName))
+                    // Custom or unknown cultures can be met as well
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14) || CultureInfoCache.IsValidCultureString(cultureName))
                     {
                         string satelliteAssembly = Path.Combine(subDirectory, satelliteFilename);
                         if (_fileExists(satelliteAssembly))
@@ -1240,7 +1241,7 @@ namespace Microsoft.Build.Tasks
             if (!parentReferencesAdded.Contains(parentReferenceFolder) && !parentReferenceResolvedFromGAC && !parentReferenceResolvedFromAssemblyFolders)
             {
                 parentReferencesAdded.Add(parentReferenceFolder);
-                parentReferenceFolders.Add(new (Directory: parentReferenceFolder, ParentAssembly: parentReference.FullPath));
+                parentReferenceFolders.Add(new(Directory: parentReferenceFolder, ParentAssembly: parentReference.FullPath));
             }
         }
 
@@ -1290,7 +1291,7 @@ namespace Microsoft.Build.Tasks
             // If a reference has the SDKName metadata on it then we will only search using a single resolver, that is the InstalledSDKResolver.
             if (reference.SDKName.Length > 0)
             {
-                jaggedResolvers.Add(new Resolver[] { new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion) });
+                jaggedResolvers.Add([new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion)]);
             }
             else
             {
@@ -2541,8 +2542,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool CompareAssembliesIgnoringVersion(AssemblyName a, AssemblyName b)
         {
-            ErrorUtilities.VerifyThrowInternalNull(a, nameof(a));
-            ErrorUtilities.VerifyThrowInternalNull(b, nameof(b));
+            ErrorUtilities.VerifyThrowInternalNull(a);
+            ErrorUtilities.VerifyThrowInternalNull(b);
 
             if (a == b)
             {

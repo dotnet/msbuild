@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -32,7 +32,9 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        // used by test to reset regexes
+        /// <summary>
+        /// Test only: repopulate lazy wildcard regexes from the environment.
+        /// </summary>
         internal static void CaptureLazyWildcardRegexes()
         {
             s_lazyWildCardExpansionRegexes = PopulateRegexFromEnvironment();
@@ -185,7 +187,7 @@ namespace Microsoft.Build.Internal
         {
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, nameof(filespecEscaped));
 
-            string[] fileList = Array.Empty<string>();
+            string[] fileList = [];
 
             // Used to properly detect and log drive enumerating wildcards when applicable.
             string excludeFileSpec = string.Empty;
@@ -200,7 +202,7 @@ namespace Microsoft.Build.Internal
             if (filespecMatchesLazyWildcard || (filespecHasNoWildCards && excludeSpecsAreEmpty))
             {
                 // Just return the original string.
-                fileList = new string[] { returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped) };
+                fileList = [returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped)];
             }
             else
             {
@@ -282,7 +284,10 @@ namespace Microsoft.Build.Internal
                             break;
 
                         default:
-                            throw new InternalErrorException($"Logging type {loggingMechanism.GetType()} is not understood by {nameof(GetFileList)}.");
+                            throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "UnknownLoggingType",
+                                loggingMechanism.GetType(),
+                                nameof(GetFileList)));
                     }
                 }
 
@@ -320,7 +325,10 @@ namespace Microsoft.Build.Internal
                             break;
 
                         default:
-                            throw new InternalErrorException($"Logging type {loggingMechanism.GetType()} is not understood by {nameof(GetFileList)}.");
+                            throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "UnknownLoggingType",
+                                loggingMechanism.GetType(),
+                                nameof(GetFileList)));
                     }
                 }
                 else
@@ -330,7 +338,30 @@ namespace Microsoft.Build.Internal
                     // as a relative path, we will get back a bunch of relative paths.
                     // If the filespec started out as an absolute path, we will get
                     // back a bunch of absolute paths
-                    (fileList, _, _) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+                    (fileList, _, _, string globFailure) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+
+                    // log globing failure with the present logging mechanism
+                    if (globFailure != null)
+                    {
+                        switch (loggingMechanism)
+                        {
+                            case TargetLoggingContext targetLoggingContext:
+                                targetLoggingContext.LogCommentFromText(MessageImportance.Low, globFailure);
+                                break;
+                            case ILoggingService loggingService:
+                                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, globFailure);
+                                break;
+                            case EvaluationLoggingContext evaluationLoggingContext:
+                                evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, globFailure);
+                                break;
+                            default:
+                                throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                    "UnknownLoggingType",
+                                    loggingMechanism.GetType(),
+                                    nameof(GetFileList)));
+                        }
+                    }
+
 
                     ErrorUtilities.VerifyThrow(fileList != null, "We must have a list of files here, even if it's empty.");
 

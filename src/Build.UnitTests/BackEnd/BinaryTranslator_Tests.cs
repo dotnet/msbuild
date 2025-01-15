@@ -258,7 +258,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [MemberData(nameof(GetBuildExceptionsAsTestData))]
         public void TestSerializationOfBuildExceptions(Type exceptionType)
         {
-            Exception e = (Exception)Activator.CreateInstance(exceptionType, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.CreateInstance | BindingFlags.Instance, null, new object[]{"msg", new GenericBuildTransferredException() }, System.Globalization.CultureInfo.CurrentCulture);
+            Exception e = (Exception)Activator.CreateInstance(
+                exceptionType,
+                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.CreateInstance | BindingFlags.Instance,
+                null,
+                new object[] { "msg", new GenericBuildTransferredException() },
+                System.Globalization.CultureInfo.CurrentCulture);
             Exception remote;
             try
             {

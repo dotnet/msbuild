@@ -9,14 +9,9 @@
 //  3. Remove the FilePath and receive only the text
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 
@@ -30,11 +25,11 @@ internal partial class EditorConfigFile
 
 #if NETCOREAPP
 
-[GeneratedRegex(s_sectionMatcherPattern)]
-private static partial Regex GetSectionMatcherRegex();
+    [GeneratedRegex(s_sectionMatcherPattern)]
+    private static partial Regex GetSectionMatcherRegex();
 
-[GeneratedRegex(s_propertyMatcherPattern)]
-private static partial Regex GetPropertyMatcherRegex();
+    [GeneratedRegex(s_propertyMatcherPattern)]
+    private static partial Regex GetPropertyMatcherRegex();
 
 #else
     private static readonly Regex s_sectionMatcher = new Regex(s_sectionMatcherPattern, RegexOptions.Compiled);
@@ -81,9 +76,9 @@ private static partial Regex GetPropertyMatcherRegex();
         // dictionary, but we also use a case-insensitive key comparer when doing lookups
         var activeSectionProperties = ImmutableDictionary.CreateBuilder<string, string>(StringComparer.OrdinalIgnoreCase);
         string activeSectionName = "";
-        var lines = string.IsNullOrEmpty(text) ? Array.Empty<string>() : text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+        var lines = string.IsNullOrEmpty(text) ? [] : text.Split(["\r\n", "\n"], StringSplitOptions.None);
 
-        foreach(var line in lines)
+        foreach (var line in lines)
         {
             if (string.IsNullOrWhiteSpace(line))
             {
@@ -177,7 +172,7 @@ private static partial Regex GetPropertyMatcherRegex();
 
         /// <summary>
         /// Keys and values for this section. All keys are lower-cased according to the
-        /// EditorConfig specification and keys are compared case-insensitively. 
+        /// EditorConfig specification and keys are compared case-insensitively.
         /// </summary>
         public ImmutableDictionary<string, string> Properties { get; }
     }

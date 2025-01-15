@@ -303,7 +303,7 @@ namespace Microsoft.Build.Framework
                 // By doing this, we no longer need to transmit properties using this message because they've already
                 // been transmitted as part of the BuildRequestConfiguration.
                 return properties ?? (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
-                    ? Enumerable.Empty<DictionaryEntry>()
+                    ? (DictionaryEntry[])[]
                     : null);
             }
         }
@@ -329,13 +329,13 @@ namespace Microsoft.Build.Framework
                 // has likely not loaded this project, and therefore the live items would not be available to them, which is
                 // the same as the current functionality.
                 return items ?? (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
-                    ? Enumerable.Empty<DictionaryEntry>()
+                    ? (DictionaryEntry[])[]
                     : null);
             }
         }
 
         // Following 3 properties are intended only for internal transfer - to properly communicate the warn as error/msg
-        //  from the worker node, to the main node - that may be producing the buildcheck diagnostics.
+        //  from the worker node, to the main node.
         // They are not going to be in a binlog (at least not as of now).
 
         internal ISet<string>? WarningsAsErrors { get; set; }

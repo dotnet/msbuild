@@ -119,8 +119,8 @@ namespace Microsoft.Build.Internal
 
         public virtual int[] RetrieveHandshakeComponents()
         {
-            return new int[]
-            {
+            return
+            [
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(options),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor),
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Internal
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId)
-            };
+            ];
         }
 
         public virtual string GetKey() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}".ToString(CultureInfo.InvariantCulture);
@@ -152,15 +152,15 @@ namespace Microsoft.Build.Internal
 
         public override int[] RetrieveHandshakeComponents()
         {
-            return new int[]
-            {
+            return
+            [
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(options),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
-            };
+            ];
         }
 
         public override string GetKey()

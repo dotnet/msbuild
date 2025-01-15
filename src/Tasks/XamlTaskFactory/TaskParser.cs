@@ -89,8 +89,8 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public bool Parse(string contentOrFile, string desiredRule)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(contentOrFile, nameof(contentOrFile));
-            ErrorUtilities.VerifyThrowArgumentLength(desiredRule, nameof(desiredRule));
+            ErrorUtilities.VerifyThrowArgumentLength(contentOrFile);
+            ErrorUtilities.VerifyThrowArgumentLength(desiredRule);
 
             bool parseSuccessful = ParseAsContentOrFile(contentOrFile, desiredRule);
             if (!parseSuccessful)
@@ -186,8 +186,8 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         internal bool ParseXamlDocument(TextReader reader, string desiredRule)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(reader, nameof(reader));
-            ErrorUtilities.VerifyThrowArgumentLength(desiredRule, nameof(desiredRule));
+            ErrorUtilities.VerifyThrowArgumentNull(reader);
+            ErrorUtilities.VerifyThrowArgumentLength(desiredRule);
 
             object rootObject = XamlServices.Load(reader);
             if (rootObject != null)

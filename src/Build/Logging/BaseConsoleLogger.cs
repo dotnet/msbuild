@@ -964,7 +964,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal virtual bool ApplyParameter(string parameterName, string parameterValue)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
+            ErrorUtilities.VerifyThrowArgumentNull(parameterName);
 
             switch (parameterName.ToUpperInvariant())
             {

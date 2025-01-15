@@ -129,7 +129,7 @@ namespace Microsoft.Build.Evaluation
     /// </remarks>
     /// <typeparam name="P">Type of the properties used.</typeparam>
     /// <typeparam name="I">Type of the items used.</typeparam>
-    internal class Expander<P, I>
+    internal partial class Expander<P, I>
         where P : class, IProperty
         where I : class, IItem
     {
@@ -493,7 +493,7 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, _loggingContext);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -514,7 +514,7 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             return PropertyExpander<P>.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -562,7 +562,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -636,7 +636,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             return ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, expression, _items, itemFactory, options, includeNullItems, out isTransformExpression, elementLocation);
         }
@@ -952,7 +952,7 @@ namespace Microsoft.Build.Evaluation
                         // if there are no item vectors in the string
                         // run a simpler Regex to find item metadata references
                         MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
-                        result = RegularExpressions.ItemMetadataPattern.Value.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                        result = RegularExpressions.ItemMetadataRegex.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
                     }
                     else
                     {
@@ -983,7 +983,7 @@ namespace Microsoft.Build.Evaluation
                                 // Extract the part of the expression that appears before the item vector expression
                                 // e.g. the ABC in ABC@(foo->'%(FullPath)')
                                 string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
-                                string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                                string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
 
                                 // Append the metadata replacement
                                 finalResultBuilder.Append(replacementResult);
@@ -991,7 +991,7 @@ namespace Microsoft.Build.Evaluation
                                 // Expand any metadata that appears in the item vector expression's separator
                                 if (itemVectorExpressions[n].Separator != null)
                                 {
-                                    vectorExpression = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
+                                    vectorExpression = RegularExpressions.NonTransformItemMetadataRegex.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
                                 }
 
                                 // Append the item vector expression as is
@@ -1008,7 +1008,7 @@ namespace Microsoft.Build.Evaluation
                         if (start < expression.Length)
                         {
                             string subExpressionToReplaceIn = expression.Substring(start);
-                            string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                            string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
 
                             finalResultBuilder.Append(replacementResult);
                         }
@@ -2152,7 +2152,7 @@ namespace Microsoft.Build.Evaluation
                     if (functionName == null)
                     {
                         functionName = "ExpandQuotedExpressionFunction";
-                        arguments = new string[] { function };
+                        arguments = [function];
                     }
                     else if (argumentsExpression != null)
                     {
@@ -2719,7 +2719,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             matchEvaluator = new MetadataMatchEvaluator(item.Key, item.Value, elementLocation);
 
-                            include = RegularExpressions.ItemMetadataPattern.Value.Replace(arguments[0], matchEvaluator.GetMetadataValueFromMatch);
+                            include = RegularExpressions.ItemMetadataRegex.Replace(arguments[0], matchEvaluator.GetMetadataValueFromMatch);
                         }
 
                         // Include may be empty. Historically we have created items with empty include
@@ -3086,13 +3086,19 @@ namespace Microsoft.Build.Evaluation
         /// Regular expressions used by the expander.
         /// The expander currently uses regular expressions rather than a parser to do its work.
         /// </summary>
-        private static class RegularExpressions
+        private static partial class RegularExpressions
         {
             /**************************************************************************************************************************
             * WARNING: The regular expressions below MUST be kept in sync with the expressions in the ProjectWriter class -- if the
             * description of an item vector changes, the expressions must be updated in both places.
             *************************************************************************************************************************/
 
+
+
+#if NET7_0_OR_GREATER
+            [GeneratedRegex(ItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
+            internal static partial Regex ItemMetadataPattern();
+#else
             /// <summary>
             /// Regular expression used to match item metadata references embedded in strings.
             /// For example, %(Compile.DependsOn) or %(DependsOn).
@@ -3100,10 +3106,23 @@ namespace Microsoft.Build.Evaluation
             internal static readonly Lazy<Regex> ItemMetadataPattern = new Lazy<Regex>(
                 () => new Regex(ItemMetadataSpecification,
                     RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+#endif
 
-            /// <summary>
-            /// Name of the group matching the "name" of a metadatum.
-            /// </summary>
+            internal static Regex ItemMetadataRegex
+            {
+                get
+                {
+#if NET7_0_OR_GREATER
+                    return ItemMetadataPattern();
+#else
+                    return ItemMetadataPattern.Value;
+#endif
+                }
+            }
+
+                /// <summary>
+                /// Name of the group matching the "name" of a metadatum.
+                /// </summary>
             internal const string NameGroup = "NAME";
 
             /// <summary>
@@ -3116,18 +3135,35 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal const string ItemTypeGroup = "ITEM_TYPE";
 
+            internal const string NonTransformItemMetadataSpecification = @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
+                                                                ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" +
+                                                                ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" +
+                                                                ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
+                                                                ItemVectorWithTransformRHS + @"))";
+
+#if NET7_0_OR_GREATER
+            [GeneratedRegex(NonTransformItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
+            internal static partial Regex NonTransformItemMetadataPattern();
+#else
             /// <summary>
             /// regular expression used to match item metadata references outside of item vector transforms.
             /// </summary>
             /// <remarks>PERF WARNING: this Regex is complex and tends to run slowly.</remarks>
             internal static readonly Lazy<Regex> NonTransformItemMetadataPattern = new Lazy<Regex>(
-                () => new Regex(
-                    @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
-                    ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" +
-                    ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" +
-                    ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
-                    ItemVectorWithTransformRHS + @"))",
-                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+                () => new Regex(NonTransformItemMetadataSpecification,
+                                RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+#endif
+            internal static Regex NonTransformItemMetadataRegex
+            {
+                get
+                {
+#if NET7_0_OR_GREATER
+                    return NonTransformItemMetadataPattern();
+#else
+                    return NonTransformItemMetadataPattern.Value;
+#endif
+                }
+            }
 
             /// <summary>
             /// Complete description of an item metadata reference, including the optional qualifying item type.
@@ -3283,7 +3319,7 @@ namespace Microsoft.Build.Evaluation
                 _methodMethodName = methodName;
                 if (arguments == null)
                 {
-                    _arguments = Array.Empty<string>();
+                    _arguments = [];
                 }
                 else
                 {
@@ -3525,10 +3561,13 @@ namespace Microsoft.Build.Evaluation
                     if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", _methodMethodName, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", _methodMethodName, StringComparison.OrdinalIgnoreCase)))
                     {
                         // Support comparison when the lhs is an integer
-                        if (IsFloatingPointRepresentation(args[0]) && !IsFloatingPointRepresentation(objectInstance))
+                        if (IsFloatingPointRepresentation(args[0]))
                         {
-                            objectInstance = Convert.ChangeType(objectInstance, typeof(double), CultureInfo.InvariantCulture);
-                            _receiverType = objectInstance.GetType();
+                            if (double.TryParse(objectInstance.ToString(), NumberStyles.Number | NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out double result))
+                            {
+                                objectInstance = result;
+                                _receiverType = objectInstance.GetType();
+                            }
                         }
 
                         // change the type of the final unescaped string into the destination
@@ -3545,11 +3584,7 @@ namespace Microsoft.Build.Evaluation
                             // include $(MSBuildThisFileDirectory) as a parameter.
                             string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
-                            args = new[]
-                            {
-                                args[0],
-                                startingDirectory,
-                            };
+                            args = [args[0], startingDirectory];
                         }
                     }
 
@@ -3597,8 +3632,17 @@ namespace Microsoft.Build.Evaluation
                             // otherwise there is the potential of running a function twice!
                             try
                             {
-                                // First use InvokeMember using the standard binder - this will match and coerce as needed
-                                functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                // If there are any out parameters, try to figure out their type and create defaults for them as appropriate before calling the method.
+                                if (args.Any(a => "out _".Equals(a)))
+                                {
+                                    IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
+                                    functionResult = GetMethodResult(objectInstance, methods, args, 0);
+                                }
+                                else
+                                {
+                                    // If there are no out parameters, use InvokeMember using the standard binder - this will match and coerce as needed
+                                    functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                }
                             }
                             // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
                             // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coercion is possible, so throw.
@@ -3692,6 +3736,48 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return false;
+            }
+
+            private object GetMethodResult(object objectInstance, IEnumerable<MethodInfo> methods, object[] args, int index)
+            {
+                for (int i = index; i < args.Length; i++)
+                {
+                    if (args[i].Equals("out _"))
+                    {
+                        object toReturn = null;
+                        foreach (MethodInfo method in methods)
+                        {
+                            Type t = method.GetParameters()[i].ParameterType;
+                            args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
+                            object currentReturnValue = GetMethodResult(objectInstance, methods, args, i + 1);
+                            if (currentReturnValue is not null)
+                            {
+                                if (toReturn is null)
+                                {
+                                    toReturn = currentReturnValue;
+                                }
+                                else if (!toReturn.Equals(currentReturnValue))
+                                {
+                                    // There were multiple methods that seemed viable and gave different results. We can't differentiate between them so throw.
+                                    ErrorUtilities.ThrowArgument("CouldNotDifferentiateBetweenCompatibleMethods", _methodMethodName, args.Length);
+                                    return null;
+                                }
+                            }
+                        }
+
+                        return toReturn;
+                    }
+                }
+
+                try
+                {
+                    return _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture) ?? "null";
+                }
+                catch (Exception)
+                {
+                    // This isn't a viable option, but perhaps another set of parameters will work.
+                    return null;
+                }
             }
 
             /// <summary>
@@ -5154,7 +5240,7 @@ namespace Microsoft.Build.Evaluation
                 // If there are no arguments, then just create an empty array
                 if (String.IsNullOrEmpty(argumentsContent))
                 {
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = [];
                 }
                 else
                 {
@@ -5228,7 +5314,7 @@ namespace Microsoft.Build.Evaluation
                     // It may be that there are '()' but no actual arguments content
                     if (argumentStartIndex == expressionFunction.Length - 1)
                     {
-                        functionArguments = Array.Empty<string>();
+                        functionArguments = [];
                     }
                     else
                     {
@@ -5238,7 +5324,7 @@ namespace Microsoft.Build.Evaluation
                         // If there are no arguments, then just create an empty array
                         if (string.IsNullOrEmpty(argumentsContent))
                         {
-                            functionArguments = Array.Empty<string>();
+                            functionArguments = [];
                         }
                         else
                         {
@@ -5261,7 +5347,7 @@ namespace Microsoft.Build.Evaluation
                         nextMethodIndex = indexerIndex;
                     }
 
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = [];
 
                     if (nextMethodIndex > 0)
                     {
