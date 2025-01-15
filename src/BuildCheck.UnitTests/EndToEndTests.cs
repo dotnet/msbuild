@@ -401,6 +401,37 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    [Fact]
+    public void TFMinNonSdkCheckTest()
+    {
+        string content = """
+                <Project ToolsVersion="msbuilddefaulttoolsversion">
+                    <PropertyGroup>
+                      <TargetFramework>net472</TargetFramework>
+                    </PropertyGroup>
+                    <Target Name="Build">
+                        <Message Text="Build done"/>
+                    </Target>
+                </Project>
+                """;
+
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+
+        workFolder.CreateFile("testproj.proj", content);
+
+        _env.SetCurrentDirectory(workFolder.Path);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue();
+
+        string expectedDiagnostic = "warning BC0108: .* specifies 'TargetFramework\\(s\\)' property";
+        Regex.Matches(output, expectedDiagnostic).Count.ShouldBe(2);
+
+        GetWarningsCount(output).ShouldBe(1);
+    }
+
 
     [Fact]
     public void ConfigChangeReflectedOnReuse()
