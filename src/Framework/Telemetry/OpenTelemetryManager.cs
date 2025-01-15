@@ -187,9 +187,6 @@ namespace Microsoft.Build.Framework.Telemetry
                 _collector?.Dispose();
 #endif
                 _telemetryState = TelemetryState.Disposed;
-
-                // testing
-                throw new NotImplementedException("Collector dispose happened!");
             }
         }
 
