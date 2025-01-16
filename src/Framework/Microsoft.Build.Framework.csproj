@@ -28,7 +28,6 @@
     <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector"/>
     <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions"/>
     <PackageReference Include="OpenTelemetry" />
-    <PackageReference Include="Microsoft.Extensions.Primitives" />
   </ItemGroup>
   
   <!-- Framework and standard don't have DiagnosticSource. -->
