@@ -66,7 +66,8 @@ internal sealed class UntrustedLocationCheck : Check
                 {
                     try
                     {
-                        // based on doc - a final slash is not added
+                        // based on doc (https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetknownfolderpath)
+                        //  - a final slash is not added
                         return SHGetKnownFolderPath(new Guid("374DE290-123F-4565-9164-39C4925E467B"), 0, IntPtr.Zero);
                     }
                     catch
