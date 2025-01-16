@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
@@ -11,6 +11,7 @@ using Shouldly;
 
 using Xunit;
 using Xunit.Abstractions;
+using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 
 namespace Microsoft.Build.Engine.UnitTests.Evaluation
 {
@@ -25,7 +26,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         [Fact]
         public void TryConvertToIntGivenNull()
         {
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToInt(null, out int actual).ShouldBeFalse();
+            ParseArgs.TryConvertToInt(null, out int actual).ShouldBeFalse();
             actual.ShouldBe(0);
         }
 
@@ -33,7 +34,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToIntGivenDouble()
         {
             const double value = 10.0;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToInt(value, out int actual).ShouldBeTrue();
+            ParseArgs.TryConvertToInt(value, out int actual).ShouldBeTrue();
             actual.ShouldBe(10);
         }
 
@@ -41,7 +42,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToIntGivenLong()
         {
             const long value = 10;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToInt(value, out int actual).ShouldBeTrue();
+            ParseArgs.TryConvertToInt(value, out int actual).ShouldBeTrue();
             actual.ShouldBe(10);
         }
 
@@ -49,7 +50,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToIntGivenInt()
         {
             const int value = 10;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToInt(value, out int actual).ShouldBeTrue();
+            ParseArgs.TryConvertToInt(value, out int actual).ShouldBeTrue();
             actual.ShouldBe(10);
         }
 
@@ -57,7 +58,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToIntGivenString()
         {
             const string value = "10";
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToInt(value, out int actual).ShouldBeTrue();
+            ParseArgs.TryConvertToInt(value, out int actual).ShouldBeTrue();
             actual.ShouldBe(10);
         }
 
@@ -66,7 +67,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         {
             const int expected = int.MinValue;
             const double value = expected;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToInt(value, out int actual).ShouldBeTrue();
+            ParseArgs.TryConvertToInt(value, out int actual).ShouldBeTrue();
             actual.ShouldBe(expected);
         }
 
@@ -75,7 +76,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         {
             const int expected = int.MaxValue;
             const double value = expected;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToInt(value, out int actual).ShouldBeTrue();
+            ParseArgs.TryConvertToInt(value, out int actual).ShouldBeTrue();
             actual.ShouldBe(expected);
         }
 
@@ -83,7 +84,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToIntGivenDoubleWithLessThanIntMinValue()
         {
             const double value = int.MinValue - 1.0;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToInt(value, out int actual).ShouldBeFalse();
+            ParseArgs.TryConvertToInt(value, out int actual).ShouldBeFalse();
             actual.ShouldBe(0);
         }
 
@@ -91,7 +92,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToIntGivenDoubleWithGreaterThanIntMaxValue()
         {
             const double value = int.MaxValue + 1.0;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToInt(value, out int actual).ShouldBeFalse();
+            ParseArgs.TryConvertToInt(value, out int actual).ShouldBeFalse();
             actual.ShouldBe(0);
         }
 
@@ -99,7 +100,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToIntGivenLongWithGreaterThanIntMaxValue()
         {
             const long value = int.MaxValue + 1L;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToInt(value, out int actual).ShouldBeFalse();
+            ParseArgs.TryConvertToInt(value, out int actual).ShouldBeFalse();
             actual.ShouldBe(0);
         }
 
@@ -108,7 +109,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         [Fact]
         public void TryConvertToLongGivenNull()
         {
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong(null, out long actual).ShouldBeFalse();
+            ParseArgs.TryConvertToLong(null, out long actual).ShouldBeFalse();
             actual.ShouldBe(0);
         }
 
@@ -116,7 +117,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToLongGivenDouble()
         {
             const double value = 10.0;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong(value, out long actual).ShouldBeTrue();
+            ParseArgs.TryConvertToLong(value, out long actual).ShouldBeTrue();
             actual.ShouldBe(10);
         }
 
@@ -124,7 +125,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToLongGivenLong()
         {
             const long value = 10;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong(value, out long actual).ShouldBeTrue();
+            ParseArgs.TryConvertToLong(value, out long actual).ShouldBeTrue();
             actual.ShouldBe(10);
         }
 
@@ -132,7 +133,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToLongGivenInt()
         {
             const int value = 10;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong(value, out long actual).ShouldBeTrue();
+            ParseArgs.TryConvertToLong(value, out long actual).ShouldBeTrue();
             actual.ShouldBe(10);
         }
 
@@ -140,7 +141,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToLongGivenString()
         {
             const string value = "10";
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong(value, out long actual).ShouldBeTrue();
+            ParseArgs.TryConvertToLong(value, out long actual).ShouldBeTrue();
             actual.ShouldBe(10);
         }
 
@@ -149,7 +150,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         {
             const long expected = long.MinValue;
             const double value = expected;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong(value, out long actual).ShouldBeTrue();
+            ParseArgs.TryConvertToLong(value, out long actual).ShouldBeTrue();
             actual.ShouldBe(expected);
         }
 
@@ -159,14 +160,14 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             // An OverflowException should not be thrown from TryConvertToLong().
             // Convert.ToInt64(double) has a defect and will throw an OverflowException
             // for values >= (long.MaxValue - 511) and <= long.MaxValue.
-            _ = Should.NotThrow(() => Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong((double)long.MaxValue, out _));
+            _ = Should.NotThrow(() => ParseArgs.TryConvertToLong((double)long.MaxValue, out _));
         }
 
         [WindowsFullFrameworkOnlyFact]
         public void TryConvertToLongGivenDoubleWithLongMaxValueFramework()
         {
             const long longMaxValue = long.MaxValue;
-            bool result = Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong((double)longMaxValue, out long actual);
+            bool result = ParseArgs.TryConvertToLong((double)longMaxValue, out long actual);
 
             // Because of loss of precision, long.MaxValue will not 'round trip' from long to double to long.
             result.ShouldBeFalse();
@@ -177,7 +178,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToLongGivenDoubleWithLongMaxValueDotNet()
         {
             const long longMaxValue = long.MaxValue;
-            bool result = Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong((double)longMaxValue, out long actual);
+            bool result = ParseArgs.TryConvertToLong((double)longMaxValue, out long actual);
 
             // Testing on macOS 12 on Apple Silicon M1 Pro produces different result.
             result.ShouldBeTrue();
@@ -192,7 +193,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             const long veryLargeLong = long.MaxValue - 512;
             const double value = veryLargeLong;
             const long expected = 9223372036854774784L;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong(value, out long actual).ShouldBeTrue();
+            ParseArgs.TryConvertToLong(value, out long actual).ShouldBeTrue();
             actual.ShouldBe(expected);
         }
 
@@ -200,7 +201,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToLongGivenDoubleWithLessThanLongMinValue()
         {
             const double value = -92233720368547758081D;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong(value, out long actual).ShouldBeFalse();
+            ParseArgs.TryConvertToLong(value, out long actual).ShouldBeFalse();
             actual.ShouldBe(0);
         }
 
@@ -208,7 +209,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToLongGivenDoubleWithGreaterThanLongMaxValue()
         {
             const double value = (double)long.MaxValue + long.MaxValue;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToLong(value, out long actual).ShouldBeFalse();
+            ParseArgs.TryConvertToLong(value, out long actual).ShouldBeFalse();
             actual.ShouldBe(0);
         }
 
@@ -217,7 +218,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         [Fact]
         public void TryConvertToDoubleGivenNull()
         {
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToDouble(null, out double actual).ShouldBeFalse();
+            ParseArgs.TryConvertToDouble(null, out double actual).ShouldBeFalse();
             actual.ShouldBe(0);
         }
 
@@ -225,7 +226,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToDoubleGivenDouble()
         {
             const double value = 10.0;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToDouble(value, out double actual).ShouldBeTrue();
+            ParseArgs.TryConvertToDouble(value, out double actual).ShouldBeTrue();
             actual.ShouldBe(10.0);
         }
 
@@ -233,7 +234,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToDoubleGivenLong()
         {
             const long value = 10;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToDouble(value, out double actual).ShouldBeTrue();
+            ParseArgs.TryConvertToDouble(value, out double actual).ShouldBeTrue();
             actual.ShouldBe(10.0);
         }
 
@@ -241,7 +242,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToDoubleGivenInt()
         {
             const int value = 10;
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToDouble(value, out double actual).ShouldBeTrue();
+            ParseArgs.TryConvertToDouble(value, out double actual).ShouldBeTrue();
             actual.ShouldBe(10.0);
         }
 
@@ -249,7 +250,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         public void TryConvertToDoubleGivenString()
         {
             const string value = "10";
-            Expander<IProperty, IItem>.Function<IProperty>.TryConvertToDouble(value, out double actual).ShouldBeTrue();
+            ParseArgs.TryConvertToDouble(value, out double actual).ShouldBeTrue();
             actual.ShouldBe(10.0);
         }
 
@@ -267,7 +268,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                 // The invariant culture should be used and "1,2" should be 12.0 not 1.2.
                 var cultureEnglishSouthAfrica = CultureInfo.CreateSpecificCulture("en-ZA");
                 currentThread.CurrentCulture = cultureEnglishSouthAfrica;
-                Expander<IProperty, IItem>.Function<IProperty>.TryConvertToDouble(value, out double actual).ShouldBeTrue();
+                ParseArgs.TryConvertToDouble(value, out double actual).ShouldBeTrue();
                 actual.ShouldBe(12.0);
             }
             finally
