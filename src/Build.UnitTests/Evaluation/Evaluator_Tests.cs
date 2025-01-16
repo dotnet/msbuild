@@ -96,6 +96,48 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [Theory]
+        [InlineData("(test")]
+        [InlineData("@@@test")]
+        [InlineData(@")(!!test")]
+        public void VerifyItemsUpdateIsHandledForAnyProjectPath(string projectPathCandidate)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder projDirectory = env.CreateFolder(Path.Combine(env.CreateNewTempPath().TempPath, projectPathCandidate), createFolder: true);
+                TransientTestFile projectFile = env.CreateFile(projDirectory, "project.proj", @$"
+<Project>
+
+  <ItemGroup>
+    <ItemCheck Include=""Test"" />
+  </ItemGroup>
+
+  <ItemGroup>
+     <ItemCheck Update=""Test""
+             NewTestLabels=""Dummy"" />
+  </ItemGroup>
+
+
+ <Target Name=""MyTarget"">
+    <Message Text=""ItemCheck updated metadata value: @(ItemCheck->Metadata('NewTestLabels'))"" />
+  </Target>
+</Project>
+");
+                bool result = false;
+                try
+                {
+                    Project project = new(projectFile.Path);
+                    MockLogger logger = new();
+                    result = project.Build(logger);
+
+                    result.ShouldBeTrue();
+                    project.AllEvaluatedItems.Where(ei => ei.ItemType == "ItemCheck" && ei.Metadata.Any(m => m.EvaluatedValue == "Dummy")).ShouldNotBeEmpty();
+                }
+                catch (InvalidProjectFileException) { }
+            }
+        }
+
+
         // Some of these are also tested elsewhere, but this consolidates related tests in one spot.
         public static IEnumerable<object[]> ImportLoadingScenarioTestData
         {
