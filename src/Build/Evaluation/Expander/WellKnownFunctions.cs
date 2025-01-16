@@ -16,7 +16,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
-using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParsing;
+using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 
 
 namespace Microsoft.Build.Evaluation.Expander

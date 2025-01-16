@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Evaluation.Expander
 {
-    internal class ArgumentParsing
+    internal class ArgumentParser
     {
         internal static bool TryGetArgs(object[] args, out string? arg0, out string? arg1, bool enforceLength = true)
         {

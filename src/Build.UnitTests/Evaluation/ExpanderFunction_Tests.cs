@@ -11,7 +11,7 @@ using Shouldly;
 
 using Xunit;
 using Xunit.Abstractions;
-using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParsing;
+using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 
 namespace Microsoft.Build.Engine.UnitTests.Evaluation
 {

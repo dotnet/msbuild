@@ -25,7 +25,7 @@ using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
-using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParsing;
+using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
 
