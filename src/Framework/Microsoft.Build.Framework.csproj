@@ -23,14 +23,13 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
     <Reference Include="System.Xaml" />
-    
+
     <!-- Telemetry in Framework-->
-    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector"/>
-    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions"/>
-    <PackageReference Include="OpenTelemetry" />
-    <PackageReference Include="Microsoft.Extensions.Primitives" />
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" PrivateAssets="all" />
+    <PackageReference Include="OpenTelemetry" PrivateAssets="all" />
   </ItemGroup>
-  
+
   <!-- Framework and standard don't have DiagnosticSource. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
