@@ -65,8 +65,8 @@ namespace Microsoft.Build.Execution
         /// </param>
         internal TargetResult(TaskItem[] items, WorkUnitResult result, BuildEventContext originalBuildEventContext = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(items, nameof(items));
-            ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
+            ErrorUtilities.VerifyThrowArgumentNull(items);
+            ErrorUtilities.VerifyThrowArgumentNull(result);
             _items = items;
             _result = result;
             _originalBuildEventContext = originalBuildEventContext;
@@ -133,6 +133,22 @@ namespace Microsoft.Build.Execution
                     default:
                         return TargetResultCode.Skipped;
                 }
+            }
+        }
+
+        public string TargetResultCodeToString()
+        {
+            switch (ResultCode)
+            {
+                case TargetResultCode.Failure:
+                    return nameof(TargetResultCode.Failure);
+                case TargetResultCode.Skipped:
+                    return nameof(TargetResultCode.Skipped);
+                case TargetResultCode.Success:
+                    return nameof(TargetResultCode.Success);
+                default:
+                    Debug.Fail($"Unknown enum value: {ResultCode}");
+                    return ResultCode.ToString();
             }
         }
 

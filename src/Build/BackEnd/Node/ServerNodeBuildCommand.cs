@@ -90,7 +90,7 @@ namespace Microsoft.Build.BackEnd
             TargetConsoleConfiguration consoleConfiguration,
             PartialBuildTelemetry? partialBuildTelemetry)
         {
-            ErrorUtilities.VerifyThrowInternalNull(consoleConfiguration, nameof(consoleConfiguration));
+            ErrorUtilities.VerifyThrowInternalNull(consoleConfiguration);
 
             _commandLine = commandLine;
             _startupDirectory = startupDirectory;

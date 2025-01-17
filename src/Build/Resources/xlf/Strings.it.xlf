@@ -171,6 +171,46 @@
         <target state="translated">Durante la compilazione non deve essere usata alcuna proprietà implicita derivata da una variabile di ambiente.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_MessageFmt">
+        <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
+        <target state="translated">Il progetto {0} fa riferimento all'output di un progetto {1}. Percorso di riferimento: {2}. Usare invece ProjectReference.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_Title">
+        <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
+        <target state="translated">Un progetto non può fare riferimento al relativo output tramite 'Reference', ma direttamente tramite 'ProjectReference'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_MessageFmt">
+        <source>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</source>
+        <target state="translated">Il progetto {0} specifica l'elemento 'EmbeddedResource' '{1}', che potrebbe contenere un'estensione per la denotazione delle impostazioni cultura ('{2}'), tuttavia i metadati espliciti 'Culture' e 'WithCulture=false' non sono specificati.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_Title">
+        <source>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</source>
+        <target state="translated">È consigliabile specificare i metadati 'Culture' espliciti o i metadati 'WithCulture=false' con l'elemento 'EmbeddedResource' per evitare una stima errata o non deterministica delle impostazioni cultura.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0107_MessageFmt">
+        <source>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</source>
+        <target state="translated">Project {0} specifica la proprietà 'TargetFrameworks' '{1}' e la proprietà 'TargetFramework' '{2}' contemporaneamente. In questo modo 'TargetFrameworks' verrà ignorato e la compilazione funzionerà come destinazione singola.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0107_Title">
+        <source>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</source>
+        <target state="translated">Le proprietà 'TargetFramework' (singolare) e 'TargetFrameworks' (plural) non devono essere specificate contemporaneamente negli script.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0106_MessageFmt">
+        <source>Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</source>
+        <target state="translated">Project {0} specifica '{1}' elemento '{2}' per cui 'CopyToOutputDirectory' è impostato su 'Always'. Modificare i metadati o usare la proprietà 'CopyToOutputDirectory'.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0106_Title">
+        <source>Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</source>
+        <target state="translated">Evitare di specificare 'Always' per 'CopyToOutputDirectory' perché ciò può causare operazioni di copia non necessarie durante la compilazione. Usare il valore dei metadati 'PreserveNewest' o 'IfDifferent' oppure impostare la proprietà 'SkipUnchangedFilesOnCopyAlways' su true per utilizzare una copia più efficace.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">È stato eseguito l'accesso alla proprietà '{0}', ma non è mai stata inizializzata.</target>
@@ -287,6 +327,11 @@
         <target state="translated">Impossibile trovare l'assembly di controllo personalizzato specificato: “{0}”. Verificare se esiste.</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
+      <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
+        <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
+        <target state="translated">Trovati più overload per il metodo "{0}" con i parametri {1}. Questo non è attualmente supportato.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
         <target state="translated">Non è stato possibile caricare il tipo di controllo personalizzato: “{0}” dall'assembly: “{1}”. Assicurarsi che erediti la classe di base Microsoft.Build.Experimental.BuildCheck.Check. Se non è destinato a essere un controllo personalizzato, non deve essere esposto. Per altre informazioni: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
@@ -367,6 +412,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" fa riferimento a {0} elemento/i, mentre "{3}" fa riferimento a {1} elemento/i. Devono avere lo stesso numero di elementi.</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Si è verificata un'eccezione durante l'espansione di un fileSpec con GLOBS: fileSpec: "{0}", presupponendo che si tratti di un nome di file. Eccezione: {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -761,6 +811,11 @@ Errori: {3}</target>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
         <target state="translated">Legge la proprietà non inizializzata "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownLoggingType">
+        <source>Logging type {0} is not understood by {1}.</source>
+        <target state="translated">Il tipo di registrazione {0} non è riconosciuto da {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
@@ -1186,8 +1241,8 @@ Errori: {3}</target>
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
-        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: il progetto importato "{0}" non è stato trovato. Verificare che l'espressione nella dichiarazione Import "{1}" sia corretta e che il file sia presente sul disco.</target>
+        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>
+        <target state="translated">MSB4019: il progetto importato "{0}" non è stato trovato. Verificare che l'espressione nella dichiarazione Import "{1}", che ha restituito "{2}", sia corretta e che il file sia presente sul disco.</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
@@ -1574,8 +1629,8 @@ Errori: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeeded">
-        <source>MSB4075: The project file "{0}" must be opened in the Visual Studio IDE and converted to the latest version before it can be built by MSBuild.</source>
-        <target state="translated">MSB4075: prima di compilare il file di progetto "{0}" con MSBuild, è necessario aprirlo in Visual Studio IDE e convertirlo alla versione più recente.</target>
+        <source>MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</source>
+        <target state="translated">MSB4075: prima di compilare il file di progetto "{0}" con MSBuild, è necessario aprirlo in una versione di Visual Studio IDE supportata e convertirlo alla versione più recente. Altre informazioni: https://aka.ms/DeprecatedProjectConversion</target>
         <note>{StrBegin="MSB4075: "}</note>
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeededToVcxProj">

@@ -152,7 +152,7 @@ namespace Microsoft.Build.BackEnd
         public void Listen(INodePacketFactory factory)
         {
             ErrorUtilities.VerifyThrow(_status == LinkStatus.Inactive, "Link not inactive.  Status is {0}", _status);
-            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
+            ErrorUtilities.VerifyThrowArgumentNull(factory);
             _packetFactory = factory;
 
             InitializeAsyncPacketThread();
@@ -314,7 +314,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
+            ErrorUtilities.VerifyThrowArgumentNull(packet);
             ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
             ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
             _packetQueue.Enqueue(packet);
@@ -531,13 +531,15 @@ namespace Microsoft.Build.BackEnd
             {
                 // Ordering is important.  We want packetAvailable to supercede terminate otherwise we will not properly wait for all
                 // packets to be sent by other threads which are shutting down, such as the logging thread.
-                WaitHandle[] handles = new WaitHandle[] {
+                WaitHandle[] handles =
+                [
 #if FEATURE_APM
                     result.AsyncWaitHandle,
 #else
                     ((IAsyncResult)readTask).AsyncWaitHandle,
 #endif
-                    localPacketAvailable, localTerminatePacketPump };
+                    localPacketAvailable, localTerminatePacketPump
+                ];
 
                 int waitId = WaitHandle.WaitAny(handles);
                 switch (waitId)

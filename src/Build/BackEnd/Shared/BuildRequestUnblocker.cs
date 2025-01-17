@@ -52,7 +52,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal BuildRequestUnblocker(BuildResult buildResult)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buildResult, nameof(buildResult));
+            ErrorUtilities.VerifyThrowArgumentNull(buildResult);
             _buildResult = buildResult;
             _blockedGlobalRequestId = buildResult.ParentGlobalRequestId;
         }
@@ -63,7 +63,7 @@ namespace Microsoft.Build.BackEnd
         internal BuildRequestUnblocker(BuildRequest parentRequest, BuildResult buildResult)
             : this(buildResult)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parentRequest, nameof(parentRequest));
+            ErrorUtilities.VerifyThrowArgumentNull(parentRequest);
             _blockedGlobalRequestId = parentRequest.GlobalRequestId;
         }
 
