@@ -131,13 +131,13 @@ extends:
           condition: and(succeeded(), in(variables['SignType'], 'test', 'real'))
 
         # OptProf is not needed because 17.3 will not be serviced in VS.
-        # - task: MicroBuildOptProfPlugin@6
-        #   inputs:
-        #     ProfilingInputsDropName: '$(VisualStudio.DropName)'
-        #     ShouldSkipOptimize: true
-        #     AccessToken: '$(System.AccessToken)'
-        #     feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
-        #   displayName: 'Install OptProf Plugin'
+        - task: MicroBuildOptProfPlugin@6
+          inputs:
+            ProfilingInputsDropName: '$(VisualStudio.DropName)'
+            ShouldSkipOptimize: true
+            AccessToken: '$(System.AccessToken)'
+            feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
+          displayName: 'Install OptProf Plugin'
 
         # Required by MicroBuildBuildVSBootstrapper
         - task: MicroBuildSwixPlugin@4
@@ -171,48 +171,48 @@ extends:
 
         # OptProf is not needed because 17.3 will not be serviced in VS.
         # Publish OptProf configuration files
-        # - task: 1ES.PublishArtifactsDrop@1
-        #   inputs:
-        #     dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
-        #     buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
-        #     sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
-        #     toLowerCase: false
-        #     usePat: true
-        #   displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
-        #   condition: succeeded()
+        - task: 1ES.PublishArtifactsDrop@1
+          inputs:
+            dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
+            buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+            sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
+            toLowerCase: false
+            usePat: true
+          displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
+          condition: succeeded()
 
         # Build VS bootstrapper
         # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-        # - task: MicroBuildBuildVSBootstrapper@3
-        #   inputs:
-        #     vsMajorVersion: $(VisualStudio.MajorVersion)
-        #     channelName: $(VisualStudio.ChannelName)
-        #     manifests: $(VisualStudio.SetupManifestList)
-        #     outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
-        #     bootstrapperCoreVersion:
-        #   displayName: 'OptProf - Build VS bootstrapper'
-        #   condition: succeeded()
+        - task: MicroBuildBuildVSBootstrapper@3
+          inputs:
+            vsMajorVersion: $(VisualStudio.MajorVersion)
+            channelName: $(VisualStudio.ChannelName)
+            manifests: $(VisualStudio.SetupManifestList)
+            outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+            bootstrapperCoreVersion:
+          displayName: 'OptProf - Build VS bootstrapper'
+          condition: succeeded()
 
         # Publish run settings
-        # - task: PowerShell@2
-        #   inputs:
-        #     filePath: eng\common\sdk-task.ps1
-        #     arguments: -configuration $(BuildConfiguration)
-        #               -task VisualStudio.BuildIbcTrainingSettings
-        #               /p:VisualStudioDropName=$(VisualStudio.DropName)
-        #               /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-        #               /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
-        #   displayName: 'OptProf - Build IBC training settings'
-        #   condition: succeeded()
+        - task: PowerShell@2
+          inputs:
+            filePath: eng\common\sdk-task.ps1
+            arguments: -configuration $(BuildConfiguration)
+                      -task VisualStudio.BuildIbcTrainingSettings
+                      /p:VisualStudioDropName=$(VisualStudio.DropName)
+                      /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+                      /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
+          displayName: 'OptProf - Build IBC training settings'
+          condition: succeeded()
 
         # Publish bootstrapper info
-        # - task: 1ES.PublishBuildArtifacts@1
-        #   inputs:
-        #     PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
-        #     ArtifactName: MicroBuildOutputs
-        #     ArtifactType: Container
-        #   displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
-        #   condition: succeeded()
+        - task: 1ES.PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
+            ArtifactName: MicroBuildOutputs
+            ArtifactType: Container
+          displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
+          condition: succeeded()
 
         - task: 1ES.PublishBuildArtifacts@1
           displayName: 'Publish Artifact: logs'
