@@ -2203,7 +2203,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0108_MessageFmt" xml:space="preserve">
-    <value>Project {0} specifies 'TargetFramework(s)' property '{1}', while it's not SDK-style project. Those properties are not understood by legacy-style projects and have no impact.</value>
+    <value>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</value>
     <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0201_Title" xml:space="preserve">
