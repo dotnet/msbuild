@@ -2199,7 +2199,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0108_Title" xml:space="preserve">
-    <value>'TargetFramework' nor 'TargetFrameworks' property should not be specified in non-SDK style projects.</value>
+    <value>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</value>
     <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0108_MessageFmt" xml:space="preserve">
