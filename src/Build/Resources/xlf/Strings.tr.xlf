@@ -415,7 +415,7 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="new">An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</target>
+        <target state="translated">bir fileSpec globs ile genişletilirken özel durum oluştu: fileSpec: "{0}", dosya adı olduğu varsayılıyor. Özel durum: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -815,7 +815,7 @@ Hatalar: {3}</target>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="new">Logging type {0} is not understood by {1}.</target>
+        <target state="translated">Günlük kaydı {0} günlük kaydı türü {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

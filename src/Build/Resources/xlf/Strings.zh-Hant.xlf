@@ -415,7 +415,7 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="new">An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</target>
+        <target state="translated">展開具有 glob： fileSpec： "{0}" 的 fileSpec 時發生例外狀況，假設它是檔名。例外狀況： {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -815,7 +815,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="new">Logging type {0} is not understood by {1}.</target>
+        <target state="translated">{1} 無法了解記錄類型 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
