@@ -117,26 +117,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
              NewTestLabels=""Dummy"" />
   </ItemGroup>
 
-
  <Target Name=""MyTarget"">
     <Message Text=""ItemCheck updated metadata value: @(ItemCheck->Metadata('NewTestLabels'))"" />
   </Target>
 </Project>
 ");
-                bool result = false;
-                try
-                {
-                    Project project = new(projectFile.Path);
-                    MockLogger logger = new();
-                    result = project.Build(logger);
+                Project project = new(projectFile.Path);
+                MockLogger logger = new();
+                var result = project.Build(logger);
 
-                    result.ShouldBeTrue();
-                    project.AllEvaluatedItems.Where(ei => ei.ItemType == "ItemCheck" && ei.Metadata.Any(m => m.EvaluatedValue == "Dummy")).ShouldNotBeEmpty();
-                }
-                catch (InvalidProjectFileException) { }
+                result.ShouldBeTrue();
+                project.AllEvaluatedItems.Where(ei => ei.ItemType == "ItemCheck" && ei.Metadata.Any(m => m.EvaluatedValue == "Dummy")).ShouldNotBeEmpty();
             }
         }
-
 
         // Some of these are also tested elsewhere, but this consolidates related tests in one spot.
         public static IEnumerable<object[]> ImportLoadingScenarioTestData
