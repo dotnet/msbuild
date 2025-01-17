@@ -210,6 +210,7 @@ namespace Microsoft.Build.Shared
         internal const string withCulture = "WithCulture";
         internal const string copyToOutputDirectory = "CopyToOutputDirectory";
         internal const string copyAlways = "Always";
+        internal const string managed = "Managed";
 
         /// <summary>
         /// The output path for a given item.
@@ -250,5 +251,6 @@ namespace Microsoft.Build.Shared
         internal const string EmbeddedResource = "EmbeddedResource";
         internal const string None = "None";
         internal const string Reference = "Reference";
+        internal const string ProjectCapability = "ProjectCapability";
     }
 }
