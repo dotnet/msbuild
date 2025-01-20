@@ -67,7 +67,6 @@
     <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
     <MicrosoftNetCompilersToolsetVersion>4.13.0-3.24607.3</MicrosoftNetCompilersToolsetVersion>
     <NuGetBuildTasksVersion>6.13.0-rc.93</NuGetBuildTasksVersion>
-    <NuGetBuildTasksVersion>6.12.0-rc.106</NuGetBuildTasksVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
