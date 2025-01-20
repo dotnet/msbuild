@@ -428,7 +428,7 @@ public class EndToEndTests : IDisposable
         <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
           <PropertyGroup>
             <OutputType>Library</OutputType>
-            <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+            <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
             <OutputPath>bin\Debug\</OutputPath>
         	<NoWarn>CS2008</NoWarn>
           </PropertyGroup>
@@ -441,8 +441,8 @@ public class EndToEndTests : IDisposable
         <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
           <PropertyGroup>
             <OutputType>Library</OutputType>
-            <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-            <TargetFramework>v4.6.2</TargetFramework>
+            <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+            <TargetFramework>v4.7.2</TargetFramework>
             <OutputPath>bin\Debug\</OutputPath>
         	<NoWarn>CS2008</NoWarn>
           </PropertyGroup>
