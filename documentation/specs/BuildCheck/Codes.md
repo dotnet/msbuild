@@ -130,7 +130,7 @@ dotnet build my-multi-target.csproj /p:TargetFramework=net9.0
 <a name="BC0108"></a>
 ## BC0108 - TargetFramework or TargetFrameworks specified in SDK-less project.
 
-"'TargetFramework' nor 'TargetFrameworks' property should not be specified in projects not using .NET SDK."
+"'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects not using .NET SDK."
 
 'TargetFramework' or 'TargetFrameworks' control the project output targets in modern .NET SDK projects. The older SDK-less projects interprets different properties for similar mechanism (like 'TargetFrameworkVersion') and the 'TargetFramework' or 'TargetFrameworks' are silently ignored.
 
