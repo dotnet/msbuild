@@ -394,7 +394,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         _buildStartTime = e.Timestamp;
 
-        if (Terminal.SupportsProgressReporting)
+        if (Terminal.SupportsProgressReporting && Verbosity != LoggerVerbosity.Quiet)
         {
             Terminal.Write(AnsiCodes.SetProgressIndeterminate);
         }
@@ -460,7 +460,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
         finally
         {
-            if (Terminal.SupportsProgressReporting)
+            if (Terminal.SupportsProgressReporting && Verbosity != LoggerVerbosity.Quiet)
             {
                 Terminal.Write(AnsiCodes.RemoveProgress);
             }
