@@ -192,7 +192,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Determines if the user has explicitly opted out of telemetry.
         /// </summary>
-        private bool IsOptOut() => Traits.Instance.FrameworkTelemetryOptOut || Traits.Instance.SdkTelemetryOptOut;
+        private bool IsOptOut() => Traits.Instance.FrameworkTelemetryOptOut || Traits.Instance.SdkTelemetryOptOut || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14);
 
         /// <summary>
         /// Determines if telemetry should be initialized based on sampling and environment variable overrides.
