@@ -307,7 +307,7 @@ namespace Microsoft.Build.UnitTests
                             bool logMessage = !(eventArgs is BuildFinishedEventArgs) || LogBuildFinished;
                             if (logMessage)
                             {
-                                string msg = eventArgs.Message;
+                                string msg = eventArgs.Message ?? $"(null message in {eventArgs.GetType().Name} event)";
                                 if (eventArgs is BuildMessageEventArgs m && m.LineNumber != 0)
                                 {
                                     msg = $"{m.File}({m.LineNumber},{m.ColumnNumber}): {msg}";

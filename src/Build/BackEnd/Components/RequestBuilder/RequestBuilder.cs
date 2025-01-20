@@ -196,8 +196,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="entry">The entry to build.</param>
         public void BuildRequest(NodeLoggingContext loggingContext, BuildRequestEntry entry)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
-            ErrorUtilities.VerifyThrowArgumentNull(entry, nameof(entry));
+            ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
+            ErrorUtilities.VerifyThrowArgumentNull(entry);
             ErrorUtilities.VerifyThrow(_componentHost != null, "Host not set.");
             ErrorUtilities.VerifyThrow(_targetBuilder == null, "targetBuilder not null");
             ErrorUtilities.VerifyThrow(_nodeLoggingContext == null, "nodeLoggingContext not null");
@@ -332,10 +332,10 @@ namespace Microsoft.Build.BackEnd
         public async Task<BuildResult[]> BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets = false)
         {
             VerifyIsNotZombie();
-            ErrorUtilities.VerifyThrowArgumentNull(projectFiles, nameof(projectFiles));
-            ErrorUtilities.VerifyThrowArgumentNull(properties, nameof(properties));
-            ErrorUtilities.VerifyThrowArgumentNull(targets, nameof(targets));
-            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions, nameof(toolsVersions));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFiles);
+            ErrorUtilities.VerifyThrowArgumentNull(properties);
+            ErrorUtilities.VerifyThrowArgumentNull(targets);
+            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions);
             ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
             ErrorUtilities.VerifyThrow(projectFiles.Length == properties.Length, "Properties and project counts not the same");
             ErrorUtilities.VerifyThrow(projectFiles.Length == toolsVersions.Length, "Tools versions and project counts not the same");
@@ -402,7 +402,7 @@ namespace Microsoft.Build.BackEnd
 
             RaiseOnBlockedRequest(blockingGlobalRequestId, blockingTarget, partialBuildResult);
 
-            WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueEvent };
+            WaitHandle[] handles = [_terminateEvent, _continueEvent];
 
             int handle;
             if (IsBuilderUsingLegacyThreadingSemantics(_componentHost, _requestEntry))
@@ -448,7 +448,7 @@ namespace Microsoft.Build.BackEnd
             VerifyIsNotZombie();
             RaiseOnBlockedRequest(_requestEntry.Request.GlobalRequestId, String.Empty);
 
-            WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueEvent };
+            WaitHandle[] handles = [_terminateEvent, _continueEvent];
 
             int handle = WaitHandle.WaitAny(handles);
 
@@ -506,7 +506,7 @@ namespace Microsoft.Build.BackEnd
             RaiseResourceRequest(ResourceRequest.CreateAcquireRequest(_requestEntry.Request.GlobalRequestId, requestedCores, waitForCores));
 
             // Wait for one of two events to be signaled: 1) The build was canceled, 2) The response to our request was received.
-            WaitHandle[] waitHandles = new WaitHandle[] { _terminateEvent, responseEvent };
+            WaitHandle[] waitHandles = [_terminateEvent, responseEvent];
             int waitResult;
 
             // Drop the lock so that the same task can call ReleaseCores from other threads to unblock itself.
@@ -550,7 +550,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
             ErrorUtilities.VerifyThrow(_componentHost == null, "RequestBuilder already initialized.");
             _componentHost = host;
         }
@@ -957,7 +957,7 @@ namespace Microsoft.Build.BackEnd
             BuildResult[] results;
             if (waitForResults)
             {
-                WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueEvent };
+                WaitHandle[] handles = [_terminateEvent, _continueEvent];
 
                 int handle;
                 if (IsBuilderUsingLegacyThreadingSemantics(_componentHost, _requestEntry))

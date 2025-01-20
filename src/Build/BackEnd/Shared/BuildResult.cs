@@ -380,7 +380,7 @@ namespace Microsoft.Build.Execution
                     return BuildResultCode.Failure;
                 }
 
-                foreach (KeyValuePair<string, TargetResult> result in _resultsByTarget ?? Enumerable.Empty<KeyValuePair<string, TargetResult>>())
+                foreach (KeyValuePair<string, TargetResult> result in _resultsByTarget ?? [])
                 {
                     if ((result.Value.ResultCode == TargetResultCode.Failure && !result.Value.TargetFailureDoesntCauseBuildFailure)
                         || result.Value.AfterTargetsHaveFailed)
@@ -523,8 +523,8 @@ namespace Microsoft.Build.Execution
         /// <param name="result">The results for the target.</param>
         public void AddResultsForTarget(string target, TargetResult result)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(target, nameof(target));
-            ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
+            ErrorUtilities.VerifyThrowArgumentNull(target);
+            ErrorUtilities.VerifyThrowArgumentNull(result);
 
             lock (this)
             {
@@ -549,7 +549,7 @@ namespace Microsoft.Build.Execution
                 targetsToKeep.Count > 0,
                 $"{nameof(targetsToKeep)} should contain at least one target.");
 
-            foreach (string target in _resultsByTarget?.Keys ?? Enumerable.Empty<string>())
+            foreach (string target in _resultsByTarget?.Keys ?? [])
             {
                 if (!targetsToKeep.Contains(target))
                 {
@@ -564,7 +564,7 @@ namespace Microsoft.Build.Execution
         /// <param name="results">The results to merge in.</param>
         public void MergeResults(BuildResult results)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(results, nameof(results));
+            ErrorUtilities.VerifyThrowArgumentNull(results);
             ErrorUtilities.VerifyThrow(results.ConfigurationId == ConfigurationId, "Result configurations don't match");
 
             // If we are merging with ourself or with a shallow clone, do nothing.
@@ -574,7 +574,7 @@ namespace Microsoft.Build.Execution
             }
 
             // Merge in the results
-            foreach (KeyValuePair<string, TargetResult> targetResult in results._resultsByTarget ?? Enumerable.Empty<KeyValuePair<string, TargetResult>>())
+            foreach (KeyValuePair<string, TargetResult> targetResult in results._resultsByTarget ?? [])
             {
                 // NOTE: I believe that because we only allow results for a given target to be produced and cached once for a given configuration,
                 // we can never receive conflicting results for that target, since the cache and build request manager would always return the
@@ -696,7 +696,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void CacheIfPossible()
         {
-            foreach (KeyValuePair<string, TargetResult> targetResultPair in _resultsByTarget ?? Enumerable.Empty<KeyValuePair<string, TargetResult>>())
+            foreach (KeyValuePair<string, TargetResult> targetResultPair in _resultsByTarget ?? [])
             {
                 targetResultPair.Value.CacheItems(ConfigurationId, targetResultPair.Key);
             }

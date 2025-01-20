@@ -270,10 +270,10 @@ namespace Microsoft.Build.Evaluation
         /// <param name="defaultOverrideToolsVersion">ToolsVersion to use as the default ToolsVersion for this version of MSBuild.</param>
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
-            ErrorUtilities.VerifyThrowArgumentLength(toolsPath, nameof(toolsPath));
-            ErrorUtilities.VerifyThrowArgumentNull(environmentProperties, nameof(environmentProperties));
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
+            ErrorUtilities.VerifyThrowArgumentLength(toolsPath);
+            ErrorUtilities.VerifyThrowArgumentNull(environmentProperties);
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
 
             _toolsVersion = toolsVersion;
             this.ToolsPath = toolsPath;
@@ -349,8 +349,8 @@ namespace Microsoft.Build.Evaluation
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, ProjectCollection projectCollection, DirectoryGetFiles getFiles, LoadXmlFromPath loadXmlFromPath, string msbuildOverrideTasksPath, DirectoryExists directoryExists)
             : this(toolsVersion, toolsPath, buildProperties, projectCollection.EnvironmentProperties, projectCollection.GlobalPropertiesCollection, null, msbuildOverrideTasksPath, null)
         {
-            ErrorUtilities.VerifyThrowInternalNull(getFiles, nameof(getFiles));
-            ErrorUtilities.VerifyThrowInternalNull(loadXmlFromPath, nameof(loadXmlFromPath));
+            ErrorUtilities.VerifyThrowInternalNull(getFiles);
+            ErrorUtilities.VerifyThrowInternalNull(loadXmlFromPath);
 
             _directoryExists = directoryExists;
             _getFiles = getFiles;
@@ -730,7 +730,7 @@ namespace Microsoft.Build.Evaluation
                 Array.Sort<string>(defaultTasksFiles, StringComparer.OrdinalIgnoreCase);
                 return defaultTasksFiles;
             }
-            return Array.Empty<string>();
+            return [];
         }
 
         /// <summary>
