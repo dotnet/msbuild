@@ -142,7 +142,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             if (BuildSuccess.HasValue)
             {
-                properties[nameof(BuildSuccess)] = BuildSuccess.HasValue.ToString(CultureInfo.InvariantCulture);
+                properties[nameof(BuildSuccess)] = BuildSuccess.Value.ToString(CultureInfo.InvariantCulture);
             }
 
             if (BuildTarget != null)
