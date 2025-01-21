@@ -1061,10 +1061,17 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// Creates a Terminal logger or Console logger based on the environment.
     /// This method is called by reflection from dotnet. Do not modify the name or parameters without adapting the SDK.
     /// </summary>
-    public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity)
+    public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[]? args)
     {
         Debugger.Launch();
-        bool isDisabled = (Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty).Equals("off", StringComparison.InvariantCultureIgnoreCase);
+
+        string tlArg = args?.FirstOrDefault(a => a.StartsWith("--tl:", StringComparison.InvariantCultureIgnoreCase)) ?? string.Empty;
+
+        bool isDisabled =
+            tlArg.Equals("--tl:on", StringComparison.InvariantCultureIgnoreCase) ? false :
+            tlArg.Equals("--tl:off", StringComparison.InvariantCultureIgnoreCase) ? true :
+            (Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty).Equals("off", StringComparison.InvariantCultureIgnoreCase);
+
         (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
 
         if (isDisabled || !supportsAnsi || !outputIsScreen)
