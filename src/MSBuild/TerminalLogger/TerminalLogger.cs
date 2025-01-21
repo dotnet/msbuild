@@ -1063,8 +1063,6 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[]? args)
     {
-        Debugger.Launch();
-
         string tlArg = args?.FirstOrDefault(a => a.StartsWith("--tl:", StringComparison.InvariantCultureIgnoreCase)) ?? string.Empty;
 
         bool isDisabled =
