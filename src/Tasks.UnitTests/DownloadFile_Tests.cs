@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 downloadFile.Cancel();
 
-                task.Wait(TimeSpan.FromSeconds(1500)).ShouldBeTrue();
+                task.Wait(TimeSpan.FromMilliseconds(1500)).ShouldBeTrue();
 
                 task.Result.ShouldBeFalse();
             }
