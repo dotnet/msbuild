@@ -96,7 +96,6 @@
     <!-- OpenTelemetry in tests explicitly included because in framework it has PrivateAssets="all" -->
     <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions"/>
     <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector"/>
-    <PackageReference Include="OpenTelemetry"/>
   </ItemGroup>
 
   <!-- Ensure ref assemblies are placed under `ref/$(TargetFramework)` in the NuGet package -->
