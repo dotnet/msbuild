@@ -241,6 +241,16 @@
         <target state="translated">사용되지 않는 속성은 선언하면 안 됩니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_MessageFmt">
+        <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
+        <target state="new">Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_Title">
+        <source>Downloads folder is untrusted for projects building.</source>
+        <target state="new">Downloads folder is untrusted for projects building.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">질문 빌드에 실패했습니다. 빌드가 최신이 아닌 대상 또는 작업을 발견하여 일찍 종료되었습니다.</target>
@@ -412,6 +422,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}"은(는) 항목을 {0}개 참조하고 "{3}"은(는) 항목을 {1}개 참조합니다. 참조하는 항목 수는 같아야 합니다.</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">globs: fileSpec: "{0}" fileSpec을 파일 이름으로 가정하여 fileSpec을 확장하는 동안 예외가 발생했습니다. 예외: {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -806,6 +821,11 @@ Errors: {3}</source>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
         <target state="translated">초기화되지 않은 속성 "{0}" 읽기</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownLoggingType">
+        <source>Logging type {0} is not understood by {1}.</source>
+        <target state="translated">로깅 유형 {0} {1} 이해할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
