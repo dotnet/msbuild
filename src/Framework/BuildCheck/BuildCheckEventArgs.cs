@@ -46,12 +46,7 @@ internal sealed class BuildCheckTracingEventArgs(
     {
         base.WriteToStream(writer);
 
-        writer.Write7BitEncodedInt(TracingData.InfrastructureTracingData.Count);
-        foreach (KeyValuePair<string, TimeSpan> kvp in TracingData.InfrastructureTracingData)
-        {
-            writer.Write(kvp.Key);
-            writer.Write(kvp.Value.Ticks);
-        }
+        writer.WriteDurationsDictionary(TracingData.InfrastructureTracingData);
 
         writer.Write7BitEncodedInt(TracingData.TelemetryData.Count);
         foreach (BuildCheckRuleTelemetryData data in TracingData.TelemetryData.Values)
@@ -82,17 +77,9 @@ internal sealed class BuildCheckTracingEventArgs(
     {
         base.CreateFromStream(reader, version);
 
+        var infrastructureTracingData = reader.ReadDurationDictionary();
+
         int count = reader.Read7BitEncodedInt();
-        var infrastructureTracingData = new Dictionary<string, TimeSpan>(count);
-        for (int i = 0; i < count; i++)
-        {
-            string key = reader.ReadString();
-            TimeSpan value = TimeSpan.FromTicks(reader.ReadInt64());
-
-            infrastructureTracingData.Add(key, value);
-        }
-
-        count = reader.Read7BitEncodedInt();
         List<BuildCheckRuleTelemetryData> tracingData = new List<BuildCheckRuleTelemetryData>(count);
         for (int i = 0; i < count; i++)
         {

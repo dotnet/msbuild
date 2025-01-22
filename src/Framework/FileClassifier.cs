@@ -92,6 +92,8 @@ namespace Microsoft.Build.Framework
         /// </summary>
         private volatile IReadOnlyList<string> _knownBuiltInLogicDirectoriesSnapshot = [];
 
+        private string? _nugetCacheLocation;
+
         /// <summary>
         ///     Creates default FileClassifier which following immutable folders:
         ///     Classifications provided are:
@@ -250,7 +252,8 @@ namespace Microsoft.Build.Framework
             // example: C:\Program Files\dotnet\
             RegisterImmutableDirectory(getPropertyValue("NetCoreRoot")?.Trim(), false);
             // example: C:\Users\<username>\.nuget\packages\
-            RegisterImmutableDirectory(getPropertyValue("NuGetPackageFolders")?.Trim(), true);
+            _nugetCacheLocation = getPropertyValue("NuGetPackageFolders")?.Trim();
+            RegisterImmutableDirectory(_nugetCacheLocation, true);
 
             IsImmutablePathsInitialized = true;
         }
@@ -341,6 +344,19 @@ namespace Microsoft.Build.Framework
         /// <returns><see langword="true" /> if the file is non-modifiable, otherwise <see langword="false" />.</returns>
         public bool IsNonModifiable(string filePath)
             => IsInLocationList(filePath, _knownImmutableDirectoriesSnapshot);
+
+        /// <summary>
+        ///    Gets whether a file is assumed to be inside a nuget cache location.
+        /// </summary>
+        public bool IsInNugetCache(string filePath)
+        {
+            string? nugetCache = _nugetCacheLocation;
+            if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(nugetCache))
+            {
+                return false;
+            }
+            return filePath.StartsWith(nugetCache, PathComparison);
+        }
 
         private static bool IsInLocationList(string filePath, IReadOnlyList<string> locations)
         {

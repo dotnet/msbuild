@@ -147,6 +147,11 @@ namespace Microsoft.Build.BackEnd
         /// The Build Check Manager.
         /// </summary>
         BuildCheckManagerProvider,
+
+        /// <summary>
+        /// The component which collects telemetry data.
+        /// </summary>
+        TelemetryCollector,
     }
 
     /// <summary>
