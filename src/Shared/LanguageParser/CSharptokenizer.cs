@@ -51,7 +51,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  GetEnumerator
-         * 
+         *
          * Return a new token enumerator.
          */
         public IEnumerator GetEnumerator()

@@ -68,7 +68,7 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
-        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it. 
+        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it.
         /// </summary>
         internal void ExecuteTask(Lookup lookup)
         {
@@ -157,7 +157,7 @@ namespace Microsoft.Build.BuildEngine
                     // "Execute" each bucket
                     foreach (ItemBucket bucket in buckets)
                     {
-                        // Gather the outputs, but don't make them visible to other buckets 
+                        // Gather the outputs, but don't make them visible to other buckets
                         switch (child.ChildType)
                         {
                             case ChildType.BuildItemAdd:
@@ -204,7 +204,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Remove items from the world. Removes to items that are part of the project manifest are backed up, so 
+        /// Remove items from the world. Removes to items that are part of the project manifest are backed up, so
         /// they can be reverted when the project is reset after the end of the build.
         /// </summary>
         private void ExecuteRemove(BuildItemGroupChildXml child, ItemBucket bucket)
@@ -230,7 +230,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Modifies items in the world - specifically, changes their metadata. Changes to items that are part of the project manifest are backed up, so 
+        /// Modifies items in the world - specifically, changes their metadata. Changes to items that are part of the project manifest are backed up, so
         /// they can be reverted when the project is reset after the end of the build.
         /// </summary>
         /// <param name="child"></param>
@@ -375,6 +375,6 @@ namespace Microsoft.Build.BuildEngine
                 || String.Equals(name, XMakeElements.itemGroup, StringComparison.Ordinal);
         }
 
-        #endregion  
+        #endregion
     }
 }

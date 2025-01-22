@@ -498,7 +498,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -556,7 +556,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -612,7 +612,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -667,7 +667,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -716,7 +716,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyPropG)'=='1'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyPropA)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -771,7 +771,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyPropG)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyPropA)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -829,7 +829,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyPropG)'=='1'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyPropA)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -1375,7 +1375,7 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             string projectFile2 = ObjectModelHelpers.CreateTempFileOnDisk(@"
-                <Project DefaultTargets=`t` xmlns=`msbuildnamespace` ToolsVersion=`msbuilddefaulttoolsversion`>                  
+                <Project DefaultTargets=`t` xmlns=`msbuildnamespace` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Target Name=`t`>
                         <MSBuild Projects=`" + projectFile1 + @"` Targets=`BUILD`>
                             <Output TaskParameter=`TargetOutputs` ItemName=`out`/>
@@ -1468,7 +1468,7 @@ namespace Microsoft.Build.UnitTests
                 <Project>
                     <Target Name=`Build`>
                         <MSBuild Projects=`" + projectFile1 + @"` Targets=`Build` />
-                    </Target>	
+                    </Target>
                 </Project>");
 
             try

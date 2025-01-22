@@ -27,7 +27,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
         * Method:  MoveNext
-        * 
+        *
         * Declare the MoveNext method required by IEnumerator
         */
         public bool MoveNext()
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
         * Method:  Reset
-        * 
+        *
         * Declare the Reset method required by IEnumerator
         */
         public void Reset()
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
         * Method:  Current
-        * 
+        *
         * Declare the Current property required by IEnumerator
         */
         public object Current

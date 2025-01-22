@@ -650,8 +650,8 @@ namespace Microsoft.Build.BuildEngine
         public event CustomBuildEventHandler CustomEventRaised;
 
         /// <summary>
-        /// this event is raised to log build status events, such as 
-        /// build/project/target/task started/stopped 
+        /// this event is raised to log build status events, such as
+        /// build/project/target/task started/stopped
         /// </summary>
         /// <owner> t-jeffv, sumedhk </owner>
         public event BuildStatusEventHandler StatusEventRaised;

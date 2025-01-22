@@ -2,6 +2,7 @@ trigger:
 - main
 - vs*
 - exp/*
+- perf/*
 
 # If defined here, these values are not overrideable
 # Once they exist, we should define these as "runtime parameters"
@@ -32,15 +33,18 @@ variables:
       value: ${{parameters.OptProfDropName}}
     - name: SourceBranch
       value: ''
-  - name: _DotNetArtifactsCategory
-    value: .NETCore
-  - name: _DotNetValidationArtifactsCategory
-    value: .NETCoreValidation
   - name: EnableReleaseOneLocBuild
-    value: false
+    value: false # Disable loc for vs17.10 now that it's shipped
   - name: Codeql.Enabled
     value: true
   - group: DotNet-MSBuild-SDLValidation-Params
+  - group: AzureDevOps-Artifact-Feeds-Pats
+  - name: cfsNugetWarnLevel
+    value: warn
+  - name: nugetMultiFeedWarnLevel
+    value: none
+  - name: NugetSecurityAnalysisWarningLevel
+    value: none
 
 resources:
   repositories:
@@ -99,21 +103,27 @@ extends:
         timeoutInMinutes: 180
 
         variables:
-        - group: DotNet-Blob-Feed
-        - group: DotNet-Symbol-Publish
         - group: Publish-Build-Assets
         - name: TeamName
           value: MSBuild
         - name: VisualStudio.MajorVersion
           value: 17
         - name: VisualStudio.ChannelName
-          value: 'int.d17.8' # MSBuild's vs17.8 branch corresponds to this VS channel
+          value: 'int.d17.10' # MSBuild's vs17.10 branch corresponds to this VS channel
         - name: VisualStudio.DropName
           value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
         steps:
         - task: NuGetToolInstaller@1
           displayName: 'Install NuGet.exe'
+
+        - task: PowerShell@2
+          displayName: Setup Private Feeds Credentials
+          inputs:
+            filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+            arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+          env:
+            Token: $(dn-bot-dnceng-artifact-feeds-rw)
 
         - task: NuGetCommand@2
           displayName: Restore internal tools
@@ -152,12 +162,6 @@ extends:
                     /p:VisualStudioDropAccessToken=$(System.AccessToken)
                     /p:VisualStudioDropName=$(VisualStudio.DropName)
                     /p:DotNetSignType=$(SignType)
-                    /p:DotNetPublishToBlobFeed=true
-                    /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-                    /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
-                    /p:PublishToSymbolServer=true
-                    /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
-                    /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
                     /p:TeamName=MSBuild
                     /p:DotNetPublishUsingPipelines=true
                     /p:VisualStudioIbcDrop=$(OptProfDrop)
@@ -298,7 +302,7 @@ extends:
             - name: Managed
               pool:
                 name: AzurePipelines-EO
-                image: AzurePipelinesUbuntu22.04compliantGPT
+                image: 1ESPT-Ubuntu22.04
                 os: linux
 
       - template: /eng/common/templates-official/job/publish-build-assets.yml@self
@@ -309,8 +313,8 @@ extends:
             - Windows_NT
             - Source_Build_Managed
           pool:
-            name: AzurePipelines-EO
-            image: 1ESPT-Windows2022
+            name: $(DncEngInternalBuildPool)
+            image: $(WindowsImage)
             os: windows
 
     - template: eng\common\templates-official\post-build\post-build.yml@self

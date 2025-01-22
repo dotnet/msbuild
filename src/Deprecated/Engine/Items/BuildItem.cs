@@ -53,7 +53,7 @@ namespace Microsoft.Build.BuildEngine
 
         // This is the "Include" value of a virtual item. This
         // may contain wildcards.
-        // For persisted (non-virtual) items, the include is gotten from 
+        // For persisted (non-virtual) items, the include is gotten from
         // the backing xml; there is no point storing a copy here, and this
         // remains null.
         private string include = null;
@@ -400,7 +400,7 @@ namespace Microsoft.Build.BuildEngine
         /// when a build generates a large number of items.
         /// </remarks>
         /// <param name="ownerDocument">can be null</param>
-        /// <param name="name">can be null</param> 
+        /// <param name="name">can be null</param>
         private BuildItem(XmlDocument ownerDocument, string name, string include, bool createCustomMetadataCache, ItemDefinitionLibrary itemDefinitionLibrary)
         {
             BuildItemHelper(ownerDocument, name, include, createCustomMetadataCache, itemDefinitionLibrary);
@@ -1133,7 +1133,7 @@ namespace Microsoft.Build.BuildEngine
         /// FUTURE: Currently this isn't done when the item is constructed; so for example HasMetadata will always return
         /// false until EvaluatedAllItemMetadata is explicitly called. The reason for this is that Metadata are
         /// not first class objects, they are merely string pairs produced by running over the child XML with a particular expander.
-        /// When Metadata are first class objects this method can be changed to merely evaluate them, 
+        /// When Metadata are first class objects this method can be changed to merely evaluate them,
         /// just as BuildItemGroup.Evaluate does for BuildItem, then methods like HasMetadata behave more sanely. Of course this
         /// could be a breaking change.
         /// </remarks>
@@ -1205,7 +1205,7 @@ namespace Microsoft.Build.BuildEngine
             ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
             ErrorUtilities.VerifyThrow(this.unevaluatedCustomMetadata != null, "Item not initialized properly. unevaluatedCustomAttributes is null.");
 #if DEBUG
-            // The hashtable of metadata (this.unevaluatedCustomMetadata) should never contain 
+            // The hashtable of metadata (this.unevaluatedCustomMetadata) should never contain
             // values for those reserved metadata that the engine provides (Filename, RelativeDir,
             // Extension, etc.).  The one exception is that the hashtable is allowed to contain
             // a value for "RecursiveDir" because that one is extra special ... tasks are allowed
@@ -1272,7 +1272,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Retrieves an arbitrary metadata from the item element, expands any property and item references within it, and 
+        /// Retrieves an arbitrary metadata from the item element, expands any property and item references within it, and
         /// unescapes it.
         /// </summary>
         /// <remarks>Custom attributes on virtual items are not evaluated.</remarks>
@@ -1901,7 +1901,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Updates the build item xml backing store with the passed in xml backing store. 
+        /// Updates the build item xml backing store with the passed in xml backing store.
         /// </summary>
         internal void UpdateBackingXml(BuildItemGroupChildXml backingXml)
         {

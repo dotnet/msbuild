@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests
 
             // We don't check for this type in the ComDependencyWalker, so it doesn't get counted as a known OLE type.
             // It's too late in the Dev10 cycle to add it to shipping code without phenomenally good reason, but we should
-            // re-examine this in Dev11.  
+            // re-examine this in Dev11.
             // oleTypeLib.AddTypeInfo(new MockTypeInfo(TYPEKIND.TKIND_ENUM));
 
             foreach (MockTypeInfo typeInfo in oleTypeLib.ContainedTypeInfos)
@@ -296,7 +296,7 @@ namespace Microsoft.Build.UnitTests
             walker.AnalyzeTypeLibrary(mainTypeLib);
 
             // Did the current failure point get hit for this test? If not then no point in checking anything
-            // The previous test (FaultInjectionMainLib) ensures that all defined failure points actually 
+            // The previous test (FaultInjectionMainLib) ensures that all defined failure points actually
             // cause some sort of trouble
             if (walker.EncounteredProblems.Count > 0)
             {

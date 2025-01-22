@@ -116,7 +116,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 this.writeableData = null;
 
-                // If the source it was writeable, need to transform it into 
+                // If the source it was writeable, need to transform it into
                 // read-only because we don't want subsequent writes to bleed through.
                 if (that.writeableData != null)
                 {

@@ -401,14 +401,14 @@ namespace Microsoft.Build.Tasks.Xaml
                 argumentDependencyLookup.Add(propertyToAdd.Name, propertyToAdd);
             }
 
-            // We've read any enumerated values and any dependencies, so we just 
+            // We've read any enumerated values and any dependencies, so we just
             // have to add the property
             propertyList.AddLast(propertyToAdd);
             return true;
         }
 
         /// <summary>
-        /// Gets all the attributes assigned in the xml file for this parameter or all of the nested switches for 
+        /// Gets all the attributes assigned in the xml file for this parameter or all of the nested switches for
         /// this parameter group
         /// </summary>
         private static Property ObtainAttributes(XamlTypes.BaseProperty baseProperty, Property parameterGroup)

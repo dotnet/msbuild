@@ -20,12 +20,12 @@ namespace Microsoft.Build.UnitTests
     public class ProjectSchemaValidationHandlerTest
     {
         /***********************************************************************
-         * 
+         *
          * Test:        ProjectSchemaValidationHandlerTest.VerifyProjectSchema
-         *  
+         *
          * This calls VerifyProjectSchema to validate a project file passed, where
          * the project contents are invalid
-         * 
+         *
          **********************************************************************/
         [Fact]
         public void VerifyInvalidProjectSchema()
@@ -175,12 +175,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         /***********************************************************************
-         * 
+         *
          * Test:        ProjectSchemaValidationHandlerTest.VerifyProjectSchema
-         *  
+         *
          * This calls VerifyProjectSchema to validate a project XML
          * specified in a string, where the project passed is valid
-         * 
+         *
          **********************************************************************/
         [Fact]
         public void VerifyValidProjectSchema()
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests
 
                 // ProjectSchemaValidationHandler.VerifyProjectSchema
                 //    (
-                //    projectFilename, 
+                //    projectFilename,
                 //    msbuildTempXsdFilenames[0],
                 //    @"c:\"
                 //    );

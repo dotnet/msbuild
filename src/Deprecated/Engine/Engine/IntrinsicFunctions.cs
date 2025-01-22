@@ -116,7 +116,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Perform a bitwise OR on the first and second (first | second) 
+        /// Perform a bitwise OR on the first and second (first | second)
         /// </summary>
         internal static int BitwiseOr(int first, int second)
         {
@@ -124,7 +124,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Perform a bitwise AND on the first and second (first &amp; second) 
+        /// Perform a bitwise AND on the first and second (first &amp; second)
         /// </summary>
         internal static int BitwiseAnd(int first, int second)
         {
@@ -132,7 +132,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Perform a bitwise XOR on the first and second (first ^ second) 
+        /// Perform a bitwise XOR on the first and second (first ^ second)
         /// </summary>
         internal static int BitwiseXor(int first, int second)
         {
@@ -140,7 +140,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Perform a bitwise NOT on the first and second (~first) 
+        /// Perform a bitwise NOT on the first and second (~first)
         /// </summary>
         internal static int BitwiseNot(int first)
         {
@@ -225,11 +225,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location. 
+        /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location.
         /// Throws UriFormatException.
         /// </summary>
         /// <param name="basePath">
-        /// The base path we want to relativize to. Must be absolute.  
+        /// The base path we want to relativize to. Must be absolute.
         /// Should <i>not</i> include a filename as the last segment will be interpreted as a directory.
         /// </param>
         /// <param name="path">
@@ -297,11 +297,11 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// Returns true if a task host exists that can service the requested runtime and architecture
-        /// values, and false otherwise. 
+        /// values, and false otherwise.
         /// </summary>
         /// <comments>
         /// The old engine ignores the concept of the task host entirely, so it shouldn't really
-        /// matter what we return.  So we return "true" because regardless of the task host parameters, 
+        /// matter what we return.  So we return "true" because regardless of the task host parameters,
         /// the task will be successfully run (in-proc).
         /// </comments>
         internal static bool DoesTaskHostExist(string runtime, string architecture)

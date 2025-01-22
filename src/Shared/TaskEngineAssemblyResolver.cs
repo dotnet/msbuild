@@ -42,10 +42,10 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Installs an AssemblyResolve handler in the current AppDomain. This class can be created in any AppDomain, 
+        /// Installs an AssemblyResolve handler in the current AppDomain. This class can be created in any AppDomain,
         /// so it's possible to create an AppDomain, create an instance of this class in it and use this method to install
         /// an event handler in that AppDomain. Since the event handler instance is stored internally, this method
-        /// should only be called once before a corresponding call to RemoveHandler (not that it would make sense to do 
+        /// should only be called once before a corresponding call to RemoveHandler (not that it would make sense to do
         /// anything else).
         /// </summary>
         internal void InstallHandler()

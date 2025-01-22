@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -16,7 +17,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Experimental
 {
     /// <summary>
-    /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server 
+    /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server
     /// </summary>
     public sealed class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
@@ -69,7 +70,7 @@ namespace Microsoft.Build.Experimental
 
         /// <summary>
         /// Indicate that cancel has been requested and initiated.
-        /// </summary>        
+        /// </summary>
         private bool _cancelRequested = false;
         private string _serverBusyMutexName = default!;
 
@@ -92,7 +93,7 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// Starts up the server node and processes all build requests until the server is requested to shut down.
         /// </summary>
-        /// <param name="shutdownException">The exception which caused shutdown, if any.</param> 
+        /// <param name="shutdownException">The exception which caused shutdown, if any.</param>
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {
@@ -357,7 +358,10 @@ namespace Microsoft.Build.Experimental
 
             // Set build process context
             Directory.SetCurrentDirectory(command.StartupDirectory);
+
             CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
+            Traits.UpdateFromEnvironment();
+
             Thread.CurrentThread.CurrentCulture = command.Culture;
             Thread.CurrentThread.CurrentUICulture = command.UICulture;
 

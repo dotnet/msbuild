@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Basic project content start
         /// </summary>
-        private string basicProjectContentsBefore = @" 
+        private string basicProjectContentsBefore = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <PropertyGroup>
                         <p1>true</p1>
@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Basic project content with only one property group
         /// </summary>
-        private string basicProjectContentsWithOnePropertyGroup = @" 
+        private string basicProjectContentsWithOnePropertyGroup = @"
                             <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                                 <PropertyGroup>
                                     <n>v</n>
@@ -508,7 +508,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             group.SetProperty("n2", "v2");
             group.SetProperty("n3", "v3");
 
-            BuildProperty[] property = new BuildProperty[] 
+            BuildProperty[] property = new BuildProperty[]
                 {
                     GetSpecificBuildPropertyOutOfBuildPropertyGroup(group, "n1"),
                     GetSpecificBuildPropertyOutOfBuildPropertyGroup(group, "n2"),
@@ -582,7 +582,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             Project p = Build.UnitTests.ObjectModelHelpers.CreateInMemoryProject(basicProjectContentsBefore);
             AddNewPropertyToEachPropertyGroup(p, "n", String.Empty);
 
-            string projectContentsAfter = @" 
+            string projectContentsAfter = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <PropertyGroup>
                         <p1>true</p1>
@@ -609,7 +609,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             Project p = Build.UnitTests.ObjectModelHelpers.CreateInMemoryProject(basicProjectContentsBefore);
             AddNewPropertyToEachPropertyGroup(p, "n", "v");
 
-            string projectContentsAfter = @" 
+            string projectContentsAfter = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <PropertyGroup>
                         <p1>true</p1>
@@ -639,7 +639,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             AddNewPropertyToEachPropertyGroup(p, "n3", "v3");
             AddNewPropertyToEachPropertyGroup(p, "n4", "v4");
 
-            string projectContentsAfter = @" 
+            string projectContentsAfter = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <PropertyGroup>
                         <p1>true</p1>
@@ -672,7 +672,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             Project p = Build.UnitTests.ObjectModelHelpers.CreateInMemoryProject(basicProjectContentsBefore);
             AddNewPropertyToEachPropertyGroupWithPropertyValueAsLiteral(p, "n", @"%*?@$();\", true);
 
-            string projectContentsAfter = @" 
+            string projectContentsAfter = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <PropertyGroup>
                         <p1>true</p1>
@@ -699,7 +699,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             Project p = Build.UnitTests.ObjectModelHelpers.CreateInMemoryProject(basicProjectContentsBefore);
             AddNewPropertyToEachPropertyGroupWithPropertyValueAsLiteral(p, "n", @"%*?@$();\", false);
 
-            string projectContentsAfter = @" 
+            string projectContentsAfter = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <PropertyGroup>
                         <p1>true</p1>
@@ -763,7 +763,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void ConditionGetWhenSetItXML()
         {
-            string projectContents = @" 
+            string projectContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <PropertyGroup Condition="" '$(Foo)' == 'Bar' "">
                         <n1>v1</n1>
@@ -871,7 +871,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void IsImportedAllFromMainProject()
         {
-            string projectContents = @" 
+            string projectContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <PropertyGroup>
                         <n1>v1</n1>
@@ -898,7 +898,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void IsImportedAllFromImportProject()
         {
-            string projectContents = @" 
+            string projectContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
                 </Project>
@@ -917,7 +917,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void IsImportedFromMainProjectAndImported()
         {
-            string projectContents = @" 
+            string projectContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <PropertyGroup>
                         <n1>v1</n1>
@@ -965,7 +965,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void SetImportedPropertyGroupConditionTrue()
         {
-            string projectContents = @" 
+            string projectContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
                 </Project>
@@ -985,7 +985,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void SetImportedPropertyGroupConditionFalse()
         {
-            string projectContents = @" 
+            string projectContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
                 </Project>
@@ -1005,7 +1005,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void SetImportedPropertyGroupCondition()
         {
-            string projectContents = @" 
+            string projectContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
                 </Project>
@@ -1025,7 +1025,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void SetImportedPropertyGroupConditionToEmtpySTring()
         {
-            string projectContents = @" 
+            string projectContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
                 </Project>
@@ -1045,7 +1045,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         [Test]
         public void SetImportedPropertyGroupConditionToNull()
         {
-            string projectContents = @" 
+            string projectContents = @"
                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                     <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets' />
                 </Project>
