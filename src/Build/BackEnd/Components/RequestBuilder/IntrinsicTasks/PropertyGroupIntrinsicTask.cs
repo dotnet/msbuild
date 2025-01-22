@@ -124,7 +124,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="evaluatedValue">The new evaluated value of the property.</param>
         private void LogPropertyInTargetAssignment(ProjectPropertyGroupTaskPropertyInstance property, string evaluatedValue)
         {
-            if (_propertyTrackingSettings == 0 || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            if (_propertyTrackingSettings == 0)
             {
                 return;
             }

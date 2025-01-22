@@ -1601,7 +1601,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="location">The source location where the property assignment occurs.</param>
         private void LogPropertyInTaskAssignment(string propertyName, string propertyValue, IElementLocation location)
         {
-            if (_propertyTrackingSettings == 0 || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            if (_propertyTrackingSettings == 0)
             {
                 return;
             }

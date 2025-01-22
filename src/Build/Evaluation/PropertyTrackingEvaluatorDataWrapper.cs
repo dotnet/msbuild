@@ -298,7 +298,7 @@ namespace Microsoft.Build.Evaluation
                 property.EvaluatedValue,
 
                 // If the property is from XML, we don't need property source since a full location is available.
-                location == null ? EnumUtilities.GetEnumString(source) : string.Empty,
+                location == null ? GetPropertySourceName(source) : string.Empty,
                 location?.File,
                 location?.Line ?? 0,
                 location?.Column ?? 0,
@@ -332,8 +332,7 @@ namespace Microsoft.Build.Evaluation
 
             // Either we want to specifically track property reassignments
             // or we do not want to track nothing - in which case the prop reassignment is enabled by default.
-            if ((_settings & PropertyTrackingSetting.PropertyReassignment) == PropertyTrackingSetting.PropertyReassignment ||
-                (_settings == 0 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)))
+            if (_settings == 0 || (_settings & PropertyTrackingSetting.PropertyReassignment) == PropertyTrackingSetting.PropertyReassignment)
             {
                 var args = new PropertyReassignmentEventArgs(
                     property.Name,
@@ -391,6 +390,17 @@ namespace Microsoft.Build.Evaluation
             EnvironmentVariable,
             CommandLine,
         }
+
+        private static string GetPropertySourceName(PropertySource source) => source switch
+        {
+            PropertySource.Xml => "XML",
+            PropertySource.BuiltIn => "Built-in",
+            PropertySource.Global => "Global",
+            PropertySource.Toolset => "Toolset",
+            PropertySource.EnvironmentVariable => "Environment Variable",
+            PropertySource.CommandLine => "Command Line",
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
+        };
     }
 
     [Flags]
