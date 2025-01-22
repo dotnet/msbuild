@@ -17,47 +17,6 @@ namespace Microsoft.Build.Framework.Telemetry
 {
 
     /// <summary>
-    /// State of the telemetry infrastructure.
-    /// </summary>
-    internal enum TelemetryState
-    {
-        /// <summary>
-        /// Initial state.
-        /// </summary>
-        Uninitialized,
-
-        /// <summary>
-        /// Opt out of telemetry.
-        /// </summary>
-        OptOut,
-
-        /// <summary>
-        /// Run not sampled for telemetry.
-        /// </summary>
-        Unsampled,
-
-        /// <summary>
-        /// For core hook, ActivitySource is created.
-        /// </summary>
-        TracerInitialized,
-
-        /// <summary>
-        /// For VS scenario with a collector. ActivitySource, OTel TracerProvider are created.
-        /// </summary>
-        ExporterInitialized,
-
-        /// <summary>
-        /// For standalone, ActivitySource, OTel TracerProvider, VS OpenTelemetry Collector are created.
-        /// </summary>
-        CollectorInitialized,
-
-        /// <summary>
-        /// End state.
-        /// </summary>
-        Disposed
-    }
-
-    /// <summary>
     /// Singleton class for configuring and managing the telemetry infrastructure with System.Diagnostics.Activity,
     /// OpenTelemetry SDK, and VS OpenTelemetry Collector.
     /// </summary>
@@ -118,13 +77,21 @@ namespace Microsoft.Build.Framework.Telemetry
                 DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
 
 #if NETFRAMEWORK
-                InitializeTracerProvider();
+                try
+                {
+                    InitializeTracerProvider();
 
-                // TODO: Enable commented logic when Collector is present in VS
-                // if (isStandalone)
-                InitializeCollector();
+                    // TODO: Enable commented logic when Collector is present in VS
+                    // if (isStandalone)
+                    InitializeCollector();
 
-                // }
+                    // }
+                }
+                // catch OTel assemblies not present in VS tests
+                catch (System.IO.IOException)
+                {
+                    _telemetryState = TelemetryState.Unsampled;
+                }
 #endif
             }
         }
@@ -215,6 +182,47 @@ namespace Microsoft.Build.Framework.Telemetry
             // Simple random sampling, this method is called once, no need to save the Random instance.
             Random random = new();
             return random.NextDouble() < _sampleRate;
+        }
+
+        /// <summary>
+        /// State of the telemetry infrastructure.
+        /// </summary>
+        internal enum TelemetryState
+        {
+            /// <summary>
+            /// Initial state.
+            /// </summary>
+            Uninitialized,
+
+            /// <summary>
+            /// Opt out of telemetry.
+            /// </summary>
+            OptOut,
+
+            /// <summary>
+            /// Run not sampled for telemetry.
+            /// </summary>
+            Unsampled,
+
+            /// <summary>
+            /// For core hook, ActivitySource is created.
+            /// </summary>
+            TracerInitialized,
+
+            /// <summary>
+            /// For VS scenario with a collector. ActivitySource, OTel TracerProvider are created.
+            /// </summary>
+            ExporterInitialized,
+
+            /// <summary>
+            /// For standalone, ActivitySource, OTel TracerProvider, VS OpenTelemetry Collector are created.
+            /// </summary>
+            CollectorInitialized,
+
+            /// <summary>
+            /// End state.
+            /// </summary>
+            Disposed
         }
     }
 }

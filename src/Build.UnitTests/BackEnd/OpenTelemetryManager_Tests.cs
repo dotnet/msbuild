@@ -60,7 +60,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
 
             // Assert
             var state = GetTelemetryState(OpenTelemetryManager.Instance);
-            state.ShouldBe(TelemetryState.OptOut);
+            state.ShouldBe(OpenTelemetryManager.TelemetryState.OptOut);
             OpenTelemetryManager.Instance.DefaultActivitySource.ShouldBeNull();
         }
 #if NET
@@ -78,11 +78,11 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             OpenTelemetryManager.Instance.Initialize(isStandalone: false);
 
             var state = GetTelemetryState(OpenTelemetryManager.Instance);
-            state.ShouldBe(TelemetryState.Unsampled);
+            state.ShouldBe(OpenTelemetryManager.TelemetryState.Unsampled);
             OpenTelemetryManager.Instance.DefaultActivitySource.ShouldBeNull();
         }
 #endif
-        
+
         [WindowsFullFrameworkOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             // Assert
             var state = GetTelemetryState(OpenTelemetryManager.Instance);
             // On .NET Framework, we expect TelemetryState.ExporterInitialized
-            // On .NET / .NET Standard, the code doesn't explicitly set TelemetryState 
+            // On .NET / .NET Standard, the code doesn't explicitly set TelemetryState
             // => it remains TelemetryState.Uninitialized if not net48 or netframework.
             // So we can do a check to see if it is either ExporterInitialized or left at Uninitialized.
             // If your code has changed to set a different state, adapt accordingly.
@@ -108,16 +108,16 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
 #if NETFRAMEWORK
             if (standalone)
             {
-                state.ShouldBe(TelemetryState.CollectorInitialized);
+                state.ShouldBe(OpenTelemetryManager.TelemetryState.CollectorInitialized);
             }
             else
             {
                 // TODO: collector in VS
                 // state.ShouldBe(TelemetryState.ExporterInitialized);
-                state.ShouldBe(TelemetryState.CollectorInitialized);
+                state.ShouldBe(OpenTelemetryManager.TelemetryState.CollectorInitialized);
             }
 #else
-            state.ShouldBe(TelemetryState.TracerInitialized);
+            state.ShouldBe(OpenTelemetryManager.TelemetryState.TracerInitialized);
 #endif
             // In either scenario, we expect a non-null DefaultActivitySource
             OpenTelemetryManager.Instance.DefaultActivitySource.ShouldNotBeNull();
@@ -140,10 +140,10 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             var secondState = GetTelemetryState(OpenTelemetryManager.Instance);
 
             // Assert
-            // Because the manager was already set to "OptOut" on the first call, 
+            // Because the manager was already set to "OptOut" on the first call,
             // the second call is a no-op (the state remains the same).
-            firstState.ShouldBe(TelemetryState.OptOut);
-            secondState.ShouldBe(TelemetryState.OptOut);
+            firstState.ShouldBe(OpenTelemetryManager.TelemetryState.OptOut);
+            secondState.ShouldBe(OpenTelemetryManager.TelemetryState.OptOut);
         }
 
         /* Helper methods */
@@ -153,8 +153,8 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         /// </summary>
         private void ResetManagerState()
         {
-            // The manager is a private static Lazy<OpenTelemetryManager>. We can forcibly 
-            // set the instance's internal fields to revert it to Uninitialized. 
+            // The manager is a private static Lazy<OpenTelemetryManager>. We can forcibly
+            // set the instance's internal fields to revert it to Uninitialized.
             // Another approach is to forcibly re-create the Lazy<T>, but that's more complicated.
             //
             // For demonstration, we do minimal reflection to set:
@@ -165,7 +165,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             // 1. telemetryState
             var telemetryStateField = typeof(OpenTelemetryManager)
                 .GetField("_telemetryState", BindingFlags.NonPublic | BindingFlags.Instance);
-            telemetryStateField?.SetValue(instance, TelemetryState.Uninitialized);
+            telemetryStateField?.SetValue(instance, OpenTelemetryManager.TelemetryState.Uninitialized);
 
             // 2. DefaultActivitySource
             var defaultSourceProp = typeof(OpenTelemetryManager)
@@ -177,11 +177,11 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         /// <summary>
         /// Reads the private _telemetryState field from the given manager instance using reflection.
         /// </summary>
-        private TelemetryState GetTelemetryState(OpenTelemetryManager manager)
+        private OpenTelemetryManager.TelemetryState GetTelemetryState(OpenTelemetryManager manager)
         {
             var field = typeof(OpenTelemetryManager)
                 .GetField("_telemetryState", BindingFlags.NonPublic | BindingFlags.Instance);
-            return (TelemetryState)field?.GetValue(manager)!;
+            return (OpenTelemetryManager.TelemetryState)field?.GetValue(manager)!;
         }
     }
 }
