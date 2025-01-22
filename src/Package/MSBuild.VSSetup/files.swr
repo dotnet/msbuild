@@ -39,11 +39,12 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)BuildXL.Native.dll
   file source=$(X86BinPath)BuildXL.Processes.dll
   file source=$(X86BinPath)BuildXL.Utilities.Core.dll
-  file source=$(X86BinPath)Microsoft.VisualStudio.OpenTelemetry.ClientExtensions.dll
-  file source=$(X86BinPath)Microsoft.VisualStudio.OpenTelemetry.Collector.dll
+  file source=$(X86BinPath)Microsoft.VisualStudio.OpenTelemetry.ClientExtensions.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
+  file source=$(X86BinPath)Microsoft.VisualStudio.OpenTelemetry.Collector.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)Microsoft.VisualStudio.SolutionPersistence.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)RuntimeContracts.dll
   file source=$(X86BinPath)System.Buffers.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
+  file source=$(X86BinPath)System.Diagnostics.DiagnosticSource.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)System.Memory.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)System.Reflection.Metadata.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)System.Reflection.MetadataLoadContext.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
