@@ -565,6 +565,27 @@ namespace Microsoft.Build.UnitTests
                     .Select(v => v.TotalSeconds.ToString(CultureInfo.InvariantCulture)).ToCsvString(false));
         }
 
+        [Fact]
+        public void RoundtripWorkerNodeTelemetryEventArgs()
+        {
+            string key1 = "AA";
+            TimeSpan span1 = TimeSpan.FromSeconds(5);
+            string key2 = "b";
+            TimeSpan span2 = TimeSpan.FromSeconds(15);
+            string key3 = "cCc";
+            TimeSpan span3 = TimeSpan.FromSeconds(50);
+
+            Dictionary<string, TimeSpan> stats = new() { { key1, span1 }, { key2, span2 }, { key3, span3 } };
+
+            WorkerNodeTelemetryEventArgs args = new WorkerNodeTelemetryEventArgs(stats);
+
+            Roundtrip(args,
+                e => e.TracingData.InfrastructureTracingData.Keys.Count.ToString(),
+                e => e.TracingData.InfrastructureTracingData.Keys.ToCsvString(false),
+                e => e.TracingData.InfrastructureTracingData.Values
+                    .Select(v => v.TotalSeconds.ToString(CultureInfo.InvariantCulture)).ToCsvString(false));
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
