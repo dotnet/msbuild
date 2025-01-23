@@ -1266,6 +1266,10 @@ namespace Microsoft.Build.Execution
                     && !FileClassifier.Shared.IsBuiltInLogic(_definingFileFullPath);
             }
 
+            public bool IsFromNugetCache
+                => FileClassifier.Shared.IsInNugetCache(_taskFactoryAssemblyLoadInfo.AssemblyFile) ||
+                   FileClassifier.Shared.IsInNugetCache(_definingFileFullPath);
+
             private static bool IsMicrosoftAssembly(string assemblyName)
                 => assemblyName.StartsWith("Microsoft.", StringComparison.Ordinal);
 
