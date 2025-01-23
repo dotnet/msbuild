@@ -194,7 +194,7 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)System.Reflection.MetadataLoadContext.dll
   file source=$(X86BinPath)System.Text.Json.dll
   file source=$(X86BinPath)Microsoft.Bcl.AsyncInterfaces.dll
-  file source=$(X86BinPath)Microsoft.IO.Redist.dll
+  file source=$(X86BinPath)Microsoft.IO.Redist.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Text.Encodings.Web.dll
   file source=$(X86BinPath)System.Threading.Tasks.Extensions.dll
   file source=$(X86BinPath)System.ValueTuple.dll
