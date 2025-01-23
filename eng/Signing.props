@@ -8,9 +8,9 @@
 
     <FileSignInfo Include="RuntimeContracts.dll" CertificateName="3PartySHA2" />
 
-    <FileSignInfo Include="OpenTelemetry.dll" CertificateName="None" />
-    <FileSignInfo Include="OpenTelemetry.Api.dll" CertificateName="None" />
-    <FileSignInfo Include="OpenTelemetry.Api.ProviderBuilderExtensions.dll" CertificateName="None" />
+    <FileSignInfo Include="OpenTelemetry.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="OpenTelemetry.Api.dll" CertificateName="3PartySHA2" />
+    <FileSignInfo Include="OpenTelemetry.Api.ProviderBuilderExtensions.dll" CertificateName="3PartySHA2" />
   </ItemGroup>
 
   <PropertyGroup>
