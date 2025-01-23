@@ -421,7 +421,9 @@ namespace Microsoft.Build.Tasks.UnitTests
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            buffer[Position % count] = (byte)('A' + Position % 26);
+            // Simulate infinite stream by keeping providing a single character to the beginning of the requested destination.
+            // Writes next char A ~ Z in alphabet into the begining of requested destination. The count could be ignored.
+            buffer[offset] = (byte)('A' + Position % 26);
             Position++;
             Task.Delay(delayMilliseconds).Wait();
             return 1;
