@@ -77,8 +77,6 @@ namespace Microsoft.Build.Framework.Telemetry
                 DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
 
 #if NETFRAMEWORK
-                try
-                {
                     InitializeTracerProvider();
 
                     // TODO: Enable commented logic when Collector is present in VS
@@ -86,12 +84,6 @@ namespace Microsoft.Build.Framework.Telemetry
                     InitializeCollector();
 
                     // }
-                }
-                // catch OTel assemblies not present in VS tests
-                catch (System.IO.IOException)
-                {
-                    _telemetryState = TelemetryState.Unsampled;
-                }
 #endif
             }
         }
