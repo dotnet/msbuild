@@ -1159,7 +1159,6 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-
                 HandleProjectStarted(buildCheckManager);
 
                 // Make sure to extract known immutable folders from properties and register them for fast up-to-date check
@@ -1230,7 +1229,6 @@ namespace Microsoft.Build.BackEnd
                     new CheckLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext),
                     _requestEntry.RequestConfiguration.ProjectFullPath);
             }
-
 
             BuildResult CopyTargetResultsFromProxyTargetsToRealTargets(BuildResult resultFromTargetBuilder)
             {
