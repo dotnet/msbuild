@@ -565,26 +565,25 @@ namespace Microsoft.Build.UnitTests
                     .Select(v => v.TotalSeconds.ToString(CultureInfo.InvariantCulture)).ToCsvString(false));
         }
 
-        [Fact]
-        public void RoundtripWorkerNodeTelemetryEventArgs()
-        {
-            string key1 = "AA";
-            TimeSpan span1 = TimeSpan.FromSeconds(5);
-            string key2 = "b";
-            TimeSpan span2 = TimeSpan.FromSeconds(15);
-            string key3 = "cCc";
-            TimeSpan span3 = TimeSpan.FromSeconds(50);
+        // Let's not have this event in the binlog at all
+        //[Fact]
+        //public void RoundtripWorkerNodeTelemetryEventArgs()
+        //{
+        //    WorkerNodeTelemetryData td = new WorkerNodeTelemetryData(
+        //        new Dictionary<string, TaskExecutionStats>()
+        //        {
+        //            { "task1", new TaskExecutionStats(TimeSpan.FromMinutes(1), 5) },
+        //            { "task2", new TaskExecutionStats(TimeSpan.Zero, 0) },
+        //            { "task3", new TaskExecutionStats(TimeSpan.FromTicks(1234), 12) }
+        //        },
+        //        new Dictionary<string, bool>() { { "target1", false }, { "target2", true }, });
 
-            Dictionary<string, TimeSpan> stats = new() { { key1, span1 }, { key2, span2 }, { key3, span3 } };
+        //    WorkerNodeTelemetryEventArgs args = new WorkerNodeTelemetryEventArgs(td);
 
-            WorkerNodeTelemetryEventArgs args = new WorkerNodeTelemetryEventArgs(stats);
-
-            Roundtrip(args,
-                e => e.TracingData.InfrastructureTracingData.Keys.Count.ToString(),
-                e => e.TracingData.InfrastructureTracingData.Keys.ToCsvString(false),
-                e => e.TracingData.InfrastructureTracingData.Values
-                    .Select(v => v.TotalSeconds.ToString(CultureInfo.InvariantCulture)).ToCsvString(false));
-        }
+        //    Roundtrip(args,
+        //        e => e.WorkerNodeTelemetryData.TasksExecutionData.Select(kp => $"{kp.Key}:{kp.Value.CumulativeExecutionTime.Ticks}:{kp.Value.ExecutionsCount}").OrderBy(k => k).ToCsvString(),
+        //        e => e.WorkerNodeTelemetryData.TargetsExecutionData.Select(kp => $"{kp.Key}:{kp.Value}").OrderBy(k => k).ToCsvString());
+        //}
 
         [Theory]
         [InlineData(true)]

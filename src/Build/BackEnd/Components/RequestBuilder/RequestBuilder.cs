@@ -1159,6 +1159,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
+
                 HandleProjectStarted(buildCheckManager);
 
                 // Make sure to extract known immutable folders from properties and register them for fast up-to-date check

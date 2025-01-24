@@ -10,14 +10,18 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
     public class TelemetryTests
     {
-        public TelemetryTests()
+        private readonly ITestOutputHelper _output;
+
+        public TelemetryTests(ITestOutputHelper output)
         {
             ProjectBuildStats.DurationThresholdForTopN = TimeSpan.Zero;
+            _output = output;
         }
 
         private sealed class ProjectFinishedCapturingLogger : ILogger
@@ -46,50 +50,47 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void WorkerNodeTelemetryCollection_BasicTarget()
         {
-            var tstLogger = new ProjectFinishedCapturingLogger();
+            WorkerNodeTelemetryData? workerNodeTelemetryData = null;
+            InternalTelemeteryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeTelemetryData = dt;
+
             var testProject = """
-                        <Project>
-                            <Target Name="Build">
-                                <Message Text="Hello World"/>
-                                <CreateItem Include="foo.bar">
-                                    <Output TaskParameter="Include" ItemName="I" />
-                                </CreateItem>
-                                <Message Text="Bye World"/>
-                            </Target>
-                        </Project>
-                """;
-            Helpers.BuildProjectContentUsingBuildManager(testProject, tstLogger,
+                                      <Project>
+                                          <Target Name="Build">
+                                              <Message Text="Hello World"/>
+                                              <CreateItem Include="foo.bar">
+                                                  <Output TaskParameter="Include" ItemName="I" />
+                                              </CreateItem>
+                                              <Message Text="Bye World"/>
+                                          </Target>
+                                      </Project>
+                              """;
+
+            MockLogger logger = new MockLogger(_output);
+            Helpers.BuildProjectContentUsingBuildManager(testProject, logger,
                 new BuildParameters() { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
 
-            tstLogger.ProjectFinishedEventArgsReceived.Count.ShouldBe(1);
-            ProjectBuildStats? stats = tstLogger.ProjectFinishedEventArgsReceived[0].ProjectBuildStats;
-            stats.ShouldNotBeNull();
-            ((int)stats.CustomTargetsCount).ShouldBe(1);
-            ((int)stats.ExecutedCustomTargetsCount).ShouldBe(1);
-            ((int)stats.TotalTargetsCount).ShouldBe(1);
-            ((int)stats.ExecutedCustomTargetsCount).ShouldBe(1);
+            workerNodeTelemetryData!.ShouldNotBeNull();
+            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey("C:Build");
+            workerNodeTelemetryData.TargetsExecutionData["C:Build"].ShouldBeTrue();
+            workerNodeTelemetryData.TargetsExecutionData.Keys.Count.ShouldBe(1);
 
-            ((int)stats.TotalTasksCount).ShouldBeGreaterThan(2);
-            ((int)stats.TotalTasksExecutionsCount).ShouldBe(3);
-            ((int)stats.TotalExecutedTasksCount).ShouldBe(2);
-            ((int)stats.CustomTasksCount).ShouldBe(0);
-            ((int)stats.CustomTasksExecutionsCount).ShouldBe(0);
-            ((int)stats.ExecutedCustomTasksCount).ShouldBe(0);
-            stats.TotalTasksExecution.ShouldBeGreaterThan(TimeSpan.Zero);
-            stats.TotalCustomTasksExecution.ShouldBe(TimeSpan.Zero);
+            workerNodeTelemetryData.TasksExecutionData.Keys.Count.ShouldBeGreaterThan(2);
+            ((int)workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.Message"].ExecutionsCount).ShouldBe(2);
+            workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.Message"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
+            ((int)workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.CreateItem"].ExecutionsCount).ShouldBe(1);
+            workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.CreateItem"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
 
-            stats.TopTasksByCumulativeExecution.Count.ShouldNotBe(0);
-            foreach (var st in stats.TopTasksByCumulativeExecution)
-            {
-                st.Key.ShouldBeGreaterThan(TimeSpan.Zero);
-                (st.Value.EndsWith("Message") || st.Value.EndsWith("CreateItem")).ShouldBeTrue($"Only specified tasks expected. Encountered: {st.Value}");
-            }
+            workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.StartsWith("C:") && !k.StartsWith("N:"));
+            workerNodeTelemetryData.TasksExecutionData.Values
+                .Count(v => v.CumulativeExecutionTime > TimeSpan.Zero || v.ExecutionsCount > 0).ShouldBe(2);
         }
 
         [Fact]
         public void WorkerNodeTelemetryCollection_CustomTargetsAndTasks()
         {
-            var tstLogger = new ProjectFinishedCapturingLogger();
+            WorkerNodeTelemetryData? workerNodeTelemetryData = null;
+            InternalTelemeteryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeTelemetryData = dt;
+
             var testProject = """
                                       <Project>
                                       <UsingTask
@@ -135,33 +136,35 @@ namespace Microsoft.Build.Engine.UnitTests
                                           </Target>
                                       </Project>
                               """;
-            Helpers.BuildProjectContentUsingBuildManager(testProject, tstLogger,
+            MockLogger logger = new MockLogger(_output);
+            Helpers.BuildProjectContentUsingBuildManager(testProject, logger,
                 new BuildParameters() { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
 
-            tstLogger.ProjectFinishedEventArgsReceived.Count.ShouldBe(1);
-            ProjectBuildStats? stats = tstLogger.ProjectFinishedEventArgsReceived[0].ProjectBuildStats;
-            stats.ShouldNotBeNull();
-            ((int)stats.CustomTargetsCount).ShouldBe(3);
-            ((int)stats.ExecutedCustomTargetsCount).ShouldBe(2);
-            ((int)stats.TotalTargetsCount).ShouldBe(3);
-            ((int)stats.ExecutedCustomTargetsCount).ShouldBe(2);
+            workerNodeTelemetryData!.ShouldNotBeNull();
+            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey("C:Build");
+            workerNodeTelemetryData.TargetsExecutionData["C:Build"].ShouldBeTrue();
+            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey("C:BeforeBuild");
+            workerNodeTelemetryData.TargetsExecutionData["C:BeforeBuild"].ShouldBeTrue();
+            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey("C:NotExecuted");
+            workerNodeTelemetryData.TargetsExecutionData["C:NotExecuted"].ShouldBeFalse();
+            workerNodeTelemetryData.TargetsExecutionData.Keys.Count.ShouldBe(3);
 
-            ((int)stats.TotalTasksCount).ShouldBeGreaterThan(2);
-            ((int)stats.TotalTasksExecutionsCount).ShouldBe(6);
-            ((int)stats.TotalExecutedTasksCount).ShouldBe(3);
-            ((int)stats.CustomTasksCount).ShouldBe(2);
-            ((int)stats.CustomTasksExecutionsCount).ShouldBe(2);
-            ((int)stats.ExecutedCustomTasksCount).ShouldBe(1);
-            stats.TotalTasksExecution.ShouldBeGreaterThan(TimeSpan.Zero);
-            stats.TotalCustomTasksExecution.ShouldBeGreaterThan(TimeSpan.Zero);
+            workerNodeTelemetryData.TasksExecutionData.Keys.Count.ShouldBeGreaterThan(2);
+            ((int)workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.Message"].ExecutionsCount).ShouldBe(3);
+            workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.Message"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
+            ((int)workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.CreateItem"].ExecutionsCount).ShouldBe(1);
+            workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.CreateItem"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
 
-            stats.TopTasksByCumulativeExecution.Count.ShouldNotBe(0);
-            foreach (var st in stats.TopTasksByCumulativeExecution)
-            {
-                st.Key.ShouldBeGreaterThan(TimeSpan.Zero);
-                (st.Value.EndsWith("Message") || st.Value.EndsWith("CreateItem") || st.Value.EndsWith("Task01")).ShouldBeTrue($"Only specified tasks expected. Encountered: {st.Value}");
-            }
-            stats.TopTasksByCumulativeExecution.Any(t => t.Value.Equals("Custom:Task01")).ShouldBeTrue($"Expected to encounter custom task. Tasks: {stats.TopTasksByCumulativeExecution.Select(t => t.Value).ToCsvString()}");
+            ((int)workerNodeTelemetryData.TasksExecutionData["C:Task01"].ExecutionsCount).ShouldBe(2);
+            workerNodeTelemetryData.TasksExecutionData["C:Task01"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
+
+            ((int)workerNodeTelemetryData.TasksExecutionData["C:Task02"].ExecutionsCount).ShouldBe(0);
+            workerNodeTelemetryData.TasksExecutionData["C:Task02"].CumulativeExecutionTime.ShouldBe(TimeSpan.Zero);
+
+            workerNodeTelemetryData.TasksExecutionData.Values
+                .Count(v => v.CumulativeExecutionTime > TimeSpan.Zero || v.ExecutionsCount > 0).ShouldBe(3);
+
+            workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.StartsWith("N:"));
         }
     }
 }

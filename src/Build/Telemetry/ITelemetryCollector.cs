@@ -61,41 +61,23 @@ internal class TelemetryCollectorProvider : IBuildComponent
         _instance = null;
     }
 
-    public class TelemetryCollector : ITelemetryCollector, IWorkerNodeTelemetryData
+    public class TelemetryCollector : ITelemetryCollector
     {
-        private readonly Dictionary<string, TaskExecutionStats> _tasksExecutionData = new();
-        private readonly Dictionary<string, bool> _targetsExecutionData = new();
+        private readonly WorkerNodeTelemetryData _workerNodeTelemetryData = new();
 
         // in future, this might ber per event type
         public bool IsTelemetryCollected => true;
 
-        Dictionary<string, TaskExecutionStats> IWorkerNodeTelemetryData.TasksExecutionData => _tasksExecutionData;
-
-        Dictionary<string, bool> IWorkerNodeTelemetryData.TargetsExecutionData => _targetsExecutionData;
-
         public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, bool isCustom, bool isFromNugetCache)
         {
             name = GetName(name, isCustom, isFromNugetCache);
-
-            TaskExecutionStats taskExecutionStats;
-            if (!_tasksExecutionData.TryGetValue(name, out taskExecutionStats))
-            {
-                taskExecutionStats = new(cumulativeExectionTime, executionsCount);
-                _tasksExecutionData[name] = taskExecutionStats;
-            }
-            else
-            {
-                taskExecutionStats.CumulativeExecutionTime += cumulativeExectionTime;
-                taskExecutionStats.ExecutionsCount += executionsCount;
-            }
+            _workerNodeTelemetryData.AddTask(name, cumulativeExectionTime, executionsCount);
         }
 
         public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isFromNugetCache)
         {
             name = GetName(name, isCustom, isFromNugetCache);
-            _targetsExecutionData[name] =
-                // we just need to store if it was ever executed
-                wasExecuted || (_targetsExecutionData.TryGetValue(name, out bool wasAlreadyExecuted) && wasAlreadyExecuted);
+            _workerNodeTelemetryData.AddTarget(name, wasExecuted);
         }
 
         private static string GetName(string name, bool isCustom, bool isFromNugetCache)
@@ -115,7 +97,7 @@ internal class TelemetryCollectorProvider : IBuildComponent
 
         public void FinalizeProcessing(LoggingContext loggingContext)
         {
-            WorkerNodeTelemetryEventArgs telemetryArgs = new(this)
+            WorkerNodeTelemetryEventArgs telemetryArgs = new(_workerNodeTelemetryData)
                 { BuildEventContext = loggingContext.BuildEventContext };
             loggingContext.LogBuildEvent(telemetryArgs);
         }

@@ -667,6 +667,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
                 LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
                 LoggingEventType.BuildCanceledEvent => new BuildCanceledEventArgs("Build canceled."),
+                LoggingEventType.WorkerNodeTelemetryEvent => new WorkerNodeTelemetryEventArgs(),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
