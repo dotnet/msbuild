@@ -249,6 +249,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="BuildCanceledEventArgs"/>
         /// </summary>
         BuildCanceledEvent = 41,
+
+        /// <summary>
+        /// Event is <see cref="WorkerNodeTelemetryEventArgs"/>
+        /// </summary>
+        WorkerNodeTelemetryEvent = 42,
     }
     #endregion
 
@@ -808,6 +813,10 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(BuildCanceledEventArgs))
             {
                 return LoggingEventType.BuildCanceledEvent;
+            }
+            else if (eventType == typeof(WorkerNodeTelemetryEventArgs))
+            {
+                return LoggingEventType.WorkerNodeTelemetryEvent;
             }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))

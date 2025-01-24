@@ -9,14 +9,13 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Telemetry;
 
 internal interface ITelemetryCollector
 {
     bool IsTelemetryCollected { get; }
-
-    void AddData();
 
     void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, bool isCustom,
         bool isFromNugetCache);
@@ -62,20 +61,17 @@ internal class TelemetryCollectorProvider : IBuildComponent
         _instance = null;
     }
 
-    public class TelemetryCollector : ITelemetryCollector
+    public class TelemetryCollector : ITelemetryCollector, IWorkerNodeTelemetryData
     {
-        private struct TaskExecutionStats(TimeSpan cumulativeExecutionTime, short executionsCount)
-        {
-            public TimeSpan CumulativeExecutionTime { get; set; } = cumulativeExecutionTime;
-            public short ExecutionsCount { get; set; } = executionsCount;
-        }
-
         private readonly Dictionary<string, TaskExecutionStats> _tasksExecutionData = new();
         private readonly Dictionary<string, bool> _targetsExecutionData = new();
 
         // in future, this might ber per event type
         public bool IsTelemetryCollected => true;
-        public void AddData() => throw new NotImplementedException();
+
+        Dictionary<string, TaskExecutionStats> IWorkerNodeTelemetryData.TasksExecutionData => _tasksExecutionData;
+
+        Dictionary<string, bool> IWorkerNodeTelemetryData.TargetsExecutionData => _targetsExecutionData;
 
         public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, bool isCustom, bool isFromNugetCache)
         {
@@ -119,17 +115,9 @@ internal class TelemetryCollectorProvider : IBuildComponent
 
         public void FinalizeProcessing(LoggingContext loggingContext)
         {
-            //if (IsInProcNode)
-            //{
-            //    // We do not want to send tracing stats from in-proc node
-            //    return;
-            //}
-
-            //var checkEventStats = CreateCheckTracingStats();
-
-            //BuildCheckTracingEventArgs checkEventArg =
-            //    new(checkEventStats) { BuildEventContext = loggingContext.BuildEventContext };
-            //loggingContext.LogBuildEvent(checkEventArg);
+            WorkerNodeTelemetryEventArgs telemetryArgs = new(this)
+                { BuildEventContext = loggingContext.BuildEventContext };
+            loggingContext.LogBuildEvent(telemetryArgs);
         }
     }
 
@@ -137,7 +125,6 @@ internal class TelemetryCollectorProvider : IBuildComponent
     {
         public bool IsTelemetryCollected => false;
 
-        public void AddData() { }
         public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, bool isCustom, bool isFromNugetCache) { }
         public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isFromNugetCache) { }
 
