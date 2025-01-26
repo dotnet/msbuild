@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 TransientTestFolder projDirectory = env.CreateFolder(Path.Combine(env.CreateNewTempPath().TempPath, projectPathCandidate), createFolder: true);
-                TransientTestFile projectFile = env.CreateFile(projDirectory, "project.proj", @$"
+                TransientTestFile projectFile = env.CreateFile(projDirectory, "project.proj", @"
 <Project>
 
   <ItemGroup>
