@@ -158,7 +158,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = Helpers.GetFirst(project.GetItems("i"));
             ProjectMetadata m0 = item.GetMetadata("m0");
@@ -829,7 +830,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
 
                     // Setup
-                    ProjectCollection projectCollection = new ProjectCollection();
+                    using ProjectCollection projectCollection = new ProjectCollection();
                     MockLogger collectionLogger = new MockLogger();
                     projectCollection.RegisterLogger(collectionLogger);
                     Project project = new Project(projectCollection);
@@ -1192,7 +1193,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetItems("i").First().SetMetadataValue("m", "m2");
 
@@ -1234,7 +1236,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item1 = project.GetItems("i").First();
             ProjectItem item1b = project.GetItems("i").ElementAt(1);
@@ -1284,7 +1287,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item1 = project.GetItems("i").First();
             ProjectItem item1b = project.GetItems("i").ElementAt(1);
@@ -1353,7 +1357,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Equal("l0", project.GetItems("i").First().GetMetadataValue("l"));
             Assert.Equal("m1", project.GetItems("i").First().GetMetadataValue("m"));
@@ -1450,7 +1455,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Equal("l0", project.GetItems("i").First().GetMetadataValue("l"));
             Assert.Equal("m1", project.GetItems("i").First().GetMetadataValue("m"));
@@ -3758,10 +3764,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
     public class ProjectItemWithOptimizations_Tests : ProjectItem_Tests
     {
-       public ProjectItemWithOptimizations_Tests()
-       {
-           // Make sure we always use the dictionary-based Remove logic.
-           _env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
-       }
+        public ProjectItemWithOptimizations_Tests()
+        {
+            // Make sure we always use the dictionary-based Remove logic.
+            _env.SetEnvironmentVariable("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", "0");
+        }
     }
 }

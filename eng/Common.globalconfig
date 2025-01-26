@@ -321,9 +321,6 @@ dotnet_diagnostic.CA1837.severity = suggestion
 # Avoid 'StringBuilder' parameters for P/Invokes
 dotnet_diagnostic.CA1838.severity = warning
 
-# Dispose objects before losing scope
-dotnet_diagnostic.CA2000.severity = none
-
 # Do not lock on objects with weak identity
 dotnet_diagnostic.CA2002.severity = none
 
