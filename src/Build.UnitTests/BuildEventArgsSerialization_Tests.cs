@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using FluentAssertions;
+using FluentAssertions.Equivalency;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
@@ -919,17 +920,22 @@ namespace Microsoft.Build.UnitTests
         public void PropertyInitialValueEventArgs()
         {
             var args = new PropertyInitialValueSetEventArgs(
-                propertyName: Guid.NewGuid().ToString(),
-                propertyValue: Guid.NewGuid().ToString(),
-                propertySource: Guid.NewGuid().ToString(),
-                message: Guid.NewGuid().ToString(),
+                propertyName: "a",
+                propertyValue: "b",
+                propertySource: null,
+                file: "file.cs",
+                line: 10,
+                column: 20,
+                message: "Property initial value: $(a)=\"b\" Source: file.cs (10,20)",
                 helpKeyword: Guid.NewGuid().ToString(),
                 senderName: Guid.NewGuid().ToString());
 
             Roundtrip(args,
                 e => e.PropertyName,
                 e => e.PropertyValue,
-                e => e.PropertySource,
+                e => e.File,
+                e => e.LineNumber.ToString(),
+                e => e.ColumnNumber.ToString(),
                 e => e.Message,
                 e => e.HelpKeyword,
                 e => e.SenderName);
