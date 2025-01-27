@@ -77,6 +77,8 @@ namespace Microsoft.Build.Framework.Telemetry
                 DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
 
 #if NETFRAMEWORK
+                try
+                {
                     InitializeTracerProvider();
 
                     // TODO: Enable commented logic when Collector is present in VS
@@ -84,6 +86,18 @@ namespace Microsoft.Build.Framework.Telemetry
                     InitializeCollector();
 
                     // }
+                }
+                catch (Exception ex)
+                {
+                    // catch exceptions from loading the OTel SDK or Collector to maintain usability of Microsoft.Build.Framework package in our and downstream tests in VS.
+                    if (ex is System.IO.FileNotFoundException or System.IO.FileLoadException)
+                    {
+                        _telemetryState = TelemetryState.Unsampled;
+                        return;
+                    }
+
+                    throw;
+                }
 #endif
             }
         }
@@ -122,13 +136,32 @@ namespace Microsoft.Build.Framework.Telemetry
             _telemetryState = TelemetryState.CollectorInitialized;
         }
 #endif
+
+        private void ForceFlushInner()
+        {
+#if NETFRAMEWORK
+            _tracerProvider?.ForceFlush();
+#endif
+        }
+
         /// <summary>
         /// Flush the telemetry in TracerProvider/Exporter.
         /// </summary>
         public void ForceFlush()
         {
+            if (ShouldBeCleanedUp())
+            {
+                ForceFlushInner();
+            }
+        }
+
+        // to avoid assembly loading OpenTelemetry in tests
+        private void ShutdownInner()
+        {
 #if NETFRAMEWORK
-            _tracerProvider?.ForceFlush();
+            _tracerProvider?.Shutdown();
+            // Dispose stops the collector, with a default drain timeout of 10s
+            _collector?.Dispose();
 #endif
         }
 
@@ -139,11 +172,11 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             lock (_initializeLock)
             {
-#if NETFRAMEWORK
-                _tracerProvider?.Shutdown();
-                // Dispose stops the collector, with a drain timeout of 10s
-                _collector?.Dispose();
-#endif
+                if (ShouldBeCleanedUp())
+                {
+                    ShutdownInner();
+                }
+
                 _telemetryState = TelemetryState.Disposed;
             }
         }
@@ -174,6 +207,11 @@ namespace Microsoft.Build.Framework.Telemetry
             // Simple random sampling, this method is called once, no need to save the Random instance.
             Random random = new();
             return random.NextDouble() < _sampleRate;
+        }
+
+        private bool ShouldBeCleanedUp()
+        {
+            return _telemetryState ==TelemetryState.CollectorInitialized || _telemetryState == TelemetryState.ExporterInitialized;
         }
 
         /// <summary>
