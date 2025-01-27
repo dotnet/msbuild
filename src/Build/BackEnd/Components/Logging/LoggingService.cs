@@ -1419,8 +1419,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     do
                     {
                         // Check if instance fields are nulled (cleanup was called)
-                        if (_eventQueue == null || _dequeueEvent == null
-                            || _emptyQueueEvent == null || _enqueueEvent == null)
+                        if (_eventQueue == null || _dequeueEvent == null || _emptyQueueEvent == null || _enqueueEvent == null)
                         {
                             break;
                         }
@@ -1436,13 +1435,12 @@ namespace Microsoft.Build.BackEnd.Logging
 
                             if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
                             {
-                                // Add timeout to avoid infinite wait if handles get nulled
-                                WaitHandle.WaitAny(waitHandlesForNextEvent, 100);
+                                WaitHandle.WaitAny(waitHandlesForNextEvent);
                             }
 
                             _emptyQueueEvent?.Reset();
                         }
-                    } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+                    } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested || _emptyQueueEvent != null);
 
                     _emptyQueueEvent?.Set();
                 }
