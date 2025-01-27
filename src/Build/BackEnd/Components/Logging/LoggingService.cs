@@ -1418,6 +1418,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     do
                     {
+                        // Check if instance fields are nulled (cleanup was called)
+                        if (_eventQueue == null || _dequeueEvent == null
+                            || _emptyQueueEvent == null || _enqueueEvent == null)
+                        {
+                            break;
+                        }
+
                         if (_eventQueue.TryDequeue(out object ev))
                         {
                             LoggingEventProcessor(ev);
@@ -1429,7 +1436,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
                             if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
                             {
-                                WaitHandle.WaitAny(waitHandlesForNextEvent);
+                                // Add timeout to avoid infinite wait if handles get nulled
+                                WaitHandle.WaitAny(waitHandlesForNextEvent, 100);
                             }
 
                             _emptyQueueEvent?.Reset();
