@@ -188,7 +188,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             if (BuildEngineHost != null)
             {
-                telemetryItems.Add(new TelemetryItem(nameof(BuildEngineHost), BuildEngineHost, false));
+                telemetryItems.Add(new TelemetryItem(nameof(BuildEngineHost), "Testing", false));
             }
 
             if (BuildSuccess.HasValue)
