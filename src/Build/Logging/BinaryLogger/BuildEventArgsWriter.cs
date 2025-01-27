@@ -567,7 +567,7 @@ namespace Microsoft.Build.Logging
 
         private BinaryLogRecordKind Write(PropertyReassignmentEventArgs e)
         {
-            WriteMessageFields(e, writeMessage: true, writeImportance: true);
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
             WriteDeduplicatedString(e.PropertyName);
             WriteDeduplicatedString(e.PreviousValue);
             WriteDeduplicatedString(e.NewValue);
@@ -585,7 +585,7 @@ namespace Microsoft.Build.Logging
 
         private BinaryLogRecordKind Write(PropertyInitialValueSetEventArgs e)
         {
-            WriteMessageFields(e, writeImportance: true);
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
             WriteDeduplicatedString(e.PropertyName);
             WriteDeduplicatedString(e.PropertyValue);
             WriteDeduplicatedString(e.PropertySource);

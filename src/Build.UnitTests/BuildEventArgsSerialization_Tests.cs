@@ -881,6 +881,7 @@ namespace Microsoft.Build.UnitTests
                 propertyName: "a",
                 previousValue: "b",
                 newValue: "c",
+                location: null,
                 file: "file.cs",
                 line: 10,
                 column: 20,

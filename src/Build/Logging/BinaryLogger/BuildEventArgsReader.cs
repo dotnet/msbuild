@@ -1176,6 +1176,7 @@ namespace Microsoft.Build.Logging
                 propertyName,
                 previousValue,
                 newValue,
+                location,
                 fields.File,
                 fields.LineNumber,
                 fields.ColumnNumber,

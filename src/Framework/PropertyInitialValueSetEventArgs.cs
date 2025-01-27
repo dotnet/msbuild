@@ -95,8 +95,13 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                var formattedSource = File != null ? $"{File} ({LineNumber},{ColumnNumber})" : PropertySource;
-                return string.Format(RawMessage, PropertyName, PropertyValue, formattedSource);
+                if (RawMessage == null)
+                {
+                    string formattedLocation = File == null ? PropertySource : $"{File} ({LineNumber},{ColumnNumber})";
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", PropertyName, PropertyValue, formattedLocation);
+                }
+
+                return RawMessage;
             }
         }
 

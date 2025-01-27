@@ -56,6 +56,7 @@ namespace Microsoft.Build.Framework
         /// <param name="propertyName">The name of the property whose value was reassigned.</param>
         /// <param name="previousValue">The previous value of the reassigned property.</param>
         /// <param name="newValue">The new value of the reassigned property.</param>
+        /// <param name="location">The property location (XML, command line, etc).</param>
         /// <param name="file">The file associated with the event.</param>
         /// <param name="line">The line number (0 if not applicable).</param>
         /// <param name="column">The column number (0 if not applicable).</param>
@@ -67,6 +68,7 @@ namespace Microsoft.Build.Framework
             string propertyName,
             string previousValue,
             string newValue,
+            string location,
             string file,
             int line,
             int column,
@@ -79,6 +81,7 @@ namespace Microsoft.Build.Framework
             PropertyName = propertyName;
             PreviousValue = previousValue;
             NewValue = newValue;
+            Location = location;
         }
 
         /// <summary>
@@ -105,8 +108,13 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                string formattedLocation = File != null ? $"{File} ({LineNumber},{ColumnNumber})" : Location;
-                return string.Format(RawMessage, PropertyName, NewValue, PreviousValue, formattedLocation);
+                if (RawMessage == null)
+                {
+                    string formattedLocation = File == null ? Location : $"{File} ({LineNumber},{ColumnNumber})";
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("PropertyReassignment", PropertyName, NewValue, PreviousValue, formattedLocation);
+                }
+
+                return RawMessage;
             }
         }
 

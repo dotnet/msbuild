@@ -302,7 +302,7 @@ namespace Microsoft.Build.Evaluation
                 location?.File,
                 location?.Line ?? 0,
                 location?.Column ?? 0,
-                ResourceUtilities.GetResourceString("PropertyAssignment"))
+                message: null)
             { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
 
             _evaluationLoggingContext.LogBuildEvent(args);
@@ -338,10 +338,11 @@ namespace Microsoft.Build.Evaluation
                     property.Name,
                     oldValue,
                     newValue,
+                    location: null,
                     location?.File,
                     location?.Line ?? 0,
                     location?.Column ?? 0,
-                    message: ResourceUtilities.GetResourceString("PropertyReassignment"))
+                    message: null)
                 { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
 
                 _evaluationLoggingContext.LogBuildEvent(args);
@@ -394,11 +395,11 @@ namespace Microsoft.Build.Evaluation
         private static string GetPropertySourceName(PropertySource source) => source switch
         {
             PropertySource.Xml => "XML",
-            PropertySource.BuiltIn => "Built-in",
+            PropertySource.BuiltIn => "BuiltIn",
             PropertySource.Global => "Global",
             PropertySource.Toolset => "Toolset",
-            PropertySource.EnvironmentVariable => "Environment Variable",
-            PropertySource.CommandLine => "Command Line",
+            PropertySource.EnvironmentVariable => "EnvironmentVariable",
+            PropertySource.CommandLine => "CommandLine",
             _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
         };
     }

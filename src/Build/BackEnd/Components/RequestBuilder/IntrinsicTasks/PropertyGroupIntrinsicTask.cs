@@ -141,7 +141,7 @@ namespace Microsoft.Build.BackEnd
                     property.Location.File,
                     property.Location.Line,
                     property.Location.Column,
-                    ResourceUtilities.GetResourceString("PropertyAssignment"))
+                    message: null)
                 { BuildEventContext = LoggingContext.BuildEventContext };
 
                 LoggingContext.LogBuildEvent(args);
@@ -152,10 +152,11 @@ namespace Microsoft.Build.BackEnd
                     property.Name,
                     previousPropertyValue,
                     evaluatedValue,
+                    location: null,
                     property.Location.File,
                     property.Location.Line,
                     property.Location.Column,
-                    message: ResourceUtilities.GetResourceString("PropertyReassignment"))
+                    message: null)
                 { BuildEventContext = LoggingContext.BuildEventContext, };
 
                 LoggingContext.LogBuildEvent(args);
