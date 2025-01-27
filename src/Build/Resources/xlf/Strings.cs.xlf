@@ -243,12 +243,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="new">Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</target>
+        <target state="translated">Umístění: '{0}' nelze plně považovat za důvěryhodné, umístěte projekty mimo danou složku (Projekt: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="new">Downloads folder is untrusted for projects building.</target>
+        <target state="translated">Složka Stažené soubory není důvěryhodná pro sestavování projektů.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">

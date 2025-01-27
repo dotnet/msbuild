@@ -243,12 +243,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="new">Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</target>
+        <target state="translated">Konum: '{0}' tam olarak güvenilir olamaz, projelerinizi bu klasörün dışına yerleştirin (Proje: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="new">Downloads folder is untrusted for projects building.</target>
+        <target state="translated">İndirmeler klasörü, proje oluşturma için güvenilir değil.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">

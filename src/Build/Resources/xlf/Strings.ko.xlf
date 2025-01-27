@@ -243,12 +243,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="new">Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</target>
+        <target state="translated">위치: '{0}' 완전히 신뢰할 수 없습니다. 프로젝트를 해당 폴더 외부에 배치하세요(프로젝트: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="new">Downloads folder is untrusted for projects building.</target>
+        <target state="translated">프로젝트 빌드에 대해 다운로드 폴더를 신뢰할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">

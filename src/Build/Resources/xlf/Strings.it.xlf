@@ -243,12 +243,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="new">Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</target>
+        <target state="translated">Percorso: '{0}' non può essere considerato completamente attendibile. Inserire i progetti all'esterno di tale cartella (Progetto: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="new">Downloads folder is untrusted for projects building.</target>
+        <target state="translated">La cartella Dei download non è attendibile per la compilazione di progetti.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">

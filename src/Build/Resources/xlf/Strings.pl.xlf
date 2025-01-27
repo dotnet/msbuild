@@ -243,12 +243,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="new">Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</target>
+        <target state="translated">Lokalizacja: '{0}' nie można w pełni zaufać. Umieść projekty poza tym folderem (projekt: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="new">Downloads folder is untrusted for projects building.</target>
+        <target state="translated">Folder Pobrane nie jest zaufany do kompilowania projektów.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
