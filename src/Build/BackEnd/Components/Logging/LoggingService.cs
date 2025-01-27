@@ -245,9 +245,9 @@ namespace Microsoft.Build.BackEnd.Logging
         private ConcurrentQueue<object> _eventQueue;
 
         // Long-lived event handles that never get disposed to avoid race conditions.
-        private static readonly AutoResetEvent _longLivedDequeueEvent = new AutoResetEvent(false);
-        private static readonly ManualResetEvent _longLivedEmptyQueueEvent = new ManualResetEvent(false);
-        private static readonly AutoResetEvent _longLivedEnqueueEvent = new AutoResetEvent(false);
+        private readonly AutoResetEvent _longLivedDequeueEvent = new AutoResetEvent(false);
+        private readonly ManualResetEvent _longLivedEmptyQueueEvent = new ManualResetEvent(true);
+        private readonly AutoResetEvent _longLivedEnqueueEvent = new AutoResetEvent(false);
 
         /// <summary>
         /// Event set when message is consumed from queue.
@@ -1392,6 +1392,11 @@ namespace Microsoft.Build.BackEnd.Logging
         private void StartLoggingEventProcessing()
         {
             _eventQueue = new ConcurrentQueue<object>();
+
+            // Reset the long-lived events to clean state
+            _longLivedDequeueEvent?.Set();
+            _longLivedEmptyQueueEvent?.Reset();
+            _longLivedEnqueueEvent?.Reset();
 
             // Assign instance fields to long-lived events
             _dequeueEvent = _longLivedDequeueEvent;
