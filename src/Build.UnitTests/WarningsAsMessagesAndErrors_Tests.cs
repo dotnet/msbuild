@@ -9,6 +9,7 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using static System.Net.WebRequestMethods;
 
 #nullable disable
 
@@ -35,7 +36,7 @@ namespace Microsoft.Build.Engine.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(GetTestProject(treatAllWarningsAsErrors: false));
         }
 
-        [Fact]
+        [Fact (Skip = "TreatWarningAsErrors is excluded in the first wave of the unification. See https://github.com/dotnet/msbuild/issues/10871")]
         public void TreatAllWarningsAsErrorsNoPrefix()
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(GetTestProject(customProperties: new Dictionary<string, string>
@@ -354,9 +355,10 @@ namespace Microsoft.Build.Engine.UnitTests
         [InlineData("MSB1235", "MSB1234", "MSB1234", "MSB1234", false)] // Log MSB1234, treat as error via MSBuildWarningsAsErrors
         [InlineData("MSB1235", "", "MSB1234", "MSB1234", true)] // Log MSB1234, expect MSB1234 as error via MSBuildTreatWarningsAsErrors
         [InlineData("MSB1234", "MSB1234", "MSB1234", "MSB4181", true)]// Log MSB1234, MSBuildWarningsAsMessages takes priority
-        [InlineData("MSB1235", "MSB1234", "MSB1234", "MSB1234", false, false)] // Log MSB1234, treat as error via BuildWarningsAsErrors
-        [InlineData("MSB1235", "", "MSB1234", "MSB1234", true, false)] // Log MSB1234, expect MSB1234 as error via BuildTreatWarningsAsErrors
-        [InlineData("MSB1234", "MSB1234", "MSB1234", "MSB4181", true, false)]// Log MSB1234, BuildWarningsAsMessages takes priority
+        // TreatWarningAsErrors is excluded in the first wave of the unification.See https://github.com/dotnet/msbuild/issues/10871
+        // [InlineData("MSB1235", "MSB1234", "MSB1234", "MSB1234", false, false)] // Log MSB1234, treat as error via BuildWarningsAsErrors
+        // [InlineData("MSB1235", "", "MSB1234", "MSB1234", true, false)] // Log MSB1234, expect MSB1234 as error via BuildTreatWarningsAsErrors
+        // [InlineData("MSB1234", "MSB1234", "MSB1234", "MSB4181", true, false)]// Log MSB1234, BuildWarningsAsMessages takes priority
         public void WarningsAsErrorsAndMessages_Tests(string WarningsAsMessages,
                                                       string WarningsAsErrors,
                                                       string WarningToLog,
@@ -529,8 +531,9 @@ namespace Microsoft.Build.Engine.UnitTests
         [Theory]
         [InlineData("MSB1234", false, 1, 1)]
         [InlineData("MSB0000", true, 0, 2)]
-        [InlineData("MSB1234", false, 1, 1, false)]
-        [InlineData("MSB0000", true, 0, 2, false)]
+        // TreatWarningAsErrors is excluded in the first wave of the unification.See https://github.com/dotnet/msbuild/issues/10871
+        // [InlineData("MSB1234", false, 1, 1, false)  
+        // [InlineData("MSB0000", true, 0, 2, false)
         public void TaskReturnsTrue_Tests(string warningsAsErrors, bool treatAllWarningsAsErrors, int warningCountShouldBe, int errorCountShouldBe, bool useMSPrefix = true)
         {
             string prefix = useMSPrefix ? "MSBuild" : "";

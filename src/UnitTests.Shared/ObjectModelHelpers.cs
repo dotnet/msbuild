@@ -782,8 +782,13 @@ namespace Microsoft.Build.UnitTests
         /// expected to fail.
         /// </summary>
         /// <param name="projectContents">The project file content in string format.</param>
+        ///  <param name="testOutputHelper"><see cref="ITestOutputHelper"/> to log to.</param>
+        /// <param name="loggerVerbosity">The required logging verbosity.</param>
         /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
-        public static MockLogger BuildProjectExpectFailure([StringSyntax(StringSyntaxAttribute.Xml)] string projectContents)
+        public static MockLogger BuildProjectExpectFailure(
+            [StringSyntax(StringSyntaxAttribute.Xml)] string projectContents,
+            ITestOutputHelper testOutputHelper = null,
+            LoggerVerbosity loggerVerbosity = LoggerVerbosity.Normal)
         {
             MockLogger logger = new MockLogger(testOutputHelper);
             BuildProjectExpectFailure(projectContents, logger);
