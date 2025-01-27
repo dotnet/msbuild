@@ -71,10 +71,6 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             // Clear any override that might have existed
             Environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, null);
 
-            // Also ensure we are not opting out
-            Environment.SetEnvironmentVariable(DotnetOptOut, "false");
-            Environment.SetEnvironmentVariable(TelemetryFxOptoutEnvVarName, "false");
-
             OpenTelemetryManager.Instance.Initialize(isStandalone: false);
 
             var state = GetTelemetryState(OpenTelemetryManager.Instance);
@@ -83,15 +79,13 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         }
 #endif
 
-        [WindowsFullFrameworkOnlyTheory]
+        [WindowsOnlyTheory]
         [InlineData(true)]
         [InlineData(false)]
         public void Initialize_ShouldSetSampleRateOverride_AndCreateActivitySource_WhenRandomBelowOverride(bool standalone)
         {
 
             // Arrange
-            Environment.SetEnvironmentVariable(TelemetryFxOptoutEnvVarName, "false");
-            Environment.SetEnvironmentVariable(DotnetOptOut, "false");
             Environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, "1.0");
 
             // Act

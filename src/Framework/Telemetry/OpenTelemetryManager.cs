@@ -75,6 +75,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 }
 
                 DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
+                _telemetryState = TelemetryState.TracerInitialized;
 
 #if NETFRAMEWORK
                 try
@@ -154,7 +155,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 ForceFlushInner();
             }
         }
-
+        
         // to avoid assembly loading OpenTelemetry in tests
         private void ShutdownInner()
         {
