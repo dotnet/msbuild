@@ -1393,11 +1393,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             _eventQueue = new ConcurrentQueue<object>();
 
-            // Reset the long-lived events to clean state
-            _longLivedDequeueEvent?.Reset();
-            _longLivedEmptyQueueEvent?.Reset();
-            _longLivedEnqueueEvent?.Reset();
-
             // Assign instance fields to long-lived events
             _dequeueEvent = _longLivedDequeueEvent;
             _emptyQueueEvent = _longLivedEmptyQueueEvent;
@@ -1460,11 +1455,6 @@ namespace Microsoft.Build.BackEnd.Logging
             _loggingEventProcessingCancellation?.Dispose();
 
             _eventQueue = null;
-
-            // check if it's causing build hang???
-            _dequeueEvent?.Dispose();
-            _enqueueEvent?.Dispose();
-            _emptyQueueEvent?.Dispose();
 
             // Just null the instance fields and avoid disposing due to race conditions.
             // Adding a lock would be expensive for the logging.
