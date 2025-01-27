@@ -297,6 +297,7 @@ namespace Microsoft.Build.CommandLine
             {
                 DumpCounters(false /* log to console */);
             }
+            OpenTelemetryManager.Instance.Shutdown();
 
             return exitCode;
         }

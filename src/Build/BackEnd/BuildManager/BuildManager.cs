@@ -1087,7 +1087,7 @@ namespace Microsoft.Build.Execution
                                 .WithTags(_buildTelemetry)
                                 .WithStartTime(_buildTelemetry.InnerStartAt)
                                 .Dispose();
-                            OpenTelemetryManager.Instance.Shutdown();
+                            OpenTelemetryManager.Instance.ForceFlush();
 
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
