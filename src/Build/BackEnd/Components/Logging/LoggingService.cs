@@ -62,7 +62,7 @@ namespace Microsoft.Build.BackEnd.Logging
         ShuttingDown,
 
         /// <summary>
-        /// The logging service completly shutdown
+        /// The logging service completely shutdown.
         /// </summary>
         Shutdown
     }
@@ -244,15 +244,15 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private ConcurrentQueue<object> _eventQueue;
 
+        // Long-lived event handles that never get disposed to avoid race conditions.
+        private static readonly AutoResetEvent _longLivedDequeueEvent = new AutoResetEvent(false);
+        private static readonly ManualResetEvent _longLivedEmptyQueueEvent = new ManualResetEvent(false);
+        private static readonly AutoResetEvent _longLivedEnqueueEvent = new AutoResetEvent(false);
+
         /// <summary>
         /// Event set when message is consumed from queue.
         /// </summary>
         private AutoResetEvent _dequeueEvent;
-
-        /// <summary>
-        /// Local copy of dequeue event to avoid race condition on shutdown operation.
-        /// </summary>
-        private AutoResetEvent _dequeueEventDoubleCheckCopy;
 
         /// <summary>
         /// Event set when queue become empty. 
@@ -260,19 +260,9 @@ namespace Microsoft.Build.BackEnd.Logging
         private ManualResetEvent _emptyQueueEvent;
 
         /// <summary>
-        /// Local copy of empty queue event to avoid race condition on shutdown operation.
-        /// </summary>
-        private ManualResetEvent _emptyQueueEventDoubleCheckCopy;
-
-        /// <summary>
         /// Event set when message is added into queue.
         /// </summary>
         private AutoResetEvent _enqueueEvent;
-
-        /// <summary>
-        /// Local copy of enqueue event to avoid race condition on shutdown operation.
-        /// </summary>
-        private AutoResetEvent _enqueueEventDoubleCheckCopy;
 
         /// <summary>
         /// CTS for stopping logging event processing.
@@ -1403,14 +1393,15 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             _eventQueue = new ConcurrentQueue<object>();
 
-            _dequeueEvent = new AutoResetEvent(false);
-            _dequeueEventDoubleCheckCopy = _dequeueEvent;
+            // Reset the long-lived events to clean state
+            _longLivedDequeueEvent.Reset();
+            _longLivedEmptyQueueEvent.Reset();
+            _longLivedEnqueueEvent.Reset();
 
-            _emptyQueueEvent = new ManualResetEvent(false);
-            _emptyQueueEventDoubleCheckCopy = _emptyQueueEvent;
-
-            _enqueueEvent = new AutoResetEvent(false);
-            _enqueueEventDoubleCheckCopy = _enqueueEvent;
+            // Assign instance fields to long-lived events
+            _dequeueEvent = _longLivedDequeueEvent;
+            _emptyQueueEvent = _longLivedEmptyQueueEvent;
+            _enqueueEvent = _longLivedEnqueueEvent;
 
             _loggingEventProcessingCancellation = new CancellationTokenSource();
             _loggingEventProcessingThread = new Thread(LoggingEventProc);
@@ -1421,29 +1412,36 @@ namespace Microsoft.Build.BackEnd.Logging
             void LoggingEventProc()
             {
                 var completeAdding = _loggingEventProcessingCancellation.Token;
-                WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEventDoubleCheckCopy };
+                WaitHandle[] waitHandlesForNextEvent = [completeAdding.WaitHandle, _enqueueEvent];
 
-                do
+                try
                 {
-                    if (_eventQueue.TryDequeue(out object ev))
+                    do
                     {
-                        LoggingEventProcessor(ev);
-                        _dequeueEventDoubleCheckCopy?.Set();
-                    }
-                    else
-                    {
-                        _emptyQueueEventDoubleCheckCopy?.Set();
-
-                        if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
+                        if (_eventQueue.TryDequeue(out object ev))
                         {
-                            WaitHandle.WaitAny(waitHandlesForNextEvent);
+                            LoggingEventProcessor(ev);
+                            _dequeueEvent.Set();
                         }
+                        else
+                        {
+                            _emptyQueueEvent.Set();
 
-                        _emptyQueueEventDoubleCheckCopy?.Reset();
-                    }
-                } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+                            if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
+                            {
+                                WaitHandle.WaitAny(waitHandlesForNextEvent);
+                            }
 
-                _emptyQueueEventDoubleCheckCopy?.Set();
+                            _emptyQueueEvent.Reset();
+                        }
+                    } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+
+                    _emptyQueueEvent.Set();
+                }
+                catch (Exception)
+                {
+                    // Exit if fatal error occurs
+                }
             }
         }
 
@@ -1453,18 +1451,15 @@ namespace Microsoft.Build.BackEnd.Logging
         private void CleanLoggingEventProcessing()
         {
             _loggingEventProcessingCancellation?.Cancel();
-            _dequeueEvent?.Dispose();
-            _enqueueEvent?.Dispose();
-            _emptyQueueEvent?.Dispose();
             _loggingEventProcessingCancellation?.Dispose();
 
             _eventQueue = null;
+
+            // Just null the instance fields and avoid disposing due to race conditions.
+            // Adding a lock would be expensive for the logging.
             _dequeueEvent = null;
-            _dequeueEventDoubleCheckCopy = null;
             _enqueueEvent = null;
-            _enqueueEventDoubleCheckCopy = null;
             _emptyQueueEvent = null;
-            _emptyQueueEventDoubleCheckCopy = null;
             _loggingEventProcessingCancellation = null;
             _loggingEventProcessingThread = null;
         }
