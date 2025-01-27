@@ -1394,9 +1394,9 @@ namespace Microsoft.Build.BackEnd.Logging
             _eventQueue = new ConcurrentQueue<object>();
 
             // Reset the long-lived events to clean state
-            _longLivedDequeueEvent.Reset();
-            _longLivedEmptyQueueEvent.Reset();
-            _longLivedEnqueueEvent.Reset();
+            _longLivedDequeueEvent?.Reset();
+            _longLivedEmptyQueueEvent?.Reset();
+            _longLivedEnqueueEvent?.Reset();
 
             // Assign instance fields to long-lived events
             _dequeueEvent = _longLivedDequeueEvent;
@@ -1421,22 +1421,22 @@ namespace Microsoft.Build.BackEnd.Logging
                         if (_eventQueue.TryDequeue(out object ev))
                         {
                             LoggingEventProcessor(ev);
-                            _dequeueEvent.Set();
+                            _dequeueEvent?.Set();
                         }
                         else
                         {
-                            _emptyQueueEvent.Set();
+                            _emptyQueueEvent?.Set();
 
                             if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
                             {
                                 WaitHandle.WaitAny(waitHandlesForNextEvent);
                             }
 
-                            _emptyQueueEvent.Reset();
+                            _emptyQueueEvent?.Reset();
                         }
                     } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
-                    _emptyQueueEvent.Set();
+                    _emptyQueueEvent?.Set();
                 }
                 catch (Exception)
                 {
@@ -1460,6 +1460,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _dequeueEvent = null;
             _enqueueEvent = null;
             _emptyQueueEvent = null;
+
             _loggingEventProcessingCancellation = null;
             _loggingEventProcessingThread = null;
         }
