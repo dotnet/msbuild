@@ -1461,6 +1461,11 @@ namespace Microsoft.Build.BackEnd.Logging
 
             _eventQueue = null;
 
+            // check if it's causing build hang???
+            _dequeueEvent?.Dispose();
+            _enqueueEvent?.Dispose();
+            _emptyQueueEvent?.Dispose();
+
             // Just null the instance fields and avoid disposing due to race conditions.
             // Adding a lock would be expensive for the logging.
             _dequeueEvent = null;
