@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -907,7 +907,10 @@ public class EndToEndTests : IDisposable
 
             // The test packages are generated during the test project build and saved in CustomChecks folder.
             string checksPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.Parent?.FullName ?? string.Empty, "CustomChecks");
-            AddPackageSource(doc, packageSourcesNode, "Key", checksPackagesPath);
+            AddPackageSource(doc, packageSourcesNode, "CustomCheckSource", checksPackagesPath);
+
+            // MSBuild packages are placed in a separate folder, so we need to add it as a package source.
+            AddPackageSource(doc, packageSourcesNode, "MSBuildTestPackagesSource", RunnerUtilities.ArtifactsLocationAttribute.ArtifactsLocation);
 
             doc.Save(Path.Combine(checkCandidatePath, "nuget.config"));
         }
