@@ -132,7 +132,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 .Build();
 
             _collector = OpenTelemetryCollectorProvider.CreateCollector(collectorSettings);
-            _collector.StartAsync().GetAwaiter().GetResult();
+            _collector.StartAsync();
 
             _telemetryState = TelemetryState.CollectorInitialized;
         }
@@ -155,7 +155,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 ForceFlushInner();
             }
         }
-        
+
         // to avoid assembly loading OpenTelemetry in tests
         private void ShutdownInner()
         {
