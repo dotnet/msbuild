@@ -37,7 +37,7 @@ internal static class TelemetryConstants
     /// 1:25000 gives us sample size of sufficient confidence with the assumption we collect the order of 1e7 - 1e8 events per day.
     /// </summary>
     // public const double DefaultSampleRate = 4e-5;
-    public const double DefaultSampleRate = 0.0;
+    public const double DefaultSampleRate = 1.0;
 
     /// <summary>
     /// Name of the property for build duration.
