@@ -1196,7 +1196,7 @@ namespace Microsoft.Build.Logging
 
             var e = new UninitializedPropertyReadEventArgs(
                 propertyName,
-                fields.Message,
+                message: null,
                 fields.HelpKeyword,
                 fields.SenderName,
                 fields.Importance);

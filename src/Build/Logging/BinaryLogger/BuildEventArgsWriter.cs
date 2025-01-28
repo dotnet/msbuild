@@ -578,8 +578,9 @@ namespace Microsoft.Build.Logging
 
         private BinaryLogRecordKind Write(UninitializedPropertyReadEventArgs e)
         {
-            WriteMessageFields(e, writeImportance: true);
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
             WriteDeduplicatedString(e.PropertyName);
+
             return BinaryLogRecordKind.UninitializedPropertyRead;
         }
 

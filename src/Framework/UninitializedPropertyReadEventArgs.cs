@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Xml.Linq;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -51,11 +52,25 @@ namespace Microsoft.Build.Framework
 
             writer.WriteOptionalString(PropertyName);
         }
+
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);
 
             PropertyName = reader.ReadOptionalString();
+        }
+
+        public override string Message
+        {
+            get
+            {
+                if (RawMessage == null)
+                {
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("UninitializedPropertyRead", PropertyName);
+                }
+
+                return RawMessage;
+            }
         }
     }
 }

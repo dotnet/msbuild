@@ -243,10 +243,10 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            var args = new UninitializedPropertyReadEventArgs(
-                name,
-                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("UninitializedPropertyRead", name));
-            args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
+            var args = new UninitializedPropertyReadEventArgs(name, message: null)
+            {
+                BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+            };
 
             _evaluationLoggingContext.LogBuildEvent(args);
         }

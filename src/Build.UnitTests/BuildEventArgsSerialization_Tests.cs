@@ -904,8 +904,8 @@ namespace Microsoft.Build.UnitTests
         public void UninitializedPropertyReadEventArgs()
         {
             var args = new UninitializedPropertyReadEventArgs(
-                propertyName: Guid.NewGuid().ToString(),
-                message: Guid.NewGuid().ToString(),
+                propertyName: "a",
+                message: "Read uninitialized property \"a\"",
                 helpKeyword: Guid.NewGuid().ToString(),
                 senderName: Guid.NewGuid().ToString());
 
