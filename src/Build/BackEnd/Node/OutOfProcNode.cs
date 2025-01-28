@@ -583,10 +583,8 @@ namespace Microsoft.Build.Execution
         {
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
-#if RUNTIME_TYPE_NETCORE
                 if (packet is LogMessagePacketBase logMessage
-                    && logMessage.EventType == LoggingEventType.CustomEvent
-                    && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
+                    && logMessage.EventType == LoggingEventType.CustomEvent)
                 {
                     BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
 
@@ -601,9 +599,6 @@ namespace Microsoft.Build.Execution
                 {
                     _nodeEndpoint.SendData(packet);
                 }
-#else
-                _nodeEndpoint.SendData(packet);
-#endif
             }
         }
 

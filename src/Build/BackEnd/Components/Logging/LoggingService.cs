@@ -971,56 +971,9 @@ namespace Microsoft.Build.BackEnd.Logging
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
             InjectNonSerializedData(loggingPacket);
 
-            WarnOnDeprecatedCustomArgsSerialization(loggingPacket);
+            ErrorUtilities.VerifyThrow(loggingPacket.EventType != LoggingEventType.CustomEvent, "Custom event types are no longer supported. The check should be implemented in OutOfPRocNode.SendPacket");
 
             ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
-        }
-
-        /// <summary>
-        /// Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet.
-        /// Since BinaryFormatter is going to be deprecated, log warning so users can use new Extended*EventArgs instead of custom
-        /// EventArgs derived from existing EventArgs.
-        /// </summary>
-        private void WarnOnDeprecatedCustomArgsSerialization(LogMessagePacket loggingPacket)
-        {
-            if (loggingPacket.EventType == LoggingEventType.CustomEvent
-                && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
-            {
-                BuildEventArgs buildEvent = loggingPacket.NodeBuildEvent.Value.Value;
-                BuildEventContext buildEventContext = buildEvent?.BuildEventContext ?? BuildEventContext.Invalid;
-
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
-                    out string warningCode,
-                    out string helpKeyword,
-                    "DeprecatedEventSerialization",
-                    buildEvent?.GetType().Name ?? string.Empty);
-
-                BuildWarningEventArgs warning = new(
-                    null,
-                    warningCode,
-                    BuildEventFileInfo.Empty.File,
-                    BuildEventFileInfo.Empty.Line,
-                    BuildEventFileInfo.Empty.Column,
-                    BuildEventFileInfo.Empty.EndLine,
-                    BuildEventFileInfo.Empty.EndColumn,
-                    message,
-                    helpKeyword,
-                    "MSBuild");
-
-                warning.BuildEventContext = buildEventContext;
-                if (warning.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
-                {
-                    warning.ProjectFile = buildEvent switch
-                    {
-                        BuildMessageEventArgs buildMessageEvent => buildMessageEvent.ProjectFile,
-                        BuildErrorEventArgs buildErrorEvent => buildErrorEvent.ProjectFile,
-                        BuildWarningEventArgs buildWarningEvent => buildWarningEvent.ProjectFile,
-                        _ => null,
-                    };
-                }
-
-                ProcessLoggingEvent(warning);
-            }
         }
 
         /// <summary>
