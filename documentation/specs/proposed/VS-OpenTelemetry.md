@@ -24,6 +24,7 @@ It's a bit confusing how things are named in OpenTelemetry and .NET and VS Telem
 - If not sampled, no infra initialization overhead.
 - Avoid allocations when not sampled.
 - Has to have no impact on Core without opting into tracing, small impact on Framework
+- No regression in VS perf ddrit scenarios.
 
 ### Privacy
 
@@ -60,6 +61,7 @@ The data sent via VS OpenTelemetry is neither a subset neither a superset of wha
 ##### Features
 
 - BuildCheck enabled
+- Custom tasks and targets counts and durations
 
 The design allows for easy instrumentation of additional data points.
 
@@ -73,21 +75,21 @@ The design allows for easy instrumentation of additional data points.
 
 - Initialize and finalize in Xmake.cs
 	- ActivitySource, TracerProvider, VS Collector
-		- overhead of starting VS collector is fairly big (0.3s on Devbox)[JanProvaznik/VSCollectorBenchmarks](https://github.com/JanProvaznik/VSCollectorBenchmarks)
+		- overhead of starting VS collector is nonzero
 			- head sampling should avoid initializing if not sampled
 
-## VS scenario
+## VS in proc (devenv) scenario
 
 - VS can call `BuildManager` in a thread unsafe way the telemetry implementation has to be mindful of [BuildManager instances acquire its own BuildTelemetry instance by rokonec · Pull Request #8444 · dotnet/msbuild](https://github.com/dotnet/msbuild/pull/8444)
 	- ensure no race conditions in initialization
 	- only 1 TracerProvider with VS defined processing should exist
-- Visual Studio should be responsible for having a running collector, we don't want this overhead in MSBuild and eventually many components can use it
+- Visual Studio should be responsible for having a running collector, we don't want this overhead in MSBuild and eventually many will use it
 
 ## Implementation and MSBuild developer experience
 
 ### ActivitySource names
 
-...
+- Microsoft.VisualStudio.OpenTelemetry.MSBuild.Default
 
 ### Sampling
 
@@ -100,6 +102,10 @@ For proportion estimation (of fairly common occurence in the builds), with not v
 - We want to avoid that cost when not sampled, therefore we prefer head sampling.
 - Enables opt-in and opt-out for guaranteed sample or not sampled.
 - nullable ActivitySource, using `?` when working with them, we can be initialized but not sampled -> it will not reinitialize but not collect telemetry.
+
+- for Dev17 we can't use the new OTel assemblies and their dependencies, so everything has to be opt in.
+- for Dev18 OpenTelemetry will be available and usable by default
+- We can use experiments in VS to pass the environment variable to initialize
 
 ### Initialization at entrypoints
 
@@ -149,7 +155,7 @@ myActivity?.WithTags(data);
 
 #### Multiple Activity Sources
 
-We can create ActivitySources with different sample rates. Ultimately this is limited by the need to initialize a collector.
+We want to create ActivitySources with different sample rates, this requires either implementation server side or a custom Processor.
 
 We potentially want apart from the Default ActivitySource:
 
@@ -166,6 +172,6 @@ We potentially want apart from the Default ActivitySource:
 - Sampling rare events details.
 - In standalone we could start the collector async without waiting which would potentially miss some earlier traces (unlikely to miss the important end of build trace though) but would degrade performance less than waiting for it's startup. The performance and utility tradeoff is not clear.
 - Can collector startup/shutdown be faster?
-- We could let users configure sample rate via env variable, VS profile
+- Exceptions in Collector code paths
 - Do we want to send antivirus state? Figuring it out is expensive: https://github.com/dotnet/msbuild/compare/main...proto/get-av ~100ms
-- ability to configure the overal and per-namespace sampling from server side (e.g. storing it in the .msbuild folder in user profile if different then default values set from server side - this would obviously have a delay of the default sample rate # of executions)
+- ability to configure the overall and per-namespace sampling from server side (e.g. storing it in the .msbuild folder in user profile if different then default values set from server side - this would obviously have a delay of the default sample rate # of executions)
