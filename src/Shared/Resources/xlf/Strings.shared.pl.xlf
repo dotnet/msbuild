@@ -28,7 +28,7 @@
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
-        <source>Custom event type '{0}' is not supported as all custom event types were deprecated due to unsecure serialization. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
         <target state="needs-review-translation">Użycie niezabezpieczonego formatu BinaryFormatter podczas serializacji niestandardowego typu zdarzenia „{0}”. Wkrótce ta funkcja będzie przestarzała. Zamiast tego należy użyć Extended*EventArgs. Więcej informacji: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
