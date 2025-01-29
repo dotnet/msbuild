@@ -136,7 +136,7 @@
     <value>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</value>
   </data>
   <data name="DeprecatedEventSerialization" xml:space="preserve">
-    <value>Custom event type '{0}' is not supported as all custom event types were deprecated due to unsecure serialization. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</value>
+    <value>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</value>
   </data>
   <data name="FileLocation" xml:space="preserve">
     <value>{0} ({1},{2})</value>
