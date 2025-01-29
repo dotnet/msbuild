@@ -971,7 +971,7 @@ namespace Microsoft.Build.BackEnd.Logging
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
             InjectNonSerializedData(loggingPacket);
 
-            ErrorUtilities.VerifyThrow(loggingPacket.EventType != LoggingEventType.CustomEvent, "Custom event types are no longer supported. The check should be implemented in OutOfPRocNode.SendPacket");
+            ErrorUtilities.VerifyThrow(loggingPacket.EventType != LoggingEventType.CustomEvent, "Custom event types are no longer supported. Does the sending node have a different version?");
 
             ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
         }
