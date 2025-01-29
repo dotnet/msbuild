@@ -115,7 +115,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 allEvents.First(x => x is BuildErrorEventArgs).Message.ShouldContain(
                     string.Format(ResourceUtilities.GetResourceString("DeprecatedEventSerialization"),
                     "MyCustomBuildEventArgs"));
-
             }
             finally
             {
