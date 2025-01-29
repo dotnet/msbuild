@@ -78,8 +78,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _env = TestEnvironment.Create(output);
         }
 
-        [Fact]
-        public void Build_WithCustomBuildArgs_ShouldEmitError()
+        [DotNetOnlyFact]
+        public void Build_WithCustomBuildArgs_ShouldEmitErrorOnNetCore() => Build_WithCustomBuildArgs_ShouldEmitEvent<BuildErrorEventArgs>();
+
+        [WindowsFullFrameworkOnlyFact]
+        public void Build_WithCustomBuildArgs_ShouldEmitWarningOnFramework() => Build_WithCustomBuildArgs_ShouldEmitEvent<BuildWarningEventArgs>();
+
+        private void Build_WithCustomBuildArgs_ShouldEmitEvent<T>() where T : LazyFormattedBuildEventArgs
         {
             var testFiles = _env.CreateTestProjectWithFiles(string.Empty, ["main", "child1"], string.Empty);
 
@@ -111,8 +116,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 var result = submission.Execute();
                 var allEvents = _logger.AllBuildEvents;
 
-                allEvents.OfType<BuildErrorEventArgs>().ShouldHaveSingleItem();
-                allEvents.First(x => x is BuildErrorEventArgs).Message.ShouldContain(
+                allEvents.OfType<T>().ShouldHaveSingleItem();
+                allEvents.First(x => x is T).Message.ShouldContain(
                     string.Format(ResourceUtilities.GetResourceString("DeprecatedEventSerialization"),
                     "MyCustomBuildEventArgs"));
             }
