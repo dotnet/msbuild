@@ -29,8 +29,12 @@ internal interface IWorkerNodeTelemetryData
 
 internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
 {
+    // Indicate custom targets/task - those must be hashed.
     public const string CustomPrefix = "C:";
+    // Indicate targets/tasks sourced from nuget cache - those can be custom or MSFT provided ones.
     public const string FromNugetPrefix = "N:";
+    // Indicate targets/tasks generated during build - those must be hashed (as they contain paths).
+    public const string MetaProjPrefix = "M:";
 
     public WorkerNodeTelemetryData(Dictionary<string, TaskExecutionStats> tasksExecutionData, Dictionary<string, bool> targetsExecutionData)
     {

@@ -1284,11 +1284,22 @@ namespace Microsoft.Build.BackEnd
                     // E.g. _SourceLinkHasSingleProvider can be brought explicitly via nuget (Microsoft.SourceLink.GitHub) as well as sdk
                     projectTargetInstance.Value.Location.Equals(targetResult.TargetLocation);
 
-                bool isFromNuget = FileClassifier.Shared.IsInNugetCache(projectTargetInstance.Value.FullPath);
+                bool isFromNuget, isMetaprojTarget, isCustom;
 
-                bool isCustom = IsCustomTargetPath(projectTargetInstance.Value.FullPath) ||
-                                // add the isFromNuget to condition - to prevent double checking of nonnuget package
-                                (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
+                if (IsMetaprojTargetPath(projectTargetInstance.Value.FullPath))
+                {
+                    isMetaprojTarget = true;
+                    isFromNuget = false;
+                    isCustom = false;
+                }
+                else
+                {
+                    isMetaprojTarget = false;
+                    isFromNuget = FileClassifier.Shared.IsInNugetCache(projectTargetInstance.Value.FullPath);
+                    isCustom = !FileClassifier.Shared.IsBuiltInLogic(projectTargetInstance.Value.FullPath) ||
+                               // add the isFromNuget to condition - to prevent double checking of nonnuget package
+                               (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
+                }
 
                 collector.AddTarget(
                     projectTargetInstance.Key,
@@ -1296,6 +1307,7 @@ namespace Microsoft.Build.BackEnd
                     //  to remember target names from ResultsByTarget from before execution
                     wasExecuted,
                     isCustom,
+                    isMetaprojTarget,
                     isFromNuget);
             }
 
@@ -1325,8 +1337,8 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private static bool IsCustomTargetPath(string targetPath)
-            =>  !targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase) && !FileClassifier.Shared.IsBuiltInLogic(targetPath);
+        private static bool IsMetaprojTargetPath(string targetPath)
+            => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Saves the current operating environment.

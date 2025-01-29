@@ -21,7 +21,7 @@ internal interface ITelemetryCollector
         bool isFromNugetCache);
 
     // wasExecuted - means anytime, not necessarily from the last time target was added to telemetry
-    void AddTarget(string name, bool wasExecuted, bool isCustom, bool isFromNugetCache);
+    void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache);
 
     void FinalizeProcessing(LoggingContext loggingContext);
 }
@@ -70,18 +70,23 @@ internal class TelemetryCollectorProvider : IBuildComponent
 
         public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, long totalMemoryConsumed, bool isCustom, bool isFromNugetCache)
         {
-            name = GetName(name, isCustom, isFromNugetCache);
+            name = GetName(name, isCustom, false, isFromNugetCache);
             _workerNodeTelemetryData.AddTask(name, cumulativeExectionTime, executionsCount, totalMemoryConsumed);
         }
 
-        public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isFromNugetCache)
+        public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache)
         {
-            name = GetName(name, isCustom, isFromNugetCache);
+            name = GetName(name, isCustom, isMetaproj, isFromNugetCache);
             _workerNodeTelemetryData.AddTarget(name, wasExecuted);
         }
 
-        private static string GetName(string name, bool isCustom, bool isFromNugetCache)
+        private static string GetName(string name, bool isCustom, bool isMetaproj, bool isFromNugetCache)
         {
+            if (isMetaproj)
+            {
+                name = WorkerNodeTelemetryData.MetaProjPrefix + name;
+            }
+
             if (isCustom)
             {
                 name = WorkerNodeTelemetryData.CustomPrefix + name;
@@ -108,7 +113,7 @@ internal class TelemetryCollectorProvider : IBuildComponent
         public bool IsTelemetryCollected => false;
 
         public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, long totalMemoryConsumed, bool isCustom, bool isFromNugetCache) { }
-        public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isFromNugetCache) { }
+        public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache) { }
 
         public void FinalizeProcessing(LoggingContext loggingContext) { }
     }
