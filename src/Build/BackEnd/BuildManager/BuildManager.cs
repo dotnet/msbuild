@@ -1082,12 +1082,10 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
-                            OpenTelemetryManager.Instance.DefaultActivitySource?
-                                .StartActivity("Build")?
-                                .WithTags(_buildTelemetry)
-                                .WithStartTime(_buildTelemetry.InnerStartAt)
-                                .Dispose();
-                            OpenTelemetryManager.Instance.ForceFlush();
+                            if (OpenTelemetryManager.Instance.IsActive())
+                            {
+                                EndBuildTelemetry();
+                            }
 
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
@@ -1129,6 +1127,17 @@ namespace Microsoft.Build.Execution
                     LogErrorAndShutdown(errorMessage);
                 }
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads
+        private void EndBuildTelemetry()
+        {
+            OpenTelemetryManager.Instance.DefaultActivitySource?
+                .StartActivity("Build")?
+                .WithTags(_buildTelemetry!)
+                .WithStartTime(_buildTelemetry!.InnerStartAt)
+                .Dispose();
+            OpenTelemetryManager.Instance.ForceFlush();
         }
 
         /// <summary>

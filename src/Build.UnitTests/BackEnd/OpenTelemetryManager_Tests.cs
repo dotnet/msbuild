@@ -78,8 +78,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             OpenTelemetryManager.Instance.DefaultActivitySource.ShouldBeNull();
         }
 #endif
-
-        [WindowsOnlyTheory]
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void Initialize_ShouldSetSampleRateOverride_AndCreateActivitySource_WhenRandomBelowOverride(bool standalone)

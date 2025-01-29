@@ -12,6 +12,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -74,39 +75,45 @@ namespace Microsoft.Build.Framework.Telemetry
                     return;
                 }
 
-                DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
-                _telemetryState = TelemetryState.TracerInitialized;
-
-#if NETFRAMEWORK
-                try
-                {
-                    InitializeTracerProvider();
-
-                    // TODO: Enable commented logic when Collector is present in VS
-                    // if (isStandalone)
-                    InitializeCollector();
-
-                    // }
-                }
-                catch (Exception ex)
-                {
-                    // catch exceptions from loading the OTel SDK or Collector to maintain usability of Microsoft.Build.Framework package in our and downstream tests in VS.
-                    if (ex is System.IO.FileNotFoundException or System.IO.FileLoadException)
-                    {
-                        _telemetryState = TelemetryState.Unsampled;
-                        return;
-                    }
-
-                    throw;
-                }
-#endif
+                InitializeActivitySources();
             }
+#if NETFRAMEWORK
+            try
+            {
+                InitializeTracerProvider();
+
+                // TODO: Enable commented logic when Collector is present in VS
+                // if (isStandalone)
+                InitializeCollector();
+
+                // }
+            }
+            catch (Exception ex)
+            {
+                // catch exceptions from loading the OTel SDK or Collector to maintain usability of Microsoft.Build.Framework package in our and downstream tests in VS.
+                if (ex is System.IO.FileNotFoundException or System.IO.FileLoadException)
+                {
+                    _telemetryState = TelemetryState.Unsampled;
+                    return;
+                }
+
+                throw;
+            }
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads
+        private void InitializeActivitySources()
+        {
+            _telemetryState = TelemetryState.TracerInitialized;
+            DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace, _sampleRate);
         }
 
 #if NETFRAMEWORK
         /// <summary>
         /// Initializes the OpenTelemetry SDK TracerProvider with VS default exporter settings.
         /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads
         private void InitializeTracerProvider()
         {
             var exporterSettings = OpenTelemetryExporterSettingsBuilder
@@ -125,6 +132,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Initializes the VS OpenTelemetry Collector with VS default settings.
         /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads
         private void InitializeCollector()
         {
             IOpenTelemetryCollectorSettings collectorSettings = OpenTelemetryCollectorSettingsBuilder
@@ -137,7 +145,7 @@ namespace Microsoft.Build.Framework.Telemetry
             _telemetryState = TelemetryState.CollectorInitialized;
         }
 #endif
-
+        [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads
         private void ForceFlushInner()
         {
 #if NETFRAMEWORK
@@ -155,8 +163,9 @@ namespace Microsoft.Build.Framework.Telemetry
                 ForceFlushInner();
             }
         }
-        
+
         // to avoid assembly loading OpenTelemetry in tests
+        [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads
         private void ShutdownInner()
         {
 #if NETFRAMEWORK
@@ -210,10 +219,9 @@ namespace Microsoft.Build.Framework.Telemetry
             return random.NextDouble() < _sampleRate;
         }
 
-        private bool ShouldBeCleanedUp()
-        {
-            return _telemetryState ==TelemetryState.CollectorInitialized || _telemetryState == TelemetryState.ExporterInitialized;
-        }
+        private bool ShouldBeCleanedUp() => _telemetryState == TelemetryState.CollectorInitialized || _telemetryState == TelemetryState.ExporterInitialized;
+
+        internal bool IsActive() => _telemetryState == TelemetryState.TracerInitialized || _telemetryState == TelemetryState.CollectorInitialized || _telemetryState == TelemetryState.ExporterInitialized;
 
         /// <summary>
         /// State of the telemetry infrastructure.

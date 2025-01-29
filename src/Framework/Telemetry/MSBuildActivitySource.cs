@@ -11,10 +11,12 @@ namespace Microsoft.Build.Framework.Telemetry
     internal class MSBuildActivitySource
     {
         private readonly ActivitySource _source;
+        private readonly double _sampleRate;
 
-        public MSBuildActivitySource(string name)
+        public MSBuildActivitySource(string name, double sampleRate)
         {
             _source = new ActivitySource(name);
+            _sampleRate = sampleRate;
         }
         /// <summary>
         /// Prefixes activity with VS OpenTelemetry.
@@ -26,6 +28,7 @@ namespace Microsoft.Build.Framework.Telemetry
             var activity = Activity.Current?.HasRemoteParent == true
                 ? _source.StartActivity($"{TelemetryConstants.EventPrefix}{name}", ActivityKind.Internal, parentId: Activity.Current.ParentId)
                 : _source.StartActivity($"{TelemetryConstants.EventPrefix}{name}");
+            activity?.WithTag(new("SampleRate", _sampleRate, false));
             return activity;
         }
     }

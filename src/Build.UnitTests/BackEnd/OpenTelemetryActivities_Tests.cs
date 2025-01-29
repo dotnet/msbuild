@@ -141,7 +141,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         [Fact]
         public void StartActivity_ShouldPrefixNameCorrectly_WhenNoRemoteParent()
         {
-            var source = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
+            var source = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace, 1.0);
             using var listener = new ActivityListener
             {
                 ShouldListenTo = activitySource => activitySource.Name == TelemetryConstants.DefaultActivitySourceNamespace,
@@ -167,7 +167,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             parentActivity.AddTag("sampleTag", "sampleVal");
             parentActivity.Start();
 
-            var source = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
+            var source = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace, 1.0);
             using var listener = new ActivityListener
             {
                 ShouldListenTo = activitySource => activitySource.Name == TelemetryConstants.DefaultActivitySourceNamespace,
