@@ -140,7 +140,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 .Build();
 
             _collector = OpenTelemetryCollectorProvider.CreateCollector(collectorSettings);
-            _collector.StartAsync().GetAwaiter().GetResult();
+            _collector.StartAsync();
 
             _telemetryState = TelemetryState.CollectorInitialized;
         }
