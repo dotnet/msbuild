@@ -1205,6 +1205,7 @@ namespace Microsoft.Build.Execution
                 {
                     ExecutedCount = 0;
                     _executedSw.Reset();
+                    TotalMemoryConsumption = 0;
                 }
             }
 
