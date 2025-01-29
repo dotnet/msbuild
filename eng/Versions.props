@@ -7,8 +7,6 @@
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
-    <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
-    <SemanticVersioningV1>true</SemanticVersioningV1>
     <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
   </PropertyGroup>
   <!-- Repo Toolset Features -->

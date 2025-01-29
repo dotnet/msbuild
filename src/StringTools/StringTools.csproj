@@ -10,7 +10,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <SemanticVersioningV1>true</SemanticVersioningV1>
 
     <EnablePackageValidation>true</EnablePackageValidation>
 
@@ -18,7 +17,7 @@
 
     <AssemblyName>Microsoft.NET.StringTools</AssemblyName>
     <PackageDescription>This package contains the $(AssemblyName) assembly which implements common string-related functionality such as weak interning.</PackageDescription>
-    
+
     <IncludeBuildOutput Condition="'$(TargetFramework)' == 'net35'">false</IncludeBuildOutput>
     <!-- Don't publish the reference assembly if the build output isn't included. -->
     <TargetsForTfmSpecificBuildOutput Condition="'$(IncludeBuildOutput)' == 'false'" />
