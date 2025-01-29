@@ -401,7 +401,8 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
+    // Windows only - due to targeting NetFx
+    [WindowsOnlyTheory]
     [InlineData(
         """
         <Project ToolsVersion="msbuilddefaulttoolsversion">
