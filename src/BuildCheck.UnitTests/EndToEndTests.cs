@@ -406,7 +406,7 @@ public class EndToEndTests : IDisposable
         """
         <Project ToolsVersion="msbuilddefaulttoolsversion">
             <PropertyGroup>
-              <TargetFramework>net472</TargetFramework>
+              <TargetFramework>net48</TargetFramework>
             </PropertyGroup>
             <Target Name="Build">
                 <Message Text="Build done"/>
@@ -428,7 +428,7 @@ public class EndToEndTests : IDisposable
         <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
           <PropertyGroup>
             <OutputType>Library</OutputType>
-            <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+            <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
             <OutputPath>bin\Debug\</OutputPath>
         	<NoWarn>CS2008</NoWarn>
           </PropertyGroup>
@@ -441,8 +441,8 @@ public class EndToEndTests : IDisposable
         <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
           <PropertyGroup>
             <OutputType>Library</OutputType>
-            <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-            <TargetFramework>v4.7.2</TargetFramework>
+            <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+            <TargetFramework>v4.8</TargetFramework>
             <OutputPath>bin\Debug\</OutputPath>
         	<NoWarn>CS2008</NoWarn>
           </PropertyGroup>
@@ -450,7 +450,7 @@ public class EndToEndTests : IDisposable
         </Project>
         """,
         true)]
-    public void TFMinNonSdkCheckTest2(string projectContent, bool expectCheckTrigger)
+    public void TFMinNonSdkCheckTest(string projectContent, bool expectCheckTrigger)
     {
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
 
