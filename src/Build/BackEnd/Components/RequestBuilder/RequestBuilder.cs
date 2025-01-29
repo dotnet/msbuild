@@ -1278,13 +1278,25 @@ namespace Microsoft.Build.BackEnd
 
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
+                bool wasExecuted =
+                    unfilteredResult.ResultsByTarget.TryGetValue(projectTargetInstance.Key, out TargetResult targetResult) &&
+                    // We need to match on location of target as well - as multiple targets with same name can be defined.
+                    // E.g. _SourceLinkHasSingleProvider can be brought explicitly via nuget (Microsoft.SourceLink.GitHub) as well as sdk
+                    projectTargetInstance.Value.Location.Equals(targetResult.TargetLocation);
+
+                bool isFromNuget = FileClassifier.Shared.IsInNugetCache(projectTargetInstance.Value.FullPath);
+
+                bool isCustom = IsCustomTargetPath(projectTargetInstance.Value.FullPath) ||
+                                // add the isFromNuget to condition - to prevent double checking of nonnuget package
+                                (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
+
                 collector.AddTarget(
                     projectTargetInstance.Key,
                     // would we want to distinguish targets that were executed only during this execution - we'd need
                     //  to remember target names from ResultsByTarget from before execution
-                    unfilteredResult.ResultsByTarget.ContainsKey(projectTargetInstance.Key),
-                    IsCustomTargetPath(projectTargetInstance.Value.FullPath),
-                    FileClassifier.Shared.IsInNugetCache(projectTargetInstance.Value.FullPath));
+                    wasExecuted,
+                    isCustom,
+                    isFromNuget);
             }
 
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
@@ -1302,6 +1314,7 @@ namespace Microsoft.Build.BackEnd
                     collector.AddTask(registeredTaskRecord.TaskIdentity.Name,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
+                        registeredTaskRecord.Statistics.TotalMemoryConsumption,
                         registeredTaskRecord.GetIsCustom(),
                         registeredTaskRecord.IsFromNugetCache);
 

@@ -14,9 +14,10 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Framework;
 
 
-internal struct TaskExecutionStats(TimeSpan cumulativeExecutionTime, short executionsCount)
+internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, short executionsCount, long totalMemoryConsumption)
 {
     public TimeSpan CumulativeExecutionTime { get; set; } = cumulativeExecutionTime;
+    public long TotalMemoryConsumption { get; set; } = totalMemoryConsumption;
     public short ExecutionsCount { get; set; } = executionsCount;
 }
 
@@ -28,6 +29,9 @@ internal interface IWorkerNodeTelemetryData
 
 internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
 {
+    public const string CustomPrefix = "C:";
+    public const string FromNugetPrefix = "N:";
+
     public WorkerNodeTelemetryData(Dictionary<string, TaskExecutionStats> tasksExecutionData, Dictionary<string, bool> targetsExecutionData)
     {
         TasksExecutionData = tasksExecutionData;
@@ -38,7 +42,7 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
     {
         foreach (var task in other.TasksExecutionData)
         {
-            AddTask(task.Key, task.Value.CumulativeExecutionTime, task.Value.ExecutionsCount);
+            AddTask(task.Key, task.Value.CumulativeExecutionTime, task.Value.ExecutionsCount, task.Value.TotalMemoryConsumption);
         }
 
         foreach (var target in other.TargetsExecutionData)
@@ -47,18 +51,19 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         }
     }
 
-    public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount)
+    public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, long totalMemoryConsumption)
     {
-        TaskExecutionStats taskExecutionStats;
+        TaskExecutionStats? taskExecutionStats;
         if (!TasksExecutionData.TryGetValue(name, out taskExecutionStats))
         {
-            taskExecutionStats = new(cumulativeExectionTime, executionsCount);
+            taskExecutionStats = new(cumulativeExectionTime, executionsCount, totalMemoryConsumption);
             TasksExecutionData[name] = taskExecutionStats;
         }
         else
         {
             taskExecutionStats.CumulativeExecutionTime += cumulativeExectionTime;
             taskExecutionStats.ExecutionsCount += executionsCount;
+            taskExecutionStats.TotalMemoryConsumption += totalMemoryConsumption;
         }
     }
 
@@ -93,6 +98,7 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
             writer.Write(entry.Key);
             writer.Write(entry.Value.CumulativeExecutionTime.Ticks);
             writer.Write(entry.Value.ExecutionsCount);
+            writer.Write(entry.Value.TotalMemoryConsumption);
         }
 
         writer.Write7BitEncodedInt(WorkerNodeTelemetryData.TargetsExecutionData.Count);
@@ -110,7 +116,7 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
         for (int i = 0; i < count; i++)
         {
             tasksExecutionData.Add(reader.ReadString(),
-                new TaskExecutionStats(TimeSpan.FromTicks(reader.ReadInt64()), reader.ReadInt16()));
+                new TaskExecutionStats(TimeSpan.FromTicks(reader.ReadInt64()), reader.ReadInt16(), reader.ReadInt64()));
         }
 
         count = reader.Read7BitEncodedInt();
@@ -149,6 +155,48 @@ internal sealed class InternalTelemeteryConsumingLogger : ILogger
     private void EventSourceOnBuildFinished(object sender, BuildFinishedEventArgs e)
     {
         TestOnly_InternalTelemetryAggregted?.Invoke(_workerNodeTelemetryData);
+        FlushDataIntoConsoleIfRequested();
+    }
+
+    private void FlushDataIntoConsoleIfRequested()
+    {
+        if (Environment.GetEnvironmentVariable("MSBUILDOUTPUTNODESTELEMETRY") != "1")
+        {
+            return;
+        }
+
+        Console.WriteLine("==========================================");
+        Console.WriteLine($"Targets ({_workerNodeTelemetryData.TargetsExecutionData.Count}):");
+        foreach (var target in _workerNodeTelemetryData.TargetsExecutionData)
+        {
+            Console.WriteLine($"{target.Key} : {target.Value}");
+        }
+        Console.WriteLine("==========================================");
+        Console.WriteLine($"Tasks: ({_workerNodeTelemetryData.TasksExecutionData.Count})");
+        Console.WriteLine("Custom tasks:");
+        foreach (var task in _workerNodeTelemetryData.TasksExecutionData.Where(t => t.Key.StartsWith(WorkerNodeTelemetryData.CustomPrefix) || t.Key.StartsWith(WorkerNodeTelemetryData.FromNugetPrefix + WorkerNodeTelemetryData.CustomPrefix)))
+        {
+            Console.WriteLine($"{task.Key}");
+        }
+        Console.WriteLine("==========================================");
+        Console.WriteLine("Tasks by time:");
+        foreach (var task in _workerNodeTelemetryData.TasksExecutionData.OrderByDescending(t => t.Value.CumulativeExecutionTime).Take(20))
+        {
+            Console.WriteLine($"{task.Key} - {task.Value.CumulativeExecutionTime}");
+        }
+        Console.WriteLine("==========================================");
+        Console.WriteLine("Tasks by memory consumption:");
+        foreach (var task in _workerNodeTelemetryData.TasksExecutionData.OrderByDescending(t => t.Value.TotalMemoryConsumption).Take(20))
+        {
+            Console.WriteLine($"{task.Key} - {task.Value.TotalMemoryConsumption / 1024.0:0.00}kB");
+        }
+        Console.WriteLine("==========================================");
+        Console.WriteLine("Tasks by Executions count:");
+        foreach (var task in _workerNodeTelemetryData.TasksExecutionData.OrderByDescending(t => t.Value.ExecutionsCount))
+        {
+            Console.WriteLine($"{task.Key} - {task.Value.ExecutionsCount}");
+        }
+        Console.WriteLine("==========================================");
     }
 
     public void Shutdown()

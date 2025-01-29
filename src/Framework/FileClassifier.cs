@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Shared;
 #if !RUNTIME_TYPE_NETCORE
 using System.Diagnostics;
 using System.Text.RegularExpressions;
@@ -73,6 +74,12 @@ namespace Microsoft.Build.Framework
         /// </summary>
         private static readonly Lazy<FileClassifier> s_sharedInstance = new(() => new FileClassifier());
 
+        private const string MicrosoftAssemblyPrefix = "Microsoft.";
+
+        // Surrogate for the span - to prevent array allocation on each span access.
+        private static readonly char[] s_microsoftAssemblyPrefixChars = MicrosoftAssemblyPrefix.ToCharArray();
+        private static ReadOnlySpan<char> MicrosoftAssemblyPrefixSpan => s_microsoftAssemblyPrefixChars;
+
         /// <summary>
         ///     Serves purpose of thread safe set of known immutable directories.
         /// </summary>
@@ -92,7 +99,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         private volatile IReadOnlyList<string> _knownBuiltInLogicDirectoriesSnapshot = [];
 
-        private string? _nugetCacheLocation;
+        private IReadOnlyList<string> _nugetCacheLocations = [];
 
         /// <summary>
         ///     Creates default FileClassifier which following immutable folders:
@@ -204,6 +211,22 @@ namespace Microsoft.Build.Framework
         public static FileClassifier Shared => s_sharedInstance.Value;
 
         /// <summary>
+        ///    Checks if assembly name indicates it is a Microsoft assembly.
+        /// </summary>
+        /// <param name="assemblyName"></param>
+        public static bool IsMicrosoftAssembly(string assemblyName)
+            => assemblyName.StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        ///    Checks if assembly name indicates it is a Microsoft assembly.
+        /// </summary>
+        public static bool IsMicrosoftAssembly(ReadOnlySpan<char> assemblyName)
+            => assemblyName.StartsWith(MicrosoftAssemblyPrefixSpan, StringComparison.OrdinalIgnoreCase);
+
+        private static bool IsInLocationList(string filePath, IReadOnlyList<string> locations)
+            => GetFirstMatchingLocationfromList(filePath, locations) is not null;
+
+        /// <summary>
         ///     Try add path into set of known immutable paths.
         ///     Files under any of these folders are considered non-modifiable.
         /// </summary>
@@ -251,9 +274,19 @@ namespace Microsoft.Build.Framework
             RegisterImmutableDirectory(getPropertyValue("FrameworkPathOverride")?.Trim(), false);
             // example: C:\Program Files\dotnet\
             RegisterImmutableDirectory(getPropertyValue("NetCoreRoot")?.Trim(), false);
-            // example: C:\Users\<username>\.nuget\packages\
-            _nugetCacheLocation = getPropertyValue("NuGetPackageFolders")?.Trim();
-            RegisterImmutableDirectory(_nugetCacheLocation, true);
+            // example: C:\Users\<username>\.nuget\packages\;...
+            string[]? nugetLocations =
+                getPropertyValue("NuGetPackageFolders")
+                    ?.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(p => EnsureTrailingSlash(p.Trim())).ToArray();
+            if (nugetLocations is { Length: > 0 })
+            {
+                _nugetCacheLocations = nugetLocations ?? [];
+                foreach (string location in nugetLocations!)
+                {
+                    RegisterImmutableDirectory(location, true);
+                }
+            }
 
             IsImmutablePathsInitialized = true;
         }
@@ -349,20 +382,24 @@ namespace Microsoft.Build.Framework
         ///    Gets whether a file is assumed to be inside a nuget cache location.
         /// </summary>
         public bool IsInNugetCache(string filePath)
+            => IsInLocationList(filePath, _nugetCacheLocations);
+
+        /// <summary>
+        ///    Gets whether a file is assumed to be in the nuget cache and name indicates it's produced by Microsoft.
+        /// </summary>
+        public bool IsMicrosoftPackageInNugetCache(string filePath)
         {
-            string? nugetCache = _nugetCacheLocation;
-            if (string.IsNullOrEmpty(filePath) || string.IsNullOrEmpty(nugetCache))
-            {
-                return false;
-            }
-            return filePath.StartsWith(nugetCache, PathComparison);
+            string? containingNugetCache = GetFirstMatchingLocationfromList(filePath, _nugetCacheLocations);
+
+            return containingNugetCache != null &&
+                   IsMicrosoftAssembly(filePath.AsSpan(containingNugetCache.Length));
         }
 
-        private static bool IsInLocationList(string filePath, IReadOnlyList<string> locations)
+        private static string? GetFirstMatchingLocationfromList(string filePath, IReadOnlyList<string> locations)
         {
             if (string.IsNullOrEmpty(filePath))
             {
-                return false;
+                return null;
             }
 
             // Avoid a foreach loop or linq.Any because they allocate.
@@ -371,11 +408,11 @@ namespace Microsoft.Build.Framework
             {
                 if (filePath.StartsWith(locations[i], PathComparison))
                 {
-                    return true;
+                    return locations[i];
                 }
             }
 
-            return false;
+            return null;
         }
     }
 }

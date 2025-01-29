@@ -1182,12 +1182,15 @@ namespace Microsoft.Build.Execution
             internal class Stats()
             {
                 public short ExecutedCount { get; private set; } = 0;
+                public long TotalMemoryConsumption { get; private set; } = 0;
                 private readonly Stopwatch _executedSw  = new Stopwatch();
+                private long _memoryConsumptionOnStart;
 
                 public TimeSpan ExecutedTime => _executedSw.Elapsed;
 
                 public void ExecutionStarted()
                 {
+                    _memoryConsumptionOnStart = GC.GetTotalMemory(false);
                     _executedSw.Start();
                     ExecutedCount++;
                 }
@@ -1195,6 +1198,7 @@ namespace Microsoft.Build.Execution
                 public void ExecutionStoped()
                 {
                     _executedSw.Stop();
+                    TotalMemoryConsumption += GC.GetTotalMemory(false) - _memoryConsumptionOnStart;
                 }
 
                 public void Reset()
@@ -1258,9 +1262,11 @@ namespace Microsoft.Build.Execution
                         //  so we need to check file as well (the very last condition).
                         !string.IsNullOrEmpty(_parameterGroupAndTaskBody?.InlineTaskXmlBody) ||
                         (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyName) &&
-                         !IsMicrosoftAssembly(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
+                         !FileClassifier.IsMicrosoftAssembly(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
                         (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyFile) &&
-                         !IsMicrosoftAssembly(Path.GetFileName(_taskFactoryAssemblyLoadInfo.AssemblyFile)) &&
+                         // This condition will as well capture Microsoft tasks pulled from NuGet cache - since we decide based on assembly name.
+                         // Hence we do not have to add the 'IsMicrosoftPackageInNugetCache' call anywhere here 
+                         !FileClassifier.IsMicrosoftAssembly(Path.GetFileName(_taskFactoryAssemblyLoadInfo.AssemblyFile)) &&
                          !FileClassifier.Shared.IsBuiltInLogic(_taskFactoryAssemblyLoadInfo.AssemblyFile)))
                     // and let's consider all tasks imported by common targets as non custom logic.
                     && !FileClassifier.Shared.IsBuiltInLogic(_definingFileFullPath);
@@ -1269,9 +1275,6 @@ namespace Microsoft.Build.Execution
             public bool IsFromNugetCache
                 => FileClassifier.Shared.IsInNugetCache(_taskFactoryAssemblyLoadInfo.AssemblyFile) ||
                    FileClassifier.Shared.IsInNugetCache(_definingFileFullPath);
-
-            private static bool IsMicrosoftAssembly(string assemblyName)
-                => assemblyName.StartsWith("Microsoft.", StringComparison.Ordinal);
 
             /// <summary>
             /// Gets the task name this record was registered with.

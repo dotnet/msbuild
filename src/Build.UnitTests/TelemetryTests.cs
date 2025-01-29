@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -20,7 +19,6 @@ namespace Microsoft.Build.Engine.UnitTests
 
         public TelemetryTests(ITestOutputHelper output)
         {
-            ProjectBuildStats.DurationThresholdForTopN = TimeSpan.Zero;
             _output = output;
         }
 

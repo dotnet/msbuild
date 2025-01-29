@@ -565,26 +565,6 @@ namespace Microsoft.Build.UnitTests
                     .Select(v => v.TotalSeconds.ToString(CultureInfo.InvariantCulture)).ToCsvString(false));
         }
 
-        // Let's not have this event in the binlog at all
-        //[Fact]
-        //public void RoundtripWorkerNodeTelemetryEventArgs()
-        //{
-        //    WorkerNodeTelemetryData td = new WorkerNodeTelemetryData(
-        //        new Dictionary<string, TaskExecutionStats>()
-        //        {
-        //            { "task1", new TaskExecutionStats(TimeSpan.FromMinutes(1), 5) },
-        //            { "task2", new TaskExecutionStats(TimeSpan.Zero, 0) },
-        //            { "task3", new TaskExecutionStats(TimeSpan.FromTicks(1234), 12) }
-        //        },
-        //        new Dictionary<string, bool>() { { "target1", false }, { "target2", true }, });
-
-        //    WorkerNodeTelemetryEventArgs args = new WorkerNodeTelemetryEventArgs(td);
-
-        //    Roundtrip(args,
-        //        e => e.WorkerNodeTelemetryData.TasksExecutionData.Select(kp => $"{kp.Key}:{kp.Value.CumulativeExecutionTime.Ticks}:{kp.Value.ExecutionsCount}").OrderBy(k => k).ToCsvString(),
-        //        e => e.WorkerNodeTelemetryData.TargetsExecutionData.Select(kp => $"{kp.Key}:{kp.Value}").OrderBy(k => k).ToCsvString());
-        //}
-
         [Theory]
         [InlineData(true)]
         [InlineData(false)]

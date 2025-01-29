@@ -17,7 +17,7 @@ internal interface ITelemetryCollector
 {
     bool IsTelemetryCollected { get; }
 
-    void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, bool isCustom,
+    void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, long totalMemoryConsumed, bool isCustom,
         bool isFromNugetCache);
 
     // wasExecuted - means anytime, not necessarily from the last time target was added to telemetry
@@ -68,10 +68,10 @@ internal class TelemetryCollectorProvider : IBuildComponent
         // in future, this might ber per event type
         public bool IsTelemetryCollected => true;
 
-        public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, bool isCustom, bool isFromNugetCache)
+        public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, long totalMemoryConsumed, bool isCustom, bool isFromNugetCache)
         {
             name = GetName(name, isCustom, isFromNugetCache);
-            _workerNodeTelemetryData.AddTask(name, cumulativeExectionTime, executionsCount);
+            _workerNodeTelemetryData.AddTask(name, cumulativeExectionTime, executionsCount, totalMemoryConsumed);
         }
 
         public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isFromNugetCache)
@@ -84,12 +84,12 @@ internal class TelemetryCollectorProvider : IBuildComponent
         {
             if (isCustom)
             {
-                name = "C:" + name;
+                name = WorkerNodeTelemetryData.CustomPrefix + name;
             }
 
             if (isFromNugetCache)
             {
-                name = "N:" + name;
+                name = WorkerNodeTelemetryData.FromNugetPrefix + name;
             }
 
             return name;
@@ -107,7 +107,7 @@ internal class TelemetryCollectorProvider : IBuildComponent
     {
         public bool IsTelemetryCollected => false;
 
-        public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, bool isCustom, bool isFromNugetCache) { }
+        public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, long totalMemoryConsumed, bool isCustom, bool isFromNugetCache) { }
         public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isFromNugetCache) { }
 
         public void FinalizeProcessing(LoggingContext loggingContext) { }

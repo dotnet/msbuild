@@ -20,9 +20,9 @@ namespace Microsoft.Build.Framework.UnitTests
             WorkerNodeTelemetryData td = new WorkerNodeTelemetryData(
                 new Dictionary<string, TaskExecutionStats>()
                 {
-                        { "task1", new TaskExecutionStats(TimeSpan.FromMinutes(1), 5) },
-                        { "task2", new TaskExecutionStats(TimeSpan.Zero, 0) },
-                        { "task3", new TaskExecutionStats(TimeSpan.FromTicks(1234), 12) }
+                        { "task1", new TaskExecutionStats(TimeSpan.FromMinutes(1), 5, 1234) },
+                        { "task2", new TaskExecutionStats(TimeSpan.Zero, 0, 0) },
+                        { "task3", new TaskExecutionStats(TimeSpan.FromTicks(1234), 12, 987654321) }
                 },
                 new Dictionary<string, bool>() { { "target1", false }, { "target2", true }, });
 
