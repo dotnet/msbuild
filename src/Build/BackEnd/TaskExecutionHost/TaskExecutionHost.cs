@@ -31,6 +31,7 @@ namespace Microsoft.Build.BackEnd
 {
     /// <summary>
     /// Flags returned by TaskExecutionHost.FindTask().
+    /// random change for a test
     /// </summary>
     [Flags]
     internal enum TaskRequirements
