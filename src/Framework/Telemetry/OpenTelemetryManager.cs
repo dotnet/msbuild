@@ -69,6 +69,13 @@ namespace Microsoft.Build.Framework.Telemetry
                     return;
                 }
 
+                // TODO: temporary until we have green light to enable telemetry perf-wise
+                if (!IsOptIn())
+                {
+                    _telemetryState = TelemetryState.Unsampled;
+                    return;
+                }
+
                 if (!IsSampled())
                 {
                     _telemetryState = TelemetryState.Unsampled;
@@ -195,6 +202,11 @@ namespace Microsoft.Build.Framework.Telemetry
         /// Determines if the user has explicitly opted out of telemetry.
         /// </summary>
         private bool IsOptOut() => Traits.Instance.FrameworkTelemetryOptOut || Traits.Instance.SdkTelemetryOptOut || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14);
+
+        /// <summary>
+        /// TODO: Temporary until perf of loading OTel is agreed to in VS.
+        /// </summary>
+        private bool IsOptIn() => !IsOptOut() && Traits.Instance.TelemetrySampleRateOverride.HasValue;
 
         /// <summary>
         /// Determines if telemetry should be initialized based on sampling and environment variable overrides.

@@ -1129,7 +1129,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads
+        [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads of System.Diagnostics.DiagnosticSource, TODO: when this is agreed to perf-wise enable instrumenting using activities anywhere...
         private void EndBuildTelemetry()
         {
             OpenTelemetryManager.Instance.DefaultActivitySource?
