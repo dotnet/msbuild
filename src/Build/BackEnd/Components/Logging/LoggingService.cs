@@ -73,6 +73,11 @@ namespace Microsoft.Build.BackEnd.Logging
     internal partial class LoggingService : ILoggingService, INodePacketHandler
     {
         /// <summary>
+        /// Gets or sets a value if BuildCheck is enabled. The presence of this flag influences the logging logic.
+        /// </summary>
+        private bool _buildCheckEnabled;
+
+        /// <summary>
         /// The default maximum size for the logging event queue.
         /// </summary>
         private const uint DefaultQueueCapacity = 200000;
@@ -474,11 +479,6 @@ namespace Microsoft.Build.BackEnd.Logging
         public bool Question { get; set; }
 
         /// <summary>
-        /// Gets or sets a value if BuildCheck is enabled. The presence of this flag influences the logging logic.
-        /// </summary>
-        internal bool BuildCheckEnabled { get; set; }
-
-        /// <summary>
         /// The list of descriptions which describe how to create forwarding loggers on a node.
         /// This is used by the node provider to get a list of registered descriptions so that
         /// they can be transmitted to child nodes.
@@ -877,7 +877,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 _buildEngineDataRouter = (buildComponentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)?.BuildEngineDataRouter;
 
-                BuildCheckEnabled = buildComponentHost.BuildParameters!.IsBuildCheckEnabled;
+                _buildCheckEnabled = buildComponentHost.BuildParameters!.IsBuildCheckEnabled;
             }
         }
 

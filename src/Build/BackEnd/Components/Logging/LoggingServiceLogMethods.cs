@@ -617,7 +617,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // BuildCheck can still emit some LogBuildEvent(s) after ProjectFinishedEventArgs was reported.
             // Due to GetAndVerifyProjectFileFromContext validation, these checks break the build.
-            if (!BuildCheckEnabled)
+            if (!_buildCheckEnabled)
             {
                 // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
                 if (!_projectFileMap.TryRemove(projectBuildEventContext.ProjectContextId, out _))
