@@ -479,7 +479,7 @@ namespace Microsoft.Build.BackEnd
 
                             // Flag the completion of the task.
                             taskLoggingContext.LogTaskBatchFinished(_projectFullPath, taskResult.ResultCode == WorkUnitResultCode.Success || taskResult.ResultCode == WorkUnitResultCode.Skipped);
-                            taskFactoryWrapper?.Statistics?.ExecutionStoped();
+                            taskFactoryWrapper?.Statistics?.ExecutionStopped();
 
                             if (taskResult.ResultCode == WorkUnitResultCode.Failed && _continueOnError == ContinueOnError.WarnAndContinue)
                             {

@@ -10,11 +10,11 @@ namespace Microsoft.Build.Telemetry;
 /// A build component responsible for accumulating telemetry data from worker node and then sending it to main node
 /// at the end of the build.
 /// </summary>
-internal interface ITelemetryCollector
+internal interface ITelemetryForwarder
 {
     bool IsTelemetryCollected { get; }
 
-    void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, long totalMemoryConsumed, bool isCustom,
+    void AddTask(string name, TimeSpan cumulativeExecutionTime, short executionsCount, long totalMemoryConsumed, bool isCustom,
         bool isFromNugetCache);
 
     /// <summary>

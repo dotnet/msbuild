@@ -80,7 +80,7 @@ namespace Microsoft.Build.BackEnd
             _componentEntriesByType[BuildComponentType.RequestBuilder] = new BuildComponentEntry(BuildComponentType.RequestBuilder, RequestBuilder.CreateComponent, CreationPattern.CreateAlways);
             // Following two conditionally registers real or no-op implementation based on BuildParameters
             _componentEntriesByType[BuildComponentType.BuildCheckManagerProvider] = new BuildComponentEntry(BuildComponentType.BuildCheckManagerProvider, BuildCheckManagerProvider.CreateComponent, CreationPattern.Singleton);
-            _componentEntriesByType[BuildComponentType.TelemetryCollector] = new BuildComponentEntry(BuildComponentType.TelemetryCollector, TelemetryCollectorProvider.CreateComponent, CreationPattern.Singleton);
+            _componentEntriesByType[BuildComponentType.TelemetryForwarder] = new BuildComponentEntry(BuildComponentType.TelemetryForwarder, TelemetryForwarderProvider.CreateComponent, CreationPattern.Singleton);
             _componentEntriesByType[BuildComponentType.TargetBuilder] = new BuildComponentEntry(BuildComponentType.TargetBuilder, TargetBuilder.CreateComponent, CreationPattern.CreateAlways);
             _componentEntriesByType[BuildComponentType.TaskBuilder] = new BuildComponentEntry(BuildComponentType.TaskBuilder, TaskBuilder.CreateComponent, CreationPattern.CreateAlways);
             _componentEntriesByType[BuildComponentType.RegisteredTaskObjectCache] = new BuildComponentEntry(BuildComponentType.RegisteredTaskObjectCache, RegisteredTaskObjectCache.CreateComponent, CreationPattern.Singleton);

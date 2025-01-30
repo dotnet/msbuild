@@ -1262,8 +1262,8 @@ namespace Microsoft.Build.BackEnd
 
         private void UpdateStatisticsPostBuild()
         {
-            ITelemetryCollector collector =
-                ((TelemetryCollectorProvider)_componentHost.GetComponent(BuildComponentType.TelemetryCollector))
+            ITelemetryForwarder collector =
+                ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
                 .Instance;
 
             if (!collector.IsTelemetryCollected)

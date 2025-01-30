@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Microsoft.Build.Framework;
 
-internal sealed class InternalTelemeteryConsumingLogger : ILogger
+internal sealed class InternalTelemetryConsumingLogger : ILogger
 {
     public LoggerVerbosity Verbosity { get; set; }
     public string? Parameters { get; set; }

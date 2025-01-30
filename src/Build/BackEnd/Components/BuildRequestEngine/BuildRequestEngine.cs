@@ -288,7 +288,7 @@ namespace Microsoft.Build.BackEnd
                     var buildCheckManager = buildCheckProvider!.Instance;
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
                     // Flush and send the final telemetry data if they are being collected
-                    ITelemetryCollector telemetryCollector = (_componentHost.GetComponent(BuildComponentType.TelemetryCollector) as TelemetryCollectorProvider)!.Instance;
+                    ITelemetryForwarder telemetryCollector = (_componentHost.GetComponent(BuildComponentType.TelemetryForwarder) as TelemetryForwarderProvider)!.Instance;
                     telemetryCollector.FinalizeProcessing(_nodeLoggingContext);
                     // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
                     buildCheckProvider.ShutdownComponent();

@@ -2961,7 +2961,7 @@ namespace Microsoft.Build.Execution
                     verbosity: LoggerVerbosity.Quiet);
 
                 ILogger internalTelemetryLogger =
-                    new InternalTelemeteryConsumingLogger();
+                    new InternalTelemetryConsumingLogger();
 
                 ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(internalTelemetryLogger, forwardingLoggerDescription) };
 

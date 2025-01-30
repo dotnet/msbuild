@@ -149,9 +149,9 @@ namespace Microsoft.Build.BackEnd
         BuildCheckManagerProvider,
 
         /// <summary>
-        /// The component which collects telemetry data.
+        /// The component which collects telemetry data in worker node and forwards it to the main node.
         /// </summary>
-        TelemetryCollector,
+        TelemetryForwarder,
     }
 
     /// <summary>

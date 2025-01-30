@@ -49,7 +49,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public void WorkerNodeTelemetryCollection_BasicTarget()
         {
             WorkerNodeTelemetryData? workerNodeTelemetryData = null;
-            InternalTelemeteryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeTelemetryData = dt;
+            InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeTelemetryData = dt;
 
             var testProject = """
                                       <Project>
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public void WorkerNodeTelemetryCollection_CustomTargetsAndTasks()
         {
             WorkerNodeTelemetryData? workerNodeTelemetryData = null;
-            InternalTelemeteryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeTelemetryData = dt;
+            InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeTelemetryData = dt;
 
             var testProject = """
                                       <Project>

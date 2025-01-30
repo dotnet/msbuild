@@ -13,16 +13,16 @@ namespace Microsoft.Build.Telemetry;
 /// A build component responsible for accumulating telemetry data from worker node and then sending it to main node
 /// at the end of the build.
 /// </summary>
-internal class TelemetryCollectorProvider : IBuildComponent
+internal class TelemetryForwarderProvider : IBuildComponent
 {
-    private ITelemetryCollector? _instance;
+    private ITelemetryForwarder? _instance;
 
-    public ITelemetryCollector Instance => _instance ?? new NullTelemetryCollector();
+    public ITelemetryForwarder Instance => _instance ?? new NullTelemetryForwarder();
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
-        ErrorUtilities.VerifyThrow(type == BuildComponentType.TelemetryCollector, "Cannot create components of type {0}", type);
-        return new TelemetryCollectorProvider();
+        ErrorUtilities.VerifyThrow(type == BuildComponentType.TelemetryForwarder, "Cannot create components of type {0}", type);
+        return new TelemetryForwarderProvider();
     }
 
     public void InitializeComponent(IBuildComponentHost host)
@@ -33,11 +33,11 @@ internal class TelemetryCollectorProvider : IBuildComponent
         {
             if (host!.BuildParameters.IsTelemetryEnabled)
             {
-                _instance = new TelemetryCollector();
+                _instance = new TelemetryForwarder();
             }
             else
             {
-                _instance = new NullTelemetryCollector();
+                _instance = new NullTelemetryForwarder();
             }
         }
     }
@@ -48,17 +48,17 @@ internal class TelemetryCollectorProvider : IBuildComponent
         _instance = null;
     }
 
-    public class TelemetryCollector : ITelemetryCollector
+    public class TelemetryForwarder : ITelemetryForwarder
     {
         private readonly WorkerNodeTelemetryData _workerNodeTelemetryData = new();
 
         // in future, this might be per event type
         public bool IsTelemetryCollected => true;
 
-        public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, long totalMemoryConsumed, bool isCustom, bool isFromNugetCache)
+        public void AddTask(string name, TimeSpan cumulativeExecutionTime, short executionsCount, long totalMemoryConsumed, bool isCustom, bool isFromNugetCache)
         {
             name = GetName(name, isCustom, false, isFromNugetCache);
-            _workerNodeTelemetryData.AddTask(name, cumulativeExectionTime, executionsCount, totalMemoryConsumed);
+            _workerNodeTelemetryData.AddTask(name, cumulativeExecutionTime, executionsCount, totalMemoryConsumed);
         }
 
         public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache)
@@ -95,11 +95,11 @@ internal class TelemetryCollectorProvider : IBuildComponent
         }
     }
 
-    public class NullTelemetryCollector : ITelemetryCollector
+    public class NullTelemetryForwarder : ITelemetryForwarder
     {
         public bool IsTelemetryCollected => false;
 
-        public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, long totalMemoryConsumed, bool isCustom, bool isFromNugetCache) { }
+        public void AddTask(string name, TimeSpan cumulativeExecutionTime, short executionsCount, long totalMemoryConsumed, bool isCustom, bool isFromNugetCache) { }
         public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache) { }
 
         public void FinalizeProcessing(LoggingContext loggingContext) { }

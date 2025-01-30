@@ -1195,7 +1195,7 @@ namespace Microsoft.Build.Execution
                     ExecutedCount++;
                 }
 
-                public void ExecutionStoped()
+                public void ExecutionStopped()
                 {
                     _executedSw.Stop();
                     TotalMemoryConsumption += GC.GetTotalMemory(false) - _memoryConsumptionOnStart;
@@ -1255,6 +1255,10 @@ namespace Microsoft.Build.Execution
             {
             }
 
+            /// <summary>
+            /// Evaluates whether the current task is assumed to be defined within the user code - as opposed
+            ///  to being a built-in task, or task authored by Microsoft brought to build via sdk, common targets or nuget.
+            /// </summary>
             public bool GetIsCustom()
             {
                 return
