@@ -367,21 +367,32 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         {
             if (checksToRemove is not null)
             {
-                foreach (CheckWrapper check in checksToRemove)
+                lock (_checkRegistryLock)
                 {
-                    var checkFactory = _checkRegistry.Find(c => c.MaterializedCheck == check);
-                    if (checkFactory is not null)
+                    foreach (CheckWrapper check in checksToRemove)
                     {
-                        checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting check '{check.Check.FriendlyName}'. The check has thrown an unhandled exception while executing registered actions.");
-                        RemoveCheck(checkFactory);
+                        var checkFactory = _checkRegistry.Find(c => c.MaterializedCheck == check);
+                        if (checkFactory is not null)
+                        {
+                            checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting check '{check.Check.FriendlyName}'. The check has thrown an unhandled exception while executing registered actions.");
+                            RemoveCheck(checkFactory);
+                        }
                     }
                 }
             }
 
-            foreach (var throttledCheck in _checkRegistry.FindAll(c => c.MaterializedCheck?.IsThrottled ?? false))
+            lock (_checkRegistryLock)
             {
-                checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"Dismounting check '{throttledCheck.FriendlyName}'. The check has exceeded the maximum number of results allowed. Any additional results will not be displayed.");
-                RemoveCheck(throttledCheck);
+                // Create a separate list of checks to materialize the list before modifications
+                var throttledChecks = _checkRegistry
+                .Where(c => c.MaterializedCheck?.IsThrottled ?? false)
+                .ToList();
+
+                foreach (var throttledCheck in throttledChecks)
+                {
+                    checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"Dismounting check '{throttledCheck.FriendlyName}'. The check has exceeded the maximum number of results allowed. Any additional results will not be displayed.");
+                    RemoveCheck(throttledCheck);
+                }
             }
         }
 
