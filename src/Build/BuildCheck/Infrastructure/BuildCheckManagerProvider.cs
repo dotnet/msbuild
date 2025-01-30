@@ -66,6 +66,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly IConfigurationProvider _configurationProvider = new ConfigurationProvider();
         private readonly BuildCheckCentralContext _buildCheckCentralContext;
         private readonly List<CheckFactoryContext> _checkRegistry;
+        private readonly object _checkRegistryLock = new();
         private readonly bool[] _enabledDataSources = new bool[(int)BuildCheckDataSource.ValuesCount];
         private readonly BuildEventsProcessor _buildEventsProcessor;
         private readonly IBuildCheckAcquisitionModule _acquisitionModule;
@@ -170,15 +171,18 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private void RegisterBuiltInChecks(BuildCheckDataSource buildCheckDataSource)
         {
-            _checkRegistry.AddRange(
+            lock (_checkRegistryLock)
+            {
+                _checkRegistry.AddRange(
                 s_builtInFactoriesPerDataSource[(int)buildCheckDataSource]
                     .Select(v => new CheckFactoryContext(v.Factory, v.RuleIds, v.DefaultEnablement)));
 
-            if (s_testFactoriesPerDataSource is not null)
-            {
-                _checkRegistry.AddRange(
-                    s_testFactoriesPerDataSource[(int)buildCheckDataSource]
-                        .Select(v => new CheckFactoryContext(v.Factory, v.RuleIds, v.DefaultEnablement)));
+                if (s_testFactoriesPerDataSource is not null)
+                {
+                    _checkRegistry.AddRange(
+                        s_testFactoriesPerDataSource[(int)buildCheckDataSource]
+                            .Select(v => new CheckFactoryContext(v.Factory, v.RuleIds, v.DefaultEnablement)));
+                }
             }
         }
 
@@ -211,7 +215,11 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
                         if (checkFactoryContext != null)
                         {
-                            _checkRegistry.Add(checkFactoryContext);
+                            lock (_checkRegistryLock)
+                            {
+                                _checkRegistry.Add(checkFactoryContext);
+                            }
+
                             try
                             {
                                 SetupSingleCheck(checkFactoryContext, projectPath);
@@ -379,7 +387,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private void RemoveCheck(CheckFactoryContext checkToRemove)
         {
-            _checkRegistry.Remove(checkToRemove);
+            lock (_checkRegistryLock)
+            {
+                _checkRegistry.Remove(checkToRemove);
+            }
 
             if (checkToRemove.MaterializedCheck is not null)
             {
