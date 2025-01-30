@@ -17,28 +17,29 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
     [Collection("OpenTelemetryManagerTests")]
     public class OpenTelemetryManagerTests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
-
-        // TestEnvironment automatically restores environment variables on Dispose
-        private readonly TestEnvironment _env;
 
         private const string TelemetryFxOptoutEnvVarName = "MSBUILD_TELEMETRY_OPTOUT";
         private const string DotnetOptOut = "DOTNET_CLI_TELEMETRY_OPTOUT";
         private const string TelemetrySampleRateOverrideEnvVarName = "MSBUILD_TELEMETRY_SAMPLE_RATE";
 
-        public OpenTelemetryManagerTests(ITestOutputHelper output)
+        public OpenTelemetryManagerTests()
         {
-            _output = output;
-            _env = TestEnvironment.Create(_output);
 
             // Reset the manager state at the start of each test.
             ResetManagerState();
+            ResetEnvVars();
+        }
+
+        private void ResetEnvVars()
+        {
+            Environment.SetEnvironmentVariable(DotnetOptOut, null);
+            Environment.SetEnvironmentVariable(TelemetryFxOptoutEnvVarName, null);
+            Environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, null);
         }
 
         public void Dispose()
         {
-            // Dispose TestEnvironment to restore any environment variables, etc.
-            _env.Dispose();
+            ResetEnvVars();
 
             // Reset again in case the test created new references or manipulated the singleton after environment cleanup.
             ResetManagerState();
@@ -52,7 +53,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         public void Initialize_ShouldSetStateToOptOut_WhenOptOutEnvVarIsTrue(string optoutVar, string value)
         {
             // Arrange
-            _env.SetEnvironmentVariable(optoutVar, value);
+            Environment.SetEnvironmentVariable(optoutVar, value);
 
             // Act
             OpenTelemetryManager.Instance.Initialize(isStandalone: false);
@@ -65,7 +66,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         [Fact]
         public void Initialize_ShouldSetStateToUnsampled_WhenNoOverrideOnNetCore()
         {
-            _env.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, null);
+            Environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, null);
 
             OpenTelemetryManager.Instance.Initialize(isStandalone: false);
 
@@ -80,7 +81,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         public void Initialize_ShouldSetSampleRateOverride_AndCreateActivitySource_WhenRandomBelowOverride(bool standalone)
         {
             // Arrange
-            _env.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, "1.0");
+            Environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, "1.0");
 
             // Act
             OpenTelemetryManager.Instance.Initialize(isStandalone: standalone);
@@ -93,11 +94,11 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         [Fact]
         public void Initialize_ShouldNoOp_WhenCalledMultipleTimes()
         {
-            _env.SetEnvironmentVariable(DotnetOptOut, "true");
+            Environment.SetEnvironmentVariable(DotnetOptOut, "true");
             OpenTelemetryManager.Instance.Initialize(isStandalone: true);
             var state1 = OpenTelemetryManager.Instance.IsActive();
 
-            _env.SetEnvironmentVariable(DotnetOptOut, null);
+            Environment.SetEnvironmentVariable(DotnetOptOut, null);
             OpenTelemetryManager.Instance.Initialize(isStandalone: true);
             var state2 = OpenTelemetryManager.Instance.IsActive();
 
