@@ -1586,7 +1586,8 @@ namespace Microsoft.Build.BackEnd
                             }
                         }
 
-                        LogPropertyInTaskAssignment(outputTargetName, outputString, parameterLocation);
+                        PropertyTrackingUtils.LogPropertyAssignment(_propertyTrackingSettings, outputTargetName, outputString, parameterLocation, _projectInstance.GetProperty(outputTargetName)?.EvaluatedValue ?? null, _targetLoggingContext);
+
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));
                     }
                 }
@@ -1601,14 +1602,14 @@ namespace Microsoft.Build.BackEnd
         /// <param name="location">The source location where the property assignment occurs.</param>
         private void LogPropertyInTaskAssignment(string propertyName, string propertyValue, IElementLocation location)
         {
-            if (_propertyTrackingSettings == 0)
+            if (_propertyTrackingSettings == PropertyTrackingSetting.None)
             {
                 return;
             }
 
             var previousPropertyValue = _projectInstance.GetProperty(propertyName)?.EvaluatedValue;
 
-            if (previousPropertyValue == null && (_propertyTrackingSettings & PropertyTrackingSetting.PropertyInitialValueSet) == PropertyTrackingSetting.PropertyInitialValueSet)
+            if (previousPropertyValue == null && PropertyTrackingUtils.IsPropertyTrackingEnabled(_propertyTrackingSettings, PropertyTrackingSetting.PropertyInitialValueSet))
             {
                 var args = new PropertyInitialValueSetEventArgs(
                     propertyName,
@@ -1622,7 +1623,7 @@ namespace Microsoft.Build.BackEnd
 
                 _targetLoggingContext.LogBuildEvent(args);
             }
-            else if ((_propertyTrackingSettings & PropertyTrackingSetting.PropertyReassignment) == PropertyTrackingSetting.PropertyReassignment)
+            else if (PropertyTrackingUtils.IsPropertyTrackingEnabled(_propertyTrackingSettings, PropertyTrackingSetting.PropertyReassignment))
             {
                 var args = new PropertyReassignmentEventArgs(
                     propertyName,

@@ -149,11 +149,6 @@ namespace Microsoft.Build.Evaluation
         private readonly PropertyDictionary<ProjectPropertyInstance> _globalProperties;
 
         /// <summary>
-        /// Properties passed from the command line (e.g. by using /p:).
-        /// </summary>
-        private readonly HashSet<string> _propertiesFromCommandLine;
-
-        /// <summary>
         /// The properties representing the environment.
         /// </summary>
         private PropertyDictionary<ProjectPropertyInstance> _environmentProperties;
@@ -347,7 +342,7 @@ namespace Microsoft.Build.Evaluation
                     _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(globalProperties.Count);
 
                     // at this stage globalProperties collection contains entries passed from command line (e.g. /p:foo=bar).
-                    _propertiesFromCommandLine = new HashSet<string>(globalProperties.Keys);
+                    PropertiesFromCommandLine = [.. globalProperties.Keys];
 
                     foreach (KeyValuePair<string, string> pair in globalProperties)
                     {
@@ -508,7 +503,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Properties passed from the command line (e.g. by using /p:).
         /// </summary>
-        public HashSet<string> PropertiesFromCommandLine => _propertiesFromCommandLine;
+        public HashSet<string> PropertiesFromCommandLine { get; }
 
         /// <summary>
         /// The default tools version of this project collection. Projects use this tools version if they

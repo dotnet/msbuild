@@ -34,12 +34,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="loggingContext">The logging context</param>
         /// <param name="projectInstance">The project instance</param>
         /// <param name="logTaskInputs">Flag to determine whether or not to log task inputs.</param>
-        /// <param name="settingValue">Flag to determine whether or not property tracking enabled.</param>
-        public PropertyGroupIntrinsicTask(ProjectPropertyGroupTaskInstance taskInstance, TargetLoggingContext loggingContext, ProjectInstance projectInstance, bool logTaskInputs, int settingValue)
+        public PropertyGroupIntrinsicTask(ProjectPropertyGroupTaskInstance taskInstance, TargetLoggingContext loggingContext, ProjectInstance projectInstance, bool logTaskInputs)
             : base(loggingContext, projectInstance, logTaskInputs)
         {
             _taskInstance = taskInstance;
-            _propertyTrackingSettings = (PropertyTrackingSetting)settingValue;
+            _propertyTrackingSettings = (PropertyTrackingSetting)Traits.Instance.LogPropertyTracking;
         }
 
         /// <summary>
@@ -89,7 +88,7 @@ namespace Microsoft.Build.BackEnd
                             string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property.Location);
                             bucket.Expander.PropertiesUseTracker.CheckPreexistingUndefinedUsage(property, evaluatedValue, LoggingContext);
 
-                            LogPropertyInTargetAssignment(property, evaluatedValue);
+                            PropertyTrackingUtils.LogPropertyAssignment(_propertyTrackingSettings, property.Name, evaluatedValue, property.Location, Project.GetProperty(property.Name)?.EvaluatedValue ?? null, LoggingContext);
 
                             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents)
                             {
@@ -114,52 +113,6 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Logs property assignment information during target execution, providing detailed tracking of property value changes.
-        /// </summary>
-        /// <param name="property">The property instance being assigned or modified.</param>
-        /// <param name="evaluatedValue">The new evaluated value of the property.</param>
-        private void LogPropertyInTargetAssignment(ProjectPropertyGroupTaskPropertyInstance property, string evaluatedValue)
-        {
-            if (_propertyTrackingSettings == 0)
-            {
-                return;
-            }
-
-            var previousPropertyValue = Project.GetProperty(property.Name)?.EvaluatedValue;
-
-            if (previousPropertyValue == null
-                && (_propertyTrackingSettings & PropertyTrackingSetting.PropertyInitialValueSet) == PropertyTrackingSetting.PropertyInitialValueSet)
-            {
-                var args = new PropertyInitialValueSetEventArgs(
-                    property.Name,
-                    evaluatedValue,
-                    propertySource: string.Empty,
-                    property.Location.File,
-                    property.Location.Line,
-                    property.Location.Column,
-                    message: null)
-                { BuildEventContext = LoggingContext.BuildEventContext };
-
-                LoggingContext.LogBuildEvent(args);
-            }
-            else if ((_propertyTrackingSettings & PropertyTrackingSetting.PropertyReassignment) == PropertyTrackingSetting.PropertyReassignment)
-            {
-                var args = new PropertyReassignmentEventArgs(
-                    property.Name,
-                    previousPropertyValue,
-                    evaluatedValue,
-                    location: null,
-                    property.Location.File,
-                    property.Location.Line,
-                    property.Location.Column,
-                    message: null)
-                { BuildEventContext = LoggingContext.BuildEventContext, };
-
-                LoggingContext.LogBuildEvent(args);
             }
         }
 

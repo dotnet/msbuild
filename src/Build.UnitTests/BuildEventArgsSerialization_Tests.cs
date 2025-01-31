@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using FluentAssertions;
-using FluentAssertions.Equivalency;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;

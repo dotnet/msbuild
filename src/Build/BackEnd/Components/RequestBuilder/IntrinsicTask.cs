@@ -70,7 +70,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (taskInstance is ProjectPropertyGroupTaskInstance propertyGroupTaskInstance)
             {
-                return new PropertyGroupIntrinsicTask(propertyGroupTaskInstance, loggingContext, projectInstance, logTaskInputs, Traits.Instance.LogPropertyTracking);
+                return new PropertyGroupIntrinsicTask(propertyGroupTaskInstance, loggingContext, projectInstance, logTaskInputs);
             }
             else if (taskInstance is ProjectItemGroupTaskInstance itemGroupTaskInstance)
             {
