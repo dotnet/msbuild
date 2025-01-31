@@ -22,12 +22,30 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         private const string DotnetOptOut = "DOTNET_CLI_TELEMETRY_OPTOUT";
         private const string TelemetrySampleRateOverrideEnvVarName = "MSBUILD_TELEMETRY_SAMPLE_RATE";
 
+        private string? preTestFxOptout;
+        private string? preTestDotnetOptout;
+        private string? preTestSampleRate;
+
         public OpenTelemetryManagerTests()
         {
-
-            // Reset the manager state at the start of each test.
+            // control environment state before each test
+            SaveEnvVars();
             ResetManagerState();
             ResetEnvVars();
+        }
+
+        private void SaveEnvVars()
+        {
+            preTestFxOptout = Environment.GetEnvironmentVariable(TelemetryFxOptoutEnvVarName);
+            preTestDotnetOptout = Environment.GetEnvironmentVariable(DotnetOptOut);
+            preTestSampleRate = Environment.GetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName);
+        }
+
+        private void RestoreEnvVars()
+        {
+            Environment.SetEnvironmentVariable(TelemetryFxOptoutEnvVarName, preTestFxOptout);
+            Environment.SetEnvironmentVariable(DotnetOptOut, preTestDotnetOptout);
+            Environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, preTestSampleRate);
         }
 
         private void ResetEnvVars()
@@ -39,10 +57,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
 
         public void Dispose()
         {
-            ResetEnvVars();
-
-            // Reset again in case the test created new references or manipulated the singleton after environment cleanup.
-            ResetManagerState();
+            RestoreEnvVars();
         }
 
         [Theory]
