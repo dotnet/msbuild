@@ -90,8 +90,13 @@ The [`BuildEventArgs`](https://github.com/dotnet/msbuild/blob/main/src/Framework
 * `ProjectContextId` - This indicates unique build request (so request for result from project + target(s) combination). There can be multiple build requests using the same evaluation - so a single `ProjectInstanceId` (and `EvaluationId`) often maps to multiple `ProjectContextId`s
 * `NodeId` - indicates the node where the event was generated ('0' for the SchedulerNode with possible in-proc execution node, positive ids for the out-of-proc execution nodes). The whole evaluation happens on a single node - so all evaluation time events with single `EvaluationId` have same `NodeId`. Execution is attempted to be performed on a node which evaluated ('evaluation affinity') - so usually all events with corresponding `EvaluationId` and `InstanceId` have the same `NodeId`. But evaluation results are transferable between nodes (it's `Translatable`) so evaluation events and build events `NodeId` doesn't have to match. Single build execution happens on the same node - so all events with same `ProjectContextId` have same `NodeId`. Though multiple build executions can be interleaved on a same node (due to 'Yielding' - either voluntarily explicitly called by the Task, or implicitly enforced by `RequestBuilder`).
 
-<img width="687" alt="{95317D21-AF06-4160-AF3B-60A3BA6E3BAD}" src="https://github.com/user-attachments/assets/fea16107-36c4-42fd-940e-1b5a01bc29d9" />
-
+```
+# Project.csproj
+└── EvaluationId: ABC                   # Single evaluation of the project
+   └── ProjectInstanceId: XYZ           # Single instance created from evaluation
+       ├── ProjectContextId: 123        # Build request for Compile target  
+       └── ProjectContextId: 456        # Build request for Pack target
+```
 In this example:
 
 * The project is evaluated once, generating `EvaluationId`: ABC
