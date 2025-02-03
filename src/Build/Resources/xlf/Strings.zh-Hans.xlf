@@ -158,7 +158,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageAddendum">
         <source>'{0}' with value: '{1}'</source>
-        <target state="translated">值为“{1}”的“{0}”</target>
+        <target state="translated">'{0}'，值为 '{1}'</target>
         <note>Will be used as a parameter {0} in previous message.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageFmt">
@@ -168,22 +168,72 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_Title">
         <source>No implicit property derived from an environment variable should be used during the build.</source>
-        <target state="translated">在生成过程中，不应使用派生自环境变量的隐式属性。</target>
+        <target state="translated">在生成过程中，不应使用派生自环境变量的任何隐式属性。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_MessageFmt">
+        <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
+        <target state="translated">项目 {0} 引用项目 {1} 的输出。引用的路径: {2}。应转而使用 ProjectReference。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_Title">
+        <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
+        <target state="translated">不得通过 "Reference" 引用项目的输出来引用项目，而是应通过 "ProjectReference" 直接引用。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_MessageFmt">
+        <source>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</source>
+        <target state="translated">项目 {0} 指定 "EmbeddedResource" 项“{1}”，该项可能有表示扩展(“{2}”)的区域性，但未指定显示 "Culture" 和 "WithCulture=false" 元数据。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_Title">
+        <source>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</source>
+        <target state="translated">建议在有 "EmbeddedResource" 项时指定显式 "Culture" 元数据或指定 "WithCulture=false" 元数据，以避免错误或不确定的区域性估计。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0107_MessageFmt">
+        <source>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</source>
+        <target state="translated">Project {0} 同时指定“TargetFrameworks”属性 '{1}' 和“TargetFramework”属性 '{2}'。这将导致忽略 “TargetFrameworks”，并且生成的行为将作为单一目标。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0107_Title">
+        <source>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</source>
+        <target state="translated">不应同时在脚本中指定单数) 和 “TargetFrameworks” (复数) 属性 (TargetFramework”。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0106_MessageFmt">
+        <source>Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</source>
+        <target state="translated">Project {0} 指定将 “CopyToOutputDirectory” 设置为 “Always” 的 '{1}' 项 '{2}'。更改元数据或使用 “CopyToOutputDirectory” 属性。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0106_Title">
+        <source>Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</source>
+        <target state="translated">避免为 “CopyToOutputDirectory” 指定 “Always”，因为这可能会导致生成过程中出现不必要的复制操作。使用 “PreserveNewest” 或 “IfDifferent” 元数据值，或将 “SkipUnchangedFilesOnCopyAlways” 属性设置为 true 以使用更有效的复制。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_MessageFmt">
+        <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
+        <target state="new">Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_Title">
+        <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
+        <target state="new">'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</target>
+        <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
-        <target state="translated">已访问属性“{0}”，但从未将其初始化过。</target>
+        <target state="translated">已访问属性 '{0}'，但从未将其初始化。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_Title">
         <source>A property that is accessed should be declared first.</source>
-        <target state="translated">应首先声明访问的属性。</target>
+        <target state="translated">应首先声明所访问的属性。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_MessageFmt">
         <source>Property: '{0}' first declared/initialized at {1} used before it was initialized.</source>
-        <target state="translated">属性“{0}”在 {1} 使用时首先声明/初始化，再进行初始化。</target>
+        <target state="translated">属性: '{0}' 在 {1} 处使用时先声明/初始化，然后再进行初始化。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_Title">
@@ -193,12 +243,22 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_MessageFmt">
         <source>Property: '{0}' was declared/initialized, but it was never used.</source>
-        <target state="translated">属性“{0}”已声明/初始化，但从未使用过。</target>
+        <target state="translated">属性: '{0}' 已声明/初始化，但从未使用过。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_Title">
         <source>A property that is not used should not be declared.</source>
         <target state="translated">不应声明未使用的属性。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_MessageFmt">
+        <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
+        <target state="new">Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_Title">
+        <source>Downloads folder is untrusted for projects building.</source>
+        <target state="new">Downloads folder is untrusted for projects building.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
@@ -284,32 +344,37 @@
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
-        <target state="translated">找不到指定的自定义检查程序集: {0}。请检查它是否存在。</target>
+        <target state="translated">找不到指定的自定义检查程序集: '{0}'。请检查它是否存在。</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
+      </trans-unit>
+      <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
+        <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
+        <target state="translated">找到包含参数“{1}”的方法“{0}”的多个重载。当前不支持此操作。</target>
+        <note />
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">未能从程序集“{1}”加载自定义检查类型“{0}”。请确保它继承 Microsoft.Build.Experimental.BuildCheck.Check 基类。如果不打算将其作为自定义检查，则不应将其公开。详细信息: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">未能从程序集 '{1}' 加载自定义检查类型 '{0}'。请确保它继承 Microsoft.Build.Experimental.BuildCheck.Check 基类。如果它不旨在作为自定义检查，则不应将其公开。详细信息: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
         <source>Failed to register the custom check: '{0}'.</source>
-        <target state="translated">未能注册自定义检查: {0}。</target>
+        <target state="translated">未能注册自定义检查: '{0}'。</target>
         <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedRuleLoading">
         <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
-        <target state="translated">未能实例化自定义检查规则，出现以下异常: {0}。</target>
+        <target state="translated">未能实例化自定义检查规则，出现以下异常: '{0}'。</target>
         <note>The message is emitted on failed loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckRegistered">
         <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">已从位置“{1}”为内部版本注册自定义检查“{0}”。</target>
+        <target state="translated">已从位置 '{1}' 为内部版本注册自定义检查 '{0}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckSuccessfulAcquisition">
         <source>Custom check rule: '{0}' has been registered successfully.</source>
-        <target state="translated">已成功注册自定义检查规则“{0}”。</target>
+        <target state="translated">已成功注册自定义检查规则 '{0}'。</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -368,6 +433,11 @@
         <target state="translated">MSB3094: “{2}”引用 {0} 个项，而“{3}”引用 {1} 个项。它们必须具有相同的项数。</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">展开 glob 为 fileSpec： fileSpec： "{0}" 的 fileSpec 时发生异常，假定它是文件名。异常： {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: 在条件“{0}”的位置“{1}”处出现意外空格。是否忘记了删除空格?</target>
@@ -375,7 +445,7 @@
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
-        <target state="translated">{1} 项中的“{0}”中存在非法字符。</target>
+        <target state="translated">'{1}' 项中的 '{0}' 中存在非法字符。</target>
         <note />
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
@@ -395,7 +465,7 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="translated">使用 SharingPolicy.Isolated 或 SharingPolicy.SharedSDKCache 创建的 EvaluationContext 对象不支持被传递 MSBuildFileSystemBase 文件系统。</target>
+        <target state="translated">使用 SharingPolicy.Isolated 创建的 EvaluationContext 对象。SharingPolicy.SharedSDKCache 不支持被传递 MSBuildFileSystemBase 文件系统。</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
@@ -761,6 +831,11 @@ Errors: {3}</source>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
         <target state="translated">读取未初始化的属性“{0}”</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownLoggingType">
+        <source>Logging type {0} is not understood by {1}.</source>
+        <target state="translated">{1} 无法理解日志记录类型 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
@@ -1186,8 +1261,8 @@ Errors: {3}</source>
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
-        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: 找不到导入的项目“{0}”。请确认 Import 声明“{1}”中的表达式正确，且文件位于磁盘上。</target>
+        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>
+        <target state="translated">MSB4019: 找不到导入的项目“{0}”。请确认 Import 声明“{1}”中计算结果为“{2}”的表达式正确无误且该文件位于磁盘上。</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">
@@ -1574,8 +1649,8 @@ Errors: {3}</source>
         <note />
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeeded">
-        <source>MSB4075: The project file "{0}" must be opened in the Visual Studio IDE and converted to the latest version before it can be built by MSBuild.</source>
-        <target state="translated">MSB4075: 必须在 Visual Studio IDE 中打开项目文件“{0}”，并将其转换为最新版本，然后才能使用 MSBuild 生成该项目文件。</target>
+        <source>MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</source>
+        <target state="translated">MSB4075: 项目文件“{0}”必须在支持它的 Visual Studio IDE 版本中打开并转换为最新版本，然后才能使用 MSBuild 生成该项目文件。详细信息: https://aka.ms/DeprecatedProjectConversion</target>
         <note>{StrBegin="MSB4075: "}</note>
       </trans-unit>
       <trans-unit id="ProjectUpgradeNeededToVcxProj">
@@ -2683,7 +2758,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidSdkFormat">
         <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
-        <target state="translated">MSB4229: 值“{0}”对 Sdk 规范无效。此属性应该是以分号分隔的Sdk-name/minimum-version 对（用正斜杠分隔）的列表。</target>
+        <target state="translated">MSB4229: 值“{0}”对 Sdk 规范无效。此属性应该是以分号分隔的Sdk-name/minimum-version 对 (用正斜杠分隔) 的列表。</target>
         <note>{StrBegin="MSB4229: "}</note>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">

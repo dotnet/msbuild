@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Evaluation.Expander;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -25,6 +26,7 @@ using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
 
@@ -130,7 +132,7 @@ namespace Microsoft.Build.Evaluation
     /// </remarks>
     /// <typeparam name="P">Type of the properties used.</typeparam>
     /// <typeparam name="I">Type of the items used.</typeparam>
-    internal class Expander<P, I>
+    internal partial class Expander<P, I>
         where P : class, IProperty
         where I : class, IItem
     {
@@ -491,7 +493,7 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, _loggingContext);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -512,7 +514,7 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             return PropertyExpander<P>.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -560,7 +562,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
@@ -634,7 +636,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             return ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, expression, _items, itemFactory, options, includeNullItems, out isTransformExpression, elementLocation);
         }
@@ -955,7 +957,7 @@ namespace Microsoft.Build.Evaluation
                         // if there are no item vectors in the string
                         // run a simpler Regex to find item metadata references
                         MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
-                        result = RegularExpressions.ItemMetadataPattern.Value.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                        result = RegularExpressions.ItemMetadataRegex.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
                     }
                     else
                     {
@@ -989,7 +991,7 @@ namespace Microsoft.Build.Evaluation
                                 // Extract the part of the expression that appears before the item vector expression
                                 // e.g. the ABC in ABC@(foo->'%(FullPath)')
                                 string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
-                                string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, matchEvaluator);
+                                string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, matchEvaluator);
 
                                 // Append the metadata replacement
                                 finalResultBuilder.Append(replacementResult);
@@ -997,7 +999,7 @@ namespace Microsoft.Build.Evaluation
                                 // Expand any metadata that appears in the item vector expression's separator
                                 if (itemVectorExpressions[n].Separator != null)
                                 {
-                                    vectorExpression = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(itemVectorExpressions[n].Value, matchEvaluator, -1, itemVectorExpressions[n].SeparatorStart);
+                                    vectorExpression = RegularExpressions.NonTransformItemMetadataRegex.Replace(itemVectorExpressions[n].Value, matchEvaluator, -1, itemVectorExpressions[n].SeparatorStart);
                                 }
 
                                 // Append the item vector expression as is
@@ -1016,7 +1018,7 @@ namespace Microsoft.Build.Evaluation
                             matchMetadataEvaluator ??= new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
                             matchEvaluator ??= new MatchEvaluator(matchMetadataEvaluator.ExpandSingleMetadata);
                             string subExpressionToReplaceIn = expression.Substring(start);
-                            string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, matchEvaluator);
+                            string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, matchEvaluator);
 
                             finalResultBuilder.Append(replacementResult);
                         }
@@ -2165,7 +2167,7 @@ namespace Microsoft.Build.Evaluation
                     if (functionName == null)
                     {
                         functionName = "ExpandQuotedExpressionFunction";
-                        arguments = new string[] { function };
+                        arguments = [function];
                     }
                     else if (argumentsExpression != null)
                     {
@@ -2732,7 +2734,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             matchEvaluator = new MetadataMatchEvaluator(item.Key, item.Value, elementLocation);
 
-                            include = RegularExpressions.ItemMetadataPattern.Value.Replace(arguments[0], matchEvaluator.GetMetadataValueFromMatch);
+                            include = RegularExpressions.ItemMetadataRegex.Replace(arguments[0], matchEvaluator.GetMetadataValueFromMatch);
                         }
 
                         // Include may be empty. Historically we have created items with empty include
@@ -3099,13 +3101,19 @@ namespace Microsoft.Build.Evaluation
         /// Regular expressions used by the expander.
         /// The expander currently uses regular expressions rather than a parser to do its work.
         /// </summary>
-        private static class RegularExpressions
+        private static partial class RegularExpressions
         {
             /**************************************************************************************************************************
             * WARNING: The regular expressions below MUST be kept in sync with the expressions in the ProjectWriter class -- if the
             * description of an item vector changes, the expressions must be updated in both places.
             *************************************************************************************************************************/
 
+
+
+#if NET7_0_OR_GREATER
+            [GeneratedRegex(ItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
+            internal static partial Regex ItemMetadataPattern();
+#else
             /// <summary>
             /// Regular expression used to match item metadata references embedded in strings.
             /// For example, %(Compile.DependsOn) or %(DependsOn).
@@ -3113,10 +3121,23 @@ namespace Microsoft.Build.Evaluation
             internal static readonly Lazy<Regex> ItemMetadataPattern = new Lazy<Regex>(
                 () => new Regex(ItemMetadataSpecification,
                     RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+#endif
 
-            /// <summary>
-            /// Name of the group matching the "name" of a metadatum.
-            /// </summary>
+            internal static Regex ItemMetadataRegex
+            {
+                get
+                {
+#if NET7_0_OR_GREATER
+                    return ItemMetadataPattern();
+#else
+                    return ItemMetadataPattern.Value;
+#endif
+                }
+            }
+
+                /// <summary>
+                /// Name of the group matching the "name" of a metadatum.
+                /// </summary>
             internal const string NameGroup = "NAME";
 
             /// <summary>
@@ -3129,18 +3150,35 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal const string ItemTypeGroup = "ITEM_TYPE";
 
+            internal const string NonTransformItemMetadataSpecification = @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
+                                                                ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" +
+                                                                ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" +
+                                                                ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
+                                                                ItemVectorWithTransformRHS + @"))";
+
+#if NET7_0_OR_GREATER
+            [GeneratedRegex(NonTransformItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
+            internal static partial Regex NonTransformItemMetadataPattern();
+#else
             /// <summary>
             /// regular expression used to match item metadata references outside of item vector transforms.
             /// </summary>
             /// <remarks>PERF WARNING: this Regex is complex and tends to run slowly.</remarks>
             internal static readonly Lazy<Regex> NonTransformItemMetadataPattern = new Lazy<Regex>(
-                () => new Regex(
-                    @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
-                    ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" +
-                    ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" +
-                    ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
-                    ItemVectorWithTransformRHS + @"))",
-                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+                () => new Regex(NonTransformItemMetadataSpecification,
+                                RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+#endif
+            internal static Regex NonTransformItemMetadataRegex
+            {
+                get
+                {
+#if NET7_0_OR_GREATER
+                    return NonTransformItemMetadataPattern();
+#else
+                    return NonTransformItemMetadataPattern.Value;
+#endif
+                }
+            }
 
             /// <summary>
             /// Complete description of an item metadata reference, including the optional qualifying item type.
@@ -3296,7 +3334,7 @@ namespace Microsoft.Build.Evaluation
                 _methodMethodName = methodName;
                 if (arguments == null)
                 {
-                    _arguments = Array.Empty<string>();
+                    _arguments = [];
                 }
                 else
                 {
@@ -3473,7 +3511,7 @@ namespace Microsoft.Build.Evaluation
 
                         // For our intrinsic function we need to support calling of internal methods
                         // since we don't want them to be public
-                        if (_receiverType == typeof(Microsoft.Build.Evaluation.IntrinsicFunctions))
+                        if (_receiverType == typeof(IntrinsicFunctions))
                         {
                             _bindingFlags |= BindingFlags.NonPublic;
                         }
@@ -3515,8 +3553,8 @@ namespace Microsoft.Build.Evaluation
                         {
                             // Unescape the value since we're about to send it out of the engine and into
                             // the function being called. If a file or a directory function, fix the path
-                            if (_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory)
-                                || _receiverType == typeof(System.IO.Path))
+                            if (_receiverType == typeof(File) || _receiverType == typeof(Directory)
+                                || _receiverType == typeof(Path))
                             {
                                 argumentValue = FileUtilities.FixFilePath(argumentValue);
                             }
@@ -3538,10 +3576,13 @@ namespace Microsoft.Build.Evaluation
                     if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", _methodMethodName, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", _methodMethodName, StringComparison.OrdinalIgnoreCase)))
                     {
                         // Support comparison when the lhs is an integer
-                        if (IsFloatingPointRepresentation(args[0]) && !IsFloatingPointRepresentation(objectInstance))
+                        if (ParseArgs.IsFloatingPointRepresentation(args[0]))
                         {
-                            objectInstance = Convert.ChangeType(objectInstance, typeof(double), CultureInfo.InvariantCulture);
-                            _receiverType = objectInstance.GetType();
+                            if (double.TryParse(objectInstance.ToString(), NumberStyles.Number | NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out double result))
+                            {
+                                objectInstance = result;
+                                _receiverType = objectInstance.GetType();
+                            }
                         }
 
                         // change the type of the final unescaped string into the destination
@@ -3558,11 +3599,7 @@ namespace Microsoft.Build.Evaluation
                             // include $(MSBuildThisFileDirectory) as a parameter.
                             string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
-                            args = new[]
-                            {
-                                args[0],
-                                startingDirectory,
-                            };
+                            args = [args[0], startingDirectory];
                         }
                     }
 
@@ -3570,7 +3607,7 @@ namespace Microsoft.Build.Evaluation
                     // need to locate an appropriate constructor and invoke it
                     if (String.Equals("new", _methodMethodName, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (!TryExecuteWellKnownConstructorNoThrow(out functionResult, args))
+                        if (!WellKnownFunctions.TryExecuteWellKnownConstructorNoThrow(_receiverType, out functionResult, args))
                         {
                             functionResult = LateBindExecute(null /* no previous exception */, BindingFlags.Public | BindingFlags.Instance, null /* no instance for a constructor */, args, true /* is constructor */);
                         }
@@ -3583,12 +3620,12 @@ namespace Microsoft.Build.Evaluation
                         {
                             // First attempt to recognize some well-known functions to avoid binding
                             // and potential first-chance MissingMethodExceptions.
-                            wellKnownFunctionSuccess = TryExecuteWellKnownFunction(out functionResult, objectInstance, args);
+                            wellKnownFunctionSuccess = WellKnownFunctions.TryExecuteWellKnownFunction(_methodMethodName, _receiverType, _fileSystem, out functionResult, objectInstance, args);
 
                             if (!wellKnownFunctionSuccess)
                             {
                                 // Some well-known functions need evaluated value from properties.
-                                wellKnownFunctionSuccess = TryExecuteWellKnownFunctionWithPropertiesParam(properties, out functionResult, objectInstance, args);
+                                wellKnownFunctionSuccess = WellKnownFunctions.TryExecuteWellKnownFunctionWithPropertiesParam(_methodMethodName, _receiverType, _loggingContext, properties, out functionResult, objectInstance, args);
                             }
                         }
                         // we need to preserve the same behavior on exceptions as the actual binder
@@ -3610,8 +3647,17 @@ namespace Microsoft.Build.Evaluation
                             // otherwise there is the potential of running a function twice!
                             try
                             {
-                                // First use InvokeMember using the standard binder - this will match and coerce as needed
-                                functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                // If there are any out parameters, try to figure out their type and create defaults for them as appropriate before calling the method.
+                                if (args.Any(a => "out _".Equals(a)))
+                                {
+                                    IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
+                                    functionResult = GetMethodResult(objectInstance, methods, args, 0);
+                                }
+                                else
+                                {
+                                    // If there are no out parameters, use InvokeMember using the standard binder - this will match and coerce as needed
+                                    functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                }
                             }
                             // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
                             // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coercion is possible, so throw.
@@ -3686,1300 +3732,46 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            private bool TryExecuteWellKnownFunctionWithPropertiesParam(IPropertyProvider<T> properties, out object returnVal, object objectInstance, object[] args)
+            private object GetMethodResult(object objectInstance, IEnumerable<MethodInfo> methods, object[] args, int index)
             {
-                returnVal = null;
-
-                if (_receiverType == typeof(IntrinsicFunctions))
+                for (int i = index; i < args.Length; i++)
                 {
-                    if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RegisterBuildCheck), StringComparison.OrdinalIgnoreCase))
+                    if (args[i].Equals("out _"))
                     {
-                        string projectPath = properties.GetProperty("MSBuildProjectFullPath")?.EvaluatedValue ?? string.Empty;
-                        ErrorUtilities.VerifyThrow(_loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
-                        if (TryGetArg(args, out string arg0))
+                        object toReturn = null;
+                        foreach (MethodInfo method in methods)
                         {
-                            returnVal = IntrinsicFunctions.RegisterBuildCheck(projectPath, arg0, _loggingContext);
-                            return true;
+                            Type t = method.GetParameters()[i].ParameterType;
+                            args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
+                            object currentReturnValue = GetMethodResult(objectInstance, methods, args, i + 1);
+                            if (currentReturnValue is not null)
+                            {
+                                if (toReturn is null)
+                                {
+                                    toReturn = currentReturnValue;
+                                }
+                                else if (!toReturn.Equals(currentReturnValue))
+                                {
+                                    // There were multiple methods that seemed viable and gave different results. We can't differentiate between them so throw.
+                                    ErrorUtilities.ThrowArgument("CouldNotDifferentiateBetweenCompatibleMethods", _methodMethodName, args.Length);
+                                    return null;
+                                }
+                            }
                         }
+
+                        return toReturn;
                     }
                 }
 
-                return false;
-            }
-
-            /// <summary>
-            /// Shortcut to avoid calling into binding if we recognize some most common functions.
-            /// Binding is expensive and throws first-chance MissingMethodExceptions, which is
-            /// bad for debugging experience and has a performance cost.
-            /// A typical binding operation with exception can take ~1.500 ms; this call is ~0.050 ms
-            /// (rough numbers just for comparison).
-            /// See https://github.com/dotnet/msbuild/issues/2217.
-            /// </summary>
-            /// <param name="returnVal">The value returned from the function call.</param>
-            /// <param name="objectInstance">Object that the function is called on.</param>
-            /// <param name="args">arguments.</param>
-            /// <returns>True if the well known function call binding was successful.</returns>
-            private bool TryExecuteWellKnownFunction(out object returnVal, object objectInstance, object[] args)
-            {
-                returnVal = null;
-
-                if (objectInstance is string text)
+                try
                 {
-                    if (string.Equals(_methodMethodName, nameof(string.StartsWith), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.StartsWith(arg0);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.Replace), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArgs(args, out string arg0, out string arg1))
-                        {
-                            returnVal = text.Replace(arg0, arg1);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.Contains), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.Contains(arg0);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.ToUpperInvariant), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (args.Length == 0)
-                        {
-                            returnVal = text.ToUpperInvariant();
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.ToLowerInvariant), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (args.Length == 0)
-                        {
-                            returnVal = text.ToLowerInvariant();
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.EndsWith), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.EndsWith(arg0);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.ToLower), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (args.Length == 0)
-                        {
-                            returnVal = text.ToLower();
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.IndexOf), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArgs(args, out string arg0, out StringComparison arg1))
-                        {
-                            returnVal = text.IndexOf(arg0, arg1);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.IndexOfAny), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.IndexOfAny(arg0.ToCharArray());
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.LastIndexOf), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.LastIndexOf(arg0);
-                            return true;
-                        }
-                        else if (TryGetArgs(args, out arg0, out int startIndex))
-                        {
-                            returnVal = text.LastIndexOf(arg0, startIndex);
-                            return true;
-                        }
-                        else if (TryGetArgs(args, out arg0, out StringComparison arg1))
-                        {
-                            returnVal = text.LastIndexOf(arg0, arg1);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.LastIndexOfAny), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.LastIndexOfAny(arg0.ToCharArray());
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.Length), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (args.Length == 0)
-                        {
-                            returnVal = text.Length;
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.Substring), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out int startIndex))
-                        {
-                            returnVal = text.Substring(startIndex);
-                            return true;
-                        }
-                        else if (TryGetArgs(args, out startIndex, out int length))
-                        {
-                            returnVal = text.Substring(startIndex, length);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.Split), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string separator) && separator.Length == 1)
-                        {
-                            returnVal = text.Split(separator[0]);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.PadLeft), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out int totalWidth))
-                        {
-                            returnVal = text.PadLeft(totalWidth);
-                            return true;
-                        }
-                        else if (TryGetArgs(args, out totalWidth, out string paddingChar) && paddingChar.Length == 1)
-                        {
-                            returnVal = text.PadLeft(totalWidth, paddingChar[0]);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.PadRight), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out int totalWidth))
-                        {
-                            returnVal = text.PadRight(totalWidth);
-                            return true;
-                        }
-                        else if (TryGetArgs(args, out totalWidth, out string paddingChar) && paddingChar.Length == 1)
-                        {
-                            returnVal = text.PadRight(totalWidth, paddingChar[0]);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.TrimStart), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string trimChars) && trimChars.Length > 0)
-                        {
-                            returnVal = text.TrimStart(trimChars.ToCharArray());
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.TrimEnd), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string trimChars) && trimChars.Length > 0)
-                        {
-                            returnVal = text.TrimEnd(trimChars.ToCharArray());
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, "get_Chars", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out int index))
-                        {
-                            returnVal = text[index];
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.Equals), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.Equals(arg0);
-                            return true;
-                        }
-                    }
+                    return _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture) ?? "null";
                 }
-                else if (objectInstance is string[] stringArray)
+                catch (Exception)
                 {
-                    if (string.Equals(_methodMethodName, "GetValue", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out int index))
-                        {
-                            returnVal = stringArray[index];
-                            return true;
-                        }
-                    }
+                    // This isn't a viable option, but perhaps another set of parameters will work.
+                    return null;
                 }
-                else if (objectInstance == null) // Calling a well-known static function
-                {
-                    if (_receiverType == typeof(string))
-                    {
-                        if (string.Equals(_methodMethodName, nameof(string.IsNullOrWhiteSpace), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = string.IsNullOrWhiteSpace(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(string.IsNullOrEmpty), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = string.IsNullOrEmpty(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(string.Copy), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = arg0;
-                                return true;
-                            }
-                        }
-                    }
-                    else if (_receiverType == typeof(Math))
-                    {
-                        if (string.Equals(_methodMethodName, nameof(Math.Max), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out var arg0, out double arg1))
-                            {
-                                returnVal = Math.Max(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Math.Min), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out double arg0, out var arg1))
-                            {
-                                returnVal = Math.Min(arg0, arg1);
-                                return true;
-                            }
-                        }
-                    }
-                    else if (_receiverType == typeof(IntrinsicFunctions))
-                    {
-                        if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.EnsureTrailingSlash), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.EnsureTrailingSlash(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ValueOrDefault), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.ValueOrDefault(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.NormalizePath), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (ElementsOfType(args, typeof(string)))
-                            {
-                                returnVal = IntrinsicFunctions.NormalizePath(Array.ConvertAll(args, o => (string)o));
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetDirectoryNameOfFileAbove), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.GetDirectoryNameOfFileAbove(arg0, arg1, _fileSystem);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetRegistryValueFromView), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length >= 4 &&
-                                TryGetArgs(args, out string arg0, out string arg1, enforceLength: false))
-                            {
-                                returnVal = IntrinsicFunctions.GetRegistryValueFromView(arg0, arg1, args[2], new ArraySegment<object>(args, 3, args.Length - 3));
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsRunningFromVisualStudio), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.IsRunningFromVisualStudio();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Escape), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.Escape(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Unescape), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.Unescape(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetPathOfFileAbove), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.GetPathOfFileAbove(arg0, arg1, _fileSystem);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Add), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Add, IntrinsicFunctions.Add, out returnVal))
-                            {
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Subtract), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Subtract, IntrinsicFunctions.Subtract, out returnVal))
-                            {
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Multiply), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Multiply, IntrinsicFunctions.Multiply, out returnVal))
-                            {
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Divide), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Divide, IntrinsicFunctions.Divide, out returnVal))
-                            {
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Modulo), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryExecuteArithmeticOverload(args, IntrinsicFunctions.Modulo, IntrinsicFunctions.Modulo, out returnVal))
-                            {
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetCurrentToolsDirectory), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetCurrentToolsDirectory();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetToolsDirectory32), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetToolsDirectory32();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetToolsDirectory64), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetToolsDirectory64();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetMSBuildSDKsPath), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetMSBuildSDKsPath();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetVsInstallRoot), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetVsInstallRoot();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetMSBuildExtensionsPath), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetMSBuildExtensionsPath();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetProgramFiles32), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetProgramFiles32();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.VersionEquals), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.VersionEquals(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.VersionNotEquals), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.VersionNotEquals(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.VersionGreaterThan), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.VersionGreaterThan(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.VersionGreaterThanOrEquals), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.VersionGreaterThanOrEquals(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.VersionLessThan), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.VersionLessThan(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.VersionLessThanOrEquals), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.VersionLessThanOrEquals(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetFrameworkIdentifier), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.GetTargetFrameworkIdentifier(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetFrameworkVersion), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg0);
-                                return true;
-                            }
-                            if (TryGetArgs(args, out string arg1, out int arg2))
-                            {
-                                returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg1, arg2);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsTargetFrameworkCompatible), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.IsTargetFrameworkCompatible(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetPlatformIdentifier), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.GetTargetPlatformIdentifier(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetPlatformVersion), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg0);
-                                return true;
-                            }
-                            if (TryGetArgs(args, out string arg1, out int arg2))
-                            {
-                                returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg1, arg2);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ConvertToBase64), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.ConvertToBase64(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ConvertFromBase64), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.ConvertFromBase64(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.StableStringHash), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                // Prevent loading methods refs from StringTools if ChangeWave opted out.
-                                returnVal = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
-                                    ? IntrinsicFunctions.StableStringHash(arg0)
-                                    : IntrinsicFunctions.StableStringHashLegacy(arg0);
-                                return true;
-                            }
-                            else if (TryGetArgs(args, out string arg1, out string arg2) && Enum.TryParse<IntrinsicFunctions.StringHashingAlgorithm>(arg2, true, out var hashAlgorithm))
-                            {
-                                returnVal = IntrinsicFunctions.StableStringHash(arg1, hashAlgorithm);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.AreFeaturesEnabled), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out Version arg0))
-                            {
-                                returnVal = IntrinsicFunctions.AreFeaturesEnabled(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.SubstringByAsciiChars), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out int arg1, out int arg2))
-                            {
-                                returnVal = IntrinsicFunctions.SubstringByAsciiChars(arg0, arg1, arg2);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.CheckFeatureAvailability), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.CheckFeatureAvailability(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.BitwiseOr), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out int arg0, out int arg1))
-                            {
-                                returnVal = IntrinsicFunctions.BitwiseOr(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.BitwiseAnd), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out int arg0, out int arg1))
-                            {
-                                returnVal = IntrinsicFunctions.BitwiseAnd(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.BitwiseXor), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out int arg0, out int arg1))
-                            {
-                                returnVal = IntrinsicFunctions.BitwiseXor(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.BitwiseNot), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out int arg0))
-                            {
-                                returnVal = IntrinsicFunctions.BitwiseNot(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.LeftShift), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out int arg0, out int arg1))
-                            {
-                                returnVal = IntrinsicFunctions.LeftShift(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RightShift), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out int arg0, out int arg1))
-                            {
-                                returnVal = IntrinsicFunctions.RightShift(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.RightShiftUnsigned), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out int arg0, out int arg1))
-                            {
-                                returnVal = IntrinsicFunctions.RightShiftUnsigned(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.NormalizeDirectory), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.NormalizeDirectory(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsOSPlatform), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.IsOSPlatform(arg0);
-                                return true;
-                            }
-                        }
-                    }
-                    else if (_receiverType == typeof(Path))
-                    {
-                        if (string.Equals(_methodMethodName, nameof(Path.Combine), StringComparison.OrdinalIgnoreCase))
-                        {
-                            string arg0, arg1, arg2, arg3;
-
-                            // Combine has fast implementations for up to 4 parameters: https://github.com/dotnet/corefx/blob/2c55db90d622fa6279184e6243f0470a3755d13c/src/Common/src/CoreLib/System/IO/Path.cs#L293-L317
-                            switch (args.Length)
-                            {
-                                case 0:
-                                    return false;
-                                case 1:
-                                    if (TryGetArg(args, out arg0))
-                                    {
-                                        returnVal = Path.Combine(arg0);
-                                        return true;
-                                    }
-                                    break;
-                                case 2:
-                                    if (TryGetArgs(args, out arg0, out arg1))
-                                    {
-                                        returnVal = Path.Combine(arg0, arg1);
-                                        return true;
-                                    }
-                                    break;
-                                case 3:
-                                    if (TryGetArgs(args, out arg0, out arg1, out arg2))
-                                    {
-                                        returnVal = Path.Combine(arg0, arg1, arg2);
-                                        return true;
-                                    }
-                                    break;
-                                case 4:
-                                    if (TryGetArgs(args, out arg0, out arg1, out arg2, out arg3))
-                                    {
-                                        returnVal = Path.Combine(arg0, arg1, arg2, arg3);
-                                        return true;
-                                    }
-                                    break;
-                                default:
-                                    if (ElementsOfType(args, typeof(string)))
-                                    {
-                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string)o));
-                                        return true;
-                                    }
-                                    break;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.DirectorySeparatorChar), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = Path.DirectorySeparatorChar;
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.GetFullPath), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = Path.GetFullPath(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.IsPathRooted), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = Path.IsPathRooted(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.GetTempPath), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = Path.GetTempPath();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.GetFileName), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = Path.GetFileName(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.GetDirectoryName), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = Path.GetDirectoryName(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.GetFileNameWithoutExtension), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = Path.GetFileNameWithoutExtension(arg0);
-                                return true;
-                            }
-                        }
-                    }
-                    else if (_receiverType == typeof(Version))
-                    {
-                        if (string.Equals(_methodMethodName, nameof(Version.Parse), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = Version.Parse(arg0);
-                                return true;
-                            }
-                        }
-                    }
-                    else if (_receiverType == typeof(Guid))
-                    {
-                        if (string.Equals(_methodMethodName, nameof(Guid.NewGuid), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = Guid.NewGuid();
-                                return true;
-                            }
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(Regex.Replace), StringComparison.OrdinalIgnoreCase) && args.Length == 3)
-                    {
-                        if (TryGetArg([args[0]], out string arg1) && TryGetArg([args[1]], out string arg2) && TryGetArg([args[2]], out string arg3))
-                        {
-                            returnVal = Regex.Replace(arg1, arg2, arg3);
-                            return true;
-                        }
-                    }
-                }
-                else if (string.Equals(_methodMethodName, nameof(Version.ToString), StringComparison.OrdinalIgnoreCase) && objectInstance is Version v)
-                {
-                    if (TryGetArg(args, out int arg0))
-                    {
-                        returnVal = v.ToString(arg0);
-                        return true;
-                    }
-                }
-                else if (string.Equals(_methodMethodName, nameof(Int32.ToString), StringComparison.OrdinalIgnoreCase) && objectInstance is int i)
-                {
-                    if (TryGetArg(args, out string arg0))
-                    {
-                        returnVal = i.ToString(arg0);
-                        return true;
-                    }
-                }
-                if (Traits.Instance.LogPropertyFunctionsRequiringReflection)
-                {
-                    LogFunctionCall("PropertyFunctionsRequiringReflection", objectInstance, args);
-                }
-
-                return false;
-            }
-
-            /// <summary>
-            /// Shortcut to avoid calling into binding if we recognize some most common constructors.
-            /// Analogous to TryExecuteWellKnownFunction but guaranteed to not throw.
-            /// </summary>
-            /// <param name="returnVal">The instance as created by the constructor call.</param>
-            /// <param name="args">Arguments.</param>
-            /// <returns>True if the well known constructor call binding was successful.</returns>
-            private bool TryExecuteWellKnownConstructorNoThrow(out object returnVal, object[] args)
-            {
-                returnVal = null;
-
-                if (_receiverType == typeof(string))
-                {
-                    if (args.Length == 0)
-                    {
-                        returnVal = String.Empty;
-                        return true;
-                    }
-                    if (TryGetArg(args, out string arg0))
-                    {
-                        returnVal = arg0;
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            private bool ElementsOfType(object[] args, Type type)
-            {
-                for (var i = 0; i < args.Length; i++)
-                {
-                    if (args[i].GetType() != type)
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-            private static bool TryGetArgs(object[] args, out string arg0, out string arg1, bool enforceLength = true)
-            {
-                arg0 = null;
-                arg1 = null;
-
-                if (enforceLength && args.Length != 2)
-                {
-                    return false;
-                }
-
-                if (args[0] is string value0 &&
-                    args[1] is string value1)
-                {
-                    arg0 = value0;
-                    arg1 = value1;
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            private bool TryGetArgs(object[] args, out string arg0, out string arg1, out string arg2)
-            {
-                arg0 = null;
-                arg1 = null;
-                arg2 = null;
-
-                if (args.Length != 3)
-                {
-                    return false;
-                }
-
-                if (args[0] is string value0 &&
-                    args[1] is string value1 &&
-                    args[2] is string value2)
-                {
-                    arg0 = value0;
-                    arg1 = value1;
-                    arg2 = value2;
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            private bool TryGetArgs(object[] args, out string arg0, out string arg1, out string arg2, out string arg3)
-            {
-                arg0 = null;
-                arg1 = null;
-                arg2 = null;
-                arg3 = null;
-
-                if (args.Length != 4)
-                {
-                    return false;
-                }
-
-                if (args[0] is string value0 &&
-                    args[1] is string value1 &&
-                    args[2] is string value2 &&
-                    args[3] is string value3)
-                {
-                    arg0 = value0;
-                    arg1 = value1;
-                    arg2 = value2;
-                    arg3 = value3;
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            private bool TryGetArgs(object[] args, out string arg0, out string arg1)
-            {
-                arg0 = null;
-                arg1 = null;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                if (args[0] is string value0 &&
-                    args[1] is string value1)
-                {
-                    arg0 = value0;
-                    arg1 = value1;
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            private static bool TryGetArgs(object[] args, out string arg0, out int arg1, out int arg2)
-            {
-                arg0 = null;
-                arg1 = 0;
-                arg2 = 0;
-
-                if (args.Length != 3)
-                {
-                    return false;
-                }
-
-                var value1 = args[1] as string;
-                var value2 = args[2] as string;
-                arg0 = args[0] as string;
-                if (value1 != null &&
-                    value2 != null &&
-                    arg0 != null &&
-                    int.TryParse(value1, out arg1) &&
-                    int.TryParse(value2, out arg2))
-                {
-                    return true;
-                }
-
-                return false;
-            }
-
-            private static bool TryGetArg(object[] args, out int arg0)
-            {
-                if (args.Length != 1)
-                {
-                    arg0 = 0;
-                    return false;
-                }
-
-                return TryConvertToInt(args[0], out arg0);
-            }
-
-            private static bool TryGetArg(object[] args, out Version arg0)
-            {
-                if (args.Length != 1)
-                {
-                    arg0 = default;
-                    return false;
-                }
-
-                return TryConvertToVersion(args[0], out arg0);
-            }
-
-            private static bool TryConvertToVersion(object value, out Version arg0)
-            {
-                string val = value as string;
-
-                if (string.IsNullOrEmpty(val) || !Version.TryParse(val, out arg0))
-                {
-                    arg0 = default;
-                    return false;
-                }
-
-                return true;
-            }
-
-            /// <summary>
-            /// Try to convert value to int.
-            /// </summary>
-            internal static bool TryConvertToInt(object value, out int arg)
-            {
-                switch (value)
-                {
-                    case double d:
-                        if (d >= int.MinValue && d <= int.MaxValue)
-                        {
-                            arg = Convert.ToInt32(d);
-                            if (Math.Abs(arg - d) == 0)
-                            {
-                                return true;
-                            }
-                        }
-
-                        break;
-                    case long l:
-                        if (l >= int.MinValue && l <= int.MaxValue)
-                        {
-                            arg = Convert.ToInt32(l);
-                            return true;
-                        }
-
-                        break;
-                    case int i:
-                        arg = i;
-                        return true;
-                    case string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture.NumberFormat, out arg):
-                        return true;
-                }
-
-                arg = 0;
-                return false;
-            }
-
-            /// <summary>
-            /// Try to convert value to long.
-            /// </summary>
-            internal static bool TryConvertToLong(object value, out long arg)
-            {
-                switch (value)
-                {
-                    case double d:
-                        if (d >= long.MinValue && d <= long.MaxValue)
-                        {
-                            arg = (long)d;
-                            if (Math.Abs(arg - d) == 0)
-                            {
-                                return true;
-                            }
-                        }
-
-                        break;
-                    case long l:
-                        arg = l;
-                        return true;
-                    case int i:
-                        arg = i;
-                        return true;
-                    case string s when long.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture.NumberFormat, out arg):
-                        return true;
-                }
-
-                arg = 0;
-                return false;
-            }
-
-            /// <summary>
-            /// Try to convert value to double.
-            /// </summary>
-            internal static bool TryConvertToDouble(object value, out double arg)
-            {
-                switch (value)
-                {
-                    case double unboxed:
-                        arg = unboxed;
-                        return true;
-                    case long l:
-                        arg = l;
-                        return true;
-                    case int i:
-                        arg = i;
-                        return true;
-                    case string str when double.TryParse(str, NumberStyles.Number | NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out arg):
-                        return true;
-                    default:
-                        arg = 0;
-                        return false;
-                }
-            }
-
-            private static bool TryGetArg(object[] args, out string arg0)
-            {
-                if (args.Length != 1)
-                {
-                    arg0 = null;
-                    return false;
-                }
-
-                arg0 = args[0] as string;
-                return arg0 != null;
-            }
-
-            private static bool TryGetArgs(object[] args, out string arg0, out StringComparison arg1)
-            {
-                if (args.Length != 2)
-                {
-                    arg0 = null;
-                    arg1 = default;
-
-                    return false;
-                }
-
-                arg0 = args[0] as string;
-
-                // reject enums as ints. In C# this would require a cast, which is not supported in msbuild expressions
-                if (arg0 == null || !(args[1] is string comparisonTypeName) || int.TryParse(comparisonTypeName, out _))
-                {
-                    arg1 = default;
-                    return false;
-                }
-
-                // Allow fully-qualified enum, e.g. "System.StringComparison.OrdinalIgnoreCase"
-                if (comparisonTypeName.Contains('.'))
-                {
-                    comparisonTypeName = comparisonTypeName.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
-                }
-
-                return Enum.TryParse(comparisonTypeName, out arg1);
-            }
-
-            private static bool TryGetArgs(object[] args, out int arg0)
-            {
-                arg0 = 0;
-
-                if (args.Length != 1)
-                {
-                    return false;
-                }
-
-                return TryConvertToInt(args[0], out arg0);
-            }
-
-            private static bool TryGetArgs(object[] args, out int arg0, out int arg1)
-            {
-                arg0 = 0;
-                arg1 = 0;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                return TryConvertToInt(args[0], out arg0) &&
-                       TryConvertToInt(args[1], out arg1);
-            }
-
-            private static bool TryGetArgs(object[] args, out double arg0, out double arg1)
-            {
-                arg0 = 0;
-                arg1 = 0;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                return TryConvertToDouble(args[0], out arg0) &&
-                       TryConvertToDouble(args[1], out arg1);
-            }
-
-            private static bool TryGetArgs(object[] args, out int arg0, out string arg1)
-            {
-                arg0 = 0;
-                arg1 = null;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                arg1 = args[1] as string;
-                if (arg1 == null && args[1] is char ch)
-                {
-                    arg1 = ch.ToString();
-                }
-
-                if (TryConvertToInt(args[0], out arg0) &&
-                    arg1 != null)
-                {
-                    return true;
-                }
-
-                return false;
-            }
-
-            private static bool TryGetArgs(object[] args, out string arg0, out int arg1)
-            {
-                arg0 = null;
-                arg1 = 0;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                var value1 = args[1] as string;
-                arg0 = args[0] as string;
-                if (value1 != null &&
-                    arg0 != null &&
-                    int.TryParse(value1, out arg1))
-                {
-                    return true;
-                }
-
-                return false;
-            }
-
-            private static bool IsFloatingPointRepresentation(object value)
-            {
-                return value is double || (value is string str && double.TryParse(str, NumberStyles.Number | NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out double _));
-            }
-
-            private static bool TryExecuteArithmeticOverload(object[] args, Func<long, long, long> integerOperation, Func<double, double, double> realOperation, out object resultValue)
-            {
-                resultValue = null;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                if (TryConvertToLong(args[0], out long argLong0) && TryConvertToLong(args[1], out long argLong1))
-                {
-                    resultValue = integerOperation(argLong0, argLong1);
-                    return true;
-                }
-
-                if (TryConvertToDouble(args[0], out double argDouble0) && TryConvertToDouble(args[1], out double argDouble1))
-                {
-                    resultValue = realOperation(argDouble0, argDouble1);
-                    return true;
-                }
-
-                return false;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            private void LogFunctionCall(string fileName, object objectInstance, object[] args)
-            {
-                var logFile = Path.Combine(Directory.GetCurrentDirectory(), fileName);
-
-                var argSignature = args != null
-                    ? string.Join(", ", args.Select(a => a?.GetType().Name ?? "null"))
-                    : string.Empty;
-
-                File.AppendAllText(logFile, $"ReceiverType={_receiverType?.FullName}; ObjectInstanceType={objectInstance?.GetType().FullName}; MethodName={_methodMethodName}({argSignature})\n");
             }
 
             /// <summary>
@@ -5167,7 +3959,7 @@ namespace Microsoft.Build.Evaluation
                 // If there are no arguments, then just create an empty array
                 if (String.IsNullOrEmpty(argumentsContent))
                 {
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = [];
                 }
                 else
                 {
@@ -5241,7 +4033,7 @@ namespace Microsoft.Build.Evaluation
                     // It may be that there are '()' but no actual arguments content
                     if (argumentStartIndex == expressionFunction.Length - 1)
                     {
-                        functionArguments = Array.Empty<string>();
+                        functionArguments = [];
                     }
                     else
                     {
@@ -5251,7 +4043,7 @@ namespace Microsoft.Build.Evaluation
                         // If there are no arguments, then just create an empty array
                         if (string.IsNullOrEmpty(argumentsContent))
                         {
-                            functionArguments = Array.Empty<string>();
+                            functionArguments = [];
                         }
                         else
                         {
@@ -5274,7 +4066,7 @@ namespace Microsoft.Build.Evaluation
                         nextMethodIndex = indexerIndex;
                     }
 
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = [];
 
                     if (nextMethodIndex > 0)
                     {
@@ -5332,7 +4124,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             coercedArguments[n] = args[n].ToString().ToCharArray();
                         }
-                        else if (parameters[n].ParameterType.GetTypeInfo().IsEnum && args[n] is string && ((string)args[n]).Contains("."))
+                        else if (parameters[n].ParameterType.GetTypeInfo().IsEnum && args[n] is string v && v.Contains("."))
                         {
                             Type enumType = parameters[n].ParameterType;
                             string typeLeafName = enumType.Name + ".";
@@ -5415,7 +4207,7 @@ namespace Microsoft.Build.Evaluation
 
                     // We don't want to expose the real type name of our intrinsics
                     // so we'll replace it with "MSBuild"
-                    if (_receiverType == typeof(Microsoft.Build.Evaluation.IntrinsicFunctions))
+                    if (_receiverType == typeof(IntrinsicFunctions))
                     {
                         typeName = "MSBuild";
                     }
@@ -5448,7 +4240,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private static bool IsStaticMethodAvailable(Type receiverType, string methodName)
             {
-                if (receiverType == typeof(Microsoft.Build.Evaluation.IntrinsicFunctions))
+                if (receiverType == typeof(IntrinsicFunctions))
                 {
                     // These are our intrinsic functions, so we're OK with those
                     return true;

@@ -22,6 +22,7 @@
       Overall build summary
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
@@ -66,6 +67,13 @@
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
+      <trans-unit id="BuildSummary">
+        <source>Build summary:</source>
+        <target state="translated">Resumo da compilação:</target>
+        <note>
+      A header used by Terminal Logger to introduce the build summary.
+    </note>
+      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">Argumentos de linha de comando = "{0}"</target>
@@ -89,6 +97,7 @@
         <target state="translated">({0:F1}s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
+        's' should reflect the localized abbreviation for seconds
       </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
@@ -120,8 +129,9 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Faz com que o MSBuild relate acessos a arquivos para qualquer plug-in
-                     de cache de projeto configurado.
+                     Faz com que o MSBuild relate acessos a arquivos a qualquer
+ configurado
+                     plug-ins de cache do projeto.
 
                      Este sinalizador é experimental e pode não funcionar conforme o esperado.
     </target>
@@ -300,7 +310,7 @@
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      This writes the value of property Bar into Biz.txt.
     </source>
-        <target state="translated">  -getResultOutputFile:file
+        <target state="translated">  -getResultOutputFile:arquivo
                      Redirecionar a saída de get* para um arquivo.
 
                      Exemplo:
@@ -315,12 +325,12 @@
       <trans-unit id="HelpMessage_52_BuildCheckSwitch">
         <source>  -check
                      Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
+                     BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
                      Habilita BuildChecks durante o build.
-                     BuildCheck habilita a avaliação de regras para garantir que as propriedades 
+                     BuildCheck habilita a avaliação de regras para garantir as propriedades
                      do build. Para obter mais informações, confira aka.ms/buildcheck
 	</target>
         <note>
@@ -1736,6 +1746,7 @@ arquivo de resposta.
       {1}: project name
       {2}: BuildResult_{X}
       {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
@@ -1756,6 +1767,7 @@ arquivo de resposta.
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="ProjectNotFoundError">
@@ -1810,6 +1822,7 @@ arquivo de resposta.
         <target state="translated">Restauração concluída ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
@@ -1819,6 +1832,7 @@ arquivo de resposta.
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="SAC">
@@ -1914,6 +1928,7 @@ arquivo de resposta.
       {1}: project name
       {2}: BuildResult_{X}
       {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
@@ -1926,6 +1941,7 @@ arquivo de resposta.
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="TestSummary_BannerAndTotal">
@@ -1936,7 +1952,10 @@ arquivo de resposta.
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
         <target state="translated">duração: {0}s</target>
-        <note>{0} whole number</note>
+        <note>
+      {0} whole number
+      's' should reflect the localized abbreviation for seconds
+    </note>
       </trans-unit>
       <trans-unit id="TestSummary_Failed">
         <source>failed: {0}</source>

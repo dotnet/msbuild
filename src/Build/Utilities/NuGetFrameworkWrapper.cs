@@ -66,7 +66,7 @@ namespace Microsoft.Build.Evaluation
             var NuGetFramework = NuGetAssembly.GetType("NuGet.Frameworks.NuGetFramework");
             var NuGetFrameworkCompatibilityProvider = NuGetAssembly.GetType("NuGet.Frameworks.CompatibilityProvider");
             var NuGetFrameworkDefaultCompatibilityProvider = NuGetAssembly.GetType("NuGet.Frameworks.DefaultCompatibilityProvider");
-            ParseMethod = NuGetFramework.GetMethod("Parse", new Type[] { typeof(string) });
+            ParseMethod = NuGetFramework.GetMethod("Parse", [typeof(string)]);
             IsCompatibleMethod = NuGetFrameworkCompatibilityProvider.GetMethod("IsCompatible");
             DefaultCompatibilityProvider = NuGetFrameworkDefaultCompatibilityProvider.GetMethod("get_Instance").Invoke(null, Array.Empty<object>());
             FrameworkProperty = NuGetFramework.GetProperty("Framework");
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Evaluation
 
         private object Parse(string tfm)
         {
-            return ParseMethod.Invoke(null, new object[] { tfm });
+            return ParseMethod.Invoke(null, [tfm]);
         }
 
         public string GetTargetFrameworkIdentifier(string tfm)
@@ -105,7 +105,7 @@ namespace Microsoft.Build.Evaluation
 
         public bool IsCompatible(string target, string candidate)
         {
-            return Convert.ToBoolean(IsCompatibleMethod.Invoke(DefaultCompatibilityProvider, new object[] { Parse(target), Parse(candidate) }));
+            return Convert.ToBoolean(IsCompatibleMethod.Invoke(DefaultCompatibilityProvider, [Parse(target), Parse(candidate)]));
         }
 
         private string GetNonZeroVersionParts(Version version, int minVersionPartCount)
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Evaluation
 
             IEnumerable<(string originalTfm, object parsedTfm)> ParseTfms(string desiredTargetFrameworks)
             {
-                return desiredTargetFrameworks.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(tfm =>
+                return desiredTargetFrameworks.Split([';'], StringSplitOptions.RemoveEmptyEntries).Select(tfm =>
                 {
                     (string originalTfm, object parsedTfm) parsed = (tfm, Parse(tfm));
                     return parsed;

@@ -22,6 +22,7 @@
       Overall build summary
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_Failed">
@@ -33,14 +34,14 @@
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrors">
         <source>failed with {0} error(s)</source>
-        <target state="translated">selhalo s {0} chybami.</target>
+        <target state="translated">selhalo s {0} chybou/chybami.</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
       </trans-unit>
       <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
         <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="translated">selhalo s {0} chybami a {1} upozorněními.</target>
+        <target state="translated">selhalo s chybami (celkem {0}) a upozorněními (celkem {1})</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
     </note>
@@ -61,9 +62,16 @@
       </trans-unit>
       <trans-unit id="BuildResult_SucceededWithWarnings">
         <source>succeeded with {0} warning(s)</source>
-        <target state="translated">akce proběhla úspěšně s {0} upozorněním(i).</target>
+        <target state="translated">uspělo s {0} upozorněním(i).</target>
         <note>
       Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildSummary">
+        <source>Build summary:</source>
+        <target state="translated">Souhrn sestavení:</target>
+        <note>
+      A header used by Terminal Logger to introduce the build summary.
     </note>
       </trans-unit>
       <trans-unit id="CommandLine">
@@ -89,6 +97,7 @@
         <target state="translated">({0:F1} s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
+        's' should reflect the localized abbreviation for seconds
       </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
@@ -316,12 +325,12 @@
       <trans-unit id="HelpMessage_52_BuildCheckSwitch">
         <source>  -check
                      Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties 
+                     BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
                      Povolí během sestavení BuildChecks.
-                     BuildCheck umožňuje vyhodnocovat pravidla, aby se zajistily vlastnosti 
+                     BuildCheck umožňuje vyhodnocovat pravidla, aby se zajistily vlastnosti
                      sestavení. Další informace viz aka.ms/buildcheck
 	</target>
         <note>
@@ -800,20 +809,17 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;protok_nást&gt;   Použít daný protokolovací nástroj k protokolování
-                     událostí nástroje MSBuild. Chcete-li zadat více protokolovacích.
-                     nástrojů, musíte je zadat jednotlivě.
-                     Syntaxe hodnoty &lt;protok_nást&gt;:
-                        [&lt;třída_protok_nást&gt;,]&lt;sestavení_protok_nást&gt;
-                        [;&lt;param_protok_nást&gt;]
-                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
-                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
-                     Syntaxe hodnoty &lt;sestavení_protok_nást&gt;:
-                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
+        <target state="translated">  -logger:&lt;logger&gt;   Použít daný protokolovací nástroj k protokolování událostí nástroje MSBuild. Pokud chcete zadat 
+                     více protokolovacích nástrojů, musíte je zadat jednotlivě.
+                     Syntaxe hodnoty &lt;logger&gt; je:
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
+                     Syntaxe hodnoty &lt;logger class&gt; je:
+                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+                     Syntaxe hodnoty &lt;logger assembly&gt; je:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
-                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se 
-                     protokolovacímu nástroji přesně v tom tvaru, v jakém
-                     byly zadány. (Krátký tvar: -l)
+                     Parametry &lt;logger parameters&gt; jsou volitelné a předávají se
+                     protokolovacímu nástroji přesně v tom tvaru, v jakém byly zadány. (Krátký tvar: -l)
                      Příklady:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -1082,23 +1088,20 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;                     
-                     Použít zadaný protokolovací nástroj pro protokolování událostí
-                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci 
-                     protokolovacího nástroje. Chcete-li zadat více 
-                     protokolovacích nástrojů, uveďte je jednotlivě. 
+        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
+                     Použít zadaný protokolovací nástroj pro protokolování událostí z nástroje MSBuild; ke každému uzlu připojit
+                     jinou instanci protokolovacího nástroje. Pokud chcete zadat více
+                     protokolovacích nástrojů, uveďte je jednotlivě.
                      (Krátký tvar: -dl)
-                     Syntaxe hodnoty &lt;protok_nást&gt;:
-                        [&lt;třída_protok_nást&gt;,]&lt;sestav_protok_nást&gt;
-                        [;&lt;param_protok_nást&gt;]
-                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
-                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
-                     Syntaxe hodnoty &lt;sestav_protok_nást&gt;:
-                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
+                     Syntaxe hodnoty &lt;logger&gt; je:
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
+                     Syntaxe hodnoty &lt;logger class&gt; je:
+                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+                     Syntaxe hodnoty &lt;logger assembly&gt; je:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
                      Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se
-                     protokolovacímu nástroji přesně v zadaném tvaru.
-                     (Krátký tvar: -l)
+                     protokolovacímu nástroji přesně v zadaném tvaru. (Krátký tvar: -l)
                      Příklady:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -1286,7 +1289,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                                              Verbosity=diagnostic;Encoding=UTF-8
 
                        -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn 
+                       -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1748,6 +1751,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       {1}: project name
       {2}: BuildResult_{X}
       {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="ProjectFinished_OutputPath">
@@ -1768,6 +1772,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="ProjectNotFoundError">
@@ -1822,6 +1827,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <target state="translated">Obnovení dokončeno ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
@@ -1831,6 +1837,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
       {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="SAC">
@@ -1926,6 +1933,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       {1}: project name
       {2}: BuildResult_{X}
       {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTF">
@@ -1938,6 +1946,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="TestSummary_BannerAndTotal">
@@ -1948,7 +1957,10 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       <trans-unit id="TestSummary_Duration">
         <source>duration: {0}s</source>
         <target state="translated">doba trvání: {0} s</target>
-        <note>{0} whole number</note>
+        <note>
+      {0} whole number
+      's' should reflect the localized abbreviation for seconds
+    </note>
       </trans-unit>
       <trans-unit id="TestSummary_Failed">
         <source>failed: {0}</source>

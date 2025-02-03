@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 
@@ -41,7 +42,7 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword.</param>
         /// <param name="senderName">name of event sender.</param>
         public LazyFormattedBuildEventArgs(
-            string? message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string? message,
             string? helpKeyword,
             string? senderName)
             : this(message, helpKeyword, senderName, DateTime.Now, null)
@@ -57,7 +58,7 @@ namespace Microsoft.Build.Framework
         /// <param name="eventTimestamp">Timestamp when event was created.</param>
         /// <param name="messageArgs">Message arguments.</param>
         public LazyFormattedBuildEventArgs(
-            string? message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string? message,
             string? helpKeyword,
             string? senderName,
             DateTime eventTimestamp,
@@ -116,7 +117,17 @@ namespace Microsoft.Build.Framework
                     // Arguments may be ints, etc, so explicitly convert
                     // Convert.ToString returns String.Empty when it cannot convert, rather than throwing
                     // It returns null if the input is null.
-                    writer.Write(Convert.ToString(argument, CultureInfo.CurrentCulture) ?? "");
+                    string argValue;
+                    try
+                    {
+                        argValue = Convert.ToString(argument, CultureInfo.CurrentCulture) ?? "";
+                    }
+                    // Let's grace handle case where custom ToString implementation (that Convert.ToString fallbacks to) throws.
+                    catch (Exception e)
+                    {
+                        argValue = $"Argument conversion to string failed{Environment.NewLine}{e}";
+                    }
+                    writer.Write(argValue);
                 }
             }
             else
@@ -164,7 +175,7 @@ namespace Microsoft.Build.Framework
         /// <param name="unformatted">The string to format.</param>
         /// <param name="args">Optional arguments for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
-        private static string FormatString(string unformatted, params object[] args)
+        private static string FormatString([StringSyntax(StringSyntaxAttribute.CompositeFormat)] string unformatted, params object[] args)
         {
             // Based on the one in Shared/ResourceUtilities.
             string formatted = unformatted;

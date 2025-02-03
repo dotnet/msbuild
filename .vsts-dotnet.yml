@@ -34,10 +34,16 @@ variables:
     - name: SourceBranch
       value: ''
   - name: EnableReleaseOneLocBuild
-    value: true # Enable loc for vs17.13
+    value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
     value: true
-  - group: DotNet-MSBuild-SDLValidation-Params
+  - group: AzureDevOps-Artifact-Feeds-Pats
+  - name: cfsNugetWarnLevel
+    value: warn
+  - name: nugetMultiFeedWarnLevel
+    value: none
+  - name: NugetSecurityAnalysisWarningLevel
+    value: none
 
 resources:
   repositories:
@@ -54,6 +60,11 @@ extends:
       name: VSEngSS-MicroBuild2022-1ES
       os: windows
     sdl:
+      policheck:
+        enabled: true
+        exclusionsFile: $(Build.SourcesDirectory)\eng\policheck_exclusions.xml
+      tsa:
+        enabled: true
       # We generate SBOM ourselves, so don't need steps injected by 1ES.
       sbom:
         enabled: false
@@ -115,6 +126,14 @@ extends:
         steps:
         - task: NuGetToolInstaller@1
           displayName: 'Install NuGet.exe'
+
+        - task: PowerShell@2
+          displayName: Setup Private Feeds Credentials
+          inputs:
+            filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+            arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+          env:
+            Token: $(dn-bot-dnceng-artifact-feeds-rw)
 
         - task: NuGetCommand@2
           displayName: Restore internal tools
@@ -306,18 +325,3 @@ extends:
         enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
-        SDLValidationParameters:
-          enable: true
-          continueOnError: false
-          params: ' -SourceToolsList @("policheck","credscan")
-          -TsaInstanceURL "$(_TsaInstanceURL)"
-          -TsaProjectName "$(_TsaProjectName)"
-          -TsaNotificationEmail "$(_TsaNotificationEmail)"
-          -TsaCodebaseAdmin "$(_TsaCodebaseAdmin)"
-          -TsaBugAreaPath "$(_TsaBugAreaPath)"
-          -TsaIterationPath "$(_TsaIterationPath)"
-          -TsaRepositoryName "dotnet-msbuild"
-          -TsaCodebaseName "dotnet-msbuild"
-          -TsaPublish $True
-          -CrScanAdditionalRunConfigParams @("SuppressionsPath < $(Build.SourcesDirectory)\eng\CredScanSuppressions.json")
-          -PoliCheckAdditionalRunConfigParams @("UserExclusionPath < $(Build.SourcesDirectory)\eng\policheck_exclusions.xml")'

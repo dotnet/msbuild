@@ -42,8 +42,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public TargetPlatformSDK(string targetPlatformIdentifier, Version targetPlatformVersion, string path)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformIdentifier, nameof(targetPlatformIdentifier));
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, nameof(targetPlatformVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformIdentifier);
+            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion);
             TargetPlatformIdentifier = targetPlatformIdentifier;
             TargetPlatformVersion = targetPlatformVersion;
             Path = path;

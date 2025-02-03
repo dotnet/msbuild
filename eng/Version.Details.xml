@@ -2,9 +2,9 @@
 <Dependencies>
   <ProductDependencies>
     <!-- Intermediate is necessary for source build. -->
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="8.0.0-alpha.1.24415.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="9.0.0-alpha.1.25066.1">
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>fe3794a68bd668d36d4d5014a9e6c9d22c0e6d86</Sha>
+      <Sha>93a3395781d30f69201367371c28cfc5005c0264</Sha>
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
@@ -53,9 +53,9 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>5535e31a712343a63f5d7d796cd874e563e5ac14</Sha>
     </Dependency>
-    <Dependency Name="System.Text.Json" Version="8.0.4">
+    <Dependency Name="System.Text.Json" Version="8.0.5">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
-      <Sha>2aade6beb02ea367fd97c4070a4198802fe61c03</Sha>
+      <Sha>81cabf2857a01351e5ab578947c7403a5b128ad1</Sha>
     </Dependency>
     <Dependency Name="System.Threading.Tasks.Dataflow" Version="8.0.0">
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
@@ -71,36 +71,36 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="9.0.0-beta.24466.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="9.0.0-beta.25065.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>04b9022eba9c184a8036328af513c22e6949e8b6</Sha>
+      <Sha>c4bbc67763bf0c5a868862df874079380e647d61</Sha>
     </Dependency>
     <!-- Intermediate is necessary for source build. -->
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.arcade" Version="9.0.0-beta.24466.2">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.arcade" Version="9.0.0-beta.25065.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>04b9022eba9c184a8036328af513c22e6949e8b6</Sha>
+      <Sha>c4bbc67763bf0c5a868862df874079380e647d61</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="9.0.0-beta.24466.2">
+    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="9.0.0-beta.25065.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>04b9022eba9c184a8036328af513c22e6949e8b6</Sha>
+      <Sha>c4bbc67763bf0c5a868862df874079380e647d61</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.12.0-rc.112">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.13.0-rc.113">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>502e691d67590946d0a4765a25f1da2b6d6c32fc</Sha>
+      <Sha>c4b26195ee5a77e70b2ea5fd50db87d6a9194c24</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.12.0-3.24470.11">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.13.0-3.25076.8">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>54fd790788b03c256f736c917fc368daf0a643db</Sha>
+      <Sha>cef17ee67990e8a447c7461bb94b4df7f0fb12ee</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn" Version="4.12.0-3.24470.11">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn" Version="4.13.0-3.25076.8">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>54fd790788b03c256f736c917fc368daf0a643db</Sha>
+      <Sha>cef17ee67990e8a447c7461bb94b4df7f0fb12ee</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="9.0.0-beta.24466.2">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="9.0.0-beta.25065.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>04b9022eba9c184a8036328af513c22e6949e8b6</Sha>
+      <Sha>c4bbc67763bf0c5a868862df874079380e647d61</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

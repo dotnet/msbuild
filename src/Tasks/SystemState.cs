@@ -168,7 +168,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             public void Translate(ITranslator translator)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(translator, nameof(translator));
+                ErrorUtilities.VerifyThrowArgumentNull(translator);
 
                 translator.Translate(ref lastModified);
                 translator.Translate(ref assemblyName,
