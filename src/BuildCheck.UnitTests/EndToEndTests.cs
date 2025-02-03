@@ -401,6 +401,75 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    // Windows only - due to targeting NetFx
+    [WindowsOnlyTheory]
+    [InlineData(
+        """
+        <Project ToolsVersion="msbuilddefaulttoolsversion">
+            <PropertyGroup>
+              <TargetFramework>net48</TargetFramework>
+            </PropertyGroup>
+            <Target Name="Build">
+                <Message Text="Build done"/>
+            </Target>
+        </Project>
+        """,
+        false)]
+    [InlineData(
+        """
+        <Project Sdk="Microsoft.NET.Sdk">
+          <PropertyGroup>
+            <TargetFramework>net9.0</TargetFramework>
+          </PropertyGroup>
+        </Project>
+        """,
+        false)]
+    [InlineData(
+        """
+        <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+          <PropertyGroup>
+            <OutputType>Library</OutputType>
+            <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+            <OutputPath>bin\Debug\</OutputPath>
+        	<NoWarn>CS2008</NoWarn>
+          </PropertyGroup>
+          <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+        </Project>
+        """,
+        false)]
+    [InlineData(
+        """
+        <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+          <PropertyGroup>
+            <OutputType>Library</OutputType>
+            <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+            <TargetFramework>v4.8</TargetFramework>
+            <OutputPath>bin\Debug\</OutputPath>
+        	<NoWarn>CS2008</NoWarn>
+          </PropertyGroup>
+          <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+        </Project>
+        """,
+        true)]
+    public void TFMinNonSdkCheckTest(string projectContent, bool expectCheckTrigger)
+    {
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+
+        workFolder.CreateFile("testproj.csproj", projectContent);
+
+        _env.SetCurrentDirectory(workFolder.Path);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue();
+
+        string expectedDiagnostic = "warning BC0108: .* specifies 'TargetFramework\\(s\\)' property";
+        Regex.Matches(output, expectedDiagnostic).Count.ShouldBe(expectCheckTrigger ? 2 : 0);
+
+        GetWarningsCount(output).ShouldBe(expectCheckTrigger ? 1 : 0);
+    }
+
 
     [Fact]
     public void ConfigChangeReflectedOnReuse()
