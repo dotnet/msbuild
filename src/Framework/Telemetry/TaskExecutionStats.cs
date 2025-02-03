@@ -10,4 +10,15 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, short execut
     public TimeSpan CumulativeExecutionTime { get; set; } = cumulativeExecutionTime;
     public long TotalMemoryConsumption { get; set; } = totalMemoryConsumption;
     public short ExecutionsCount { get; set; } = executionsCount;
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is TaskExecutionStats other)
+        {
+            return CumulativeExecutionTime == other.CumulativeExecutionTime &&
+                   TotalMemoryConsumption == other.TotalMemoryConsumption &&
+                   ExecutionsCount == other.ExecutionsCount;
+        }
+        return false;
+    }
 }
