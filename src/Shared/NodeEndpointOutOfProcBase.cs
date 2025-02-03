@@ -15,11 +15,12 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
+
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
 #endif
-#if NET451_OR_GREATER || NETCOREAPP
+#if !FEATURE_APM
 using System.Threading.Tasks;
 #endif
 
@@ -151,7 +152,7 @@ namespace Microsoft.Build.BackEnd
         public void Listen(INodePacketFactory factory)
         {
             ErrorUtilities.VerifyThrow(_status == LinkStatus.Inactive, "Link not inactive.  Status is {0}", _status);
-            ErrorUtilities.VerifyThrowArgumentNull(factory);
+            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
             _packetFactory = factory;
 
             InitializeAsyncPacketThread();
@@ -313,7 +314,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet);
+            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
             ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
             ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
             _packetQueue.Enqueue(packet);
@@ -510,7 +511,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private void RunReadLoop(BufferedReadStream localReadPipe, NamedPipeServerStream localWritePipe,
+        private void RunReadLoop(Stream localReadPipe, Stream localWritePipe,
             ConcurrentQueue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
         {
             // Ordering of the wait handles is important.  The first signalled wait handle in the array
@@ -519,30 +520,25 @@ namespace Microsoft.Build.BackEnd
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
             byte[] headerByte = new byte[5];
-#if NET451_OR_GREATER
-            Task<int> readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
-#elif NETCOREAPP
-            Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
-#else
+#if FEATURE_APM
             IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
-#endif
-
-            // Ordering is important.  We want packetAvailable to supercede terminate otherwise we will not properly wait for all
-            // packets to be sent by other threads which are shutting down, such as the logging thread.
-            WaitHandle[] handles = 
-            [
-#if NET451_OR_GREATER || NETCOREAPP
-                ((IAsyncResult)readTask).AsyncWaitHandle,
 #else
-                result.AsyncWaitHandle,
+            Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
 #endif
-                localPacketAvailable,
-                localTerminatePacketPump,
-            ];
 
             bool exitLoop = false;
             do
             {
+                // Ordering is important.  We want packetAvailable to supercede terminate otherwise we will not properly wait for all
+                // packets to be sent by other threads which are shutting down, such as the logging thread.
+                WaitHandle[] handles = new WaitHandle[] {
+#if FEATURE_APM
+                    result.AsyncWaitHandle,
+#else
+                    ((IAsyncResult)readTask).AsyncWaitHandle,
+#endif
+                    localPacketAvailable, localTerminatePacketPump };
+
                 int waitId = WaitHandle.WaitAny(handles);
                 switch (waitId)
                 {
@@ -551,10 +547,10 @@ namespace Microsoft.Build.BackEnd
                             int bytesRead = 0;
                             try
                             {
-#if NET451_OR_GREATER || NETCOREAPP
-                                bytesRead = readTask.Result;
-#else
+#if FEATURE_APM
                                 bytesRead = localReadPipe.EndRead(result);
+#else
+                                bytesRead = readTask.Result;
 #endif
                             }
                             catch (Exception e)
@@ -595,7 +591,7 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-                            NodePacketType packetType = (NodePacketType)headerByte[0];
+                            NodePacketType packetType = (NodePacketType)Enum.ToObject(typeof(NodePacketType), headerByte[0]);
 
                             try
                             {
@@ -611,18 +607,10 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-#if NET451_OR_GREATER
-                            readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
-#elif NETCOREAPP
-                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
-#else
+#if FEATURE_APM
                             result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
-#endif
-
-#if NET451_OR_GREATER || NETCOREAPP
-                            handles[0] = ((IAsyncResult)readTask).AsyncWaitHandle;
 #else
-                            handles[0] = result.AsyncWaitHandle;
+                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
 #endif
                         }
 
@@ -685,8 +673,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
     }
 }
