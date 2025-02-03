@@ -456,7 +456,9 @@ namespace Microsoft.Build.Tasks
             // then we can short-circuit the File IO involved with GetAssemblyName()
             if (redistList != null)
             {
-                if (!string.IsNullOrEmpty(path) && path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+                string extension = Path.GetExtension(path);
+
+                if (string.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase))
                 {
                     IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName(
                             Path.GetFileNameWithoutExtension(path));

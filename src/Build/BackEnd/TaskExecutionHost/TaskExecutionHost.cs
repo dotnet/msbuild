@@ -1224,18 +1224,15 @@ namespace Microsoft.Build.BackEnd
 
             string taskAndParameterName = _taskName + "_" + parameter.Name;
             string key = "DisableLogTaskParameter_" + taskAndParameterName;
+            string metadataKey = "DisableLogTaskParameterItemMetadata_" + taskAndParameterName;
 
             if (string.Equals(lookup.GetProperty(key)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
             {
                 parameter.Log = false;
             }
-            else
+            else if (string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
             {
-                string metadataKey = "DisableLogTaskParameterItemMetadata_" + taskAndParameterName;
-                if (string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
-                {
-                    parameter.LogItemMetadata = false;
-                }
+                parameter.LogItemMetadata = false;
             }
         }
 

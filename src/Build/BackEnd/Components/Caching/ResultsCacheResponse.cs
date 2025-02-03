@@ -42,6 +42,11 @@ namespace Microsoft.Build.BackEnd
         public BuildResult Results;
 
         /// <summary>
+        /// The subset of explicit targets which must be built because there are no results for them in the cache.
+        /// </summary>
+        public HashSet<string> ExplicitTargetsToBuild;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="type">The response type.</param>
@@ -49,6 +54,7 @@ namespace Microsoft.Build.BackEnd
         {
             Type = type;
             Results = null;
+            ExplicitTargetsToBuild = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
     }
 }

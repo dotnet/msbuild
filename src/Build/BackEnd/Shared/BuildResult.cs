@@ -10,7 +10,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Framework;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Build.Execution
 {

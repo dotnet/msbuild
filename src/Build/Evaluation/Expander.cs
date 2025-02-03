@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -276,6 +275,9 @@ namespace Microsoft.Build.Evaluation
         /// Enabled by ExpanderOptions.Truncate.
         /// </summary>
         private const int ItemLimitPerExpansion = 3;
+        private static readonly char[] s_singleQuoteChar = { '\'' };
+        private static readonly char[] s_backtickChar = { '`' };
+        private static readonly char[] s_doubleQuoteChar = { '"' };
 
         /// <summary>
         /// Those characters which indicate that an expression may contain expandable
@@ -783,43 +785,38 @@ namespace Microsoft.Build.Evaluation
             // we reached the end of an argument, add the builder's final result
             // to our arguments.
             argumentBuilder.Trim();
+            string argValue = argumentBuilder.ToString();
 
-            if (argumentBuilder.Length > 0)
+            // We support passing of null through the argument constant value null
+            if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
             {
-                char firstChar = argumentBuilder[0];
-                char lastChar = argumentBuilder[argumentBuilder.Length - 1];
-                if (firstChar == '\'' && lastChar == '\'')
+                arguments.Add(null);
+            }
+            else
+            {
+                if (argValue.Length > 0)
                 {
-                    argumentBuilder.Trim('\'');
-                    arguments.Add(argumentBuilder.ToString());
-                }
-                else if (firstChar == '`' && lastChar == '`')
-                {
-                    argumentBuilder.Trim('`');
-                    arguments.Add(argumentBuilder.ToString());
-                }
-                else if (firstChar == '"' && lastChar == '"')
-                {
-                    argumentBuilder.Trim('"');
-                    arguments.Add(argumentBuilder.ToString());
-                }
-                else
-                {
-                    string argValue = argumentBuilder.ToString();
-                    // We support passing of null through the argument constant value null
-                    if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
+                    if (argValue[0] == '\'' && argValue[argValue.Length - 1] == '\'')
                     {
-                        arguments.Add(null);
+                        arguments.Add(argValue.Trim(s_singleQuoteChar));
+                    }
+                    else if (argValue[0] == '`' && argValue[argValue.Length - 1] == '`')
+                    {
+                        arguments.Add(argValue.Trim(s_backtickChar));
+                    }
+                    else if (argValue[0] == '"' && argValue[argValue.Length - 1] == '"')
+                    {
+                        arguments.Add(argValue.Trim(s_doubleQuoteChar));
                     }
                     else
                     {
                         arguments.Add(argValue);
                     }
                 }
-            }
-            else
-            {
-                arguments.Add(string.Empty);
+                else
+                {
+                    arguments.Add(argValue);
+                }
             }
         }
 
@@ -975,13 +972,10 @@ namespace Microsoft.Build.Evaluation
                         using SpanBasedStringBuilder finalResultBuilder = Strings.GetSpanBasedStringBuilder();
 
                         int start = 0;
-                        MetadataMatchEvaluator matchMetadataEvaluator = null;
-                        MatchEvaluator matchEvaluator = null;
+                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
 
-                        if (itemVectorExpressions != null && itemVectorExpressions.Count > 0)
+                        if (itemVectorExpressions != null)
                         {
-                            matchMetadataEvaluator ??= new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
-                            matchEvaluator ??= new MatchEvaluator(matchMetadataEvaluator.ExpandSingleMetadata);
                             // Move over the expression, skipping those that have been recognized as an item vector expression
                             // Anything other than an item vector expression we want to expand bare metadata in.
                             for (int n = 0; n < itemVectorExpressions.Count; n++)
@@ -991,7 +985,7 @@ namespace Microsoft.Build.Evaluation
                                 // Extract the part of the expression that appears before the item vector expression
                                 // e.g. the ABC in ABC@(foo->'%(FullPath)')
                                 string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
-                                string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, matchEvaluator);
+                                string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
 
                                 // Append the metadata replacement
                                 finalResultBuilder.Append(replacementResult);
@@ -999,7 +993,7 @@ namespace Microsoft.Build.Evaluation
                                 // Expand any metadata that appears in the item vector expression's separator
                                 if (itemVectorExpressions[n].Separator != null)
                                 {
-                                    vectorExpression = RegularExpressions.NonTransformItemMetadataRegex.Replace(itemVectorExpressions[n].Value, matchEvaluator, -1, itemVectorExpressions[n].SeparatorStart);
+                                    vectorExpression = RegularExpressions.NonTransformItemMetadataRegex.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
                                 }
 
                                 // Append the item vector expression as is
@@ -1015,10 +1009,8 @@ namespace Microsoft.Build.Evaluation
                         // then we need to metadata replace and then append that
                         if (start < expression.Length)
                         {
-                            matchMetadataEvaluator ??= new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
-                            matchEvaluator ??= new MatchEvaluator(matchMetadataEvaluator.ExpandSingleMetadata);
                             string subExpressionToReplaceIn = expression.Substring(start);
-                            string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, matchEvaluator);
+                            string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
 
                             finalResultBuilder.Append(replacementResult);
                         }
@@ -1118,12 +1110,7 @@ namespace Microsoft.Build.Evaluation
 
                         if (IsTruncationEnabled(_options) && metadataValue.Length > CharacterLimitPerExpansion)
                         {
-                            Span<char> trimmedMetadataSpan = stackalloc char[CharacterLimitPerExpansion];
-                            metadataValue.AsSpan().Slice(0, CharacterLimitPerExpansion - 3).CopyTo(trimmedMetadataSpan);
-                            trimmedMetadataSpan[trimmedMetadataSpan.Length - 3] = '.';
-                            trimmedMetadataSpan[trimmedMetadataSpan.Length - 2] = '.';
-                            trimmedMetadataSpan[trimmedMetadataSpan.Length - 1] = '.';
-                            metadataValue = trimmedMetadataSpan.ToString();
+                            metadataValue = metadataValue.Substring(0, CharacterLimitPerExpansion - 3) + "...";
                         }
                     }
 
@@ -2049,7 +2036,7 @@ namespace Microsoft.Build.Evaluation
                 if (!isTransformExpression)
                 {
                     // No transform: expression is like @(Compile), so include the item spec without a transform base item
-                    foreach (S item in itemsOfType.GetStructEnumerable())
+                    foreach (S item in itemsOfType)
                     {
                         if ((item.EvaluatedIncludeEscaped.Length > 0) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
                         {
@@ -2441,7 +2428,7 @@ namespace Microsoft.Build.Evaluation
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidItemFunctionExpression", functionName, item.Key, e.Message);
                         }
 
-                        if (NativeMethods.FileOrDirectoryExists(rootedPath))
+                        if (File.Exists(rootedPath) || Directory.Exists(rootedPath))
                         {
                             yield return item;
                         }
