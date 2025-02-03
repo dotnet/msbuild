@@ -3,4 +3,4 @@
 
 namespace Microsoft.Build.Framework.Telemetry;
 
-internal record TelemetryItem(string Name, object Value, bool Hashed);
+internal record TelemetryItem(string Name, object Value, bool NeedsHashing);

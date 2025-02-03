@@ -39,7 +39,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// </summary>
         public static Activity WithTag(this Activity activity, TelemetryItem item)
         {
-            object value = item.Hashed ? GetHashed(item.Value) : item.Value;
+            object value = item.NeedsHashing ? GetHashed(item.Value) : item.Value;
             activity.SetTag($"{TelemetryConstants.PropertyPrefix}{item.Name}", value);
             return activity;
         }
@@ -78,24 +78,24 @@ namespace Microsoft.Build.Framework.Telemetry
 #if NET9_0_OR_GREATER
                 return Convert.ToHexStringLower(hash);
 #else
-            return Convert.ToHexString(hash).ToLowerInvariant();
+                return Convert.ToHexString(hash).ToLowerInvariant();
 #endif
 
 #else
-            // Create the SHA256 object and compute the hash
-            using (var sha256 = SHA256.Create())
-            {
-                byte[] hash = sha256.ComputeHash(bytes);
-
-                // Convert the hash bytes to a lowercase hex string (manual loop approach)
-                var sb = new StringBuilder(hash.Length * 2);
-                foreach (byte b in hash)
+                // Create the SHA256 object and compute the hash
+                using (var sha256 = SHA256.Create())
                 {
-                    sb.AppendFormat("{0:x2}", b);
-                }
+                    byte[] hash = sha256.ComputeHash(bytes);
 
-                return sb.ToString();
-            }
+                    // Convert the hash bytes to a lowercase hex string (manual loop approach)
+                    var sb = new StringBuilder(hash.Length * 2);
+                    foreach (byte b in hash)
+                    {
+                        sb.AppendFormat("{0:x2}", b);
+                    }
+
+                    return sb.ToString();
+                }
 #endif
             }
 

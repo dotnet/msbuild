@@ -56,8 +56,15 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <param name="isStandalone">Differentiates between executing as MSBuild.exe or from VS/API.</param>
         public void Initialize(bool isStandalone)
         {
+            // for lock free early exit
+            if (_telemetryState != TelemetryState.Uninitialized)
+            {
+                return;
+            }
+
             lock (_initializeLock)
             {
+                // for correctness
                 if (_telemetryState != TelemetryState.Uninitialized)
                 {
                     return;
@@ -95,16 +102,11 @@ namespace Microsoft.Build.Framework.Telemetry
 
                 // }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is System.IO.FileNotFoundException or System.IO.FileLoadException)
             {
                 // catch exceptions from loading the OTel SDK or Collector to maintain usability of Microsoft.Build.Framework package in our and downstream tests in VS.
-                if (ex is System.IO.FileNotFoundException or System.IO.FileLoadException)
-                {
-                    _telemetryState = TelemetryState.Unsampled;
-                    return;
-                }
-
-                throw;
+                _telemetryState = TelemetryState.Unsampled;
+                return;
             }
 #endif
         }
@@ -129,7 +131,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             TracerProviderBuilder tracerProviderBuilder = Sdk
                 .CreateTracerProviderBuilder()
-                // this adds listeners to ActivitySources with the prefix "Microsoft.VisualStudio.OpenTelemetry."
+                                // this adds listeners to ActivitySources with the prefix "Microsoft.VisualStudio.OpenTelemetry."
                                 .AddVisualStudioDefaultTraceExporter(exporterSettings);
 
             _tracerProvider = tracerProviderBuilder.Build();

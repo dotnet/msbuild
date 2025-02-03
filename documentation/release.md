@@ -18,7 +18,7 @@ As of [#7018](https://github.com/dotnet/msbuild/pull/7018), MSBuild uses a Rosly
 
 That is a new step in our release process for each formal release (including patch releases if they change API surface).
 
-## Major release extra release steps
+## Major version extra update steps
 
 Update major version of VS in
 

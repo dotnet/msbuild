@@ -22,7 +22,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             var telemetryItem = new TelemetryItem(
                 Name: "TestItem",
                 Value: "TestValue",
-                Hashed: false);
+                NeedsHashing: false);
 
             activity.WithTag(telemetryItem);
 
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             var telemetryItem = new TelemetryItem(
                 Name: "TestItem",
                 Value: "SensitiveValue",
-                Hashed: true);
+                NeedsHashing: true);
 
             activity.WithTag(telemetryItem);
 
