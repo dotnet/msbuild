@@ -71,14 +71,14 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="8.0.0-beta.25066.6">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="8.0.0-beta.25079.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>4db725213dccb0d1102427bce1c39ba3117da7f7</Sha>
+      <Sha>cae548d41ddb92922d78f3d9737635d104f650a5</Sha>
     </Dependency>
     <!-- Intermediate is necessary for source build. -->
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.arcade" Version="8.0.0-beta.25066.6">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.arcade" Version="8.0.0-beta.25079.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>4db725213dccb0d1102427bce1c39ba3117da7f7</Sha>
+      <Sha>cae548d41ddb92922d78f3d9737635d104f650a5</Sha>
       <SourceBuild RepoName="arcade" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.23475.1" CoherentParentDependency="Microsoft.DotNet.Arcade.Sdk">
@@ -100,9 +100,9 @@
       <Sha>0b8371953e61f6179f39f1d62ebbd6a251f335e0</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="8.0.0-beta.25066.6">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="8.0.0-beta.25079.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>4db725213dccb0d1102427bce1c39ba3117da7f7</Sha>
+      <Sha>cae548d41ddb92922d78f3d9737635d104f650a5</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
