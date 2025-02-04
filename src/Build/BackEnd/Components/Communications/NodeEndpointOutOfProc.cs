@@ -34,7 +34,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override Handshake GetHandshake()
         {
-            Debugger.Launch();
             HandshakeOptions handshakeOptions = CommunicationsUtilities.GetHandshakeOptions(
                 taskHost: false,
                 architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(),

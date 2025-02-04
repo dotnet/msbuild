@@ -101,7 +101,7 @@ namespace Microsoft.Build.Internal
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
             CommunicationsUtilities.Trace("Handshake salt is " + handshakeSalt);
             string toolsDirectory = (nodeType & HandshakeOptions.NET) == HandshakeOptions.NET
-                ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryNET
+                ? BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory
                 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
             CommunicationsUtilities.Trace("Tools directory root is " + toolsDirectory);
             salt = CommunicationsUtilities.GetHashCode(handshakeSalt + toolsDirectory);
@@ -647,7 +647,8 @@ namespace Microsoft.Build.Internal
                 }
             }
 
-            if (!string.IsNullOrEmpty(architectureFlagToSet))
+            // if clrVersion is 5 or greater, we will default to .NET runtime
+            if (!string.IsNullOrEmpty(architectureFlagToSet) && clrVersion < 5)
             {
                 if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
                 {

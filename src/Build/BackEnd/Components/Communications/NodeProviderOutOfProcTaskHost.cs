@@ -471,7 +471,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // TODO Get path to msbuild.dll
-                msbuildAssemblyPath = @"C:\msbuild\msbuild_yk\msbuild\artifacts\bin\bootstrap\core\sdk\9.0.200-preview.0.24523.19\MSBuild.dll";
+                msbuildAssemblyPath = BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory;
                 toolPath = s_baseTaskHostPathNet;
             }
             else

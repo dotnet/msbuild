@@ -31,7 +31,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         protected override Handshake GetHandshake()
         {
-            Debugger.Launch();
             return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: true));
         }
     }
