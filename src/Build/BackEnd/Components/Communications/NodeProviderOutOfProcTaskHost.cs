@@ -534,7 +534,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool CreateNode(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
-            //Debugger.Launch();
             ErrorUtilities.VerifyThrowArgumentNull(factory);
             ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey((int)hostContext), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
 

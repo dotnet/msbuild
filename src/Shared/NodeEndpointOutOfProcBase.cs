@@ -262,7 +262,7 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         /// <summary>
-        /// Returns the host handshake for this node endpoint
+        /// Returns the host handshake for this node endpoint.
         /// </summary>
         protected abstract Handshake GetHandshake();
 
@@ -395,6 +395,7 @@ namespace Microsoft.Build.BackEnd
                     // verify it. Afterwards, the host sends an "End of Handshake" signal, to which we respond in kind.
                     // Once the handshake is complete, both sides can be assured the other is ready to accept data.
                     Handshake handshake = GetHandshake();
+                    CommunicationsUtilities.Trace($"Child handshake: {handshake}");
                     try
                     {
                         int[] handshakeComponents = handshake.RetrieveHandshakeComponents();

@@ -648,7 +648,7 @@ namespace Microsoft.Build.Internal
             }
 
             // if clrVersion is 5 or greater, we will default to .NET runtime
-            if (!string.IsNullOrEmpty(architectureFlagToSet) && clrVersion < 5)
+            if (!string.IsNullOrEmpty(architectureFlagToSet))
             {
                 if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
                 {

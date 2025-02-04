@@ -31,6 +31,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         protected override Handshake GetHandshake()
         {
+            CommunicationsUtilities.Trace("Creating handshake for out-of-proc task host node endpoint");
             return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: true));
         }
     }
