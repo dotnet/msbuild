@@ -100,7 +100,9 @@ namespace Microsoft.Build.Internal
 
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
             CommunicationsUtilities.Trace("Handshake salt is " + handshakeSalt);
-            string toolsDirectory = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+            string toolsDirectory = (nodeType & HandshakeOptions.NET) == HandshakeOptions.NET
+                ? BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryNET
+                : BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
             CommunicationsUtilities.Trace("Tools directory root is " + toolsDirectory);
             salt = CommunicationsUtilities.GetHashCode(handshakeSalt + toolsDirectory);
             Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);

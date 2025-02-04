@@ -25,6 +25,8 @@ using Microsoft.Build.Shared;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
+using System.Runtime.InteropServices.ComTypes;
+using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -44,7 +46,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The number of times to retry creating an out-of-proc node.
         /// </summary>
-        private const int NodeCreationRetries = 10;
+        private const int NodeCreationRetries = 1;
 
         /// <summary>
         /// The amount of time to wait for an out-of-proc node to spool up before we give up.
@@ -183,7 +185,8 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Finds or creates a child processes which can act as a node.
         /// </summary>
-        protected IList<NodeContext> GetNodes(string msbuildLocation,
+        protected IList<NodeContext> GetNodes(
+            string msbuildExecutableLocation,
             string commandLineArgs,
             int nextNodeId,
             INodePacketFactory factory,
@@ -199,19 +202,19 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            if (String.IsNullOrEmpty(msbuildLocation))
+            if (String.IsNullOrEmpty(msbuildExecutableLocation))
             {
-                msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
+                msbuildExecutableLocation = _componentHost.BuildParameters.NodeExeLocation;
             }
 
-            if (String.IsNullOrEmpty(msbuildLocation))
+            if (String.IsNullOrEmpty(msbuildExecutableLocation))
             {
                 string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
 
                 if (!String.IsNullOrEmpty(msbuildExeName))
                 {
                     // we assume that MSBUILD_EXE_NAME is, in fact, just the name.
-                    msbuildLocation = Path.Combine(msbuildExeName, ".exe");
+                    msbuildExecutableLocation = Path.Combine(msbuildExeName, ".exe");
                 }
             }
 
@@ -226,7 +229,7 @@ namespace Microsoft.Build.BackEnd
             if (_componentHost.BuildParameters.EnableNodeReuse)
             {
                 IList<Process> possibleRunningNodesList;
-                (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation);
+                (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildExecutableLocation);
                 possibleRunningNodes = new ConcurrentQueue<Process>(possibleRunningNodesList);
 
                 if (possibleRunningNodesList.Count > 0)
@@ -317,13 +320,13 @@ namespace Microsoft.Build.BackEnd
                     // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
                     // nodes because we should never be able to connect in this case.
                     string taskHostNameForClr2TaskHost = Path.GetFileNameWithoutExtension(NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost);
-                    if (Path.GetFileNameWithoutExtension(msbuildLocation).Equals(taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
+                    if (Path.GetFileNameWithoutExtension(msbuildExecutableLocation).Equals(taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
                     {
                         if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) == null)
                         {
                             CommunicationsUtilities.Trace(
                                 "Failed to launch node from {0}. The required .NET Framework v3.5 is not installed or enabled. CommandLine: {1}",
-                                msbuildLocation,
+                                msbuildExecutableLocation,
                                 commandLineArgs);
 
                             string nodeFailedToLaunchError = ResourceUtilities.GetResourceString("TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled");
@@ -333,7 +336,7 @@ namespace Microsoft.Build.BackEnd
 #endif
                     // Create the node process
                     INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
-                    Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId);
+                    Process msbuildProcess = nodeLauncher.Start(msbuildExecutableLocation, commandLineArgs, nodeId);
                     _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
 
                     // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
@@ -506,6 +509,8 @@ namespace Microsoft.Build.BackEnd
             for (int i = 0; i < handshakeComponents.Length; i++)
             {
                 CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
+                CommunicationsUtilities.Trace($"Pipe state: {nodeStream.IsConnected}, Handle valid: {!nodeStream.SafePipeHandle.IsClosed}");
+                CommunicationsUtilities.Trace($"Can write: {nodeStream.CanWrite}");
                 nodeStream.WriteIntForHandshake(handshakeComponents[i]);
             }
 

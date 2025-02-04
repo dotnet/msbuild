@@ -15,6 +15,8 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
+using System.Diagnostics;
+
 
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
@@ -346,6 +348,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void PacketPumpProc()
         {
+            System.Diagnostics.Debugger.Launch();
             NamedPipeServerStream localPipeServer = _pipeServer;
 
             AutoResetEvent localPacketAvailable = _packetAvailable;
