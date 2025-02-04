@@ -11,14 +11,29 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, short execut
     public long TotalMemoryConsumption { get; set; } = totalMemoryConsumption;
     public short ExecutionsCount { get; set; } = executionsCount;
 
+    // We need custom Equals for easier assertations in tests
     public override bool Equals(object? obj)
     {
         if (obj is TaskExecutionStats other)
         {
-            return CumulativeExecutionTime == other.CumulativeExecutionTime &&
-                   TotalMemoryConsumption == other.TotalMemoryConsumption &&
-                   ExecutionsCount == other.ExecutionsCount;
+            return Equals(other);
         }
         return false;
+    }
+
+    protected bool Equals(TaskExecutionStats other)
+        => CumulativeExecutionTime.Equals(other.CumulativeExecutionTime) &&
+           TotalMemoryConsumption == other.TotalMemoryConsumption &&
+           ExecutionsCount == other.ExecutionsCount;
+
+    public override int GetHashCode()
+    {
+        unchecked
+        {
+            var hashCode = CumulativeExecutionTime.GetHashCode();
+            hashCode = (hashCode * 397) ^ TotalMemoryConsumption.GetHashCode();
+            hashCode = (hashCode * 397) ^ ExecutionsCount.GetHashCode();
+            return hashCode;
+        }
     }
 }
