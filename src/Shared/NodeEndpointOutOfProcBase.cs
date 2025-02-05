@@ -514,8 +514,8 @@ namespace Microsoft.Build.BackEnd
         private void RunReadLoop(Stream localReadPipe, Stream localWritePipe,
             ConcurrentQueue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
         {
-            // Ordering of the wait handles is important.  The first signalled wait handle in the array
-            // will be returned by WaitAny if multiple wait handles are signalled.  We prefer to have the
+            // Ordering of the wait handles is important.  The first signaled wait handle in the array
+            // will be returned by WaitAny if multiple wait handles are signaled.  We prefer to have the
             // terminate event triggered so that we cannot get into a situation where packets are being
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
