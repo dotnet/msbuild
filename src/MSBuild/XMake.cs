@@ -51,8 +51,6 @@ using Directory = Microsoft.IO.Directory;
 using File = Microsoft.IO.File;
 using FileInfo = Microsoft.IO.FileInfo;
 using Path = Microsoft.IO.Path;
-using BuildXL.Processes.Tracing;
-using Microsoft.Build.Utilities;
 #endif
 
 #nullable disable
