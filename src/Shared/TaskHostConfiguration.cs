@@ -43,6 +43,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private CultureInfo _uiCulture = CultureInfo.CurrentUICulture;
 
+        /// <summary>
+        /// Task host runtime.
+        /// </summary>
+        private string _runtime;
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// The AppDomainSetup that we may want to use on AppDomainIsolated tasks.
@@ -207,6 +212,94 @@ namespace Microsoft.Build.BackEnd
 
             _globalParameters = globalParameters ?? new Dictionary<string, string>();
         }
+
+#if FEATURE_APPDOMAIN
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="runtime">Task host runtime.</param>
+        /// <param name="nodeId">The ID of the node being configured.</param>
+        /// <param name="startupDirectory">The startup directory for the task being executed.</param>
+        /// <param name="buildProcessEnvironment">The set of environment variables to apply to the task execution process.</param>
+        /// <param name="culture">The culture of the thread that will execute the task.</param>
+        /// <param name="uiCulture">The UI culture of the thread that will execute the task.</param>
+        /// <param name="appDomainSetup">The AppDomainSetup that may be used to pass information to an AppDomainIsolated task.</param>
+        /// <param name="lineNumberOfTask">The line number of the location from which this task was invoked.</param>
+        /// <param name="columnNumberOfTask">The column number of the location from which this task was invoked.</param>
+        /// <param name="projectFileOfTask">The project file from which this task was invoked.</param>
+        /// <param name="continueOnError">Flag to continue with the build after a the task failed</param>
+        /// <param name="taskName">Name of the task.</param>
+        /// <param name="taskLocation">Location of the assembly the task is to be loaded from.</param>
+        /// <param name="isTaskInputLoggingEnabled">Whether task inputs are logged.</param>
+        /// <param name="taskParameters">Parameters to apply to the task.</param>
+        /// <param name="globalParameters">global properties for the current project.</param>
+        /// <param name="warningsAsErrors">Warning codes to be treated as errors for the current project.</param>
+        /// <param name="warningsNotAsErrors">Warning codes not to be treated as errors for the current project.</param>
+        /// <param name="warningsAsMessages">Warning codes to be treated as messages for the current project.</param>
+#else
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="runtime">Task host runtime.</param>
+        /// <param name="nodeId">The ID of the node being configured.</param>
+        /// <param name="startupDirectory">The startup directory for the task being executed.</param>
+        /// <param name="buildProcessEnvironment">The set of environment variables to apply to the task execution process.</param>
+        /// <param name="culture">The culture of the thread that will execute the task.</param>
+        /// <param name="uiCulture">The UI culture of the thread that will execute the task.</param>
+        /// <param name="lineNumberOfTask">The line number of the location from which this task was invoked.</param>
+        /// <param name="columnNumberOfTask">The column number of the location from which this task was invoked.</param>
+        /// <param name="projectFileOfTask">The project file from which this task was invoked.</param>
+        /// <param name="continueOnError">Flag to continue with the build after a the task failed</param>
+        /// <param name="taskName">Name of the task.</param>
+        /// <param name="taskLocation">Location of the assembly the task is to be loaded from.</param>
+        /// <param name="isTaskInputLoggingEnabled">Whether task inputs are logged.</param>
+        /// <param name="taskParameters">Parameters to apply to the task.</param>
+        /// <param name="globalParameters">global properties for the current project.</param>
+        /// <param name="warningsAsErrors">Warning codes to be logged as errors for the current project.</param>
+        /// <param name="warningsNotAsErrors">Warning codes not to be treated as errors for the current project.</param>
+        /// <param name="warningsAsMessages">Warning codes to be treated as messages for the current project.</param>
+#endif
+        public TaskHostConfiguration(
+                string runtime,
+                int nodeId,
+                string startupDirectory,
+                IDictionary<string, string> buildProcessEnvironment,
+                CultureInfo culture,
+                CultureInfo uiCulture,
+#if FEATURE_APPDOMAIN
+                AppDomainSetup appDomainSetup,
+#endif
+                int lineNumberOfTask,
+                int columnNumberOfTask,
+                string projectFileOfTask,
+                bool continueOnError,
+                string taskName,
+                string taskLocation,
+                bool isTaskInputLoggingEnabled,
+                IDictionary<string, object> taskParameters,
+                Dictionary<string, string> globalParameters,
+                ICollection<string> warningsAsErrors,
+                ICollection<string> warningsNotAsErrors,
+                ICollection<string> warningsAsMessages)
+            : this(nodeId,
+                  startupDirectory,
+                  buildProcessEnvironment,
+                  culture,
+                  uiCulture,
+#if FEATURE_APPDOMAIN
+                appDomainSetup,
+#endif
+                  lineNumberOfTask,
+                  columnNumberOfTask,
+                  projectFileOfTask,
+                  continueOnError,
+                  taskName, taskLocation,
+                  isTaskInputLoggingEnabled,
+                  taskParameters,
+                  globalParameters,
+                  warningsAsErrors,
+                  warningsNotAsErrors,
+                  warningsAsMessages) => _runtime = runtime;
 
         /// <summary>
         /// Constructor for deserialization.
@@ -417,20 +510,27 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
 #if FEATURE_APPDOMAIN
-            byte[] appDomainConfigBytes = null;
 
-            // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
-            if (translator.Mode == TranslationDirection.WriteToStream)
+            // Skip AppDomain configuration when targeting .NET Task Host (Runtime="Net").
+            // Although MSBuild.exe runs under .NET Framework and has AppDomain support,
+            // we don't transmit AppDomain config when communicating with dotnet.exe (it is not supported in .NET 5+).
+            if (!string.Equals(_runtime, "Net", StringComparison.OrdinalIgnoreCase))
             {
-                appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
-            }
+                byte[] appDomainConfigBytes = null;
 
-            translator.Translate(ref appDomainConfigBytes);
+                // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
+                if (translator.Mode == TranslationDirection.WriteToStream)
+                {
+                    appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+                }
 
-            if (translator.Mode == TranslationDirection.ReadFromStream)
-            {
-                _appDomainSetup = new AppDomainSetup();
-                _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
+                translator.Translate(ref appDomainConfigBytes);
+
+                if (translator.Mode == TranslationDirection.ReadFromStream)
+                {
+                    _appDomainSetup = new AppDomainSetup();
+                    _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
+                }
             }
 #endif
             translator.Translate(ref _lineNumberOfTask);

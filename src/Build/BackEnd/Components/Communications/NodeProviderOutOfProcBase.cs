@@ -25,8 +25,6 @@ using Microsoft.Build.Shared;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
-using System.Runtime.InteropServices.ComTypes;
-using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -46,7 +44,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The number of times to retry creating an out-of-proc node.
         /// </summary>
-        private const int NodeCreationRetries = 1;
+        private const int NodeCreationRetries = 10;
 
         /// <summary>
         /// The amount of time to wait for an out-of-proc node to spool up before we give up.
@@ -509,8 +507,6 @@ namespace Microsoft.Build.BackEnd
             for (int i = 0; i < handshakeComponents.Length; i++)
             {
                 CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
-                CommunicationsUtilities.Trace($"Pipe state: {nodeStream.IsConnected}, Handle valid: {!nodeStream.SafePipeHandle.IsClosed}");
-                CommunicationsUtilities.Trace($"Can write: {nodeStream.CanWrite}");
                 nodeStream.WriteIntForHandshake(handshakeComponents[i]);
             }
 

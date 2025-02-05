@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
 
@@ -31,7 +30,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         protected override Handshake GetHandshake()
         {
-            CommunicationsUtilities.Trace("Creating handshake for out-of-proc task host node endpoint");
             return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: true));
         }
     }

@@ -15,8 +15,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
-using System.Diagnostics;
-
 
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
@@ -348,7 +346,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void PacketPumpProc()
         {
-            System.Diagnostics.Debugger.Launch();
             NamedPipeServerStream localPipeServer = _pipeServer;
 
             AutoResetEvent localPacketAvailable = _packetAvailable;
@@ -395,7 +392,6 @@ namespace Microsoft.Build.BackEnd
                     // verify it. Afterwards, the host sends an "End of Handshake" signal, to which we respond in kind.
                     // Once the handshake is complete, both sides can be assured the other is ready to accept data.
                     Handshake handshake = GetHandshake();
-                    CommunicationsUtilities.Trace($"Child handshake: {handshake}");
                     try
                     {
                         int[] handshakeComponents = handshake.RetrieveHandshakeComponents();

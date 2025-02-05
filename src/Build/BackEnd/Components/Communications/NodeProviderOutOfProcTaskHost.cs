@@ -404,7 +404,7 @@ namespace Microsoft.Build.BackEnd
         /// executable (MSBuild, MSBuildTaskHost or dotnet) and path to MSBuild.dll if we want to use a custom one.
         /// null is returned if executable cannot be resolved.
         /// </summary>
-        internal static (string msbuildExcutable, string msbuildAssemblyPath) GetHostExecutionInfoFromContext(HandshakeOptions hostContext)
+        internal static (string msbuildExcutable, string msbuildAssemblyPath) GetMSBuildLocationFromHostContext(HandshakeOptions hostContext)
         {
             string toolName = GetTaskHostNameFromHostContext(hostContext);
             string toolPath = null;
@@ -449,7 +449,7 @@ namespace Microsoft.Build.BackEnd
 
                 toolPath = s_pathToX32Clr2;
             }
-            else if (IsHandshakeOptionEnabled(HandshakeOptions.X64))
+            else if (IsHandshakeOptionEnabled(HandshakeOptions.X64) && !IsHandshakeOptionEnabled(HandshakeOptions.NET))
             {
                 s_pathToX64Clr4 ??= s_baseTaskHostPath64;
 
@@ -471,7 +471,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // TODO Get path to msbuild.dll
-                msbuildAssemblyPath = BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory;
+                msbuildAssemblyPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory, "MSBuild.dll");
                 toolPath = s_baseTaskHostPathNet;
             }
             else
@@ -543,11 +543,7 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            // Start the new process.  We pass in a node mode with a node number of 2, to indicate that we
-            // want to start up an MSBuild task host node.
-            // Start the new process. We pass in a node mode with a node number of 2, to indicate that we
-            // want to start up an MSBuild task host node.
-            (string msbuildExecutable, string msbuildAssemblyLocation) = GetHostExecutionInfoFromContext(hostContext);
+            (string msbuildExecutable, string msbuildAssemblyLocation) = GetMSBuildLocationFromHostContext(hostContext);
 
             // we couldn't even figure out the location we're trying to launch ... just go ahead and fail.
             if (msbuildExecutable == null)
@@ -563,7 +559,8 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                // Original format for non-dotnet executables
+                // Start the new process.  We pass in a node mode with a node number of 2, to indicate that we
+                // want to start up an MSBuild task host node.
                 commandLineArgs = $"/nologo /nodemode:2 /nodereuse:{ComponentHost.BuildParameters.EnableNodeReuse} /low:{ComponentHost.BuildParameters.LowPriority}";
             }
 
