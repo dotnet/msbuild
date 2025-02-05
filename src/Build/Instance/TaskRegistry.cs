@@ -1259,7 +1259,7 @@ namespace Microsoft.Build.Execution
             /// Evaluates whether the current task is assumed to be defined within the user code - as opposed
             ///  to being a built-in task, or task authored by Microsoft brought to build via sdk, common targets or nuget.
             /// </summary>
-            public bool GetIsCustom()
+            public bool ComputeIfCustom()
             {
                 return
                     (

@@ -1327,7 +1327,7 @@ namespace Microsoft.Build.BackEnd
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
                         registeredTaskRecord.Statistics.TotalMemoryConsumption,
-                        registeredTaskRecord.GetIsCustom(),
+                        registeredTaskRecord.ComputeIfCustom(),
                         registeredTaskRecord.IsFromNugetCache);
 
                     registeredTaskRecord.Statistics.Reset();
