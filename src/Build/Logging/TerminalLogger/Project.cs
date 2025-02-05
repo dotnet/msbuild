@@ -18,7 +18,9 @@ internal sealed class Project
     /// <summary>
     /// Initialized a new <see cref="Project"/> with the given <paramref name="targetFramework"/>.
     /// </summary>
+    /// <param name="projectFile">The full path to the project file.</param>
     /// <param name="targetFramework">The target framework of the project or null if not multi-targeting.</param>
+    /// <param name="stopwatch">A stopwatch to time the build of the project.</param>
     public Project(string projectFile, string? targetFramework, StopwatchAbstraction? stopwatch)
     {
         File = projectFile;
@@ -58,7 +60,7 @@ internal sealed class Project
     public bool IsTestProject { get; set; }
 
     /// <summary>
-    /// True when the project has run target with name "_CachePluginRunStart" defined in <see cref="TerminalLogger._cachePluginStartTarget"/>.
+    /// True when the project has run target with name "_CachePluginRunStart".
     /// </summary>
     public bool IsCachePluginProject { get; set; }
 

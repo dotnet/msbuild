@@ -253,7 +253,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Private constructor invoked by static factory.
     /// </summary>
-    private TerminalLogger(LoggerVerbosity verbosity, uint? originalConsoleMode) : this()
+    internal TerminalLogger(LoggerVerbosity verbosity, uint? originalConsoleMode) : this()
     {
         Verbosity = verbosity;
         _originalConsoleMode = originalConsoleMode;
@@ -1081,35 +1081,12 @@ internal sealed partial class TerminalLogger : INodeLogger
     #region Helpers
 
     /// <summary>
-    /// Creates a Terminal logger or Console logger based on the environment.
-    /// This method is called by reflection from dotnet. Do not modify the name or parameters without adapting the SDK.
-    /// </summary>
-    public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[]? args)
-    {
-        string tlArg = args?.FirstOrDefault(a => a.StartsWith("--tl:", StringComparison.InvariantCultureIgnoreCase)) ?? string.Empty;
-
-        bool isDisabled =
-            tlArg.Equals("--tl:on", StringComparison.InvariantCultureIgnoreCase) ? false :
-            tlArg.Equals("--tl:off", StringComparison.InvariantCultureIgnoreCase) ? true :
-            (Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty).Equals("off", StringComparison.InvariantCultureIgnoreCase);
-
-        (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
-
-        if (isDisabled || !supportsAnsi || !outputIsScreen)
-        {
-            NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
-            return new ConsoleLogger(verbosity);
-        }
-
-        return new TerminalLogger(verbosity, originalConsoleMode);
-    }
-
-    /// <summary>
     /// Construct a build result summary string.
     /// </summary>
     /// <param name="succeeded">True if the build completed with success.</param>
-    /// <param name="hasError">True if the build has logged at least one error.</param>
-    /// <param name="hasWarning">True if the build has logged at least one warning.</param>
+    /// <param name="countErrors">The number of errors encountered during the build.</param>
+    /// <param name="countWarnings">The number of warnings encountered during the build.</param>
+    /// <returns>A string representing the build result summary.</returns>
     private static string GetBuildResultString(bool succeeded, int countErrors, int countWarnings)
     {
         if (!succeeded)

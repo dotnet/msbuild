@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Logging;
@@ -327,6 +329,45 @@ namespace Microsoft.Build.Logging
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// Creates a Terminal logger if possible, or a Console logger.
+        /// </summary>
+        /// <param name="verbosity">Level of detail to show in the log.</param>
+        /// <param name="args">Command line arguments for the logger configuration. Currently, only '--tl:on' and '--tl:off' are supported.</param>
+        public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[] args)
+        {
+            string tlArg = args?.LastOrDefault(a => a.StartsWith("--tl:", StringComparison.InvariantCultureIgnoreCase)) ?? string.Empty;
+
+            bool isDisabled =
+                tlArg.Equals("--tl:on", StringComparison.InvariantCultureIgnoreCase) ? false :
+                tlArg.Equals("--tl:off", StringComparison.InvariantCultureIgnoreCase) ? true :
+                (Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty).Equals("off", StringComparison.InvariantCultureIgnoreCase);
+
+            (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+
+            if (isDisabled || !supportsAnsi || !outputIsScreen)
+            {
+                NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
+                return new ConsoleLogger(verbosity);
+            }
+
+            return new TerminalLogger.TerminalLogger(verbosity, originalConsoleMode);
+        }
+
+        /// <summary>
+        /// DO NOT USE THIS METHOD. This implementation should be internal, but it's temporarily public for technical reasons. 
+        /// </summary>
+        [Obsolete("Use CreateTerminalOrConsoleLogger instead.")]
+        public static ILogger CreateTerminalLogger(LoggerVerbosity verbosity, string aggregatedLoggerParameters, out string[] configurableForwardingLoggerParameters)
+        {
+            configurableForwardingLoggerParameters = TerminalLogger.TerminalLogger.ConfigurableForwardingLoggerParameters;
+
+            return new TerminalLogger.TerminalLogger(verbosity)
+            {
+                Parameters = aggregatedLoggerParameters
+            };
+        }
 
         /// <summary>
         /// Apply a parameter.
