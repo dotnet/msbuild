@@ -34,6 +34,13 @@
     <!-- Binary serialization by ITranslatable -->
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
+
+    <!-- Node communication -->
+    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
+    <Compile Include="..\Shared\INodeEndpoint.cs" />
+    <Compile Include="..\Shared\INodePacket.cs" />
+    <Compile Include="..\Shared\INodePacketFactory.cs" />
+    <Compile Include="..\Shared\INodePacketHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -186,6 +193,8 @@
     <Compile Include="AssemblyDependency\UnificationVersion.cs" />
     <Compile Include="AssemblyDependency\UnifiedAssemblyName.cs" />
     <Compile Include="AssemblyDependency\WarnOrErrorOnTargetArchitectureMismatchBehavior.cs" />
+    <Compile Include="AssemblyDependency\Service\OutOfProcRarNode.cs" />
+    <Compile Include="AssemblyDependency\Service\RarNodeShutdownReason.cs" />
     <Compile Include="AssemblyFolder.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyRemapping.cs" />
