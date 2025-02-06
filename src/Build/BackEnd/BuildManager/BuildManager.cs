@@ -559,6 +559,11 @@ namespace Microsoft.Build.Execution
                 }
 #endif
 
+                if (Traits.Instance.UseOutOfProcRarNode)
+                {
+                    RarNodeLauncher.Start();
+                }
+
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
