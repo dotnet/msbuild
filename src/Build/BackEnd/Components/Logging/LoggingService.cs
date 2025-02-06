@@ -244,11 +244,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private ConcurrentQueue<object> _eventQueue;
 
-        // Long-lived event handles that never get disposed to avoid race conditions.
-        private readonly AutoResetEvent _longLivedDequeueEvent = new AutoResetEvent(false);
-        private readonly ManualResetEvent _longLivedEmptyQueueEvent = new ManualResetEvent(true);
-        private readonly AutoResetEvent _longLivedEnqueueEvent = new AutoResetEvent(false);
-
         /// <summary>
         /// Event set when message is consumed from queue.
         /// </summary>
@@ -1392,18 +1387,11 @@ namespace Microsoft.Build.BackEnd.Logging
         private void StartLoggingEventProcessing()
         {
             _eventQueue = new ConcurrentQueue<object>();
-
-            // Reset the long-lived events to clean state
-            _longLivedDequeueEvent?.Set();
-            _longLivedEmptyQueueEvent?.Reset();
-            _longLivedEnqueueEvent?.Reset();
-
-            // Assign instance fields to long-lived events
-            _dequeueEvent = _longLivedDequeueEvent;
-            _emptyQueueEvent = _longLivedEmptyQueueEvent;
-            _enqueueEvent = _longLivedEnqueueEvent;
-
+            _dequeueEvent = new AutoResetEvent(false);
+            _emptyQueueEvent = new ManualResetEvent(false);
+            _enqueueEvent = new AutoResetEvent(false);
             _loggingEventProcessingCancellation = new CancellationTokenSource();
+
             _loggingEventProcessingThread = new Thread(LoggingEventProc);
             _loggingEventProcessingThread.Name = $"MSBuild LoggingService events queue pump: {this.GetHashCode()}";
             _loggingEventProcessingThread.IsBackground = true;
@@ -1414,40 +1402,34 @@ namespace Microsoft.Build.BackEnd.Logging
                 var completeAdding = _loggingEventProcessingCancellation.Token;
                 WaitHandle[] waitHandlesForNextEvent = [completeAdding.WaitHandle, _enqueueEvent];
 
-                try
+                // Store field references locally to prevent race with cleanup
+                var eventQueue = _eventQueue;
+                var dequeueEvent = _dequeueEvent;
+                var emptyQueueEvent = _emptyQueueEvent;
+                var enqueueEvent = _enqueueEvent;
+
+                do
                 {
-                    do
+                    if (eventQueue.TryDequeue(out object ev))
                     {
-                        // Check if instance fields are nulled (cleanup was called)
-                        if (_eventQueue == null || _dequeueEvent == null || _emptyQueueEvent == null || _enqueueEvent == null)
+                        LoggingEventProcessor(ev);
+                        dequeueEvent?.Set();
+                    }
+                    else
+                    {
+                        emptyQueueEvent?.Set();
+
+                        // Wait for next event, or finish.
+                        if (!completeAdding.IsCancellationRequested && eventQueue.IsEmpty)
                         {
-                            break;
+                            WaitHandle.WaitAny(waitHandlesForNextEvent);
                         }
 
-                        if (_eventQueue.TryDequeue(out object ev))
-                        {
-                            LoggingEventProcessor(ev);
-                            _dequeueEvent?.Set();
-                        }
-                        else
-                        {
-                            _emptyQueueEvent?.Set();
+                        emptyQueueEvent?.Reset();
+                    }
+                } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
-                            if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
-                            {
-                                WaitHandle.WaitAny(waitHandlesForNextEvent);
-                            }
-
-                            _emptyQueueEvent?.Reset();
-                        }
-                    } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested || _emptyQueueEvent != null);
-
-                    _emptyQueueEvent?.Set();
-                }
-                catch (Exception)
-                {
-                    // Exit if fatal error occurs
-                }
+                _emptyQueueEvent.Set();
             }
         }
 
@@ -1457,12 +1439,13 @@ namespace Microsoft.Build.BackEnd.Logging
         private void CleanLoggingEventProcessing()
         {
             _loggingEventProcessingCancellation?.Cancel();
+            _dequeueEvent?.Dispose();
+            _enqueueEvent?.Dispose();
+            _emptyQueueEvent?.Dispose();
             _loggingEventProcessingCancellation?.Dispose();
 
             _eventQueue = null;
 
-            // Just null the instance fields and avoid disposing due to race conditions.
-            // Adding a lock would be expensive for the logging.
             _dequeueEvent = null;
             _enqueueEvent = null;
             _emptyQueueEvent = null;
