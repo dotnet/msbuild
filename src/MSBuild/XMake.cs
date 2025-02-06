@@ -35,6 +35,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Tasks.AssemblyDependency;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using FileLogger = Microsoft.Build.Logging.FileLogger;
@@ -3419,6 +3420,20 @@ namespace Microsoft.Build.CommandLine
                     // whatever our priority is is correct.
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                     shutdownReason = node.Run(out nodeException);
+                }
+                else if (nodeModeNumber == 3)
+                {
+                    // The RAR service persists between builds, and will continue to process requests until terminated.
+                    OutOfProcRarNode rarNode = new();
+                    RarNodeShutdownReason rarShutdownReason = rarNode.Run(out nodeException);
+
+                    shutdownReason = rarShutdownReason switch
+                    {
+                        RarNodeShutdownReason.Error => NodeEngineShutdownReason.Error,
+                        RarNodeShutdownReason.AlreadyRunning => NodeEngineShutdownReason.Error,
+                        RarNodeShutdownReason.ConnectionTimedOut => NodeEngineShutdownReason.ConnectionFailed,
+                        _ => throw new ArgumentOutOfRangeException(nameof(rarShutdownReason), $"Unexpected value: {rarShutdownReason}"),
+                    };
                 }
                 else if (nodeModeNumber == 8)
                 {
