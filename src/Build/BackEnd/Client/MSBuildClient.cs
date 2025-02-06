@@ -138,17 +138,7 @@ namespace Microsoft.Build.Experimental
 
         private void CreateNodePipeStream()
         {
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-            _nodeStream = new NamedPipeClientStream(
-                serverName: ".",
-                _pipeName,
-                PipeDirection.InOut,
-                PipeOptions.Asynchronous
-#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                | PipeOptions.CurrentUserOnly
-#endif
-            );
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            _nodeStream = CommunicationsUtilities.CreateSecurePipeClient(_pipeName);
             _packetPump = new MSBuildClientPacketPump(_nodeStream);
         }
 
@@ -621,7 +611,7 @@ namespace Microsoft.Build.Experimental
                 tryAgain = false;
                 try
                 {
-                    NodeProviderOutOfProcBase.ConnectToPipeStream(_nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds));
+                    CommunicationsUtilities.ConnectToPipeStream(_nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds));
                 }
                 catch (Exception ex)
                 {

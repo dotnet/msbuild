@@ -11,10 +11,6 @@ using System.IO.Pipes;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-#if FEATURE_PIPE_SECURITY
-using System.Security.Principal;
-#endif
-
 #if FEATURE_APM
 using Microsoft.Build.Eventing;
 #else
@@ -416,111 +412,26 @@ namespace Microsoft.Build.BackEnd
             return hostHandshake.ToString() + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
         }
 
-#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-        // This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
-        //  on non-Windows operating systems
-        private static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
-        {
-            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-#if FEATURE_PIPE_SECURITY
-            PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
-#else
-            var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
-                System.Security.AccessControl.AccessControlSections.Owner | System.Security.AccessControl.AccessControlSections.Group);
-#endif
-            IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
-            if (remoteOwner != identifier)
-            {
-                CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
-                throw new UnauthorizedAccessException();
-            }
-        }
-#endif
-
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
-        private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake)
+        private NamedPipeClientStream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake)
         {
             // Try and connect to the process.
             string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
 
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-            NamedPipeClientStream nodeStream = new NamedPipeClientStream(
-                serverName: ".",
-                pipeName,
-                PipeDirection.InOut,
-                PipeOptions.Asynchronous
-#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                | PipeOptions.CurrentUserOnly
-#endif
-            );
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-            CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId, pipeName, timeout);
+            NamedPipeClientStream nodeStream = CommunicationsUtilities.CreateSecurePipeClient(pipeName);
 
-            try
-            {
-                ConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
-                return nodeStream;
-            }
-            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-            {
-                // Can be:
-                // UnauthorizedAccessException -- Couldn't connect, might not be a node.
-                // IOException -- Couldn't connect, already in use.
-                // TimeoutException -- Couldn't connect, might not be a node.
-                // InvalidOperationException – Couldn’t connect, probably a different build
-                CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, e.Message.TrimEnd());
+            CommunicationsUtilities.Trace("Attempting connect to PID {0}", nodeProcessId);
 
+            if (!CommunicationsUtilities.ConnectToPipeStream(nodeStream, pipeName, handshake, timeout))
+            {
                 // If we don't close any stream, we might hang up the child
-                nodeStream?.Dispose();
+                nodeStream.Dispose();
+                return null;
             }
 
-            return null;
-        }
-
-        /// <summary>
-        /// Connect to named pipe stream and ensure validate handshake and security.
-        /// </summary>
-        /// <remarks>
-        /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
-        /// </remarks>
-        internal static void ConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout)
-        {
-            nodeStream.Connect(timeout);
-
-#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-            if (NativeMethodsShared.IsWindows)
-            {
-                // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
-                // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
-                // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
-                // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
-                // remote node could set the owner to something else would also let it change owners on other objects, so
-                // this would be a security flaw upstream of us.
-                ValidateRemotePipeSecurityOnWindows(nodeStream);
-            }
-#endif
-
-            int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
-            for (int i = 0; i < handshakeComponents.Length; i++)
-            {
-                CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
-                nodeStream.WriteIntForHandshake(handshakeComponents[i]);
-            }
-
-            // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
-            nodeStream.WriteEndOfHandshakeSignal();
-
-            CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
-
-#if NETCOREAPP2_1_OR_GREATER
-            nodeStream.ReadEndOfHandshakeSignal(true, timeout);
-#else
-            nodeStream.ReadEndOfHandshakeSignal(true);
-#endif
-            // We got a connection.
-            CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+            return nodeStream;
         }
 
         /// <summary>
