@@ -199,7 +199,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// The amount of time to wait for an the host to wait for a connection.
         /// </summary>
-        private const int DeafultConnectTimeout = 30_000;
+        private const int DefaultConnectTimeout = 30_000;
 
         /// <summary>
         /// The size of the buffers to use for named pipes.
@@ -472,7 +472,7 @@ namespace Microsoft.Build.Internal
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         }
 
-        internal static bool ConnectToPipeStream(NamedPipeClientStream pipeClient, string pipeName, Handshake handshake, int connectTimeout = DeafultConnectTimeout)
+        internal static bool ConnectToPipeStream(NamedPipeClientStream pipeClient, string pipeName, Handshake handshake, int connectTimeout = DefaultConnectTimeout)
         {
             Trace("Attempting connect to pipe {0} with timeout {1} ms", pipeName, connectTimeout);
 
