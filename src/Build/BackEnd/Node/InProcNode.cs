@@ -137,7 +137,7 @@ namespace Microsoft.Build.BackEnd
                 _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
                 _nodeEndpoint.Listen(this);
 
-                var waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent };
+                WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent];
 
                 // Get the current directory before doing work. We need this so we can restore the directory when the node shuts down.
                 _savedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();

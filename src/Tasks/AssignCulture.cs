@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Collections;
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -46,6 +47,11 @@ namespace Microsoft.Build.Tasks
         /// In case the Culture metadata was not provided, the logic of RespectAlreadyAssignedItemCulture will not take any effect.
         /// </summary>
         public bool RespectAlreadyAssignedItemCulture { get; set; } = false;
+
+        /// <summary>
+        /// If the flag set to 'true' the task will log a warning when the culture metadata is overwritten by the task.
+        /// </summary>
+        public bool WarnOnCultureOverwritten { get; set; } = false;
 
         /// <summary>
         /// This outgoing list of files is exactly the same as the incoming Files
@@ -141,7 +147,7 @@ namespace Microsoft.Build.Tasks
 
                     string dependentUpon = AssignedFiles[i].GetMetadata(ItemMetadataNames.dependentUpon);
                     string existingCulture = AssignedFiles[i].GetMetadata(ItemMetadataNames.culture);
-                    
+
                     if (RespectAlreadyAssignedItemCulture && !string.IsNullOrEmpty(existingCulture))
                     {
                         AssignedFiles[i].SetMetadata(ItemMetadataNames.withCulture, "true");
@@ -157,6 +163,20 @@ namespace Microsoft.Build.Tasks
                             // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
                             // https://github.com/dotnet/msbuild/issues/3064
                             ConversionUtilities.ValidBooleanFalse(AssignedFiles[i].GetMetadata(ItemMetadataNames.withCulture)));
+
+                        // The culture was explicitly specified, but not opted in via 'RespectAlreadyAssignedItemCulture' and different will be used
+                        if (WarnOnCultureOverwritten &&
+                            !string.IsNullOrEmpty(existingCulture) &&
+                            !MSBuildNameIgnoreCaseComparer.Default.Equals(existingCulture, info.culture))
+                        {
+                            Log.LogWarningWithCodeFromResources("AssignCulture.CultureOverwritten",
+                                existingCulture, AssignedFiles[i].ItemSpec, info.culture);
+                            // Remove the culture if it's not recognized
+                            if (string.IsNullOrEmpty(info.culture))
+                            {
+                                AssignedFiles[i].RemoveMetadata(ItemMetadataNames.culture);
+                            }
+                        }
 
                         if (!string.IsNullOrEmpty(info.culture))
                         {

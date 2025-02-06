@@ -558,7 +558,7 @@ namespace System.Security.Cryptography
                 methodName,
                 BindingFlags.Public | BindingFlags.Static,
                 null,
-                new[] { typeof(X509Certificate2) },
+                [typeof(X509Certificate2)],
                 null);
 
             Debug.Assert(api != null, "Method '" + methodName + "(X509Certificate2 c)' not found on type '" + type + "'");
