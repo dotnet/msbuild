@@ -55,7 +55,7 @@
     <SystemThreadingChannelsVersion>8.0.0</SystemThreadingChannelsVersion>
     <SystemThreadingTasksDataflowVersion>8.0.0</SystemThreadingTasksDataflowVersion>
     <SystemDiagnosticsDiagnosticSourceVersion>8.0.1</SystemDiagnosticsDiagnosticSourceVersion>
-    <MicrosoftVisualStudioOpenTelemetryVersion>0.1.718-beta</MicrosoftVisualStudioOpenTelemetryVersion>
+    <MicrosoftVisualStudioOpenTelemetryVersion>0.2.101-beta</MicrosoftVisualStudioOpenTelemetryVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
