@@ -497,7 +497,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!-- Output location for publish target. -->
   <PropertyGroup>
     <PublishDir Condition="'$(PublishDir)' != '' and !HasTrailingSlash('$(PublishDir)')">$(PublishDir)\</PublishDir>
-    <PublishDir Condition="'$(PublishDir)'==''">$([MSBuild]::EnsureTrailingSlash($([MSBuild]::NormalizePath('$(OutputPath)', 'app.publish'))))</PublishDir>
+    <PublishDir Condition="'$(PublishDir)'==''">$(OutputPath)app.publish\</PublishDir>
   </PropertyGroup>
 
   <!--
