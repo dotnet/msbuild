@@ -141,6 +141,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(null, true, true, "off", nameof(ConsoleLogger))]
         [InlineData("--tl:off", true, true, "", nameof(ConsoleLogger))]
         [InlineData(null, true, true, "", "TerminalLogger")]
+        [InlineData("-tl:on", true, true, "off", "TerminalLogger")]
         public void CreateTerminalOrConsoleLogger_CreatesCorrectLoggerInstance(string argsString, bool supportsAnsi, bool outputIsScreen, string evnVariableValue, string expectedLoggerName)
         {
             string originalValue = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER");

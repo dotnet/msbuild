@@ -336,7 +336,7 @@ namespace Microsoft.Build.Logging
         /// Creates a Terminal logger if possible, or a Console logger.
         /// </summary>
         /// <param name="verbosity">Level of detail to show in the log.</param>
-        /// <param name="args">Command line arguments for the logger configuration. Currently, only '--tl:off' is supported to disable TerminalLogger.</param>
+        /// <param name="args">Command line arguments for the logger configuration. Currently, only '--tl:off' and '--tl:on' are supported right now.</param>
         public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[] args)
         {
             (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
@@ -346,10 +346,15 @@ namespace Microsoft.Build.Logging
 
         internal static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[] args, bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode)
         {
-            string tlArg = args?.LastOrDefault(a => a.StartsWith("--tl:", StringComparison.InvariantCultureIgnoreCase)) ?? string.Empty;
+            string tlArg = args?
+                .LastOrDefault(a =>
+                    a.StartsWith("/tl:", StringComparison.InvariantCultureIgnoreCase) ||
+                    a.StartsWith("-tl:", StringComparison.InvariantCultureIgnoreCase) ||
+                    a.StartsWith("--tl:", StringComparison.InvariantCultureIgnoreCase)) ?? string.Empty;
 
             bool isDisabled =
-                tlArg.Equals("--tl:off", StringComparison.InvariantCultureIgnoreCase) ||
+                tlArg.EndsWith("tl:on", StringComparison.InvariantCultureIgnoreCase) ? false :
+                tlArg.EndsWith("tl:off", StringComparison.InvariantCultureIgnoreCase) ? true :
                 (Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty).Equals("off", StringComparison.InvariantCultureIgnoreCase);
 
             if (isDisabled || !supportsAnsi || !outputIsScreen)
