@@ -176,17 +176,6 @@
     <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
-    <Compile Include="Logging\TerminalLogger\BuildMessage.cs" />
-    <Compile Include="Logging\TerminalLogger\ITerminal.cs" />
-    <Compile Include="Logging\TerminalLogger\MessageSeverity.cs" />
-    <Compile Include="Logging\TerminalLogger\NodesFrame.cs" />
-    <Compile Include="Logging\TerminalLogger\NodeStatus.cs" />
-    <Compile Include="Logging\TerminalLogger\Project.cs" />
-    <Compile Include="Logging\TerminalLogger\StopwatchAbstraction.cs" />
-    <Compile Include="Logging\TerminalLogger\SystemStopwatch.cs" />
-    <Compile Include="Logging\TerminalLogger\Terminal.cs" />
-    <Compile Include="Logging\TerminalLogger\TerminalLogger.cs" />
-    <Compile Include="Logging\TerminalLogger\TestSummary.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />

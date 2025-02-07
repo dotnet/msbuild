@@ -4,6 +4,8 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Logging;
@@ -337,14 +339,18 @@ namespace Microsoft.Build.Logging
         /// <param name="args">Command line arguments for the logger configuration. Currently, only '--tl:on' and '--tl:off' are supported.</param>
         public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[] args)
         {
+            (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+
+            return CreateTerminalOrConsoleLogger(verbosity, args, supportsAnsi, outputIsScreen, originalConsoleMode);
+        }
+
+        internal static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[] args, bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode)
+        {
             string tlArg = args?.LastOrDefault(a => a.StartsWith("--tl:", StringComparison.InvariantCultureIgnoreCase)) ?? string.Empty;
 
             bool isDisabled =
-                tlArg.Equals("--tl:on", StringComparison.InvariantCultureIgnoreCase) ? false :
-                tlArg.Equals("--tl:off", StringComparison.InvariantCultureIgnoreCase) ? true :
+                tlArg.Equals("--tl:off", StringComparison.InvariantCultureIgnoreCase) ||
                 (Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty).Equals("off", StringComparison.InvariantCultureIgnoreCase);
-
-            (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
 
             if (isDisabled || !supportsAnsi || !outputIsScreen)
             {
@@ -352,21 +358,12 @@ namespace Microsoft.Build.Logging
                 return new ConsoleLogger(verbosity);
             }
 
-            return new TerminalLogger.TerminalLogger(verbosity, originalConsoleMode);
-        }
+            // TODO: Move TerminalLogger to this project, use InternalsVisibleTo attribute and resolve type conflicts errors caused by shared files.
+            // This logic is tested to ensure that the TerminalLogger is available in the MSBuild assembly and we can create an instance of it.
+            Type tlType = Assembly.Load("MSBuild").GetType("Microsoft.Build.Logging.TerminalLogger.TerminalLogger");
+            ILogger terminalLogger = Activator.CreateInstance(tlType, BindingFlags.Instance | BindingFlags.NonPublic, null, [verbosity, originalConsoleMode], null) as ILogger;
 
-        /// <summary>
-        /// DO NOT USE THIS METHOD. This implementation should be internal, but it's temporarily public for technical reasons. 
-        /// </summary>
-        [Obsolete("Use CreateTerminalOrConsoleLogger instead.")]
-        public static ILogger CreateTerminalLogger(LoggerVerbosity verbosity, string aggregatedLoggerParameters, out string[] configurableForwardingLoggerParameters)
-        {
-            configurableForwardingLoggerParameters = TerminalLogger.TerminalLogger.ConfigurableForwardingLoggerParameters;
-
-            return new TerminalLogger.TerminalLogger(verbosity)
-            {
-                Parameters = aggregatedLoggerParameters
-            };
+            return terminalLogger;
         }
 
         /// <summary>

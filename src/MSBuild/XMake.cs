@@ -41,6 +41,7 @@ using FileLogger = Microsoft.Build.Logging.FileLogger;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
+using TerminalLogger = Microsoft.Build.Logging.TerminalLogger.TerminalLogger;
 
 #if NETFRAMEWORK
 // Use I/O operations from Microsoft.IO.Redist which is generally higher perf
@@ -4018,10 +4019,10 @@ namespace Microsoft.Build.CommandLine
         {
             if (!noConsoleLogger)
             {
-#pragma warning disable CS0618 // Intentional use due to technical debt
-                // A central logger will be created for both single proc and multiproc.
-                ILogger logger = ConsoleLogger.CreateTerminalLogger(verbosity, aggregatedLoggerParameters, out string[] configurableForwardingLoggerParameters);
-#pragma warning restore CS0618 
+                TerminalLogger logger = new TerminalLogger(verbosity)
+                {
+                    Parameters = aggregatedLoggerParameters
+                };
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
                 // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
@@ -4032,7 +4033,7 @@ namespace Microsoft.Build.CommandLine
                 else
                 {
                     // For performance, register this logger using the forwarding logger mechanism.
-                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", configurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
+                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", TerminalLogger.ConfigurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
                     distributedLoggerRecords.Add(forwardingLoggerRecord);
                 }
             }

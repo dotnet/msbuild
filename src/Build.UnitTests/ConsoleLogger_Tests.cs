@@ -134,6 +134,31 @@ namespace Microsoft.Build.UnitTests
             _output = output;
         }
 
+        [Theory]
+        [InlineData(null, false, false, "", nameof(ConsoleLogger))]
+        [InlineData(null, true, false, "", nameof(ConsoleLogger))]
+        [InlineData(null, false, true, "", nameof(ConsoleLogger))]
+        [InlineData(null, true, true, "off", nameof(ConsoleLogger))]
+        [InlineData("--tl:off", true, true, "", nameof(ConsoleLogger))]
+        [InlineData(null, true, true, "", "TerminalLogger")]
+        public void CreateTerminalOrConsoleLogger_CreatesCorrectLoggerInstance(string argsString, bool supportsAnsi, bool outputIsScreen, string evnVariableValue, string expectedLoggerName)
+        {
+            string originalValue = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER");
+            Environment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", evnVariableValue);
+
+            try
+            {
+                string[] args = argsString?.Split(' ');
+                ILogger logger = ConsoleLogger.CreateTerminalOrConsoleLogger(default, args, supportsAnsi, outputIsScreen, default);
+
+                logger.ShouldNotBeNull();
+                logger.GetType().Name.ShouldBe(expectedLoggerName);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", originalValue);
+            }
+        }
 
         /// <summary>
         /// Verify when the project has not been named that we correctly get the same placeholder
