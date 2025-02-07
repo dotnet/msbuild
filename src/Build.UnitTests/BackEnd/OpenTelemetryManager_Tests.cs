@@ -21,10 +21,12 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         private const string TelemetryFxOptoutEnvVarName = "MSBUILD_TELEMETRY_OPTOUT";
         private const string DotnetOptOut = "DOTNET_CLI_TELEMETRY_OPTOUT";
         private const string TelemetrySampleRateOverrideEnvVarName = "MSBUILD_TELEMETRY_SAMPLE_RATE";
+        private const string VS1714TelemetryOptInEnvVarName = "MSBUILD_TELEMETRY_OPTIN";
 
         private string? preTestFxOptout;
         private string? preTestDotnetOptout;
         private string? preTestSampleRate;
+        private string? preTestVS1714TelemetryOptIn;
 
         public OpenTelemetryManagerTests()
         {
@@ -39,6 +41,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             preTestFxOptout = Environment.GetEnvironmentVariable(TelemetryFxOptoutEnvVarName);
             preTestDotnetOptout = Environment.GetEnvironmentVariable(DotnetOptOut);
             preTestSampleRate = Environment.GetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName);
+            preTestVS1714TelemetryOptIn = Environment.GetEnvironmentVariable(VS1714TelemetryOptInEnvVarName);
         }
 
         private void RestoreEnvVars()
@@ -46,6 +49,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             Environment.SetEnvironmentVariable(TelemetryFxOptoutEnvVarName, preTestFxOptout);
             Environment.SetEnvironmentVariable(DotnetOptOut, preTestDotnetOptout);
             Environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, preTestSampleRate);
+            Environment.SetEnvironmentVariable(VS1714TelemetryOptInEnvVarName, preTestVS1714TelemetryOptIn);
         }
 
         private void ResetEnvVars()
@@ -53,6 +57,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
             Environment.SetEnvironmentVariable(DotnetOptOut, null);
             Environment.SetEnvironmentVariable(TelemetryFxOptoutEnvVarName, null);
             Environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, null);
+            Environment.SetEnvironmentVariable(VS1714TelemetryOptInEnvVarName, null);
         }
 
         public void Dispose()
@@ -96,6 +101,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         public void Initialize_ShouldSetSampleRateOverride_AndCreateActivitySource_WhenRandomBelowOverride(bool standalone)
         {
             // Arrange
+            Environment.SetEnvironmentVariable(VS1714TelemetryOptInEnvVarName, "1");
             Environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, "1.0");
 
             // Act

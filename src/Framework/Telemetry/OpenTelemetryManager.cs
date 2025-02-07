@@ -208,7 +208,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// TODO: Temporary until perf of loading OTel is agreed to in VS.
         /// </summary>
-        private bool IsOptIn() => !IsOptOut() && Traits.Instance.TelemetrySampleRateOverride.HasValue;
+        private bool IsOptIn() => !IsOptOut() && (Traits.Instance.TelemetryOptIn || Traits.Instance.TelemetrySampleRateOverride.HasValue);
 
         /// <summary>
         /// Determines if telemetry should be initialized based on sampling and environment variable overrides.
