@@ -1586,57 +1586,11 @@ namespace Microsoft.Build.BackEnd
                             }
                         }
 
-                        PropertyTrackingUtils.LogPropertyAssignment(_propertyTrackingSettings, outputTargetName, outputString, parameterLocation, _projectInstance.GetProperty(outputTargetName)?.EvaluatedValue ?? null, _targetLoggingContext);
+                        PropertyTrackingUtils.LogPropertyAssignment(_propertyTrackingSettings, outputTargetName, outputString, parameterLocation, _projectInstance.GetProperty(outputTargetName)?.EvaluatedValue ?? null, _taskLoggingContext);
 
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Logs property assignment information during task execution, based on configured property tracking settings.
-        /// </summary>
-        /// <param name="propertyName">The name of the property being assigned or reassigned.</param>
-        /// <param name="propertyValue">The new value being assigned to the property.</param>
-        /// <param name="location">The source location where the property assignment occurs.</param>
-        private void LogPropertyInTaskAssignment(string propertyName, string propertyValue, IElementLocation location)
-        {
-            if (_propertyTrackingSettings == PropertyTrackingSetting.None)
-            {
-                return;
-            }
-
-            var previousPropertyValue = _projectInstance.GetProperty(propertyName)?.EvaluatedValue;
-
-            if (previousPropertyValue == null && PropertyTrackingUtils.IsPropertyTrackingEnabled(_propertyTrackingSettings, PropertyTrackingSetting.PropertyInitialValueSet))
-            {
-                var args = new PropertyInitialValueSetEventArgs(
-                    propertyName,
-                    propertyValue,
-                    propertySource: string.Empty,
-                    location.File,
-                    location.Line,
-                    location.Column,
-                    message: null)
-                { BuildEventContext = _targetLoggingContext.BuildEventContext };
-
-                _targetLoggingContext.LogBuildEvent(args);
-            }
-            else if (PropertyTrackingUtils.IsPropertyTrackingEnabled(_propertyTrackingSettings, PropertyTrackingSetting.PropertyReassignment))
-            {
-                var args = new PropertyReassignmentEventArgs(
-                    propertyName,
-                    previousPropertyValue,
-                    propertyValue,
-                    location: null,
-                    location.File,
-                    location.Line,
-                    location.Column,
-                    message: null)
-                { BuildEventContext = _targetLoggingContext.BuildEventContext };
-
-                _targetLoggingContext.LogBuildEvent(args);
             }
         }
 

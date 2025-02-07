@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable

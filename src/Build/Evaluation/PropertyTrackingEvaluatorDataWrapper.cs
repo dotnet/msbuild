@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
@@ -452,35 +451,41 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            if (previousPropertyValue == null && IsPropertyTrackingEnabled(settings, PropertyTrackingSetting.PropertyInitialValueSet))
+            if (previousPropertyValue == null)
             {
-                var args = new PropertyInitialValueSetEventArgs(
-                    propertyName,
-                    propertyValue,
-                    propertySource: string.Empty,
-                    location.File,
-                    location.Line,
-                    location.Column,
-                    message: null)
-                { BuildEventContext = loggingContext.BuildEventContext };
+                if (IsPropertyTrackingEnabled(settings, PropertyTrackingSetting.PropertyInitialValueSet))
+                {
+                    var args = new PropertyInitialValueSetEventArgs(
+                        propertyName,
+                        propertyValue,
+                        propertySource: string.Empty,
+                        location.File,
+                        location.Line,
+                        location.Column,
+                        message: null) { BuildEventContext = loggingContext.BuildEventContext };
 
-                loggingContext.LogBuildEvent(args);
+                    loggingContext.LogBuildEvent(args);
+                }
             }
-            else if (IsPropertyTrackingEnabled(settings, PropertyTrackingSetting.PropertyReassignment)
-                || (settings == PropertyTrackingSetting.None && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14)))
+            else
             {
-                var args = new PropertyReassignmentEventArgs(
-                    propertyName,
-                    previousPropertyValue,
-                    propertyValue,
-                    location: null,
-                    location.File,
-                    location.Line,
-                    location.Column,
-                    message: null)
-                { BuildEventContext = loggingContext.BuildEventContext, };
+                if (IsPropertyTrackingEnabled(settings, PropertyTrackingSetting.PropertyReassignment) || (settings == PropertyTrackingSetting.None && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14)))
+                {
+                    if (propertyValue != previousPropertyValue)
+                    {
+                        var args = new PropertyReassignmentEventArgs(
+                            propertyName,
+                            previousPropertyValue,
+                            propertyValue,
+                            location: null,
+                            location.File,
+                            location.Line,
+                            location.Column,
+                            message: null) { BuildEventContext = loggingContext.BuildEventContext, };
 
-                loggingContext.LogBuildEvent(args);
+                        loggingContext.LogBuildEvent(args);
+                    }
+                }
             }
         }
     }
