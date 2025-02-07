@@ -34,7 +34,7 @@ variables:
     - name: SourceBranch
       value: ''
   - name: EnableReleaseOneLocBuild
-    value: true # Enable loc for vs17.13
+    value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
     value: true
   - group: AzureDevOps-Artifact-Feeds-Pats
@@ -119,7 +119,7 @@ extends:
         - name: VisualStudio.MajorVersion
           value: 17
         - name: VisualStudio.ChannelName
-          value: 'int.d17.13' # MSBuild's vs17.13 branch corresponds to this VS channel
+          value: 'int.main'
         - name: VisualStudio.DropName
           value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
