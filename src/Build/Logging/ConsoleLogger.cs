@@ -336,7 +336,7 @@ namespace Microsoft.Build.Logging
         /// Creates a Terminal logger if possible, or a Console logger.
         /// </summary>
         /// <param name="verbosity">Level of detail to show in the log.</param>
-        /// <param name="args">Command line arguments for the logger configuration. Currently, only '--tl:on' and '--tl:off' are supported.</param>
+        /// <param name="args">Command line arguments for the logger configuration. Currently, only '--tl:off' is supported to disable TerminalLogger.</param>
         public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[] args)
         {
             (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
