@@ -29,29 +29,24 @@ namespace Microsoft.Build.Shared
         internal const string SdksPath = "MSBuildSDKsPath";
 
         /// <summary>
-        ///  The prefix that was originally used. Now extracted out for the purpose of allowing even the non-prefixed variant.
-        /// </summary>
-        internal const string MSBuildPrefix = "MSBuild";
-
-        /// <summary>
         /// Name of the property that indicates that all warnings should be treated as errors.
         /// </summary>
-        internal const string TreatWarningsAsErrors = "TreatWarningsAsErrors";
+        internal const string TreatWarningsAsErrors = "MSBuildTreatWarningsAsErrors";
 
         /// <summary>
         /// Name of the property that indicates a list of warnings to treat as errors.
         /// </summary>
-        internal const string WarningsAsErrors = "WarningsAsErrors";
+        internal const string WarningsAsErrors = "MSBuildWarningsAsErrors";
 
         /// <summary>
         /// Name of the property that indicates a list of warnings to not treat as errors.
         /// </summary>
-        internal const string WarningsNotAsErrors = "WarningsNotAsErrors";
+        internal const string WarningsNotAsErrors = "MSBuildWarningsNotAsErrors";
 
         /// <summary>
         /// Name of the property that indicates the list of warnings to treat as messages.
         /// </summary>
-        internal const string WarningsAsMessages = "WarningsAsMessages";
+        internal const string WarningsAsMessages = "MSBuildWarningsAsMessages";
 
         /// <summary>
         /// The name of the environment variable that users can specify to override where NuGet assemblies are loaded from in the NuGetSdkResolver.
@@ -147,6 +142,9 @@ namespace Microsoft.Build.Shared
 
         internal const string InnerBuildProperty = nameof(InnerBuildProperty);
         internal const string InnerBuildPropertyValues = nameof(InnerBuildPropertyValues);
+        internal const string TargetFrameworks = nameof(TargetFrameworks);
+        internal const string TargetFramework = nameof(TargetFramework);
+        internal const string UsingMicrosoftNETSdk = nameof(UsingMicrosoftNETSdk);
     }
 
     // TODO: Remove these when VS gets updated to setup project cache plugins.
@@ -210,6 +208,9 @@ namespace Microsoft.Build.Shared
         internal const string publicKeyToken = "PublicKeyToken";
         internal const string culture = "Culture";
         internal const string withCulture = "WithCulture";
+        internal const string copyToOutputDirectory = "CopyToOutputDirectory";
+        internal const string copyAlways = "Always";
+        internal const string managed = "Managed";
 
         /// <summary>
         /// The output path for a given item.
@@ -238,5 +239,18 @@ namespace Microsoft.Build.Shared
         internal const string UndefinePropertiesMetadataName = "UndefineProperties";
         internal const string AdditionalPropertiesMetadataName = "AdditionalProperties";
         internal const string ProjectConfigurationDescription = "ProjectConfigurationDescription";
+    }
+
+    /// <summary>
+    /// Constants naming well-known items.
+    /// </summary>
+    internal static class ItemNames
+    {
+        internal const string Compile = "Compile";
+        internal const string Content = "Content";
+        internal const string EmbeddedResource = "EmbeddedResource";
+        internal const string None = "None";
+        internal const string Reference = "Reference";
+        internal const string ProjectCapability = "ProjectCapability";
     }
 }

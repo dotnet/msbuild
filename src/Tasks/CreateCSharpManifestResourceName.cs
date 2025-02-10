@@ -101,12 +101,26 @@ namespace Microsoft.Build.Tasks
             }
 
             dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
-            Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName, treatAsCultureNeutral);
+            Culture.ItemCultureInfo info;
 
-            // If the item has a culture override, respect that.
-            if (!string.IsNullOrEmpty(culture))
+            if (!string.IsNullOrEmpty(culture) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
             {
-                info.culture = culture;
+                info = new Culture.ItemCultureInfo()
+                {
+                    culture = culture,
+                    cultureNeutralFilename =
+                        embeddedFileName.RemoveLastInstanceOf("." + culture, StringComparison.OrdinalIgnoreCase),
+                };
+            }
+            else
+            {
+                info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName, treatAsCultureNeutral);
+                // If the item has a culture override, respect that.
+                // We need to recheck here due to changewave in condition above - after Wave17_14 removal, this should be unconditional.
+                if (!string.IsNullOrEmpty(culture))
+                {
+                    info.culture = culture;
+                }
             }
 
             var manifestName = StringBuilderCache.Acquire();

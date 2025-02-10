@@ -18,6 +18,24 @@ pipelines:
         credscan:
           lastModifiedDate: 2024-03-14
         binskim:
-          lastModifiedDate: 2024-03-14
+          lastModifiedDate: 2024-11-27
         spotbugs:
           lastModifiedDate: 2024-03-14
+  24295:
+    retail:
+      source:
+        credscan:
+          lastModifiedDate: 2024-11-06
+        eslint:
+          lastModifiedDate: 2024-11-06
+        psscriptanalyzer:
+          lastModifiedDate: 2024-11-06
+        armory:
+          lastModifiedDate: 2024-11-06
+      binary:
+        credscan:
+          lastModifiedDate: 2024-11-06
+        binskim:
+          lastModifiedDate: 2024-11-21
+        spotbugs:
+          lastModifiedDate: 2024-11-06

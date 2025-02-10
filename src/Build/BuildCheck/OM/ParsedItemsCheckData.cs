@@ -79,6 +79,11 @@ public sealed class EvaluatedItemsCheckData : CheckData
     /// Lazy enumerates evaluated items for a current project. Only items with matching type will be returned (case-insensitive, MSBuild valid names only).
     /// </summary>
     public IEnumerable<ItemData> EnumerateItemsOfType(string typeName) => _evaluationFinishedEventArgs.EnumerateItemsOfType(typeName);
+
+    /// <summary>
+    /// Lazy enumerates evaluated items for a current project. Only items with matching type will be returned (case-insensitive, MSBuild valid names only, matching any type from the given list).
+    /// </summary>
+    public IEnumerable<ItemData> EnumerateItemsOfTypes(string[] typeNames) => _evaluationFinishedEventArgs.EnumerateItemsOfTypes(typeNames);
 }
 
 /// <summary>

@@ -129,19 +129,36 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private static T Construct<T>() where T : new() => new();
 
-        private static readonly (string[] ruleIds, bool defaultEnablement, CheckFactory factory)[][] s_builtInFactoriesPerDataSource =
+        /// <summary>
+        /// The builtin check factory definition
+        /// </summary>
+        /// <param name="RuleIds">The rule ids that the check is able to emit.</param>
+        /// <param name="DefaultEnablement">Is it enabled by default?</param>
+        /// <param name="Factory">Factory method to create the check.</param>
+        internal readonly record struct BuiltInCheckFactory(
+            string[] RuleIds,
+            bool DefaultEnablement,
+            CheckFactory Factory);
+
+        private static readonly BuiltInCheckFactory[][] s_builtInFactoriesPerDataSource =
         [
 
             // BuildCheckDataSource.EventArgs
             [
-                ([SharedOutputPathCheck.SupportedRule.Id], SharedOutputPathCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<SharedOutputPathCheck>),
-                ([DoubleWritesCheck.SupportedRule.Id], DoubleWritesCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<DoubleWritesCheck>),
-                ([NoEnvironmentVariablePropertyCheck.SupportedRule.Id], NoEnvironmentVariablePropertyCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<NoEnvironmentVariablePropertyCheck>)
+                new BuiltInCheckFactory([SharedOutputPathCheck.SupportedRule.Id], SharedOutputPathCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<SharedOutputPathCheck>),
+                new BuiltInCheckFactory([PreferProjectReferenceCheck.SupportedRule.Id], PreferProjectReferenceCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<PreferProjectReferenceCheck>),
+                new BuiltInCheckFactory([CopyAlwaysCheck.SupportedRule.Id], CopyAlwaysCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<CopyAlwaysCheck>),
+                new BuiltInCheckFactory([DoubleWritesCheck.SupportedRule.Id], DoubleWritesCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<DoubleWritesCheck>),
+                new BuiltInCheckFactory([NoEnvironmentVariablePropertyCheck.SupportedRule.Id], NoEnvironmentVariablePropertyCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<NoEnvironmentVariablePropertyCheck>),
+                new BuiltInCheckFactory([EmbeddedResourceCheck.SupportedRule.Id], EmbeddedResourceCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<EmbeddedResourceCheck>),
+                new BuiltInCheckFactory([TargetFrameworkConfusionCheck.SupportedRule.Id], TargetFrameworkConfusionCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<TargetFrameworkConfusionCheck>),
+                new BuiltInCheckFactory([TargetFrameworkUnexpectedCheck.SupportedRule.Id], TargetFrameworkUnexpectedCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<TargetFrameworkUnexpectedCheck>),
+                new BuiltInCheckFactory([UntrustedLocationCheck.SupportedRule.Id], UntrustedLocationCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<UntrustedLocationCheck>),
             ],
 
             // BuildCheckDataSource.Execution
             [
-                (PropertiesUsageCheck.SupportedRulesList.Select(r => r.Id).ToArray(),
+                new BuiltInCheckFactory(PropertiesUsageCheck.SupportedRulesList.Select(r => r.Id).ToArray(),
                     PropertiesUsageCheck.SupportedRulesList.Any(r => r.DefaultConfiguration.IsEnabled ?? false),
                     Construct<PropertiesUsageCheck>)
             ]
@@ -150,19 +167,19 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         /// <summary>
         /// For tests only. TODO: Remove when check acquisition is done.
         /// </summary>
-        internal static (string[] ruleIds, bool defaultEnablement, CheckFactory factory)[][]? s_testFactoriesPerDataSource;
+        internal static BuiltInCheckFactory[][]? s_testFactoriesPerDataSource;
 
         private void RegisterBuiltInChecks(BuildCheckDataSource buildCheckDataSource)
         {
             _checkRegistry.AddRange(
                 s_builtInFactoriesPerDataSource[(int)buildCheckDataSource]
-                    .Select(v => new CheckFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
+                    .Select(v => new CheckFactoryContext(v.Factory, v.RuleIds, v.DefaultEnablement)));
 
             if (s_testFactoriesPerDataSource is not null)
             {
                 _checkRegistry.AddRange(
                     s_testFactoriesPerDataSource[(int)buildCheckDataSource]
-                        .Select(v => new CheckFactoryContext(v.factory, v.ruleIds, v.defaultEnablement)));
+                        .Select(v => new CheckFactoryContext(v.Factory, v.RuleIds, v.DefaultEnablement)));
             }
         }
 
@@ -384,7 +401,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             if (!IsInProcNode)
             {
                 propertiesLookup =
-                    BuildEventsProcessor.ExtractPropertiesLookup(evaluationFinishedEventArgs);
+                    BuildEventsProcessor.ExtractEvaluatedPropertiesLookup(evaluationFinishedEventArgs);
                 Func<string, string?> getPropertyValue = p =>
                     propertiesLookup.TryGetValue(p, out string? value) ? value : null;
 
@@ -397,12 +414,10 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 if (importedProjects != null && TryGetProjectFullPath(checkContext.BuildEventContext, out string projectPath))
                 {
-                    lock (importedProjects)
+                    foreach (string importedProject in importedProjects)
                     {
-                        foreach (string importedProject in importedProjects)
-                        {
-                            _buildEventsProcessor.ProcessProjectImportedEventArgs(checkContext, projectPath, importedProject);
-                        }
+                        _buildEventsProcessor.ProcessProjectImportedEventArgs(checkContext, projectPath,
+                            importedProject);
                     }
                 }
             }
@@ -490,8 +505,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private readonly ConcurrentDictionary<int, string> _projectsByInstanceId = new();
         private readonly ConcurrentDictionary<int, string> _projectsByEvaluationId = new();
-
-        private readonly ConcurrentDictionary<int, HashSet<string>> _deferredProjectEvalIdToImportedProjects = new();
+        // We are receiving project imported data only from the logger events - hence always in a single threaded context
+        //  (https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Logging-Internals.md)
+        private readonly Dictionary<int, HashSet<string>> _deferredProjectEvalIdToImportedProjects = new();
 
         /// <summary>
         /// This method fetches the project full path from the context id.
@@ -558,12 +574,22 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             SetupChecksForNewProject(projectFullPath, checkContext);
         }
 
+        public void ProcessProjectEvaluationStarted(ICheckContext checkContext, string projectFullPath)
+            => ProcessProjectEvaluationStarted(BuildCheckDataSource.BuildExecution, checkContext, projectFullPath);
+
         public void ProcessProjectEvaluationStarted(
+            BuildCheckDataSource buildCheckDataSource,
             ICheckContext checkContext,
             string projectFullPath)
         {
             _projectsByEvaluationId[checkContext.BuildEventContext.EvaluationId] = projectFullPath;
-            _deferredProjectEvalIdToImportedProjects.TryAdd(checkContext.BuildEventContext.EvaluationId, [projectFullPath]);
+            // We are receiving project imported data only from the logger events
+            if (buildCheckDataSource == BuildCheckDataSource.EventArgs &&
+                !_deferredProjectEvalIdToImportedProjects.ContainsKey(checkContext.BuildEventContext.EvaluationId))
+            {
+                _deferredProjectEvalIdToImportedProjects.Add(checkContext.BuildEventContext.EvaluationId,
+                    [projectFullPath]);
+            }
         }
 
         /*
@@ -598,24 +624,17 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly Dictionary<int, List<BuildEventArgs>> _deferredEvalDiagnostics = new();
 
         /// <summary>
-        /// Propagates a newly imported project file to all projects that import the original project file.
-        /// This method ensures that if Project A imports Project B, and Project B now imports Project C,
-        /// then Project A will also show Project C as an import.
+        /// Registers the logic import by a project file.
         /// </summary>
         /// <param name="evaluationId">The evaluation id is associated with the root project path.</param>
-        /// <param name="originalProjectFile">The path of the project file that is importing a new project.</param>
-        /// <param name="newImportedProjectFile">The path of the newly imported project file.</param>
-        private void PropagateImport(int evaluationId, string originalProjectFile, string newImportedProjectFile)
+        /// <param name="importingProjectFile">The path of the project file that is importing a new project.</param>
+        /// <param name="importedFile">The path of the imported project file.</param>
+        private void PropagateImport(int evaluationId, string importingProjectFile, string importedFile)
         {
-            if (_deferredProjectEvalIdToImportedProjects.TryGetValue(evaluationId, out HashSet<string>? importedProjects))
+            if (_deferredProjectEvalIdToImportedProjects.TryGetValue(evaluationId,
+                    out HashSet<string>? importedProjects))
             {
-                lock (importedProjects)
-                {
-                    if (importedProjects.Contains(originalProjectFile))
-                    {
-                        importedProjects.Add(newImportedProjectFile);
-                    }
-                }
+                importedProjects.Add(importedFile);
             }
         }
 
