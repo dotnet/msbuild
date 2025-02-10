@@ -162,6 +162,11 @@ elementFormDefault="qualified">
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
                         <xs:choice>
                             <xs:element name="WrapperTool"/>
+                            <xs:element name="EmbedInteropTypes" type="msb:boolean">
+                                <xs:annotation>
+                                <xs:documentation><!-- _locID_text="COMReference_EmbedInteropTypes" _locComment="" -->Whether the types in this reference need to embedded into the target assembly - interop assemblies only (optional, boolean)</xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
                         </xs:choice>
                     </xs:sequence>
         </xs:extension>
