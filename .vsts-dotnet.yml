@@ -120,6 +120,9 @@ extends:
           value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
         steps:
+        - task: NuGetToolInstaller@1
+          displayName: 'Install NuGet.exe'
+
         - task: PowerShell@2
           displayName: Setup Private Feeds Credentials
           inputs:
@@ -127,6 +130,15 @@ extends:
             arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
           env:
             Token: $(dn-bot-dnceng-artifact-feeds-rw)
+
+        - task: NuGetCommand@2
+          displayName: Restore internal tools
+          inputs:
+            command: restore
+            feedsToUse: config
+            restoreSolution: 'eng\common\internal\Tools.csproj'
+            nugetConfigPath: 'NuGet.config'
+            restoreDirectory: '$(Build.SourcesDirectory)\.packages'
 
         - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
           inputs:
