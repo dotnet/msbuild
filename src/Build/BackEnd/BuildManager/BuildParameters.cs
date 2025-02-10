@@ -339,6 +339,10 @@ namespace Microsoft.Build.Execution
             set => _useSynchronousLogging = value;
         }
 
+        /// <summary>
+        /// Properties passed from the command line (e.g. by using /p:).
+        /// </summary>
+        public ICollection<string> PropertiesFromCommandLine => _propertiesFromCommandLine;
 
         /// <summary>
         /// Indicates whether to emit a default error if a task returns false without logging an error.

@@ -160,7 +160,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Properties passed from the command line (e.g. by using /p:).
         /// </summary>
-        private readonly HashSet<string> _propertiesFromCommandLine;
+        private readonly ICollection<string> _propertiesFromCommandLine;
 
         /// <summary>
         /// The cache to consult for any imports that need loading.
@@ -205,7 +205,7 @@ namespace Microsoft.Build.Evaluation
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
-            HashSet<string> propertiesFromCommandLine,
+            ICollection<string> propertiesFromCommandLine,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
             IDirectoryCacheFactory directoryCacheFactory,
@@ -307,7 +307,7 @@ namespace Microsoft.Build.Evaluation
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
-            HashSet<string> propertiesFromCommandLine,
+            ICollection<string> propertiesFromCommandLine,
             ILoggingService loggingService,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
