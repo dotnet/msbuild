@@ -85,9 +85,9 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>bac7e1caea791275b7c3ccb4cb75fd6a04a26618</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.13.0-rc.113">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.13.1-rc.1">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>c4b26195ee5a77e70b2ea5fd50db87d6a9194c24</Sha>
+      <Sha>3d42754f2962b30deac1ec48e5415aa83c071b37</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.13.0-3.25076.8">
       <Uri>https://github.com/dotnet/roslyn</Uri>
