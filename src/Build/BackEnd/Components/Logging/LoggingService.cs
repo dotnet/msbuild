@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -72,6 +72,11 @@ namespace Microsoft.Build.BackEnd.Logging
     /// </summary>
     internal partial class LoggingService : ILoggingService, INodePacketHandler
     {
+        /// <summary>
+        /// Gets or sets a value if BuildCheck is enabled. The presence of this flag influences the logging logic.
+        /// </summary>
+        private bool _buildCheckEnabled;
+
         /// <summary>
         /// The default maximum size for the logging event queue.
         /// </summary>
@@ -871,6 +876,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 _serviceState = LoggingServiceState.Initialized;
 
                 _buildEngineDataRouter = (buildComponentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)?.BuildEngineDataRouter;
+
+                _buildCheckEnabled = buildComponentHost.BuildParameters.IsBuildCheckEnabled;
             }
         }
 
