@@ -1263,7 +1263,7 @@ namespace Microsoft.Build.Evaluation
                     globalProperty.Name,
                     ((IProperty)globalProperty).EvaluatedValueEscaped,
                     isGlobalProperty: true /* it is a global property, but it comes from command line and is tracked separately */,
-                    false /* may NOT be a reserved name */,
+                    mayBeReserved: false /* may NOT be a reserved name */,
                     loggingContext: _evaluationLoggingContext,
                     isCommandLineProperty: _propertiesFromCommandLine.Contains(globalProperty.Name) /* IS coming from command line argument */);
             }

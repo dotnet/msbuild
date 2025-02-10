@@ -88,7 +88,16 @@ namespace Microsoft.Build.BackEnd
                             string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property.Location);
                             bucket.Expander.PropertiesUseTracker.CheckPreexistingUndefinedUsage(property, evaluatedValue, LoggingContext);
 
-                            PropertyTrackingUtils.LogPropertyAssignment(_propertyTrackingSettings, property.Name, evaluatedValue, property.Location, Project.GetProperty(property.Name)?.EvaluatedValue ?? null, LoggingContext);
+                            if (_propertyTrackingSettings != PropertyTrackingSetting.None)
+                            {
+                                PropertyTrackingUtils.LogPropertyAssignment(
+                                    _propertyTrackingSettings,
+                                    property.Name,
+                                    evaluatedValue,
+                                    property.Location,
+                                    Project.GetProperty(property.Name)?.EvaluatedValue ?? null,
+                                    LoggingContext);
+                            }
 
                             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents)
                             {

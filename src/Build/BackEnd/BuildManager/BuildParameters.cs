@@ -149,7 +149,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Properties passed from the command line (e.g. by using /p:).
         /// </summary>
-        private HashSet<string> _propertiesFromCommandLine;
+        private ICollection<string> _propertiesFromCommandLine;
 
         /// <summary>
         /// The loggers.
@@ -285,7 +285,7 @@ namespace Microsoft.Build.Execution
             _environmentProperties = other._environmentProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._environmentProperties) : null;
             _forwardingLoggers = other._forwardingLoggers != null ? new List<ForwardingLoggerRecord>(other._forwardingLoggers) : null;
             _globalProperties = other._globalProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._globalProperties) : null;
-            _propertiesFromCommandLine = other._propertiesFromCommandLine != null ? new HashSet<string>(other._propertiesFromCommandLine) : null;
+            _propertiesFromCommandLine = other._propertiesFromCommandLine != null ? new HashSet<string>(other._propertiesFromCommandLine, StringComparer.OrdinalIgnoreCase) : null;
             HostServices = other.HostServices;
             _loggers = other._loggers != null ? new List<ILogger>(other._loggers) : null;
             _maxNodeCount = other._maxNodeCount;
@@ -478,11 +478,6 @@ namespace Microsoft.Build.Execution
                 }
             }
         }
-
-        /// <summary>
-        /// Properties passed from the command line (e.g. by using /p:).
-        /// </summary>
-        public HashSet<string> PropertiesFromCommandLine => _propertiesFromCommandLine;
 
         /// <summary>
         /// Interface allowing the host to provide additional control over the build process.

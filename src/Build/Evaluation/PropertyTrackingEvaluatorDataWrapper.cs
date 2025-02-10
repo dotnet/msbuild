@@ -392,7 +392,7 @@ namespace Microsoft.Build.Evaluation
 
         private static string GetPropertySourceName(PropertySource source) => source switch
         {
-            PropertySource.Xml => "XML",
+            PropertySource.Xml => "Xml",
             PropertySource.BuiltIn => "BuiltIn",
             PropertySource.Global => "Global",
             PropertySource.Toolset => "Toolset",
@@ -446,11 +446,6 @@ namespace Microsoft.Build.Evaluation
             string? previousPropertyValue,
             LoggingContext loggingContext)
         {
-            if (settings == PropertyTrackingSetting.None)
-            {
-                return;
-            }
-
             if (previousPropertyValue == null)
             {
                 if (IsPropertyTrackingEnabled(settings, PropertyTrackingSetting.PropertyInitialValueSet))
@@ -469,7 +464,8 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                if (IsPropertyTrackingEnabled(settings, PropertyTrackingSetting.PropertyReassignment) || (settings == PropertyTrackingSetting.None && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14)))
+                if (IsPropertyTrackingEnabled(settings, PropertyTrackingSetting.PropertyReassignment)
+                    || (settings == PropertyTrackingSetting.None && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14)))
                 {
                     if (propertyValue != previousPropertyValue)
                     {

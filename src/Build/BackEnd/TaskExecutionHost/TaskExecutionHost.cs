@@ -1586,7 +1586,16 @@ namespace Microsoft.Build.BackEnd
                             }
                         }
 
-                        PropertyTrackingUtils.LogPropertyAssignment(_propertyTrackingSettings, outputTargetName, outputString, parameterLocation, _projectInstance.GetProperty(outputTargetName)?.EvaluatedValue ?? null, _taskLoggingContext);
+                        if (_propertyTrackingSettings != PropertyTrackingSetting.None)
+                        {
+                            PropertyTrackingUtils.LogPropertyAssignment(
+                                _propertyTrackingSettings,
+                                outputTargetName,
+                                outputString,
+                                parameterLocation,
+                                _projectInstance.GetProperty(outputTargetName)?.EvaluatedValue ?? null,
+                                _taskLoggingContext);
+                        }
 
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));
                     }

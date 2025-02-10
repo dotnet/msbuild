@@ -503,7 +503,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Properties passed from the command line (e.g. by using /p:).
         /// </summary>
-        public HashSet<string> PropertiesFromCommandLine { get; }
+        public ICollection<string> PropertiesFromCommandLine { get; }
 
         /// <summary>
         /// The default tools version of this project collection. Projects use this tools version if they
