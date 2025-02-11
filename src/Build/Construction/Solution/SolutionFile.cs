@@ -658,7 +658,9 @@ namespace Microsoft.Build.Construction
                 JsonDocumentOptions options = new JsonDocumentOptions() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
                 JsonDocument text = JsonDocument.Parse(File.ReadAllText(solutionFilterFile), options);
                 solution = text.RootElement.GetProperty("solution");
-                return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solutionFilterFile), solution.GetProperty("path").GetString()));
+                string solutionRelativePath = solution.GetProperty("path").GetString();
+                solutionRelativePath = Path.DirectorySeparatorChar == '/' ? solutionRelativePath.Replace('\\', '/') : solutionRelativePath.Replace('/', '\\');
+                return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(solutionFilterFile), solutionRelativePath));
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
             {
