@@ -1425,11 +1425,19 @@ namespace Microsoft.Build.BackEnd.Logging
                             WaitHandle.WaitAny(waitHandlesForNextEvent);
                         }
 
-                        emptyQueueEvent?.Reset();
+                        try
+                        {
+                            emptyQueueEvent?.Reset();
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            // Events were disposed during shutdown, exit processing
+                            return;
+                        }
                     }
-                } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+                } while (!eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
-                _emptyQueueEvent.Set();
+                emptyQueueEvent.Set();
             }
         }
 
