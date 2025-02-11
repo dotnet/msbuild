@@ -10,12 +10,12 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
-using Microsoft.Build.Experimental.BuildCheck;
 
 #nullable disable
 
@@ -62,7 +62,7 @@ namespace Microsoft.Build.BackEnd.Logging
         ShuttingDown,
 
         /// <summary>
-        /// The logging service completly shutdown
+        /// The logging service completely shutdown.
         /// </summary>
         Shutdown
     }
@@ -253,12 +253,14 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Event set when message is consumed from queue.
         /// </summary>
         private AutoResetEvent _dequeueEvent;
+
         /// <summary>
-        /// Event set when queue become empty.
+        /// Event set when queue become empty. 
         /// </summary>
         private ManualResetEvent _emptyQueueEvent;
+
         /// <summary>
-        /// Even set when message is added into queue.
+        /// Event set when message is added into queue.
         /// </summary>
         private AutoResetEvent _enqueueEvent;
 
@@ -1408,33 +1410,46 @@ namespace Microsoft.Build.BackEnd.Logging
             void LoggingEventProc()
             {
                 var completeAdding = _loggingEventProcessingCancellation.Token;
-                WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEvent };
+                WaitHandle[] waitHandlesForNextEvent = [completeAdding.WaitHandle, _enqueueEvent];
 
-                do
+                try
                 {
-                    if (_eventQueue.TryDequeue(out object ev))
-                    {
-                        LoggingEventProcessor(ev);
-                        _dequeueEvent.Set();
-                    }
-                    else
-                    {
-                        _emptyQueueEvent.Set();
+                    // Store field references locally to prevent race with cleanup
+                    var eventQueue = _eventQueue;
+                    var dequeueEvent = _dequeueEvent;
+                    var emptyQueueEvent = _emptyQueueEvent;
+                    var enqueueEvent = _enqueueEvent;
 
-                        // Wait for next event, or finish.
-                        if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
+                    do
+                    {
+                        if (eventQueue.TryDequeue(out object ev))
                         {
-                            WaitHandle.WaitAny(waitHandlesForNextEvent);
+                            LoggingEventProcessor(ev);
+                            dequeueEvent?.Set();
                         }
+                        else
+                        {
+                            emptyQueueEvent?.Set();
 
-                        _emptyQueueEvent.Reset();
-                    }
-                } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+                            // Wait for next event, or finish.
+                            if (!completeAdding.IsCancellationRequested && eventQueue.IsEmpty)
+                            {
+                                WaitHandle.WaitAny(waitHandlesForNextEvent);
+                            }
 
-                _emptyQueueEvent.Set();
+                            emptyQueueEvent.Reset();
+                        }
+                    } while (!eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+
+                    emptyQueueEvent.Set();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Events/queue were disposed during shutdown, exit processing
+                    return;
+                }
             }
         }
-
 
         /// <summary>
         /// Clean resources used for logging event processing queue.
@@ -1448,9 +1463,11 @@ namespace Microsoft.Build.BackEnd.Logging
             _loggingEventProcessingCancellation?.Dispose();
 
             _eventQueue = null;
+
             _dequeueEvent = null;
             _enqueueEvent = null;
             _emptyQueueEvent = null;
+
             _loggingEventProcessingCancellation = null;
             _loggingEventProcessingThread = null;
         }
