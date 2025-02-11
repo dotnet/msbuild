@@ -1426,6 +1426,8 @@ namespace Microsoft.Build.BackEnd.Logging
                             {
                                 WaitHandle.WaitAny(waitHandlesForNextEvent);
                             }
+
+                            emptyQueueEvent.Reset();
                         }
                     } while (!eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
