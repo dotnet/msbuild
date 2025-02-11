@@ -1402,42 +1402,40 @@ namespace Microsoft.Build.BackEnd.Logging
                 var completeAdding = _loggingEventProcessingCancellation.Token;
                 WaitHandle[] waitHandlesForNextEvent = [completeAdding.WaitHandle, _enqueueEvent];
 
-                // Store field references locally to prevent race with cleanup
-                var eventQueue = _eventQueue;
-                var dequeueEvent = _dequeueEvent;
-                var emptyQueueEvent = _emptyQueueEvent;
-                var enqueueEvent = _enqueueEvent;
-
-                do
+                try
                 {
-                    if (eventQueue.TryDequeue(out object ev))
+                    // Store field references locally to prevent race with cleanup
+                    var eventQueue = _eventQueue;
+                    var dequeueEvent = _dequeueEvent;
+                    var emptyQueueEvent = _emptyQueueEvent;
+                    var enqueueEvent = _enqueueEvent;
+
+                    do
                     {
-                        LoggingEventProcessor(ev);
-                        dequeueEvent?.Set();
-                    }
-                    else
-                    {
-                        emptyQueueEvent?.Set();
-
-                        // Wait for next event, or finish.
-                        if (!completeAdding.IsCancellationRequested && eventQueue.IsEmpty)
+                        if (eventQueue.TryDequeue(out object ev))
                         {
-                            WaitHandle.WaitAny(waitHandlesForNextEvent);
+                            LoggingEventProcessor(ev);
+                            dequeueEvent?.Set();
                         }
-
-                        try
+                        else
                         {
-                            emptyQueueEvent?.Reset();
-                        }
-                        catch (ObjectDisposedException)
-                        {
-                            // Events were disposed during shutdown, exit processing
-                            return;
-                        }
-                    }
-                } while (!eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+                            emptyQueueEvent?.Set();
 
-                emptyQueueEvent.Set();
+                            // Wait for next event, or finish.
+                            if (!completeAdding.IsCancellationRequested && eventQueue.IsEmpty)
+                            {
+                                WaitHandle.WaitAny(waitHandlesForNextEvent);
+                            }
+                        }
+                    } while (!eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+
+                    emptyQueueEvent.Set();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Events/queue were disposed during shutdown, exit processing
+                    return;
+                }
             }
         }
 
