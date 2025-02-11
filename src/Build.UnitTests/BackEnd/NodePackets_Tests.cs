@@ -79,6 +79,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             GeneratedFileUsedEventArgs generatedFileUsed = new GeneratedFileUsedEventArgs("path", "some content");
             BuildSubmissionStartedEventArgs buildSubmissionStarted = new(new Dictionary<string, string> { { "Value1", "Value2" } }, ["Path1"], ["TargetName"], BuildRequestDataFlags.ReplaceExistingProjectInstance, 123);
             BuildCheckTracingEventArgs buildCheckTracing = new();
+            BuildCanceledEventArgs buildCanceled = new("message", DateTime.UtcNow);
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
@@ -114,6 +115,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(generatedFileUsed, LoggingEventType.GeneratedFileUsedEvent);
             VerifyLoggingPacket(buildSubmissionStarted, LoggingEventType.BuildSubmissionStartedEvent);
             VerifyLoggingPacket(buildCheckTracing, LoggingEventType.BuildCheckTracingEvent);
+            VerifyLoggingPacket(buildCanceled, LoggingEventType.BuildCanceledEvent);
         }
 
         private static BuildEventContext CreateBuildEventContext()
@@ -287,31 +289,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     CreateTargetSkipped(),
                     new ExtendedBuildErrorEventArgs("extError", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedBuildWarningEventArgs("extWarn", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedBuildMessageEventArgs("extWarn", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", MessageImportance.Normal, DateTime.UtcNow, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedCustomBuildEventArgs("extCustom", "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedCriticalBuildMessageEventArgs("extCritMsg", "Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },

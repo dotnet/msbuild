@@ -770,8 +770,8 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
             TargetBuilder builder = (TargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
             IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
-            (string name, TargetBuiltReason reason)[] target = { ("Build", TargetBuiltReason.None) }
-;            BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, target), cache[1]);
+            (string name, TargetBuiltReason reason)[] target = { ("Build", TargetBuiltReason.None) };
+            BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, target), cache[1]);
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask" });

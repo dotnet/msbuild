@@ -49,6 +49,20 @@
       "tool": "binskim",
       "ruleId": "BA2007",
       "createdDate": "2024-06-19 17:22:41Z"
+    },
+    "1757d0179485ad6618415e151de2453f25d5484071f7bae328fa9ca9d4d54688": {
+      "signature": "1757d0179485ad6618415e151de2453f25d5484071f7bae328fa9ca9d4d54688",
+      "alternativeSignatures": [],
+      "target": "src/Tasks.UnitTests/TestResources/mycert.pfx",
+      "line": 1,
+      "memberOf": [
+        "default"
+      ],
+      "tool": "credscan",
+      "ruleId": "CSCAN-GENERAL0020",
+      "createdDate": "2024-11-06 10:51:54Z",
+      "expirationDate": "2025-04-25 11:21:52Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2024-11-06 11:21:52Z"
     }
   }
 }

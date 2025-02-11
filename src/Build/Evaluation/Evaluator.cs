@@ -213,11 +213,11 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingService,
             BuildEventContext buildEventContext)
         {
-            ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
-            ErrorUtilities.VerifyThrowInternalNull(evaluationContext, nameof(evaluationContext));
-            ErrorUtilities.VerifyThrowInternalNull(loggingService, nameof(loggingService));
-            ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
+            ErrorUtilities.VerifyThrowInternalNull(data);
+            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache);
+            ErrorUtilities.VerifyThrowInternalNull(evaluationContext);
+            ErrorUtilities.VerifyThrowInternalNull(loggingService);
+            ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
 
             _evaluationLoggingContext = new EvaluationLoggingContext(
                 loggingService,
@@ -362,7 +362,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string buildEventFileInfoFullPath, BuildEventContext buildEventContext)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped, nameof(unevaluatedIncludeEscaped));
+            ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped);
 
             List<I> items = new List<I>();
             itemFactory.ItemElement = itemElement;
@@ -2239,7 +2239,7 @@ namespace Microsoft.Build.Evaluation
                             VerifyVSDistributionPath(importElement.Project, importLocationInProject);
 
                             ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectNotFound",
-                                                                      importFileUnescaped, importExpressionEscaped);
+                                                                      importFileUnescaped, unescapedExpression, importExpressionEscaped);
                         }
                         else
                         {

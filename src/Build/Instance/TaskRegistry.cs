@@ -182,7 +182,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal TaskRegistry(ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache);
 
             RootElementCache = projectRootElementCache;
         }
@@ -202,8 +202,8 @@ namespace Microsoft.Build.Execution
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         internal TaskRegistry(Toolset toolset, ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
-            ErrorUtilities.VerifyThrowInternalNull(toolset, nameof(toolset));
+            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache);
+            ErrorUtilities.VerifyThrowInternalNull(toolset);
 
             RootElementCache = projectRootElementCache;
             _toolset = toolset;
@@ -293,7 +293,7 @@ namespace Microsoft.Build.Execution
             where P : class, IProperty
             where I : class, IItem
         {
-            ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile, nameof(directoryOfImportingFile));
+            ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile);
 #if DEBUG
             ErrorUtilities.VerifyThrowInternalError(!taskRegistry._isInitialized, "Attempt to modify TaskRegistry after it was initialized.");
 #endif
@@ -664,7 +664,7 @@ namespace Microsoft.Build.Execution
 
             if (exactMatchRequired)
             {
-                return Enumerable.Empty<RegisteredTaskRecord>();
+                return [];
             }
 
             // look through all task declarations for partial matches
@@ -689,7 +689,7 @@ namespace Microsoft.Build.Execution
             bool overrideTask = false)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
-            ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo, nameof(assemblyLoadInfo));
+            ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo);
 
             // Lazily allocate the hashtable
             if (_taskRegistrations == null)
@@ -1613,8 +1613,8 @@ namespace Microsoft.Build.Execution
                     where P : class, IProperty
                     where I : class, IItem
                 {
-                    ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml, nameof(projectUsingTaskXml));
-                    ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
+                    ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml);
+                    ErrorUtilities.VerifyThrowArgumentNull(expander);
 
                     ProjectUsingTaskBodyElement taskElement = projectUsingTaskXml.TaskBody;
                     if (taskElement != null)
