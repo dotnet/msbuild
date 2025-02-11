@@ -285,12 +285,12 @@ EndGlobal
         }
 
         [Fact]
-        public void SolutionFilterWithAtSymbolInThePath()
+        public void SolutionFilterWithSpecialSymbolInThePath()
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
-            // Create folder with @ in the name
-            folder = testEnvironment.CreateFolder(Path.Combine(folder.Path, "test@folder"), createFolder: true);
+            // Create folder with special symbols in the name
+            folder = testEnvironment.CreateFolder(Path.Combine(folder.Path, $"test@folder%special$symbols"), createFolder: true);
             // Create simple solution and simple solution filter
             TransientTestFile sln = testEnvironment.CreateFile(folder, "SimpleSolution.sln",
             """
