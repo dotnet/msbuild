@@ -21,7 +21,6 @@ using Microsoft.VisualStudio.SolutionPersistence;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Drawing;
 
 namespace Microsoft.Build.Engine.UnitTests.Construction
 {
@@ -330,7 +329,7 @@ EndGlobal
             """);
 
             SolutionFile sp = SolutionFile.Parse(slnf.Path);
-            
+
             // just assert that no error is thrown
             Assert.True(sp.ProjectShouldBuild("SolutionTest.csproj"));
         }
