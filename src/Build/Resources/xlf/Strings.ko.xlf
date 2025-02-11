@@ -211,6 +211,16 @@
         <target state="translated">빌드하는 동안 불필요한 복사 작업이 발생할 수 있으므로 'CopyToOutputDirectory'에 대해 'Always'를 지정하지 마세요. 'PreserveNewest' 또는 'IfDifferent' 메타데이터 값을 사용하거나' SkipUnchangedFilesOnCopyAlways' 속성을 true로 설정하여 보다 효과적인 복사를 사용합니다.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_MessageFmt">
+        <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
+        <target state="translated">프로젝트 {0} .NET SDK를 사용하지 않는 'TargetFramework' 속성 '{1}' 지정합니다. 이러한 속성은 C# 대상을 직접 가져오는 프로젝트에서 이해할 수 없습니다.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_Title">
+        <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
+        <target state="translated">'TargetFramework' 및 'TargetFrameworks' 속성은 사용되지 않으며 .NET SDK를 사용하지 않는 프로젝트에서 지정해서는 안 됩니다.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">속성: '{0}'에 액세스했지만 초기화되지 않았습니다.</target>
@@ -239,6 +249,16 @@
       <trans-unit id="BuildCheck_BC0203_Title">
         <source>A property that is not used should not be declared.</source>
         <target state="translated">사용되지 않는 속성은 선언하면 안 됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_MessageFmt">
+        <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
+        <target state="translated">위치: '{0}' 완전히 신뢰할 수 없습니다. 프로젝트를 해당 폴더 외부에 배치하세요(프로젝트: {1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_Title">
+        <source>Downloads folder is untrusted for projects building.</source>
+        <target state="translated">프로젝트 빌드에 대해 다운로드 폴더를 신뢰할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
@@ -412,6 +432,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}"은(는) 항목을 {0}개 참조하고 "{3}"은(는) 항목을 {1}개 참조합니다. 참조하는 항목 수는 같아야 합니다.</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">globs: fileSpec: "{0}" fileSpec을 파일 이름으로 가정하여 fileSpec을 확장하는 동안 예외가 발생했습니다. 예외: {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -806,6 +831,11 @@ Errors: {3}</source>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
         <target state="translated">초기화되지 않은 속성 "{0}" 읽기</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownLoggingType">
+        <source>Logging type {0} is not understood by {1}.</source>
+        <target state="translated">로깅 유형 {0} {1} 이해할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
