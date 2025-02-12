@@ -126,6 +126,8 @@ namespace Microsoft.Build.Execution
         private bool _enableNodeReuse = false;
 #endif
 
+        private bool _useOutOfProcRarNode;
+
         /// <summary>
         /// The original process environment.
         /// </summary>
@@ -271,6 +273,7 @@ namespace Microsoft.Build.Execution
             _culture = other._culture;
             _defaultToolsVersion = other._defaultToolsVersion;
             _enableNodeReuse = other._enableNodeReuse;
+            _useOutOfProcRarNode = other._useOutOfProcRarNode;
             _buildProcessEnvironment = resetEnvironment
                 ? CommunicationsUtilities.GetEnvironmentVariables()
                 : other._buildProcessEnvironment != null
@@ -410,6 +413,15 @@ namespace Microsoft.Build.Execution
         {
             get => _enableNodeReuse;
             set => _enableNodeReuse = Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1" ? false : value;
+        }
+
+        /// <summary>
+        /// When true, the ResolveAssemblyReferences task executes in an out-of-proc node which persists across builds.
+        /// </summary>
+        public bool UseOutOfProcRarNode
+        {
+            get => _useOutOfProcRarNode;
+            set => _useOutOfProcRarNode = value;
         }
 
         /// <summary>
@@ -892,6 +904,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _defaultToolsVersion);
             translator.Translate(ref _disableInProcNode);
             translator.Translate(ref _enableNodeReuse);
+            translator.Translate(ref _useOutOfProcRarNode);
             translator.TranslateProjectPropertyInstanceDictionary(ref _environmentProperties);
             /* No forwarding logger information sent here - that goes with the node configuration */
             translator.TranslateProjectPropertyInstanceDictionary(ref _globalProperties);

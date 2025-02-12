@@ -1521,6 +1521,11 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
+                    if (Traits.Instance.UseOutOfProcRarNode)
+                    {
+                        parameters.UseOutOfProcRarNode = true;
+                    }
+
                     List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = new();
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;

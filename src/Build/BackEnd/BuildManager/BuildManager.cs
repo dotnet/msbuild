@@ -559,7 +559,7 @@ namespace Microsoft.Build.Execution
                 }
 #endif
 
-                if (Traits.Instance.UseOutOfProcRarNode)
+                if (_buildParameters.UseOutOfProcRarNode)
                 {
                     RarNodeLauncher.Start();
                 }
