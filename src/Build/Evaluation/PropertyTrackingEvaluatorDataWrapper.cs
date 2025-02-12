@@ -327,10 +327,7 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            // Either we want to specifically track property reassignments
-            // or we do not want to track nothing - in which case the prop reassignment is enabled by default.    
-            if (PropertyTrackingUtils.IsPropertyTrackingEnabled(_settings, PropertyTrackingSetting.PropertyReassignment)
-                || (_settings == PropertyTrackingSetting.None && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14)))
+            if (PropertyTrackingUtils.IsPropertyReassignmentEnabled(_settings))
             {
                 var args = new PropertyReassignmentEventArgs(
                     property.Name,
@@ -425,6 +422,11 @@ namespace Microsoft.Build.Evaluation
         /// <returns>true if the specified tracking setting is enabled in the settings configuration.</returns>
         internal static bool IsPropertyTrackingEnabled(PropertyTrackingSetting settings, PropertyTrackingSetting currentTrackingSetting) => (settings & currentTrackingSetting) == currentTrackingSetting;
 
+        // Either we want to specifically track property reassignments
+        // or we do not want to track nothing - in which case the prop reassignment is enabled by default.
+        internal static bool IsPropertyReassignmentEnabled(PropertyTrackingSetting currentTrackingSetting) => IsPropertyTrackingEnabled(currentTrackingSetting, PropertyTrackingSetting.PropertyReassignment)
+                || (currentTrackingSetting == PropertyTrackingSetting.None && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14));
+
         /// <summary>
         /// Logs property assignment information during execution, providing detailed tracking of property value changes.
         /// This internal method handles two scenarios:
@@ -464,8 +466,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                if (IsPropertyTrackingEnabled(settings, PropertyTrackingSetting.PropertyReassignment)
-                    || (settings == PropertyTrackingSetting.None && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14)))
+                if (IsPropertyReassignmentEnabled(settings))
                 {
                     if (propertyValue != previousPropertyValue)
                     {
