@@ -116,7 +116,8 @@ namespace Microsoft.Build.Evaluation
 
         internal override void DiscardImplicitReferences()
         {
-            throw new NotImplementedException();
+            // Neither _strongCache or _weakCache are presented in this implementation, we have nothing to discard.
+            return;
         }
 
         internal override void DiscardAnyWeakReference(ProjectRootElement projectRootElement)
