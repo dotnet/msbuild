@@ -41,7 +41,7 @@ namespace Microsoft.Build.Execution
         /// <param name="itemType">The type of item this definition object represents.</param>
         internal ProjectItemDefinitionInstance(string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowArgumentNull(itemType);
 
             _itemType = itemType;
         }
@@ -122,7 +122,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Names of all metadata on this item definition
         /// </summary>
-        public IEnumerable<string> MetadataNames => _metadata == null ? Enumerable.Empty<string>() : _metadata.Keys;
+        public IEnumerable<string> MetadataNames => _metadata == null ? [] : _metadata.Keys;
 
         /// <summary>
         /// Implementation of IKeyed exposing the item type, so these

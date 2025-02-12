@@ -421,7 +421,7 @@ namespace Microsoft.Build.Graph
             int degreeOfParallelism,
             CancellationToken cancellationToken)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             var measurementInfo = BeginMeasurement();
 
@@ -498,7 +498,7 @@ namespace Microsoft.Build.Graph
             Func<ProjectGraphNode, string> nodeIdProvider,
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(nodeIdProvider, nameof(nodeIdProvider));
+            ErrorUtilities.VerifyThrowArgumentNull(nodeIdProvider);
 
             var nodeIds = new ConcurrentDictionary<ProjectGraphNode, string>();
 
@@ -681,7 +681,7 @@ namespace Microsoft.Build.Graph
                                     targetName);
 
                                 ProjectGraphNode node = GetNodeForProject(project);
-                                ProjectGraphBuildRequest entryEdge = new(node,[projectTargetName]);
+                                ProjectGraphBuildRequest entryEdge = new(node, [projectTargetName]);
                                 encounteredEdges.Add(entryEdge);
                                 edgesToVisit.Enqueue(entryEdge);
                                 isSolutionTraversalTarget = true;
@@ -696,7 +696,7 @@ namespace Microsoft.Build.Graph
                     {
                         foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                         {
-                            ProjectGraphBuildRequest entryEdge = new(entryPointNode,[targetName]);
+                            ProjectGraphBuildRequest entryEdge = new(entryPointNode, [targetName]);
                             encounteredEdges.Add(entryEdge);
                             edgesToVisit.Enqueue(entryEdge);
                         }

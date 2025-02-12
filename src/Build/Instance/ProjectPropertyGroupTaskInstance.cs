@@ -50,9 +50,9 @@ namespace Microsoft.Build.Execution
             ElementLocation conditionLocation,
             List<ProjectPropertyGroupTaskPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
-            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
-            ErrorUtilities.VerifyThrowInternalNull(properties, nameof(properties));
+            ErrorUtilities.VerifyThrowInternalNull(condition);
+            ErrorUtilities.VerifyThrowInternalNull(location);
+            ErrorUtilities.VerifyThrowInternalNull(properties);
 
             _condition = condition;
             _location = location;
