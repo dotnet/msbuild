@@ -12,16 +12,27 @@ namespace Microsoft.Build.BackEnd
 {
     internal sealed class RarNodeLauncher
     {
+        private readonly INodeLauncher _nodeLauncher;
+
+        private readonly ServerNodeHandshake _handshake;
+
+        private readonly string _pipeName;
+
+        internal RarNodeLauncher(INodeLauncher nodeLauncher)
+        {
+            _nodeLauncher = nodeLauncher;
+            _handshake = new ServerNodeHandshake(HandshakeOptions.None);
+
+            // SYNC: src\Tasks\AssemblyDependency\Service\OutOfProcRarNode.cs
+            _pipeName = $"MSBuildRarNode-{_handshake.ComputeHash()}";
+        }
+
         /// <summary>
         /// Creates a new MSBuild process with the RAR nodemode.
         /// </summary>
-        public static void Start()
+        public void Start()
         {
-            // SYNC: src\Tasks\AssemblyDependency\Service\OutOfProcRarNode.cs
-            ServerNodeHandshake handshake = new(HandshakeOptions.None);
-            string pipeName = $"MSBuildRarNode-{handshake.ComputeHash()}";
-
-            if (!IsRarNodeRunning(pipeName))
+            if (!IsRarNodeRunning())
             {
                 CommunicationsUtilities.Trace("Launching RAR node...");
 
@@ -36,32 +47,32 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            ValidateConnection(pipeName, handshake);
+            ValidateConnection();
         }
 
-        private static bool IsRarNodeRunning(string pipeName)
+        private bool IsRarNodeRunning()
         {
             // If the node is running, we will find it in the list of named pipes.
             // TODO: Adapt for non-Windows platforms.
             const string NamedPipeRoot = @"\\.\pipe\";
             string[] pipeNames = Directory.GetFiles(NamedPipeRoot);
-            return pipeNames.Contains(Path.Combine(NamedPipeRoot, pipeName));
+
+            return pipeNames.Contains(Path.Combine(NamedPipeRoot, _pipeName));
         }
 
-        private static void LaunchNode()
+        private void LaunchNode()
         {
             string msbuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
             string commandLineArgs = string.Join(" ", ["/nologo", "/nodemode:3"]);
-            NodeLauncher nodeLauncher = new();
-            _ = nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId: 0);
+            _ = _nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId: 0);
         }
 
-        private static void ValidateConnection(string pipeName, Handshake handshake)
+        private void ValidateConnection()
         {
             // TODO: Move to RAR client once it is merged. This is just to validate that the handshake implementation is functional.
-            using NamedPipeClientStream pipeClient = CommunicationsUtilities.CreateSecurePipeClient(pipeName);
+            using NamedPipeClientStream pipeClient = CommunicationsUtilities.CreateSecurePipeClient(_pipeName);
 
-            if (!CommunicationsUtilities.ConnectToPipeStream(pipeClient, pipeName, handshake))
+            if (!CommunicationsUtilities.ConnectToPipeStream(pipeClient, _pipeName, _handshake))
             {
                 CommunicationsUtilities.Trace("Failed to connect to RAR node.");
             }

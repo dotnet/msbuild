@@ -552,17 +552,19 @@ namespace Microsoft.Build.Execution
                     _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath("msbuild-cache");
                 }
 
+                if (_buildParameters.UseOutOfProcRarNode)
+                {
+                    NodeLauncher nodeLauncher = ((IBuildComponentHost)this).GetComponent<NodeLauncher>(BuildComponentType.NodeLauncher);
+                    RarNodeLauncher rarNodeLauncher = new(nodeLauncher);
+                    rarNodeLauncher.Start();
+                }
+
 #if FEATURE_REPORTFILEACCESSES
                 if (_buildParameters.ReportFileAccesses)
                 {
                     EnableDetouredNodeLauncher();
                 }
 #endif
-
-                if (_buildParameters.UseOutOfProcRarNode)
-                {
-                    RarNodeLauncher.Start();
-                }
 
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
