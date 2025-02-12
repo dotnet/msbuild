@@ -41,6 +41,7 @@
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
+    <Compile Include="..\Shared\NamedPipeUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->

@@ -27,7 +27,7 @@ namespace Microsoft.Build.BackEnd
             _handshake = new ServerNodeHandshake(HandshakeOptions.None);
 
             // SYNC: src\Tasks\AssemblyDependency\Service\OutOfProcRarNode.cs
-            _pipeName = $"MSBuildRarNode-{_handshake.ComputeHash()}";
+            _pipeName = NamedPipeUtil.GetPlatformSpecificPipeName($"MSBuildRarNode-{_handshake.ComputeHash()}");
         }
 
         /// <summary>
@@ -55,12 +55,22 @@ namespace Microsoft.Build.BackEnd
 
         private bool IsRarNodeRunning()
         {
-            // If the node is running, we will find it in the list of named pipes.
-            // TODO: Adapt for non-Windows platforms.
-            const string NamedPipeRoot = @"\\.\pipe\";
-            IEnumerable<string> pipeNames = FileSystems.Default.EnumerateFiles(NamedPipeRoot);
+            // Determine if the node is running by checking if the expected named pipe exists.
+            if (NativeMethodsShared.IsWindows)
+            {
+                const string NamedPipeRoot = @"\\.\pipe\";
 
-            return pipeNames.Contains(Path.Combine(NamedPipeRoot, _pipeName));
+                // File.Exists() will crash the pipe server, as the underlying Windows APIs have undefined behavior
+                // when used with pipe objects. Enumerating the pipe directory avoids this issue.
+                IEnumerable<string> pipeNames = FileSystems.Default.EnumerateFiles(NamedPipeRoot);
+
+                return pipeNames.Contains(Path.Combine(NamedPipeRoot, _pipeName));
+            }
+            else
+            {
+                // On Unix, named pipes are implemented via sockets, and the pipe name is simply the file path.
+                return FileSystems.Default.FileExists(_pipeName);
+            }
         }
 
         private void LaunchNode()

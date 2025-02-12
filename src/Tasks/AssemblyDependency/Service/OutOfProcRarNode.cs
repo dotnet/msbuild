@@ -5,6 +5,7 @@ using System;
 using System.IO.Pipes;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks.AssemblyDependency
 {
@@ -20,7 +21,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
         public OutOfProcRarNode()
         {
             // SYNC: src\Build\BackEnd\Components\Communications\RarNodeLauncher.cs
-            _pipeName = $"MSBuildRarNode-{_handshake.ComputeHash()}";
+            _pipeName = NamedPipeUtil.GetPlatformSpecificPipeName($"MSBuildRarNode-{_handshake.ComputeHash()}");
         }
 
         /// <summary>
