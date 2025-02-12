@@ -835,6 +835,8 @@ namespace Microsoft.Build.CommandLine
                         {
                             using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
                             {
+                                collection.PropertiesFromCommandLine = [.. globalProperties.Keys];
+
                                 Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
 
                                 if (getResultOutputFile.Length == 0)

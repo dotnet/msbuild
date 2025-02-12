@@ -341,9 +341,6 @@ namespace Microsoft.Build.Evaluation
                 {
                     _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(globalProperties.Count);
 
-                    // at this stage globalProperties collection contains entries passed from command line (e.g. /p:foo=bar).
-                    PropertiesFromCommandLine = [.. globalProperties.Keys];
-
                     foreach (KeyValuePair<string, string> pair in globalProperties)
                     {
                         try
@@ -503,7 +500,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Properties passed from the command line (e.g. by using /p:).
         /// </summary>
-        public ICollection<string> PropertiesFromCommandLine { get; }
+        public ICollection<string> PropertiesFromCommandLine { get; set; }
 
         /// <summary>
         /// The default tools version of this project collection. Projects use this tools version if they
