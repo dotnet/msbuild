@@ -753,7 +753,7 @@ namespace Microsoft.Build.Shared
         /// <param name="fileSpec">The file spec to get the full path of.</param>
         /// <param name="currentDirectory"></param>
         /// <param name="escape">Whether to escape the path after getting the full path.</param>
-        /// <returns>full path</returns>
+        /// <returns>Full path to the file, escaped.</returns>
         internal static string GetFullPath(string fileSpec, string currentDirectory, bool escape = true)
         {
             // Sending data out of the engine into the filesystem, so time to unescape.
