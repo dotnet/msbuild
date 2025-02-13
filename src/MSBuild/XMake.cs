@@ -835,6 +835,7 @@ namespace Microsoft.Build.CommandLine
                         {
                             using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
                             {
+                                // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
                                 collection.PropertiesFromCommandLine = [.. globalProperties.Keys];
 
                                 Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
@@ -1394,6 +1395,9 @@ namespace Microsoft.Build.CommandLine
                     loadProjectsReadOnly: !isPreprocess,
                     useAsynchronousLogging: true,
                     reuseProjectRootElementCache: s_isServerNode);
+
+                // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
+                projectCollection.PropertiesFromCommandLine = [.. globalProperties.Keys];
 
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
                 {
