@@ -451,7 +451,7 @@ dotnet_diagnostic.xUnit2013.severity = none
 
 
 # Build Checks
-[*.csproj]
+[*.{csproj,proj}]
 build_check.BC0201.AllowUninitializedPropertiesInConditions=true
 build_check.BC0201.Severity=suggestion
 build_check.BC0202.Severity=suggestion
