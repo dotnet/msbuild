@@ -18,13 +18,13 @@ namespace Microsoft.Build.Framework.UnitTests
         public void SerializationDeserializationTest()
         {
             WorkerNodeTelemetryData td = new WorkerNodeTelemetryData(
-                new Dictionary<string, TaskExecutionStats>()
+                new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>()
                 {
-                        { "task1", new TaskExecutionStats(TimeSpan.FromMinutes(1), 5, 1234) },
-                        { "task2", new TaskExecutionStats(TimeSpan.Zero, 0, 0) },
-                        { "task3", new TaskExecutionStats(TimeSpan.FromTicks(1234), 12, 987654321) }
+                        { (TaskOrTargetTelemetryKey)"task1", new TaskExecutionStats(TimeSpan.FromMinutes(1), 5, 1234) },
+                        { (TaskOrTargetTelemetryKey)"task2", new TaskExecutionStats(TimeSpan.Zero, 0, 0) },
+                        { (TaskOrTargetTelemetryKey)"task3", new TaskExecutionStats(TimeSpan.FromTicks(1234), 12, 987654321) }
                 },
-                new Dictionary<string, bool>() { { "target1", false }, { "target2", true }, });
+                new Dictionary<TaskOrTargetTelemetryKey, bool>() { { (TaskOrTargetTelemetryKey)"target1", false }, { (TaskOrTargetTelemetryKey)"target2", true }, });
 
             WorkerNodeTelemetryEventArgs args = new WorkerNodeTelemetryEventArgs(td);
 

@@ -26,6 +26,7 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, short execut
            TotalMemoryConsumption == other.TotalMemoryConsumption &&
            ExecutionsCount == other.ExecutionsCount;
 
+    // Needed since we override Equals
     public override int GetHashCode()
     {
         unchecked

@@ -8,14 +8,7 @@ namespace Microsoft.Build.Framework;
 
 internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
 {
-    // Indicate custom targets/task - those must be hashed.
-    public const string CustomPrefix = "C:";
-    // Indicate targets/tasks sourced from nuget cache - those can be custom or MSFT provided ones.
-    public const string FromNugetPrefix = "N:";
-    // Indicate targets/tasks generated during build - those must be hashed (as they contain paths).
-    public const string MetaProjPrefix = "M:";
-
-    public WorkerNodeTelemetryData(Dictionary<string, TaskExecutionStats> tasksExecutionData, Dictionary<string, bool> targetsExecutionData)
+    public WorkerNodeTelemetryData(Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData, Dictionary<TaskOrTargetTelemetryKey, bool> targetsExecutionData)
     {
         TasksExecutionData = tasksExecutionData;
         TargetsExecutionData = targetsExecutionData;
@@ -34,13 +27,13 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         }
     }
 
-    public void AddTask(string name, TimeSpan cumulativeExectionTime, short executionsCount, long totalMemoryConsumption)
+    public void AddTask(TaskOrTargetTelemetryKey task, TimeSpan cumulativeExectionTime, short executionsCount, long totalMemoryConsumption)
     {
         TaskExecutionStats? taskExecutionStats;
-        if (!TasksExecutionData.TryGetValue(name, out taskExecutionStats))
+        if (!TasksExecutionData.TryGetValue(task, out taskExecutionStats))
         {
             taskExecutionStats = new(cumulativeExectionTime, executionsCount, totalMemoryConsumption);
-            TasksExecutionData[name] = taskExecutionStats;
+            TasksExecutionData[task] = taskExecutionStats;
         }
         else
         {
@@ -50,17 +43,17 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         }
     }
 
-    public void AddTarget(string name, bool wasExecuted)
+    public void AddTarget(TaskOrTargetTelemetryKey target, bool wasExecuted)
     {
-        TargetsExecutionData[name] =
+        TargetsExecutionData[target] =
             // we just need to store if it was ever executed
-            wasExecuted || (TargetsExecutionData.TryGetValue(name, out bool wasAlreadyExecuted) && wasAlreadyExecuted);
+            wasExecuted || (TargetsExecutionData.TryGetValue(target, out bool wasAlreadyExecuted) && wasAlreadyExecuted);
     }
 
     public WorkerNodeTelemetryData()
-        : this(new Dictionary<string, TaskExecutionStats>(StringComparer.OrdinalIgnoreCase), new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase))
+        : this(new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>(), new Dictionary<TaskOrTargetTelemetryKey, bool>())
     { }
 
-    public Dictionary<string, TaskExecutionStats> TasksExecutionData { get; }
-    public Dictionary<string, bool> TargetsExecutionData { get; }
+    public Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> TasksExecutionData { get; }
+    public Dictionary<TaskOrTargetTelemetryKey, bool> TargetsExecutionData { get; }
 }

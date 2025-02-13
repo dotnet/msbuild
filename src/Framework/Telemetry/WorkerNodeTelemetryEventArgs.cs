@@ -19,18 +19,18 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
     internal override void WriteToStream(BinaryWriter writer)
     {
         writer.Write7BitEncodedInt(WorkerNodeTelemetryData.TasksExecutionData.Count);
-        foreach (KeyValuePair<string, TaskExecutionStats> entry in WorkerNodeTelemetryData.TasksExecutionData)
+        foreach (KeyValuePair<TaskOrTargetTelemetryKey, TaskExecutionStats> entry in WorkerNodeTelemetryData.TasksExecutionData)
         {
-            writer.Write(entry.Key);
+            WriteToStream(writer, entry.Key);
             writer.Write(entry.Value.CumulativeExecutionTime.Ticks);
             writer.Write(entry.Value.ExecutionsCount);
             writer.Write(entry.Value.TotalMemoryConsumption);
         }
 
         writer.Write7BitEncodedInt(WorkerNodeTelemetryData.TargetsExecutionData.Count);
-        foreach (KeyValuePair<string, bool> entry in WorkerNodeTelemetryData.TargetsExecutionData)
+        foreach (KeyValuePair<TaskOrTargetTelemetryKey, bool> entry in WorkerNodeTelemetryData.TargetsExecutionData)
         {
-            writer.Write(entry.Key);
+            WriteToStream(writer, entry.Key);
             writer.Write(entry.Value);
         }
     }
@@ -38,20 +38,37 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         int count = reader.Read7BitEncodedInt();
-        Dictionary<string, TaskExecutionStats> tasksExecutionData = new();
+        Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData = new();
         for (int i = 0; i < count; i++)
         {
-            tasksExecutionData.Add(reader.ReadString(),
+            tasksExecutionData.Add(ReadFromStream(reader),
                 new TaskExecutionStats(TimeSpan.FromTicks(reader.ReadInt64()), reader.ReadInt16(), reader.ReadInt64()));
         }
 
         count = reader.Read7BitEncodedInt();
-        Dictionary<string, bool> targetsExecutionData = new();
+        Dictionary<TaskOrTargetTelemetryKey, bool> targetsExecutionData = new();
         for (int i = 0; i < count; i++)
         {
-            targetsExecutionData.Add(reader.ReadString(), reader.ReadBoolean());
+            targetsExecutionData.Add(ReadFromStream(reader), reader.ReadBoolean());
         }
 
         WorkerNodeTelemetryData = new WorkerNodeTelemetryData(tasksExecutionData, targetsExecutionData);
+    }
+
+    private static void WriteToStream(BinaryWriter writer, TaskOrTargetTelemetryKey key)
+    {
+        writer.Write(key.Name);
+        writer.Write(key.IsCustom);
+        writer.Write(key.IsFromNugetCache);
+        writer.Write(key.IsFromMetaProject);
+    }
+
+    private static TaskOrTargetTelemetryKey ReadFromStream(BinaryReader reader)
+    {
+        return new TaskOrTargetTelemetryKey(
+            reader.ReadString(),
+            reader.ReadBoolean(),
+            reader.ReadBoolean(),
+            reader.ReadBoolean());
     }
 }

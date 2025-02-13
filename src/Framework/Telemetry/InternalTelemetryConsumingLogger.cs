@@ -50,7 +50,7 @@ internal sealed class InternalTelemetryConsumingLogger : ILogger
         Console.WriteLine("==========================================");
         Console.WriteLine($"Tasks: ({_workerNodeTelemetryData.TasksExecutionData.Count})");
         Console.WriteLine("Custom tasks:");
-        foreach (var task in _workerNodeTelemetryData.TasksExecutionData.Where(t => t.Key.StartsWith(WorkerNodeTelemetryData.CustomPrefix) || t.Key.StartsWith(WorkerNodeTelemetryData.FromNugetPrefix + WorkerNodeTelemetryData.CustomPrefix)))
+        foreach (var task in _workerNodeTelemetryData.TasksExecutionData.Where(t => t.Key.IsCustom))
         {
             Console.WriteLine($"{task.Key}");
         }

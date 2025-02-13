@@ -68,17 +68,18 @@ namespace Microsoft.Build.Engine.UnitTests
                 new BuildParameters() { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
 
             workerNodeTelemetryData!.ShouldNotBeNull();
-            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey("C:Build");
-            workerNodeTelemetryData.TargetsExecutionData["C:Build"].ShouldBeTrue();
+            var buildTargetKey = new TaskOrTargetTelemetryKey("Build", true, false);
+            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(buildTargetKey);
+            workerNodeTelemetryData.TargetsExecutionData[buildTargetKey].ShouldBeTrue();
             workerNodeTelemetryData.TargetsExecutionData.Keys.Count.ShouldBe(1);
 
             workerNodeTelemetryData.TasksExecutionData.Keys.Count.ShouldBeGreaterThan(2);
-            ((int)workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.Message"].ExecutionsCount).ShouldBe(2);
-            workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.Message"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
-            ((int)workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.CreateItem"].ExecutionsCount).ShouldBe(1);
-            workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.CreateItem"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
+            ((int)workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].ExecutionsCount).ShouldBe(2);
+            workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
+            ((int)workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].ExecutionsCount).ShouldBe(1);
+            workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
 
-            workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.StartsWith("C:") && !k.StartsWith("N:"));
+            workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsCustom && !k.IsFromNugetCache);
             workerNodeTelemetryData.TasksExecutionData.Values
                 .Count(v => v.CumulativeExecutionTime > TimeSpan.Zero || v.ExecutionsCount > 0).ShouldBe(2);
         }
@@ -139,30 +140,30 @@ namespace Microsoft.Build.Engine.UnitTests
                 new BuildParameters() { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
 
             workerNodeTelemetryData!.ShouldNotBeNull();
-            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey("C:Build");
-            workerNodeTelemetryData.TargetsExecutionData["C:Build"].ShouldBeTrue();
-            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey("C:BeforeBuild");
-            workerNodeTelemetryData.TargetsExecutionData["C:BeforeBuild"].ShouldBeTrue();
-            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey("C:NotExecuted");
-            workerNodeTelemetryData.TargetsExecutionData["C:NotExecuted"].ShouldBeFalse();
+            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("Build", true, false));
+            workerNodeTelemetryData.TargetsExecutionData[new TaskOrTargetTelemetryKey("Build", true, false)].ShouldBeTrue();
+            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("BeforeBuild", true, false));
+            workerNodeTelemetryData.TargetsExecutionData[new TaskOrTargetTelemetryKey("BeforeBuild", true, false)].ShouldBeTrue();
+            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("NotExecuted", true, false));
+            workerNodeTelemetryData.TargetsExecutionData[new TaskOrTargetTelemetryKey("NotExecuted", true, false)].ShouldBeFalse();
             workerNodeTelemetryData.TargetsExecutionData.Keys.Count.ShouldBe(3);
 
             workerNodeTelemetryData.TasksExecutionData.Keys.Count.ShouldBeGreaterThan(2);
-            ((int)workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.Message"].ExecutionsCount).ShouldBe(3);
-            workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.Message"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
-            ((int)workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.CreateItem"].ExecutionsCount).ShouldBe(1);
-            workerNodeTelemetryData.TasksExecutionData["Microsoft.Build.Tasks.CreateItem"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
+            ((int)workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].ExecutionsCount).ShouldBe(3);
+            workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
+            ((int)workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].ExecutionsCount).ShouldBe(1);
+            workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
 
-            ((int)workerNodeTelemetryData.TasksExecutionData["C:Task01"].ExecutionsCount).ShouldBe(2);
-            workerNodeTelemetryData.TasksExecutionData["C:Task01"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
+            ((int)workerNodeTelemetryData.TasksExecutionData[new TaskOrTargetTelemetryKey("Task01", true, false)].ExecutionsCount).ShouldBe(2);
+            workerNodeTelemetryData.TasksExecutionData[new TaskOrTargetTelemetryKey("Task01", true, false)].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
 
-            ((int)workerNodeTelemetryData.TasksExecutionData["C:Task02"].ExecutionsCount).ShouldBe(0);
-            workerNodeTelemetryData.TasksExecutionData["C:Task02"].CumulativeExecutionTime.ShouldBe(TimeSpan.Zero);
+            ((int)workerNodeTelemetryData.TasksExecutionData[new TaskOrTargetTelemetryKey("Task02", true, false)].ExecutionsCount).ShouldBe(0);
+            workerNodeTelemetryData.TasksExecutionData[new TaskOrTargetTelemetryKey("Task02", true, false)].CumulativeExecutionTime.ShouldBe(TimeSpan.Zero);
 
             workerNodeTelemetryData.TasksExecutionData.Values
                 .Count(v => v.CumulativeExecutionTime > TimeSpan.Zero || v.ExecutionsCount > 0).ShouldBe(3);
 
-            workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.StartsWith("N:"));
+            workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsFromNugetCache);
         }
     }
 }
