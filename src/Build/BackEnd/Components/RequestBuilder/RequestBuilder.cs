@@ -1262,7 +1262,7 @@ namespace Microsoft.Build.BackEnd
 
         private void UpdateStatisticsPostBuild()
         {
-            ITelemetryForwarder collector =
+            ITelemetryForwarder telemetryForwarder =
                 ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
                 .Instance;
 
@@ -1301,7 +1301,7 @@ namespace Microsoft.Build.BackEnd
                                (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
                 }
 
-                collector.AddTarget(
+                telemetryForwarder.AddTarget(
                     projectTargetInstance.Key,
                     // would we want to distinguish targets that were executed only during this execution - we'd need
                     //  to remember target names from ResultsByTarget from before execution
@@ -1323,7 +1323,7 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
                 {
-                    collector.AddTask(registeredTaskRecord.TaskIdentity.Name,
+                    telemetryForwarder.AddTask(registeredTaskRecord.TaskIdentity.Name,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
                         registeredTaskRecord.Statistics.TotalMemoryConsumption,
