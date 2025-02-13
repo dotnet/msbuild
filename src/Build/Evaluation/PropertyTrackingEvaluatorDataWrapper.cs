@@ -425,7 +425,7 @@ namespace Microsoft.Build.Evaluation
         // Either we want to specifically track property reassignments
         // or we do not want to track nothing - in which case the prop reassignment is enabled by default.
         internal static bool IsPropertyReassignmentEnabled(PropertyTrackingSetting currentTrackingSetting) => IsPropertyTrackingEnabled(currentTrackingSetting, PropertyTrackingSetting.PropertyReassignment)
-                || (currentTrackingSetting == PropertyTrackingSetting.None && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14));
+                || (currentTrackingSetting == PropertyTrackingSetting.None && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10));
 
         /// <summary>
         /// Logs property assignment information during execution, providing detailed tracking of property value changes.
