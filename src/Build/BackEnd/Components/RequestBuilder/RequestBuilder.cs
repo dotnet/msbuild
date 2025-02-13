@@ -1266,7 +1266,7 @@ namespace Microsoft.Build.BackEnd
                 ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
                 .Instance;
 
-            if (!collector.IsTelemetryCollected)
+            if (!telemetryForwarder.IsTelemetryCollected)
             {
                 return;
             }
