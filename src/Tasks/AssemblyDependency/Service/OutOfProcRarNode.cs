@@ -3,6 +3,8 @@
 
 using System;
 using System.IO.Pipes;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -27,22 +29,28 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
         /// <summary>
         /// Starts the node and begins processing RAR execution requests until cancelled.
         /// </summary>
-        /// <param name="shutdownException"></param>
+        /// <param name="shutdownException">The exception which caused shutdown, if any.</param>
+        /// <param name="cancellationToken">A cancellation token to observe while running the node loop.</param>
         /// <returns></returns>
-        public RarNodeShutdownReason Run(out Exception? shutdownException)
+        public RarNodeShutdownReason Run(out Exception? shutdownException, CancellationToken cancellationToken = default)
         {
             RarNodeShutdownReason shutdownReason;
             shutdownException = null;
 
             try
             {
-                shutdownReason = RunInternal();
+                shutdownReason = RunInternal(cancellationToken);
             }
             catch (UnauthorizedAccessException)
             {
                 // Access to the path is denied if named pipe already exists.
                 shutdownException = new InvalidOperationException("RAR node is already running.");
                 shutdownReason = RarNodeShutdownReason.AlreadyRunning;
+            }
+            catch (OperationCanceledException)
+            {
+                // Cancellation is considered an intentional shutdown of the node.
+                shutdownReason = RarNodeShutdownReason.Complete;
             }
             catch (Exception ex)
             {
@@ -55,7 +63,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             return shutdownReason;
         }
 
-        private RarNodeShutdownReason RunInternal()
+        private RarNodeShutdownReason RunInternal(CancellationToken cancellationToken)
         {
             CommunicationsUtilities.Trace("Starting new server node with handshake {0}", _handshake);
 
@@ -66,7 +74,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             // Run until no builds have been requested in the timeout period.
             while (linkStatus != LinkStatus.ConnectionFailed)
             {
-                linkStatus = CommunicationsUtilities.WaitForConnection(pipeServer, _handshake);
+                linkStatus = WaitForConnection();
 
                 if (linkStatus == LinkStatus.Active)
                 {
@@ -83,6 +91,17 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             }
 
             return RarNodeShutdownReason.ConnectionTimedOut;
+
+            // Unblock the parent thread if cancellation is requested. Cancellation is only expected when MSBuild is
+            // gracefully shutting down or running in unit tests.
+            LinkStatus WaitForConnection()
+            {
+                Task<LinkStatus> linkStatusTask = Task.Run(
+                    () => CommunicationsUtilities.WaitForConnection(pipeServer, _handshake));
+                linkStatusTask.Wait(cancellationToken);
+
+                return linkStatusTask.GetAwaiter().GetResult();
+            }
         }
     }
 }

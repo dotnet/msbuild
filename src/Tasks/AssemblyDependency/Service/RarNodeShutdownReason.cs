@@ -9,6 +9,11 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
     public enum RarNodeShutdownReason
     {
         /// <summary>
+        /// The RAR node was instructed to terminate and gracefully shut down.
+        /// </summary>
+        Complete,
+
+        /// <summary>
         /// The RAR node is already running.
         /// </summary>
         AlreadyRunning,

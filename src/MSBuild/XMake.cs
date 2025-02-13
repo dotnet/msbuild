@@ -3430,10 +3430,11 @@ namespace Microsoft.Build.CommandLine
                 {
                     // The RAR service persists between builds, and will continue to process requests until terminated.
                     OutOfProcRarNode rarNode = new();
-                    RarNodeShutdownReason rarShutdownReason = rarNode.Run(out nodeException);
+                    RarNodeShutdownReason rarShutdownReason = rarNode.Run(out nodeException, s_buildCancellationSource.Token);
 
                     shutdownReason = rarShutdownReason switch
                     {
+                        RarNodeShutdownReason.Complete => NodeEngineShutdownReason.BuildComplete,
                         RarNodeShutdownReason.Error => NodeEngineShutdownReason.Error,
                         RarNodeShutdownReason.AlreadyRunning => NodeEngineShutdownReason.Error,
                         RarNodeShutdownReason.ConnectionTimedOut => NodeEngineShutdownReason.ConnectionFailed,
