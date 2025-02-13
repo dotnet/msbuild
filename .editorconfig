@@ -1,4 +1,4 @@
-﻿# editorconfig.org
+# editorconfig.org
 
 # top-most EditorConfig file
 root = true
@@ -454,3 +454,4 @@ dotnet_diagnostic.xUnit2013.severity = none
 [*.csproj]
 build_check.BC0201.AllowUninitializedPropertiesInConditions=true
 build_check.BC0202.AllowUninitializedPropertiesInConditions=true
+build_check.BC0202.severity = suggestion
