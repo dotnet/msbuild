@@ -424,14 +424,26 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Attempting connect to PID {0}", nodeProcessId);
 
-            if (!CommunicationsUtilities.ConnectToPipeStream(nodeStream, pipeName, handshake, timeout))
+            try
             {
+
+                CommunicationsUtilities.ConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
+                return nodeStream;
+            }
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            {
+                // Can be:
+                // UnauthorizedAccessException -- Couldn't connect, might not be a node.
+                // IOException -- Couldn't connect, already in use.
+                // TimeoutException -- Couldn't connect, might not be a node.
+                // InvalidOperationException – Couldn’t connect, probably a different build
+                CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, e.Message.TrimEnd());
+
                 // If we don't close any stream, we might hang up the child
-                nodeStream.Dispose();
-                return null;
+                nodeStream?.Dispose();
             }
 
-            return nodeStream;
+            return null;
         }
 
         /// <summary>

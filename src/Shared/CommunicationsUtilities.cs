@@ -472,44 +472,29 @@ namespace Microsoft.Build.Internal
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         }
 
-        internal static bool ConnectToPipeStream(NamedPipeClientStream pipeClient, string pipeName, Handshake handshake, int connectTimeout = DefaultConnectTimeout)
+        internal static void ConnectToPipeStream(NamedPipeClientStream pipeClient, string pipeName, Handshake handshake, int timeout = DefaultConnectTimeout)
         {
-            Trace("Attempting connect to pipe {0} with timeout {1} ms", pipeName, connectTimeout);
+            Trace("Attempting connect to pipe {0} with timeout {1} ms", pipeName, timeout);
 
-            try
-            {
-                pipeClient.Connect(connectTimeout);
+            pipeClient.Connect(timeout);
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                if (NativeMethodsShared.IsWindows)
-                {
-                    // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
-                    // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
-                    // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
-                    // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
-                    // remote node could set the owner to something else would also let it change owners on other objects, so
-                    // this would be a security flaw upstream of us.
-                    ValidateRemotePipeSecurityOnWindows(pipeClient);
-                }
+            if (NativeMethodsShared.IsWindows)
+            {
+                // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
+                // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
+                // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
+                // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
+                // remote node could set the owner to something else would also let it change owners on other objects, so
+                // this would be a security flaw upstream of us.
+                ValidateRemotePipeSecurityOnWindows(pipeClient);
+            }
 #endif
 
-                SendHandshake(pipeClient, pipeName, handshake, connectTimeout);
-            }
-            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-            {
-                // Can be:
-                // UnauthorizedAccessException -- Couldn't connect, might not be a node.
-                // IOException -- Couldn't connect, already in use.
-                // TimeoutException -- Couldn't connect, might not be a node.
-                // InvalidOperationException – Couldn’t connect, probably a different build
-                Trace("Failed to connect to pipe {0}. {1}", pipeName, e.Message.TrimEnd());
-                return false;
-            }
+            SendHandshake(pipeClient, pipeName, handshake, timeout);
 
             // We got a connection.
             Trace("Successfully connected to pipe {0}...!", pipeName);
-
-            return true;
         }
 
         /// <summary>

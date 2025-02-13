@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -82,12 +83,17 @@ namespace Microsoft.Build.BackEnd
 
         private void ValidateConnection()
         {
-            // TODO: Move to RAR client once it is merged. This is just to validate that the handshake implementation is functional.
+            // TODO: Move to RAR client once it is merged. This exists just to validate that the handshake implementation is functional,
+            // TODO: otherwise this may add latency to the build start.
             using NamedPipeClientStream pipeClient = CommunicationsUtilities.CreateSecurePipeClient(_pipeName);
 
-            if (!CommunicationsUtilities.ConnectToPipeStream(pipeClient, _pipeName, _handshake))
+            try
             {
-                CommunicationsUtilities.Trace("Failed to connect to RAR node.");
+                CommunicationsUtilities.ConnectToPipeStream(pipeClient, _pipeName, _handshake);
+            }
+            catch (Exception ex)
+            {
+                CommunicationsUtilities.Trace("Failed to connect to RAR node: {0}", ex);
             }
         }
     }
