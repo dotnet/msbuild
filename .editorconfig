@@ -457,3 +457,6 @@ build_check.BC0202.AllowUninitializedPropertiesInConditions=true
 build_check.BC0202.severity = suggestion
 build_check.BC0102.severity = suggestion
 build_check.BC0201.severity = suggestion
+build_check.BC0202.Scope = ProjectFileOnly
+build_check.BC0102.Scope = ProjectFileOnly
+build_check.BC0201.Scope = ProjectFileOnly
