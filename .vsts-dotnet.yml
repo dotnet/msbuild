@@ -47,6 +47,7 @@ resources:
   - repository: 1ESPipelineTemplates
     type: git
     name: 1ESPipelineTemplates/1ESPipelineTemplates
+    ref: refs/tags/1es/release-2025-01-27-3
 
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
