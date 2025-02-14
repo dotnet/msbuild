@@ -223,7 +223,7 @@ namespace Microsoft.Build.Internal
             }
 
             // ...or it looks like the whole thing is a big CDATA tag ...
-            bool startsWithCData = (innerXml.IndexOf("<![CDATA[", StringComparison.Ordinal) == 0);
+            bool startsWithCData = innerXml.AsSpan().TrimStart().StartsWith("<![CDATA[".AsSpan(), StringComparison.Ordinal);
 
             if (startsWithCData)
             {
