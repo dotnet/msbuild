@@ -28,7 +28,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             int t1 = Environment.TickCount;
             s.Serialize(w, manifest);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "ManifestWriter.Serialize t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"ManifestWriter.Serialize t={Environment.TickCount - t1}");
 
             w.Flush();
             m.Position = 0;
@@ -188,7 +188,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             Util.WriteLogFile(n + ".write.3-formatted.xml", s4);
 
             Util.CopyStream(s4, output);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "ManifestWriter.WriteManifest t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"ManifestWriter.WriteManifest t={Environment.TickCount - t1}");
         }
     }
 }
