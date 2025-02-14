@@ -95,6 +95,7 @@ extends:
       - job: Windows_NT
         pool:
           name: VSEngSS-MicroBuild2022-1ES
+          image: server2022-microbuildVS2022-Previous
           demands:
           - agent.os -equals Windows_NT
 
