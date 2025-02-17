@@ -610,8 +610,8 @@ namespace Microsoft.Build.Shared
 
                 MSBuildToolsDirectory32 = MSBuildToolsDirectoryRoot;
                 MSBuildToolsDirectory64 = existsCheck(potentialAmd64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "amd64") : CurrentMSBuildToolsDirectory;
-                MSBuildToolsDirectoryNET = @"C:\msbuild\msbuild_yk\msbuild\artifacts\bin\bootstrap\core";
-                MSBuildAssemblyDirectory = @"C:\msbuild\msbuild_yk\msbuild\artifacts\bin\bootstrap\core\sdk\9.0.200-preview.0.24603.3";
+                MSBuildToolsDirectoryNET = Environment.GetEnvironmentVariable("MSBuildToolsDirectoryNET") ?? "";
+                MSBuildAssemblyDirectory = Environment.GetEnvironmentVariable("MSBuildAssemblyDirectory") ?? "";
 #if RUNTIME_TYPE_NETCORE
                 // Fall back to "current" for any architecture since .NET SDK doesn't
                 // support cross-arch task invocations.

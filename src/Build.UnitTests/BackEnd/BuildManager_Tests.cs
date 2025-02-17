@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Xml;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -1726,7 +1725,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.0 task, we should
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly.
         /// </summary>
-        [Fact]
+        [WindowsFullFrameworkOnlyFact]
         public void CancelledBuildInTaskHostWithDelay40()
         {
             string contents = CleanupFileContents(@$"
@@ -4385,7 +4384,7 @@ $@"<Project InitialTargets=`Sleep`>
             }
         }
 
-        [Theory]
+        [WindowsFullFrameworkOnlyTheory]
         [InlineData("", false)] // regular task host, input logging disabled
         [InlineData("", true)] // regular task host, input logging enabled
         [InlineData("TaskHostFactory", false)] // OOP task host, input logging disabled

@@ -3,12 +3,11 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Build.Shared;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Xunit.Abstractions;
-using System.Linq;
 
 #nullable disable
 
@@ -20,6 +19,7 @@ namespace Microsoft.Build.UnitTests.Shared
 
         public static ArtifactsLocationAttribute ArtifactsLocationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<ArtifactsLocationAttribute>()
                                                    ?? throw new InvalidOperationException("This test assembly does not have the ArtifactsLocationAttribute");
+
 #if !FEATURE_RUN_EXE_IN_TESTS
         private static readonly string s_dotnetExePath = EnvironmentProvider.GetDotnetExePath();
 

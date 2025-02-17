@@ -335,6 +335,7 @@ namespace Microsoft.Build.BackEnd
                     // Create the node process
                     INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
                     Process msbuildProcess = nodeLauncher.Start(msbuildExecutableLocation, commandLineArgs, nodeId);
+
                     _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
 
                     // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID

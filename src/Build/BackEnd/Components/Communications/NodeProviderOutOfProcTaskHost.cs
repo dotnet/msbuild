@@ -391,7 +391,7 @@ namespace Microsoft.Build.BackEnd
                     s_msbuildName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
 
                     s_msbuildName ??= (hostContext & HandshakeOptions.NET) == HandshakeOptions.NET
-                            ? "dotnet.exe"
+                            ? (NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet")
                             : "MSBuild.exe";
                 }
 
@@ -463,14 +463,6 @@ namespace Microsoft.Build.BackEnd
             }
             else if (IsHandshakeOptionEnabled(HandshakeOptions.NET))
             {
-                // if we want some flexibility in the future, we can add a new environment variable for this.
-                var envTaskHostPathNet = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
-                if (envTaskHostPathNet != null && FileUtilities.FileExistsNoThrow(Path.Combine(envTaskHostPathNet, toolName)))
-                {
-                    s_baseTaskHostPathNet = envTaskHostPathNet;
-                }
-
-                // TODO Get path to msbuild.dll
                 msbuildAssemblyPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory, "MSBuild.dll");
                 toolPath = s_baseTaskHostPathNet;
             }
