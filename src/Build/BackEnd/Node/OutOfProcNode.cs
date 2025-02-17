@@ -583,27 +583,27 @@ namespace Microsoft.Build.Execution
         {
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
-#if RUNTIME_TYPE_NETCORE
                 if (packet is LogMessagePacketBase logMessage
-                    && logMessage.EventType == LoggingEventType.CustomEvent
-                    && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
+                    && logMessage.EventType == LoggingEventType.CustomEvent)
                 {
                     BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
 
                     // Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet<T>
                     // Since BinaryFormatter is deprecated in dotnet 8+, log error so users discover root cause easier
                     // then by reading CommTrace where it would be otherwise logged as critical infra error.
-                    _loggingService.LogError(_loggingContext?.BuildEventContext ?? BuildEventContext.Invalid, null, BuildEventFileInfo.Empty,
-                            "DeprecatedEventSerialization",
-                            buildEvent?.GetType().Name ?? string.Empty);
+#if RUNTIME_TYPE_NETCORE
+                    _loggingService.LogError(
+#else
+                    _loggingService.LogWarning(
+#endif
+                        _loggingContext?.BuildEventContext ?? BuildEventContext.Invalid, null, BuildEventFileInfo.Empty,
+                        "DeprecatedEventSerialization",
+                        buildEvent?.GetType().Name ?? string.Empty);
                 }
                 else
                 {
                     _nodeEndpoint.SendData(packet);
                 }
-#else
-                _nodeEndpoint.SendData(packet);
-#endif
             }
         }
 
