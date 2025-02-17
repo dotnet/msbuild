@@ -15,7 +15,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         #region Constructor
 
         /// <summary>
-        /// Default constructor needed for 
+        /// Default constructor needed for
         /// </summary>
         public NameValuePair()
         {

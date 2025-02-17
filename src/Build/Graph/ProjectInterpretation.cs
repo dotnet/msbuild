@@ -78,12 +78,14 @@ namespace Microsoft.Build.Graph
             public bool SkipIfNonexistent { get; }
         }
 
-        public IEnumerable<ReferenceInfo> GetReferences(ProjectInstance requesterInstance, ProjectCollection projectCollection, ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory)
+        public IEnumerable<ReferenceInfo> GetReferences(ProjectGraphNode projectGraphNode, ProjectCollection projectCollection, ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory)
         {
             IEnumerable<ProjectItemInstance> projectReferenceItems;
             IEnumerable<GlobalPropertiesModifier> globalPropertiesModifiers = null;
 
-            switch (GetProjectType(requesterInstance))
+            ProjectInstance requesterInstance = projectGraphNode.ProjectInstance;
+
+            switch (projectGraphNode.ProjectType)
             {
                 case ProjectType.OuterBuild:
                     projectReferenceItems = ConstructInnerBuildReferences(requesterInstance);
@@ -251,7 +253,7 @@ namespace Microsoft.Build.Graph
             {
                 ProjectGraphNode outerBuild = node.Value.GraphNode;
 
-                if (GetProjectType(outerBuild.ProjectInstance) == ProjectType.OuterBuild && outerBuild.ReferencingProjects.Count != 0)
+                if (outerBuild.ProjectType == ProjectType.OuterBuild && outerBuild.ReferencingProjects.Count != 0)
                 {
                     foreach (ProjectGraphNode innerBuild in outerBuild.ProjectReferences)
                     {
@@ -524,18 +526,18 @@ namespace Microsoft.Build.Graph
                 return new TargetsToPropagate(targetsForOuterBuild.ToImmutable(), targetsForInnerBuild.ToImmutable());
             }
 
-            public ImmutableList<string> GetApplicableTargetsForReference(ProjectInstance reference)
+            public ImmutableList<string> GetApplicableTargetsForReference(ProjectGraphNode projectGraphNode)
             {
                 ImmutableList<string> RemoveNonexistentTargetsIfSkippable(ImmutableList<TargetSpecification> targets)
                 {
                     // Keep targets that are non-skippable or that exist but are skippable.
                     return targets
-                        .Where(t => !t.SkipIfNonexistent || reference.Targets.ContainsKey(t.Target))
+                        .Where(t => !t.SkipIfNonexistent || projectGraphNode.ProjectInstance.Targets.ContainsKey(t.Target))
                         .Select(t => t.Target)
                         .ToImmutableList();
                 }
 
-                return GetProjectType(reference) switch
+                return projectGraphNode.ProjectType switch
                 {
                     ProjectType.InnerBuild => RemoveNonexistentTargetsIfSkippable(_allTargets),
                     ProjectType.OuterBuild => RemoveNonexistentTargetsIfSkippable(_outerBuildTargets),
@@ -545,13 +547,15 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        public bool RequiresTransitiveProjectReferences(ProjectInstance projectInstance)
+        public bool RequiresTransitiveProjectReferences(ProjectGraphNode projectGraphNode)
         {
             // Outer builds do not get edges based on ProjectReference or their transitive closure, only inner builds do.
-            if (GetProjectType(projectInstance) == ProjectType.OuterBuild)
+            if (projectGraphNode.ProjectType == ProjectType.OuterBuild)
             {
                 return false;
             }
+
+            ProjectInstance projectInstance = projectGraphNode.ProjectInstance;
 
             // special case for Quickbuild which updates msbuild binaries independent of props/targets. Remove this when all QB repos will have
             // migrated to new enough Visual Studio versions whose Microsoft.Managed.After.Targets enable transitive references.

@@ -58,7 +58,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     </Target>
 
                     <Target Name='CallTarget'>
-                        <CallTarget Targets='SelfTarget'/>  
+                        <CallTarget Targets='SelfTarget'/>
                     </Target>
 
                     <Target Name='SelfTarget'>
@@ -558,9 +558,7 @@ BuildEngine5.BuildProjectFilesInParallel(
 
             TransientTestFile CreateTmpFile(TestEnvironment env)
             {
-                return NativeMethodsShared.IsMono && NativeMethodsShared.IsOSX
-                                                ? env.CreateFile(new TransientTestFolder(Path.Combine(Directory.GetCurrentDirectory(), Guid.NewGuid().ToString("N"))))
-                                                : env.CreateFile();
+                return env.CreateFile();
             }
         }
 

@@ -44,7 +44,7 @@ namespace Microsoft.Build.Construction
         public string FullName { get; }
 
         /// <summary>
-        /// Given a configuration name and a platform name, compute the full name 
+        /// Given a configuration name and a platform name, compute the full name
         /// of this configuration
         /// </summary>
         internal static string ComputeFullName(string configurationName, string platformName)

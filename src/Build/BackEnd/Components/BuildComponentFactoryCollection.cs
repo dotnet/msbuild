@@ -89,7 +89,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Shuts down all factories registered to this component factory collection. 
+        /// Shuts down all factories registered to this component factory collection.
         /// </summary>
         public void ShutdownComponents()
         {

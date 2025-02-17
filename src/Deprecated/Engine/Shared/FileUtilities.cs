@@ -17,7 +17,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 {
     /// <summary>
     /// This class contains utility methods for file IO.
-    /// PERF\COVERAGE NOTE: Try to keep classes in 'shared' as granular as possible. All the methods in 
+    /// PERF\COVERAGE NOTE: Try to keep classes in 'shared' as granular as possible. All the methods in
     /// each class get pulled into the resulting assembly.
     /// </summary>
     /// <owner>SumedhK</owner>
@@ -31,7 +31,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <owner>SumedhK</owner>
         internal static class ItemSpecModifiers
         {
-            // NOTE: If you add an item here that starts with a new letter, you need to update the case 
+            // NOTE: If you add an item here that starts with a new letter, you need to update the case
             // statements in IsItemSpecModifier and IsDerivableItemSpecModifier.
             internal const string FullPath = "FullPath";
             internal const string RootDir = "RootDir";
@@ -97,21 +97,21 @@ namespace Microsoft.Build.BuildEngine.Shared
                 return false;
             }
 
-            /* 
+            /*
              * What follows requires some explanation.
-             * 
-             * This function is called many times and slowness here will be amplified 
+             *
+             * This function is called many times and slowness here will be amplified
              * in critical performance scenarios.
-             * 
+             *
              * The following switch statement attempts to identify item spec modifiers that
-             * have the exact case that our constants in ItemSpecModifiers have. This is the 
+             * have the exact case that our constants in ItemSpecModifiers have. This is the
              * 99% case.
-             * 
+             *
              * Further, the switch statement can identify certain cases in which there is
              * definitely no chance that 'name' is an item spec modifier. For example, a
              * 7 letter 'name' that doesn't start with 'r' or 'R' can't be RootDir and
              * therefore is not an item spec modifier.
-             * 
+             *
              */
             switch (name.Length)
             {
@@ -263,7 +263,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 {
                     if (name[0] == 'R' || name[0] == 'r')
                     {
-                        // The only 12 letter ItemSpecModifier that starts with 'R' is 'RecursiveDir' 
+                        // The only 12 letter ItemSpecModifier that starts with 'R' is 'RecursiveDir'
                         return false;
                     }
                 }
@@ -274,7 +274,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         /// <summary>
         /// Performs path manipulations on the given item-spec as directed.
-        /// 
+        ///
         /// Supported modifiers:
         ///     %(FullPath)         = full path of item
         ///     %(RootDir)          = root directory of item
@@ -287,7 +287,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         ///     %(ModifiedTime)     = last write time of item
         ///     %(CreatedTime)      = creation time of item
         ///     %(AccessedTime)     = last access time of item
-        /// 
+        ///
         /// NOTES:
         /// 1) This method always returns an empty string for the %(RecursiveDir) modifier because it does not have enough
         ///    information to compute it -- only the BuildItem class can compute this modifier.
@@ -298,7 +298,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// 1) successive slashes are combined into 1 slash
         /// 2) trailing periods are discarded
         /// 3) forward slashes are changed to back-slashes
-        /// 
+        ///
         /// As a result, we cannot rely on any file-spec that has passed through a Path method to remain the same. We will
         /// therefore not bother preserving slashes and periods when file-specs are transformed.
         /// </remarks>
@@ -459,7 +459,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                         }
                         else
                         {
-                            // File does not exist, or path is a directory                        
+                            // File does not exist, or path is a directory
                             modifiedItemSpec = String.Empty;
                         }
                     }
@@ -477,7 +477,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                         }
                         else
                         {
-                            // File does not exist, or path is a directory                        
+                            // File does not exist, or path is a directory
                             modifiedItemSpec = String.Empty;
                         }
                     }
@@ -573,7 +573,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Indicates if the given character is a slash. 
+        /// Indicates if the given character is a slash.
         /// </summary>
         /// <owner>SumedhK</owner>
         /// <param name="c"></param>
@@ -722,7 +722,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <summary>
         /// Gets a file info object for the specified file path. If the file path
         /// is invalid, or is a directory, or cannot be accessed, or does not exist,
-        /// it returns null rather than throwing or returning a FileInfo around a non-existent file. 
+        /// it returns null rather than throwing or returning a FileInfo around a non-existent file.
         /// This allows it to be called where File.Exists() (which never throws, and returns false
         /// for directories) was called - but with the advantage that a FileInfo object is returned
         /// that can be queried (e.g., for LastWriteTime) without hitting the disk again.
@@ -784,11 +784,11 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location. 
+        /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location.
         /// Throws UriFormatException.
         /// </summary>
         /// <param name="basePath">
-        /// The base path we want to relativize to. Must be absolute.  
+        /// The base path we want to relativize to. Must be absolute.
         /// Should <i>not</i> include a filename as the last segment will be interpreted as a directory.
         /// </param>
         /// <param name="path">

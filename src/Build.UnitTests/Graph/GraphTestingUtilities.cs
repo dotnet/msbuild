@@ -65,7 +65,7 @@ namespace Microsoft.Build.Graph.UnitTests
             foreach (ProjectGraphNode outerBuildReferencer in outerBuild.ReferencingProjects)
             {
                 ProjectGraphNode[] innerBuilds = outerBuildReferencer.ProjectReferences
-                    .Where(p => IsInnerBuild(p) && p.ProjectInstance.FullPath == outerBuild.ProjectInstance.FullPath)
+                    .Where(p => p.ProjectType == ProjectInterpretation.ProjectType.InnerBuild && p.ProjectInstance.FullPath == outerBuild.ProjectInstance.FullPath)
                     .ToArray();
 
                 innerBuilds.Length.ShouldBe(expectedInnerBuildCount);
@@ -91,7 +91,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             additionalGlobalProperties ??= new Dictionary<string, string>();
 
-            IsNotMultitargeting(node).ShouldBeTrue();
+            node.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.NonMultitargeting);
             node.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
             node.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
         }
@@ -100,8 +100,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             additionalGlobalProperties.ShouldNotBeNull();
 
-            IsOuterBuild(outerBuild).ShouldBeTrue();
-            IsInnerBuild(outerBuild).ShouldBeFalse();
+            outerBuild.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.OuterBuild);
 
             outerBuild.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
             outerBuild.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
@@ -114,8 +113,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             additionalGlobalProperties.ShouldNotBeNull();
 
-            IsOuterBuild(innerBuild).ShouldBeFalse();
-            IsInnerBuild(innerBuild).ShouldBeTrue();
+            innerBuild.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
 
             var innerBuildPropertyValue = innerBuild.ProjectInstance.GetPropertyValue(InnerBuildPropertyName);
 
@@ -130,21 +128,6 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        internal static bool IsOuterBuild(ProjectGraphNode project)
-        {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.OuterBuild;
-        }
-
-        internal static bool IsInnerBuild(ProjectGraphNode project)
-        {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.InnerBuild;
-        }
-
-        internal static bool IsNotMultitargeting(ProjectGraphNode project)
-        {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.NonMultitargeting;
-        }
-
         internal static ProjectGraphNode GetFirstNodeWithProjectNumber(ProjectGraph graph, int projectNum)
         {
             return GetNodesWithProjectNumber(graph, projectNum).First();
@@ -157,7 +140,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
         internal static ProjectGraphNode GetOuterBuild(ProjectGraph graph, int projectNumber)
         {
-            return GetNodesWithProjectNumber(graph, projectNumber).FirstOrDefault(IsOuterBuild);
+            return GetNodesWithProjectNumber(graph, projectNumber).FirstOrDefault(i => i.ProjectType == ProjectInterpretation.ProjectType.OuterBuild);
         }
 
         internal static IReadOnlyCollection<ProjectGraphNode> GetInnerBuilds(ProjectGraph graph, int projectNumber)
@@ -171,7 +154,7 @@ namespace Microsoft.Build.Graph.UnitTests
             else
             {
                 var innerBuilds = GetNodesWithProjectNumber(graph, projectNumber)
-                    .Where(p => IsInnerBuild(p) && p.ProjectInstance.FullPath.Equals(outerBuild.ProjectInstance.FullPath))
+                    .Where(p => p.ProjectType == ProjectInterpretation.ProjectType.InnerBuild && p.ProjectInstance.FullPath.Equals(outerBuild.ProjectInstance.FullPath))
                     .ToArray();
 
                 innerBuilds.ShouldNotBeEmpty();
