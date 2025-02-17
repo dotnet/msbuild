@@ -451,7 +451,7 @@ dotnet_diagnostic.xUnit2013.severity = none
 
 
 # Build Checks
-[*.{csproj,proj,metaproj,props}]
+[*.{csproj,proj,metaproj,props,swixproj}]
 build_check.BC0201.Severity=none
 build_check.BC0202.Severity=none
 build_check.BC0203.Severity=none
