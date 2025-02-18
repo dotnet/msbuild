@@ -721,7 +721,7 @@ namespace Microsoft.Build.Construction
             => _dirtyReason == null ? null : String.Format(CultureInfo.InvariantCulture, _dirtyReason, _dirtyParameter);
 
         /// <summary>
-        /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later.
+        /// Initialize an in-memory, empty ProjectRootElement instance that CANNOT be saved later.
         /// The ProjectRootElement will not be marked dirty.
         /// Uses the global project collection.
         /// </summary>
