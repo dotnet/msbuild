@@ -558,7 +558,6 @@ namespace Microsoft.Build.BackEnd
                 nodeId,
                 this,
                 new Handshake(hostContext),
-                NodeContextCreated,
                 NodeContextTerminated,
                 1);
 
@@ -568,7 +567,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Method called when a context created.
         /// </summary>
-        private void NodeContextCreated(NodeContext context)
+        protected override void CreateNode(NodeContext context)
         {
             _nodeContexts[(HandshakeOptions)context.NodeId] = context;
 

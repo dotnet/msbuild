@@ -68,12 +68,6 @@ namespace Microsoft.Build.BackEnd
         private readonly ConcurrentDictionary<string, byte /*void*/> _processesToIgnore = new();
 
         /// <summary>
-        /// Delegate used to tell the node provider that a context has been created.
-        /// </summary>
-        /// <param name="context">The created node context.</param>
-        internal delegate void NodeContextCreatedDelegate(NodeContext context);
-
-        /// <summary>
         /// Delegate used to tell the node provider that a context has terminated.
         /// </summary>
         /// <param name="nodeId">The id of the node which terminated.</param>
@@ -180,6 +174,8 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        protected abstract void CreateNode(NodeContext context);
+
         /// <summary>
         /// Finds or creates a child processes which can act as a node.
         /// </summary>
@@ -188,7 +184,6 @@ namespace Microsoft.Build.BackEnd
             int nextNodeId,
             INodePacketFactory factory,
             Handshake hostHandshake,
-            NodeContextCreatedDelegate createNode,
             NodeContextTerminateDelegate terminateNode,
             int numberOfNodesToCreate)
         {
@@ -380,7 +375,7 @@ namespace Microsoft.Build.BackEnd
             {
                 NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode);
                 nodeContexts.Enqueue(nodeContext);
-                createNode(nodeContext);
+                CreateNode(nodeContext);
             }
         }
 
