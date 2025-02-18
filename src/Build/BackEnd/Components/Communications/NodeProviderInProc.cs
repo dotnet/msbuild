@@ -285,7 +285,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Deserializes and routes a packet.  Not used in the in-proc node.
         /// </summary>
-        public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
+        public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslatorBase translator)
         {
             // Not used
             ErrorUtilities.ThrowInternalErrorUnreachable();

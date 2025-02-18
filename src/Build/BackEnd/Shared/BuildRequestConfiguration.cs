@@ -957,9 +957,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        internal static BuildRequestConfiguration FactoryForDeserialization(ITranslator translator)
+        internal static BuildRequestConfiguration FactoryForDeserialization(ITranslatorBase translator)
         {
-            return new BuildRequestConfiguration(translator);
+            return new BuildRequestConfiguration((ITranslator)translator);
         }
 
         #endregion

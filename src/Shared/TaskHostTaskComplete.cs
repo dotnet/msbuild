@@ -255,10 +255,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        internal static INodePacket FactoryForDeserialization(ITranslator translator)
+        internal static INodePacket FactoryForDeserialization(ITranslatorBase translator)
         {
             TaskHostTaskComplete taskComplete = new TaskHostTaskComplete();
-            taskComplete.Translate(translator);
+            taskComplete.Translate((ITranslator)translator);
             return taskComplete;
         }
     }

@@ -96,9 +96,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         public NodePacketType Type => NodePacketType.ResolveSdkResponse;
 
-        public static INodePacket FactoryForDeserialization(ITranslator translator)
+        public static INodePacket FactoryForDeserialization(ITranslatorBase translator)
         {
-            return new SdkResult(translator);
+            return new SdkResult((ITranslator)translator);
         }
 
         public override bool Equals(object obj)

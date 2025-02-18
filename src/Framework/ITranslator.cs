@@ -47,6 +47,17 @@ namespace Microsoft.Build.BackEnd
         ReadFromStream
     }
 
+    internal enum ProtocolType
+    {
+        Binary,
+        Json
+    }
+
+    internal interface ITranslatorBase
+    {
+        ProtocolType Protocol { get; }
+    }
+
     /// <summary>
     /// This interface represents an object which aids objects in serializing and
     /// deserializing INodePackets.
@@ -64,7 +75,7 @@ namespace Microsoft.Build.BackEnd
     ///    that by ensuring a single Translate method on a given object can handle both reads and
     ///    writes without referencing any field more than once.
     /// </remarks>
-    internal interface ITranslator : IDisposable
+    internal interface ITranslator : ITranslatorBase, IDisposable
     {
         /// <summary>
         /// Returns the current serialization mode.

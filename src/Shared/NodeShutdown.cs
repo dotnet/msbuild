@@ -111,10 +111,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory method for deserialization
         /// </summary>
-        internal static NodeShutdown FactoryForDeserialization(ITranslator translator)
+        internal static NodeShutdown FactoryForDeserialization(ITranslatorBase translator)
         {
             NodeShutdown shutdown = new NodeShutdown();
-            shutdown.Translate(translator);
+            shutdown.Translate((ITranslator)translator);
             return shutdown;
         }
 

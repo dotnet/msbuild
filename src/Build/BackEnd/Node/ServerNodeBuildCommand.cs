@@ -119,10 +119,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        internal static INodePacket FactoryForDeserialization(ITranslator translator)
+        internal static INodePacket FactoryForDeserialization(ITranslatorBase translator)
         {
             ServerNodeBuildCommand command = new();
-            command.Translate(translator);
+            command.Translate((ITranslator)translator);
 
             return command;
         }

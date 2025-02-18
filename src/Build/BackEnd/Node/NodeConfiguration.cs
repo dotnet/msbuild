@@ -184,10 +184,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        internal static INodePacket FactoryForDeserialization(ITranslator translator)
+        internal static INodePacket FactoryForDeserialization(ITranslatorBase translator)
         {
             NodeConfiguration configuration = new NodeConfiguration();
-            configuration.Translate(translator);
+            configuration.Translate((ITranslator)translator);
 
             return configuration;
         }

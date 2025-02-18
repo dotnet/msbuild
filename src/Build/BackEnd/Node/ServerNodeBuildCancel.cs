@@ -11,7 +11,7 @@ namespace Microsoft.Build.BackEnd
         {
         }
 
-        internal static INodePacket FactoryForDeserialization(ITranslator translator)
+        internal static INodePacket FactoryForDeserialization(ITranslatorBase translator)
         {
             return new ServerNodeBuildCancel();
         }
