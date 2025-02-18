@@ -173,7 +173,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 an.SetPublicKey(pk);
                 byte[] pkt = an.GetPublicKeyToken();
 
-                publicKeyToken = BitConverter.ToString(pkt).Replace("-", "");
+                publicKeyToken =
+#if NET
+                    Convert.ToHexString(pkt);
+#else
+                    BitConverter.ToString(pkt).Replace("-", "");
+#endif
             }
 
             if (!String.IsNullOrEmpty(publicKeyToken))

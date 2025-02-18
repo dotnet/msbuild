@@ -8,11 +8,6 @@ namespace Microsoft.Build.Shared
 {
     internal static partial class EnvironmentUtilities
     {
-        public static bool Is64BitProcess => Marshal.SizeOf<IntPtr>() == 8;
-
-        public static bool Is64BitOperatingSystem =>
-            Environment.Is64BitOperatingSystem;
-
         public static bool IsWellKnownEnvironmentDerivedProperty(string propertyName)
         {
             return propertyName.StartsWith("MSBUILD", StringComparison.OrdinalIgnoreCase) ||

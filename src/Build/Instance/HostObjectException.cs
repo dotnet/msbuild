@@ -40,7 +40,7 @@ namespace Microsoft.Build.Execution
             Exception innerException) :
             base(ErrorMessagePrefix
                 + string.Format(ErrorMessageProjectTargetTask, projectFile, targetName, taskName)
-                + (innerException == null ? string.Empty : ("\n=============\n" + innerException.ToString() + "\n\n")),
+                + (innerException == null ? string.Empty : ($"\n=============\n{innerException}\n\n")),
                 innerException)
         {
         }

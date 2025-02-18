@@ -495,7 +495,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (localPipeServer.IsConnected)
                 {
-#if NETCOREAPP // OperatingSystem.IsWindows() is new in .NET 5.0
+#if NET // OperatingSystem.IsWindows() is new in .NET 5.0
                     if (OperatingSystem.IsWindows())
 #endif
                     {
@@ -523,7 +523,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APM
             IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-            Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
+            Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length).AsTask();
 #endif
 
             bool exitLoop = false;
@@ -612,7 +612,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APM
                             result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
+                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length).AsTask();
 #endif
                         }
 

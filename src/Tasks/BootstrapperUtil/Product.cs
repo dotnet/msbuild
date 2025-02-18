@@ -168,7 +168,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
             else
             {
-                Debug.WriteLine(String.Format(CultureInfo.CurrentCulture, "A package with culture '{0}' has already been added to product '{1}'", package.Culture.ToLowerInvariant(), ProductCode));
+                Debug.WriteLine($"A package with culture '{package.Culture.ToLowerInvariant()}' has already been added to product '{ProductCode}'");
             }
         }
 

@@ -43,17 +43,21 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                if (dashPosition != -1)
+                if (dashPosition >= 0)
                 {
                     // This is a version range.
-                    OldVersionLow = new Version(oldVersion.Substring(0, dashPosition));
-                    OldVersionHigh = new Version(oldVersion.Substring(dashPosition + 1));
+#if NET
+                    OldVersionLow = Version.Parse(oldVersion.AsSpan(0, dashPosition));
+                    OldVersionHigh = Version.Parse(oldVersion.AsSpan(dashPosition + 1));
+#else
+                    OldVersionLow = Version.Parse(oldVersion.Substring(0, dashPosition));
+                    OldVersionHigh = Version.Parse(oldVersion.Substring(dashPosition + 1));
+#endif
                 }
                 else
                 {
                     // This is a single version.
-                    OldVersionLow = new Version(oldVersion);
-                    OldVersionHigh = new Version(oldVersion);
+                    OldVersionLow = OldVersionHigh = new Version(oldVersion);
                 }
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))

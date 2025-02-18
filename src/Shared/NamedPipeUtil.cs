@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -10,10 +11,12 @@ namespace Microsoft.Build.Shared
     {
         internal static string GetPlatformSpecificPipeName(int? processId = null)
         {
-            if (processId is null)
-            {
-                processId = Process.GetCurrentProcess().Id;
-            }
+            processId ??=
+#if NET
+                Environment.ProcessId;
+#else
+                Process.GetCurrentProcess().Id;
+#endif
 
             string pipeName = $"MSBuild{processId}";
 

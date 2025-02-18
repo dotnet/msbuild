@@ -96,7 +96,7 @@ namespace Microsoft.Build.Logging
                 if (!string.IsNullOrEmpty(_loggerClassName) &&
                     !string.IsNullOrEmpty(_loggerAssembly.AssemblyFile))
                 {
-                    return _loggerClassName + ":" + _loggerAssembly.AssemblyFile;
+                    return $"{_loggerClassName}:{_loggerAssembly.AssemblyFile}";
                 }
                 else if (!string.IsNullOrEmpty(_loggerClassName))
                 {

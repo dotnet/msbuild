@@ -22,7 +22,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// The cache for AppDomain lifetime objects.
         /// </summary>
-        private static Lazy<ConcurrentDictionary<object, object>> s_appDomainLifetimeObjects = new Lazy<ConcurrentDictionary<object, object>>();
+        private static readonly Lazy<ConcurrentDictionary<object, object>> s_appDomainLifetimeObjects = new Lazy<ConcurrentDictionary<object, object>>();
 
         /// <summary>
         /// The cache for Build lifetime objects.

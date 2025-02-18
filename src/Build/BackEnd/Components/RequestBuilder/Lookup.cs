@@ -1373,7 +1373,7 @@ namespace Microsoft.Build.BackEnd
                 _modifies = null;
                 _properties = properties;
                 _propertySets = null;
-                _threadIdThatEnteredScope = Thread.CurrentThread.ManagedThreadId;
+                _threadIdThatEnteredScope = Environment.CurrentManagedThreadId;
                 _truncateLookupsAtThisScope = false;
             }
 

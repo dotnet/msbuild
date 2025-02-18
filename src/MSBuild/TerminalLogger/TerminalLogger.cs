@@ -13,8 +13,10 @@ using System.Diagnostics;
 using Microsoft.Build.Framework.Logging;
 using System.Globalization;
 
-#if NET7_0_OR_GREATER
+#if NET
 using System.Diagnostics.CodeAnalysis;
+using System.Buffers;
+
 #endif
 #if NETFRAMEWORK
 using Microsoft.IO;
@@ -34,15 +36,10 @@ internal sealed partial class TerminalLogger : INodeLogger
 {
     private const string FilePathPattern = " -> ";
 
-#if NET7_0_OR_GREATER
-    [StringSyntax(StringSyntaxAttribute.Regex)]
-    private const string ImmediateMessagePattern = @"\[CredentialProvider\]|--interactive";
-    private const RegexOptions Options = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture;
-
-    [GeneratedRegex(ImmediateMessagePattern, Options)]
-    private static partial Regex ImmediateMessageRegex();
+#if NET
+    private static readonly SearchValues<string> _immediateMessageKeywords = SearchValues.Create(["[CredentialProvider]", "--interactive"], StringComparison.OrdinalIgnoreCase);
 #else
-    private static readonly string[] _immediateMessageKeywords = { "[CredentialProvider]", "--interactive" };
+    private static readonly string[] _immediateMessageKeywords = ["[CredentialProvider]", "--interactive"];
 #endif
 
     private static readonly string[] newLineStrings = { "\r\n", "\n" };
@@ -185,11 +182,6 @@ internal sealed partial class TerminalLogger : INodeLogger
             "WARNINGEVENT",
             "ERROREVENT"
     };
-
-    /// <summary>
-    /// The two directory separator characters to be passed to methods like <see cref="String.IndexOfAny(char[])"/>.
-    /// </summary>
-    private static readonly char[] PathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
 
     /// <summary>
     /// One summary per finished project test run.
@@ -974,8 +966,8 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <param name="message">Raised event.</param>
     /// <returns>true if marker is detected.</returns>
     private bool IsImmediateMessage(string message) =>
-#if NET7_0_OR_GREATER
-        ImmediateMessageRegex().IsMatch(message);
+#if NET
+        message.AsSpan().ContainsAny(_immediateMessageKeywords);
 #else
         _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
 #endif
@@ -1137,7 +1129,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             return null;
         }
 
-        int index = path.LastIndexOfAny(PathSeparators);
+        int index = path.AsSpan().LastIndexOfAny(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         return index >= 0
             ? $"{path.Substring(0, index + 1)}{AnsiCodes.MakeBold(path.Substring(index + 1))}"
             : path;
@@ -1235,7 +1227,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         builder.Append($"{category} {code}: ");
 
         // render multi-line message in a special way
-        if (message.IndexOf('\n') >= 0)
+        if (message.Contains('\n'))
         {
             // Place the multiline message under the project in case of minimal and higher verbosity.
             string[] lines = message.Split(newLineStrings, StringSplitOptions.None);

@@ -79,7 +79,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Whether the cache should log activity to the Debug.Out stream
         /// </summary>
-        private static bool s_debugLogCacheActivity = Environment.GetEnvironmentVariable("MSBUILDDEBUGXMLCACHE") == "1";
+        private static readonly bool s_debugLogCacheActivity = Environment.GetEnvironmentVariable("MSBUILDDEBUGXMLCACHE") == "1";
 
         /// <summary>
         /// Whether the cache should check file content for cache entry invalidation.
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// Value shall be true only in case of testing. Outside QA tests it shall be false.
         /// </remarks>
-        private static bool s_сheckFileContent = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT"));
+        private static readonly bool s_сheckFileContent = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT"));
 
 #if DEBUG
         /// <summary>
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Evaluation
             /// Shall be always 0 or 1. Reentrance to the Get function (value > 1) could lead to race condition.
             /// </summary>
             [ThreadStatic]
-            private static int s_getEntriesNumber = 0;
+            private static int s_getEntriesNumber;
 
             public ReentrancyGuard()
             {
@@ -674,7 +674,7 @@ namespace Microsoft.Build.Evaluation
             if (s_debugLogCacheActivity)
             {
                 string prefix = OutOfProcNode.IsOutOfProcNode ? "C" : "P";
-                Trace.WriteLine(prefix + " " + Process.GetCurrentProcess().Id + " | " + message + param1);
+                Trace.WriteLine($"{prefix} {Process.GetCurrentProcess().Id} | {message}{param1}");
             }
         }
     }

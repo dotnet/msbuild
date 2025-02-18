@@ -97,7 +97,7 @@ namespace Microsoft.Build.Shared
         private const string dotNetFrameworkRegistryKeyV20 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionV20;
 
         internal static string dotNetFrameworkVersionFolderPrefixV30 = NativeMethodsShared.IsWindows ? "v3.0" : "3.0"; // v3.0 is for WinFx.
-        private static string s_dotNetFrameworkRegistryKeyV30 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30 + "\\Setup";
+        private static readonly string s_dotNetFrameworkRegistryKeyV30 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30 + "\\Setup";
 
 #if FEATURE_WIN32_REGISTRY
         private const string fallbackDotNetFrameworkSdkRegistryInstallPath = "SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows";
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Shared
         private const string fullDotNetFrameworkSdkRegistryPathForV35ToolsOnManagedToolsSDK80A = "HKEY_LOCAL_MACHINE\\" + dotNetFrameworkSdkRegistryPathForV35ToolsOnManagedToolsSDK80A;
 
         internal static string dotNetFrameworkVersionFolderPrefixV35 = NativeMethodsShared.IsWindows ? "v3.5" : "3.5"; // v3.5 is for Orcas.
-        private static string s_dotNetFrameworkRegistryKeyV35 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV35;
+        private static readonly string s_dotNetFrameworkRegistryKeyV35 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV35;
 
         internal const string fullDotNetFrameworkSdkRegistryKeyV35OnVS10 = fullDotNetFrameworkSdkRegistryPathForV35ToolsOnWinSDK70A;
         internal const string fullDotNetFrameworkSdkRegistryKeyV35OnVS11 = fullDotNetFrameworkSdkRegistryPathForV35ToolsOnManagedToolsSDK80A;
@@ -512,7 +512,7 @@ namespace Microsoft.Build.Shared
                                 fallbackDotNetFrameworkSdkRegistryInstallPath,
                                 fallbackDotNetFrameworkSdkInstallKeyValue);
 
-                        if (EnvironmentUtilities.Is64BitProcess && s_fallbackDotNetFrameworkSdkInstallPath == null)
+                        if (Environment.Is64BitProcess && s_fallbackDotNetFrameworkSdkInstallPath == null)
                         {
                             // Since we're 64-bit, what we just checked was the 64-bit fallback key -- so now let's
                             // check the 32-bit one too, just in case.
@@ -773,8 +773,7 @@ namespace Microsoft.Build.Shared
         {
             if (!NativeMethodsShared.IsWindows)
             {
-                if (!string.IsNullOrEmpty(prefix)
-                    && prefix.Substring(0, 1).Equals("v", StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(prefix) && prefix[0] is 'v' or 'V')
                 {
                     prefix = prefix.Substring(1);
                 }
@@ -813,8 +812,12 @@ namespace Microsoft.Build.Shared
                 // the path is something like 'C:\MyPath\64\Framework64'.  9 = length of 'Framework', to make the index match
                 // the location of the '64'.
                 int indexOf64 = indexOfFramework64 + 9;
-                string tempLocation = baseLocation;
-                baseLocation = tempLocation.Substring(0, indexOf64) + tempLocation.Substring(indexOf64 + 2, tempLocation.Length - indexOf64 - 2);
+                baseLocation =
+#if NET
+                    string.Concat(baseLocation.AsSpan(0, indexOf64), baseLocation.AsSpan(indexOf64 + 2));
+#else
+                    baseLocation.Substring(0, indexOf64) + baseLocation.Substring(indexOf64 + 2);
+#endif
             }
             else if (indexOfFramework64 == -1 && architecture == DotNetFrameworkArchitecture.Bitness64)
             {

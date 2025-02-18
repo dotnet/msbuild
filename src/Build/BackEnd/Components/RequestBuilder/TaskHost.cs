@@ -42,7 +42,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Help diagnose tasks that log after they return.
         /// </summary>
-        private static bool s_breakOnLogAfterTaskReturns = Environment.GetEnvironmentVariable("MSBUILDBREAKONLOGAFTERTASKRETURNS") == "1";
+        private static readonly bool s_breakOnLogAfterTaskReturns = Environment.GetEnvironmentVariable("MSBUILDBREAKONLOGAFTERTASKRETURNS") == "1";
 
         /// <summary>
         /// The build component host
@@ -357,7 +357,7 @@ namespace Microsoft.Build.BackEnd
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
                 ErrorUtilities.VerifyThrow(_yieldThreadId == -1, "Cannot call Yield() while yielding.");
-                _yieldThreadId = Thread.CurrentThread.ManagedThreadId;
+                _yieldThreadId = Environment.CurrentManagedThreadId;
                 MSBuildEventSource.Log.ExecuteTaskYieldStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 builderCallback.Yield();
             }
@@ -386,7 +386,7 @@ namespace Microsoft.Build.BackEnd
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
                 ErrorUtilities.VerifyThrow(_yieldThreadId != -1, "Cannot call Reacquire() before Yield().");
-                ErrorUtilities.VerifyThrow(_yieldThreadId == Thread.CurrentThread.ManagedThreadId, "Cannot call Reacquire() on thread {0} when Yield() was called on thread {1}", Thread.CurrentThread.ManagedThreadId, _yieldThreadId);
+                ErrorUtilities.VerifyThrow(_yieldThreadId == Environment.CurrentManagedThreadId, "Cannot call Reacquire() on thread {0} when Yield() was called on thread {1}", Environment.CurrentManagedThreadId, _yieldThreadId);
                 MSBuildEventSource.Log.ExecuteTaskYieldStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 MSBuildEventSource.Log.ExecuteTaskReacquireStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 builderCallback.Reacquire();

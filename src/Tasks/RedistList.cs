@@ -372,7 +372,7 @@ namespace Microsoft.Build.Tasks
                 throw new ArgumentNullException(nameof(assemblyName));
             }
 
-            int i = assemblyName.IndexOf(",", StringComparison.Ordinal);
+            int i = assemblyName.IndexOf(',');
             return i > 0 ? assemblyName.Substring(0, i) : assemblyName;
         }
 
@@ -794,7 +794,7 @@ namespace Microsoft.Build.Tasks
                         {
                             // When comparing the assembly entries we want to compare the FullName which is a formatted as name, version, publicKeyToken and culture and whether the entry is a redistroot flag
                             // We do not need to add the redistName and the framework directory because this will be the same for all entries in the current redist list being read.
-                            string hashIndex = String.Format(CultureInfo.InvariantCulture, "{0},{1}", newEntry.FullName, newEntry.IsRedistRoot == null ? "null" : newEntry.IsRedistRoot.ToString());
+                            string hashIndex = $"{newEntry.FullName},{(newEntry.IsRedistRoot == null ? "null" : newEntry.IsRedistRoot.ToString())}";
 
                             assemblyEntries.TryGetValue(hashIndex, out AssemblyEntry dictionaryEntry);
                             // If the entry is not in the dictionary or the entry is in the dictionary but the new entry has the ingac flag true, make sure the dictionary contains the entry with the ingac true.

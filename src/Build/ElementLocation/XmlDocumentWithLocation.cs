@@ -27,7 +27,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Used to cache tag names in loaded files.
         /// </summary>
-        private static NameTable s_nameTable = new XmlNameTableThreadSafe();
+        private static readonly NameTable s_nameTable = new XmlNameTableThreadSafe();
 
         /// <summary>
         /// Whether we can selectively load as read-only (eg just when in program files directory)

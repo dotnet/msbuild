@@ -19,7 +19,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Synchronizes access to the staScheduler field.
         /// </summary>
-        private static Object s_staSchedulerSync = new Object();
+        private static readonly Object s_staSchedulerSync = new Object();
 
         /// <summary>
         /// The singleton STA scheduler object.
@@ -155,7 +155,7 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// The current queue of tasks.
             /// </summary>
-            private ConcurrentQueue<Task> _queuedTasks = new ConcurrentQueue<Task>();
+            private readonly ConcurrentQueue<Task> _queuedTasks = new ConcurrentQueue<Task>();
 
             /// <summary>
             /// Returns the list of queued tasks.

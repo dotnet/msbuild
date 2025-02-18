@@ -70,7 +70,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Additional level of caching kept at the process level.
         /// </summary>
-        private static ConcurrentDictionary<string, FileState> s_processWideFileStateCache = new ConcurrentDictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, FileState> s_processWideFileStateCache = new ConcurrentDictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// XML tables of installed assemblies.

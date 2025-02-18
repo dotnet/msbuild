@@ -68,7 +68,7 @@ namespace Microsoft.Build.Shared.Debugging
 
         public static CommonWriterType StdOutWriter = (id, callsite, args) => Console.WriteLine(SimpleFormat(id, callsite, args));
 
-        private static Lazy<string> _artifactsLogs = new Lazy<string>(
+        private static readonly Lazy<string> _artifactsLogs = new Lazy<string>(
             () =>
             {
                 var executingAssembly = FileUtilities.ExecutingAssemblyPath;

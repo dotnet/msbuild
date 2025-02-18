@@ -363,9 +363,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ReadHierarchy(StreamReader file)
         {
-            while (!file.EndOfStream)
+            while (file.ReadLine() is string line)
             {
-                string line = file.ReadLine();
                 if (line.Length == 0)
                 {
                     return;
@@ -394,9 +393,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ReadTimes(StreamReader file)
         {
-            while (!file.EndOfStream)
+            while (file.ReadLine() is string line)
             {
-                string line = file.ReadLine();
                 if (line.Length == 0)
                 {
                     return;

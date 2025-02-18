@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-#if NET5_0_OR_GREATER
+#if NET
 using System.Linq;
 using Microsoft.Build.Framework;
 #endif
@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal static class CultureInfoCache
     {
-#if !NET5_0_OR_GREATER
+#if !NET
         private static readonly Lazy<HashSet<string>> ValidCultureNames = new Lazy<HashSet<string>>(() => InitializeValidCultureNames());
 #endif
 
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if the culture is determined to be valid.</returns>
         internal static bool IsValidCultureString(string name)
         {
-#if NET5_0_OR_GREATER
+#if NET
             try
             {
                 // GetCultureInfo throws if the culture doesn't exist

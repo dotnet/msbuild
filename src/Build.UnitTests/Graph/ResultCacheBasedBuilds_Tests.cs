@@ -356,13 +356,13 @@ namespace Microsoft.Build.Graph.UnitTests
 
             deserializationInfo.exception.ShouldBeNull();
 
-            var buildResults = deserializationInfo.ResultsCache.GetEnumerator().ToArray();
+            var buildResults = deserializationInfo.ResultsCache.ToArray();
             buildResults.ShouldHaveSingleItem();
 
             var rootNodeBuildResult = buildResults.First();
             rootNodeBuildResult.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ToArray().ShouldBe(expectedOutput[rootNode]);
 
-            var configEntries = deserializationInfo.ConfigCache.GetEnumerator().ToArray();
+            var configEntries = deserializationInfo.ConfigCache.ToArray();
             configEntries.ShouldHaveSingleItem();
 
             configEntries.First().ConfigurationId.ShouldBe(rootNodeBuildResult.ConfigurationId);

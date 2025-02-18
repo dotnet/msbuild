@@ -60,7 +60,7 @@ namespace Microsoft.Build.Framework
                     ? message
                     : "MSB0001: Internal MSBuild Error: " + message + (innerException == null
                         ? String.Empty
-                        : ("\n=============\n" + innerException.ToString() + "\n\n")),
+                        : $"\n=============\n{innerException}\n\n"),
                 innerException)
         {
             if (!calledFromDeserialization)

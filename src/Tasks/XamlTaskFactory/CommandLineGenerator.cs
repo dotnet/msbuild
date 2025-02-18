@@ -413,22 +413,21 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private static bool PerformSwitchValueSubstition(CommandLineBuilder clb, CommandLineToolSwitch commandLineToolSwitch, string switchValue)
         {
-            Regex regex = new Regex(@"\[value]", RegexOptions.IgnoreCase);
-            Match match = regex.Match(commandLineToolSwitch.SwitchValue);
-            if (match.Success)
+            const string Value = "[value]";
+            int valuePos = commandLineToolSwitch.SwitchValue.IndexOf(Value, StringComparison.OrdinalIgnoreCase);
+            if (valuePos >= 0)
             {
-                string prefixToAppend = commandLineToolSwitch.SwitchValue.Substring(match.Index + match.Length, commandLineToolSwitch.SwitchValue.Length - (match.Index + match.Length));
-                string valueToAppend;
-                if (!switchValue.EndsWith("\\\\", StringComparison.OrdinalIgnoreCase) && switchValue.EndsWith("\\", StringComparison.OrdinalIgnoreCase) && prefixToAppend.Length > 0 && prefixToAppend[0] == '\"')
-                {
-                    // If the combined string would create \" then we need to escape it
-                    // if the combined string would create \\" then we ignore it as as assume it is already escaped.
-                    valueToAppend = commandLineToolSwitch.SwitchValue.Substring(0, match.Index) + switchValue + "\\" + prefixToAppend;
-                }
-                else
-                {
-                    valueToAppend = commandLineToolSwitch.SwitchValue.Substring(0, match.Index) + switchValue + prefixToAppend;
-                }
+                string prefixToAppend = commandLineToolSwitch.SwitchValue.Substring(valuePos + Value.Length);
+
+                // If the combined string would create \" then we need to escape it
+                // if the combined string would create \\" then we ignore it as as assume it is already escaped.
+                bool needsEscaping =
+                    !switchValue.EndsWith("\\\\", StringComparison.OrdinalIgnoreCase) &&
+                    switchValue.EndsWith("\\", StringComparison.OrdinalIgnoreCase) &&
+                    prefixToAppend.Length > 0 &&
+                    prefixToAppend[0] == '\"';
+
+                string valueToAppend = $"{commandLineToolSwitch.SwitchValue.Substring(0, valuePos)}{switchValue}{(needsEscaping ? "\\" : "")}{prefixToAppend}";
 
                 clb.AppendSwitch(valueToAppend);
                 return true;
@@ -645,8 +644,7 @@ namespace Microsoft.Build.Tasks.Xaml
             // Match all instances of [asdf], where "asdf" can be any combination of any
             // characters *except* a [ or an ]. i.e., if "[ [ sdf ]" is passed, then we will
             // match "[ sdf ]"
-            string matchString = @"\[[^\[\]]+\]";
-            Regex regex = new Regex(matchString, RegexOptions.ECMAScript);
+            Regex regex = new Regex(@"\[[^\[\]]+\]", RegexOptions.ECMAScript);
             MatchCollection matches = regex.Matches(CommandLineTemplate);
 
             int indexOfEndOfLastSubstitution = 0;
@@ -735,7 +733,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 indexOfEndOfLastSubstitution = match.Index + match.Length;
             }
 
-            builder.AppendTextUnquoted(CommandLineTemplate.Substring(indexOfEndOfLastSubstitution, CommandLineTemplate.Length - indexOfEndOfLastSubstitution));
+            builder.AppendTextUnquoted(CommandLineTemplate.Substring(indexOfEndOfLastSubstitution));
         }
     }
 }

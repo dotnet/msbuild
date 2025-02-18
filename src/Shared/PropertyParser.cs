@@ -47,10 +47,10 @@ namespace Microsoft.Build.Tasks
                     // whitespace from beginning and end of both name and value.  (When authoring a
                     // project/targets file, people like to use whitespace and newlines to pretty up
                     // the file format.)
-                    if (indexOfEqualsSign != -1)
+                    if (indexOfEqualsSign >= 0)
                     {
-                        propertyName = propertyNameValuePair.Substring(0, indexOfEqualsSign).Trim();
-                        propertyValue = propertyNameValuePair.Substring(indexOfEqualsSign + 1).Trim();
+                        propertyName = propertyNameValuePair.AsSpan(0, indexOfEqualsSign).Trim().ToString();
+                        propertyValue = propertyNameValuePair.AsSpan(indexOfEqualsSign + 1).Trim().ToString();
                     }
 
                     // Make sure we have a property name and property value (though the value is allowed to be blank).
@@ -103,8 +103,8 @@ namespace Microsoft.Build.Tasks
                         // whitespace from beginning and end of both name and value.  (When authoring a
                         // project/targets file, people like to use whitespace and newlines to pretty up
                         // the file format.)
-                        string propertyName = propertyNameValueString.Substring(0, indexOfEqualsSign).Trim();
-                        string propertyValue = EscapingUtilities.Escape(propertyNameValueString.Substring(indexOfEqualsSign + 1).Trim());
+                        string propertyName = propertyNameValueString.AsSpan(0, indexOfEqualsSign).Trim().ToString();
+                        string propertyValue = EscapingUtilities.Escape(propertyNameValueString.AsSpan(indexOfEqualsSign + 1).Trim().ToString());
 
                         // Make sure we have a property name and property value (though the value is allowed to be blank).
                         if (propertyName.Length == 0)

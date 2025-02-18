@@ -45,12 +45,17 @@ namespace Microsoft.Build.Tasks
             {
                 return null;
             }
+
+#if NET
+            return Convert.ToHexString(a);
+#else
             var s = new StringBuilder(a.Length * 2);
             foreach (Byte b in a)
             {
                 s.Append(b.ToString("X02", CultureInfo.InvariantCulture));
             }
             return s.ToString();
+#endif
         }
 
         public override bool Execute()

@@ -24,7 +24,7 @@ namespace Microsoft.Build.CommandLine
         {
             try
             {
-#if NET7_0_OR_GREATER
+#if NET
                 if (OperatingSystem.IsIOS() || OperatingSystem.IsAndroid() || OperatingSystem.IsTvOS()) // Output + Input Encoding are unavailable on these platforms per docs, and they're only available past net 5.
                 {
                     return;
@@ -32,7 +32,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                 _originalOutputEncoding = Console.OutputEncoding;
 
-#if NET7_0_OR_GREATER
+#if NET
                 if (OperatingSystem.IsBrowser()) // Input Encoding is also unavailable in this platform. (No concern for net472 as browser is unavailable.)
                 {
                     return;

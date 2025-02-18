@@ -94,7 +94,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// We use a BindingFlags.Public flag here because the getter is public, so although the setter is internal,
         /// it is only discoverable with Reflection using the Public flag (go figure!)
         /// </remarks>
-        private static Lazy<PropertyInfo> s_projectStartedEventArgsGlobalProperties = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("GlobalProperties", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
+        private static readonly Lazy<PropertyInfo> s_projectStartedEventArgsGlobalProperties = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("GlobalProperties", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
 
         /// <summary>
         /// A cached reflection accessor for an internal member.
@@ -103,7 +103,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// We use a BindingFlags.Public flag here because the getter is public, so although the setter is internal,
         /// it is only discoverable with Reflection using the Public flag (go figure!)
         /// </remarks>
-        private static Lazy<PropertyInfo> s_projectStartedEventArgsToolsVersion = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("ToolsVersion", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
+        private static readonly Lazy<PropertyInfo> s_projectStartedEventArgsToolsVersion = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("ToolsVersion", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
 
         #region Data
 

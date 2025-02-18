@@ -29,7 +29,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// An object for the two inproc endpoints to synchronize on.
         /// </summary>
-        private static Object s_locker = new Object();
+        private static readonly Object s_locker = new Object();
 
         /// <summary>
         /// The current communication status of the node.

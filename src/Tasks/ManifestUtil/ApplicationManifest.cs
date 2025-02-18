@@ -508,7 +508,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
             }
 
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "GenerateManifest.CheckForComDuplicates t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"GenerateManifest.CheckForComDuplicates t={Environment.TickCount - t1}");
         }
 
         private void ValidateConfig()
@@ -661,11 +661,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                     // Check for two or more items with the same TargetPath...
                     string key = assembly.TargetPath.ToLowerInvariant();
-                    if (!targetPathList.ContainsKey(key))
+                    if (!targetPathList.TryGetValue(key, out bool value))
                     {
                         targetPathList.Add(key, false);
                     }
-                    else if (!targetPathList[key])
+                    else if (!value)
                     {
                         OutputMessages.AddWarningMessage("GenerateManifest.DuplicateTargetPath", assembly.ToString());
                         targetPathList[key] = true; // only warn once per path
@@ -707,18 +707,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                     // Check for two or more items with the same TargetPath...
                     string key = file.TargetPath.ToLowerInvariant();
-                    if (!targetPathList.ContainsKey(key))
+                    if (!targetPathList.TryGetValue(key, out bool value))
                     {
                         targetPathList.Add(key, false);
                     }
-                    else if (!targetPathList[key])
+                    else if (!value)
                     {
                         OutputMessages.AddWarningMessage("GenerateManifest.DuplicateTargetPath", file.TargetPath);
                         targetPathList[key] = true; // only warn once per path
                     }
                 }
             }
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "GenerateManifest.CheckManifestReferences t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"GenerateManifest.CheckManifestReferences t={Environment.TickCount - t1}");
         }
 
         private void ValidateReferenceForPartialTrust(AssemblyReference assembly, TrustInfo trustInfo)

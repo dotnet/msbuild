@@ -82,7 +82,7 @@ namespace Microsoft.Build.Shared
                 return;
             }
 
-            bool is64bitOS = EnvironmentUtilities.Is64BitOperatingSystem;
+            bool is64bitOS = Environment.Is64BitOperatingSystem;
             bool targeting64bit = targetProcessorArchitecture == ProcessorArchitecture.Amd64 || targetProcessorArchitecture == ProcessorArchitecture.IA64;
 
             // The registry lookup should be as follows:
@@ -367,7 +367,7 @@ namespace Microsoft.Build.Shared
             // Loop over versions from registry.
             foreach (string version in versions)
             {
-                if ((version.Length > 0) && (String.Equals(version.Substring(0, 1), "v", StringComparison.OrdinalIgnoreCase)))
+                if ((version.Length > 0) && version[0] is 'v' or 'V')
                 {
                     Version candidateVersion = VersionUtilities.ConvertToVersion(version);
 

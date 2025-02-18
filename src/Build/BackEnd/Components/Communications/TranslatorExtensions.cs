@@ -20,7 +20,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal static class TranslatorExtensions
     {
-        private static Lazy<ConcurrentDictionary<Type, ConstructorInfo>> parameterlessConstructorCache = new Lazy<ConcurrentDictionary<Type, ConstructorInfo>>(() => new ConcurrentDictionary<Type, ConstructorInfo>());
+        private static readonly Lazy<ConcurrentDictionary<Type, ConstructorInfo>> parameterlessConstructorCache = new Lazy<ConcurrentDictionary<Type, ConstructorInfo>>(() => new ConcurrentDictionary<Type, ConstructorInfo>());
 
         /// <summary>
         /// Translates a PropertyDictionary of ProjectPropertyInstances.

@@ -327,7 +327,7 @@ namespace Microsoft.Build.Tasks
                     // Supporting property references would require access to Expander which is unavailable in Microsoft.Build.Tasks
                     Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternPropertyReferences", pattern);
                 }
-                else if (pattern.IndexOfAny(FileUtilities.InvalidPathChars) != -1)
+                else if (pattern.AsSpan().IndexOfAny(FileUtilities.InvalidPathChars) >= 0)
                 {
                     Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternInvalidPath", pattern);
                 }

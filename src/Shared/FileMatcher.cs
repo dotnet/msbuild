@@ -26,14 +26,19 @@ namespace Microsoft.Build.Shared
         private readonly IFileSystem _fileSystem;
         private const string recursiveDirectoryMatch = "**";
 
-        private static readonly string s_directorySeparator = new string(Path.DirectorySeparatorChar, 1);
+        private static readonly string s_directorySeparatorString = Path.DirectorySeparatorChar.ToString();
+        private static readonly string s_twoDirectorySeparators = s_directorySeparatorString + s_directorySeparatorString;
 
-        private static readonly string s_thisDirectory = "." + s_directorySeparator;
+        private static readonly string s_thisDirectory = $".{s_directorySeparatorString}";
 
         private static readonly char[] s_wildcardCharacters = { '*', '?' };
         private static readonly char[] s_wildcardAndSemicolonCharacters = { '*', '?', ';' };
 
-        private static readonly string[] s_propertyAndItemReferences = { "$(", "@(" };
+#if NET
+        private static readonly SearchValues<string> s_propertyAndItemReferences = SearchValues.Create(["$(", "@("], StringComparison.Ordinal);
+#else
+        private static readonly string[] s_propertyAndItemReferences = ["$(", "@("];
+#endif
 
         // on OSX both System.IO.Path separators are '/', so we have to use the literals
         internal static readonly char[] directorySeparatorCharacters = FileUtilities.Slashes;
@@ -44,12 +49,6 @@ namespace Microsoft.Build.Shared
 
         private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _cachedGlobExpansions;
         private readonly Lazy<ConcurrentDictionary<string, object>> _cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
-
-        /// <summary>
-        /// Cache of the list of invalid path characters, because this method returns a clone (for security reasons)
-        /// which can cause significant transient allocations
-        /// </summary>
-        private static readonly char[] s_invalidPathChars = Path.GetInvalidPathChars();
 
         public const RegexOptions DefaultRegexOptions = RegexOptions.IgnoreCase;
 
@@ -186,7 +185,7 @@ namespace Microsoft.Build.Shared
             // Choose LastIndexOfAny instead of IndexOfAny because it seems more likely
             // that wildcards will tend to be towards the right side.
 
-            return -1 != filespec.LastIndexOfAny(s_wildcardCharacters);
+            return filespec.LastIndexOfAny(s_wildcardCharacters) >= 0;
         }
 
         /// <summary>
@@ -195,10 +194,8 @@ namespace Microsoft.Build.Shared
         internal static bool HasWildcardsSemicolonItemOrPropertyReferences(string filespec)
         {
             return
-
-                (-1 != filespec.IndexOfAny(s_wildcardAndSemicolonCharacters)) ||
-                HasPropertyOrItemReferences(filespec)
-                ;
+                (filespec.IndexOfAny(s_wildcardAndSemicolonCharacters) >= 0) ||
+                HasPropertyOrItemReferences(filespec);
         }
 
         /// <summary>
@@ -206,7 +203,12 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool HasPropertyOrItemReferences(string filespec)
         {
-            return s_propertyAndItemReferences.Any(filespec.Contains);
+            return
+#if NET
+                filespec.AsSpan().ContainsAny(s_propertyAndItemReferences);
+#else
+                s_propertyAndItemReferences.Any(filespec.Contains);
+#endif
         }
 
         /// <summary>
@@ -288,10 +290,10 @@ namespace Microsoft.Build.Shared
             //    extensions that start with the same three characters e.g. "*.htm" would match both "file.htm" and "file.html"
             // 3) if the ? wildcard is to the left of a period, it matches files with shorter name e.g. ???.txt would match
             //    foo.txt, fo.txt and also f.txt
-            return searchPattern.IndexOf("?.", StringComparison.Ordinal) != -1 ||
+            return searchPattern.Contains("?.") ||
                    (
                        Path.GetExtension(searchPattern).Length == (3 + 1 /* +1 for the period */) &&
-                       searchPattern.IndexOf('*') != -1) ||
+                       searchPattern.Contains('*')) ||
                    searchPattern.EndsWith("?", StringComparison.Ordinal);
         }
 
@@ -440,7 +442,7 @@ namespace Microsoft.Build.Shared
             string path,
             GetFileSystemEntries getFileSystemEntries)
         {
-            if (path.IndexOf("~", StringComparison.Ordinal) == -1)
+            if (!path.Contains('~'))
             {
                 // A path with no '~' must not be a short name.
                 return path;
@@ -451,15 +453,11 @@ namespace Microsoft.Build.Shared
 
             string[] parts = path.Split(directorySeparatorCharacters);
             string pathRoot;
-            bool isUnc = path.StartsWith(s_directorySeparator + s_directorySeparator, StringComparison.Ordinal);
+            bool isUnc = path.StartsWith(s_twoDirectorySeparators, StringComparison.Ordinal);
             int startingElement;
             if (isUnc)
             {
-                pathRoot = s_directorySeparator + s_directorySeparator;
-                pathRoot += parts[2];
-                pathRoot += s_directorySeparator;
-                pathRoot += parts[3];
-                pathRoot += s_directorySeparator;
+                pathRoot = $"{s_twoDirectorySeparators}{parts[2]}{s_directorySeparatorString}{parts[3]}{s_directorySeparatorString}";
                 startingElement = 4;
             }
             else
@@ -468,7 +466,7 @@ namespace Microsoft.Build.Shared
                 if (path.Length > 2 && path[1] == ':')
                 {
                     // Not relative
-                    pathRoot = parts[0] + s_directorySeparator;
+                    pathRoot = parts[0] + s_directorySeparatorString;
                     startingElement = 1;
                 }
                 else
@@ -493,7 +491,7 @@ namespace Microsoft.Build.Shared
                 }
                 else
                 {
-                    if (parts[i].IndexOf("~", StringComparison.Ordinal) == -1)
+                    if (!parts[i].Contains('~'))
                     {
                         // If there's no ~, don't hit the disk.
                         longParts[i - startingElement] = parts[i];
@@ -529,7 +527,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            return pathRoot + string.Join(s_directorySeparator, longParts);
+            return pathRoot + string.Join(s_directorySeparatorString, longParts);
         }
 
         /// <summary>
@@ -562,8 +560,7 @@ namespace Microsoft.Build.Shared
              */
             if (recursiveDirectoryMatch == filenamePart)
             {
-                wildcardDirectoryPart += recursiveDirectoryMatch;
-                wildcardDirectoryPart += s_directorySeparator;
+                wildcardDirectoryPart = $"{wildcardDirectoryPart}{recursiveDirectoryMatch}{s_directorySeparatorString}";
                 filenamePart = "*.*";
             }
 
@@ -1107,7 +1104,7 @@ namespace Microsoft.Build.Shared
                 // or we've reached the end of the wildcard directory elements,
                 considerFiles = true;
             }
-            else if (recursionState.RemainingWildcardDirectory.IndexOf(recursiveDirectoryMatch, StringComparison.Ordinal) == 0)
+            else if (recursionState.RemainingWildcardDirectory.StartsWith(recursiveDirectoryMatch, StringComparison.Ordinal))
             {
                 // or, we've reached a "**" so everything else is matched recursively.
                 considerFiles = true;
@@ -1211,21 +1208,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <returns>True if both parts meet all conditions for a legal filespec.</returns>
         private static bool IsLegalFileSpec(string wildcardDirectoryPart, string filenamePart) =>
-            !HasDotDot(wildcardDirectoryPart)
+            !wildcardDirectoryPart.Contains("..")
             && !HasMisplacedRecursiveOperator(wildcardDirectoryPart)
             && !HasMisplacedRecursiveOperator(filenamePart);
-
-        private static bool HasDotDot(string str)
-        {
-            for (int i = 0; i < str.Length - 1; i++)
-            {
-                if (str[i] == '.' && str[i + 1] == '.')
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
 
         private static bool HasMisplacedRecursiveOperator(string str)
         {
@@ -1585,7 +1570,7 @@ namespace Microsoft.Build.Shared
         internal static bool RawFileSpecIsValid(string filespec)
         {
             // filespec cannot contain illegal characters
-            if (-1 != filespec.IndexOfAny(s_invalidPathChars))
+            if (filespec.AsSpan().IndexOfAny(MSBuildConstants.InvalidPathChars) >= 0)
             {
                 return false;
             }
@@ -1595,7 +1580,7 @@ namespace Microsoft.Build.Shared
              *
              * Any path with "..." in it is illegal.
              */
-            if (-1 != filespec.IndexOf("...", StringComparison.Ordinal))
+            if (filespec.Contains("..."))
             {
                 return false;
             }
@@ -1607,12 +1592,12 @@ namespace Microsoft.Build.Shared
              *        http://www.website.com
              *
              */
-            int rightmostColon = filespec.LastIndexOf(":", StringComparison.Ordinal);
+            int rightmostColon = filespec.LastIndexOf(':');
 
             if
             (
-                -1 != rightmostColon
-                && 1 != rightmostColon)
+                rightmostColon >= 0
+                && rightmostColon != 1)
             {
                 return false;
             }
@@ -2229,7 +2214,7 @@ namespace Microsoft.Build.Shared
                 // replace multiple slashes with the OS separator
                 else if (afterSlashesIndex > index)
                 {
-                    sb.Append(s_directorySeparator);
+                    sb.Append(s_directorySeparatorString);
                 }
 
                 // skip non-slashes
@@ -2526,7 +2511,7 @@ namespace Microsoft.Build.Shared
                                 Debug.Assert(excludeState.SearchData.RegexFileMatch != null || excludeState.SearchData.DirectoryPattern != null,
                                     "Expected Regex or directory pattern to be used for exclude file matching");
                                 excludeState.BaseDirectory = state.BaseDirectory;
-                                excludeState.RemainingWildcardDirectory = recursiveDirectoryMatch + s_directorySeparator;
+                                excludeState.RemainingWildcardDirectory = recursiveDirectoryMatch + s_directorySeparatorString;
                                 searchesToExclude.Add(excludeState);
                             }
                         }

@@ -186,7 +186,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public override string ToString()
         {
-            return _name + "=" + _escapedValue;
+            return $"{_name}={_escapedValue}";
         }
 
         /// <summary>

@@ -52,7 +52,11 @@ namespace Microsoft.Build.Shared
             // first character must be a letter,
             // second character must be a ":"
             return pattern.Length >= 2 &&
+#if NET
+                char.IsAsciiLetter(pattern[0]) &&
+#else
                 ((pattern[0] >= 'A' && pattern[0] <= 'Z') || (pattern[0] >= 'a' && pattern[0] <= 'z')) &&
+#endif
                 pattern[1] == ':';
         }
 

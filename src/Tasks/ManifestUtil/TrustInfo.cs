@@ -790,7 +790,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 output.Flush();
             }
             document.Save(output);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "ManifestWriter.WriteTrustInfo t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"ManifestWriter.WriteTrustInfo t={Environment.TickCount - t1}");
         }
     }
 }

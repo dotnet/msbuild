@@ -246,7 +246,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             using (XmlReader xr = XmlReader.Create(s, xrSettings))
             {
                 var m = (Manifest)xs.Deserialize(xr);
-                Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "ManifestReader.Deserialize t={0}", Environment.TickCount - t1));
+                Util.WriteLog($"ManifestReader.Deserialize t={Environment.TickCount - t1}");
                 return m;
             }
         }

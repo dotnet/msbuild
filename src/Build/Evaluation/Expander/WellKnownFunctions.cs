@@ -236,7 +236,7 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = text.IndexOfAny(arg0.ToCharArray());
+                    returnVal = text.AsSpan().IndexOfAny(arg0.AsSpan());
                     return true;
                 }
             }
@@ -262,7 +262,7 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = text.LastIndexOfAny(arg0.ToCharArray());
+                    returnVal = text.AsSpan().LastIndexOfAny(arg0.AsSpan());
                     return true;
                 }
             }
