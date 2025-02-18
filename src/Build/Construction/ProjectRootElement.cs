@@ -725,11 +725,11 @@ namespace Microsoft.Build.Construction
         /// The ProjectRootElement will not be marked dirty.
         /// Uses the global project collection.
         /// </summary>
-        internal static ProjectRootElement CreateNotDirty()
+        internal static ProjectRootElement CreateNotDirty(ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(ProjectCollection.GlobalProjectCollection);
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
 
-            return new ProjectRootElement(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache, Project.DefaultNewProjectTemplateOptions, true);
+            return new ProjectRootElement(projectRootElementCache, Project.DefaultNewProjectTemplateOptions, true);
         }
 
         /// <summary>

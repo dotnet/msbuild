@@ -5,6 +5,7 @@
 using System;
 using System.Text;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Xunit;
 
 #nullable disable
@@ -120,7 +121,7 @@ bar", false)]
         [Fact]
         public void CreateNotDirtyCannotBeDirtied()
         {
-            var projectRootElement = ProjectRootElement.CreateNotDirty();
+            var projectRootElement = ProjectRootElement.CreateNotDirty(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
             var versionBeforeMarkDirty = projectRootElement.Version;
 
             projectRootElement.MarkDirty("test", "test");

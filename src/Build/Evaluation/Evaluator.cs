@@ -1931,7 +1931,7 @@ namespace Microsoft.Build.Evaluation
 
             ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)
             {
-                ProjectRootElement project = ProjectRootElement.CreateNotDirty();
+                ProjectRootElement project = ProjectRootElement.CreateNotDirty(_projectRootElementCache);
                 project.FullPath = projectPath;
 
                 if (sdkResult.PropertiesToAdd?.Any() == true)
