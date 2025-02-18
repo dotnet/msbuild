@@ -5,6 +5,8 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Threading.Channels;
+
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
@@ -573,16 +575,14 @@ namespace Microsoft.Build.BackEnd
             private MemoryStream _writeBufferMemoryStream;
 
             /// <summary>
-            /// A queue used for enqueuing packets to write to the stream asynchronously.
+            /// A channel used for enqueuing packets to write to the stream asynchronously.
             /// </summary>
-            private ConcurrentQueue<INodePacket> _packetWriteQueue = new ConcurrentQueue<INodePacket>();
-
-            /// <summary>
-            /// A task representing the last packet write, so we can chain packet writes one after another.
-            /// We want to queue up writing packets on a separate thread asynchronously, but serially.
-            /// Each task drains the <see cref="_packetWriteQueue"/>
-            /// </summary>
-            private Task _packetWriteDrainTask = Task.CompletedTask;
+            private Channel<INodePacket> _packetChannel = Channel.CreateUnbounded<INodePacket>(new UnboundedChannelOptions()
+            {
+                SingleWriter = false,
+                SingleReader = true,
+                AllowSynchronousContinuations = false
+            });
 
             /// <summary>
             /// Delegate called when the context terminates.
@@ -622,6 +622,52 @@ namespace Microsoft.Build.BackEnd
             /// Id of node.
             /// </summary>
             public int NodeId => _nodeId;
+
+            public async void StartDrainingQueue()
+            {
+                while (await _packetChannel.Reader.WaitToReadAsync())
+                {
+                    while (_packetChannel.Reader.TryRead(out var packet))
+                    {
+                        // NodeContext context = (NodeContext)this;
+                        MemoryStream writeStream = this._writeBufferMemoryStream;
+                        writeStream.SetLength(0);
+                        ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
+                        try
+                        {
+                            writeStream.WriteByte((byte)packet.Type);
+                            // Pad for the packet length
+                            WriteInt32(writeStream, 0);
+                            packet.Translate(writeTranslator);
+                            int writeStreamLength = (int)writeStream.Position;
+                            // Now plug in the real packet length
+                            writeStream.Position = 1;
+                            WriteInt32(writeStream, writeStreamLength - 5);
+                            byte[] writeStreamBuffer = writeStream.GetBuffer();
+                            for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
+                            {
+                                int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
+#pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                                await _serverToClientStream.WriteAsync(writeStreamBuffer, i, lengthToWrite, CancellationToken.None);
+#pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                            }
+                            if (IsExitPacket(packet))
+                            {
+                                _exitPacketState = ExitPacketState.ExitPacketSent;
+                            }
+                        }
+                        catch (IOException e)
+                        {
+                            // Do nothing here because any exception will be caught by the async read handler
+                            CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in SendData: {0}", e);
+                        }
+                        catch (ObjectDisposedException) // This happens if a child dies unexpectedly
+                        {
+                            // Do nothing here because any exception will be caught by the async read handler
+                        }
+                    }
+                }
+            }
 
             /// <summary>
             /// Starts a new asynchronous read operation for this node.
@@ -710,85 +756,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     _exitPacketState = ExitPacketState.ExitPacketQueued;
                 }
-                _packetWriteQueue.Enqueue(packet);
-                DrainPacketQueue();
-            }
-
-            /// <summary>
-            /// Schedule a task to drain the packet write queue. We could have had a
-            /// dedicated thread that would pump the queue constantly, but
-            /// we don't want to allocate a dedicated thread per node (1MB stack)
-            /// </summary>
-            /// <remarks>Usually there'll be a single packet in the queue, but sometimes
-            /// a burst of SendData comes in, with 10-20 packets scheduled. In this case
-            /// the first scheduled task will drain all of them, and subsequent tasks
-            /// will run on an empty queue. I tried to write logic that avoids queueing
-            /// a new task if the queue is already being drained, but it didn't show any
-            /// improvement and made things more complicated.</remarks>
-            private void DrainPacketQueue()
-            {
-                // this lock is only necessary to protect a write to _packetWriteDrainTask field
-                lock (_packetWriteQueue)
-                {
-                    // average latency between the moment this runs and when the delegate starts
-                    // running is about 100-200 microseconds (unless there's thread pool saturation)
-                    _packetWriteDrainTask = _packetWriteDrainTask.ContinueWith(
-                        SendDataCoreAsync,
-                        this,
-                        TaskScheduler.Default).Unwrap();
-
-                    static async Task SendDataCoreAsync(Task _, object state)
-                    {
-                        NodeContext context = (NodeContext)state;
-                        while (context._packetWriteQueue.TryDequeue(out var packet))
-                        {
-                            MemoryStream writeStream = context._writeBufferMemoryStream;
-
-                            // clear the buffer but keep the underlying capacity to avoid reallocations
-                            writeStream.SetLength(0);
-
-                            ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
-                            try
-                            {
-                                writeStream.WriteByte((byte)packet.Type);
-
-                                // Pad for the packet length
-                                WriteInt32(writeStream, 0);
-                                packet.Translate(writeTranslator);
-
-                                int writeStreamLength = (int)writeStream.Position;
-
-                                // Now plug in the real packet length
-                                writeStream.Position = 1;
-                                WriteInt32(writeStream, writeStreamLength - 5);
-
-                                byte[] writeStreamBuffer = writeStream.GetBuffer();
-
-                                for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
-                                {
-                                    int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
-#pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
-                                    await context._serverToClientStream.WriteAsync(writeStreamBuffer, i, lengthToWrite, CancellationToken.None);
-#pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
-                                }
-
-                                if (IsExitPacket(packet))
-                                {
-                                    context._exitPacketState = ExitPacketState.ExitPacketSent;
-                                }
-                            }
-                            catch (IOException e)
-                            {
-                                // Do nothing here because any exception will be caught by the async read handler
-                                CommunicationsUtilities.Trace(context._nodeId, "EXCEPTION in SendData: {0}", e);
-                            }
-                            catch (ObjectDisposedException) // This happens if a child dies unexpectedly
-                            {
-                                // Do nothing here because any exception will be caught by the async read handler
-                            }
-                        }
-                    }
-                }
+                _packetChannel.Writer.TryWrite(packet);
             }
 
             private static bool IsExitPacket(INodePacket packet)
@@ -829,7 +797,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Wait up to 100ms until all remaining packets are sent.
                     // We don't need to wait long, just long enough for the Task to start running on the ThreadPool.
-                    await Task.WhenAny(_packetWriteDrainTask, Task.Delay(100));
+                    await Task.WhenAny(Task.Delay(100));
                 }
                 if (_exitPacketState == ExitPacketState.ExitPacketSent)
                 {
