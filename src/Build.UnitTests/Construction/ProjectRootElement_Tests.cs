@@ -116,5 +116,16 @@ bar", false)]
                 Assert.Equal(string.Empty, children[0].ChildNodes[1].Value);
             }
         }
+
+        [Fact]
+        public void CreateNotDirtyCannotBeDirtied()
+        {
+            var projectRootElement = ProjectRootElement.CreateNotDirty();
+            var versionBeforeMarkDirty = projectRootElement.Version;
+
+            projectRootElement.MarkDirty("test", "test");
+
+            Assert.Equal(projectRootElement.Version, versionBeforeMarkDirty);
+        }
     }
 }
