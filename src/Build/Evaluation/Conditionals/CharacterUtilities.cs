@@ -3,6 +3,8 @@
 
 #nullable disable
 
+using Microsoft.Build.Framework;
+
 namespace Microsoft.Build.Evaluation
 {
     internal static class CharacterUtilities
@@ -24,8 +26,18 @@ namespace Microsoft.Build.Evaluation
 
         internal static bool IsHexDigit(char candidate)
         {
-            return char.IsDigit(candidate) || ((uint)((candidate | 0x20) - 'a') <= 'f' - 'a');
-            // TODO: Is the intent here really to include Unicode digits, or could this be char.IsAsciiHexChar?
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
+            {
+#if NET
+                return char.IsAsciiHexDigit(candidate);
+#else
+                return (candidate - '0' <= '9' - '0') || ((uint)((candidate | 0x20) - 'a') <= 'f' - 'a');
+#endif
+            }
+            else
+            {
+                return char.IsDigit(candidate) || ((uint)((candidate | 0x20) - 'a') <= 'f' - 'a');
+            }
         }
     }
 }
