@@ -176,12 +176,12 @@ namespace Microsoft.Build.Construction
             ProjectParser.Parse(document, this);
         }
 
-        private readonly bool _cannotBeDirty = false;
+        private readonly bool _cannotBeDirtied = false;
 
         private ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions, bool canBeDirty)
             : this(projectRootElementCache, projectFileOptions)
         {
-            _cannotBeDirty = canBeDirty;
+            _cannotBeDirtied = canBeDirty;
         }
 
         /// <summary>
@@ -1837,7 +1837,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal sealed override void MarkDirty(string reason, string param)
         {
-            if (_cannotBeDirty)
+            if (_cannotBeDirtied)
             {
                 return;
             }
