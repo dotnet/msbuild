@@ -758,28 +758,38 @@ namespace Microsoft.Build.BackEnd
                 // clear the buffer but keep the underlying capacity to avoid reallocations
                 writeStream.SetLength(0);
 
-                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
                 try
                 {
                     writeStream.WriteByte((byte)packet.Type);
-
                     // Pad for the packet length
                     WriteInt32(writeStream, 0);
-                    packet.Translate(writeTranslator);
+
+#if !TASKHOST
+
+                    if (packet is ITranslatable2 jsonTranslatable)
+                    {
+                        var writeTranslator = JsonTranslator.GetWriteTranslator(writeStream);
+                        jsonTranslatable.Translate(writeTranslator);
+                    }
+                    else
+#endif
+                    {
+                        var writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
+                        packet.Translate(writeTranslator);
+                    }
 
                     int writeStreamLength = (int)writeStream.Position;
-
                     // Now plug in the real packet length
                     writeStream.Position = 1;
                     WriteInt32(writeStream, writeStreamLength - 5);
 
                     byte[] writeStreamBuffer = writeStream.GetBuffer();
-
                     for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
                     {
                         int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
                         _serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                     }
+
                     if (IsExitPacket(packet))
                     {
                         _exitPacketState = ExitPacketState.ExitPacketSent;
