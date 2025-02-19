@@ -299,7 +299,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (!_isTraversalProject.HasValue)
                 {
-                    if (String.Equals(Path.GetFileName(ProjectFullPath), "dirs.proj", StringComparison.OrdinalIgnoreCase))
+#if NET471_OR_GREATER
+                    if (MemoryExtensions.Equals(Microsoft.IO.Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj".AsSpan(), StringComparison.OrdinalIgnoreCase))
+#else
+                    if (MemoryExtensions.Equals(Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj", StringComparison.OrdinalIgnoreCase))
+#endif
                     {
                         // dirs.proj are assumed to be traversals
                         _isTraversalProject = true;

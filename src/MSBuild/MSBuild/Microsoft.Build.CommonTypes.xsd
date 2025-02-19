@@ -162,6 +162,11 @@ elementFormDefault="qualified">
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
                         <xs:choice>
                             <xs:element name="WrapperTool"/>
+                            <xs:element name="EmbedInteropTypes" type="msb:boolean">
+                                <xs:annotation>
+                                <xs:documentation><!-- _locID_text="COMReference_EmbedInteropTypes" _locComment="" -->Whether the types in this reference need to embedded into the target assembly - interop assemblies only (optional, boolean)</xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
                         </xs:choice>
                     </xs:sequence>
         </xs:extension>
@@ -2291,6 +2296,111 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="EmbedRazorGenerateSources" _locComment="" -->Configures whether all of the @(RazorGenerate) items will be added as embedded files to the produced assembly. When true, everything in @(RazorGenerate) will be added to @(RazorEmbeddedFiles) and passed to CSC.</xs:documentation>
         </xs:annotation>
+    </xs:element>
+
+    <!-- ======================== TESTING PROPERTIES ======================== -->
+    <xs:element name="UseVSTest" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UseVSTest" _locComment="" -->Set to 'true' to use VSTest. The default is 'false' which uses MSTest runner. This property is only applicable when using MSTest.Sdk.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableMSTestRunner" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMSTestRunner" _locComment="" -->Enables or disables the use of the MSTest runner. The default is 'true' when using MSTest.Sdk, and 'false' otherwise. Supported in MSTest 3.2 and later versions.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="GenerateTestingPlatformEntryPoint" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="GenerateTestingPlatformEntryPoint" _locComment="" -->Set this property to 'false' to disable the automatic generation of entry point for Microsoft.Testing.Platform.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="GenerateSelfRegisteredExtensions" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="GenerateSelfRegisteredExtensions" _locComment="" -->Set this property to 'false' to disable auto registration of extensions through the 'AddSelfRegisteredExtensions'.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="GenerateProgramFile" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="GenerateProgramFile" _locComment="" -->Set this property to 'false' to disable the automatic generation of entry point for VSTest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <!-- Not documenting DisableTestingPlatformServerCapability intentionally for now. We don't expect any one to need it. -->
+    <xs:element name="TestingExtensionsProfile" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TestingExtensionsProfile" _locComment="" -->Controls the set of extensions that are enabled. Note that 'AllMicrosoft' enables all extensions, even those with a restrictive license.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Default" />
+          <xs:enumeration value="None" />
+          <xs:enumeration value="AllMicrosoft" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
+    <xs:element name="EnableMicrosoftTestingExtensionsCrashDump" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsCrashDump" _locComment="" -->Enables the Microsoft.Testing.Extensions.CrashDump extension. This is not supported by VSTest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableMicrosoftTestingExtensionsCodeCoverage" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsCodeCoverage" _locComment="" -->Enables the Microsoft.Testing.Extensions.CodeCoverage extension. This is not supported by VSTest</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableMicrosoftTestingExtensionsTrxReport" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsTrxReport" _locComment="" -->Enables the Microsoft.Testing.Extensions.TrxReport extension. This is not supported by VSTest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableMicrosoftTestingExtensionsHangDump" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsHangDump" _locComment="" -->Enables the Microsoft.Testing.Extensions.HangDump extension. This is not supported by VSTest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableMicrosoftTestingExtensionsHotReload" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsHotReload" _locComment="" -->Enables the Microsoft.Testing.Extensions.HotReload extension (it has restrictive license). This is not supported by VSTest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableMicrosoftTestingExtensionsRetry" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsRetry" _locComment="" -->Enables the Microsoft.Testing.Extensions.Retry extension (it has restrictive license). This is not supported by VSTest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableAspireTesting" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableAspireTesting" _locComment="" -->Enables the testing support for .NET Aspire application model. This adds a reference to 'Aspire.Hosting.Testing' NuGet package.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnablePlaywright" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnablePlaywright" _locComment="" -->Enables end-to-end testing for modern web apps using Playwright. This adds a reference to 'Microsoft.Playwright.MSTest' NuGet package.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="IsTestingPlatformApplication" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="IsTestingPlatformApplication" _locComment="" -->Controls whether the application is a test application. Set it to 'false' in a non-test project that references a test project to avoid error CS8892.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="TestingPlatformCommandLineArguments" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TestingPlatformCommandLineArguments" _locComment="" -->The command-line arguments to pass for the test executable. This is not supported by VSTest.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="TestingPlatformCaptureOutput" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TestingPlatformCaptureOutput" _locComment="" -->This property controls whether all console output that a test executable writes is captured and hidden from the user when you use 'dotnet test' to run 'Microsoft.Testing.Platform' tests. By default, the console output is hidden. This is not supported by VSTest.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="TestingPlatformDotnetTestSupport" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TestingPlatformDotnetTestSupport" _locComment="" -->This property controls whether VSTest is used when you use 'dotnet test' to run tests. If you set this property to 'true', VSTest is disabled and all 'Microsoft.Testing.Platform' tests are run directly. This is not supported by VSTest.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="TestingPlatformShowTestsFailure" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TestingPlatformShowTestsFailure" _locComment="" -->This property controls whether a single failure or all errors in a failed test are reported when you use `dotnet test` to run tests. By default, test failures are summarized into a log file, and a single failure per test project is reported to MSBuild. To show errors per failed test, set this property to 'true'. This is not supported by VSTest.</xs:documentation>
+      </xs:annotation>
     </xs:element>
 
     <!-- ======================== gRPC properties ======================== -->

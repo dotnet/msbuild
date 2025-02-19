@@ -40,7 +40,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
-    <MicrosoftVisualStudioSolutionPersistenceVersion>1.0.9</MicrosoftVisualStudioSolutionPersistenceVersion>
+    <MicrosoftVisualStudioSolutionPersistenceVersion>1.0.28</MicrosoftVisualStudioSolutionPersistenceVersion>
     <SystemCollectionsImmutableVersion>8.0.0</SystemCollectionsImmutableVersion>
     <SystemConfigurationConfigurationManagerVersion>8.0.0</SystemConfigurationConfigurationManagerVersion>
     <SystemFormatsAsn1Version>8.0.1</SystemFormatsAsn1Version>
@@ -61,9 +61,9 @@
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.24572.2</MicrosoftDotNetXUnitExtensionsVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.13.0-3.24614.4</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.13.0-rc.105</NuGetBuildTasksVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.25111.5</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.14.0-2.25111.1</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.13.0-rc.113</NuGetBuildTasksVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
     <BootstrapSdkVersion>9.0.200-preview.0.24603.3</BootstrapSdkVersion>

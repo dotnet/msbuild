@@ -615,10 +615,15 @@ namespace Microsoft.Build.BackEnd.Logging
             buildEvent.BuildEventContext = projectBuildEventContext;
             ProcessLoggingEvent(buildEvent);
 
-            // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
-            if (!_projectFileMap.TryRemove(projectBuildEventContext.ProjectContextId, out _))
+            // BuildCheck can still emit some LogBuildEvent(s) after ProjectFinishedEventArgs was reported.
+            // Due to GetAndVerifyProjectFileFromContext validation, these checks break the build.
+            if (!_buildCheckEnabled)
             {
-                ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should be in the ID-to-file mapping!", projectBuildEventContext.ProjectContextId, projectFile);
+                // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
+                if (!_projectFileMap.TryRemove(projectBuildEventContext.ProjectContextId, out _))
+                {
+                    ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should be in the ID-to-file mapping!", projectBuildEventContext.ProjectContextId, projectFile);
+                }
             }
         }
 

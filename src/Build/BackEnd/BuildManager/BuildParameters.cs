@@ -147,6 +147,11 @@ namespace Microsoft.Build.Execution
         private PropertyDictionary<ProjectPropertyInstance> _globalProperties = new PropertyDictionary<ProjectPropertyInstance>();
 
         /// <summary>
+        /// Properties passed from the command line (e.g. by using /p:).
+        /// </summary>
+        private ICollection<string> _propertiesFromCommandLine;
+
+        /// <summary>
         /// The loggers.
         /// </summary>
         private IEnumerable<ILogger> _loggers;
@@ -252,6 +257,7 @@ namespace Microsoft.Build.Execution
             _defaultToolsVersion = projectCollection.DefaultToolsVersion;
 
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(projectCollection.GlobalPropertiesCollection);
+            _propertiesFromCommandLine = projectCollection.PropertiesFromCommandLine;
         }
 
         /// <summary>
@@ -281,6 +287,7 @@ namespace Microsoft.Build.Execution
             _environmentProperties = other._environmentProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._environmentProperties) : null;
             _forwardingLoggers = other._forwardingLoggers != null ? new List<ForwardingLoggerRecord>(other._forwardingLoggers) : null;
             _globalProperties = other._globalProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._globalProperties) : null;
+            _propertiesFromCommandLine = other._propertiesFromCommandLine != null ? new HashSet<string>(other._propertiesFromCommandLine, StringComparer.OrdinalIgnoreCase) : null;
             HostServices = other.HostServices;
             _loggers = other._loggers != null ? new List<ILogger>(other._loggers) : null;
             _maxNodeCount = other._maxNodeCount;
@@ -335,6 +342,10 @@ namespace Microsoft.Build.Execution
             set => _useSynchronousLogging = value;
         }
 
+        /// <summary>
+        /// Properties passed from the command line (e.g. by using /p:).
+        /// </summary>
+        public ICollection<string> PropertiesFromCommandLine => _propertiesFromCommandLine;
 
         /// <summary>
         /// Indicates whether to emit a default error if a task returns false without logging an error.

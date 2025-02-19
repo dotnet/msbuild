@@ -169,7 +169,7 @@ public class EndToEndTests : IDisposable
 
         _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:WarnOnCultureOverwritten=True /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();
@@ -401,6 +401,75 @@ public class EndToEndTests : IDisposable
         }
     }
 
+    // Windows only - due to targeting NetFx
+    [WindowsOnlyTheory]
+    [InlineData(
+        """
+        <Project ToolsVersion="msbuilddefaulttoolsversion">
+            <PropertyGroup>
+              <TargetFramework>net48</TargetFramework>
+            </PropertyGroup>
+            <Target Name="Build">
+                <Message Text="Build done"/>
+            </Target>
+        </Project>
+        """,
+        false)]
+    [InlineData(
+        """
+        <Project Sdk="Microsoft.NET.Sdk">
+          <PropertyGroup>
+            <TargetFramework>net9.0</TargetFramework>
+          </PropertyGroup>
+        </Project>
+        """,
+        false)]
+    [InlineData(
+        """
+        <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+          <PropertyGroup>
+            <OutputType>Library</OutputType>
+            <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+            <OutputPath>bin\Debug\</OutputPath>
+        	<NoWarn>CS2008</NoWarn>
+          </PropertyGroup>
+          <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+        </Project>
+        """,
+        false)]
+    [InlineData(
+        """
+        <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+          <PropertyGroup>
+            <OutputType>Library</OutputType>
+            <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+            <TargetFramework>v4.8</TargetFramework>
+            <OutputPath>bin\Debug\</OutputPath>
+        	<NoWarn>CS2008</NoWarn>
+          </PropertyGroup>
+          <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+        </Project>
+        """,
+        true)]
+    public void TFMinNonSdkCheckTest(string projectContent, bool expectCheckTrigger)
+    {
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+
+        workFolder.CreateFile("testproj.csproj", projectContent);
+
+        _env.SetCurrentDirectory(workFolder.Path);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue();
+
+        string expectedDiagnostic = "warning BC0108: .* specifies 'TargetFramework\\(s\\)' property";
+        Regex.Matches(output, expectedDiagnostic).Count.ShouldBe(expectCheckTrigger ? 2 : 0);
+
+        GetWarningsCount(output).ShouldBe(expectCheckTrigger ? 1 : 0);
+    }
+
 
     [Fact]
     public void ConfigChangeReflectedOnReuse()
@@ -579,7 +648,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Fact(Skip = "To unblock: https://github.com/dotnet/msbuild/issues/11090")]
+    [Fact]
     public void CheckHasAccessToAllConfigs()
     {
         using (var env = TestEnvironment.Create())
@@ -757,7 +826,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "To unblock: https://github.com/dotnet/msbuild/issues/11090")]
+    [Theory]
     [InlineData("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
     [InlineData("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)
@@ -790,7 +859,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "To unblock: https://github.com/dotnet/msbuild/issues/11090")]
+    [Theory]
     [InlineData("CheckCandidate", "X01234", "error", "error X01234: http://samplelink.com/X01234")]
     [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234: http://samplelink.com/X01234")]
     public void CustomCheckTest_WithEditorConfig(string checkCandidate, string ruleId, string severity, string expectedMessage)
@@ -817,7 +886,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory(Skip = "To unblock: https://github.com/dotnet/msbuild/issues/11090")]
+    [Theory]
     [InlineData("X01236", "ErrorOnInitializeCheck", "Something went wrong initializing")]
     [InlineData("X01237", "ErrorOnRegisteredAction", "something went wrong when executing registered action")]
     [InlineData("X01238", "ErrorWhenRegisteringActions", "something went wrong when registering actions")]
@@ -867,7 +936,7 @@ public class EndToEndTests : IDisposable
     }
 
 #if NET
-    [Fact(Skip = "To unblock: https://github.com/dotnet/msbuild/issues/11090")]
+    [Fact]
     public void TestBuildCheckTemplate()
     {
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
@@ -907,7 +976,10 @@ public class EndToEndTests : IDisposable
 
             // The test packages are generated during the test project build and saved in CustomChecks folder.
             string checksPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.Parent?.FullName ?? string.Empty, "CustomChecks");
-            AddPackageSource(doc, packageSourcesNode, "Key", checksPackagesPath);
+            AddPackageSource(doc, packageSourcesNode, "CustomCheckSource", checksPackagesPath);
+
+            // MSBuild packages are placed in a separate folder, so we need to add it as a package source.
+            AddPackageSource(doc, packageSourcesNode, "MSBuildTestPackagesSource", RunnerUtilities.ArtifactsLocationAttribute.ArtifactsLocation);
 
             doc.Save(Path.Combine(checkCandidatePath, "nuget.config"));
         }

@@ -211,6 +211,16 @@
         <target state="translated">Evitare di specificare 'Always' per 'CopyToOutputDirectory' perché ciò può causare operazioni di copia non necessarie durante la compilazione. Usare il valore dei metadati 'PreserveNewest' o 'IfDifferent' oppure impostare la proprietà 'SkipUnchangedFilesOnCopyAlways' su true per utilizzare una copia più efficace.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_MessageFmt">
+        <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
+        <target state="translated">Project {0} specifica la proprietà 'TargetFramework(s)' '{1}', che non usa .NET SDK. Queste proprietà non sono comprese dai progetti che importano direttamente destinazioni C#.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_Title">
+        <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
+        <target state="translated">Le proprietà 'TargetFramework' e 'TargetFrameworks' non vengono rispettate e non devono essere specificate nei progetti che non usano .NET SDK.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">È stato eseguito l'accesso alla proprietà '{0}', ma non è mai stata inizializzata.</target>
@@ -239,6 +249,16 @@
       <trans-unit id="BuildCheck_BC0203_Title">
         <source>A property that is not used should not be declared.</source>
         <target state="translated">Una proprietà non utilizzata non deve essere dichiarata.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_MessageFmt">
+        <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
+        <target state="translated">Percorso: '{0}' non può essere considerato completamente attendibile. Inserire i progetti all'esterno di tale cartella (Progetto: {1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_Title">
+        <source>Downloads folder is untrusted for projects building.</source>
+        <target state="translated">La cartella Dei download non è attendibile per la compilazione di progetti.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
@@ -412,6 +432,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" fa riferimento a {0} elemento/i, mentre "{3}" fa riferimento a {1} elemento/i. Devono avere lo stesso numero di elementi.</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Si è verificata un'eccezione durante l'espansione di un fileSpec con GLOBS: fileSpec: "{0}", presupponendo che si tratti di un nome di file. Eccezione: {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -806,6 +831,11 @@ Errori: {3}</target>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
         <target state="translated">Legge la proprietà non inizializzata "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownLoggingType">
+        <source>Logging type {0} is not understood by {1}.</source>
+        <target state="translated">Il tipo di registrazione {0} non è riconosciuto da {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
