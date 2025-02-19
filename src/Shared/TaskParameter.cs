@@ -717,7 +717,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Super simple ITaskItem derivative that we can use as a container for read items.
         /// </summary>
-        private class TaskParameterTaskItem :
+        internal class TaskParameterTaskItem :
 #if FEATURE_APPDOMAIN
             MarshalByRefObject,
 #endif
