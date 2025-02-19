@@ -103,7 +103,7 @@ namespace Microsoft.Build.Framework
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
 
         /// <summary>
-        /// Log all environment variables whether or not they are used in a build in the binary log.
+        /// Log all assembly loads including those that come from known MSBuild and .NET SDK sources in the binary log.
         /// </summary>
         public readonly bool LogAllAssemblyLoads = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLASSEMBLYLOADS"));
 
