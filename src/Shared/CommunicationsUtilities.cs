@@ -124,7 +124,8 @@ namespace Microsoft.Build.Internal
                 fileVersionBuild = fileVersion.Build;
                 fileVersionPrivate = fileVersion.Revision;
             }
-
+            
+            using Process currentProcess = Process.GetCurrentProcess();
             sessionId = Process.GetCurrentProcess().SessionId;
         }
 
@@ -849,7 +850,7 @@ namespace Microsoft.Build.Internal
                     fileName += ".txt";
 
                     using (StreamWriter file = FileUtilities.OpenWrite(
-                        String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId), append: true))
+                        string.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), EnvironmentUtilities.CurrentProcessId, nodeId), append: true))
                     {
                         long now = DateTime.UtcNow.Ticks;
                         float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
