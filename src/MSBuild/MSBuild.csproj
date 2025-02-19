@@ -146,17 +146,6 @@
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="PerformanceLogEventListener.cs" />
     <Compile Include="JsonOutputFormatter.cs" />
-    <Compile Include="TerminalLogger\BuildMessage.cs" />
-    <Compile Include="TerminalLogger\ITerminal.cs" />
-    <Compile Include="TerminalLogger\MessageSeverity.cs" />
-    <Compile Include="TerminalLogger\NodesFrame.cs" />
-    <Compile Include="TerminalLogger\NodeStatus.cs" />
-    <Compile Include="TerminalLogger\Project.cs" />
-    <Compile Include="TerminalLogger\StopwatchAbstraction.cs" />
-    <Compile Include="TerminalLogger\SystemStopwatch.cs" />
-    <Compile Include="TerminalLogger\Terminal.cs" />
-    <Compile Include="TerminalLogger\TerminalLogger.cs" />
-    <Compile Include="TerminalLogger\TestSummary.cs" />
     <Compile Include="XMake.cs" />
     <!-- This is to enable CodeMarkers in MSBuild.exe -->
     <!-- Win32 RC Files -->

@@ -4019,10 +4019,10 @@ namespace Microsoft.Build.CommandLine
         {
             if (!noConsoleLogger)
             {
-                TerminalLogger logger = new TerminalLogger(verbosity)
-                {
-                    Parameters = aggregatedLoggerParameters
-                };
+                // We can't use InternalsVisibleTo to access the internal TerminalLogger ctor from here, so we use reflection.
+                // This can be fixed when we remove shared files across projects.
+                TerminalLogger logger = Activator.CreateInstance(typeof(TerminalLogger), [verbosity]) as TerminalLogger;
+                logger.Parameters = aggregatedLoggerParameters;
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
                 // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
@@ -4032,8 +4032,26 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
+                    /// If TerminalLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main
+                    /// node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
+                    /// Important: Note that TerminalLogger is special-cased in <see cref="BackEnd.Logging.LoggingService.UpdateMinimumMessageImportance"/>
+                    /// so changing this list may impact the minimum message importance logging optimization.
+                    string[] configurableForwardingLoggerParameters =
+                    [
+                        "BUILDSTARTEDEVENT",
+                        "BUILDFINISHEDEVENT",
+                        "PROJECTSTARTEDEVENT",
+                        "PROJECTFINISHEDEVENT",
+                        "TARGETSTARTEDEVENT",
+                        "TARGETFINISHEDEVENT",
+                        "TASKSTARTEDEVENT",
+                        "HIGHMESSAGEEVENT",
+                        "WARNINGEVENT",
+                        "ERROREVENT"
+                    ];
+
                     // For performance, register this logger using the forwarding logger mechanism.
-                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", TerminalLogger.ConfigurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
+                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", configurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
                     distributedLoggerRecords.Add(forwardingLoggerRecord);
                 }
             }

@@ -14,6 +14,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
+using Microsoft.Build.Logging.TerminalLogger;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -135,14 +136,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData(null, false, false, "", nameof(ConsoleLogger))]
-        [InlineData(null, true, false, "", nameof(ConsoleLogger))]
-        [InlineData(null, false, true, "", nameof(ConsoleLogger))]
-        [InlineData(null, true, true, "off", nameof(ConsoleLogger))]
-        [InlineData("--tl:off", true, true, "", nameof(ConsoleLogger))]
-        [InlineData(null, true, true, "", "TerminalLogger")]
-        [InlineData("-tl:on", true, true, "off", "TerminalLogger")]
-        public void CreateTerminalOrConsoleLogger_CreatesCorrectLoggerInstance(string argsString, bool supportsAnsi, bool outputIsScreen, string evnVariableValue, string expectedLoggerName)
+        [InlineData(null, false, false, "", typeof(ConsoleLogger))]
+        [InlineData(null, true, false, "", typeof(ConsoleLogger))]
+        [InlineData(null, false, true, "", typeof(ConsoleLogger))]
+        [InlineData(null, true, true, "off", typeof(ConsoleLogger))]
+        [InlineData("--tl:off", true, true, "", typeof(ConsoleLogger))]
+        [InlineData(null, true, true, "", typeof(TerminalLogger))]
+        [InlineData("-tl:on", true, true, "off", typeof(TerminalLogger))]
+        public void CreateTerminalOrConsoleLogger_CreatesCorrectLoggerInstance(string argsString, bool supportsAnsi, bool outputIsScreen, string evnVariableValue, Type expectedType)
         {
             string originalValue = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER");
             Environment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", evnVariableValue);
@@ -150,10 +151,10 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 string[] args = argsString?.Split(' ');
-                ILogger logger = ConsoleLogger.CreateTerminalOrConsoleLogger(default, args, supportsAnsi, outputIsScreen, default);
+                ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(default, args, supportsAnsi, outputIsScreen, default);
 
                 logger.ShouldNotBeNull();
-                logger.GetType().Name.ShouldBe(expectedLoggerName);
+                logger.GetType().ShouldBe(expectedType);
             }
             finally
             {

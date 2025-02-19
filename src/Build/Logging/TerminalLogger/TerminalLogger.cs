@@ -30,7 +30,7 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// <remarks>
 /// Uses ANSI/VT100 control codes to erase and overwrite lines as the build is progressing.
 /// </remarks>
-internal sealed partial class TerminalLogger : INodeLogger
+public sealed partial class TerminalLogger : INodeLogger
 {
     private const string FilePathPattern = " -> ";
 
@@ -164,29 +164,6 @@ internal sealed partial class TerminalLogger : INodeLogger
     private bool _loggedPreviewMessage;
 
     /// <summary>
-    /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
-    /// </summary>
-    /// <remarks>
-    /// If TerminalLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main
-    /// node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
-    /// Important: Note that TerminalLogger is special-cased in <see cref="BackEnd.Logging.LoggingService.UpdateMinimumMessageImportance"/>
-    /// so changing this list may impact the minimum message importance logging optimization.
-    /// </remarks>
-    public static readonly string[] ConfigurableForwardingLoggerParameters =
-    {
-            "BUILDSTARTEDEVENT",
-            "BUILDFINISHEDEVENT",
-            "PROJECTSTARTEDEVENT",
-            "PROJECTFINISHEDEVENT",
-            "TARGETSTARTEDEVENT",
-            "TARGETFINISHEDEVENT",
-            "TASKSTARTEDEVENT",
-            "HIGHMESSAGEEVENT",
-            "WARNINGEVENT",
-            "ERROREVENT"
-    };
-
-    /// <summary>
     /// The two directory separator characters to be passed to methods like <see cref="String.IndexOfAny(char[])"/>.
     /// </summary>
     private static readonly char[] PathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
@@ -231,12 +208,12 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
     /// </summary>
-    public TerminalLogger()
+    internal TerminalLogger()
     {
         Terminal = new Terminal();
     }
 
-    public TerminalLogger(LoggerVerbosity verbosity) : this()
+    internal TerminalLogger(LoggerVerbosity verbosity) : this()
     {
         Verbosity = verbosity;
     }
@@ -257,6 +234,40 @@ internal sealed partial class TerminalLogger : INodeLogger
     {
         Verbosity = verbosity;
         _originalConsoleMode = originalConsoleMode;
+    }
+
+    /// <summary>
+    /// Creates a Terminal logger if possible, or a Console logger.
+    /// </summary>
+    /// <param name="verbosity">Level of detail to show in the log.</param>
+    /// <param name="args">Command line arguments for the logger configuration. Currently, only '--tl:off' and '--tl:on' are supported right now.</param>
+    public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[] args)
+    {
+        (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+
+        return CreateTerminalOrConsoleLogger(verbosity, args, supportsAnsi, outputIsScreen, originalConsoleMode);
+    }
+
+    internal static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[] args, bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode)
+    {
+        string tlArg = args?
+            .LastOrDefault(a =>
+                a.StartsWith("/tl:", StringComparison.InvariantCultureIgnoreCase) ||
+                a.StartsWith("-tl:", StringComparison.InvariantCultureIgnoreCase) ||
+                a.StartsWith("--tl:", StringComparison.InvariantCultureIgnoreCase)) ?? string.Empty;
+
+        bool isDisabled =
+            tlArg.EndsWith("tl:on", StringComparison.InvariantCultureIgnoreCase) ? false :
+            tlArg.EndsWith("tl:off", StringComparison.InvariantCultureIgnoreCase) ? true :
+            (Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty).Equals("off", StringComparison.InvariantCultureIgnoreCase);
+
+        if (isDisabled || !supportsAnsi || !outputIsScreen)
+        {
+            NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
+            return new ConsoleLogger(verbosity);
+        }
+
+        return new TerminalLogger(verbosity, originalConsoleMode);
     }
 
     #region INodeLogger implementation
