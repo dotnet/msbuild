@@ -156,6 +156,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly Dictionary<string, TaskFactoryWrapper> _intrinsicTasks = new Dictionary<string, TaskFactoryWrapper>(StringComparer.OrdinalIgnoreCase);
 
+        private readonly PropertyTrackingSetting _propertyTrackingSettings;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -172,6 +174,8 @@ namespace Microsoft.Build.BackEnd
             {
                 LogTaskInputs = Traits.Instance.EscapeHatches.LogTaskInputs;
             }
+
+            _propertyTrackingSettings = (PropertyTrackingSetting)Traits.Instance.LogPropertyTracking;
         }
 
         /// <summary>
@@ -1584,6 +1588,14 @@ namespace Microsoft.Build.BackEnd
                                 _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
                             }
                         }
+
+                        PropertyTrackingUtils.LogPropertyAssignment(
+                            _propertyTrackingSettings,
+                            outputTargetName,
+                            outputString,
+                            parameterLocation,
+                            _projectInstance.GetProperty(outputTargetName)?.EvaluatedValue ?? null,
+                            _taskLoggingContext);
 
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));
                     }
