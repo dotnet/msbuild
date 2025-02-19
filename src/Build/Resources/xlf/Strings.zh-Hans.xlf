@@ -248,7 +248,7 @@
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionSuccess">
         <source>Question build succeeded. Up-to-date checks passed.</source>
-        <target state="translated">问题生成成功。已通过最新检查。</target>
+        <target state="translated">问题生成成功。最新检查已通过。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildInProgress">
