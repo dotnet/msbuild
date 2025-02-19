@@ -173,7 +173,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace("Shutting down node with pid = {0}", nodeProcess.Id);
-                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode);
+                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode, (HandshakeOptions)NodeProviderOutOfProc.GetHandshake(nodeReuse, false).GetHandshakeOptions);
                     nodeContext.SendData(new NodeBuildComplete(false /* no node reuse */));
                     nodeStream.Dispose();
                 }
@@ -293,7 +293,7 @@ namespace Microsoft.Build.BackEnd
                             BuildEventContext = new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId)
                         });
 
-                        CreateNodeContext(nodeId, nodeToReuse, nodeStream);
+                        CreateNodeContext(nodeId, nodeToReuse, nodeStream, (HandshakeOptions)hostHandshake.GetHandshakeOptions);
                         return true;
                     }
                 }
@@ -349,7 +349,7 @@ namespace Microsoft.Build.BackEnd
                         // Connection successful, use this node.
                         CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcess.Id);
 
-                        CreateNodeContext(nodeId, msbuildProcess, nodeStream);
+                        CreateNodeContext(nodeId, msbuildProcess, nodeStream, (HandshakeOptions)hostHandshake.GetHandshakeOptions);
                         return true;
                     }
 
@@ -378,9 +378,9 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream)
+            void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream, HandshakeOptions handshake)
             {
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode);
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, handshake);
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
@@ -603,11 +603,20 @@ namespace Microsoft.Build.BackEnd
             private BinaryReaderFactory _binaryReaderFactory;
 
             /// <summary>
+            /// Handshake options.
+            /// </summary>
+            private HandshakeOptions _handshakeOptions;
+
+            /// <summary>
             /// Constructor.
             /// </summary>
-            public NodeContext(int nodeId, Process process,
+            public NodeContext(
+                int nodeId,
+                Process process,
                 Stream nodePipe,
-                INodePacketFactory factory, NodeContextTerminateDelegate terminateDelegate)
+                INodePacketFactory factory,
+                NodeContextTerminateDelegate terminateDelegate,
+                HandshakeOptions handshakeOptions)
             {
                 _nodeId = nodeId;
                 _process = process;
@@ -619,6 +628,7 @@ namespace Microsoft.Build.BackEnd
                 _writeBufferMemoryStream = new MemoryStream();
                 _terminateDelegate = terminateDelegate;
                 _binaryReaderFactory = InterningBinaryReader.CreateSharedBuffer();
+                _handshakeOptions = handshakeOptions;
             }
 
             /// <summary>
@@ -766,7 +776,7 @@ namespace Microsoft.Build.BackEnd
 
 #if !TASKHOST
 
-                    if (packet is ITranslatable2 jsonTranslatable)
+                    if ((_handshakeOptions & HandshakeOptions.NET) == HandshakeOptions.NET && packet is ITranslatable2 jsonTranslatable)
                     {
                         var writeTranslator = JsonTranslator.GetWriteTranslator(writeStream);
                         jsonTranslatable.Translate(writeTranslator);

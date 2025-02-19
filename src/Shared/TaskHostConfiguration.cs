@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -13,8 +12,8 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 #endif
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using System.Linq;
 
 #nullable disable
 
@@ -429,6 +428,23 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
+#if FEATURE_APPDOMAIN
+            byte[] appDomainConfigBytes = null;
+
+            // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+            }
+
+            translator.Translate(ref appDomainConfigBytes);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                _appDomainSetup = new AppDomainSetup();
+                _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
+            }
+#endif
             translator.Translate(ref _lineNumberOfTask);
             translator.Translate(ref _columnNumberOfTask);
             translator.Translate(ref _projectFileOfTask);
@@ -466,59 +482,53 @@ namespace Microsoft.Build.BackEnd
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                var model = new
-                {
-                    nodeId = _nodeId,
-                    startupDirectory = _startupDirectory,
-                    buildProcessEnvironment = _buildProcessEnvironment,
-                    culture = _culture?.Name,
-                    uiCulture = _uiCulture?.Name,
-                    lineNumberOfTask = _lineNumberOfTask,
-                    columnNumberOfTask = _columnNumberOfTask,
-                    projectFileOfTask = _projectFileOfTask,
-                    continueOnError = _continueOnError,
-                    taskName = _taskName,
-                    taskLocation = _taskLocation,
-                    isTaskInputLoggingEnabled = _isTaskInputLoggingEnabled,
-                    taskParameters = _taskParameters,
-                    globalParameters = _globalParameters,
-                    warningsAsErrors = _warningsAsErrors,
-                    warningsNotAsErrors = _warningsNotAsErrors,
-                    warningsAsMessages = _warningsAsMessages
-                };
+                var model = new TaskHostConfigurationModel(
+                        _nodeId,
+                        _startupDirectory,
+                        _buildProcessEnvironment,
+                        _culture?.Name,
+                        _uiCulture?.Name,
+                        _lineNumberOfTask,
+                        _columnNumberOfTask,
+                        _projectFileOfTask,
+                        _continueOnError,
+                        _taskName,
+                        _taskLocation,
+                        _isTaskInputLoggingEnabled,
+                        _taskParameters,
+                        _globalParameters,
+                        _warningsAsErrors?.ToArray(),
+                        _warningsNotAsErrors?.ToArray(),
+                        _warningsAsMessages?.ToArray());
 
-                translator.TranslateToJson(model, _jsonSerializerOptions);
+                translator.Translate(ref model, s_jsonSerializerOptions);
             }
-            else // ReadFromStream
+            else
             {
-                var model = translator.TranslateFromJson<TaskHostConfigurationModel>(_jsonSerializerOptions);
+                TaskHostConfigurationModel model = null;
+                translator.Translate(ref model, s_jsonSerializerOptions);
 
-                _nodeId = model.nodeId;
-                _startupDirectory = model.startupDirectory;
-                _buildProcessEnvironment = model.buildProcessEnvironment;
-                _culture = !string.IsNullOrEmpty(model.culture) ? CultureInfo.GetCultureInfo(model.culture) : null;
-                _uiCulture = !string.IsNullOrEmpty(model.uiCulture) ? CultureInfo.GetCultureInfo(model.uiCulture) : null;
-                _lineNumberOfTask = model.lineNumberOfTask;
-                _columnNumberOfTask = model.columnNumberOfTask;
-                _projectFileOfTask = model.projectFileOfTask;
-                _continueOnError = model.continueOnError;
-                _taskName = model.taskName;
-                _taskLocation = model.taskLocation;
-                _isTaskInputLoggingEnabled = model.isTaskInputLoggingEnabled;
-                _taskParameters = model.taskParameters;
-                _globalParameters = model.globalParameters;
-                _warningsAsErrors = model.warningsAsErrors != null
-                    ? new HashSet<string>(model.warningsAsErrors, StringComparer.OrdinalIgnoreCase)
-                    : null;
-                _warningsNotAsErrors = model.warningsNotAsErrors != null
-                    ? new HashSet<string>(model.warningsNotAsErrors, StringComparer.OrdinalIgnoreCase)
-                    : null;
-                _warningsAsMessages = model.warningsAsMessages != null
-                    ? new HashSet<string>(model.warningsAsMessages, StringComparer.OrdinalIgnoreCase)
-                    : null;
+                _nodeId = model.NodeId;
+                _startupDirectory = model.StartupDirectory;
+                _buildProcessEnvironment = model.BuildProcessEnvironment;
+                _culture = !string.IsNullOrEmpty(model.Culture) ? CultureInfo.GetCultureInfo(model.Culture) : null;
+                _uiCulture = !string.IsNullOrEmpty(model.UiCulture) ? CultureInfo.GetCultureInfo(model.UiCulture) : null;
+                _lineNumberOfTask = model.LineNumberOfTask;
+                _columnNumberOfTask = model.ColumnNumberOfTask;
+                _projectFileOfTask = model.ProjectFileOfTask;
+                _continueOnError = model.ContinueOnError;
+                _taskName = model.TaskName;
+                _taskLocation = model.TaskLocation;
+                _isTaskInputLoggingEnabled = model.IsTaskInputLoggingEnabled;
+                _taskParameters = model.TaskParameters;
+                _globalParameters = model.GlobalParameters;
+                _warningsAsErrors = model.WarningsAsErrors != null ? new HashSet<string>(model.WarningsAsErrors, StringComparer.OrdinalIgnoreCase) : null;
+                _warningsNotAsErrors = model.WarningsNotAsErrors != null ? new HashSet<string>(model.WarningsNotAsErrors, StringComparer.OrdinalIgnoreCase) : null;
+                _warningsAsMessages = model.WarningsAsMessages != null ? new HashSet<string>(model.WarningsAsMessages, StringComparer.OrdinalIgnoreCase) : null;
             }
         }
 #endif
+
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
@@ -540,36 +550,34 @@ namespace Microsoft.Build.BackEnd
 
 #if !TASKHOST
 
-        public static JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions s_jsonSerializerOptions = new()
         {
             PropertyNameCaseInsensitive = true,
             Converters =
                 {
                     new JsonStringEnumConverter(),
-                    new CustomTaskParameterConverter()
+                    new CustomTaskParameterConverter(),
                 },
         };
 
-        private class TaskHostConfigurationModel
-        {
-            public int nodeId { get; set; }
-            public string startupDirectory { get; set; }
-            public Dictionary<string, string> buildProcessEnvironment { get; set; }
-            public string culture { get; set; }
-            public string uiCulture { get; set; }
-            public int lineNumberOfTask { get; set; }
-            public int columnNumberOfTask { get; set; }
-            public string projectFileOfTask { get; set; }
-            public bool continueOnError { get; set; }
-            public string taskName { get; set; }
-            public string taskLocation { get; set; }
-            public bool isTaskInputLoggingEnabled { get; set; }
-            public Dictionary<string, TaskParameter> taskParameters { get; set; }
-            public Dictionary<string, string> globalParameters { get; set; }
-            public string[] warningsAsErrors { get; set; }
-            public string[] warningsNotAsErrors { get; set; }
-            public string[] warningsAsMessages { get; set; }
-        }
+        private record TaskHostConfigurationModel(
+            int NodeId,
+            string StartupDirectory,
+            Dictionary<string, string> BuildProcessEnvironment,
+            string Culture,
+            string UiCulture,
+            int LineNumberOfTask,
+            int ColumnNumberOfTask,
+            string ProjectFileOfTask,
+            bool ContinueOnError,
+            string TaskName,
+            string TaskLocation,
+            bool IsTaskInputLoggingEnabled,
+            Dictionary<string, TaskParameter> TaskParameters,
+            Dictionary<string, string> GlobalParameters,
+            string[] WarningsAsErrors,
+            string[] WarningsNotAsErrors,
+            string[] WarningsAsMessages);
 
         private class CustomTaskParameterConverter : JsonConverter<TaskParameter>
         {
@@ -583,45 +591,22 @@ namespace Microsoft.Build.BackEnd
                 using JsonDocument doc = JsonDocument.ParseValue(ref reader);
                 var element = doc.RootElement;
 
-                if (element.TryGetProperty("value", out JsonElement valueElement))
+                if (!element.TryGetProperty("value", out JsonElement valueElement))
                 {
-                    object value = null;
-
-                    switch (valueElement.ValueKind)
-                    {
-                        case JsonValueKind.String:
-                            value = valueElement.GetString();
-                            break;
-                        case JsonValueKind.Number:
-                            if (valueElement.TryGetInt32(out int intValue))
-                            {
-                                value = intValue;
-                            }
-                            else if (valueElement.TryGetInt64(out long longValue))
-                            {
-                                value = longValue;
-                            }
-                            else
-                            {
-                                value = valueElement.GetDouble();
-                            }
-                            break;
-                        case JsonValueKind.True:
-                        case JsonValueKind.False:
-                            value = valueElement.GetBoolean();
-                            break;
-                        case JsonValueKind.Array:
-                            value = JsonSerializer.Deserialize<object[]>(valueElement.GetRawText(), options);
-                            break;
-                        case JsonValueKind.Object:
-                            value = JsonSerializer.Deserialize<Dictionary<string, object>>(valueElement.GetRawText(), options);
-                            break;
-                    }
-
-                    return new TaskParameter(value);
+                    throw new JsonException("Invalid TaskParameter format");
                 }
 
-                throw new JsonException("Invalid TaskParameter format");
+                object value = valueElement.ValueKind switch
+                {
+                    JsonValueKind.String => valueElement.GetString(),
+                    JsonValueKind.Number => JsonTranslatorExtensions.GetNumberValue(valueElement),
+                    JsonValueKind.True or JsonValueKind.False => valueElement.GetBoolean(),
+                    JsonValueKind.Array => JsonSerializer.Deserialize<object[]>(valueElement.GetRawText(), options),
+                    JsonValueKind.Object => JsonSerializer.Deserialize<Dictionary<string, object>>(valueElement.GetRawText(), options),
+                    _ => null
+                };
+
+                return new TaskParameter(value);
             }
 
             public override void Write(Utf8JsonWriter writer, TaskParameter value, JsonSerializerOptions options)
@@ -642,102 +627,10 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    switch (wrappedValue)
-                    {
-                        case string strValue:
-                            writer.WriteStringValue(strValue);
-                            break;
-                        case int intValue:
-                            writer.WriteNumberValue(intValue);
-                            break;
-                        case long longValue:
-                            writer.WriteNumberValue(longValue);
-                            break;
-                        case double doubleValue:
-                            writer.WriteNumberValue(doubleValue);
-                            break;
-                        case float floatValue:
-                            writer.WriteNumberValue(floatValue);
-                            break;
-                        case decimal decimalValue:
-                            writer.WriteNumberValue(decimalValue);
-                            break;
-                        case bool boolValue:
-                            writer.WriteBooleanValue(boolValue);
-                            break;
-                        case DateTime dateValue:
-                            writer.WriteStringValue(dateValue);
-                            break;
-                        case ITaskItem taskItem:
-                            WriteTaskItem(writer, taskItem);
-                            break;
-                        case ITaskItem[] taskItems:
-                            WriteTaskItemArray(writer, taskItems);
-                            break;
-                        case IEnumerable enumerable:
-                            WriteEnumerable(writer, enumerable, options);
-                            break;
-                        default:
-                            JsonSerializer.Serialize(writer, wrappedValue, wrappedValue.GetType(), options);
-                            break;
-                    }
+                    JsonTranslatorExtensions.WriteValue(writer, wrappedValue, s_jsonSerializerOptions);
                 }
 
                 writer.WriteEndObject();
-            }
-
-            private static void WriteTaskItem(Utf8JsonWriter writer, ITaskItem taskItem)
-            {
-                writer.WriteStartObject();
-                writer.WritePropertyName("itemSpec");
-                writer.WriteStringValue(taskItem.ItemSpec);
-
-                if (taskItem.MetadataCount > 0)
-                {
-                    writer.WritePropertyName("metadata");
-                    writer.WriteStartObject();
-
-                    foreach (string name in taskItem.MetadataNames)
-                    {
-                        writer.WritePropertyName(name);
-                        writer.WriteStringValue(taskItem.GetMetadata(name));
-                    }
-
-                    writer.WriteEndObject();
-                }
-
-                writer.WriteEndObject();
-            }
-
-            private static void WriteTaskItemArray(Utf8JsonWriter writer, ITaskItem[] taskItems)
-            {
-                writer.WriteStartArray();
-
-                foreach (var item in taskItems)
-                {
-                    WriteTaskItem(writer, item);
-                }
-
-                writer.WriteEndArray();
-            }
-
-            private static void WriteEnumerable(Utf8JsonWriter writer, IEnumerable enumerable, JsonSerializerOptions options)
-            {
-                writer.WriteStartArray();
-
-                foreach (var item in enumerable)
-                {
-                    if (item == null)
-                    {
-                        writer.WriteNullValue();
-                    }
-                    else
-                    {
-                        JsonSerializer.Serialize(writer, item, item.GetType(), options);
-                    }
-                }
-
-                writer.WriteEndArray();
             }
         }
 #endif

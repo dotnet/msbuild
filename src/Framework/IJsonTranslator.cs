@@ -19,19 +19,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         TranslationDirection Mode { get; }
 
-        void TranslateToJson<T>(T model, JsonSerializerOptions jsonSerializerOptions = null);
-
-        T TranslateFromJson<T>(JsonSerializerOptions jsonSerializerOptions = null);
-
-        // Additional methods for specific type handling if needed
-        void TranslateCulture(string propertyName, ref CultureInfo culture);
-
-        void TranslateDictionary<TKey, TValue>(
-            JsonSerializerOptions jsonSerializerOptions,
-            string propertyName,
-            ref Dictionary<TKey, TValue> dictionary,
-            IEqualityComparer<TKey> comparer,
-            Func<TValue> valueFactory = null);
+        void Translate<T>(ref T model, JsonSerializerOptions jsonSerializerOptions = null);
     }
 }
 #endif

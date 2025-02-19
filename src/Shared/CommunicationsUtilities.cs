@@ -133,7 +133,7 @@ namespace Microsoft.Build.Internal
 
         public virtual KeyValuePair<string, int>[] RetrieveHandshakeComponents() =>
         [
-            new KeyValuePair<string, int>(nameof(salt), CommunicationsUtilities.AvoidEndOfHandshakeSignal(options)),
+            new KeyValuePair<string, int>(nameof(options), CommunicationsUtilities.AvoidEndOfHandshakeSignal(options)),
             new KeyValuePair<string, int>(nameof(salt), CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt)),
             new KeyValuePair<string, int>(nameof(fileVersionMajor), CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor)),
             new KeyValuePair<string, int>(nameof(fileVersionMinor), CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor)),
@@ -145,6 +145,8 @@ namespace Microsoft.Build.Internal
         public virtual string GetKey() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}".ToString(CultureInfo.InvariantCulture);
 
         public virtual byte? ExpectedVersionInFirstByte => CommunicationsUtilities.handshakeVersion;
+
+        public int GetHandshakeOptions => options;
     }
 
     internal sealed class ServerNodeHandshake : Handshake
@@ -163,7 +165,7 @@ namespace Microsoft.Build.Internal
 
         public override KeyValuePair<string, int>[] RetrieveHandshakeComponents() =>
         [
-            new KeyValuePair<string, int>(nameof(salt), CommunicationsUtilities.AvoidEndOfHandshakeSignal(options)),
+            new KeyValuePair<string, int>(nameof(options), CommunicationsUtilities.AvoidEndOfHandshakeSignal(options)),
             new KeyValuePair<string, int>(nameof(salt), CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt)),
             new KeyValuePair<string, int>(nameof(fileVersionMajor), CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor)),
             new KeyValuePair<string, int>(nameof(fileVersionMinor), CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor)),
@@ -500,6 +502,7 @@ namespace Microsoft.Build.Internal
                 {
                     CommunicationsUtilities.Trace("Expected end of handshake signal but received {0}. Probably the host is a different MSBuild build.", valueRead);
                 }
+
                 throw new InvalidOperationException();
             }
         }

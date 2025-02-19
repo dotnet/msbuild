@@ -77,7 +77,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static NodeBuildComplete FactoryForDeserialization(ITranslatorBase translator)
         {
-            NodeBuildComplete packet = new NodeBuildComplete();
+            NodeBuildComplete packet = new();
 
             if (translator.Protocol == ProtocolType.Binary)
             {
@@ -88,8 +88,7 @@ namespace Microsoft.Build.BackEnd
             {
                 packet.Translate((IJsonTranslator)translator);
             }
-#endif
-       
+#endif     
             return packet;
         }
 
@@ -99,16 +98,17 @@ namespace Microsoft.Build.BackEnd
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
                 var model = new NodeBuildCompleteModel(_prepareForReuse);
-                translator.TranslateToJson(model);
+                translator.Translate(ref model);
             }
-            else // ReadFromStream
+            else
             {
-                var model = translator.TranslateFromJson<NodeBuildCompleteModel>();
-                _prepareForReuse = model.prepareForReuse;
+                NodeBuildCompleteModel model = null;
+                translator.Translate(ref model);
+                _prepareForReuse = model.PrepareForReuse;
             }
         }
 
-        internal record NodeBuildCompleteModel(bool prepareForReuse);
+        internal record NodeBuildCompleteModel(bool PrepareForReuse);
 
 #endif
 

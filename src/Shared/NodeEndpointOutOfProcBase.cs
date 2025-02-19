@@ -413,7 +413,7 @@ namespace Microsoft.Build.BackEnd
                             );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
-                            // TODO ???
+                            // TODO better way to define net host ???
                             if (handshakeComponents[i].Key == "fileVersionMajor" && handshakeComponents[i].Value == NetTaskHostHandshakeVersion)
                             {
                                 isNetHost = true;
