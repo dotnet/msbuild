@@ -89,10 +89,5 @@ namespace Microsoft.Build.BackEnd
             }
         }
     }
-
-    internal static class JsonTranslatorExtensions
-    {
-        
-    }
 }
 #endif
