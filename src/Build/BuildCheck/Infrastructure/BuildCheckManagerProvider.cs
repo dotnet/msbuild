@@ -65,14 +65,14 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
         private readonly TracingReporter _tracingReporter = new TracingReporter();
         private readonly IConfigurationProvider _configurationProvider = new ConfigurationProvider();
         private readonly BuildCheckCentralContext _buildCheckCentralContext;
-        private readonly List<CheckFactoryContext> _checkRegistry;
+        private readonly ConcurrentBag<CheckFactoryContext> _checkRegistry;
         private readonly bool[] _enabledDataSources = new bool[(int)BuildCheckDataSource.ValuesCount];
         private readonly BuildEventsProcessor _buildEventsProcessor;
         private readonly IBuildCheckAcquisitionModule _acquisitionModule;
 
         internal BuildCheckManager()
         {
-            _checkRegistry = new List<CheckFactoryContext>();
+            _checkRegistry = new ConcurrentBag<CheckFactoryContext>();
             _acquisitionModule = new BuildCheckAcquisitionModule();
             _buildCheckCentralContext = new(_configurationProvider, RemoveChecksAfterExecutedActions);
             _buildEventsProcessor = new(_buildCheckCentralContext);
@@ -171,15 +171,23 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private void RegisterBuiltInChecks(BuildCheckDataSource buildCheckDataSource)
         {
-            _checkRegistry.AddRange(
-                s_builtInFactoriesPerDataSource[(int)buildCheckDataSource]
-                    .Select(v => new CheckFactoryContext(v.Factory, v.RuleIds, v.DefaultEnablement)));
+            foreach (BuiltInCheckFactory item in s_builtInFactoriesPerDataSource[(int)buildCheckDataSource])
+            {
+                _checkRegistry.Add(new CheckFactoryContext(
+                    item.Factory,
+                    item.RuleIds,
+                    item.DefaultEnablement));
+            }
 
             if (s_testFactoriesPerDataSource is not null)
             {
-                _checkRegistry.AddRange(
-                    s_testFactoriesPerDataSource[(int)buildCheckDataSource]
-                        .Select(v => new CheckFactoryContext(v.Factory, v.RuleIds, v.DefaultEnablement)));
+                foreach (BuiltInCheckFactory item in s_testFactoriesPerDataSource[(int)buildCheckDataSource])
+                {
+                    _checkRegistry.Add(new CheckFactoryContext(
+                        item.Factory,
+                        item.RuleIds,
+                        item.DefaultEnablement));
+                }
             }
         }
 
@@ -362,7 +370,8 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 foreach (CheckWrapper check in checksToRemove)
                 {
-                    var checkFactory = _checkRegistry.Find(c => c.MaterializedCheck == check);
+                    var checkFactory = _checkRegistry.FirstOrDefault(c => c.MaterializedCheck == check);
+
                     if (checkFactory is not null)
                     {
                         checkContext.DispatchAsCommentFromText(MessageImportance.High, $"Dismounting check '{check.Check.FriendlyName}'. The check has thrown an unhandled exception while executing registered actions.");
@@ -371,7 +380,9 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 }
             }
 
-            foreach (var throttledCheck in _checkRegistry.FindAll(c => c.MaterializedCheck?.IsThrottled ?? false))
+            var throttledChecks = _checkRegistry.Where(c => c.MaterializedCheck?.IsThrottled ?? false).ToList();
+
+            foreach (var throttledCheck in throttledChecks)
             {
                 checkContext.DispatchAsCommentFromText(MessageImportance.Normal, $"Dismounting check '{throttledCheck.FriendlyName}'. The check has exceeded the maximum number of results allowed. Any additional results will not be displayed.");
                 RemoveCheck(throttledCheck);
@@ -380,12 +391,26 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private void RemoveCheck(CheckFactoryContext checkToRemove)
         {
-            _checkRegistry.Remove(checkToRemove);
+            var newRegistry = new ConcurrentBag<CheckFactoryContext>(_checkRegistry.Where(x => x != checkToRemove));
+
+            while (_checkRegistry.TryTake(out _)) { }
+
+            foreach (var item in newRegistry)
+            {
+                _checkRegistry.Add(item);
+            }
 
             if (checkToRemove.MaterializedCheck is not null)
             {
                 _buildCheckCentralContext.DeregisterCheck(checkToRemove.MaterializedCheck);
-                _ruleTelemetryData.AddRange(checkToRemove.MaterializedCheck.GetRuleTelemetryData());
+
+                // Get telemetry data before disposing
+                var telemetryData = checkToRemove.MaterializedCheck.GetRuleTelemetryData();
+                foreach (var data in telemetryData)
+                {
+                    _ruleTelemetryData.Add(data); 
+                }
+
                 checkToRemove.MaterializedCheck.Check.Dispose();
             }
         }
@@ -473,7 +498,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             => _buildEventsProcessor
                 .ProcessTaskParameterEventArgs(checkContext, taskParameterEventArgs);
 
-        private readonly List<BuildCheckRuleTelemetryData> _ruleTelemetryData = [];
+        private readonly ConcurrentBag<BuildCheckRuleTelemetryData> _ruleTelemetryData = [];
 
         public BuildCheckTracingData CreateCheckTracingStats()
         {
@@ -481,11 +506,15 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 if (checkFactoryContext.MaterializedCheck != null)
                 {
-                    _ruleTelemetryData.AddRange(checkFactoryContext.MaterializedCheck.GetRuleTelemetryData());
+                    var telemetryData = checkFactoryContext.MaterializedCheck.GetRuleTelemetryData();
+                    foreach (var data in telemetryData)
+                    {
+                        _ruleTelemetryData.Add(data);
+                    }
                 }
             }
 
-            return new BuildCheckTracingData(_ruleTelemetryData, _tracingReporter.GetInfrastructureTracingStats());
+            return new BuildCheckTracingData(_ruleTelemetryData.ToList(), _tracingReporter.GetInfrastructureTracingStats());
         }
 
         public void FinalizeProcessing(LoggingContext loggingContext)
