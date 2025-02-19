@@ -94,7 +94,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
+        <target state="translated">({0:F1} 秒)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
