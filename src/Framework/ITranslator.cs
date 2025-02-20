@@ -255,18 +255,6 @@ namespace Microsoft.Build.BackEnd
         void TranslateEnum<T>(ref T value, int numericValue)
             where T : struct, Enum;
 
-        /// <summary>
-        /// Translates a value using the .Net binary formatter.
-        /// </summary>
-        /// <typeparam name="T">The reference type.</typeparam>
-        /// <param name="value">The value to be translated.</param>
-        /// <remarks>
-        /// The primary purpose of this method is to support serialization of Exceptions and
-        /// custom build logging events, since these do not support our custom serialization
-        /// methods.
-        /// </remarks>
-        void TranslateDotNet<T>(ref T value);
-
         void TranslateException(ref Exception value);
 
         /// <summary>

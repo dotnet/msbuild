@@ -434,7 +434,7 @@ namespace Microsoft.Build.CommandLine
         /// </comments>
         private static void DumpCounters(bool initializeOnly)
         {
-            Process currentProcess = Process.GetCurrentProcess();
+            using Process currentProcess = Process.GetCurrentProcess();
 
             if (!initializeOnly)
             {
@@ -464,7 +464,7 @@ namespace Microsoft.Build.CommandLine
                 using PerformanceCounter counter = new PerformanceCounter(".NET CLR Memory", "Process ID", instance, true);
                 try
                 {
-                    if ((int)counter.RawValue == currentProcess.Id)
+                    if ((int)counter.RawValue == EnvironmentUtilities.CurrentProcessId)
                     {
                         currentInstance = instance;
                         break;
@@ -630,9 +630,9 @@ namespace Microsoft.Build.CommandLine
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule.FileName} PID {currentProcess.Id}).  Press enter to continue...");
+                    Console.WriteLine($"Waiting for debugger to attach ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId}).  Press enter to continue...");
                     Console.ReadLine();
+
                     break;
             }
         }
@@ -838,6 +838,9 @@ namespace Microsoft.Build.CommandLine
                         {
                             using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
                             {
+                                // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
+                                collection.PropertiesFromCommandLine = [.. globalProperties.Keys];
+
                                 Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
 
                                 if (getResultOutputFile.Length == 0)
@@ -1396,6 +1399,9 @@ namespace Microsoft.Build.CommandLine
                     useAsynchronousLogging: true,
                     reuseProjectRootElementCache: s_isServerNode);
 
+                // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
+                projectCollection.PropertiesFromCommandLine = [.. globalProperties.Keys];
+
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
                 {
                     ThrowInvalidToolsVersionInitializationException(projectCollection.Toolsets, toolsVersion);
@@ -1739,7 +1745,7 @@ namespace Microsoft.Build.CommandLine
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "Process",
-                        Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty),
+                        EnvironmentUtilities.ProcessPath ?? string.Empty),
                     MessageImportance.Low),
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
@@ -2530,8 +2536,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (!Debugger.IsAttached)
                 {
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach... ({currentProcess.MainModule.FileName} PID {currentProcess.Id})");
+                    Console.WriteLine($"Waiting for debugger to attach... ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId})");
                     while (!Debugger.IsAttached)
                     {
                         Thread.Sleep(100);
@@ -2558,9 +2563,13 @@ namespace Microsoft.Build.CommandLine
             }
             try
             {
-                if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle)
+                if (lowPriority)
                 {
-                    Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
+                    using Process currentProcess = Process.GetCurrentProcess();
+                    if (currentProcess.PriorityClass != ProcessPriorityClass.Idle)
+                    {
+                        currentProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
+                    }
                 }
             }
             // We avoid increasing priority because that causes failures on mac/linux, but there is no good way to
