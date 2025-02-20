@@ -176,7 +176,7 @@ namespace Microsoft.Build.Construction
             ProjectParser.Parse(document, this);
         }
 
-        private readonly bool _canBeDirty = false;
+        private readonly bool _canBeDirty = true;
 
         private ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions, bool canBeDirty)
             : this(projectRootElementCache, projectFileOptions)
