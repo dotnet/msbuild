@@ -176,12 +176,12 @@ namespace Microsoft.Build.Construction
             ProjectParser.Parse(document, this);
         }
 
-        private readonly bool _cannotBeDirtied = false;
+        private readonly bool _canBeDirty = false;
 
         private ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions, bool canBeDirty)
             : this(projectRootElementCache, projectFileOptions)
         {
-            _cannotBeDirtied = canBeDirty;
+            _canBeDirty = canBeDirty;
         }
 
         /// <summary>
@@ -721,7 +721,7 @@ namespace Microsoft.Build.Construction
             => _dirtyReason == null ? null : String.Format(CultureInfo.InvariantCulture, _dirtyReason, _dirtyParameter);
 
         /// <summary>
-        /// Initialize an in-memory, empty ProjectRootElement instance that CANNOT be saved later.
+        /// Initialize an in-memory empty ProjectRootElement instance that CANNOT be saved later.
         /// The ProjectRootElement will not be marked dirty.
         /// Uses the global project collection.
         /// </summary>
@@ -729,7 +729,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
 
-            return new ProjectRootElement(projectRootElementCache, Project.DefaultNewProjectTemplateOptions, true);
+            return new ProjectRootElement(projectRootElementCache, Project.DefaultNewProjectTemplateOptions, false);
         }
 
         /// <summary>
@@ -1837,7 +1837,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal sealed override void MarkDirty(string reason, string param)
         {
-            if (_cannotBeDirtied)
+            if (!_canBeDirty)
             {
                 return;
             }
