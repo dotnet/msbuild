@@ -213,12 +213,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="new">Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</target>
+        <target state="translated">Project {0} 指定未使用 .NET SDK 的 'TargetFramework(s)' 属性 '{1}'。直接匯入 C# 目標的項目無法瞭解這些屬性。</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="new">'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</target>
+        <target state="translated">未遵守 『TargetFramework』 和 『TargetFrameworks』 屬性，且不應在未使用 .NET SDK 的專案中指定。</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
@@ -253,12 +253,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="new">Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</target>
+        <target state="translated">位置： '{0}' 無法完全信任，請將您的專案放在該資料夾之外 (Project： {1})。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="new">Downloads folder is untrusted for projects building.</target>
+        <target state="translated">專案建置不受信任的下載資料夾。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -489,7 +489,7 @@
       <trans-unit id="FatalErrorWhileLoggingWithInnerException">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</source>
-        <target state="translated">MSB4017: 由於發生未預期的記錄器失敗，因此已中止組建。
+        <target state="translated">MSB4017: 因為未預期的記錄器失敗，建置未預期停止。
    {0}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
