@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -391,27 +391,33 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
         private void RemoveCheck(CheckFactoryContext checkToRemove)
         {
-            var newRegistry = new ConcurrentBag<CheckFactoryContext>(_checkRegistry.Where(x => x != checkToRemove));
-
-            while (_checkRegistry.TryTake(out _)) { }
-
-            foreach (var item in newRegistry)
+            var tempColl = new ConcurrentBag<CheckFactoryContext>();
+            
+            // Take items one by one and only keep those we don't want to remove
+            while (_checkRegistry.TryTake(out var item))
             {
-                _checkRegistry.Add(item);
+                if (item != checkToRemove)
+                {
+                    tempColl.Add(item);
+                }
+                else if (item.MaterializedCheck is not null)
+                {
+                    _buildCheckCentralContext.DeregisterCheck(item.MaterializedCheck);
+                    
+                    var telemetryData = item.MaterializedCheck.GetRuleTelemetryData();
+                    foreach (var data in telemetryData)
+                    {
+                        _ruleTelemetryData.Add(data);
+                    }
+                    
+                    item.MaterializedCheck.Check.Dispose();
+                }
             }
 
-            if (checkToRemove.MaterializedCheck is not null)
+            // Add back all preserved items
+            foreach (var item in tempColl)
             {
-                _buildCheckCentralContext.DeregisterCheck(checkToRemove.MaterializedCheck);
-
-                // Get telemetry data before disposing
-                var telemetryData = checkToRemove.MaterializedCheck.GetRuleTelemetryData();
-                foreach (var data in telemetryData)
-                {
-                    _ruleTelemetryData.Add(data); 
-                }
-
-                checkToRemove.MaterializedCheck.Check.Dispose();
+                _checkRegistry.Add(item);
             }
         }
 
