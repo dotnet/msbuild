@@ -22,7 +22,7 @@ namespace Microsoft.Build.BuildEngine
         // The MSBuildBinPath (and ToolsPath) for this tools version
         private string toolsPath;
 
-        // Properties 
+        // Properties
         private BuildPropertyGroup properties;
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Path to this toolset's tasks and targets. Corresponds to $(MSBuildToolsPath) in a project or targets file. 
+        /// Path to this toolset's tasks and targets. Corresponds to $(MSBuildToolsPath) in a project or targets file.
         /// </summary>
         public string ToolsPath
         {

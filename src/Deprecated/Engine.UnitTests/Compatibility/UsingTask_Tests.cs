@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             string assemblyFileName = @"%25%2a%3f%40%24%28%29%3b\";
             Assertion.AssertNotNull(SetandGetAssemblyFileName(assemblyFileName));
         }
-        
+
         /// <summary>
         /// AssemblyFile test, set special non-escaped characters in ctor then get.
         /// </summary>
@@ -170,9 +170,9 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             Assertion.AssertEquals("AssemblyName.dll", CompatibilityTestHelpers.FindUsingTaskByName("TaskName", p.UsingTasks).AssemblyFile);
         }
 
-        #endregion 
+        #endregion
 
-        #region TaskName 
+        #region TaskName
 
         /// <summary>
         /// TaskName Test, simple get
@@ -228,7 +228,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         #region IsImported
 
         /// <summary>
-        /// IsImported Test, assert true for an improted file. 
+        /// IsImported Test, assert true for an improted file.
         /// </summary>
         [Test]
         public void IsImported_true()
@@ -251,7 +251,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// IsImported Test, assert true for an imported file. 
+        /// IsImported Test, assert true for an imported file.
         /// </summary>
         [Test]
         public void IsImported_false()
@@ -260,7 +260,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             p.LoadXml(TestData.ContentUsingTaskFile);
             object o = p.EvaluatedProperties;
             Assertion.AssertEquals(false, CompatibilityTestHelpers.FindUsingTaskByName("TaskName", p.UsingTasks).IsImported);
-        }   
+        }
 
         #endregion
 
@@ -303,7 +303,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         #endregion
 
         /// <summary>
-        /// Set an assembly file name, then retrieve it. 
+        /// Set an assembly file name, then retrieve it.
         /// </summary>
         private string SetandGetAssemblyFileName(string assemblyFileName)
         {
@@ -312,6 +312,6 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             object o = p.EvaluatedItems;
             UsingTask usingTask = CompatibilityTestHelpers.FindUsingTaskByName("TaskName", p.UsingTasks);
             return usingTask.AssemblyFile;
-        }   
+        }
     }
 }

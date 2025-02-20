@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -229,13 +230,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         private static bool IsAsciiString(string str)
-        {
-            foreach (char c in str)
-            {
-                if (c > 127)
-                {  return false; }
-            }
-            return true;
-        }
+            => str.All(c => c <= 127);
     }
 }

@@ -46,11 +46,11 @@ namespace Microsoft.Build.BuildEngine
             CompletedSuccessfully,
 
             // We have attempted to build this target and all its dependent
-            // targets.  However, something failed during that process, and 
+            // targets.  However, something failed during that process, and
             // we consider ourselves done with this target.
             CompletedUnsuccessfully,
 
-            // This target is to be skipped.  This state is the result of a target 
+            // This target is to be skipped.  This state is the result of a target
             // having a condition attribute and that condition evaluating to false.
             Skipped
         }
@@ -146,7 +146,7 @@ namespace Microsoft.Build.BuildEngine
             this.buildState = BuildState.NotStarted;
             this.id = project.ParentEngine.GetNextTargetId();
 
-            // The target name and target dependendencies (dependencies on other 
+            // The target name and target dependendencies (dependencies on other
             // targets) are specified as attributes of the <target> element.
 
             XmlAttribute returnsAttribute = null;
@@ -164,7 +164,7 @@ namespace Microsoft.Build.BuildEngine
                     case XMakeAttributes.name:
                         this.targetName = EscapingUtilities.UnescapeAll(targetAttribute.Value);
 
-                        // Target names cannot contain MSBuild special characters, embedded properties, 
+                        // Target names cannot contain MSBuild special characters, embedded properties,
                         // or item lists.
                         int indexOfSpecialCharacter = this.targetName.IndexOfAny(XMakeElements.illegalTargetNameCharacters);
                         if (indexOfSpecialCharacter >= 0)
@@ -204,7 +204,7 @@ namespace Microsoft.Build.BuildEngine
                         break;
 
                     // These are only recognized by the new OM:
-                    // while the solution wrapper generator is using 
+                    // while the solution wrapper generator is using
                     // the old OM to parse projects for dependencies,
                     // we must make sure to not fail for these
                     case XMakeAttributes.beforeTargets:
@@ -217,9 +217,9 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
 
-            // Hack to help the 3.5 engine at least pretend to still be able to build on top of 
-            // the 4.0 targets.  In cases where there is no Outputs attribute, just a Returns attribute, 
-            // we can approximate the correct behaviour by making the Returns attribute our "outputs" attribute. 
+            // Hack to help the 3.5 engine at least pretend to still be able to build on top of
+            // the 4.0 targets.  In cases where there is no Outputs attribute, just a Returns attribute,
+            // we can approximate the correct behaviour by making the Returns attribute our "outputs" attribute.
             if (this.outputsAttribute == null && returnsAttribute != null)
             {
                 this.outputsAttribute = returnsAttribute;
@@ -506,7 +506,7 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
-        /// Allows the caller to use a foreach loop to enumerate through the individual 
+        /// Allows the caller to use a foreach loop to enumerate through the individual
         /// BuildTask objects contained within this Target.
         /// </summary>
         /// <returns></returns>
@@ -559,8 +559,8 @@ namespace Microsoft.Build.BuildEngine
             switch (buildState)
             {
                 case BuildState.InProgress:
-                    // In single proc mode if the build state was already "in progress" 
-                    // and somebody just told us to build ourselves, it means that there is 
+                    // In single proc mode if the build state was already "in progress"
+                    // and somebody just told us to build ourselves, it means that there is
                     // a loop (circular dependency) in the target dependency graph. In multi
                     // proc mode we need to analyze the dependency graph before we can
                     // tell if there a circular dependency or if two independent chains
@@ -593,7 +593,7 @@ namespace Microsoft.Build.BuildEngine
                         (buildState == BuildState.CompletedSuccessfully) ? "TargetAlreadyCompleteSuccess" : "TargetAlreadyCompleteFailure",
                         this.targetName);
 
-                    // Only contexts which are generated from an MSBuild task could need 
+                    // Only contexts which are generated from an MSBuild task could need
                     // the outputs of this target, such contexts have a non-null evaluation
                     // request
                     if ((buildState == BuildState.CompletedSuccessfully) &&
@@ -746,7 +746,7 @@ namespace Microsoft.Build.BuildEngine
             string attributeValue
             )
         {
-            // If this Target object is not actually represented by a 
+            // If this Target object is not actually represented by a
             // <Target> element in the parentProject.file, then do not allow
             // the caller to set the condition.
             error.VerifyThrowInvalidOperation(this.targetElement != null, "CannotSetCondition");

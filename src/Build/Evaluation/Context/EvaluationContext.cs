@@ -26,19 +26,28 @@ namespace Microsoft.Build.Evaluation.Context
         public enum SharingPolicy
         {
             /// <summary>
-            /// Instructs the <see cref="EvaluationContext"/> to reuse state between the different project evaluations that use it.
+            /// Instructs the <see cref="EvaluationContext"/> to reuse all cached state between the different project evaluations that use it.
             /// </summary>
             Shared,
 
             /// <summary>
-            /// Instructs the <see cref="EvaluationContext"/> not to reuse state between the different project evaluations that use it.
+            /// Instructs the <see cref="EvaluationContext"/> to not reuse any cached state between the different project evaluations that use it.
             /// </summary>
-            Isolated
+            Isolated,
+
+            /// <summary>
+            /// Instructs the <see cref="EvaluationContext"/> to reuse SDK resolver cache between the different project evaluations that use it.
+            /// No other cached state is reused.
+            /// </summary>
+            SharedSDKCache,
         }
 
-        internal static Action<EvaluationContext> TestOnlyHookOnCreate { get; set; }
-
+        /// <summary>
+        /// For contexts that are not fully shared, this field tracks whether the instance has already been used for evaluation.
+        /// </summary>
         private int _used;
+
+        internal static Action<EvaluationContext> TestOnlyHookOnCreate { get; set; }
 
         internal SharingPolicy Policy { get; }
 
@@ -65,28 +74,26 @@ namespace Microsoft.Build.Evaluation.Context
         /// <summary>
         ///     Factory for <see cref="EvaluationContext" />
         /// </summary>
+        /// <param name="policy">The <see cref="SharingPolicy"/> to use.</param>
         public static EvaluationContext Create(SharingPolicy policy)
         {
-
-            // ReSharper disable once IntroduceOptionalParameters.Global
-            // do not remove this method to avoid breaking binary compatibility
+            // Do not remove this method to avoid breaking binary compatibility.
             return Create(policy, fileSystem: null);
         }
 
         /// <summary>
         ///     Factory for <see cref="EvaluationContext" />
         /// </summary>
-        /// <param name="policy"> The <see cref="SharingPolicy"/> to use.</param>
+        /// <param name="policy">The <see cref="SharingPolicy"/> to use.</param>
         /// <param name="fileSystem">The <see cref="IFileSystem"/> to use.
         ///     This parameter is compatible only with <see cref="SharingPolicy.Shared"/>.
-        ///     The method throws if a file system is used with <see cref="SharingPolicy.Isolated"/>.
-        ///     The reasoning is that <see cref="SharingPolicy.Isolated"/> means not reusing any caches between evaluations,
+        ///     The method throws if a file system is used with <see cref="SharingPolicy.Isolated"/> or <see cref="SharingPolicy.SharedSDKCache"/>.
+        ///     The reasoning is that these values guarantee not reusing file system caches between evaluations,
         ///     and the passed in <paramref name="fileSystem"/> might cache state.
         /// </param>
         public static EvaluationContext Create(SharingPolicy policy, MSBuildFileSystemBase fileSystem)
         {
-            // Unsupported case: isolated context with non null file system.
-            // Isolated means caches aren't reused, but the given file system might cache.
+            // Unsupported case: not-fully-shared context with non null file system.
             ErrorUtilities.VerifyThrowArgument(
                 policy == SharingPolicy.Shared || fileSystem == null,
                 "IsolatedContextDoesNotSupportFileSystem");
@@ -100,27 +107,28 @@ namespace Microsoft.Build.Evaluation.Context
             return context;
         }
 
-        private EvaluationContext CreateUsedIsolatedContext()
-        {
-            var context = Create(SharingPolicy.Isolated);
-            context._used = 1;
-
-            return context;
-        }
-
         internal EvaluationContext ContextForNewProject()
         {
-            // Projects using isolated contexts need to get a new context instance 
+            // Projects using Isolated and SharedSDKCache contexts need to get a new context instance.
             switch (Policy)
             {
                 case SharingPolicy.Shared:
                     return this;
+                case SharingPolicy.SharedSDKCache:
                 case SharingPolicy.Isolated:
-                    // reuse the first isolated context if it has not seen an evaluation yet.
-                    var previousValueWasUsed = Interlocked.CompareExchange(ref _used, 1, 0);
-                    return previousValueWasUsed == 0
-                        ? this
-                        : CreateUsedIsolatedContext();
+                    // Reuse the first not-fully-shared context if it's not been used for an evaluation yet.
+                    if (Interlocked.CompareExchange(ref _used, 1, 0) == 0)
+                    {
+                        return this;
+                    }
+                    // Create a copy if this context has already been used. Mark it used.
+                    EvaluationContext context = new EvaluationContext(Policy, fileSystem: null, sdkResolverService: Policy == SharingPolicy.SharedSDKCache ? SdkResolverService : null)
+                    {
+                        _used = 1,
+                    };
+                    TestOnlyHookOnCreate?.Invoke(context);
+                    return context;
+
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     return null;
@@ -134,11 +142,10 @@ namespace Microsoft.Build.Evaluation.Context
         /// <returns>The new evaluation context.</returns>
         internal EvaluationContext ContextWithFileSystem(IFileSystem fileSystem)
         {
-            var newContext = new EvaluationContext(this.Policy, fileSystem, this.SdkResolverService, this.FileEntryExpansionCache)
+            return new EvaluationContext(Policy, fileSystem, SdkResolverService, FileEntryExpansionCache)
             {
-                _used = 1
+                _used = 1,
             };
-            return newContext;
         }
     }
 }
