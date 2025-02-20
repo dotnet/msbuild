@@ -15,65 +15,6 @@
         <target state="translated">Sestavení se nezdařilo. Nelze získat výsledky vlastností, položek a cíle. Viz podrobnosti ve stderr výše.</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildFinished">
-        <source>Build {0} in {1}s</source>
-        <target state="translated">Sestavení {0} za {1}s</target>
-        <note>
-      Overall build summary
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Failed">
-        <source>failed</source>
-        <target state="translated">neúspěšné</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with {0} error(s)</source>
-        <target state="translated">selhalo s {0} chybami.</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
-        <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="translated">selhalo s {0} chybami a {1} upozorněními.</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with {0} warning(s)</source>
-        <target state="translated">selhalo s {0} upozorněním(i).</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Succeeded">
-        <source>succeeded</source>
-        <target state="translated">úspěšné</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with {0} warning(s)</source>
-        <target state="translated">akce proběhla úspěšně s {0} upozorněním(i).</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildSummary">
-        <source>Build summary:</source>
-        <target state="translated">Souhrn sestavení:</target>
-        <note>
-      A header used by Terminal Logger to introduce the build summary.
-    </note>
-      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">Argumenty příkazového řádku = {0}</target>

@@ -33,14 +33,6 @@
         <target state="translated">MSBUILD : error MSB1027: ключ noAutoResponse не может быть указан в файле автоответа MSBuild.rsp или в любом другом файле ответа, на который файл автоответа ссылается.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="DurationDisplay">
-        <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
-        <note>
-        {0}: duration in seconds with 1 decimal point
-        's' should reflect the localized abbreviation for seconds
-      </note>
-      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.

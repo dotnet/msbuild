@@ -15,65 +15,6 @@
         <target state="translated">生成失败。无法获取属性、项目和目标结果。在上面的 stderr 中查看详细信息。</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildFinished">
-        <source>Build {0} in {1}s</source>
-        <target state="translated">在 {1} 秒内生成 {0}</target>
-        <note>
-      Overall build summary
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Failed">
-        <source>failed</source>
-        <target state="translated">失败</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with {0} error(s)</source>
-        <target state="translated">失败，出现 {0} 错误</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
-        <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="translated">失败，出现 {0} 错误和 {1} 警告</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with {0} warning(s)</source>
-        <target state="translated">失败，出现 {0} 警告</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Succeeded">
-        <source>succeeded</source>
-        <target state="translated">已成功</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with {0} warning(s)</source>
-        <target state="translated">成功，出现 {0} 警告</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildSummary">
-        <source>Build summary:</source>
-        <target state="translated">生成摘要:</target>
-        <note>
-      A header used by Terminal Logger to introduce the build summary.
-    </note>
-      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">命令行参数 = "{0}"</target>
@@ -91,14 +32,6 @@
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
         <target state="translated">MSBUILD : error MSB1027: 不能在 MSBuild.rsp 自动响应文件中或由该自动响应文件引用的任何响应文件中指定 -noAutoResponse 开关。</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="DurationDisplay">
-        <source>({0:F1}s)</source>
-        <target state="translated">({0:F1} 秒)</target>
-        <note>
-        {0}: duration in seconds with 1 decimal point
-        's' should reflect the localized abbreviation for seconds
-      </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
@@ -1734,39 +1667,6 @@
         <source>Process = "{0}"</source>
         <target state="translated">进程 = "{0}"</target>
         <note />
-      </trans-unit>
-      <trans-unit id="ProjectFinished_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3} 秒)</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_OutputPath">
-        <source> → {0}</source>
-        <target state="translated"> → {0}</target>
-        <note>
-      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
-      {0}: VT100 coded hyperlink to project output directory
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4} 秒)</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
       </trans-unit>
       <trans-unit id="ProjectNotFoundError">
         <source>MSBUILD : error MSB1009: Project file does not exist.</source>
