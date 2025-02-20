@@ -4030,7 +4030,7 @@ namespace Microsoft.Build.CommandLine
             {
                 // We can't use InternalsVisibleTo to access the internal TerminalLogger ctor from here, so we use reflection.
                 // This can be fixed when we remove shared files across projects.
-                TerminalLogger logger = Activator.CreateInstance(typeof(TerminalLogger), [verbosity]) as TerminalLogger;
+                var logger = (TerminalLogger)Activator.CreateInstance(typeof(TerminalLogger), BindingFlags.Instance | BindingFlags.NonPublic, null, [verbosity], null);
                 logger.Parameters = aggregatedLoggerParameters;
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
