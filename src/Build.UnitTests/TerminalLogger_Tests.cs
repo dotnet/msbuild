@@ -15,7 +15,6 @@ using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
-using Microsoft.Build.Logging.TerminalLogger;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using VerifyTests;

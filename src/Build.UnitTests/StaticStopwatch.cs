@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Net.Http.Headers;
-using Microsoft.Build.Logging.TerminalLogger;
+using Microsoft.Build.Logging;
 
 namespace Microsoft.Build.CommandLine.UnitTests;
 

@@ -5,11 +5,12 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Build.Framework.Logging;
 #if NETFRAMEWORK
 using Microsoft.Build.Shared;
 #endif
 
-namespace Microsoft.Build.Logging.TerminalLogger;
+namespace Microsoft.Build.Logging;
 
 /// <summary>
 /// An <see cref="ITerminal"/> implementation for ANSI/VT100 terminals.

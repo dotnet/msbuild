@@ -3,7 +3,7 @@
 
 using System.Diagnostics;
 
-namespace Microsoft.Build.Logging.TerminalLogger;
+namespace Microsoft.Build.Logging;
 
 internal sealed class SystemStopwatch : StopwatchAbstraction
 {

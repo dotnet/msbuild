@@ -41,7 +41,7 @@ using FileLogger = Microsoft.Build.Logging.FileLogger;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
-using TerminalLogger = Microsoft.Build.Logging.TerminalLogger.TerminalLogger;
+using TerminalLogger = Microsoft.Build.Logging.TerminalLogger;
 
 #if NETFRAMEWORK
 // Use I/O operations from Microsoft.IO.Redist which is generally higher perf

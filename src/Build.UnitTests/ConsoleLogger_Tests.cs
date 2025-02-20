@@ -14,12 +14,10 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
-using Microsoft.Build.Logging.TerminalLogger;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
