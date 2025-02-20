@@ -603,7 +603,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>";
 
             projectContents = Expand(projectContents);
-            Project project = new Project(XmlReader.Create(new StringReader(projectContents)));
+            using ProjectFromString projectFromString = new(projectContents);
+            Project project = projectFromString.Project;
+
             return project;
         }
 
