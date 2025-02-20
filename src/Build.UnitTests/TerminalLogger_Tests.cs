@@ -83,10 +83,25 @@ namespace Microsoft.Build.UnitTests
             testEnvironment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", evnVariableValue);
 
             string[]? args = argsString?.Split(' ');
-            ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(default, args, supportsAnsi, outputIsScreen, default);
+            ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(args, supportsAnsi, outputIsScreen, default);
 
             logger.ShouldNotBeNull();
             logger.GetType().ShouldBe(expectedType);
+        }
+
+        [Theory]
+        [InlineData("-v:q", LoggerVerbosity.Quiet)]
+        [InlineData("-verbosity:minimal", LoggerVerbosity.Minimal)]
+        [InlineData("--v:d", LoggerVerbosity.Detailed)]
+        [InlineData("/verbosity:diag", LoggerVerbosity.Diagnostic)]
+        [InlineData(null, LoggerVerbosity.Normal)]
+        public void CreateTerminalOrConsoleLogger_ParsesVerbosity(string? argsString, LoggerVerbosity expectedVerbosity)
+        {
+            string[]? args = argsString?.Split(' ');
+            ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(args, true, true, default);
+
+            logger.ShouldNotBeNull();
+            logger.Verbosity.ShouldBe(expectedVerbosity);
         }
 
         #region IEventSource implementation

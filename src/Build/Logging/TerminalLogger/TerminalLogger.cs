@@ -241,26 +241,49 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Creates a Terminal logger if possible, or a Console logger.
     /// </summary>
-    /// <param name="verbosity">Level of detail to show in the log.</param>
-    /// <param name="args">Command line arguments for the logger configuration. Currently, only '--tl:off' and '--tl:on' are supported right now.</param>
-    public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[]? args)
+    /// <param name="args">Command line arguments for the logger configuration. Currently, only 'tl|terminallogger' and 'v|verbosity' are supported right now.</param>
+    public static ILogger CreateTerminalOrConsoleLogger(string[]? args = null)
     {
         (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
 
-        return CreateTerminalOrConsoleLogger(verbosity, args, supportsAnsi, outputIsScreen, originalConsoleMode);
+        return CreateTerminalOrConsoleLogger(args, supportsAnsi, outputIsScreen, originalConsoleMode);
     }
 
-    internal static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[]? args, bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode)
+    internal static ILogger CreateTerminalOrConsoleLogger(string[]? args, bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode)
     {
-        string tlArg = args?
-            .LastOrDefault(a =>
-                a.StartsWith("/tl:", StringComparison.InvariantCultureIgnoreCase) ||
-                a.StartsWith("-tl:", StringComparison.InvariantCultureIgnoreCase) ||
-                a.StartsWith("--tl:", StringComparison.InvariantCultureIgnoreCase)) ?? string.Empty;
+        LoggerVerbosity verbosity = LoggerVerbosity.Normal;
+        string tlArg = string.Empty;
+        string? verbosityArg = string.Empty;
+
+        if (args != null)
+        {
+            string argsString = string.Join(" ", args);
+
+            MatchCollection tlMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off)", RegexOptions.IgnoreCase);
+            tlArg = tlMatches.OfType<Match>().LastOrDefault()?.Groups["value"].Value ?? string.Empty;
+
+            MatchCollection verbosityMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:v|verbosity):(?'value'\w+)", RegexOptions.IgnoreCase);
+            verbosityArg = verbosityMatches.OfType<Match>().LastOrDefault()?.Groups["value"].Value;
+        }
+
+        verbosityArg = verbosityArg?.ToLowerInvariant() switch
+        {
+            "q" => "quiet",
+            "m" => "minimal",
+            "n" => "normal",
+            "d" => "detailed",
+            "diag" => "diagnostic",
+            _ => verbosityArg,
+        };
+
+        if (Enum.TryParse(verbosityArg, true, out LoggerVerbosity parsedVerbosity))
+        {
+            verbosity = parsedVerbosity;
+        }
 
         bool isDisabled =
-            tlArg.EndsWith("tl:on", StringComparison.InvariantCultureIgnoreCase) ? false :
-            tlArg.EndsWith("tl:off", StringComparison.InvariantCultureIgnoreCase) ? true :
+            tlArg.Equals("on", StringComparison.InvariantCultureIgnoreCase) ? false :
+            tlArg.Equals("off", StringComparison.InvariantCultureIgnoreCase) ? true :
             (Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty).Equals("off", StringComparison.InvariantCultureIgnoreCase);
 
         if (isDisabled || !supportsAnsi || !outputIsScreen)
