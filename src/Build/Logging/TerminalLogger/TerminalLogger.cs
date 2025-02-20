@@ -241,14 +241,14 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     /// <param name="verbosity">Level of detail to show in the log.</param>
     /// <param name="args">Command line arguments for the logger configuration. Currently, only '--tl:off' and '--tl:on' are supported right now.</param>
-    public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[] args)
+    public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[]? args)
     {
         (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
 
         return CreateTerminalOrConsoleLogger(verbosity, args, supportsAnsi, outputIsScreen, originalConsoleMode);
     }
 
-    internal static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[] args, bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode)
+    internal static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity, string[]? args, bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode)
     {
         string tlArg = args?
             .LastOrDefault(a =>

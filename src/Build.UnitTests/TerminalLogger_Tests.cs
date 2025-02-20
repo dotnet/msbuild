@@ -70,6 +70,26 @@ namespace Microsoft.Build.UnitTests
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
         }
 
+        [Theory]
+        [InlineData(null, false, false, "", typeof(ConsoleLogger))]
+        [InlineData(null, true, false, "", typeof(ConsoleLogger))]
+        [InlineData(null, false, true, "", typeof(ConsoleLogger))]
+        [InlineData(null, true, true, "off", typeof(ConsoleLogger))]
+        [InlineData("--tl:off", true, true, "", typeof(ConsoleLogger))]
+        [InlineData(null, true, true, "", typeof(TerminalLogger))]
+        [InlineData("-tl:on", true, true, "off", typeof(TerminalLogger))]
+        public void CreateTerminalOrConsoleLogger_CreatesCorrectLoggerInstance(string? argsString, bool supportsAnsi, bool outputIsScreen, string evnVariableValue, Type expectedType)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", evnVariableValue);
+
+            string[]? args = argsString?.Split(' ');
+            ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(default, args, supportsAnsi, outputIsScreen, default);
+
+            logger.ShouldNotBeNull();
+            logger.GetType().ShouldBe(expectedType);
+        }
+
         #region IEventSource implementation
 
 #pragma warning disable CS0067

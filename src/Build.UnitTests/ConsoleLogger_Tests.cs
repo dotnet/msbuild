@@ -135,33 +135,6 @@ namespace Microsoft.Build.UnitTests
             _output = output;
         }
 
-        [Theory]
-        [InlineData(null, false, false, "", typeof(ConsoleLogger))]
-        [InlineData(null, true, false, "", typeof(ConsoleLogger))]
-        [InlineData(null, false, true, "", typeof(ConsoleLogger))]
-        [InlineData(null, true, true, "off", typeof(ConsoleLogger))]
-        [InlineData("--tl:off", true, true, "", typeof(ConsoleLogger))]
-        [InlineData(null, true, true, "", typeof(TerminalLogger))]
-        [InlineData("-tl:on", true, true, "off", typeof(TerminalLogger))]
-        public void CreateTerminalOrConsoleLogger_CreatesCorrectLoggerInstance(string argsString, bool supportsAnsi, bool outputIsScreen, string evnVariableValue, Type expectedType)
-        {
-            string originalValue = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER");
-            Environment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", evnVariableValue);
-
-            try
-            {
-                string[] args = argsString?.Split(' ');
-                ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(default, args, supportsAnsi, outputIsScreen, default);
-
-                logger.ShouldNotBeNull();
-                logger.GetType().ShouldBe(expectedType);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", originalValue);
-            }
-        }
-
         /// <summary>
         /// Verify when the project has not been named that we correctly get the same placeholder
         /// project name for project started event and the target started event.
