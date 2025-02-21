@@ -6,20 +6,22 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Microsoft.Build.Logging.TerminalLogger;
+namespace Microsoft.Build.Logging;
 
 /// <summary>
 /// Represents a project being built.
 /// </summary>
-internal sealed class Project
+internal sealed class TerminalProjectInfo
 {
-    private List<BuildMessage>? _buildMessages;
+    private List<TerminalBuildMessage>? _buildMessages;
 
     /// <summary>
-    /// Initialized a new <see cref="Project"/> with the given <paramref name="targetFramework"/>.
+    /// Initialized a new <see cref="TerminalProjectInfo"/> with the given <paramref name="targetFramework"/>.
     /// </summary>
+    /// <param name="projectFile">The full path to the project file.</param>
     /// <param name="targetFramework">The target framework of the project or null if not multi-targeting.</param>
-    public Project(string projectFile, string? targetFramework, StopwatchAbstraction? stopwatch)
+    /// <param name="stopwatch">A stopwatch to time the build of the project.</param>
+    public TerminalProjectInfo(string projectFile, string? targetFramework, StopwatchAbstraction? stopwatch)
     {
         File = projectFile;
         TargetFramework = targetFramework;
@@ -58,7 +60,7 @@ internal sealed class Project
     public bool IsTestProject { get; set; }
 
     /// <summary>
-    /// True when the project has run target with name "_CachePluginRunStart" defined in <see cref="TerminalLogger._cachePluginStartTarget"/>.
+    /// True when the project has run target with name "_CachePluginRunStart".
     /// </summary>
     public bool IsCachePluginProject { get; set; }
 
@@ -85,21 +87,21 @@ internal sealed class Project
     /// <summary>
     /// A lazily initialized list of build messages/warnings/errors raised during the build.
     /// </summary>
-    public IReadOnlyList<BuildMessage>? BuildMessages => _buildMessages;
+    public IReadOnlyList<TerminalBuildMessage>? BuildMessages => _buildMessages;
 
     /// <summary>
     /// Adds a build message of the given severity to <see cref="BuildMessages"/>.
     /// </summary>
-    public void AddBuildMessage(MessageSeverity severity, string message)
+    public void AddBuildMessage(TerminalMessageSeverity severity, string message)
     {
-        _buildMessages ??= new List<BuildMessage>();
-        _buildMessages.Add(new BuildMessage(severity, message));
+        _buildMessages ??= new List<TerminalBuildMessage>();
+        _buildMessages.Add(new TerminalBuildMessage(severity, message));
 
-        if (severity == MessageSeverity.Error)
+        if (severity == TerminalMessageSeverity.Error)
         {
             ErrorCount++;
         }
-        else if (severity == MessageSeverity.Warning)
+        else if (severity == TerminalMessageSeverity.Warning)
         {
             WarningCount++;
         }
@@ -109,12 +111,12 @@ internal sealed class Project
     /// Filters the build messages to only include errors and warnings.
     /// </summary>
     /// <returns>A sequence of error and warning build messages.</returns>
-    public IEnumerable<BuildMessage> GetBuildErrorAndWarningMessages()
+    public IEnumerable<TerminalBuildMessage> GetBuildErrorAndWarningMessages()
     {
         return BuildMessages is null ?
-            Enumerable.Empty<BuildMessage>() :
+            Enumerable.Empty<TerminalBuildMessage>() :
             BuildMessages.Where(message =>
-                message.Severity == MessageSeverity.Error ||
-                message.Severity == MessageSeverity.Warning);
+                message.Severity == TerminalMessageSeverity.Error ||
+                message.Severity == TerminalMessageSeverity.Warning);
     }
 }

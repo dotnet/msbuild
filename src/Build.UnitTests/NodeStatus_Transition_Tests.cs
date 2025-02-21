@@ -8,8 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
-using Microsoft.Build.Logging.TerminalLogger;
+using Microsoft.Build.Framework.Logging;
+using Microsoft.Build.Logging;
 using Shouldly;
 using VerifyTests;
 using VerifyXunit;
@@ -33,7 +33,7 @@ public class NodeStatus_Transition_Tests
     {
 #if DEBUG
         // This is testing a Debug.Assert, which won't throw in Release mode.
-        Func<NodeStatus> newNodeStatus = () => new NodeStatus("project", "tfm", AnsiCodes.Colorize("colorized target", TerminalColor.Green), new MockStopwatch());
+        Func<TerminalNodeStatus> newNodeStatus = () => new TerminalNodeStatus("project", "tfm", AnsiCodes.Colorize("colorized target", TerminalColor.Green), new MockStopwatch());
         newNodeStatus.ShouldThrow<ArgumentException>().Message.ShouldContain("Target should not contain any escape codes, if you want to colorize target use the other constructor.");
 #endif
     }
@@ -58,7 +58,7 @@ public class NodeStatus_Transition_Tests
         // This test look like there is no change between the frames, but we ask the stopwatch for time they will increase the number.
         // We need this because animations check that NodeStatus reference is the same.
         // And we cannot use MockStopwatch because we don't know when to call Tick on them, and if we do it right away, the time will update in "both" nodes.
-        NodeStatus node = new("Namespace.Project", "TargetFramework", "Build", new TickingStopwatch());
+        TerminalNodeStatus node = new("Namespace.Project", "TargetFramework", "Build", new TickingStopwatch());
         var rendered = Animate(
             [
                 node,
@@ -90,7 +90,7 @@ public class NodeStatus_Transition_Tests
         // This test look like there is no change between the frames, but we ask the stopwatch for time they will increase the number.
         // We need this because animations check that NodeStatus reference is the same.
         // And we cannot use MockStopwatch because we don't know when to call Tick on them, and if we do it right away, the time will update in "both" nodes.
-        NodeStatus node = new("Namespace.Project", "TargetFramework", TerminalColor.Green, "passed", "MyTestName1", new TickingStopwatch());
+        TerminalNodeStatus node = new("Namespace.Project", "TargetFramework", TerminalColor.Green, "passed", "MyTestName1", new TickingStopwatch());
         var rendered = Animate(
             [
                 node,
@@ -107,16 +107,16 @@ public class NodeStatus_Transition_Tests
     /// </summary>
     /// <param name="nodeStatusesUpdates">Takes array of arrays. The inner array is collection of nodes that are currently running. The outer array is how they update over time.</param>
     /// <returns></returns>
-    private string Animate(params NodeStatus[][] nodeStatusesUpdates)
+    private string Animate(params TerminalNodeStatus[][] nodeStatusesUpdates)
     {
         var width = 80;
         var height = 1;
 
-        NodesFrame previousFrame = new(Array.Empty<NodeStatus>(), 0, 0);
+        TerminalNodesFrame previousFrame = new(Array.Empty<TerminalNodeStatus>(), 0, 0);
         StringBuilder result = new StringBuilder();
         foreach (var nodeStatuses in nodeStatusesUpdates)
         {
-            NodesFrame currentFrame = new NodesFrame(nodeStatuses, width, height);
+            TerminalNodesFrame currentFrame = new TerminalNodesFrame(nodeStatuses, width, height);
             result.Append(currentFrame.Render(previousFrame));
             previousFrame = currentFrame;
         }

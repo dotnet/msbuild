@@ -3,14 +3,15 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Logging.TerminalLogger;
+namespace Microsoft.Build.Logging;
 
 /// <summary>
 /// Encapsulates the per-node data shown in live node output.
 /// </summary>
-internal class NodeStatus
+internal class TerminalNodeStatus
 {
     public string Project { get; }
     public string? TargetFramework { get; }
@@ -26,7 +27,7 @@ internal class NodeStatus
     /// <param name="targetFramework">Target framework that is colorized and written on left side after project.</param>
     /// <param name="target">The currently running work, usually the currently running target. Written on right.</param>
     /// <param name="stopwatch">Duration of the current step. Written on right after target.</param>
-    public NodeStatus(string project, string? targetFramework, string target, StopwatchAbstraction stopwatch)
+    public TerminalNodeStatus(string project, string? targetFramework, string target, StopwatchAbstraction stopwatch)
     {
 #if DEBUG
         if (target.Contains("\x1B"))
@@ -49,7 +50,7 @@ internal class NodeStatus
     /// <param name="targetPrefix">Colorized status for the currently running work, written on right, before target, and separated by 1 space from it.</param>
     /// <param name="target">The currently running work, usually the currently runnig target. Written on right.</param>
     /// <param name="stopwatch">Duration of the current step. Written on right after target.</param>
-    public NodeStatus(string project, string? targetFramework, TerminalColor targetPrefixColor, string targetPrefix, string target, StopwatchAbstraction stopwatch)
+    public TerminalNodeStatus(string project, string? targetFramework, TerminalColor targetPrefixColor, string targetPrefix, string target, StopwatchAbstraction stopwatch)
         : this(project, targetFramework, target, stopwatch)
     {
         TargetPrefixColor = targetPrefixColor;
@@ -60,7 +61,7 @@ internal class NodeStatus
     /// Equality is based on the project, target framework, and target, but NOT the elapsed time.
     /// </summary>
     public override bool Equals(object? obj) =>
-        obj is NodeStatus status &&
+        obj is TerminalNodeStatus status &&
         Project == status.Project &&
         TargetFramework == status.TargetFramework &&
         Target == status.Target &&
