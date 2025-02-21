@@ -2257,7 +2257,7 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (ResolvedImport import in _data.ImportClosure)
                     {
-                        if (import.ImportingElement != null) // Exclude outer project itself
+                        if (import.ImportingElement != null && !import.ImportedProject.IsEphemeral) // Exclude outer project itself and SDK-resolver synthesized imports
                         {
                             imports.Add(import);
                         }
@@ -2280,7 +2280,7 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (var import in _data.ImportClosureWithDuplicates)
                     {
-                        if (import.ImportingElement != null) // Exclude outer project itself
+                        if (import.ImportingElement != null && !import.ImportedProject.IsEphemeral) // Exclude outer project itself and SDK-resolver synthesized imports
                         {
                             imports.Add(import);
                         }
