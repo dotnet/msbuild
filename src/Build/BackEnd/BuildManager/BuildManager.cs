@@ -257,6 +257,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private BuildTelemetry? _buildTelemetry;
 
+        /// <summary>
+        /// Logger, that if instantiated - will receive and expose telemetry data from worker nodes.
+        /// </summary>
+        private InternalTelemetryConsumingLogger? _telemetryConsumingLogger;
+
         private ProjectCacheService? _projectCacheService;
 
         private bool _hasProjectCacheServiceInitializedVsScenario;
@@ -1134,7 +1139,8 @@ namespace Microsoft.Build.Execution
         {
             OpenTelemetryManager.Instance.DefaultActivitySource?
                 .StartActivity("Build")?
-                .WithTags(_buildTelemetry!)
+                .WithTags(_buildTelemetry)
+                .WithTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder())
                 .WithStartTime(_buildTelemetry!.InnerStartAt)
                 .Dispose();
             OpenTelemetryManager.Instance.ForceFlush();
@@ -2986,10 +2992,10 @@ namespace Microsoft.Build.Execution
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);
 
-                ILogger internalTelemetryLogger =
+                _telemetryConsumingLogger =
                     new InternalTelemetryConsumingLogger();
 
-                ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(internalTelemetryLogger, forwardingLoggerDescription) };
+                ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(_telemetryConsumingLogger, forwardingLoggerDescription) };
 
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }

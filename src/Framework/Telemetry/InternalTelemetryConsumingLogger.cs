@@ -23,6 +23,8 @@ internal sealed class InternalTelemetryConsumingLogger : ILogger
 
     private readonly WorkerNodeTelemetryData _workerNodeTelemetryData = new();
 
+    public IWorkerNodeTelemetryData WorkerNodeTelemetryData => _workerNodeTelemetryData;
+
     private void EventSource5_WorkerNodeTelemetryLogged(object? sender, WorkerNodeTelemetryEventArgs e)
     {
         _workerNodeTelemetryData.Add(e.WorkerNodeTelemetryData);
