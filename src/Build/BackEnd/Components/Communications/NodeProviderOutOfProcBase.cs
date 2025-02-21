@@ -922,11 +922,29 @@ namespace Microsoft.Build.BackEnd
                 return true;
             }
 
+            private Dictionary<int, MemoryMappedFile> _readEndpoints = new Dictionary<int, MemoryMappedFile>();
+
+            private MemoryMappedFile getOrOpenFile(int nodeId)
+            {
+                if (_readEndpoints.TryGetValue(nodeId, out MemoryMappedFile MMF))
+                {
+                    return MMF;
+                }
+                else
+                {
+                    MMF = MemoryMappedFile.OpenExisting(String.Format("D:/bld/MSBuild_side_channel_other{0}", nodeId));
+                    _readEndpoints[nodeId] = MMF;
+                    return MMF;
+                }
+            }
+
+
+
 #if FEATURE_APM
             /// <summary>
             /// Callback invoked by the completion of a read of a header byte on one of the named pipes.
             /// </summary>
-            private void HeaderReadComplete(IAsyncResult result)
+            private async void HeaderReadComplete(IAsyncResult result)
             {
                 int bytesRead;
                 try
@@ -960,7 +978,37 @@ namespace Microsoft.Build.BackEnd
                 if ((NodePacketType)_headerByte[0] == NodePacketType.MemoryMappedFilePacket)
                 {
                     byte[] packetData = _readBufferMemoryStream.GetBuffer();
-                    _clientToServerStream.BeginRead(packetData, 0, 4, PickupBodyFromSideChannel, new Tuple<byte[], int>(packetData, 4));
+
+                    await _clientToServerStream.ReadAsync(packetData, 0, 4);
+
+                    int nodeId = _headerByte[1];
+                    nodeId += (int)_headerByte[2] << 8;
+                    nodeId += (int)_headerByte[3] << 16;
+                    nodeId += (int)_headerByte[4] << 24;
+                    int mmfOffset = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(packetData, 0, 3));
+
+                    var accessor = getOrOpenFile(nodeId).CreateViewStream(mmfOffset, 5);
+                    var realPacketType = (NodePacketType)accessor.ReadByte();
+
+                    var length = accessor.ReadByte();
+                    length += accessor.ReadByte() << 8;
+                    length += accessor.ReadByte() << 16;
+                    length += accessor.ReadByte() << 24;
+                    accessor.Dispose();
+                    accessor = getOrOpenFile(nodeId).CreateViewStream(mmfOffset + 5, length - 5);
+                    
+                    ITranslator readTranslator = BinaryTranslator.GetReadTranslator(accessor, _binaryReaderFactory);
+                    _packetFactory.DeserializeAndRoutePacket(_nodeId, realPacketType, readTranslator);
+                    if (realPacketType != NodePacketType.NodeShutdown)
+                    {
+                        // Read the next packet.
+                        BeginAsyncPacketRead();
+                    }
+                    else
+                    {
+                        Close();
+                    }
+
                 }
                 else
                 {
@@ -1012,80 +1060,7 @@ namespace Microsoft.Build.BackEnd
                 return true;
             }
 
-            private MemoryMappedFile _mappedFileRead
-            {
-                get
-                {
-                    if (_mappedFileRead == null)
-                    {
-                        _mappedFileRead = MemoryMappedFile.CreateOrOpen(String.Format("D:/bld/MSBuild_side_channel_other{0}", _nodeId), _mappedFileLength, MemoryMappedFileAccess.ReadWrite);
-                    }
-                    return _mappedFileRead;
-                }
-                set { }
-            }
-            private int _mappedFileReadIdx = 0;
 
-         
-
-            private void PickupBodyFromSideChannel(IAsyncResult result)
-            {
-                NodePacketType packetType = (NodePacketType)_headerByte[1];
-                // this should be long enough for the node ID
-                int nodeId = _headerByte[2];
-                nodeId += (int)_headerByte[3] << 8;
-                nodeId += (int)_headerByte[4] << 16;
-
-                var state = (Tuple<byte[], int>)result.AsyncState;
-                byte[] packetData = state.Item1;
-                int packetLength = state.Item2;
-                int bytesRead;
-
-
-                try
-                {
-                    try
-                    {
-                        bytesRead = _clientToServerStream.EndRead(result);
-                    }
-
-                    // Workaround for CLR stress bug; it sporadically calls us twice on the same async
-                    // result, and EndRead will throw on the second one. Pretend the second one never happened.
-                    catch (ArgumentException)
-                    {
-                        CommunicationsUtilities.Trace(_nodeId, "Hit CLR bug #825607: called back twice on same async result; ignoring");
-                        return;
-                    }
-
-                    if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
-                    {
-                        return;
-                    }
-                }
-                catch (IOException e)
-                {
-                    CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in BodyReadComplete (Reading): {0}", e);
-                    _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
-                    Close();
-                    return;
-                }
-
-                // Read and route the packet.
-                if (!ReadAndRoutePacket(packetType, packetData, packetLength))
-                {
-                    return;
-                }
-
-                if (packetType != NodePacketType.NodeShutdown)
-                {
-                    // Read the next packet.
-                    BeginAsyncPacketRead();
-                }
-                else
-                {
-                    Close();
-                }
-            }
 
 #if FEATURE_APM
             /// <summary>
