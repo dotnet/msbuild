@@ -9,7 +9,7 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Telemetry;
+using Microsoft.Build.TelemetryInfra;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 
 #nullable disable

@@ -7,7 +7,7 @@ using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Telemetry;
+using Microsoft.Build.TelemetryInfra;
 
 #nullable disable
 

@@ -7,7 +7,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Telemetry;
+namespace Microsoft.Build.TelemetryInfra;
 
 /// <summary>
 /// A build component responsible for accumulating telemetry data from worker node and then sending it to main node
