@@ -29,7 +29,7 @@ namespace Microsoft.Build.Collections
     /// </remarks>
     /// <typeparam name="T">Item class type to store</typeparam>
     [DebuggerDisplay("#Item types={ItemTypes.Count} #Items={Count}")]
-    internal sealed class ItemDictionary<T> : IItemDictionary<T>
+    internal sealed class ItemDictionary<T> : IItemDictionary<T>, IReadOnlyCollection<T>
         where T : class, IKeyed, IItem
     {
         /// <summary>
@@ -333,7 +333,7 @@ namespace Microsoft.Build.Collections
                     _itemLists[itemType] = list;
                 }
 
-                foreach (T item in items)
+                foreach (T item in items.GetStructEnumerable())
                 {
 #if DEBUG
                     // Debug only: hot code path
@@ -351,7 +351,7 @@ namespace Microsoft.Build.Collections
         /// <param name="other">An enumerator over the items to remove.</param>
         public void RemoveItems(IEnumerable<T> other)
         {
-            foreach (T item in other)
+            foreach (T item in other.GetStructEnumerable())
             {
                 Remove(item);
             }
