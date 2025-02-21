@@ -173,8 +173,8 @@
     <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
-    <Compile Include="Telemetry\ITelemetryForwarder.cs" />
-    <Compile Include="Telemetry\TelemetryForwarderProvider.cs" />
+    <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />
+    <Compile Include="TelemetryInfra\TelemetryForwarderProvider.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
