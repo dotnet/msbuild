@@ -176,12 +176,12 @@ namespace Microsoft.Build.Construction
             ProjectParser.Parse(document, this);
         }
 
-        private readonly bool _cannotBeDirtied = false;
+        private readonly bool _isEphemeral = false;
 
-        private ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions, bool canBeDirty)
+        private ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions, bool isEphemeral)
             : this(projectRootElementCache, projectFileOptions)
         {
-            _cannotBeDirtied = canBeDirty;
+            _isEphemeral = isEphemeral;
         }
 
         /// <summary>
@@ -721,15 +721,15 @@ namespace Microsoft.Build.Construction
             => _dirtyReason == null ? null : String.Format(CultureInfo.InvariantCulture, _dirtyReason, _dirtyParameter);
 
         /// <summary>
-        /// Initialize an in-memory, empty ProjectRootElement instance that CANNOT be saved later.
+        /// Initialize an in-memory empty ProjectRootElement instance that CANNOT be saved later.
         /// The ProjectRootElement will not be marked dirty.
         /// Uses the global project collection.
         /// </summary>
-        internal static ProjectRootElement CreateNotDirty(ProjectRootElementCacheBase projectRootElementCache)
+        internal static ProjectRootElement CreateEphemeral(ProjectRootElementCacheBase projectRootElementCache)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
 
-            return new ProjectRootElement(projectRootElementCache, Project.DefaultNewProjectTemplateOptions, true);
+            return new ProjectRootElement(projectRootElementCache, Project.DefaultNewProjectTemplateOptions, isEphemeral: true);
         }
 
         /// <summary>
@@ -1837,7 +1837,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal sealed override void MarkDirty(string reason, string param)
         {
-            if (_cannotBeDirtied)
+            if (_isEphemeral)
             {
                 return;
             }
