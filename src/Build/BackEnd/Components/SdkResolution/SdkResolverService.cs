@@ -53,7 +53,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// Stores the list of manifests of general SDK resolvers which could be loaded.
         /// </summary>
-        protected IReadOnlyList<SdkResolverManifest> _generalResolversManifestsRegistry;
+        private List<SdkResolverManifest> _generalResolversManifestsRegistry;
 
         /// <summary>
         /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
@@ -226,7 +226,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             resolvers = GetResolvers(
                 _generalResolversManifestsRegistry,
                 loggingContext,
-                sdkReferenceLocation).ToList();
+                sdkReferenceLocation);
 
             if (TryResolveSdkUsingSpecifiedResolvers(
                 resolvers,
@@ -259,22 +259,20 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return new SdkResult(sdk, null, null);
         }
 
-        private List<SdkResolver> GetResolvers(IReadOnlyList<SdkResolverManifest> resolversManifests, LoggingContext loggingContext, ElementLocation sdkReferenceLocation)
+        private List<SdkResolver> GetResolvers(List<SdkResolverManifest> resolversManifests, LoggingContext loggingContext, ElementLocation sdkReferenceLocation)
         {
             // Create a sorted by priority list of resolvers. Load them if needed.
             List<SdkResolver> resolvers = new List<SdkResolver>();
             foreach (var resolverManifest in resolversManifests)
             {
-                if (!_manifestToResolvers.TryGetValue(resolverManifest, out IReadOnlyList<SdkResolver> newResolvers))
+                IReadOnlyList<SdkResolver> newResolvers;
+                lock (_lockObject)
                 {
-                    lock (_lockObject)
+                    if (!_manifestToResolvers.TryGetValue(resolverManifest, out newResolvers))
                     {
-                        if (!_manifestToResolvers.TryGetValue(resolverManifest, out newResolvers))
-                        {
-                            // Loading of the needed resolvers.
-                            newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, sdkReferenceLocation);
-                            _manifestToResolvers[resolverManifest] = newResolvers;
-                        }
+                        // Loading of the needed resolvers.
+                        newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, sdkReferenceLocation);
+                        _manifestToResolvers[resolverManifest] = newResolvers;
                     }
                 }
 
@@ -423,7 +421,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, ResolvableSdkRegex: null);
                 generalResolversManifestsRegistry.Add(sdkResolverManifest);
                 _manifestToResolvers[sdkResolverManifest] = resolvers;
-                _generalResolversManifestsRegistry = generalResolversManifestsRegistry.AsReadOnly();
+                _generalResolversManifestsRegistry = generalResolversManifestsRegistry;
                 _specificResolversManifestsRegistry = specificResolversManifestsRegistry.AsReadOnly();
             }
         }
@@ -522,7 +520,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 // The collections are never modified after this point.
                 // So I've made them ReadOnly
                 _specificResolversManifestsRegistry = specificResolversManifestsRegistry.AsReadOnly();
-                _generalResolversManifestsRegistry = generalResolversManifestsRegistry.AsReadOnly();
+                _generalResolversManifestsRegistry = generalResolversManifestsRegistry;
             }
         }
 
