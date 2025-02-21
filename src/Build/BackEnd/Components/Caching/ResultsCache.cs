@@ -318,7 +318,7 @@ namespace Microsoft.Build.BackEnd
             bool missingTargetFound = false;
             foreach (string target in targets)
             {
-                if (!result.HasResultsForTarget(target) || (result[target].ResultCode == TargetResultCode.Skipped && !skippedResultsAreOK))
+                if (!result.TryGetResultsForTarget(target, out TargetResult targetResult) || (targetResult.ResultCode == TargetResultCode.Skipped && !skippedResultsAreOK))
                 {
                     if (checkTargetsMissingResults)
                     {
