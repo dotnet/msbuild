@@ -8,6 +8,9 @@ using Microsoft.Build.Shared.Concurrent;
 #else
 using System.Collections.Concurrent;
 #endif
+using System.IO;
+using System.IO.Pipes;
+using System.Diagnostics;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -16,6 +19,15 @@ using System.IO;
 
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
+using System.Diagnostics;
+#if NET472_OR_GREATER
+using System.IO.MemoryMappedFiles;
+using System.Collections.Generic;
+
+#endif
+
+
+
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
@@ -511,6 +523,25 @@ namespace Microsoft.Build.BackEnd
                 // We don't really care if Disconnect somehow fails, but it gives us a chance to do the right thing.
             }
         }
+#if NET472_OR_GREATER
+        private Dictionary<int, MemoryMappedFile> _sideChannels = new Dictionary<int, MemoryMappedFile>();
+
+        private MemoryMappedFile getOrOpenFile(int nodeId)
+        {
+            if (_sideChannels.TryGetValue(nodeId, out MemoryMappedFile MMF))
+            {
+                return MMF;
+            }
+            else
+            {
+                MMF = MemoryMappedFile.OpenExisting(String.Format("D:/bld/MSBuild_side_channel{0}", nodeId));
+                _sideChannels[nodeId] = MMF;
+                return MMF;
+            }
+        }
+
+
+#endif
 
         private void RunReadLoop(BufferedReadStream localReadPipe, NamedPipeServerStream localWritePipe,
             ConcurrentQueue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
@@ -597,21 +628,65 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-                            NodePacketType packetType = (NodePacketType)headerByte[0];
+                            NodePacketType packetType = (NodePacketType)Enum.ToObject(typeof(NodePacketType), headerByte[0]);
+#if NET472_OR_GREATER
+                            if (packetType == NodePacketType.MemoryMappedFilePacket)
+                            {
+                                /*
+                                var readTranslator = BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer);
 
-                            try
-                            {
-                                _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
+                                var realPacketType = (NodePacketType)readTranslator.Reader.ReadByte();
+
+
+                                var nodeId = readTranslator.Reader.ReadInt32();
+                                var offset = readTranslator.Reader.ReadInt32();
+                                var length = readTranslator.Reader.ReadInt32();
+                                */
+                                
+
+                                var nodeId = 0;
+                                nodeId += (int)headerByte[1];
+                                nodeId += ((int)headerByte[2]) << 8;
+                                nodeId += ((int)headerByte[3]) << 16;
+                                nodeId += ((int)headerByte[4]) << 24;
+
+                                var offset = localReadPipe.ReadByte();
+                                offset += localReadPipe.ReadByte() << 8;
+                                offset += localReadPipe.ReadByte() << 16;
+                                offset += localReadPipe.ReadByte() << 24;
+                                // Debugger.Launch();
+
+                                // Debugger.Launch();
+                                var accessor = getOrOpenFile(nodeId).CreateViewStream(offset, 5);
+                                var realPacketType = (NodePacketType)accessor.ReadByte();
+                                var length = accessor.ReadByte();
+                                length += accessor.ReadByte() << 8;
+                                length += accessor.ReadByte() << 16;
+                                length += accessor.ReadByte() << 24;
+                                accessor = getOrOpenFile(nodeId).CreateViewStream(offset + 5, length - 5);
+
+                                _packetFactory.DeserializeAndRoutePacket(0, realPacketType, BinaryTranslator.GetReadTranslator(accessor, _sharedReadBuffer));
+                                accessor.Dispose();
                             }
-                            catch (Exception e)
+                            else
                             {
-                                // Error while deserializing or handling packet.  Abort.
-                                CommunicationsUtilities.Trace("Exception while deserializing packet {0}: {1}", packetType, e);
-                                ExceptionHandling.DumpExceptionToFile(e);
-                                ChangeLinkStatus(LinkStatus.Failed);
-                                exitLoop = true;
-                                break;
+#endif
+                                try
+                                {
+                                    _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
+                                }
+                                catch (Exception e)
+                                {
+                                    // Error while deserializing or handling packet.  Abort.
+                                    CommunicationsUtilities.Trace("Exception while deserializing packet {0}: {1}", packetType, e);
+                                    ExceptionHandling.DumpExceptionToFile(e);
+                                    ChangeLinkStatus(LinkStatus.Failed);
+                                    exitLoop = true;
+                                    break;
+                                }
+#if NET472_OR_GREATER
                             }
+#endif
 
 #if NET451_OR_GREATER
                             readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
