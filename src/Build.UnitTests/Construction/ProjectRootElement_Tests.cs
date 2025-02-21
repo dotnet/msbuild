@@ -119,9 +119,9 @@ bar", false)]
         }
 
         [Fact]
-        public void CreateNotDirtyCannotBeDirtied()
+        public void CreateEphemeralCannotBeDirtied()
         {
-            var projectRootElement = ProjectRootElement.CreateNotDirty(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
+            var projectRootElement = ProjectRootElement.CreateEphemeral(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
             var versionBeforeMarkDirty = projectRootElement.Version;
 
             projectRootElement.MarkDirty("test", "test");
