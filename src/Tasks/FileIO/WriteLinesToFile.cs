@@ -96,7 +96,8 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    var directoryPath = Path.GetDirectoryName(FileUtilities.NormalizePath(File.ItemSpec));
+                    var spec = MakePath(File.ItemSpec);
+                    var directoryPath = Path.GetDirectoryName(FileUtilities.NormalizePath(spec));
                     if (Overwrite)
                     {
                         Directory.CreateDirectory(directoryPath);
@@ -108,20 +109,20 @@ namespace Microsoft.Build.Tasks
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
                             try
                             {
-                                if (FileUtilities.FileExistsNoThrow(File.ItemSpec))
+                                if (FileUtilities.FileExistsNoThrow(spec))
                                 {
-                                    string existingContents = System.IO.File.ReadAllText(File.ItemSpec);
+                                    string existingContents = System.IO.File.ReadAllText(spec);
                                     if (existingContents.Length == buffer.Length)
                                     {
                                         if (existingContents.Equals(contentsAsString))
                                         {
-                                            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", File.ItemSpec);
-                                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, true);
+                                            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", spec);
+                                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(spec, true);
                                             return true;
                                         }
                                         else if (FailIfNotIncremental)
                                         {
-                                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", spec);
                                             return false;
                                         }
                                     }
@@ -129,22 +130,22 @@ namespace Microsoft.Build.Tasks
                             }
                             catch (IOException)
                             {
-                                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", spec);
                             }
-                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
+                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(spec, false);
                         }
 
-                        System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
+                        System.IO.File.WriteAllText(spec, contentsAsString, encoding);
                     }
                     else
                     {
                         if (WriteOnlyWhenDifferent)
                         {
-                            Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", File.ItemSpec);
+                            Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", spec);
                         }
 
                         Directory.CreateDirectory(directoryPath);
-                        System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
+                        System.IO.File.AppendAllText(spec, buffer.ToString(), encoding);
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

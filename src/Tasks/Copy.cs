@@ -74,6 +74,8 @@ namespace Microsoft.Build.Tasks
         private static string RemovingReadOnlyAttribute;
         private static string SymbolicLinkComment;
 
+        private string _currentDirectory;
+
         #region Properties
 
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
@@ -344,7 +346,7 @@ namespace Microsoft.Build.Tasks
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
 
-                File.Copy(sourceFileState.Name, destinationFileState.Name, true);
+                File.Copy(MakePath(_currentDirectory, sourceFileState.Name), MakePath(_currentDirectory, destinationFileState.Name), true);
             }
 
             // If the destinationFile file exists, then make sure it's read-write.
@@ -1028,6 +1030,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
+            _currentDirectory = GetBasePath();
             return Execute(CopyFileWithLogging, s_parallelism);
         }
 

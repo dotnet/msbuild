@@ -7,6 +7,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using System.IO;
 
 #nullable disable
 
@@ -38,11 +39,11 @@ namespace Microsoft.Build.Tasks
             bool success = true;
             if (File != null)
             {
-                if (FileSystems.Default.FileExists(File.ItemSpec))
+                if (FileSystems.Default.FileExists(MakePath(File.ItemSpec)))
                 {
                     try
                     {
-                        string[] textLines = System.IO.File.ReadAllLines(File.ItemSpec);
+                        string[] textLines = System.IO.File.ReadAllLines(MakePath(File.ItemSpec));
 
                         var nonEmptyLines = new List<ITaskItem>();
                         char[] charsToTrim = { '\0', ' ', '\t' };

@@ -23,6 +23,9 @@ namespace Microsoft.Build.Framework;
 
 internal static class NativeMethods
 {
+    [ThreadStatic]
+    internal static string CurrentThreadWorkingDirectory;
+
     #region Constants
 
     internal const uint ERROR_INSUFFICIENT_BUFFER = 0x8007007A;

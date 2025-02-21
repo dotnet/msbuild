@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
+using System.Threading;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -72,6 +74,8 @@ namespace Microsoft.Build.Execution
         /// this factory.
         /// </summary>
         private IDictionary<string, string> _factoryIdentityParameters;
+
+        private object _locker = new object();
 
         #endregion
 
@@ -278,12 +282,18 @@ namespace Microsoft.Build.Execution
 
                 try
                 {
-                    if (propertyInfoCache == null)
+                    lock (_locker)
                     {
-                        propertyInfoCache = new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
-                    }
+                        if (propertyInfoCache == null)
+                        {
+                            propertyInfoCache = new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase);
+                        }
 
-                    propertyInfoCache.Add(propertyInfo.Name, propertyInfo);
+                        if (!propertyInfoCache.ContainsKey(propertyInfo.Name))
+                        {
+                            propertyInfoCache.Add(propertyInfo.Name, propertyInfo);
+                        }
+                    }
                 }
                 catch (ArgumentException)
                 {

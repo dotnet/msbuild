@@ -104,9 +104,14 @@ namespace Microsoft.Build.BackEnd
         private readonly ResourceRequestDelegate _resourceRequestHandler;
 
         /// <summary>
+        /// The ID of this node.
+        /// </summary>
+        private readonly int _nodeId;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
-        public InProcNode(IBuildComponentHost componentHost, INodeEndpoint inProcNodeEndpoint)
+        public InProcNode(IBuildComponentHost componentHost, INodeEndpoint inProcNodeEndpoint, int nodeId)
         {
             _componentHost = componentHost;
             _nodeEndpoint = inProcNodeEndpoint;
@@ -114,13 +119,18 @@ namespace Microsoft.Build.BackEnd
             _packetReceivedEvent = new AutoResetEvent(false);
             _shutdownEvent = new AutoResetEvent(false);
 
-            _buildRequestEngine = componentHost.GetComponent(BuildComponentType.RequestEngine) as IBuildRequestEngine;
+            // _buildRequestEngine = componentHost.GetComponent(BuildComponentType.RequestEngine) as IBuildRequestEngine;
+            var buildRequestEngine = BuildRequestEngine.CreateComponent(BuildComponentType.RequestEngine);
+            buildRequestEngine.InitializeComponent(componentHost);
+            _buildRequestEngine = (IBuildRequestEngine)buildRequestEngine;
 
             _engineExceptionEventHandler = OnEngineException;
             _newConfigurationRequestEventHandler = OnNewConfigurationRequest;
             _requestBlockedEventHandler = OnNewRequest;
             _requestCompleteEventHandler = OnRequestComplete;
             _resourceRequestHandler = OnResourceRequest;
+
+            _nodeId = nodeId;
         }
 
         #region INode Members

@@ -1170,6 +1170,7 @@ namespace Microsoft.Build.UnitTests
                                         null,
 #endif
                                         1,
+                                        false,
                                         true,
                                         new StringWriter(),
                                         new StringWriter(),
