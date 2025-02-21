@@ -126,6 +126,9 @@ extends:
         steps:
         - task: NuGetToolInstaller@1
           displayName: 'Install NuGet.exe'
+        - pwsh: Get-MpComputerStatus
+
+        - pwsh: Set-MpPreference -DisableRealtimeMonitoring $true
 
         - task: PowerShell@2
           displayName: Setup Private Feeds Credentials
