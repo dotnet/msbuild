@@ -329,7 +329,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>(GetAllChildrenOfType<ProjectImportElement>());
 
-        internal bool IsEphemeral => _cannotBeDirtied;
+        internal bool IsEphemeral => _isEphemeral;
 
         /// <summary>
         /// Get a read-only collection of the child property groups, if any.
