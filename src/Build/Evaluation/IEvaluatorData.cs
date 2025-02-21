@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -212,7 +213,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Prepares the data block for a new evaluation pass
         /// </summary>
-        void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext);
+        void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext, LoggingContext loggingContext);
 
         /// <summary>
         /// Indicates to the data block that evaluation has completed,

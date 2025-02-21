@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         {
             Project project = new Project();
             project.SetProperty("p", "v1");
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -83,7 +83,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -215,7 +215,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -297,7 +297,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -356,7 +356,8 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     <p>v1</p>
   </PropertyGroup>
 </Project>");
-            ProjectRootElement twoXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(two)));
+            using ProjectRootElementFromString projectRootElementFromString = new(two);
+            ProjectRootElement twoXml = projectRootElementFromString.Project;
             twoXml.FullPath = "p2";
 
             Project project;
@@ -368,7 +369,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 }
             }
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -417,7 +418,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -475,7 +476,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -548,7 +549,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -609,7 +610,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -669,7 +670,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -723,7 +724,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
                 Project project = new Project(xml0);
 
-                StringWriter writer = new StringWriter();
+                using StringWriter writer = new StringWriter();
 
                 project.SaveLogicalProject(writer);
 
@@ -790,7 +791,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         {
             Project project = new Project();
             project.SetProperty("p", "<![CDATA[<sender>John Smith</sender>]]>");
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -820,10 +821,11 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </ItemGroup>
 </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+           using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -874,11 +876,12 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </PropertyGroup>
 </Project>";
 
+                using ProjectRootElementFromString projectRootElementFromString = new(content);
                 Project project = Project.FromProjectRootElement(
-                    ProjectRootElement.Create(XmlReader.Create(new StringReader(content))),
+                    projectRootElementFromString.Project,
                     projectOptions);
 
-                StringWriter writer = new StringWriter();
+                using StringWriter writer = new StringWriter();
 
                 project.SaveLogicalProject(writer);
 
@@ -979,7 +982,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
                 var project = Project.FromFile(projectPath, projectOptions);
 
-                StringWriter writer = new StringWriter();
+                using StringWriter writer = new StringWriter();
 
                 project.SaveLogicalProject(writer);
 
@@ -1100,11 +1103,12 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </PropertyGroup>
 </Project>";
 
+                using ProjectRootElementFromString projectRootElementFromString = new(content);
                 Project project = Project.FromProjectRootElement(
-                    ProjectRootElement.Create(XmlReader.Create(new StringReader(content))),
+                    projectRootElementFromString.Project,
                     projectOptions);
 
-                StringWriter writer = new StringWriter();
+                using StringWriter writer = new StringWriter();
 
                 project.SaveLogicalProject(writer);
 
@@ -1233,7 +1237,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
         }
