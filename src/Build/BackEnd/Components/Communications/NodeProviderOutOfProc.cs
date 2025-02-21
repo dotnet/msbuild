@@ -56,6 +56,8 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        private Func<NodeInfo, NodeConfiguration> _configurationFactory;
+
         /// <summary>
         /// Magic number sent by the host to the client during the handshake.
         /// Derived from the binary timestamp to avoid mixing binary versions,
@@ -79,7 +81,7 @@ namespace Microsoft.Build.BackEnd
         public IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory factory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory);
-
+            _configurationFactory = configurationFactory;
             // This can run concurrently. To be properly detect internal bug when we create more nodes than allowed
             //   we add into _nodeContexts premise of future node and verify that it will not cross limits.
             if (_nodeContexts.Count + numberOfNodesToCreate > ComponentHost.BuildParameters.MaxNodeCount)
@@ -99,7 +101,7 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace("Starting to acquire {1} new or existing node(s) to establish nodes from ID {0} to {2}...", nextNodeId, numberOfNodesToCreate, nextNodeId + numberOfNodesToCreate - 1);
 
             Handshake hostHandshake = new(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(), nodeReuse: ComponentHost.BuildParameters.EnableNodeReuse, lowPriority: ComponentHost.BuildParameters.LowPriority));
-            IList<NodeContext> nodeContexts = GetNodes(null, commandLineArgs, nextNodeId, factory, hostHandshake, NodeContextCreated, NodeContextTerminated, numberOfNodesToCreate);
+            IList<NodeContext> nodeContexts = GetNodes(null, commandLineArgs, nextNodeId, factory, hostHandshake, NodeContextTerminated, numberOfNodesToCreate);
 
             if (nodeContexts.Count > 0)
             {
@@ -109,19 +111,19 @@ namespace Microsoft.Build.BackEnd
             }
 
             throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotConnectToMSBuildExe", ComponentHost.BuildParameters.NodeExeLocation));
+        }
 
-            void NodeContextCreated(NodeContext context)
-            {
-                NodeInfo nodeInfo = new NodeInfo(context.NodeId, ProviderType);
+        protected override void CreateNode(NodeContext context)
+        {
+            NodeInfo nodeInfo = new NodeInfo(context.NodeId, ProviderType);
 
-                _nodeContexts[context.NodeId] = context;
+            _nodeContexts[context.NodeId] = context;
 
-                // Start the asynchronous read.
-                context.BeginAsyncPacketRead();
+            // Start the asynchronous read.
+            context.BeginAsyncPacketRead();
 
-                // Configure the node.
-                context.SendData(configurationFactory(nodeInfo));
-            }
+            // Configure the node.
+            context.SendData(_configurationFactory(nodeInfo));
         }
 
         /// <summary>
