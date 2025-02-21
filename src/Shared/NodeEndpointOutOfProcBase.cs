@@ -523,6 +523,7 @@ namespace Microsoft.Build.BackEnd
                 // We don't really care if Disconnect somehow fails, but it gives us a chance to do the right thing.
             }
         }
+
 #if NET472_OR_GREATER
         private Dictionary<int, MemoryMappedFile> _sideChannels = new Dictionary<int, MemoryMappedFile>();
         private Dictionary<int, MemoryMappedFile> _sideChannelsWrite = new Dictionary<int, MemoryMappedFile>();
