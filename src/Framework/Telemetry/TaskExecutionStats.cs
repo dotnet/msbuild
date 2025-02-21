@@ -7,8 +7,19 @@ namespace Microsoft.Build.Framework;
 
 internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, short executionsCount, long totalMemoryConsumption)
 {
+    /// <summary>
+    /// Total execution time of the task in all nodes for all projects.
+    /// </summary>
     public TimeSpan CumulativeExecutionTime { get; set; } = cumulativeExecutionTime;
+
+    /// <summary>
+    /// Total memory consumption (across all executions) in bytes.
+    /// </summary>
     public long TotalMemoryConsumption { get; set; } = totalMemoryConsumption;
+
+    /// <summary>
+    /// Total number of execution of the tasks in all nodes for all projects.
+    /// </summary>
     public short ExecutionsCount { get; set; } = executionsCount;
 
     // We need custom Equals for easier assertations in tests
