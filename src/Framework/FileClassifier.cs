@@ -5,10 +5,11 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Shared;
 #if !RUNTIME_TYPE_NETCORE
 using System.Diagnostics;
-using System.Linq;
 using System.Text.RegularExpressions;
 #endif
 
@@ -73,6 +74,12 @@ namespace Microsoft.Build.Framework
         /// </summary>
         private static readonly Lazy<FileClassifier> s_sharedInstance = new(() => new FileClassifier());
 
+        private const string MicrosoftAssemblyPrefix = "Microsoft.";
+
+        // Surrogate for the span - to prevent array allocation on each span access.
+        private static readonly char[] s_microsoftAssemblyPrefixChars = MicrosoftAssemblyPrefix.ToCharArray();
+        private static ReadOnlySpan<char> MicrosoftAssemblyPrefixSpan => s_microsoftAssemblyPrefixChars;
+
         /// <summary>
         ///     Serves purpose of thread safe set of known immutable directories.
         /// </summary>
@@ -86,6 +93,13 @@ namespace Microsoft.Build.Framework
         ///     Copy on write snapshot of <see cref="_knownImmutableDirectories"/>.
         /// </summary>
         private volatile IReadOnlyList<string> _knownImmutableDirectoriesSnapshot = [];
+
+        /// <summary>
+        ///     Copy on write snapshot of <see cref="_knownImmutableDirectories"/>, without custom logic locations (e.g. nuget cache).
+        /// </summary>
+        private volatile IReadOnlyList<string> _knownBuiltInLogicDirectoriesSnapshot = [];
+
+        private IReadOnlyList<string> _nugetCacheLocations = [];
 
         /// <summary>
         ///     Creates default FileClassifier which following immutable folders:
@@ -109,12 +123,12 @@ namespace Microsoft.Build.Framework
                 string? programFiles = Environment.GetEnvironmentVariable(programFilesEnv);
                 if (!string.IsNullOrEmpty(programFiles))
                 {
-                    RegisterImmutableDirectory(Path.Combine(programFiles, "Reference Assemblies", "Microsoft"));
+                    RegisterImmutableDirectory(Path.Combine(programFiles, "Reference Assemblies", "Microsoft"), false);
                 }
             }
 
 #if !RUNTIME_TYPE_NETCORE
-            RegisterImmutableDirectory(GetVSInstallationDirectory());
+            RegisterImmutableDirectory(GetVSInstallationDirectory(), false);
 
             static string? GetVSInstallationDirectory()
             {
@@ -141,10 +155,10 @@ namespace Microsoft.Build.Framework
 
                 // Seems like MSBuild did not run from VS but from CLI.
                 // Identify current process and run it
-                string processName = Process.GetCurrentProcess().MainModule.FileName;
+                string? processName = EnvironmentUtilities.ProcessPath;
                 string processFileName = Path.GetFileNameWithoutExtension(processName);
 
-                if (string.IsNullOrEmpty(processFileName))
+                if (processName == null || string.IsNullOrEmpty(processFileName))
                 {
                     return null;
                 }
@@ -197,6 +211,22 @@ namespace Microsoft.Build.Framework
         public static FileClassifier Shared => s_sharedInstance.Value;
 
         /// <summary>
+        ///    Checks if assembly name indicates it is a Microsoft assembly.
+        /// </summary>
+        /// <param name="assemblyName"></param>
+        public static bool IsMicrosoftAssembly(string assemblyName)
+            => assemblyName.StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        ///    Checks if assembly name indicates it is a Microsoft assembly.
+        /// </summary>
+        public static bool IsMicrosoftAssembly(ReadOnlySpan<char> assemblyName)
+            => assemblyName.StartsWith(MicrosoftAssemblyPrefixSpan, StringComparison.OrdinalIgnoreCase);
+
+        private static bool IsInLocationList(string filePath, IReadOnlyList<string> locations)
+            => GetFirstMatchingLocationfromList(filePath, locations) is not null;
+
+        /// <summary>
         ///     Try add path into set of known immutable paths.
         ///     Files under any of these folders are considered non-modifiable.
         /// </summary>
@@ -204,7 +234,7 @@ namespace Microsoft.Build.Framework
         ///     This value is used by <see cref="IsNonModifiable" />.
         ///     Files in the NuGet package cache are not expected to change over time, once they are created.
         /// </remarks>
-        public void RegisterImmutableDirectory(string? directory)
+        private protected void RegisterImmutableDirectory(string? directory, bool isCustomLogicLocation)
         {
             if (directory?.Length > 0)
             {
@@ -213,6 +243,13 @@ namespace Microsoft.Build.Framework
                 if (_knownImmutableDirectories.TryAdd(d, d))
                 {
                     _knownImmutableDirectoriesSnapshot = new List<string>(_knownImmutableDirectories.Values);
+
+                    // Add the location to the build in logic locations - but create a new readonly destination
+                    if (!isCustomLogicLocation)
+                    {
+                        _knownBuiltInLogicDirectoriesSnapshot =
+                            _knownBuiltInLogicDirectoriesSnapshot.Append(d).ToArray();
+                    }
                 }
             }
         }
@@ -222,23 +259,34 @@ namespace Microsoft.Build.Framework
             // Register toolset paths into list of immutable directories
             // example: C:\Windows\Microsoft.NET\Framework
             string? frameworksPathPrefix32 = GetExistingRootOrNull(getPropertyValue("MSBuildFrameworkToolsPath32")?.Trim());
-            RegisterImmutableDirectory(frameworksPathPrefix32);
+            RegisterImmutableDirectory(frameworksPathPrefix32, false);
             // example: C:\Windows\Microsoft.NET\Framework64
             string? frameworksPathPrefix64 = GetExistingRootOrNull(getPropertyValue("MSBuildFrameworkToolsPath64")?.Trim());
-            RegisterImmutableDirectory(frameworksPathPrefix64);
+            RegisterImmutableDirectory(frameworksPathPrefix64, false);
             // example: C:\Windows\Microsoft.NET\FrameworkArm64
             string? frameworksPathPrefixArm64 = GetExistingRootOrNull(getPropertyValue("MSBuildFrameworkToolsPathArm64")?.Trim());
-            RegisterImmutableDirectory(frameworksPathPrefixArm64);
+            RegisterImmutableDirectory(frameworksPathPrefixArm64, false);
         }
 
         public void RegisterKnownImmutableLocations(Func<string, string?> getPropertyValue)
         {
             // example: C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2
-            RegisterImmutableDirectory(getPropertyValue("FrameworkPathOverride")?.Trim());
+            RegisterImmutableDirectory(getPropertyValue("FrameworkPathOverride")?.Trim(), false);
             // example: C:\Program Files\dotnet\
-            RegisterImmutableDirectory(getPropertyValue("NetCoreRoot")?.Trim());
-            // example: C:\Users\<username>\.nuget\packages\
-            RegisterImmutableDirectory(getPropertyValue("NuGetPackageFolders")?.Trim());
+            RegisterImmutableDirectory(getPropertyValue("NetCoreRoot")?.Trim(), false);
+            // example: C:\Users\<username>\.nuget\packages\;...
+            string[]? nugetLocations =
+                getPropertyValue("NuGetPackageFolders")
+                    ?.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(p => EnsureTrailingSlash(p.Trim())).ToArray();
+            if (nugetLocations is { Length: > 0 })
+            {
+                _nugetCacheLocations = nugetLocations ?? [];
+                foreach (string location in nugetLocations!)
+                {
+                    RegisterImmutableDirectory(location, true);
+                }
+            }
 
             IsImmutablePathsInitialized = true;
         }
@@ -315,24 +363,56 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        ///     Gets whether a file is expected to be produced as a controlled msbuild logic library ( - produced by Microsoft).
+        /// </summary>
+        /// <param name="filePath">The path to the file to test.</param>
+        /// <returns><see langword="true" /> if the file is supposed to be part of the common targets libraries set.<see langword="false" />.</returns>
+        public bool IsBuiltInLogic(string filePath)
+            => IsInLocationList(filePath, _knownBuiltInLogicDirectoriesSnapshot);
+
+        /// <summary>
         ///     Gets whether a file is expected to not be modified in place on disk once it has been created.
         /// </summary>
         /// <param name="filePath">The path to the file to test.</param>
         /// <returns><see langword="true" /> if the file is non-modifiable, otherwise <see langword="false" />.</returns>
         public bool IsNonModifiable(string filePath)
+            => IsInLocationList(filePath, _knownImmutableDirectoriesSnapshot);
+
+        /// <summary>
+        ///    Gets whether a file is assumed to be inside a nuget cache location.
+        /// </summary>
+        public bool IsInNugetCache(string filePath)
+            => IsInLocationList(filePath, _nugetCacheLocations);
+
+        /// <summary>
+        ///    Gets whether a file is assumed to be in the nuget cache and name indicates it's produced by Microsoft.
+        /// </summary>
+        public bool IsMicrosoftPackageInNugetCache(string filePath)
         {
+            string? containingNugetCache = GetFirstMatchingLocationfromList(filePath, _nugetCacheLocations);
+
+            return containingNugetCache != null &&
+                   IsMicrosoftAssembly(filePath.AsSpan(containingNugetCache.Length));
+        }
+
+        private static string? GetFirstMatchingLocationfromList(string filePath, IReadOnlyList<string> locations)
+        {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return null;
+            }
+
             // Avoid a foreach loop or linq.Any because they allocate.
             // Copy _knownImmutableDirectoriesSnapshot into a local variable so other threads can't modify it during enumeration.
-            IReadOnlyList<string> immutableDirectories = _knownImmutableDirectoriesSnapshot;
-            for (int i = 0; i < immutableDirectories.Count; i++)
+            for (int i = 0; i < locations.Count; i++)
             {
-                if (filePath.StartsWith(immutableDirectories[i], PathComparison))
+                if (filePath.StartsWith(locations[i], PathComparison))
                 {
-                    return true;
+                    return locations[i];
                 }
             }
 
-            return false;
+            return null;
         }
     }
 }

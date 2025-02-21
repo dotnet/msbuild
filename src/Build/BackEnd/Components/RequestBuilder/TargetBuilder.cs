@@ -91,6 +91,11 @@ namespace Microsoft.Build.BackEnd
         private bool _legacyCallTargetContinueOnError;
 
         /// <summary>
+        /// Flag indicating whether telemetry is requested.
+        /// </summary>
+        private bool _isTelemetryRequested;
+
+        /// <summary>
         /// Builds the specified targets.
         /// </summary>
         /// <param name="loggingContext">The logging context for the project.</param>
@@ -214,6 +219,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(host);
             _componentHost = host;
+            _isTelemetryRequested = host.BuildParameters.IsTelemetryEnabled;
         }
 
         /// <summary>
@@ -517,6 +523,11 @@ namespace Microsoft.Build.BackEnd
                         // If this result failed but we are under the influence of the legacy ContinueOnError behavior for a
                         // CallTarget, make sure we don't contribute this failure to the overall success of the build.
                         targetResult.TargetFailureDoesntCauseBuildFailure = _legacyCallTargetContinueOnError;
+
+                        if (_isTelemetryRequested)
+                        {
+                            targetResult.TargetLocation = currentTargetEntry.Target.Location;
+                        }
 
                         // This target is no longer actively building.
                         _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);

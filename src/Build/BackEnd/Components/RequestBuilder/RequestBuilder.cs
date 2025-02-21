@@ -21,6 +21,7 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.TelemetryInfra;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 
@@ -1208,6 +1209,8 @@ namespace Microsoft.Build.BackEnd
                 BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
                     allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
+                UpdateStatisticsPostBuild();
+
                 result = _requestEntry.Request.ProxyTargets == null
                     ? result
                     : CopyTargetResultsFromProxyTargetsToRealTargets(result);
@@ -1256,6 +1259,86 @@ namespace Microsoft.Build.BackEnd
                 return resultFromTargetBuilder;
             }
         }
+
+        private void UpdateStatisticsPostBuild()
+        {
+            ITelemetryForwarder telemetryForwarder =
+                ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
+                .Instance;
+
+            if (!telemetryForwarder.IsTelemetryCollected)
+            {
+                return;
+            }
+
+            IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
+            // The TargetBuilder filters out results for targets not explicitly requested before returning the result.
+            // Hence we need to fetch the original result from the cache - to get the data for all executed targets.
+            BuildResult unfilteredResult = resultsCache.GetResultsForConfiguration(_requestEntry.Request.ConfigurationId);
+
+            foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
+            {
+                bool wasExecuted =
+                    unfilteredResult.ResultsByTarget.TryGetValue(projectTargetInstance.Key, out TargetResult targetResult) &&
+                    // We need to match on location of target as well - as multiple targets with same name can be defined.
+                    // E.g. _SourceLinkHasSingleProvider can be brought explicitly via nuget (Microsoft.SourceLink.GitHub) as well as sdk
+                    projectTargetInstance.Value.Location.Equals(targetResult.TargetLocation);
+
+                bool isFromNuget, isMetaprojTarget, isCustom;
+
+                if (IsMetaprojTargetPath(projectTargetInstance.Value.FullPath))
+                {
+                    isMetaprojTarget = true;
+                    isFromNuget = false;
+                    isCustom = false;
+                }
+                else
+                {
+                    isMetaprojTarget = false;
+                    isFromNuget = FileClassifier.Shared.IsInNugetCache(projectTargetInstance.Value.FullPath);
+                    isCustom = !FileClassifier.Shared.IsBuiltInLogic(projectTargetInstance.Value.FullPath) ||
+                               // add the isFromNuget to condition - to prevent double checking of nonnuget package
+                               (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
+                }
+
+                telemetryForwarder.AddTarget(
+                    projectTargetInstance.Key,
+                    // would we want to distinguish targets that were executed only during this execution - we'd need
+                    //  to remember target names from ResultsByTarget from before execution
+                    wasExecuted,
+                    isCustom,
+                    isMetaprojTarget,
+                    isFromNuget);
+            }
+
+            TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
+            CollectTasksStats(taskReg);
+
+            void CollectTasksStats(TaskRegistry taskRegistry)
+            {
+                if (taskRegistry == null)
+                {
+                    return;
+                }
+
+                foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
+                {
+                    telemetryForwarder.AddTask(registeredTaskRecord.TaskIdentity.Name,
+                        registeredTaskRecord.Statistics.ExecutedTime,
+                        registeredTaskRecord.Statistics.ExecutedCount,
+                        registeredTaskRecord.Statistics.TotalMemoryConsumption,
+                        registeredTaskRecord.ComputeIfCustom(),
+                        registeredTaskRecord.IsFromNugetCache);
+
+                    registeredTaskRecord.Statistics.Reset();
+                }
+
+                taskRegistry.Toolset?.InspectInternalTaskRegistry(CollectTasksStats);
+            }
+        }
+
+        private static bool IsMetaprojTargetPath(string targetPath)
+            => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Saves the current operating environment.

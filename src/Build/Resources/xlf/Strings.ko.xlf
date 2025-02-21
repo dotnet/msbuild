@@ -211,6 +211,16 @@
         <target state="translated">빌드하는 동안 불필요한 복사 작업이 발생할 수 있으므로 'CopyToOutputDirectory'에 대해 'Always'를 지정하지 마세요. 'PreserveNewest' 또는 'IfDifferent' 메타데이터 값을 사용하거나' SkipUnchangedFilesOnCopyAlways' 속성을 true로 설정하여 보다 효과적인 복사를 사용합니다.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_MessageFmt">
+        <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
+        <target state="translated">프로젝트 {0} .NET SDK를 사용하지 않는 'TargetFramework' 속성 '{1}' 지정합니다. 이러한 속성은 C# 대상을 직접 가져오는 프로젝트에서 이해할 수 없습니다.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_Title">
+        <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
+        <target state="translated">'TargetFramework' 및 'TargetFrameworks' 속성은 사용되지 않으며 .NET SDK를 사용하지 않는 프로젝트에서 지정해서는 안 됩니다.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">속성: '{0}'에 액세스했지만 초기화되지 않았습니다.</target>
@@ -239,6 +249,16 @@
       <trans-unit id="BuildCheck_BC0203_Title">
         <source>A property that is not used should not be declared.</source>
         <target state="translated">사용되지 않는 속성은 선언하면 안 됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_MessageFmt">
+        <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
+        <target state="translated">위치: '{0}' 완전히 신뢰할 수 없습니다. 프로젝트를 해당 폴더 외부에 배치하세요(프로젝트: {1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_Title">
+        <source>Downloads folder is untrusted for projects building.</source>
+        <target state="translated">프로젝트 빌드에 대해 다운로드 폴더를 신뢰할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
