@@ -22,6 +22,6 @@ namespace Microsoft.Build.FileAccesses
 
         internal FileAccessData FileAccessData => _fileAccessData;
 
-        internal static INodePacket FactoryForDeserialization(ITranslator translator) => new FileAccessReport(translator);
+        internal static INodePacket FactoryForDeserialization(ITranslatorBase translator) => new FileAccessReport((ITranslator)translator);
     }
 }

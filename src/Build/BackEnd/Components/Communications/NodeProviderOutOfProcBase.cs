@@ -176,7 +176,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace("Shutting down node with pid = {0}", nodeProcess.Id);
-                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode);
+                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode, (HandshakeOptions)NodeProviderOutOfProc.GetHandshake(nodeReuse, false).GetHandshakeOptions);
                     nodeContext.SendData(new NodeBuildComplete(false /* no node reuse */));
                     nodeStream.Dispose();
                 }
@@ -186,7 +186,8 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Finds or creates a child processes which can act as a node.
         /// </summary>
-        protected IList<NodeContext> GetNodes(string msbuildLocation,
+        protected IList<NodeContext> GetNodes(
+            string msbuildExecutableLocation,
             string commandLineArgs,
             int nextNodeId,
             INodePacketFactory factory,
@@ -202,19 +203,19 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            if (String.IsNullOrEmpty(msbuildLocation))
+            if (String.IsNullOrEmpty(msbuildExecutableLocation))
             {
-                msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
+                msbuildExecutableLocation = _componentHost.BuildParameters.NodeExeLocation;
             }
 
-            if (String.IsNullOrEmpty(msbuildLocation))
+            if (String.IsNullOrEmpty(msbuildExecutableLocation))
             {
                 string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
 
                 if (!String.IsNullOrEmpty(msbuildExeName))
                 {
                     // we assume that MSBUILD_EXE_NAME is, in fact, just the name.
-                    msbuildLocation = Path.Combine(msbuildExeName, ".exe");
+                    msbuildExecutableLocation = Path.Combine(msbuildExeName, ".exe");
                 }
             }
 
@@ -229,7 +230,7 @@ namespace Microsoft.Build.BackEnd
             if (_componentHost.BuildParameters.EnableNodeReuse)
             {
                 IList<Process> possibleRunningNodesList;
-                (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation);
+                (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildExecutableLocation);
                 possibleRunningNodes = new ConcurrentQueue<Process>(possibleRunningNodesList);
 
                 if (possibleRunningNodesList.Count > 0)
@@ -296,7 +297,7 @@ namespace Microsoft.Build.BackEnd
                             BuildEventContext = new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId)
                         });
 
-                        CreateNodeContext(nodeId, nodeToReuse, nodeStream);
+                        CreateNodeContext(nodeId, nodeToReuse, nodeStream, (HandshakeOptions)hostHandshake.GetHandshakeOptions);
                         return true;
                     }
                 }
@@ -321,13 +322,13 @@ namespace Microsoft.Build.BackEnd
                     // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
                     // nodes because we should never be able to connect in this case.
                     string taskHostNameForClr2TaskHost = Path.GetFileNameWithoutExtension(NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost);
-                    if (Path.GetFileNameWithoutExtension(msbuildLocation).Equals(taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
+                    if (Path.GetFileNameWithoutExtension(msbuildExecutableLocation).Equals(taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
                     {
                         if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) == null)
                         {
                             CommunicationsUtilities.Trace(
                                 "Failed to launch node from {0}. The required .NET Framework v3.5 is not installed or enabled. CommandLine: {1}",
-                                msbuildLocation,
+                                msbuildExecutableLocation,
                                 commandLineArgs);
 
                             string nodeFailedToLaunchError = ResourceUtilities.GetResourceString("TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled");
@@ -337,7 +338,8 @@ namespace Microsoft.Build.BackEnd
 #endif
                     // Create the node process
                     INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
-                    Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId);
+                    Process msbuildProcess = nodeLauncher.Start(msbuildExecutableLocation, commandLineArgs, nodeId);
+
                     _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
 
                     // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
@@ -351,7 +353,7 @@ namespace Microsoft.Build.BackEnd
                         // Connection successful, use this node.
                         CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcess.Id);
 
-                        CreateNodeContext(nodeId, msbuildProcess, nodeStream);
+                        CreateNodeContext(nodeId, msbuildProcess, nodeStream, (HandshakeOptions)hostHandshake.GetHandshakeOptions);
                         return true;
                     }
 
@@ -380,9 +382,9 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream)
+            void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream, HandshakeOptions handshake)
             {
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode);
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, handshake);
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
@@ -506,11 +508,11 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
+            KeyValuePair<string, int>[] handshakeComponents = handshake.RetrieveHandshakeComponents();
             for (int i = 0; i < handshakeComponents.Length; i++)
             {
                 CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
-                nodeStream.WriteIntForHandshake(handshakeComponents[i]);
+                nodeStream.WriteIntForHandshake(handshakeComponents[i].Value);
             }
 
             // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
@@ -605,11 +607,20 @@ namespace Microsoft.Build.BackEnd
             private BinaryReaderFactory _binaryReaderFactory;
 
             /// <summary>
+            /// Handshake options.
+            /// </summary>
+            private HandshakeOptions _handshakeOptions;
+
+            /// <summary>
             /// Constructor.
             /// </summary>
-            public NodeContext(int nodeId, Process process,
+            public NodeContext(
+                int nodeId,
+                Process process,
                 Stream nodePipe,
-                INodePacketFactory factory, NodeContextTerminateDelegate terminateDelegate)
+                INodePacketFactory factory,
+                NodeContextTerminateDelegate terminateDelegate,
+                HandshakeOptions handshakeOptions)
             {
                 _nodeId = nodeId;
                 _process = process;
@@ -621,6 +632,7 @@ namespace Microsoft.Build.BackEnd
                 _writeBufferMemoryStream = new MemoryStream();
                 _terminateDelegate = terminateDelegate;
                 _binaryReaderFactory = InterningBinaryReader.CreateSharedBuffer();
+                _handshakeOptions = handshakeOptions;
             }
 
             /// <summary>
@@ -760,28 +772,38 @@ namespace Microsoft.Build.BackEnd
                 // clear the buffer but keep the underlying capacity to avoid reallocations
                 writeStream.SetLength(0);
 
-                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
                 try
                 {
                     writeStream.WriteByte((byte)packet.Type);
-
                     // Pad for the packet length
                     WriteInt32(writeStream, 0);
-                    packet.Translate(writeTranslator);
+
+#if !TASKHOST
+
+                    if ((_handshakeOptions & HandshakeOptions.NET) == HandshakeOptions.NET && packet is ITranslatable2 jsonTranslatable)
+                    {
+                        var writeTranslator = JsonTranslator.GetWriteTranslator(writeStream);
+                        jsonTranslatable.Translate(writeTranslator);
+                    }
+                    else
+#endif
+                    {
+                        var writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
+                        packet.Translate(writeTranslator);
+                    }
 
                     int writeStreamLength = (int)writeStream.Position;
-
                     // Now plug in the real packet length
                     writeStream.Position = 1;
                     WriteInt32(writeStream, writeStreamLength - 5);
 
                     byte[] writeStreamBuffer = writeStream.GetBuffer();
-
                     for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
                     {
                         int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
                         _serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                     }
+
                     if (IsExitPacket(packet))
                     {
                         _exitPacketState = ExitPacketState.ExitPacketSent;

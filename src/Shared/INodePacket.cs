@@ -242,4 +242,11 @@ namespace Microsoft.Build.BackEnd
         }
         #endregion
     }
+
+    internal interface INodePacket2 : INodePacket
+#if !TASKHOST
+       , ITranslatable2
+#endif
+    {
+    }
 }
