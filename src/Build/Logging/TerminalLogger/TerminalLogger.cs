@@ -252,6 +252,7 @@ public sealed partial class TerminalLogger : INodeLogger
     internal static ILogger CreateTerminalOrConsoleLogger(string[]? args, bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode)
     {
         LoggerVerbosity verbosity = LoggerVerbosity.Normal;
+        string tlEnvVariable = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty;
         string tlArg = string.Empty;
         string? verbosityArg = string.Empty;
 
@@ -284,7 +285,7 @@ public sealed partial class TerminalLogger : INodeLogger
         bool isDisabled =
             tlArg.Equals("on", StringComparison.InvariantCultureIgnoreCase) ? false :
             tlArg.Equals("off", StringComparison.InvariantCultureIgnoreCase) ? true :
-            (Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty).Equals("off", StringComparison.InvariantCultureIgnoreCase);
+            tlEnvVariable.Equals("off", StringComparison.InvariantCultureIgnoreCase) || tlEnvVariable.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase);
 
         if (isDisabled || !supportsAnsi || !outputIsScreen)
         {

@@ -74,6 +74,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(null, true, false, "", typeof(ConsoleLogger))]
         [InlineData(null, false, true, "", typeof(ConsoleLogger))]
         [InlineData(null, true, true, "off", typeof(ConsoleLogger))]
+        [InlineData(null, true, true, "false", typeof(ConsoleLogger))]
         [InlineData("--tl:off", true, true, "", typeof(ConsoleLogger))]
         [InlineData(null, true, true, "", typeof(TerminalLogger))]
         [InlineData("-tl:on", true, true, "off", typeof(TerminalLogger))]
