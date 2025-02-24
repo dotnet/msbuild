@@ -3,8 +3,12 @@
 
 using System;
 using System.Linq;
+using System.Text.Json;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
+using System.IO;
 
-namespace Microsoft.Build.Framework;
+namespace Microsoft.Build.TelemetryInfra;
 
 internal sealed class InternalTelemetryConsumingLogger : ILogger
 {
@@ -34,11 +38,12 @@ internal sealed class InternalTelemetryConsumingLogger : ILogger
     {
         TestOnly_InternalTelemetryAggregted?.Invoke(_workerNodeTelemetryData);
         FlushDataIntoConsoleIfRequested();
+        FlushDataIntoJsonFileIfRequested();
     }
 
     private void FlushDataIntoConsoleIfRequested()
     {
-        if (Environment.GetEnvironmentVariable("MSBUILDOUTPUTNODESTELEMETRY") != "1")
+        if (!Traits.IsEnvVarOneOrTrue("MSBUILDOUTPUTNODESTELEMETRY"))
         {
             return;
         }
@@ -75,6 +80,21 @@ internal sealed class InternalTelemetryConsumingLogger : ILogger
             Console.WriteLine($"{task.Key} - {task.Value.ExecutionsCount}");
         }
         Console.WriteLine("==========================================");
+    }
+
+    private void FlushDataIntoJsonFileIfRequested()
+    {
+        const string jsonFileNameVariable = "MSBUILDNODETELEMETRYFILENAME";
+        if (!Traits.IsEnvVarOneOrTrue(jsonFileNameVariable))
+        {
+            return;
+        }
+
+        var telemetryTags = _workerNodeTelemetryData.AsActivityDataHolder(true, true)?.GetActivityProperties();
+
+        using var stream = File.OpenWrite(jsonFileNameVariable);
+        stream.SetLength(0);
+        JsonSerializer.Serialize(stream, telemetryTags, new JsonSerializerOptions() { WriteIndented = true });
     }
 
     public void Shutdown()

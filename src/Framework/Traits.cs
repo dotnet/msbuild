@@ -168,7 +168,7 @@ namespace Microsoft.Build.Framework
                 : null;
         }
 
-        private static bool IsEnvVarOneOrTrue(string name)
+        internal static bool IsEnvVarOneOrTrue(string name)
         {
             string? value = Environment.GetEnvironmentVariable(name);
             return value != null &&

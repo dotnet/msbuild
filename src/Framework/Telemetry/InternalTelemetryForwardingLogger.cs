@@ -4,7 +4,7 @@
 namespace Microsoft.Build.Framework;
 
 /// <remarks>
-/// Ensure that events filtering is in sync with <see cref="InternalTelemetryConsumingLogger"/>.
+/// Ensure that events filtering is in sync with InternalTelemetryConsumingLogger.
 /// </remarks>
 internal class InternalTelemeteryForwardingLogger : IForwardingLogger
 {

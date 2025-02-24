@@ -5,8 +5,15 @@ using System;
 
 namespace Microsoft.Build.Framework;
 
-internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, short executionsCount, long totalMemoryConsumption)
+internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumption)
 {
+    private TaskExecutionStats()
+        : this(TimeSpan.Zero, 0, 0)
+    { }
+
+    internal static TaskExecutionStats CreateEmpty()
+        => new();
+
     /// <summary>
     /// Total execution time of the task in all nodes for all projects.
     /// </summary>
@@ -20,7 +27,14 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, short execut
     /// <summary>
     /// Total number of execution of the tasks in all nodes for all projects.
     /// </summary>
-    public short ExecutionsCount { get; set; } = executionsCount;
+    public int ExecutionsCount { get; set; } = executionsCount;
+
+    internal void AddAnother(TaskExecutionStats another)
+    {
+        this.CumulativeExecutionTime += another.CumulativeExecutionTime;
+        this.TotalMemoryConsumption += another.TotalMemoryConsumption;
+        this.ExecutionsCount += another.ExecutionsCount;
+    }
 
     // We need custom Equals for easier assertations in tests
     public override bool Equals(object? obj)

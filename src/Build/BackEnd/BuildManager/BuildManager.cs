@@ -36,6 +36,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
 using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
@@ -568,6 +569,7 @@ namespace Microsoft.Build.Execution
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
+                _buildParameters.IsTelemetryEnabled = OpenTelemetryManager.Instance.IsActive();
                 var loggingService = InitializeLoggingService();
 
                 // Log deferred messages and response files
@@ -1140,7 +1142,9 @@ namespace Microsoft.Build.Execution
             OpenTelemetryManager.Instance.DefaultActivitySource?
                 .StartActivity("Build")?
                 .WithTags(_buildTelemetry)
-                .WithTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder())
+                .WithTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
+                    !Traits.IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS"),
+                    !Traits.IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETARGETSDETAILS")))
                 .WithStartTime(_buildTelemetry!.InnerStartAt)
                 .Dispose();
             OpenTelemetryManager.Instance.ForceFlush();
