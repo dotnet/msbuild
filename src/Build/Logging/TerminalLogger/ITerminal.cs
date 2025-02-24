@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using Microsoft.Build.Framework.Logging;
 
-namespace Microsoft.Build.Logging.TerminalLogger;
+namespace Microsoft.Build.Logging;
 
 /// <summary>
 /// An abstraction of a terminal, built specifically to fit the <see cref="TerminalLogger"/> needs.

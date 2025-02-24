@@ -3,26 +3,26 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using System.Text.RegularExpressions;
-using System.Diagnostics;
 using Microsoft.Build.Framework.Logging;
-using System.Globalization;
+using Microsoft.Build.Shared;
 
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
+
 #if NETFRAMEWORK
 using Microsoft.IO;
 #else
 using System.IO;
 #endif
 
-namespace Microsoft.Build.Logging.TerminalLogger;
+namespace Microsoft.Build.Logging;
 
 /// <summary>
 /// A logger which updates the console output "live" during the build.
@@ -30,7 +30,7 @@ namespace Microsoft.Build.Logging.TerminalLogger;
 /// <remarks>
 /// Uses ANSI/VT100 control codes to erase and overwrite lines as the build is progressing.
 /// </remarks>
-internal sealed partial class TerminalLogger : INodeLogger
+public sealed partial class TerminalLogger : INodeLogger
 {
     private const string FilePathPattern = " -> ";
 
@@ -56,6 +56,8 @@ internal sealed partial class TerminalLogger : INodeLogger
             : this(context.ProjectContextId)
         { }
     }
+
+    private readonly record struct TestSummary(int Total, int Passed, int Skipped, int Failed);
 
     /// <summary>
     /// The indentation to use for all build output.
@@ -91,7 +93,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <remarks>
     /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding project.
     /// </remarks>
-    private readonly Dictionary<ProjectContext, Project> _projects = new();
+    private readonly Dictionary<ProjectContext, TerminalProjectInfo> _projects = new();
 
     /// <summary>
     /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
@@ -100,7 +102,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// There is no locking around access to this data structure despite it being accessed concurrently by multiple threads.
     /// However, reads and writes to locations in an array is atomic, so locking is not required.
     /// </remarks>
-    private NodeStatus?[] _nodes = Array.Empty<NodeStatus>();
+    private TerminalNodeStatus?[] _nodes = Array.Empty<TerminalNodeStatus>();
 
     /// <summary>
     /// The timestamp of the <see cref="IEventSource.BuildStarted"/> event.
@@ -146,7 +148,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// What is currently displaying in Nodes section as strings representing per-node console output.
     /// </summary>
-    private NodesFrame _currentFrame = new(Array.Empty<NodeStatus>(), 0, 0);
+    private TerminalNodesFrame _currentFrame = new(Array.Empty<TerminalNodeStatus>(), 0, 0);
 
     /// <summary>
     /// The <see cref="Terminal"/> to write console output to.
@@ -162,29 +164,6 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// True if we've logged the ".NET SDK is preview" message.
     /// </summary>
     private bool _loggedPreviewMessage;
-
-    /// <summary>
-    /// List of events the logger needs as parameters to the <see cref="ConfigurableForwardingLogger"/>.
-    /// </summary>
-    /// <remarks>
-    /// If TerminalLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main
-    /// node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
-    /// Important: Note that TerminalLogger is special-cased in <see cref="BackEnd.Logging.LoggingService.UpdateMinimumMessageImportance"/>
-    /// so changing this list may impact the minimum message importance logging optimization.
-    /// </remarks>
-    public static readonly string[] ConfigurableForwardingLoggerParameters =
-    {
-            "BUILDSTARTEDEVENT",
-            "BUILDFINISHEDEVENT",
-            "PROJECTSTARTEDEVENT",
-            "PROJECTFINISHEDEVENT",
-            "TARGETSTARTEDEVENT",
-            "TARGETFINISHEDEVENT",
-            "TASKSTARTEDEVENT",
-            "HIGHMESSAGEEVENT",
-            "WARNINGEVENT",
-            "ERROREVENT"
-    };
 
     /// <summary>
     /// The two directory separator characters to be passed to methods like <see cref="String.IndexOfAny(char[])"/>.
@@ -231,12 +210,12 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
     /// </summary>
-    public TerminalLogger()
+    internal TerminalLogger()
     {
         Terminal = new Terminal();
     }
 
-    public TerminalLogger(LoggerVerbosity verbosity) : this()
+    internal TerminalLogger(LoggerVerbosity verbosity) : this()
     {
         Verbosity = verbosity;
     }
@@ -248,6 +227,73 @@ internal sealed partial class TerminalLogger : INodeLogger
     {
         Terminal = terminal;
         _manualRefresh = true;
+    }
+
+    /// <summary>
+    /// Private constructor invoked by static factory.
+    /// </summary>
+    internal TerminalLogger(LoggerVerbosity verbosity, uint? originalConsoleMode) : this()
+    {
+        Verbosity = verbosity;
+        _originalConsoleMode = originalConsoleMode;
+    }
+
+    /// <summary>
+    /// Creates a Terminal logger if possible, or a Console logger.
+    /// </summary>
+    /// <param name="args">Command line arguments for the logger configuration. Currently, only 'tl|terminallogger' and 'v|verbosity' are supported right now.</param>
+    public static ILogger CreateTerminalOrConsoleLogger(string[]? args = null)
+    {
+        (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+
+        return CreateTerminalOrConsoleLogger(args, supportsAnsi, outputIsScreen, originalConsoleMode);
+    }
+
+    internal static ILogger CreateTerminalOrConsoleLogger(string[]? args, bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode)
+    {
+        LoggerVerbosity verbosity = LoggerVerbosity.Normal;
+        string tlEnvVariable = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty;
+        string tlArg = string.Empty;
+        string? verbosityArg = string.Empty;
+
+        if (args != null)
+        {
+            string argsString = string.Join(" ", args);
+
+            MatchCollection tlMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off)", RegexOptions.IgnoreCase);
+            tlArg = tlMatches.OfType<Match>().LastOrDefault()?.Groups["value"].Value ?? string.Empty;
+
+            MatchCollection verbosityMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:v|verbosity):(?'value'\w+)", RegexOptions.IgnoreCase);
+            verbosityArg = verbosityMatches.OfType<Match>().LastOrDefault()?.Groups["value"].Value;
+        }
+
+        verbosityArg = verbosityArg?.ToLowerInvariant() switch
+        {
+            "q" => "quiet",
+            "m" => "minimal",
+            "n" => "normal",
+            "d" => "detailed",
+            "diag" => "diagnostic",
+            _ => verbosityArg,
+        };
+
+        if (Enum.TryParse(verbosityArg, true, out LoggerVerbosity parsedVerbosity))
+        {
+            verbosity = parsedVerbosity;
+        }
+
+        bool isDisabled =
+            tlArg.Equals("on", StringComparison.InvariantCultureIgnoreCase) ? false :
+            tlArg.Equals("off", StringComparison.InvariantCultureIgnoreCase) ? true :
+            tlEnvVariable.Equals("off", StringComparison.InvariantCultureIgnoreCase) || tlEnvVariable.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase);
+
+        if (isDisabled || !supportsAnsi || !outputIsScreen)
+        {
+            NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
+            return new ConsoleLogger(verbosity);
+        }
+
+        return new TerminalLogger(verbosity, originalConsoleMode);
     }
 
     #region INodeLogger implementation
@@ -262,7 +308,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     public void Initialize(IEventSource eventSource, int nodeCount)
     {
         // When MSBUILDNOINPROCNODE enabled, NodeId's reported by build start with 2. We need to reserve an extra spot for this case.
-        _nodes = new NodeStatus[nodeCount + 1];
+        _nodes = new TerminalNodeStatus[nodeCount + 1];
 
         Initialize(eventSource);
     }
@@ -270,8 +316,6 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource)
     {
-        (_, _, _originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
-
         ParseParameters();
 
         eventSource.BuildStarted += BuildStarted;
@@ -396,7 +440,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         _buildStartTime = e.Timestamp;
 
-        if (Terminal.SupportsProgressReporting)
+        if (Terminal.SupportsProgressReporting && Verbosity != LoggerVerbosity.Quiet)
         {
             Terminal.Write(AnsiCodes.SetProgressIndeterminate);
         }
@@ -465,7 +509,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
         finally
         {
-            if (Terminal.SupportsProgressReporting)
+            if (Terminal.SupportsProgressReporting && Verbosity != LoggerVerbosity.Quiet)
             {
                 Terminal.Write(AnsiCodes.RemoveProgress);
             }
@@ -492,7 +536,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         Terminal.WriteLine(ResourceUtilities.GetResourceString("BuildSummary"));
 
-        foreach (Project project in _projects.Values.Where(p => p.HasErrorsOrWarnings))
+        foreach (TerminalProjectInfo project in _projects.Values.Where(p => p.HasErrorsOrWarnings))
         {
             string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
             string buildResult = GetBuildResultString(project.Succeeded, project.ErrorCount, project.WarningCount);
@@ -500,7 +544,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
             Terminal.WriteLine(projectHeader);
 
-            foreach (BuildMessage buildMessage in project.GetBuildErrorAndWarningMessages())
+            foreach (TerminalBuildMessage buildMessage in project.GetBuildErrorAndWarningMessages())
             {
                 Terminal.WriteLine($"{DoubleIndentation}{buildMessage.Message}");
             }
@@ -543,7 +587,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             {
                 _restoreContext = c;
                 int nodeIndex = NodeIndexForContext(buildEventContext);
-                _nodes[nodeIndex] = new NodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+                _nodes[nodeIndex] = new TerminalNodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
             }
         }
     }
@@ -573,7 +617,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
         ProjectContext c = new(buildEventContext);
 
-        if (_projects.TryGetValue(c, out Project? project))
+        if (_projects.TryGetValue(c, out TerminalProjectInfo? project))
         {
             project.Succeeded = e.Succeeded;
             project.Stopwatch.Stop();
@@ -673,7 +717,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                     // Print diagnostic output under the Project -> Output line.
                     if (project.BuildMessages is not null)
                     {
-                        foreach (BuildMessage buildMessage in project.BuildMessages)
+                        foreach (TerminalBuildMessage buildMessage in project.BuildMessages)
                         {
                             Terminal.WriteLine($"{DoubleIndentation}{buildMessage.Message}");
                         }
@@ -692,7 +736,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         }
     }
 
-    private static string GetProjectFinishedHeader(Project project, string buildResult, string duration)
+    private static string GetProjectFinishedHeader(TerminalProjectInfo project, string buildResult, string duration)
     {
         string projectFile = project.File is not null ?
             Path.GetFileNameWithoutExtension(project.File) :
@@ -727,7 +771,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     private void TargetStarted(object sender, TargetStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+        if (_restoreContext is null && buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
         {
             project.Stopwatch.Start();
 
@@ -753,12 +797,12 @@ internal sealed partial class TerminalLogger : INodeLogger
                 project.IsTestProject = true;
             }
 
-            NodeStatus nodeStatus = new(projectFile, project.TargetFramework, targetName, project.Stopwatch);
+            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, targetName, project.Stopwatch);
             UpdateNodeStatus(buildEventContext, nodeStatus);
         }
     }
 
-    private void UpdateNodeStatus(BuildEventContext buildEventContext, NodeStatus? nodeStatus)
+    private void UpdateNodeStatus(BuildEventContext buildEventContext, TerminalNodeStatus? nodeStatus)
     {
         int nodeIndex = NodeIndexForContext(buildEventContext);
         _nodes[nodeIndex] = nodeStatus;
@@ -776,7 +820,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             && buildEventContext is not null
             && _hasUsedCache
             && e.TargetName == "GetTargetPath"
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
         {
             if (project.IsCachePluginProject)
             {
@@ -800,7 +844,7 @@ internal sealed partial class TerminalLogger : INodeLogger
             // This will yield the node, so preemptively mark it idle
             UpdateNodeStatus(buildEventContext, null);
 
-            if (_projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project))
+            if (_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
             {
                 project.Stopwatch.Stop();
             }
@@ -821,7 +865,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         string? message = e.Message;
         if (message is not null && e.Importance == MessageImportance.High)
         {
-            var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project);
+            var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project);
 
             // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
             // pattern used by the CopyFilesToOutputDirectory target.
@@ -872,7 +916,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                 var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                var status = new NodeStatus(node.Project, node.TargetFramework, TerminalColor.Green, indicator, displayName, project.Stopwatch);
+                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, TerminalColor.Green, indicator, displayName, project.Stopwatch);
                                 UpdateNodeStatus(buildEventContext, status);
                                 break;
                             }
@@ -882,7 +926,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                                 var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                 var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                var status = new NodeStatus(node.Project, node.TargetFramework, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
+                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
                                 UpdateNodeStatus(buildEventContext, status);
                                 break;
                             }
@@ -930,7 +974,7 @@ internal sealed partial class TerminalLogger : INodeLogger
 
                 if (hasProject)
                 {
-                    project!.AddBuildMessage(MessageSeverity.Message, message);
+                    project!.AddBuildMessage(TerminalMessageSeverity.Message, message);
                 }
                 else
                 {
@@ -949,7 +993,7 @@ internal sealed partial class TerminalLogger : INodeLogger
         BuildEventContext? buildEventContext = e.BuildEventContext;
 
         if (buildEventContext is not null
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project)
             && Verbosity > LoggerVerbosity.Quiet)
         {
             if ((!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message!)) ||
@@ -958,7 +1002,7 @@ internal sealed partial class TerminalLogger : INodeLogger
                 RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             }
 
-            project.AddBuildMessage(MessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
+            project.AddBuildMessage(TerminalMessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
         }
         else
         {
@@ -991,10 +1035,10 @@ internal sealed partial class TerminalLogger : INodeLogger
         BuildEventContext? buildEventContext = e.BuildEventContext;
 
         if (buildEventContext is not null
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out Project? project)
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project)
             && Verbosity > LoggerVerbosity.Quiet)
         {
-            project.AddBuildMessage(MessageSeverity.Error, FormatErrorMessage(e, TripleIndentation));
+            project.AddBuildMessage(TerminalMessageSeverity.Error, FormatErrorMessage(e, TripleIndentation));
         }
         else
         {
@@ -1031,7 +1075,7 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     internal void DisplayNodes()
     {
-        NodesFrame newFrame = new NodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
+        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
 
         // Do not render delta but clear everything if Terminal width or height have changed.
         if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
@@ -1077,8 +1121,9 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// Construct a build result summary string.
     /// </summary>
     /// <param name="succeeded">True if the build completed with success.</param>
-    /// <param name="hasError">True if the build has logged at least one error.</param>
-    /// <param name="hasWarning">True if the build has logged at least one warning.</param>
+    /// <param name="countErrors">The number of errors encountered during the build.</param>
+    /// <param name="countWarnings">The number of warnings encountered during the build.</param>
+    /// <returns>A string representing the build result summary.</returns>
     private static string GetBuildResultString(bool succeeded, int countErrors, int countWarnings)
     {
         if (!succeeded)
