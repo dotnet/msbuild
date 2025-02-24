@@ -144,7 +144,7 @@ namespace Microsoft.Build.Framework
         public bool ExcludeTasksDetailsFromTelemetry = IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
 
         // for VS17.14
-        public readonly bool TelemetryOptIn = Environment.GetEnvironmentVariable("MSBUILD_TELEMETRY_OPTIN") == "1";
+        public readonly bool TelemetryOptIn = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTIN");
 
         public static void UpdateFromEnvironment()
         {
