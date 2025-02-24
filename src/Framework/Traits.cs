@@ -134,6 +134,8 @@ namespace Microsoft.Build.Framework
 
         public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
 
+        public readonly bool SlnParsingWithSolutionPersistenceOptIn = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_SLN_PARSING_SOLUTIONPERSISTENCE_OPTIN"));
+
         public static void UpdateFromEnvironment()
         {
             // Re-create Traits instance to update values in Traits according to current environment.
