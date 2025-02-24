@@ -1143,8 +1143,9 @@ namespace Microsoft.Build.Execution
                 .StartActivity("Build")?
                 .WithTags(_buildTelemetry)
                 .WithTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
-                    !Traits.IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS"),
-                    !Traits.IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETARGETSDETAILS")))
+                    includeTasksDetails: !Traits.ExcludeTasksDetailsFromTelemetry
+                    includeTargetDetails: false
+                ))
                 .WithStartTime(_buildTelemetry!.InnerStartAt)
                 .Dispose();
             OpenTelemetryManager.Instance.ForceFlush();
