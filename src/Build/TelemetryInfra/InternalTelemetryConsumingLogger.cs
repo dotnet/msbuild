@@ -85,14 +85,15 @@ internal sealed class InternalTelemetryConsumingLogger : ILogger
     private void FlushDataIntoJsonFileIfRequested()
     {
         const string jsonFileNameVariable = "MSBUILDNODETELEMETRYFILENAME";
-        if (!Traits.IsEnvVarOneOrTrue(jsonFileNameVariable))
+        var jsonFilePath = Environment.GetEnvironmentVariable(jsonFileNameVariable);
+        if (string.IsNullOrEmpty(jsonFilePath))
         {
             return;
         }
 
         var telemetryTags = _workerNodeTelemetryData.AsActivityDataHolder(true, true)?.GetActivityProperties();
 
-        using var stream = File.OpenWrite(jsonFileNameVariable);
+        using var stream = File.OpenWrite(jsonFilePath);
         stream.SetLength(0);
         JsonSerializer.Serialize(stream, telemetryTags, new JsonSerializerOptions() { WriteIndented = true });
     }
