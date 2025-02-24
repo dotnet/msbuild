@@ -686,6 +686,8 @@ namespace Microsoft.Build.UnitTests.Construction
 
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
+                testEnvironment.SetEnvironmentVariable("MSBUILD_SLN_PARSING_SOLUTIONPERSISTENCE_OPTIN", "1");
+
                 TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
 
                 string solutionPath = convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path;
