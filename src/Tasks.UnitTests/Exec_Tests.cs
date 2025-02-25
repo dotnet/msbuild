@@ -158,7 +158,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void Timeout()
+        public void Timeout1()
         {
             // On non-Windows the exit code of a killed process is SIGKILL (137)
             int expectedExitCode = NativeMethodsShared.IsWindows ? -1 : 137;
@@ -171,9 +171,20 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(expectedExitCode, exec.ExitCode);
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
             int warningsCount = ((MockEngine)exec.BuildEngine).Warnings;
-            warningsCount.ShouldBe(1,
+            if (warningsCount == 1)
+            {
+                warningsCount.ShouldBe(1,
                 $"Expected 1 warning, encountered {warningsCount}: " + string.Join(",",
                     ((MockEngine)exec.BuildEngine).WarningEvents.Select(w => w.Message)));
+            }
+            else
+            {
+                // Occasionally temp files fail to delete because of virus checkers, so generate MSB5018 warning
+                ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5018");
+                warningsCount.ShouldBe(2,
+                $"Expected 2 warnings, encountered {warningsCount}: " + string.Join(",",
+                    ((MockEngine)exec.BuildEngine).WarningEvents.Select(w => w.Message)));
+            }
 
             // ToolTask does not log an error on timeout.
             Assert.Equal(0, ((MockEngine)exec.BuildEngine).Errors);
