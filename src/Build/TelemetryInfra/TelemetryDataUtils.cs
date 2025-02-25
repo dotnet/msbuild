@@ -275,8 +275,10 @@ namespace Microsoft.Build.Framework.Telemetry
                 TasksSummary value,
                 JsonSerializerOptions options)
             {
+                writer.WriteStartObject();
                 WriteStat(writer, value.BuiltinTasksInfo, "Microsoft");
                 WriteStat(writer, value.CustomTasksInfo, "Custom");
+                writer.WriteEndObject();
 
                 void WriteStat(Utf8JsonWriter writer, TasksInfo tasksInfo, string name)
                 {
@@ -293,7 +295,7 @@ namespace Microsoft.Build.Framework.Telemetry
                         writer.WriteStartObject(name);
                         writer.WriteNumber("TotalExecutionsCount", stats.ExecutionsCount);
                         // We do not want decimals
-                        writer.WriteNumber("CumulativeExecutionTimeMs", stats.CumulativeExecutionTime.TotalMilliseconds / 1);
+                        writer.WriteNumber("CumulativeExecutionTimeMs", (long)stats.CumulativeExecutionTime.TotalMilliseconds);
                         // We do not want decimals
                         writer.WriteNumber("CumulativeConsumedMemoryKB", stats.TotalMemoryConsumption / 1024);
                         writer.WriteEndObject();
