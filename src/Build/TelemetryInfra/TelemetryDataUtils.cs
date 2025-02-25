@@ -3,15 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml;
-
 namespace Microsoft.Build.Framework.Telemetry
 {
     internal static class TelemetryDataUtils
@@ -240,7 +233,6 @@ namespace Microsoft.Build.Framework.Telemetry
             {
                 foreach (var taskInfo in tasksExecutionData)
                 {
-                    
                     UpdateStatistics(BuiltinTasksInfo, CustomTasksInfo, taskInfo.Key, taskInfo.Value);
                 }
 
