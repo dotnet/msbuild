@@ -2,21 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-
 using System.Text;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Logging.TerminalLogger;
+namespace Microsoft.Build.Logging;
 
 /// <summary>
 /// Capture states on nodes to be rendered on display.
 /// </summary>
-internal sealed class NodesFrame
+internal sealed class TerminalNodesFrame
 {
     private const int MaxColumn = 120;
 
-    private readonly (NodeStatus nodeStatus, int durationLength)[] _nodes;
+    private readonly (TerminalNodeStatus nodeStatus, int durationLength)[] _nodes;
 
     private readonly StringBuilder _renderBuilder = new();
 
@@ -24,14 +23,14 @@ internal sealed class NodesFrame
     public int Height { get; }
     public int NodesCount { get; private set; }
 
-    public NodesFrame(NodeStatus?[] nodes, int width, int height)
+    public TerminalNodesFrame(TerminalNodeStatus?[] nodes, int width, int height)
     {
         Width = Math.Min(width, MaxColumn);
         Height = height;
 
-        _nodes = new (NodeStatus, int)[nodes.Length];
+        _nodes = new (TerminalNodeStatus, int)[nodes.Length];
 
-        foreach (NodeStatus? status in nodes)
+        foreach (TerminalNodeStatus? status in nodes)
         {
             if (status is not null)
             {
@@ -42,7 +41,7 @@ internal sealed class NodesFrame
 
     internal ReadOnlySpan<char> RenderNodeStatus(int i)
     {
-        NodeStatus status = _nodes[i].nodeStatus;
+        TerminalNodeStatus status = _nodes[i].nodeStatus;
 
         string durationString = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
             "DurationDisplay",
@@ -96,7 +95,7 @@ internal sealed class NodesFrame
     /// <summary>
     /// Render VT100 string to update from current to next frame.
     /// </summary>
-    public string Render(NodesFrame previousFrame)
+    public string Render(TerminalNodesFrame previousFrame)
     {
         StringBuilder sb = _renderBuilder;
         sb.Clear();
