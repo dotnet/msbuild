@@ -197,11 +197,13 @@ namespace Microsoft.Build.Framework.Telemetry
                 TargetsSummary value,
                 JsonSerializerOptions options)
             {
+                writer.WriteStartObject();
                 writer.WriteStartObject("Loaded");
                 WriteStat(writer, value.LoadedBuiltinTargetInfo, value.LoadedCustomTargetInfo);
                 writer.WriteEndObject();
                 writer.WriteStartObject("Executed");
                 WriteStat(writer, value.ExecutedBuiltinTargetInfo, value.ExecutedCustomTargetInfo);
+                writer.WriteEndObject();
                 writer.WriteEndObject();
 
 
