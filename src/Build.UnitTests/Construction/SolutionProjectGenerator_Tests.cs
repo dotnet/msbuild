@@ -34,6 +34,8 @@ namespace Microsoft.Build.UnitTests.Construction
     {
         private readonly ITestOutputHelper output;
 
+        private readonly TestEnvironment _testEnvironment;
+
         private string _originalVisualStudioVersion = null;
 
         private static readonly BuildEventContext _buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
@@ -44,6 +46,8 @@ namespace Microsoft.Build.UnitTests.Construction
         {
             this.output = output;
 
+            _testEnvironment = TestEnvironment.Create();
+
             // Save off the value for use during cleanup
             _originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
         }
@@ -53,6 +57,7 @@ namespace Microsoft.Build.UnitTests.Construction
             // Need to make sure the environment is cleared up for later tests
             Environment.SetEnvironmentVariable("VisualStudioVersion", _originalVisualStudioVersion);
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
+            _testEnvironment.Dispose();
         }
 
         /// <summary>
@@ -433,7 +438,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
@@ -775,7 +780,7 @@ namespace Microsoft.Build.UnitTests.Construction
                     EndGlobal
                     """;
 
-                SolutionFile sp = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+                SolutionFile sp = SolutionFile_OldParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents);
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
             });
         }
@@ -1596,7 +1601,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             // These used to exist on the engine, but now need to be passed in explicitly
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
@@ -1634,7 +1639,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
@@ -1845,7 +1850,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
 
@@ -2875,8 +2880,8 @@ EndGlobal
 
         private SolutionFile ParseSolutionHelper(string solutionFileContents, bool useNewParser)
         {
-            return useNewParser ? SolutionFile_NewParser_Tests.ParseSolutionHelper(solutionFileContents) :
-                SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            return useNewParser ? SolutionFile_NewParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents) :
+                SolutionFile_OldParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents);
         }
 
         #endregion // Helper Functions

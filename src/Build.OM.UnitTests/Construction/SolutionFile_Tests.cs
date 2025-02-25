@@ -24,8 +24,21 @@ namespace Microsoft.Build.UnitTests.Construction
     /// <summary>
     /// Tests for the parts of SolutionFile that are surfaced as public API
     /// </summary>
-    public class SolutionFile_Tests
+    public class SolutionFile_Tests : IDisposable
     {
+
+        private readonly TestEnvironment _testEnvironment;
+
+        public SolutionFile_Tests()
+        {
+            _testEnvironment = TestEnvironment.Create();
+        }
+
+        public void Dispose()
+        {
+            _testEnvironment.Dispose();
+        }
+
         /// <summary>
         /// Test that a project with the C++ project guid and an extension of vcproj is seen as invalid.
         /// </summary>
@@ -57,7 +70,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(_testEnvironment, solutionFileContents);
                 Assert.Fail("Should not get here");
             });
         }
@@ -93,7 +106,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents, convertToSlnx);
 
             string expectedProjectName = convertToSlnx ? "Project name" : "Project name.myvctype";
             Assert.Equal(expectedProjectName, solution.ProjectsInOrder[0].ProjectName);
@@ -137,7 +150,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
             });
         }
 
@@ -184,7 +197,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents, convertToSlnx);
 
             Assert.Equal(3, solution.ProjectsInOrder.Count);
 
@@ -266,7 +279,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents, convertToSlnx);
 
             Assert.Equal(3, solution.ProjectsInOrder.Count);
 
@@ -351,7 +364,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents, convertToSlnx);
 
             Assert.Equal(3, solution.ProjectsInOrder.Count);
 
@@ -432,7 +445,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents, convertToSlnx);
 
             Assert.Equal(7, solution.SolutionConfigurations.Count);
 
@@ -494,7 +507,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents, convertToSlnx);
 
             Assert.Equal(6, solution.SolutionConfigurations.Count);
 
@@ -569,7 +582,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents, convertToSlnx);
 
             ProjectInSolution csharpProject = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
             ProjectInSolution vcProject = solution.ProjectsInOrder.First(p => p.ProjectName == "MainApp");
@@ -654,7 +667,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents, convertToSlnx);
 
             ProjectInSolution winFormsApp1 = solution.ProjectsInOrder.First(p => p.ProjectName == "WinFormsApp1");
             ProjectInSolution classLibrary1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
@@ -680,20 +693,13 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Helper method to create a SolutionFile object, and call it to parse the SLN file
         /// represented by the string contents passed in. Optionally can convert the SLN to SLNX and then parse the solution.
         /// </summary>
-        private static SolutionFile ParseSolutionHelper(string solutionFileContents, bool convertToSlnx = false)
+        private static SolutionFile ParseSolutionHelper(TestEnvironment testEnvironment, string solutionFileContents, bool convertToSlnx = false)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
-
-            using (TestEnvironment testEnvironment = TestEnvironment.Create())
-            {
-                testEnvironment.SetEnvironmentVariable("MSBUILD_SLN_PARSING_SOLUTIONPERSISTENCE_OPTIN", "1");
-
-                TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
-
-                string solutionPath = convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path;
-
-                return SolutionFile.Parse(solutionPath);
-            }
+            testEnvironment.SetEnvironmentVariable("MSBUILD_SLN_PARSING_SOLUTIONPERSISTENCE_OPTIN", "1");
+            TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
+            string solutionPath = convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path;
+            return SolutionFile.Parse(solutionPath);
         }
 
         private static string ConvertToSlnx(string slnPath)

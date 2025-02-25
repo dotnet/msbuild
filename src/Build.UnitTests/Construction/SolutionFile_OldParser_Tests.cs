@@ -17,13 +17,21 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
-    public class SolutionFile_OldParser_Tests
+    public class SolutionFile_OldParser_Tests : IDisposable
     {
         public ITestOutputHelper TestOutputHelper { get; }
+
+        private readonly TestEnvironment _testEnvironment;
 
         public SolutionFile_OldParser_Tests(ITestOutputHelper testOutputHelper)
         {
             TestOutputHelper = testOutputHelper;
+            _testEnvironment = TestEnvironment.Create();
+        }
+
+        public void Dispose()
+        {
+            _testEnvironment.Dispose();
         }
 
         /// <summary>
@@ -134,7 +142,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             Assert.Equal("Project name", solution.ProjectsInOrder[0].ProjectName);
             Assert.Equal("Relative path to project file", solution.ProjectsInOrder[0].RelativePath);
@@ -200,7 +208,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             ProjectSection(ProjectDependencies) = postProject
                             EndProjectSection
                         EndProject";
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
                 // Project should get added to the solution
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
                 solution.ProjectsInOrder[1].RelativePath.ShouldBe(@"ClassLibrary2.csproj");
@@ -274,7 +282,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
 
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
                 ProjectInSolution project = solution.ProjectsByGuid["{AD0F3D02-9925-4D57-9DAF-E0A9D936ABDB}"];
                 ProjectInSolution project2 = solution.ProjectsByGuid["{CCCCCCCC-9925-4D57-9DAF-E0A9D936ABDB}"];
                 project.CanBeMSBuildProjectFile(out _).ShouldBeFalse();
@@ -328,7 +336,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             EndProjectSection
                         EndProject";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
                 ProjectInSolution project1 = solution.ProjectsByGuid["{CCCCCCCC-9925-4D57-9DAF-E0A9D936ABDB}"];
                 ProjectInSolution project2 = solution.ProjectsByGuid["{DEA89696-F42B-4B58-B7EE-017FF40817D1}"];
 
@@ -389,7 +397,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             ProjectSection(ProjectDependencies) = postProject
                             EndProjectSection
                         EndProject";
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
                 // Project should get added to the solution
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
@@ -416,7 +424,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             EndProjectSection
                         EndProject";
 
-            SolutionFile solutionPriorToDev12 = ParseSolutionHelper(solutionFileContentsPriorToDev12);
+            SolutionFile solutionPriorToDev12 = ParseSolutionHelper(_testEnvironment, solutionFileContentsPriorToDev12);
 
             solutionPriorToDev12.Version.ShouldBe(11);
             solutionPriorToDev12.VisualStudioVersion.ShouldBe(10);
@@ -432,7 +440,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             EndProjectSection
                         EndProject";
 
-            SolutionFile solutionDev12 = ParseSolutionHelper(solutionFileContentsDev12);
+            SolutionFile solutionDev12 = ParseSolutionHelper(_testEnvironment, solutionFileContentsDev12);
 
             solutionDev12.Version.ShouldBe(11);
             solutionDev12.VisualStudioVersion.ShouldBe(12);
@@ -450,7 +458,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             EndProjectSection
                         EndProject";
 
-            SolutionFile solutionDev12Corrupted1 = ParseSolutionHelper(solutionFileContentsDev12Corrupted1);
+            SolutionFile solutionDev12Corrupted1 = ParseSolutionHelper(_testEnvironment, solutionFileContentsDev12Corrupted1);
             solutionDev12Corrupted1.Version.ShouldBe(11);
             solutionDev12Corrupted1.VisualStudioVersion.ShouldBe(10);
 
@@ -465,7 +473,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             EndProjectSection
                         EndProject";
 
-            SolutionFile solutionDev12Corrupted2 = ParseSolutionHelper(solutionFileContentsDev12Corrupted2);
+            SolutionFile solutionDev12Corrupted2 = ParseSolutionHelper(_testEnvironment, solutionFileContentsDev12Corrupted2);
             solutionDev12Corrupted2.Version.ShouldBe(11);
             solutionDev12Corrupted2.VisualStudioVersion.ShouldBe(10);
 
@@ -480,7 +488,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             EndProjectSection
                         EndProject";
 
-            SolutionFile solutionDev12Corrupted3 = ParseSolutionHelper(solutionFileContentsDev12Corrupted3);
+            SolutionFile solutionDev12Corrupted3 = ParseSolutionHelper(_testEnvironment, solutionFileContentsDev12Corrupted3);
             solutionDev12Corrupted3.Version.ShouldBe(11);
             solutionDev12Corrupted3.VisualStudioVersion.ShouldBe(10);
 
@@ -495,7 +503,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             EndProjectSection
                         EndProject";
 
-            SolutionFile solutionDev12Corrupted4 = ParseSolutionHelper(solutionFileContentsDev12Corrupted4);
+            SolutionFile solutionDev12Corrupted4 = ParseSolutionHelper(_testEnvironment, solutionFileContentsDev12Corrupted4);
             solutionDev12Corrupted4.Version.ShouldBe(11);
             solutionDev12Corrupted4.VisualStudioVersion.ShouldBe(10);
 
@@ -510,7 +518,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             EndProjectSection
                         EndProject";
 
-            SolutionFile solutionDev12Corrupted5 = ParseSolutionHelper(solutionFileContentsDev12Corrupted5);
+            SolutionFile solutionDev12Corrupted5 = ParseSolutionHelper(_testEnvironment, solutionFileContentsDev12Corrupted5);
             solutionDev12Corrupted5.Version.ShouldBe(11);
             solutionDev12Corrupted5.VisualStudioVersion.ShouldBe(10);
 
@@ -525,7 +533,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             EndProjectSection
                         EndProject";
 
-            SolutionFile solutionDev12Corrupted6 = ParseSolutionHelper(solutionFileContentsDev12Corrupted6);
+            SolutionFile solutionDev12Corrupted6 = ParseSolutionHelper(_testEnvironment, solutionFileContentsDev12Corrupted6);
             solutionDev12Corrupted6.Version.ShouldBe(11);
             solutionDev12Corrupted6.VisualStudioVersion.ShouldBe(12);
         }
@@ -604,7 +612,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             ProjectSection(ProjectDependencies) = postProject
                             EndProjectSection
                         EndProject";
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
                 // Project should get added to the solution
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
@@ -662,7 +670,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             ProjectSection(ProjectDependencies) = postProject
                             EndProjectSection
                         EndProject";
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+                SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
                 string errCode;
                 ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out _, "Shared.InvalidProjectFile",
                    "someproj.etp", String.Empty);
@@ -697,7 +705,7 @@ namespace Microsoft.Build.UnitTests.Construction
                     EndProject";
             // Delete the someproj.etp file if it exists
             File.Delete(proj1Path);
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
             string errCode;
             ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
                   "someproj.etp", String.Empty);
@@ -754,7 +762,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             Assert.Equal("MyProject,(=IsGreat)", solution.ProjectsInOrder[0].ProjectName);
             Assert.Equal("Relative path to project file", solution.ProjectsInOrder[0].RelativePath);
@@ -794,18 +802,13 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         /// <param name="solutionFileContents"></param>
         /// <returns></returns>
-        internal static SolutionFile ParseSolutionHelper(string solutionFileContents)
+        internal static SolutionFile ParseSolutionHelper(TestEnvironment testEnvironment, string solutionFileContents)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
-            StreamReader sr = StreamHelpers.StringToStreamReader(solutionFileContents);
-
-            SolutionFile sp = new SolutionFile();
-            sp.SolutionFileDirectory = Path.GetTempPath();
-            sp.SolutionReader = sr;
-            sp.FullPath = FileUtilities.GetTemporaryFileName(".sln");
-            sp.ParseSolution();
-            // Clean up the temporary file that got created with this call
-            return sp;
+            TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
+            SolutionFile solutionFile = new SolutionFile { FullPath = sln.Path };
+            solutionFile.ParseSolutionFile();
+            return solutionFile;
         }
 
         /// <summary>
@@ -823,7 +826,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-                ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(_testEnvironment, solutionFileContents);
             });
         }
         /// <summary>
@@ -840,7 +843,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-                ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(_testEnvironment, solutionFileContents);
             });
         }
         /// <summary>
@@ -856,7 +859,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
             solution.SolutionParserComments.ShouldHaveSingleItem(); // "Expected the solution parser to contain one comment"
             solution.SolutionParserComments[0].ShouldBe(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedSolutionComment", "999"));
         }
@@ -870,7 +873,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             solution.Version.ShouldBe(9);
         }
@@ -884,7 +887,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio 2005
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             solution.Version.ShouldBe(10);
         }
@@ -921,7 +924,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
             try
             {
-                ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(_testEnvironment, solutionFileContents);
             }
             catch (Exception ex)
             {
@@ -976,7 +979,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             solution.ProjectsInOrder.Count.ShouldBe(4);
 
@@ -1064,7 +1067,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             solution.ProjectsInOrder.Count.ShouldBe(5);
 
@@ -1162,7 +1165,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 ";
 
-            ParseSolutionHelper(solutionFileContents);
+            ParseSolutionHelper(_testEnvironment, solutionFileContents);
         }
 
         /// <summary>
@@ -1211,7 +1214,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() =>
             {
-                ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(_testEnvironment, solutionFileContents);
             });
 
             e.ErrorCode.ShouldBe("MSB5023");
@@ -1255,7 +1258,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 ";
 
-            InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() => ParseSolutionHelper(solutionFileContents));
+            InvalidProjectFileException e = Should.Throw<InvalidProjectFileException>(() => ParseSolutionHelper(_testEnvironment, solutionFileContents));
 
             e.ErrorCode.ShouldBe("MSB5009");
             e.Message.ShouldContain("{1484A47E-F4C5-4700-B13F-A2BDB6ADD35E}");
@@ -1381,7 +1384,7 @@ Global
 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             solution.ProjectsInOrder.Count.ShouldBe(6);
 
@@ -1461,7 +1464,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             solution.ProjectsInOrder.Count.ShouldBe(3);
 
@@ -1536,7 +1539,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents.Replace('`', '"'));
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents.Replace('`', '"'));
 
             solution.ProjectsInOrder.ShouldHaveSingleItem();
 
@@ -1619,7 +1622,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             solution.ProjectsInOrder.Count.ShouldBe(3);
 
@@ -1688,7 +1691,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             solution.SolutionConfigurations.Count.ShouldBe(7);
 
@@ -1748,7 +1751,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             solution.SolutionConfigurations.Count.ShouldBe(6);
 
@@ -1792,7 +1795,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-                ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(_testEnvironment, solutionFileContents);
             });
         }
         /// <summary>
@@ -1818,7 +1821,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-                ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(_testEnvironment, solutionFileContents);
             });
         }
         /// <summary>
@@ -1844,7 +1847,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-                ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(_testEnvironment, solutionFileContents);
             });
         }
 
@@ -1887,7 +1890,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             // What is needed to be checked is whether there were still both projects found in the invalid solution file
             ProjectInSolution classLibraryProject = solution.ProjectsByGuid["{6185CC21-BE89-448A-B3C0-D1C27112E595}"];
@@ -1954,7 +1957,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             ProjectInSolution csProject = solution.ProjectsByGuid["{6185CC21-BE89-448A-B3C0-D1C27112E595}"];
             ProjectInSolution vcProject = solution.ProjectsByGuid["{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}"];
@@ -2039,7 +2042,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             ProjectInSolution webProject = solution.ProjectsByGuid["{E8E75132-67E4-4D6F-9CAE-8DA4C883F418}"];
             ProjectInSolution exeProject = solution.ProjectsByGuid["{25FD9E7C-F37E-48E0-9A7C-607FE4AACCC0}"];
@@ -2094,7 +2097,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             ProjectInSolution project1 = solution.ProjectsByGuid["{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}"];
             ProjectInSolution project2 = solution.ProjectsByGuid["{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}"];
@@ -2163,7 +2166,7 @@ EndGlobal
                 ")]
         public void ParseSolutionFileContainingProjectsWithSimilarNames_TwoProjects(string solutionFileContents)
         {
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             ProjectInSolution project1 = solution.ProjectsByGuid["{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}"];
             ProjectInSolution project2 = solution.ProjectsByGuid["{ED30D4A3-1214-410B-82BB-B61E5A9D05CA}"];
@@ -2240,7 +2243,7 @@ EndGlobal
                 ")]
         public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects(string solutionFileContents)
         {
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
 
             ProjectInSolution project1 = solution.ProjectsByGuid["{6185CC21-BE89-448A-B3C0-D1C27112E595}"];
             ProjectInSolution project2 = solution.ProjectsByGuid["{FC2889D9-6050-4D2E-B022-979CCFEEAAAC}"];
@@ -2295,7 +2298,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            Action parseSolution = () => ParseSolutionHelper(solutionFileContents);
+            Action parseSolution = () => ParseSolutionHelper(_testEnvironment, solutionFileContents);
             var exception = Should.Throw<InvalidProjectFileException>(parseSolution);
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out _, out _, "SolutionParseDuplicateProject", "Project.Named.With.Dots");
@@ -2339,7 +2342,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            Action parseSolution = () => ParseSolutionHelper(solutionFileContents);
+            Action parseSolution = () => ParseSolutionHelper(_testEnvironment, solutionFileContents);
             var exception = Should.Throw<InvalidProjectFileException>(parseSolution);
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out _, out _, "SolutionParseDuplicateProject", "Project_Named_With_Dots");
@@ -2385,7 +2388,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            Action parseSolution = () => ParseSolutionHelper(solutionFileContents);
+            Action parseSolution = () => ParseSolutionHelper(_testEnvironment, solutionFileContents);
             var exception = Should.Throw<InvalidProjectFileException>(parseSolution);
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out _, out _, "SolutionParseDuplicateProject", "Project_Named_With_Dots");
@@ -2422,7 +2425,7 @@ EndGlobal
                 EndGlobal
                 ";
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents);
             string expectedRelativePath = Path.Combine("..", "ProjectA", "ProjectA.csproj");
             solution.ProjectsInOrder[0].ProjectName.ShouldBe("ProjectA");
             solution.ProjectsInOrder[0].RelativePath.ShouldBe(expectedRelativePath);
@@ -2480,7 +2483,7 @@ EndGlobal
             }
             stringBuilder.AppendLine(comment);
 
-            Should.NotThrow(() => ParseSolutionHelper(stringBuilder.ToString()));
+            Should.NotThrow(() => ParseSolutionHelper(_testEnvironment, stringBuilder.ToString()));
         }
     }
 }
