@@ -96,6 +96,41 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [Theory]
+        [InlineData("(test")]
+        [InlineData("@@@test")]
+        [InlineData(@")(!!test")]
+        public void VerifyItemsUpdateIsHandledForAnyProjectPath(string projectPathCandidate)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder projDirectory = env.CreateFolder(Path.Combine(env.CreateNewTempPath().TempPath, projectPathCandidate), createFolder: true);
+                TransientTestFile projectFile = env.CreateFile(projDirectory, "project.proj", @"
+<Project>
+
+  <ItemGroup>
+    <ItemCheck Include=""Test"" />
+  </ItemGroup>
+
+  <ItemGroup>
+     <ItemCheck Update=""Test""
+             NewTestLabels=""Dummy"" />
+  </ItemGroup>
+
+ <Target Name=""MyTarget"">
+    <Message Text=""ItemCheck updated metadata value: @(ItemCheck->Metadata('NewTestLabels'))"" />
+  </Target>
+</Project>
+");
+                Project project = new(projectFile.Path);
+                MockLogger logger = new();
+                var result = project.Build(logger);
+
+                result.ShouldBeTrue();
+                project.AllEvaluatedItems.Where(ei => ei.ItemType == "ItemCheck" && ei.Metadata.Any(m => m.EvaluatedValue == "Dummy")).ShouldNotBeEmpty();
+            }
+        }
+
         // Some of these are also tested elsewhere, but this consolidates related tests in one spot.
         public static IEnumerable<object[]> ImportLoadingScenarioTestData
         {
@@ -4708,7 +4743,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // Having just environment variables defined should default to nothing being logged except one environment variable read.
             VerifyPropertyTrackingLoggingScenario(
                 null,
-                logger =>
+                 (logger, _) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4740,7 +4775,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             VerifyPropertyTrackingLoggingScenario(
                 "1",
-                logger =>
+                (logger, _) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4771,7 +4806,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             this.VerifyPropertyTrackingLoggingScenario(
                 "0",
-                logger =>
+                 (logger, _) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4803,7 +4838,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             this.VerifyPropertyTrackingLoggingScenario(
                 "2",
-                logger =>
+                (logger, projectPath) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4829,11 +4864,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     // Verify logging of property initial values.
                     propertyInitialValueMap.ShouldContainKey("Prop");
-                    propertyInitialValueMap["Prop"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["Prop"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["Prop"].PropertyValue.ShouldBe(string.Empty);
 
                     propertyInitialValueMap.ShouldContainKey("EnvVar");
-                    propertyInitialValueMap["EnvVar"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["EnvVar"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["EnvVar"].PropertyValue.ShouldBe("It's also Defined!");
 
                     propertyInitialValueMap.ShouldContainKey("DEFINED_ENVIRONMENT_VARIABLE");
@@ -4841,11 +4876,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertyValue.ShouldBe("It's Defined!");
 
                     propertyInitialValueMap.ShouldContainKey("NotEnvVarRead");
-                    propertyInitialValueMap["NotEnvVarRead"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["NotEnvVarRead"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["NotEnvVarRead"].PropertyValue.ShouldBe("Overwritten!");
 
                     propertyInitialValueMap.ShouldContainKey("Prop2");
-                    propertyInitialValueMap["Prop2"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["Prop2"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["Prop2"].PropertyValue.ShouldBe("Value1");
                 });
         }
@@ -4855,7 +4890,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             this.VerifyPropertyTrackingLoggingScenario(
                 "4",
-                logger =>
+                (logger, _) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4889,7 +4924,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             this.VerifyPropertyTrackingLoggingScenario(
                 "8",
-                logger =>
+                (logger, _) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4920,7 +4955,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             this.VerifyPropertyTrackingLoggingScenario(
                 "15",
-                logger =>
+                (logger, projectPath) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4949,11 +4984,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     // Verify logging of property initial values.
                     propertyInitialValueMap.ShouldContainKey("Prop");
-                    propertyInitialValueMap["Prop"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["Prop"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["Prop"].PropertyValue.ShouldBe(string.Empty);
 
                     propertyInitialValueMap.ShouldContainKey("EnvVar");
-                    propertyInitialValueMap["EnvVar"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["EnvVar"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["EnvVar"].PropertyValue.ShouldBe("It's also Defined!");
 
                     propertyInitialValueMap.ShouldContainKey("DEFINED_ENVIRONMENT_VARIABLE");
@@ -4961,11 +4996,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertyValue.ShouldBe("It's Defined!");
 
                     propertyInitialValueMap.ShouldContainKey("NotEnvVarRead");
-                    propertyInitialValueMap["NotEnvVarRead"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["NotEnvVarRead"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["NotEnvVarRead"].PropertyValue.ShouldBe("Overwritten!");
 
                     propertyInitialValueMap.ShouldContainKey("Prop2");
-                    propertyInitialValueMap["Prop2"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["Prop2"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["Prop2"].PropertyValue.ShouldBe("Value1");
                 });
         }
@@ -4987,7 +5022,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new Project(XmlReader.Create(new StringReader(projectContents)), null, "Fake", fakeProjectCollection));
         }
 
-        private void VerifyPropertyTrackingLoggingScenario(string envVarValue, Action<MockLogger> loggerEvaluatorAction)
+        private void VerifyPropertyTrackingLoggingScenario(string envVarValue, Action<MockLogger, string> loggerEvaluatorAction)
         {
             // The default is that only reassignments are logged.
 
@@ -5026,7 +5061,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 project.Build().ShouldBeTrue();
 
-                loggerEvaluatorAction?.Invoke(logger);
+                loggerEvaluatorAction?.Invoke(logger, tempPath.Path);
             }
         }
 
