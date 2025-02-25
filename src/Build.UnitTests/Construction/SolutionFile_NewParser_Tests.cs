@@ -20,13 +20,21 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
-    public class SolutionFile_NewParser_Tests
+    public class SolutionFile_NewParser_Tests : IDisposable
     {
         public ITestOutputHelper TestOutputHelper { get; }
+
+        private readonly TestEnvironment _testEnvironment;
 
         public SolutionFile_NewParser_Tests(ITestOutputHelper testOutputHelper)
         {
             TestOutputHelper = testOutputHelper;
+            _testEnvironment = TestEnvironment.Create();
+        }
+
+        public void Dispose()
+        {
+            _testEnvironment.Dispose();
         }
 
         /// <summary>
@@ -80,7 +88,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents.Replace('`', '"'), convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents.Replace('`', '"'), convertToSlnx);
 
             solution.ProjectsInOrder.ShouldHaveSingleItem();
 
@@ -129,20 +137,15 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Helper method to create a SolutionFile object, and call it to parse the SLN file
         /// represented by the string contents passed in. Optionally can convert the SLN to SLNX and then parse the solution.
         /// </summary>
-        internal static SolutionFile ParseSolutionHelper(string solutionFileContents, bool convertToSlnx = false)
+        internal static SolutionFile ParseSolutionHelper(TestEnvironment testEnvironment, string solutionFileContents, bool convertToSlnx = false)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
-
-            using (TestEnvironment testEnvironment = TestEnvironment.Create())
-            {
-                TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
-
-                string solutionPath = convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path;
-
-                SolutionFile solutionFile = new SolutionFile { FullPath = solutionPath };
-                solutionFile.ParseUsingNewParser();
-                return solutionFile;
-            }
+            testEnvironment.SetEnvironmentVariable("MSBUILD_SLN_PARSING_SOLUTIONPERSISTENCE_OPTIN", "1");
+            TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
+            string solutionPath = convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path;
+            SolutionFile solutionFile = new SolutionFile { FullPath = solutionPath };
+            solutionFile.ParseUsingNewParser();
+            return solutionFile;
         }
 
         private static string ConvertToSlnx(string slnPath)
