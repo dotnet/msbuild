@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Microsoft.Build.Logging.TerminalLogger;
+using Microsoft.Build.Logging;
 
 using VerifyTests;
 using VerifyXunit;
@@ -22,7 +22,7 @@ namespace Microsoft.Build.CommandLine.UnitTests;
 [UsesVerify]
 public class NodeStatus_SizeChange_Tests : IDisposable
 {
-    private readonly NodeStatus _status = new("Namespace.Project", "TargetFramework", "Target", new MockStopwatch());
+    private readonly TerminalNodeStatus _status = new("Namespace.Project", "TargetFramework", "Target", new MockStopwatch());
     private CultureInfo _currentCulture;
 
     public NodeStatus_SizeChange_Tests()
@@ -36,7 +36,7 @@ public class NodeStatus_SizeChange_Tests : IDisposable
     [Fact]
     public async Task EverythingFits()
     {
-        NodesFrame frame = new([_status], width: 80, height: 5);
+        TerminalNodesFrame frame = new([_status], width: 80, height: 5);
 
         await Verify(frame.RenderNodeStatus(0).ToString());
     }
@@ -44,7 +44,7 @@ public class NodeStatus_SizeChange_Tests : IDisposable
     [Fact]
     public async Task TargetIsTruncatedFirst()
     {
-        NodesFrame frame = new([_status], width: 45, height: 5);
+        TerminalNodesFrame frame = new([_status], width: 45, height: 5);
 
         await Verify(frame.RenderNodeStatus(0).ToString());
     }
@@ -52,7 +52,7 @@ public class NodeStatus_SizeChange_Tests : IDisposable
     [Fact]
     public async Task NamespaceIsTruncatedNext()
     {
-        NodesFrame frame = new([_status], width: 40, height: 5);
+        TerminalNodesFrame frame = new([_status], width: 40, height: 5);
 
         await Verify(frame.RenderNodeStatus(0).ToString());
     }
@@ -60,7 +60,7 @@ public class NodeStatus_SizeChange_Tests : IDisposable
     [Fact]
     public async Task GoesToProject()
     {
-        NodesFrame frame = new([_status], width: 10, height: 5);
+        TerminalNodesFrame frame = new([_status], width: 10, height: 5);
 
         await Verify(frame.RenderNodeStatus(0).ToString());
     }

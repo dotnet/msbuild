@@ -15,7 +15,6 @@ using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
-using Microsoft.Build.Logging.TerminalLogger;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using VerifyTests;
@@ -68,6 +67,42 @@ namespace Microsoft.Build.UnitTests
 
             // Avoids issues with different cultures on different machines
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+        }
+
+        [Theory]
+        [InlineData(null, false, false, "", typeof(ConsoleLogger))]
+        [InlineData(null, true, false, "", typeof(ConsoleLogger))]
+        [InlineData(null, false, true, "", typeof(ConsoleLogger))]
+        [InlineData(null, true, true, "off", typeof(ConsoleLogger))]
+        [InlineData(null, true, true, "false", typeof(ConsoleLogger))]
+        [InlineData("--tl:off", true, true, "", typeof(ConsoleLogger))]
+        [InlineData(null, true, true, "", typeof(TerminalLogger))]
+        [InlineData("-tl:on", true, true, "off", typeof(TerminalLogger))]
+        public void CreateTerminalOrConsoleLogger_CreatesCorrectLoggerInstance(string? argsString, bool supportsAnsi, bool outputIsScreen, string evnVariableValue, Type expectedType)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", evnVariableValue);
+
+            string[]? args = argsString?.Split(' ');
+            ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(args, supportsAnsi, outputIsScreen, default);
+
+            logger.ShouldNotBeNull();
+            logger.GetType().ShouldBe(expectedType);
+        }
+
+        [Theory]
+        [InlineData("-v:q", LoggerVerbosity.Quiet)]
+        [InlineData("-verbosity:minimal", LoggerVerbosity.Minimal)]
+        [InlineData("--v:d", LoggerVerbosity.Detailed)]
+        [InlineData("/verbosity:diag", LoggerVerbosity.Diagnostic)]
+        [InlineData(null, LoggerVerbosity.Normal)]
+        public void CreateTerminalOrConsoleLogger_ParsesVerbosity(string? argsString, LoggerVerbosity expectedVerbosity)
+        {
+            string[]? args = argsString?.Split(' ');
+            ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(args, true, true, default);
+
+            logger.ShouldNotBeNull();
+            logger.Verbosity.ShouldBe(expectedVerbosity);
         }
 
         #region IEventSource implementation
