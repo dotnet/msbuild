@@ -9,7 +9,12 @@ namespace Microsoft.Build.BackEnd
     /// TaskHostTaskCancelled informs the task host that the task it is
     /// currently executing has been canceled.
     /// </summary>
-    internal class TaskHostTaskCancelled : INodePacket
+    internal class TaskHostTaskCancelled :
+#if TASKHOST
+        INodePacket
+#else
+        INodePacket2
+#endif
     {
         /// <summary>
         /// Constructor
@@ -35,13 +40,21 @@ namespace Microsoft.Build.BackEnd
             // Do nothing -- this packet doesn't contain any parameters.
         }
 
+#if !TASKHOST
+        public void Translate(IJsonTranslator translator)
+        {
+            // Do nothing -- this packet doesn't contain any parameters.
+        }
+#endif
+
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        internal static INodePacket FactoryForDeserialization(ITranslator translator)
+        internal static INodePacket FactoryForDeserialization(ITranslatorBase translator)
         {
             TaskHostTaskCancelled taskCancelled = new TaskHostTaskCancelled();
-            taskCancelled.Translate(translator);
+
+            // Do nothing -- this packet doesn't contain any parameters.
             return taskCancelled;
         }
     }

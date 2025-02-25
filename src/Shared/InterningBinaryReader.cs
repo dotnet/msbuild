@@ -251,7 +251,7 @@ namespace Microsoft.Build
         }
 
         /// <summary>
-        /// Holds thepreallocated buffer.
+        /// Holds the pre allocated buffer.
         /// </summary>
         private class Buffer : BinaryReaderFactory
         {

@@ -684,9 +684,9 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for serialization
         /// </summary>
-        internal static BuildResult FactoryForDeserialization(ITranslator translator)
+        internal static BuildResult FactoryForDeserialization(ITranslatorBase translator)
         {
-            return new BuildResult(translator);
+            return new BuildResult((ITranslator)translator);
         }
 
         #endregion

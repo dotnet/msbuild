@@ -19,7 +19,7 @@ namespace Microsoft.Build.FileAccesses
 
         internal ProcessData ProcessData => _processData;
 
-        internal static INodePacket FactoryForDeserialization(ITranslator translator) => new ProcessReport(translator);
+        internal static INodePacket FactoryForDeserialization(ITranslatorBase translator) => new ProcessReport((ITranslator)translator);
 
         /// <inheritdoc/>
         public void Translate(ITranslator translator) => translator.Translate(ref _processData);
