@@ -42,6 +42,7 @@ namespace Microsoft.Build.UnitTests.Logging
             EventHandlerHelper testHandlers = new EventHandlerHelper(sink, null);
             VerifyRegisteredHandlers(RaiseEventHelper.BuildStarted, eventHelper, testHandlers);
             VerifyRegisteredHandlers(RaiseEventHelper.BuildFinished, eventHelper, testHandlers);
+            VerifyRegisteredHandlers(RaiseEventHelper.BuildCanceled, eventHelper, testHandlers);
             VerifyRegisteredHandlers(RaiseEventHelper.NormalMessage, eventHelper, testHandlers);
             VerifyRegisteredHandlers(RaiseEventHelper.TaskFinished, eventHelper, testHandlers);
             VerifyRegisteredHandlers(RaiseEventHelper.CommandLine, eventHelper, testHandlers);
@@ -66,6 +67,7 @@ namespace Microsoft.Build.UnitTests.Logging
             RaiseEventHelper eventHelper = new RaiseEventHelper(sink);
             eventHelper.RaiseBuildEvent(RaiseEventHelper.BuildStarted);
             eventHelper.RaiseBuildEvent(RaiseEventHelper.BuildFinished);
+            eventHelper.RaiseBuildEvent(RaiseEventHelper.BuildCanceled);
             eventHelper.RaiseBuildEvent(RaiseEventHelper.NormalMessage);
             eventHelper.RaiseBuildEvent(RaiseEventHelper.TaskFinished);
             eventHelper.RaiseBuildEvent(RaiseEventHelper.CommandLine);
@@ -98,6 +100,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 RaiseExceptionInEventHandler(RaiseEventHelper.BuildStarted, exception);
                 RaiseExceptionInEventHandler(RaiseEventHelper.BuildFinished, exception);
+                RaiseExceptionInEventHandler(RaiseEventHelper.BuildCanceled, exception);
                 RaiseExceptionInEventHandler(RaiseEventHelper.NormalMessage, exception);
                 RaiseExceptionInEventHandler(RaiseEventHelper.TaskFinished, exception);
                 RaiseExceptionInEventHandler(RaiseEventHelper.CommandLine, exception);
@@ -127,7 +130,7 @@ namespace Microsoft.Build.UnitTests.Logging
             });
         }
         /// <summary>
-        /// Verify that shutdown un registers all of the event handlers
+        /// Verify that shutdown unregisters all of the event handlers
         /// </summary>
         [Fact]
         public void VerifyShutdown()
@@ -294,7 +297,10 @@ namespace Microsoft.Build.UnitTests.Logging
             try
             {
                 eventHelper.RaiseBuildEvent(buildEventToRaise);
-                if (buildEventToRaise.GetType() != typeof(GenericBuildStatusEventArgs))
+                Type eventType = buildEventToRaise.GetType();
+
+                if (eventType != typeof(GenericBuildStatusEventArgs) &&
+                    eventType != typeof(BuildCanceledEventArgs))
                 {
                     Assert.Equal(testHandlers.RaisedEvent, buildEventToRaise); // "Expected buildevent in handler to match buildevent raised on event source"
                     Assert.Equal(testHandlers.RaisedEvent, testHandlers.RaisedAnyEvent); // "Expected RaisedEvent and RaisedAnyEvent to match"
@@ -716,6 +722,11 @@ namespace Microsoft.Build.UnitTests.Logging
             private static BuildFinishedEventArgs s_buildFinished = new BuildFinishedEventArgs("Message", "Keyword", true);
 
             /// <summary>
+            /// Build Canceled Event
+            /// </summary>
+            private static BuildCanceledEventArgs s_buildCanceled = new BuildCanceledEventArgs("Message");
+
+            /// <summary>
             /// Build Message Event
             /// </summary>
             private static BuildMessageEventArgs s_buildMessage = new BuildMessageEventArgs("Message2", "help", "sender", MessageImportance.Normal);
@@ -843,6 +854,17 @@ namespace Microsoft.Build.UnitTests.Logging
                 get
                 {
                     return s_buildFinished;
+                }
+            }
+
+            /// <summary>
+            /// Event which can be raised in multiple tests.
+            /// </summary>
+            internal static BuildCanceledEventArgs BuildCanceled
+            {
+                get
+                {
+                    return s_buildCanceled;
                 }
             }
 

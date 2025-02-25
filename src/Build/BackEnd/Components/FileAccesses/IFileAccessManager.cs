@@ -9,7 +9,7 @@ using Microsoft.Build.Experimental.FileAccess;
 
 namespace Microsoft.Build.FileAccesses
 {
-    internal interface IFileAccessManager
+    internal interface IFileAccessManager : IBuildComponent
     {
         void ReportFileAccess(FileAccessData fileAccessData, int nodeId);
 
