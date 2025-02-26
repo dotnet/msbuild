@@ -15,58 +15,6 @@
         <target state="translated">Compilazione non riuscita. Non è possibile ottenere proprietà, elementi e risultati di destinazione. Vedere i dettagli in stderr sopra.</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildFinished">
-        <source>Build {0} in {1}s</source>
-        <target state="translated">Compilazione {0} in {1}s</target>
-        <note>
-      Overall build summary
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Failed">
-        <source>failed</source>
-        <target state="translated">non riuscito</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with {0} error(s)</source>
-        <target state="translated">non riuscito con {0} errori</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
-        <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="translated">non riuscito con {0} errori e {1} avvisi</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with {0} warning(s)</source>
-        <target state="translated">non riuscito con {0} avvisi</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Succeeded">
-        <source>succeeded</source>
-        <target state="translated">operazione riuscita</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with {0} warning(s)</source>
-        <target state="translated">completato con {0} avvisi</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">Argomenti della riga di comando = "{0}"</target>
@@ -84,14 +32,6 @@
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
         <target state="translated">MSBUILD : error MSB1027: non è possibile specificare l'opzione -noAutoResponse nel file di risposta automatica MSBuild.rsp o in file di risposta a cui il file di risposta automatica fa riferimento.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="DurationDisplay">
-        <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
-        <note>
-        {0}: duration in seconds with 1 decimal point
-        's' should reflect the localized abbreviation for seconds
-      </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
@@ -1740,39 +1680,6 @@ Nota: livello di dettaglio dei logger di file
         <target state="translated">Processo = "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectFinished_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3}s)</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_OutputPath">
-        <source> → {0}</source>
-        <target state="translated"> → {0}</target>
-        <note>
-      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
-      {0}: VT100 coded hyperlink to project output directory
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
       <trans-unit id="ProjectNotFoundError">
         <source>MSBUILD : error MSB1009: Project file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1009: il file di progetto non esiste.</target>
@@ -1921,59 +1828,6 @@ Nota: livello di dettaglio dei logger di file
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
         <target state="translated">Il logger del terminale non è stato usato perché l'output viene reindirizzato a un file.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_NoTF">
-        <source>{0}{1} test {2} ({3}s)</source>
-        <target state="translated">{0}{1} test {2} {3}</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_WithTF">
-        <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} test {2} {3} {4}</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="TestSummary_BannerAndTotal">
-        <source>Test summary: total: {0}</source>
-        <target state="translated">Riepilogo test: totale: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Duration">
-        <source>duration: {0}s</source>
-        <target state="translated">durata: {0}s</target>
-        <note>
-      {0} whole number
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Failed">
-        <source>failed: {0}</source>
-        <target state="translated">non riuscito: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Skipped">
-        <source>skipped: {0}</source>
-        <target state="translated">ignorato: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Succeeded">
-        <source>succeeded: {0}</source>
-        <target state="translated">riuscito: {0}</target>
-        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>

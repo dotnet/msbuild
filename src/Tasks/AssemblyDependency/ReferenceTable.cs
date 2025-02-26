@@ -971,7 +971,8 @@ namespace Microsoft.Build.Tasks
                     // Is there a candidate satellite in that folder?
                     string cultureName = Path.GetFileName(subDirectory);
 
-                    if (CultureInfoCache.IsValidCultureString(cultureName))
+                    // Custom or unknown cultures can be met as well
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14) || CultureInfoCache.IsValidCultureString(cultureName))
                     {
                         string satelliteAssembly = Path.Combine(subDirectory, satelliteFilename);
                         if (_fileExists(satelliteAssembly))
@@ -1240,7 +1241,7 @@ namespace Microsoft.Build.Tasks
             if (!parentReferencesAdded.Contains(parentReferenceFolder) && !parentReferenceResolvedFromGAC && !parentReferenceResolvedFromAssemblyFolders)
             {
                 parentReferencesAdded.Add(parentReferenceFolder);
-                parentReferenceFolders.Add(new (Directory: parentReferenceFolder, ParentAssembly: parentReference.FullPath));
+                parentReferenceFolders.Add(new(Directory: parentReferenceFolder, ParentAssembly: parentReference.FullPath));
             }
         }
 
@@ -2541,8 +2542,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool CompareAssembliesIgnoringVersion(AssemblyName a, AssemblyName b)
         {
-            ErrorUtilities.VerifyThrowInternalNull(a, nameof(a));
-            ErrorUtilities.VerifyThrowInternalNull(b, nameof(b));
+            ErrorUtilities.VerifyThrowInternalNull(a);
+            ErrorUtilities.VerifyThrowInternalNull(b);
 
             if (a == b)
             {

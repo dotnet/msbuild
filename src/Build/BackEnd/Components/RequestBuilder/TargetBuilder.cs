@@ -91,6 +91,11 @@ namespace Microsoft.Build.BackEnd
         private bool _legacyCallTargetContinueOnError;
 
         /// <summary>
+        /// Flag indicating whether telemetry is requested.
+        /// </summary>
+        private bool _isTelemetryRequested;
+
+        /// <summary>
         /// Builds the specified targets.
         /// </summary>
         /// <param name="loggingContext">The logging context for the project.</param>
@@ -103,10 +108,10 @@ namespace Microsoft.Build.BackEnd
         public async Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, (string name, TargetBuiltReason reason)[] targetNames, Lookup baseLookup, CancellationToken cancellationToken)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "projectLoggingContext");
-            ErrorUtilities.VerifyThrowArgumentNull(entry, nameof(entry));
+            ErrorUtilities.VerifyThrowArgumentNull(entry);
             ErrorUtilities.VerifyThrowArgumentNull(callback, "requestBuilderCallback");
-            ErrorUtilities.VerifyThrowArgumentNull(targetNames, nameof(targetNames));
-            ErrorUtilities.VerifyThrowArgumentNull(baseLookup, nameof(baseLookup));
+            ErrorUtilities.VerifyThrowArgumentNull(targetNames);
+            ErrorUtilities.VerifyThrowArgumentNull(baseLookup);
             ErrorUtilities.VerifyThrow(targetNames.Length > 0, "List of targets must be non-empty");
             ErrorUtilities.VerifyThrow(_componentHost != null, "InitializeComponent must be called before building targets.");
 
@@ -212,8 +217,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
             _componentHost = host;
+            _isTelemetryRequested = host.BuildParameters.IsTelemetryEnabled;
         }
 
         /// <summary>
@@ -484,7 +490,7 @@ namespace Microsoft.Build.BackEnd
                             // Execute all of the tasks on this target.
                             MSBuildEventSource.Log.TargetStart(currentTargetEntry.Name);
                             await currentTargetEntry.ExecuteTarget(taskBuilder, _requestEntry, _projectLoggingContext, _cancellationToken);
-                            MSBuildEventSource.Log.TargetStop(currentTargetEntry.Name);
+                            MSBuildEventSource.Log.TargetStop(currentTargetEntry.Name, currentTargetEntry.Result?.TargetResultCodeToString() ?? string.Empty);
                         }
 
                         break;
@@ -517,6 +523,11 @@ namespace Microsoft.Build.BackEnd
                         // If this result failed but we are under the influence of the legacy ContinueOnError behavior for a
                         // CallTarget, make sure we don't contribute this failure to the overall success of the build.
                         targetResult.TargetFailureDoesntCauseBuildFailure = _legacyCallTargetContinueOnError;
+
+                        if (_isTelemetryRequested)
+                        {
+                            targetResult.TargetLocation = currentTargetEntry.Target.Location;
+                        }
 
                         // This target is no longer actively building.
                         _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);

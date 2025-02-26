@@ -56,6 +56,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private const int TimeoutForWaitForExit = 30000;
 
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+        private static readonly WindowsIdentity s_currentWindowsIdentity = WindowsIdentity.GetCurrent();
+#endif
         /// <summary>
         /// The build component host.
         /// </summary>
@@ -95,7 +98,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         protected void SendData(NodeContext context, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
+            ErrorUtilities.VerifyThrowArgumentNull(packet);
             context.SendData(packet);
         }
 
@@ -152,7 +155,7 @@ namespace Microsoft.Build.BackEnd
             string msbuildtaskhostExeName = NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost;
 
             // Search for all instances of msbuildtaskhost process and add them to the process list
-            nodeProcesses.AddRange(new List<Process>(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildtaskhostExeName))));
+            nodeProcesses.AddRange(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildtaskhostExeName)));
 
             // For all processes in the list, send signal to terminate if able to connect
             foreach (Process nodeProcess in nodeProcesses)
@@ -237,11 +240,12 @@ namespace Microsoft.Build.BackEnd
 #endif
             ConcurrentQueue<NodeContext> nodeContexts = new();
             ConcurrentQueue<Exception> exceptions = new();
+            int currentProcessId = EnvironmentUtilities.CurrentProcessId;
             Parallel.For(nextNodeId, nextNodeId + numberOfNodesToCreate, (nodeId) =>
             {
                 try
                 {
-                    if (!TryReuseAnyFromPossibleRunningNodes(nodeId) && !StartNewNode(nodeId))
+                    if (!TryReuseAnyFromPossibleRunningNodes(currentProcessId, nodeId) && !StartNewNode(nodeId))
                     {
                         // We were unable to reuse or launch a node.
                         CommunicationsUtilities.Trace("FAILED TO CONNECT TO A CHILD NODE");
@@ -260,12 +264,12 @@ namespace Microsoft.Build.BackEnd
 
             return nodeContexts.ToList();
 
-            bool TryReuseAnyFromPossibleRunningNodes(int nodeId)
+            bool TryReuseAnyFromPossibleRunningNodes(int currentProcessId, int nodeId)
             {
                 while (possibleRunningNodes != null && possibleRunningNodes.TryDequeue(out var nodeToReuse))
                 {
                     CommunicationsUtilities.Trace("Trying to connect to existing process {2} with id {1} to establish node {0}...", nodeId, nodeToReuse.Id, nodeToReuse.ProcessName);
-                    if (nodeToReuse.Id == Process.GetCurrentProcess().Id)
+                    if (nodeToReuse.Id == currentProcessId)
                     {
                         continue;
                     }
@@ -421,7 +425,7 @@ namespace Microsoft.Build.BackEnd
         //  on non-Windows operating systems
         private static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
-            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+            SecurityIdentifier identifier = s_currentWindowsIdentity.Owner;
 #if FEATURE_PIPE_SECURITY
             PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
 #else

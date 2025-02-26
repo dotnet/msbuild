@@ -35,7 +35,7 @@ namespace Microsoft.Build.Framework.UnitTests
                 new HashSet<DiagnosticSeverity>(),
                 new HashSet<string>(), 0, 0, 500, false, TimeSpan.FromSeconds(1234));
 
-            BuildCheckTracingData data = new(new [] {ruleData1, ruleData2}, stats);
+            BuildCheckTracingData data = new(new[] { ruleData1, ruleData2 }, stats);
             BuildCheckTracingEventArgs arg = new(data);
 
             using MemoryStream stream = new MemoryStream();

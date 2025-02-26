@@ -171,6 +171,56 @@
         <target state="translated">組建期間不應使用衍生自環境變數的隱含屬性。</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_MessageFmt">
+        <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
+        <target state="translated">專案 {0} 會參照專案 {1} 的輸出。參照的路徑: {2}。應該改用 ProjectReference。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0104_Title">
+        <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
+        <target state="translated">專案不應透過 'Reference' 來參照其輸出，而應直接透過 'ProjectReference'。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_MessageFmt">
+        <source>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</source>
+        <target state="translated">專案 {0} 指定的 'EmbeddedResource' 項目 '{1}' 可能具有代表文化特性的附檔名 ('{2}')，但未指定明確的 'Culture' 和 'WithCulture=false' 中繼資料。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0105_Title">
+        <source>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</source>
+        <target state="translated">建議在 'EmbeddedResource' 項目指定明確的 'Culture' 中繼資料或 'WithCulture=false' 中繼資料，以避免錯誤或非決定性的文化特性推估。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0107_MessageFmt">
+        <source>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</source>
+        <target state="translated">Project {0} 同時指定 'TargetFrameworks' 屬性 '{1}' 與 'TargetFramework' 属性 '{2}'。這會導致忽略 『TargetFrameworks』，而且組建將以單一目標方式執行。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0107_Title">
+        <source>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</source>
+        <target state="translated">腳本中不應同時指定單數) 和 'TargetFrameworks' (複數) 屬性的 'TargetFramework' (。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0106_MessageFmt">
+        <source>Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</source>
+        <target state="translated">Project {0} 指定 '{1}' 設為 'Always' 的 'CopyToOutputDirectory' '{2}' 專案。變更元數據或使用 'CopyToOutputDirectory' 屬性。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0106_Title">
+        <source>Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</source>
+        <target state="translated">避免為 'CopyToOutputDirectory' 指定 'Always'，因為這可能會在建置期間導致不必要的複製作業。請使用 『PreserveNewest』 或 'IfDifferent' 元數據值，或將 'SkipUnchangedFilesOnCopyAlways' 属性設定為 true，以採用較有效的複製。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_MessageFmt">
+        <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
+        <target state="translated">Project {0} 指定未使用 .NET SDK 的 'TargetFramework(s)' 属性 '{1}'。直接匯入 C# 目標的項目無法瞭解這些屬性。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_Title">
+        <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
+        <target state="translated">未遵守 『TargetFramework』 和 『TargetFrameworks』 屬性，且不應在未使用 .NET SDK 的專案中指定。</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">已存取屬性: '{0}'，但從未初始化。</target>
@@ -201,6 +251,26 @@
         <target state="translated">不應宣告未使用的屬性。</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_MessageFmt">
+        <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
+        <target state="translated">位置： '{0}' 無法完全信任，請將您的專案放在該資料夾之外 (Project： {1})。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_Title">
+        <source>Downloads folder is untrusted for projects building.</source>
+        <target state="translated">專案建置不受信任的下載資料夾。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildFinished">
+        <source>Build {0} in {1}s</source>
+        <target state="new">Build {0} in {1}s</target>
+        <note>
+      Overall build summary
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">問題建立失敗。建置提早結束，因為它遇到不是最新的目標或工作。</target>
@@ -215,6 +285,55 @@
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">無法完成作業，因為建置已經在進行中。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildResult_Failed">
+        <source>failed</source>
+        <target state="new">failed</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrors">
+        <source>failed with {0} error(s)</source>
+        <target state="new">failed with {0} error(s)</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
+        <source>failed with {0} error(s) and {1} warning(s)</source>
+        <target state="new">failed with {0} error(s) and {1} warning(s)</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithWarnings">
+        <source>failed with {0} warning(s)</source>
+        <target state="new">failed with {0} warning(s)</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_Succeeded">
+        <source>succeeded</source>
+        <target state="new">succeeded</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_SucceededWithWarnings">
+        <source>succeeded with {0} warning(s)</source>
+        <target state="new">succeeded with {0} warning(s)</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildSummary">
+        <source>Build summary:</source>
+        <target state="new">Build summary:</target>
+        <note>
+      A header used by Terminal Logger to introduce the build summary.
+    </note>
       </trans-unit>
       <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
         <source>MSB4252: Project "{0}" with global properties
@@ -289,7 +408,7 @@
       </trans-unit>
       <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
         <source>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</source>
-        <target state="new">Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</target>
+        <target state="translated">在具有 {1} 參數的方法 "{0}" 發現多個多載。目前不支援此功能。</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
@@ -326,6 +445,14 @@
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: 已嘗試建立相同工作的多個覆寫: {0}</target>
         <note>{StrBegin="MSB4275: "}</note>
+      </trans-unit>
+      <trans-unit id="DurationDisplay">
+        <source>({0:F1}s)</source>
+        <target state="new">({0:F1}s)</target>
+        <note>
+        {0}: duration in seconds with 1 decimal point
+        's' should reflect the localized abbreviation for seconds
+      </note>
       </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
@@ -372,6 +499,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" 參考 {0} 個項目，"{3}" 則參考 {1} 個項目。兩者參考的項目數目必須相同。</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">展開具有 glob： fileSpec： "{0}" 的 fileSpec 時發生例外狀況，假設它是檔名。例外狀況： {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -591,6 +723,39 @@
         <target state="translated">MSB4268: 無法正確關閉專案快取。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectFinished_NoTF">
+        <source>{0}{1} {2} ({3}s)</source>
+        <target state="new">{0}{1} {2} ({3}s)</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_OutputPath">
+        <source> → {0}</source>
+        <target state="new"> → {0}</target>
+        <note>
+      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
+      {0}: VT100 coded hyperlink to project output directory
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_WithTF">
+        <source>{0}{1} {2} {3} ({4}s)</source>
+        <target state="new">{0}{1} {2} {3} ({4}s)</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph 不支援設有 ToolsVersion 中繼資料的 ProjectReference 項目。在檔案 "{1}" 中找到具有 ToolsVersion 的 ProjectReference "{0}"</target>
@@ -748,6 +913,59 @@ Errors: {3}</source>
         <target state="translated">MSB4181: "{0}" 工作傳回了 False，但未記錄錯誤。</target>
         <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
+      <trans-unit id="TestProjectFinished_NoTF">
+        <source>{0}{1} test {2} ({3}s)</source>
+        <target state="new">{0}{1} test {2} ({3}s)</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_WithTF">
+        <source>{0}{1} test {2} {3} ({4}s)</source>
+        <target state="new">{0}{1} test {2} {3} ({4}s)</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestSummary_BannerAndTotal">
+        <source>Test summary: total: {0}</source>
+        <target state="new">Test summary: total: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Duration">
+        <source>duration: {0}s</source>
+        <target state="new">duration: {0}s</target>
+        <note>
+      {0} whole number
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Failed">
+        <source>failed: {0}</source>
+        <target state="new">failed: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Skipped">
+        <source>skipped: {0}</source>
+        <target state="new">skipped: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Succeeded">
+        <source>succeeded: {0}</source>
+        <target state="new">succeeded: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
         <target state="translated">MSB4254: MSBuild 工作正在建置未在 ProjectReference 項目中指定的專案 "{0}"。在隔離式組建中，這可能代表未在 "{1}" 中將該參考明確指定為 ProjectReference 項目</target>
@@ -766,6 +984,11 @@ Errors: {3}</source>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
         <target state="translated">讀取未初始化的屬性 "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownLoggingType">
+        <source>Logging type {0} is not understood by {1}.</source>
+        <target state="translated">{1} 無法了解記錄類型 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
@@ -1191,8 +1414,8 @@ Errors: {3}</source>
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
-        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</source>
-        <target state="translated">MSB4019: 找不到匯入的專案 "{0}"。請確認 Import 宣告 "{1}" 中的運算式正確，以及該檔案位於磁碟中。</target>
+        <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>
+        <target state="translated">MSB4019: 找不到 Import 專案 "{0}"。請確認 Import 宣告 "{1}" (其中評估為 "{2}") 中的運算式正確，且該檔案位於磁碟中。</target>
         <note>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="ImportedProjectFromExtensionsPathNotFoundFromAppConfig">

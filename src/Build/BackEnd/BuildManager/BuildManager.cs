@@ -37,6 +37,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.NET.StringTools;
+using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
@@ -287,7 +288,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public BuildManager(string hostName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(hostName, nameof(hostName));
+            ErrorUtilities.VerifyThrowArgumentNull(hostName);
             _hostName = hostName;
             _buildManagerState = BuildManagerState.Idle;
             _buildSubmissions = new Dictionary<int, BuildSubmissionBase>();
@@ -452,6 +453,7 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
+            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -758,8 +760,8 @@ namespace Microsoft.Build.Execution
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule!.FileName} PID {currentProcess.Id}).  Press enter to continue...");
+                    Console.WriteLine($"Waiting for debugger to attach ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId}).  Press enter to continue...");
+
                     Console.ReadLine();
                     break;
             }
@@ -820,6 +822,15 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Point in time snapshot of all worker processes leveraged by this BuildManager.
+        /// This is meant to be used by VS. External users should not this is only best-effort, point-in-time functionality
+        ///  without guarantee of 100% correctness and safety.
+        /// </summary>
+        /// <returns>Enumeration of <see cref="Process"/> objects that were valid during the time of call to this function.</returns>
+        public IEnumerable<Process> GetWorkerProcesses()
+            => (_nodeManager?.GetProcesses() ?? []).Concat(_taskHostNodeManager?.GetProcesses() ?? []);
+
+        /// <summary>
         /// Clears out all of the cached information.
         /// </summary>
         public void ResetCaches()
@@ -866,7 +877,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
         public BuildSubmission PendBuildRequest(BuildRequestData requestData)
-            => (BuildSubmission) PendBuildRequest<BuildRequestData, BuildResult>(requestData);
+            => (BuildSubmission)PendBuildRequest<BuildRequestData, BuildResult>(requestData);
 
         /// <summary>
         /// Submits a graph build request to the current build but does not start it immediately.  Allows the user to
@@ -874,7 +885,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if StartBuild has not been called or if EndBuild has been called.</exception>
         public GraphBuildSubmission PendBuildRequest(GraphBuildRequestData requestData)
-            => (GraphBuildSubmission) PendBuildRequest<GraphBuildRequestData, GraphBuildResult>(requestData);
+            => (GraphBuildSubmission)PendBuildRequest<GraphBuildRequestData, GraphBuildResult>(requestData);
 
         /// <summary>
         /// Submits a build request to the current build but does not start it immediately.  Allows the user to
@@ -888,7 +899,7 @@ namespace Microsoft.Build.Execution
         {
             lock (_syncLock)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(requestData, nameof(requestData));
+                ErrorUtilities.VerifyThrowArgumentNull(requestData);
                 ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
                 ErrorIfState(BuildManagerState.Idle, "NoBuildInProgress");
                 VerifyStateInternal(BuildManagerState.Building);
@@ -900,8 +911,8 @@ namespace Microsoft.Build.Execution
                 {
                     // Project graph can have multiple entry points, for purposes of identifying event for same build project,
                     // we believe that including only one entry point will provide enough precision.
-                    _buildTelemetry.Project ??= requestData.EntryProjectsFullPath.FirstOrDefault();
-                    _buildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
+                    _buildTelemetry.ProjectPath ??= requestData.EntryProjectsFullPath.FirstOrDefault();
+                    _buildTelemetry.BuildTarget ??= string.Join(",", requestData.TargetNames);
                 }
 
                 _buildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
@@ -1045,10 +1056,10 @@ namespace Microsoft.Build.Execution
                         if (_buildTelemetry != null)
                         {
                             _buildTelemetry.FinishedAt = DateTime.UtcNow;
-                            _buildTelemetry.Success = _overallBuildSuccess;
-                            _buildTelemetry.Version = ProjectCollection.Version;
-                            _buildTelemetry.DisplayVersion = ProjectCollection.DisplayVersion;
-                            _buildTelemetry.FrameworkName = NativeMethodsShared.FrameworkName;
+                            _buildTelemetry.BuildSuccess = _overallBuildSuccess;
+                            _buildTelemetry.BuildEngineVersion = ProjectCollection.Version;
+                            _buildTelemetry.BuildEngineDisplayVersion = ProjectCollection.DisplayVersion;
+                            _buildTelemetry.BuildEngineFrameworkName = NativeMethodsShared.FrameworkName;
 
                             string? host = null;
                             if (BuildEnvironmentState.s_runningInVisualStudio)
@@ -1063,7 +1074,7 @@ namespace Microsoft.Build.Execution
                             {
                                 host = "VSCode";
                             }
-                            _buildTelemetry.Host = host;
+                            _buildTelemetry.BuildEngineHost = host;
 
                             _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
                             var sacState = NativeMethodsShared.GetSACState();
@@ -1071,6 +1082,11 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
+                            if (OpenTelemetryManager.Instance.IsActive())
+                            {
+                                EndBuildTelemetry();
+                            }
+
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
                         }
@@ -1111,6 +1127,17 @@ namespace Microsoft.Build.Execution
                     LogErrorAndShutdown(errorMessage);
                 }
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads of System.Diagnostics.DiagnosticSource, TODO: when this is agreed to perf-wise enable instrumenting using activities anywhere...
+        private void EndBuildTelemetry()
+        {
+            OpenTelemetryManager.Instance.DefaultActivitySource?
+                .StartActivity("Build")?
+                .WithTags(_buildTelemetry!)
+                .WithStartTime(_buildTelemetry!.InnerStartAt)
+                .Dispose();
+            OpenTelemetryManager.Instance.ForceFlush();
         }
 
         /// <summary>
@@ -1230,7 +1257,7 @@ namespace Microsoft.Build.Execution
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Complex class might need refactoring to separate scheduling elements from submission elements.")]
         private void ExecuteSubmission(BuildSubmission submission, bool allowMainThreadBuild)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(submission, nameof(submission));
+            ErrorUtilities.VerifyThrowArgumentNull(submission);
             ErrorUtilities.VerifyThrow(!submission.IsCompleted, "Submission already complete.");
 
             BuildRequestConfiguration? resolvedConfiguration = null;
@@ -1985,7 +2012,12 @@ namespace Microsoft.Build.Execution
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode,
             GraphBuildRequestData graphBuildRequestData)
         {
-            using var waitHandle = new AutoResetEvent(true);
+            // The handle is used within captured async scope. If error occurs during the build
+            //  and we return from the function before async call signals - it causes unhandled ObjectDisposedException
+            //  upon attempt to signal the handle (and hence unfinished logs).
+#pragma warning disable CA2000
+            var waitHandle = new AutoResetEvent(true);
+#pragma warning restore CA2000
             var graphBuildStateLock = new object();
 
             var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
@@ -2925,7 +2957,7 @@ namespace Microsoft.Build.Execution
                     ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider;
                 buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
 
-                // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportnace.Low is used)
+                // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportance.Low is used)
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
                     loggerClassName: typeof(BuildCheckForwardingLogger).FullName,
@@ -2939,6 +2971,25 @@ namespace Microsoft.Build.Execution
                         buildCheckManagerProvider.Instance);
 
                 ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(buildCheckLogger, forwardingLoggerDescription) };
+
+                forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
+            }
+
+            if (_buildParameters.IsTelemetryEnabled)
+            {
+                // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportance.Low is used)
+                // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
+                LoggerDescription forwardingLoggerDescription = new LoggerDescription(
+                    loggerClassName: typeof(InternalTelemeteryForwardingLogger).FullName,
+                    loggerAssemblyName: typeof(InternalTelemeteryForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                    loggerAssemblyFile: null,
+                    loggerSwitchParameters: null,
+                    verbosity: LoggerVerbosity.Quiet);
+
+                ILogger internalTelemetryLogger =
+                    new InternalTelemetryConsumingLogger();
+
+                ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(internalTelemetryLogger, forwardingLoggerDescription) };
 
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
@@ -3163,7 +3214,7 @@ namespace Microsoft.Build.Execution
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
 
-            ErrorUtilities.VerifyThrowInternalNull(inputCacheFiles, nameof(inputCacheFiles));
+            ErrorUtilities.VerifyThrowInternalNull(inputCacheFiles);
             ErrorUtilities.VerifyThrow(_configCache == null, "caches must not be set at this point");
             ErrorUtilities.VerifyThrow(_resultsCache == null, "caches must not be set at this point");
 

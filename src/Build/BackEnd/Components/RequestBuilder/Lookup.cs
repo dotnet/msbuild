@@ -91,8 +91,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal Lookup(IItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectItems, nameof(projectItems));
-            ErrorUtilities.VerifyThrowInternalNull(properties, nameof(properties));
+            ErrorUtilities.VerifyThrowInternalNull(projectItems);
+            ErrorUtilities.VerifyThrowInternalNull(properties);
 
             Lookup.Scope scope = new Lookup.Scope(this, "Lookup()", projectItems, properties);
             _lookupScopes.AddFirst(scope);

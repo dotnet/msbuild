@@ -223,7 +223,7 @@ namespace Microsoft.Build.Internal
             }
 
             // ...or it looks like the whole thing is a big CDATA tag ...
-            bool startsWithCData = (innerXml.IndexOf("<![CDATA[", StringComparison.Ordinal) == 0);
+            bool startsWithCData = innerXml.AsSpan().TrimStart().StartsWith("<![CDATA[".AsSpan(), StringComparison.Ordinal);
 
             if (startsWithCData)
             {
@@ -758,7 +758,38 @@ namespace Microsoft.Build.Internal
             }
             else
             {
-                return CastItemsOneByOne(items, typeName);
+                return CastItemsOneByOne(items, [typeName]);
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types.
+        /// Only items with matching type (case insensitive, MSBuild valid names only) will be returned.
+        /// </summary>
+        public static IEnumerable<ItemData> EnumerateItemsOfTypes(IEnumerable items, string[] typeNames)
+        {
+            if (items == null)
+            {
+                return [];
+            }
+
+            if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
+            {
+                return typeNames.Select(typeName =>
+                    projectItemInstanceDictionary[typeName]
+                        .Select(i => new ItemData(i.ItemType, (IItemData)i)))
+                        .SelectMany(j => j);
+            }
+            else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
+            {
+                return typeNames.Select(typeName =>
+                        projectItemDictionary[typeName]
+                            .Select(i => new ItemData(i.ItemType, (IItemData)i)))
+                    .SelectMany(j => j);
+            }
+            else
+            {
+                return CastItemsOneByOne(items, typeNames);
             }
         }
 
@@ -777,9 +808,9 @@ namespace Microsoft.Build.Internal
         /// Enumerates the nongeneric items and attempts to cast them.
         /// </summary>
         /// <param name="items">Nongeneric list of items.</param>
-        /// <param name="itemTypeNameToFetch">If not null, only the items with matching type (case insensitive, MSBuild valid names only) will be returned.</param>
+        /// <param name="itemTypeNamesToFetch">If not null, only the items with matching type (case insensitive, MSBuild valid names only) will be returned.</param>
         /// <returns></returns>
-        private static IEnumerable<ItemData> CastItemsOneByOne(IEnumerable items, string itemTypeNameToFetch)
+        private static IEnumerable<ItemData> CastItemsOneByOne(IEnumerable items, string[] itemTypeNamesToFetch)
         {
             foreach (var item in items)
             {
@@ -809,7 +840,7 @@ namespace Microsoft.Build.Internal
                 }
 
                 // if itemTypeNameToFetch was not set - then return all items
-                if (itemValue != null && (itemTypeNameToFetch == null || MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, itemTypeNameToFetch)))
+                if (itemValue != null && (itemTypeNamesToFetch == null || itemTypeNamesToFetch.Any(tp => MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, tp))))
                 {
                     // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
                     //  where the only types that can be assigned are ProjectItem or ProjectItemInstance

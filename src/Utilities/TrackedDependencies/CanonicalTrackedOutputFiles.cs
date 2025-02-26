@@ -80,7 +80,7 @@ namespace Microsoft.Build.Utilities
                 };
             }
 
-            _tlogFiles = TrackedDependencies.ExpandWildcards(tlogFiles);
+            _tlogFiles = TrackedDependencies.ExpandWildcards(tlogFiles, _log);
             _tlogAvailable = TrackedDependencies.ItemsExist(_tlogFiles);
             DependencyTable = new Dictionary<string, Dictionary<string, DateTime>>(StringComparer.OrdinalIgnoreCase);
             if (_tlogFiles != null && constructOutputsFromTLogs)
@@ -272,7 +272,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>An array of the rooting markers that were removed.</returns>
         public string[] RemoveRootsWithSharedOutputs(ITaskItem[] sources)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sources, nameof(sources));
+            ErrorUtilities.VerifyThrowArgumentNull(sources);
 
             var removedMarkers = new List<string>();
             string currentRoot = FileTracker.FormatRootingMarker(sources);

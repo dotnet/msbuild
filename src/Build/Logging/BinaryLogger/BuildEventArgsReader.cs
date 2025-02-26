@@ -324,7 +324,7 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.UninitializedPropertyRead => ReadUninitializedPropertyReadEventArgs(),
                 BinaryLogRecordKind.PropertyInitialValueSet => ReadPropertyInitialValueSetEventArgs(),
                 BinaryLogRecordKind.AssemblyLoad => ReadAssemblyLoadEventArgs(),
-                BinaryLogRecordKind.BuildCheckMessage => ReadBuildCheckMessageEventArgs(),
+                BinaryLogRecordKind.BuildCheckMessage => ReadBuildMessageEventArgs(),
                 BinaryLogRecordKind.BuildCheckWarning => ReadBuildWarningEventArgs(),
                 BinaryLogRecordKind.BuildCheckError => ReadBuildErrorEventArgs(),
                 BinaryLogRecordKind.BuildCheckTracing => ReadBuildCheckTracingEventArgs(),
@@ -1177,6 +1177,9 @@ namespace Microsoft.Build.Logging
                 previousValue,
                 newValue,
                 location,
+                fields.File,
+                fields.LineNumber,
+                fields.ColumnNumber,
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
@@ -1193,7 +1196,7 @@ namespace Microsoft.Build.Logging
 
             var e = new UninitializedPropertyReadEventArgs(
                 propertyName,
-                fields.Message,
+                message: null,
                 fields.HelpKeyword,
                 fields.SenderName,
                 fields.Importance);
@@ -1214,19 +1217,14 @@ namespace Microsoft.Build.Logging
                 propertyName,
                 propertyValue,
                 propertySource,
+                fields.File,
+                fields.LineNumber,
+                fields.ColumnNumber,
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
                 fields.Importance);
-            SetCommonFields(e, fields);
 
-            return e;
-        }
-
-        private BuildEventArgs ReadBuildCheckMessageEventArgs()
-        {
-            var fields = ReadBuildEventArgsFields();
-            var e = new BuildCheckResultMessage(fields.Message);
             SetCommonFields(e, fields);
 
             return e;
