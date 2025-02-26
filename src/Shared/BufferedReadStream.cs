@@ -132,14 +132,8 @@ namespace Microsoft.Build.BackEnd
             if (count > BUFFER_SIZE)
             {
                 // Trying to read more data than the buffer can hold
-                int alreadyCopied = 0;
-                if (_currentlyBufferedByteCount > 0)
-                {
-                    Array.Copy(_buffer, _currentIndexInBuffer, buffer, offset, _currentlyBufferedByteCount);
-                    alreadyCopied = _currentlyBufferedByteCount;
-                    _currentIndexInBuffer = 0;
-                    _currentlyBufferedByteCount = 0;
-                }
+                int alreadyCopied = CopyToBuffer(buffer, offset);
+
 #pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
                 int innerReadCount = await _innerStream.ReadAsync(buffer, offset + alreadyCopied, count - alreadyCopied, cancellationToken);
 #pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
@@ -156,6 +150,24 @@ namespace Microsoft.Build.BackEnd
             else
             {
                 // Need to read more data
+                int alreadyCopied = CopyToBuffer(buffer, offset);
+
+#pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                int innerReadCount = await _innerStream.ReadAsync(_buffer, 0, BUFFER_SIZE, cancellationToken);
+#pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                _currentIndexInBuffer = 0;
+                _currentlyBufferedByteCount = innerReadCount;
+
+                int remainingCopyCount = alreadyCopied + innerReadCount >= count ? count - alreadyCopied : innerReadCount;
+                Array.Copy(_buffer, 0, buffer, offset + alreadyCopied, remainingCopyCount);
+                _currentIndexInBuffer += remainingCopyCount;
+                _currentlyBufferedByteCount -= remainingCopyCount;
+
+                return alreadyCopied + remainingCopyCount;
+            }
+
+            int CopyToBuffer(byte[] buffer, int offset)
+            {
                 int alreadyCopied = 0;
                 if (_currentlyBufferedByteCount > 0)
                 {
@@ -165,28 +177,7 @@ namespace Microsoft.Build.BackEnd
                     _currentlyBufferedByteCount = 0;
                 }
 
-#pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
-                int innerReadCount = await _innerStream.ReadAsync(_buffer, 0, BUFFER_SIZE, cancellationToken);
-#pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
-                _currentIndexInBuffer = 0;
-                _currentlyBufferedByteCount = innerReadCount;
-
-                int remainingCopyCount;
-
-                if (alreadyCopied + innerReadCount >= count)
-                {
-                    remainingCopyCount = count - alreadyCopied;
-                }
-                else
-                {
-                    remainingCopyCount = innerReadCount;
-                }
-
-                Array.Copy(_buffer, 0, buffer, offset + alreadyCopied, remainingCopyCount);
-                _currentIndexInBuffer += remainingCopyCount;
-                _currentlyBufferedByteCount -= remainingCopyCount;
-
-                return alreadyCopied + remainingCopyCount;
+                return alreadyCopied;
             }
         }
 #endif
