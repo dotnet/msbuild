@@ -4,8 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.TelemetryInfra;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -164,6 +167,31 @@ namespace Microsoft.Build.Engine.UnitTests
                 .Count(v => v.CumulativeExecutionTime > TimeSpan.Zero || v.ExecutionsCount > 0).ShouldBe(3);
 
             workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsFromNugetCache);
+        }
+
+        [Fact]
+        public void Foo()
+        {
+            WorkerNodeTelemetryData wd = new WorkerNodeTelemetryData(
+                new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>()
+                {
+                    {
+                        new TaskOrTargetTelemetryKey("TaskA", false, true),
+                        new TaskExecutionStats(TimeSpan.FromSeconds(2.1554548), 5, 545)
+                    },
+                    {
+                        new TaskOrTargetTelemetryKey("TaskA", true, false),
+                        new TaskExecutionStats(TimeSpan.FromSeconds(254548), 6, 54545451)
+                    },
+                },
+                new Dictionary<TaskOrTargetTelemetryKey, bool>()
+                {
+                    { new TaskOrTargetTelemetryKey("TargetA", false, true, false), false },
+                    { new TaskOrTargetTelemetryKey("TargetA", true, true, false), false },
+                    { new TaskOrTargetTelemetryKey("TargetB", false, false, true), false }
+                });
+
+            var holder = TelemetryDataUtils.AsActivityDataHolder(wd, true, true);
         }
     }
 }

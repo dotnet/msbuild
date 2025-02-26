@@ -36,6 +36,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
 using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
@@ -256,6 +257,11 @@ namespace Microsoft.Build.Execution
         /// <remarks>Could be null</remarks>
         /// </summary>
         private BuildTelemetry? _buildTelemetry;
+
+        /// <summary>
+        /// Logger, that if instantiated - will receive and expose telemetry data from worker nodes.
+        /// </summary>
+        private InternalTelemetryConsumingLogger? _telemetryConsumingLogger;
 
         private ProjectCacheService? _projectCacheService;
 
@@ -563,6 +569,7 @@ namespace Microsoft.Build.Execution
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
+                _buildParameters.IsTelemetryEnabled |= OpenTelemetryManager.Instance.IsActive();
                 var loggingService = InitializeLoggingService();
 
                 // Log deferred messages and response files
@@ -1134,7 +1141,10 @@ namespace Microsoft.Build.Execution
         {
             OpenTelemetryManager.Instance.DefaultActivitySource?
                 .StartActivity("Build")?
-                .WithTags(_buildTelemetry!)
+                .WithTags(_buildTelemetry)
+                .WithTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
+                    includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
+                    includeTargetDetails: false))
                 .WithStartTime(_buildTelemetry!.InnerStartAt)
                 .Dispose();
             OpenTelemetryManager.Instance.ForceFlush();
@@ -2986,10 +2996,10 @@ namespace Microsoft.Build.Execution
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);
 
-                ILogger internalTelemetryLogger =
+                _telemetryConsumingLogger =
                     new InternalTelemetryConsumingLogger();
 
-                ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(internalTelemetryLogger, forwardingLoggerDescription) };
+                ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(_telemetryConsumingLogger, forwardingLoggerDescription) };
 
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }

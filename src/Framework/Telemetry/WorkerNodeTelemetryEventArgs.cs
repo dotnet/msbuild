@@ -42,7 +42,10 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
         for (int i = 0; i < count; i++)
         {
             tasksExecutionData.Add(ReadFromStream(reader),
-                new TaskExecutionStats(TimeSpan.FromTicks(reader.ReadInt64()), reader.ReadInt16(), reader.ReadInt64()));
+                new TaskExecutionStats(
+                    TimeSpan.FromTicks(reader.ReadInt64()),
+                    reader.ReadInt32(),
+                    reader.ReadInt64()));
         }
 
         count = reader.Read7BitEncodedInt();
