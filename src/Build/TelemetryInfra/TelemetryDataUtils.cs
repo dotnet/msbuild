@@ -49,7 +49,8 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             var opt = new JsonSerializerOptions
             {
-                WriteIndented = true,
+                // Add following if user-friendly indentation would be needed
+                // WriteIndented = true,
                 Converters =
                 {
                     new TargetDataConverter(),
