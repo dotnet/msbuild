@@ -1058,11 +1058,21 @@ public sealed partial class TerminalLogger : INodeLogger
     private void ThreadProc()
     {
         // 1_000 / 30 is a poor approx of 30Hz
+        var count = 0;
         while (!_cts.Token.WaitHandle.WaitOne(1_000 / 30))
         {
+            count++;
             lock (_lock)
             {
-                DisplayNodes();
+                if (count > 30)
+                {
+                    count = 0;
+                    DisplayNodes(true);
+                }
+                else
+                {
+                    DisplayNodes();
+                }
             }
         }
 
@@ -1073,9 +1083,11 @@ public sealed partial class TerminalLogger : INodeLogger
     /// Render Nodes section.
     /// It shows what all build nodes do.
     /// </summary>
-    internal void DisplayNodes()
+    internal void DisplayNodes(bool updateSize = false)
     {
-        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
+        var width = updateSize ? Terminal.Width : _currentFrame.Width;
+        var height = updateSize ? Terminal.Height : _currentFrame.Height;
+        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height);
 
         // Do not render delta but clear everything if Terminal width or height have changed.
         if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
