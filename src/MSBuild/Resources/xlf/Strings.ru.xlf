@@ -1898,29 +1898,6 @@
         <target state="translated">MSBUILD : error MSB1047: недопустимый файл для предварительной обработки. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1047: "}</note>
       </trans-unit>
-      <trans-unit id="LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: не удается создать экземпляр журнала. {0}</target>
-        <note>{StrBegin="MSBUILD : error MSB1021: "}
-      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
-      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
-      </trans-unit>
-      <trans-unit id="LoggerNotFoundError">
-        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="translated">MSBUILD : error MSB1020: не удалось найти средство ведения журнала. Убедитесь в следующем. 1. Имя средства ведения журнала совпадает с именем класса средства ведения журнала. 2. Класс средства ведения журнала является открытым и реализует интерфейс Microsoft.Build.Framework.ILogger. 3. Путь к сборке ведения журнала правильный или средство ведения журнала можно успешно загрузить, используя только указанное имя сборки.</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
-      logger class must exist in the given assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectUpgradeNeededToVcxProj">
-        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
-        <target state="translated">MSBUILD : error MSB4192: файл проекта "{0}" указан в формате "VCPROJ" или "DSP", непосредственная сборка которого с помощью MSBuild невозможна. Преобразуйте проект, открыв его в Visual Studio IDE или запустив инструмент преобразования, либо (в случае с "VCPROJ") используйте MSBuild для сборки файла решения, содержащего данный проект.</target>
-        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
-      </trans-unit>
       <trans-unit id="NeedJustMyCode">
         <source>If MSBuild debugging does not work correctly, please verify that the "Just My Code" feature is enabled in Visual Studio, and that you have selected the managed debugger.</source>
         <target state="translated">Если отладка MSBuild работает неправильно, убедитесь, что выбран управляемый отладчик, а в Visual Studio включен режим "Только мой код".</target>
@@ -2216,6 +2193,29 @@
         <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
         <target state="translated">MSBUILD: ошибка MSB1054 — укажите имя файла, чтобы создать результат профилировщика.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XMake.LoggerCreationError">
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
+        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1021: "}
+      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
+      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
+      </trans-unit>
+      <trans-unit id="XMake.LoggerNotFoundError">
+        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
+        <target state="new">MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
+      logger class must exist in the given assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="XMake.ProjectUpgradeNeededToVcxProj">
+        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
+        <target state="new">MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</target>
+        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
     </body>
   </file>
