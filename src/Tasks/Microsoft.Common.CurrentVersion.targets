@@ -3704,7 +3704,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="GenerateTargetFrameworkMonikerAttribute" BeforeTargets="BeforeCompile" DependsOnTargets="PrepareForBuild;GetReferenceAssemblyPaths;_WriteTargetFrameworkMonikerAttributeToFile"/>
 
   <Target Name="_WriteTargetFrameworkMonikerAttributeToFile"
-          DependsOnTargets="_SetTargetFrameworkMonikerAttribute"
+          AfterTargets="_SetTargetFrameworkMonikerAttribute"
           Inputs="$(MSBuildToolsPath)\Microsoft.Common.targets"
           Outputs="$(TargetFrameworkMonikerAssemblyAttributesPath)"
           Condition="'@(Compile)' != '' and '$(GenerateTargetFrameworkAttribute)' == 'true' and '$(TargetFrameworkMonikerAssemblyAttributeText)' != ''">
