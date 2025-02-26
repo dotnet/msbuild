@@ -124,7 +124,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static readonly bool s_forceSymlinks = Environment.GetEnvironmentVariable("MSBuildUseSymboliclinksIfPossible") != null;
 
-        private static readonly int s_parallelism = GetParallelismFromEnvironment();
+        private static readonly bool s_copyInParallel = GetParallelismFromEnvironment();
 
         /// <summary>
         /// Default milliseconds to wait between necessary retries
@@ -319,7 +319,6 @@ namespace Microsoft.Build.Tasks
             }
 
             if (!Traits.Instance.EscapeHatches.CopyWithoutDelete &&
-                (UseHardlinksIfPossible || UseSymboliclinksIfPossible) &&
                 destinationFileState.FileExists &&
                 !destinationFileState.IsReadOnly)
             {
@@ -427,12 +426,12 @@ namespace Microsoft.Build.Tasks
         /// Copy the files.
         /// </summary>
         /// <param name="copyFile">Delegate used to copy the files.</param>
-        /// <param name="parallelism">
+        /// <param name="copyInParallel">
         /// Thread parallelism allowed during copies. 1 uses the original algorithm, >1 uses newer algorithm.
         /// </param>
         internal bool Execute(
             CopyFileWithState copyFile,
-            int parallelism)
+            bool copyInParallel)
         {
             // If there are no source files then just return success.
             if (IsSourceSetEmpty())
@@ -462,9 +461,9 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                success = parallelism == 1 || DestinationFiles.Length == 1
+                success = !copyInParallel || DestinationFiles.Length == 1
                     ? CopySingleThreaded(copyFile, out destinationFilesSuccessfullyCopied)
-                    : CopyParallel(copyFile, parallelism, out destinationFilesSuccessfullyCopied);
+                    : CopyParallel(copyFile, out destinationFilesSuccessfullyCopied);
             }
             catch (OperationCanceledException)
             {
@@ -564,7 +563,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool CopyParallel(
             CopyFileWithState copyFile,
-            int parallelism,
             out List<ITaskItem> destinationFilesSuccessfullyCopied)
         {
             bool success = true;
@@ -1081,7 +1079,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            return Execute(CopyFileWithLogging, s_parallelism);
+            return Execute(CopyFileWithLogging, s_copyInParallel);
         }
 
         #endregion
@@ -1102,18 +1100,10 @@ namespace Microsoft.Build.Tasks
             return string.Equals(source.FileNameFullPath, destination.FileNameFullPath, FileUtilities.PathComparison);
         }
 
-        private static int GetParallelismFromEnvironment()
+        private static bool GetParallelismFromEnvironment()
         {
             int parallelism = Traits.Instance.CopyTaskParallelism;
-            if (parallelism < 0)
-            {
-                parallelism = DefaultCopyParallelism;
-            }
-            else if (parallelism == 0)
-            {
-                parallelism = int.MaxValue;
-            }
-            return parallelism;
+            return parallelism != 1;
         }
     }
 }
