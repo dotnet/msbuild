@@ -707,7 +707,7 @@ namespace Microsoft.Build.CommandLine
                 bool needToValidateProject = false;
                 string schemaFile = null;
 #endif
-                int cpuCount = 1;
+                int cpuCount = 32;
                 bool multiThreaded = false;
 #if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;
@@ -3190,7 +3190,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal static bool ProcessMultiThreadedSwitch(string[] parameters)
         {
-            bool enableMultiThreading = false;
+            bool enableMultiThreading = true;
 
             if (parameters.Length > 0)
             {
@@ -3524,27 +3524,7 @@ namespace Microsoft.Build.CommandLine
         /// </remarks>
         internal static int ProcessMaxCPUCountSwitch(string[] parameters)
         {
-            int cpuCount = 1;
-
-            if (parameters.Length > 0)
-            {
-                try
-                {
-                    cpuCount = int.Parse(parameters[parameters.Length - 1], CultureInfo.InvariantCulture);
-                }
-                catch (FormatException ex)
-                {
-                    CommandLineSwitchException.Throw("InvalidMaxCPUCountValue", parameters[parameters.Length - 1], ex.Message);
-                }
-                catch (OverflowException ex)
-                {
-                    CommandLineSwitchException.Throw("InvalidMaxCPUCountValue", parameters[parameters.Length - 1], ex.Message);
-                }
-
-                CommandLineSwitchException.VerifyThrow(cpuCount > 0 && cpuCount <= 1024, "InvalidMaxCPUCountValueOutsideRange", parameters[parameters.Length - 1]);
-            }
-
-            return cpuCount;
+            return 32;
         }
 
         /// <summary>

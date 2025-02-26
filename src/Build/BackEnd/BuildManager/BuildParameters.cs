@@ -526,7 +526,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public int MaxNodeCount
         {
-            get => _maxNodeCount;
+            get => 32;
 
             set
             {

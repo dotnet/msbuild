@@ -34,11 +34,6 @@ namespace Microsoft.Build.BackEnd
     internal class RequestBuilder : IRequestBuilder, IRequestBuilderCallback, IBuildComponent
     {
         /// <summary>
-        /// The dedicated scheduler object.
-        /// </summary>
-        private static readonly TaskScheduler s_dedicatedScheduler = new DedicatedThreadsTaskScheduler();
-
-        /// <summary>
         /// The event used to signal that this request should immediately terminate.
         /// </summary>
         private ManualResetEvent _terminateEvent;
@@ -706,7 +701,7 @@ namespace Microsoft.Build.BackEnd
                         },
                         _cancellationTokenSource.Token,
                         TaskCreationOptions.None,
-                        s_dedicatedScheduler).Unwrap();
+                        TaskScheduler.Default).Unwrap();
                 }
             }
         }
