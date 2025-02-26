@@ -271,23 +271,23 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 }
 
 #if FEATURE_REPORTFILEACCESSES
-            FileAccessManager.HandlerRegistration? handlerRegistration = null;
-            if (_componentHost.BuildParameters.ReportFileAccesses)
-            {
-                handlerRegistration = _fileAccessManager.RegisterHandlers(
-                    (buildRequest, fileAccessData) =>
-                    {
-                        // TODO: Filter out projects which do not configure this plugin
-                        FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
-                        pluginInstance.HandleFileAccess(fileAccessContext, fileAccessData);
-                    },
-                    (buildRequest, processData) =>
-                    {
-                        // TODO: Filter out projects which do not configure this plugin
-                        FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
-                        pluginInstance.HandleProcess(fileAccessContext, processData);
-                    });
-            }
+                FileAccessManager.HandlerRegistration? handlerRegistration = null;
+                if (_componentHost.BuildParameters.ReportFileAccesses)
+                {
+                    handlerRegistration = _fileAccessManager.RegisterHandlers(
+                        (buildRequest, fileAccessData) =>
+                        {
+                            // TODO: Filter out projects which do not configure this plugin
+                            FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
+                            pluginInstance.HandleFileAccess(fileAccessContext, fileAccessData);
+                        },
+                        (buildRequest, processData) =>
+                        {
+                            // TODO: Filter out projects which do not configure this plugin
+                            FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
+                            pluginInstance.HandleProcess(fileAccessContext, processData);
+                        });
+                }
 #endif
 
                 return new ProjectCachePlugin(
@@ -454,7 +454,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
                 BuildRequestData buildRequest = new BuildRequestData(
                     cacheRequest.Configuration.Project,
-                    cacheRequest.Submission.BuildRequestData?.TargetNames.ToArray() ?? Array.Empty<string>());
+                    cacheRequest.Submission.BuildRequestData?.TargetNames.ToArray() ?? []);
                 BuildEventContext buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(
                     cacheRequest.Submission.SubmissionId,
                     evaluationId: cacheRequest.Configuration.Project.EvaluationId,
@@ -650,7 +650,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             }
             else
             {
-                return new[] { new ProjectGraphEntryPoint(configuration.ProjectFullPath, globalProperties) };
+                return [new ProjectGraphEntryPoint(configuration.ProjectFullPath, globalProperties)];
             }
 
             static IReadOnlyCollection<ProjectGraphEntryPoint> GenerateGraphEntryPointsFromSolutionConfigurationXml(

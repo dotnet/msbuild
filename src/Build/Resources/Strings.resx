@@ -534,7 +534,7 @@
     <comment>{StrBegin="MSB4101: "}</comment>
   </data>
   <data name="ImportedProjectNotFound" xml:space="preserve">
-    <value>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</value>
+    <value>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</value>
     <comment>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
   <data name="ImportedProjectFromVSDistribution" xml:space="preserve">
@@ -603,6 +603,9 @@
       UE: This message is shown when the user attempts to provide an expression like "$(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)"
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </comment>
+  </data>
+  <data name="CouldNotDifferentiateBetweenCompatibleMethods">
+    <value>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</value>
   </data>
   <data name="InvalidFunctionPropertyExpression" xml:space="preserve">
     <value>MSB4184: The expression "{0}" cannot be evaluated. {1}</value>
@@ -847,7 +850,7 @@
     <value>Task name cannot be empty.</value>
   </data>
   <data name="ProjectUpgradeNeeded" xml:space="preserve">
-    <value>MSB4075: The project file "{0}" must be opened in the Visual Studio IDE and converted to the latest version before it can be built by MSBuild.</value>
+    <value>MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</value>
     <comment>{StrBegin="MSB4075: "}</comment>
   </data>
   <data name="ProjectUpgradeNeededToVcxProj" xml:space="preserve">
@@ -2164,6 +2167,36 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="BuildCheck_BC0103_MessageAddendum" xml:space="preserve">
     <value>'{0}' with value: '{1}'</value>
 	<comment>Will be used as a parameter {0} in previous message.</comment>
+  </data>
+  <data name="BuildCheck_BC0104_Title" xml:space="preserve">
+    <value>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</value>
+  </data>
+  <data name="BuildCheck_BC0104_MessageFmt" xml:space="preserve">
+    <value>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</value>
+  </data>
+  <data name="BuildCheck_BC0105_Title" xml:space="preserve">
+    <value>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</value>
+	  <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0105_MessageFmt" xml:space="preserve">
+    <value>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</value>
+	  <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0106_Title" xml:space="preserve">
+    <value>Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</value>
+	  <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0106_MessageFmt" xml:space="preserve">
+    <value>Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</value>
+	  <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0107_Title" xml:space="preserve">
+    <value>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</value>
+	  <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0107_MessageFmt" xml:space="preserve">
+    <value>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</value>
+	  <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0201_Title" xml:space="preserve">
     <value>A property that is accessed should be declared first.</value>

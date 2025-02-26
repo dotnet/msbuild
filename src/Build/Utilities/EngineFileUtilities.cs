@@ -32,7 +32,9 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        // used by test to reset regexes
+        /// <summary>
+        /// Test only: repopulate lazy wildcard regexes from the environment.
+        /// </summary>
         internal static void CaptureLazyWildcardRegexes()
         {
             s_lazyWildCardExpansionRegexes = PopulateRegexFromEnvironment();
@@ -185,7 +187,7 @@ namespace Microsoft.Build.Internal
         {
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, nameof(filespecEscaped));
 
-            string[] fileList = Array.Empty<string>();
+            string[] fileList = [];
 
             // Used to properly detect and log drive enumerating wildcards when applicable.
             string excludeFileSpec = string.Empty;
@@ -200,7 +202,7 @@ namespace Microsoft.Build.Internal
             if (filespecMatchesLazyWildcard || (filespecHasNoWildCards && excludeSpecsAreEmpty))
             {
                 // Just return the original string.
-                fileList = new string[] { returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped) };
+                fileList = [returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped)];
             }
             else
             {

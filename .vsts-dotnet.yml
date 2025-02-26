@@ -34,10 +34,9 @@ variables:
     - name: SourceBranch
       value: ''
   - name: EnableReleaseOneLocBuild
-    value: false # Disable loc for vs17.12
+    value: true # Enable loc for vs17.13
   - name: Codeql.Enabled
     value: true
-  - group: DotNet-MSBuild-SDLValidation-Params
   - group: AzureDevOps-Artifact-Feeds-Pats
   - name: cfsNugetWarnLevel
     value: warn
@@ -61,6 +60,11 @@ extends:
       name: VSEngSS-MicroBuild2022-1ES
       os: windows
     sdl:
+      policheck:
+        enabled: true
+        exclusionsFile: $(Build.SourcesDirectory)\eng\policheck_exclusions.xml
+      tsa:
+        enabled: true
       # We generate SBOM ourselves, so don't need steps injected by 1ES.
       sbom:
         enabled: false
@@ -115,7 +119,7 @@ extends:
         - name: VisualStudio.MajorVersion
           value: 17
         - name: VisualStudio.ChannelName
-          value: 'int.d17.12' # MSBuild's vs17.12 branch corresponds to this VS channel
+          value: 'int.d17.13' # MSBuild's vs17.13 branch corresponds to this VS channel
         - name: VisualStudio.DropName
           value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
@@ -324,18 +328,3 @@ extends:
         enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
-        SDLValidationParameters:
-          enable: true
-          continueOnError: false
-          params: ' -SourceToolsList @("policheck","credscan")
-          -TsaInstanceURL "$(_TsaInstanceURL)"
-          -TsaProjectName "$(_TsaProjectName)"
-          -TsaNotificationEmail "$(_TsaNotificationEmail)"
-          -TsaCodebaseAdmin "$(_TsaCodebaseAdmin)"
-          -TsaBugAreaPath "$(_TsaBugAreaPath)"
-          -TsaIterationPath "$(_TsaIterationPath)"
-          -TsaRepositoryName "dotnet-msbuild"
-          -TsaCodebaseName "dotnet-msbuild"
-          -TsaPublish $True
-          -CrScanAdditionalRunConfigParams @("SuppressionsPath < $(Build.SourcesDirectory)\eng\CredScanSuppressions.json")
-          -PoliCheckAdditionalRunConfigParams @("UserExclusionPath < $(Build.SourcesDirectory)\eng\policheck_exclusions.xml")'
