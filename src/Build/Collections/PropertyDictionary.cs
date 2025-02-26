@@ -555,6 +555,9 @@ namespace Microsoft.Build.Collections
             {
                 ICollection<T> propertiesCollection = (ICollection<T>)_properties;
                 List<TResult> result = new(propertiesCollection.Count);
+
+                // PERF: Prefer using struct enumerators from the concrete types to avoid allocations.
+                // RetrievableValuedEntryHashSet implements a struct enumerator.
                 if (_properties is RetrievableValuedEntryHashSet<T> hashSet)
                 {
                     foreach (T property in hashSet)
