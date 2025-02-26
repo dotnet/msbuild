@@ -5,7 +5,7 @@
 using System;
 #endif
 using System.Diagnostics;
-
+using System.IO.MemoryMappedFiles;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -23,6 +23,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int _nodeId;
 
+        public MemoryMappedFile _sideChannel;
         /// <summary>
         /// The system parameters which were defined on the host.
         /// </summary>

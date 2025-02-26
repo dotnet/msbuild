@@ -574,6 +574,7 @@ namespace Microsoft.Build.BackEnd
 
             // Start the asynchronous read.
             context.BeginAsyncPacketRead();
+            context.StartDrainingQueue();
 
             lock (_activeNodes)
             {

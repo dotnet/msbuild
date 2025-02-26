@@ -201,6 +201,11 @@ namespace Microsoft.Build.BackEnd
         ProcessReport,
 
         /// <summary>
+        /// Message sent via a MMF
+        /// </summary>
+        MemoryMappedFilePacket,
+
+        /// <summary>
         /// Command in form of MSBuild command line for server node - MSBuild Server.
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>

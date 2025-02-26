@@ -5,6 +5,8 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Threading.Channels;
+
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
@@ -24,6 +26,8 @@ using Microsoft.Build.Shared;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
+using System.IO.MemoryMappedFiles;
+using System.Net.Sockets;
 
 #nullable disable
 
@@ -35,10 +39,10 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal abstract class NodeProviderOutOfProcBase
     {
-        /// <summary>
+        /// xxx <summary>
         /// The maximum number of bytes to write
-        /// </summary>
-        private const int MaxPacketWriteSize = 1048576;
+        /// xxx </summary>
+        // private const int MaxPacketWriteSize = 1048576;
 
         /// <summary>
         /// The number of times to retry creating an out-of-proc node.
@@ -577,16 +581,14 @@ namespace Microsoft.Build.BackEnd
             private MemoryStream _writeBufferMemoryStream;
 
             /// <summary>
-            /// A queue used for enqueuing packets to write to the stream asynchronously.
+            /// A channel used for enqueuing packets to write to the stream asynchronously.
             /// </summary>
-            private ConcurrentQueue<INodePacket> _packetWriteQueue = new ConcurrentQueue<INodePacket>();
-
-            /// <summary>
-            /// A task representing the last packet write, so we can chain packet writes one after another.
-            /// We want to queue up writing packets on a separate thread asynchronously, but serially.
-            /// Each task drains the <see cref="_packetWriteQueue"/>
-            /// </summary>
-            private Task _packetWriteDrainTask = Task.CompletedTask;
+            private Channel<INodePacket> _packetChannel = Channel.CreateUnbounded<INodePacket>(new UnboundedChannelOptions()
+            {
+                SingleWriter = false,
+                SingleReader = true,
+                AllowSynchronousContinuations = false
+            });
 
             /// <summary>
             /// Delegate called when the context terminates.
@@ -626,6 +628,90 @@ namespace Microsoft.Build.BackEnd
             /// Id of node.
             /// </summary>
             public int NodeId => _nodeId;
+
+            private MemoryMappedFile _mappedFile;
+            private int _mappedFileIdx;
+            private int _mappedFileLength = 10000000;
+
+            public async void StartDrainingQueue()
+            {
+
+                _mappedFile = MemoryMappedFile.CreateOrOpen(String.Format("D:/bld/MSBuild_side_channel{0}", _nodeId), _mappedFileLength, MemoryMappedFileAccess.ReadWrite);
+                
+
+                while (await _packetChannel.Reader.WaitToReadAsync())
+                {
+                    while (_packetChannel.Reader.TryRead(out var packet))
+                    {
+                        if (_mappedFileIdx + _writeBufferMemoryStream.Length > _mappedFileLength)
+                        {
+                            _mappedFileIdx = 0;
+                        }
+                        var accessor = _mappedFile.CreateViewStream(_mappedFileIdx, _mappedFileLength - _mappedFileIdx);
+
+                        MemoryStream writeStream = this._writeBufferMemoryStream;
+                        writeStream.SetLength(0);
+                        try
+                        {
+                            writeStream.WriteByte((byte)NodePacketType.MemoryMappedFilePacket);
+                            // Pad for the packet length
+
+                            // Pipe bookkeeping
+                            // writeStream.WriteByte((byte)packet.Type);
+                            WriteInt32(writeStream, NodeId);
+                            WriteInt32(writeStream, _mappedFileIdx);
+
+
+                            // Writing the packet to the memory mapped file as if it was the original pipe
+
+                            byte[] x = { (byte)packet.Type };
+                            accessor.Write(x, 0, 1);
+                            accessor.Position = 5;
+                            ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(accessor);
+
+                            packet.Translate(writeTranslator);
+                            var packetSize = accessor.Position;
+                            accessor.Position = 1;
+                            WriteInt32(accessor, (int)packetSize);
+                            accessor.Dispose();
+
+
+
+                            // int writeStreamLength = (int)writeStream.Position;
+                            // WriteInt32(writeStream, (int)packetSize);
+                            _mappedFileIdx += (int)packetSize;
+
+                            // Now plug in the real packet length
+                            // writeStream.Position = 1;
+                            // WriteInt32(writeStream, writeStreamLength - 5);
+                            byte[] writeStreamBuffer = writeStream.GetBuffer();
+                            await _serverToClientStream.WriteAsync(writeStreamBuffer, 0, 9, CancellationToken.None).ConfigureAwait(true);
+                            /*
+                            for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
+                            {
+                                int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
+#pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                                await _serverToClientStream.WriteAsync(writeStreamBuffer, i, lengthToWrite, CancellationToken.None);
+#pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                            }
+                            */
+                            if (IsExitPacket(packet))
+                            {
+                                _exitPacketState = ExitPacketState.ExitPacketSent;
+                            }
+                        }
+                        catch (IOException e)
+                        {
+                            // Do nothing here because any exception will be caught by the async read handler
+                            CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in SendData: {0}", e);
+                        }
+                        catch (ObjectDisposedException) // This happens if a child dies unexpectedly
+                        {
+                            // Do nothing here because any exception will be caught by the async read handler
+                        }
+                    }
+                }
+            }
 
             /// <summary>
             /// Starts a new asynchronous read operation for this node.
@@ -714,85 +800,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     _exitPacketState = ExitPacketState.ExitPacketQueued;
                 }
-                _packetWriteQueue.Enqueue(packet);
-                DrainPacketQueue();
-            }
-
-            /// <summary>
-            /// Schedule a task to drain the packet write queue. We could have had a
-            /// dedicated thread that would pump the queue constantly, but
-            /// we don't want to allocate a dedicated thread per node (1MB stack)
-            /// </summary>
-            /// <remarks>Usually there'll be a single packet in the queue, but sometimes
-            /// a burst of SendData comes in, with 10-20 packets scheduled. In this case
-            /// the first scheduled task will drain all of them, and subsequent tasks
-            /// will run on an empty queue. I tried to write logic that avoids queueing
-            /// a new task if the queue is already being drained, but it didn't show any
-            /// improvement and made things more complicated.</remarks>
-            private void DrainPacketQueue()
-            {
-                // this lock is only necessary to protect a write to _packetWriteDrainTask field
-                lock (_packetWriteQueue)
-                {
-                    // average latency between the moment this runs and when the delegate starts
-                    // running is about 100-200 microseconds (unless there's thread pool saturation)
-                    _packetWriteDrainTask = _packetWriteDrainTask.ContinueWith(
-                        SendDataCoreAsync,
-                        this,
-                        TaskScheduler.Default).Unwrap();
-
-                    static async Task SendDataCoreAsync(Task _, object state)
-                    {
-                        NodeContext context = (NodeContext)state;
-                        while (context._packetWriteQueue.TryDequeue(out var packet))
-                        {
-                            MemoryStream writeStream = context._writeBufferMemoryStream;
-
-                            // clear the buffer but keep the underlying capacity to avoid reallocations
-                            writeStream.SetLength(0);
-
-                            ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
-                            try
-                            {
-                                writeStream.WriteByte((byte)packet.Type);
-
-                                // Pad for the packet length
-                                WriteInt32(writeStream, 0);
-                                packet.Translate(writeTranslator);
-
-                                int writeStreamLength = (int)writeStream.Position;
-
-                                // Now plug in the real packet length
-                                writeStream.Position = 1;
-                                WriteInt32(writeStream, writeStreamLength - 5);
-
-                                byte[] writeStreamBuffer = writeStream.GetBuffer();
-
-                                for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
-                                {
-                                    int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
-#pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
-                                    await context._serverToClientStream.WriteAsync(writeStreamBuffer, i, lengthToWrite, CancellationToken.None);
-#pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
-                                }
-
-                                if (IsExitPacket(packet))
-                                {
-                                    context._exitPacketState = ExitPacketState.ExitPacketSent;
-                                }
-                            }
-                            catch (IOException e)
-                            {
-                                // Do nothing here because any exception will be caught by the async read handler
-                                CommunicationsUtilities.Trace(context._nodeId, "EXCEPTION in SendData: {0}", e);
-                            }
-                            catch (ObjectDisposedException) // This happens if a child dies unexpectedly
-                            {
-                                // Do nothing here because any exception will be caught by the async read handler
-                            }
-                        }
-                    }
-                }
+                _packetChannel.Writer.TryWrite(packet);
             }
 
             private static bool IsExitPacket(INodePacket packet)
@@ -804,6 +812,14 @@ namespace Microsoft.Build.BackEnd
             /// Avoid having a BinaryWriter just to write a 4-byte int
             /// </summary>
             private static void WriteInt32(MemoryStream stream, int value)
+            {
+                stream.WriteByte((byte)value);
+                stream.WriteByte((byte)(value >> 8));
+                stream.WriteByte((byte)(value >> 16));
+                stream.WriteByte((byte)(value >> 24));
+            }
+
+            private static void WriteInt32(Stream stream, int value)
             {
                 stream.WriteByte((byte)value);
                 stream.WriteByte((byte)(value >> 8));
@@ -833,7 +849,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Wait up to 100ms until all remaining packets are sent.
                     // We don't need to wait long, just long enough for the Task to start running on the ThreadPool.
-                    await Task.WhenAny(_packetWriteDrainTask, Task.Delay(100));
+                    await Task.WhenAny(Task.Delay(100));
                 }
                 if (_exitPacketState == ExitPacketState.ExitPacketSent)
                 {
@@ -916,11 +932,29 @@ namespace Microsoft.Build.BackEnd
                 return true;
             }
 
+            private Dictionary<int, MemoryMappedFile> _readEndpoints = new Dictionary<int, MemoryMappedFile>();
+
+            private MemoryMappedFile getOrOpenFile(int nodeId)
+            {
+                if (_readEndpoints.TryGetValue(nodeId, out MemoryMappedFile MMF))
+                {
+                    return MMF;
+                }
+                else
+                {
+                    MMF = MemoryMappedFile.OpenExisting(String.Format("D:/bld/MSBuild_side_channel_other{0}", nodeId));
+                    _readEndpoints[nodeId] = MMF;
+                    return MMF;
+                }
+            }
+
+
+
 #if FEATURE_APM
             /// <summary>
             /// Callback invoked by the completion of a read of a header byte on one of the named pipes.
             /// </summary>
-            private void HeaderReadComplete(IAsyncResult result)
+            private async void HeaderReadComplete(IAsyncResult result)
             {
                 int bytesRead;
                 try
@@ -951,15 +985,54 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(_headerByte, 1, 4));
-                MSBuildEventSource.Log.PacketReadSize(packetLength);
+                if ((NodePacketType)_headerByte[0] == NodePacketType.MemoryMappedFilePacket)
+                {
+                    byte[] packetData = _readBufferMemoryStream.GetBuffer();
 
-                // Ensures the buffer is at least this length.
-                // It avoids reallocations if the buffer is already large enough.
-                _readBufferMemoryStream.SetLength(packetLength);
-                byte[] packetData = _readBufferMemoryStream.GetBuffer();
+                    await _clientToServerStream.ReadAsync(packetData, 0, 4);
 
-                _clientToServerStream.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
+                    int nodeId = _headerByte[1];
+                    nodeId += (int)_headerByte[2] << 8;
+                    nodeId += (int)_headerByte[3] << 16;
+                    nodeId += (int)_headerByte[4] << 24;
+                    int mmfOffset = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(packetData, 0, 3));
+
+                    var accessor = getOrOpenFile(nodeId).CreateViewStream(mmfOffset, 5);
+                    var realPacketType = (NodePacketType)accessor.ReadByte();
+
+                    var length = accessor.ReadByte();
+                    length += accessor.ReadByte() << 8;
+                    length += accessor.ReadByte() << 16;
+                    length += accessor.ReadByte() << 24;
+                    accessor.Dispose();
+                    accessor = getOrOpenFile(nodeId).CreateViewStream(mmfOffset + 5, length - 5);
+                    
+                    ITranslator readTranslator = BinaryTranslator.GetReadTranslator(accessor, _binaryReaderFactory);
+                    _packetFactory.DeserializeAndRoutePacket(_nodeId, realPacketType, readTranslator);
+                    if (realPacketType != NodePacketType.NodeShutdown)
+                    {
+                        // Read the next packet.
+                        BeginAsyncPacketRead();
+                    }
+                    else
+                    {
+                        Close();
+                    }
+
+                }
+                else
+                {
+                    int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(_headerByte, 1, 4));
+                    MSBuildEventSource.Log.PacketReadSize(packetLength);
+
+                    // Ensures the buffer is at least this length.
+                    // It avoids reallocations if the buffer is already large enough.
+                    _readBufferMemoryStream.SetLength(packetLength);
+                    byte[] packetData = _readBufferMemoryStream.GetBuffer();
+
+
+                    _clientToServerStream.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
+                }
             }
 #endif
 
@@ -996,6 +1069,8 @@ namespace Microsoft.Build.BackEnd
                 }
                 return true;
             }
+
+
 
 #if FEATURE_APM
             /// <summary>

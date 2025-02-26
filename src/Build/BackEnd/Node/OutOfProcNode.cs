@@ -696,6 +696,7 @@ namespace Microsoft.Build.Execution
 
             _buildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
 
+
             // Snapshot the current environment
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
@@ -834,6 +835,10 @@ namespace Microsoft.Build.Execution
             }
 
             _buildRequestEngine.InitializeForBuild(_loggingContext);
+
+#if NET472_OR_GREATER
+            _nodeEndpoint.currentNodeId = configuration.NodeId;
+#endif
 
             // Finally store off this configuration packet.
             _currentConfiguration = configuration;

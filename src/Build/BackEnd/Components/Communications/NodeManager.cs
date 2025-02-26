@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO.MemoryMappedFiles;
 using System.Threading;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -35,6 +36,8 @@ namespace Microsoft.Build.BackEnd
         /// Mapping of manager-produced node IDs to the provider hosting the node.
         /// </summary>
         private readonly Dictionary<int, INodeProvider> _nodeIdToProvider;
+
+        private readonly List<MemoryMappedFile> _memoryMappedFiles = new List<MemoryMappedFile>();
 
         /// <summary>
         /// The packet factory used to translate and route packets
