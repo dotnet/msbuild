@@ -158,7 +158,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void Timeout1()
+        public void Timeout()
         {
             // On non-Windows the exit code of a killed process is SIGKILL (137)
             int expectedExitCode = NativeMethodsShared.IsWindows ? -1 : 137;
