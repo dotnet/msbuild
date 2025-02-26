@@ -1064,14 +1064,14 @@ public sealed partial class TerminalLogger : INodeLogger
             count++;
             lock (_lock)
             {
-                if (count > 30)
+                if (count >= 30)
                 {
                     count = 0;
-                    DisplayNodes(true);
+                    DisplayNodes();
                 }
                 else
                 {
-                    DisplayNodes();
+                    DisplayNodes(false);
                 }
             }
         }
@@ -1083,7 +1083,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// Render Nodes section.
     /// It shows what all build nodes do.
     /// </summary>
-    internal void DisplayNodes(bool updateSize = false)
+    internal void DisplayNodes(bool updateSize = true)
     {
         var width = updateSize ? Terminal.Width : _currentFrame.Width;
         var height = updateSize ? Terminal.Height : _currentFrame.Height;
