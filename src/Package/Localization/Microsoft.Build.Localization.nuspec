@@ -31,7 +31,7 @@
     <file src="pt-BR\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\pt-BR\Microsoft.Build.Framework.resources.dll" />
     <file src="ru\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\ru\Microsoft.Build.Framework.resources.dll" />
     <file src="tr\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\tr\Microsoft.Build.Framework.resources.dll" />
-    <file src="zh-Hans\Microsoft.Build.Framework..resources.dll" target="lib\netstandard1.3\zh-Hans\Microsoft.Build.Framework.resources.dll" />
+    <file src="zh-Hans\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\zh-Hans\Microsoft.Build.Framework.resources.dll" />
     <file src="zh-Hant\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\zh-Hant\Microsoft.Build.Framework.resources.dll" />
 
   </files>
