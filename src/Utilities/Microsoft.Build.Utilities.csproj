@@ -63,9 +63,6 @@
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
       <Link>Shared\CopyOnWriteDictionary.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ErrorUtilities.cs">
-      <Link>Shared\ErrorUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>Shared\EscapingUtilities.cs</Link>
     </Compile>
@@ -116,9 +113,6 @@
     </Compile>
     <Compile Include="..\Shared\RegistryHelper.cs">
       <Link>Shared\RegistryHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ResourceUtilities.cs">
-      <Link>Shared\ResourceUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>Shared\TaskLoggingHelper.cs</Link>

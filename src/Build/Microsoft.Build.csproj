@@ -584,7 +584,6 @@
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectTargetElementLink.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectTaskElementLink.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskBodyElementLink.cs" />
-    <Compile Include="Resources\AssemblyResources.cs" />
     <Compile Include="Resources\Constants.cs" />
     <Compile Include="Resources\MSBuildAssemblyFileVersion.cs" />
     <!-- ######################## -->
@@ -615,9 +614,6 @@
     </Compile>
     <Compile Include="..\Shared\FileDelegates.cs">
       <Link>SharedUtilities\FileDelegates.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ErrorUtilities.cs">
-      <Link>Errors\ErrorUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>SharedUtilities\EscapingUtilities.cs</Link>
@@ -662,9 +658,6 @@
     </Compile>
     <Compile Include="..\Shared\ProjectWriter.cs">
       <Link>SharedUtilities\ProjectWriter.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ResourceUtilities.cs">
-      <Link>SharedUtilities\ResourceUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Tracing.cs" />
     <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />

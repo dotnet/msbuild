@@ -129,10 +129,8 @@
       <Link>VisualStudioConstants.cs</Link>
     </Compile>
     <Compile Include="..\Shared\AssemblyNameExtension.cs" />
-    <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\Shared\ConversionUtilities.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
-    <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\LanguageParser\token.cs" />
     <Compile Include="..\Shared\LanguageParser\tokenChar.cs" />
     <Compile Include="..\Shared\LanguageParser\tokenCharReader.cs" />
@@ -186,7 +184,6 @@
     <Compile Include="AssemblyFolder.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyRemapping.cs" />
-    <Compile Include="AssemblyResources.cs" />
     <Compile Include="AssignLinkMetadata.cs" />
     <Compile Include="AssignProjectConfiguration.cs" />
     <Compile Include="AssignTargetPath.cs" />

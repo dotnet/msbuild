@@ -72,12 +72,8 @@
     <Compile Include="..\Shared\Constants.cs" />
     <Compile Include="..\Shared\EnvironmentUtilities.cs" Link="EnvironmentUtilities.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
-    <Compile Include="..\Framework\ErrorUtilities.cs">
-      <Link>ErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ErrorUtilities.cs">
-      <Link>SharedErrorUtilities.cs</Link>
-    </Compile>
+    <Compile Include="..\Framework\ErrorUtilities.cs" />
+    <Compile Include="..\Framework\FrameworkErrorUtilities.cs" />
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>EscapingUtilities.cs</Link>
     </Compile>
@@ -170,7 +166,7 @@
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>ReadOnlyEmptyCollection.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ResourceUtilities.cs">
+    <Compile Include="..\Framework\Resources\ResourceUtilities.cs">
       <Link>ResourceUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Framework\StringBuilderCache.cs">
@@ -236,7 +232,7 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
+    <EmbeddedResource Include="..\Framework\Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
