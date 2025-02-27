@@ -2428,13 +2428,11 @@ Detailed Build Summary
         <note>{StrBegin="MSB3574: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
-        <source>
-      MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-      More information: https://aka.ms/binaryformatter-migration-guide
+        <source>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide
     </source>
-        <target state="new">
-      MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-      More information: https://aka.ms/binaryformatter-migration-guide
+        <target state="new">MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide
     </target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
@@ -6576,14 +6574,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundConflicts">
-        <source>
-      MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
-      {1}
-    </source>
-        <target state="new">
-      MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
-      {1}
-    </target>
+        <source>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</source>
+        <target state="new">MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</target>
         <note>{StrBegin="MSB3277: "}</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.FoundRelatedFile">

@@ -5032,9 +5032,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>{StrBegin="MSB3824: "}</comment>
   </data>
   <data name="GenerateResource.BinaryFormatterUse">
-    <value>
-      MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-      More information: https://aka.ms/binaryformatter-migration-guide
+    <value>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide
     </value>
     <comment>{StrBegin="MSB3825: "}</comment>
   </data>
@@ -5443,10 +5442,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>{StrBegin="MSB3276: "}</comment>
   </data>
   <data name="ResolveAssemblyReference.FoundConflicts">
-    <value>
-      MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
-      {1}
-    </value>
+    <value>MSB3277: Found conflicts between different versions of "{0}" that could not be resolved.
+{1}</value>
     <comment>{StrBegin="MSB3277: "}</comment>
   </data>
   <data name="ResolveAssemblyReference.LogAttributeFormat">
