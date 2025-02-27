@@ -10,6 +10,7 @@ using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -443,11 +444,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         // Lazy-init property returning the MSBuild engine resource manager
-        private static ResourceManager EngineResourceManager => s_engineResourceManager ?? (s_engineResourceManager = new ResourceManager(
-            "Microsoft.Build.Strings",
-            typeof(ProjectCollection).GetTypeInfo().Assembly));
+        private static ResourceManager EngineResourceManager => AssemblyResources.PrimaryResources;
 
-        private static ResourceManager s_engineResourceManager;
         private bool _reportTelemetry;
 
         // Gets the resource string given the resource ID

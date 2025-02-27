@@ -129,10 +129,8 @@
       <Link>VisualStudioConstants.cs</Link>
     </Compile>
     <Compile Include="..\Shared\AssemblyNameExtension.cs" />
-    <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\Shared\ConversionUtilities.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
-    <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\LanguageParser\token.cs" />
     <Compile Include="..\Shared\LanguageParser\tokenChar.cs" />
     <Compile Include="..\Shared\LanguageParser\tokenCharReader.cs" />
@@ -186,7 +184,6 @@
     <Compile Include="AssemblyFolder.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyRemapping.cs" />
-    <Compile Include="AssemblyResources.cs" />
     <Compile Include="AssignLinkMetadata.cs" />
     <Compile Include="AssignProjectConfiguration.cs" />
     <Compile Include="AssignTargetPath.cs" />
@@ -466,15 +463,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <!-- Resource Files -->
-    <EmbeddedResource Include="Resources\Strings.resx">
-      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
-      <Link>Resources\Strings.shared.resx</Link>
-      <SubType>Designer</SubType>
-      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
-    </EmbeddedResource>
     <EmbeddedResource Include="ManifestUtil\Resources\Strings.ManifestUtilities.resx">
       <LogicalName>$(AssemblyName).Strings.ManifestUtilities.resources</LogicalName>
       <SubType>Designer</SubType>

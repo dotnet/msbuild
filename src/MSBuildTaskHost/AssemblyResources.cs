@@ -17,7 +17,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Actual source of the resource string we'll be reading.
         /// </summary>
-        private static readonly ResourceManager s_resources = new ResourceManager("MSBuildTaskHost.Strings.Shared", Assembly.GetExecutingAssembly());
+        private static readonly ResourceManager s_resources = new ResourceManager("MSBuildTaskHost.Strings", Assembly.GetExecutingAssembly());
 
         /// <summary>
         /// Loads the specified resource string, either from the assembly's primary resources, or its shared resources.

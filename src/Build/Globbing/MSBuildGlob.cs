@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
@@ -170,7 +171,14 @@ namespace Microsoft.Build.Globbing
         {
             ErrorUtilities.VerifyThrowArgumentNull(globRoot);
             ErrorUtilities.VerifyThrowArgumentNull(fileSpec);
-            ErrorUtilities.VerifyThrowArgumentInvalidPath(globRoot, nameof(globRoot));
+
+            // ErrorUtilities.VerifyThrowArgumentInvalidPath was removed to decouple ErrorUtilities and FileUtilities
+            // This was the only call to ErrorUtilities.VerifyThrowArgumentInvalidPath in the entire codebase
+            // Original code: ErrorUtilities.VerifyThrowArgumentInvalidPath(globRoot, nameof(globRoot));
+            if (FileUtilities.PathIsInvalid(globRoot))
+            {
+                ErrorUtilities.ThrowArgument("Shared.ParameterCannotHaveInvalidPathChars", nameof(globRoot), globRoot);
+            }
 
             if (string.IsNullOrEmpty(globRoot))
             {

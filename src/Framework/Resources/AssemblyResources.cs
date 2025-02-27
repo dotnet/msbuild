@@ -14,6 +14,12 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class AssemblyResources
     {
+        private static readonly ResourceManager manager = new ResourceManager("Microsoft.Build.Framework.Strings", typeof(AssemblyResources).GetTypeInfo().Assembly);
+
+        public static ResourceManager PrimaryResources => manager;
+
+        public static ResourceManager SharedResources => manager;
+
         /// <summary>
         /// Loads the specified resource string, either from the assembly's primary resources, or its shared resources.
         /// </summary>
@@ -23,21 +29,11 @@ namespace Microsoft.Build.Shared
         internal static string GetString(string name)
         {
             // NOTE: the ResourceManager.GetString() method is thread-safe
-            string resource = s_resources.GetString(name, CultureInfo.CurrentUICulture);
-
-            if (resource == null)
-            {
-                resource = s_sharedResources.GetString(name, CultureInfo.CurrentUICulture);
-            }
+            string resource = manager.GetString(name, CultureInfo.CurrentUICulture);
 
             ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", name);
 
             return resource;
         }
-
-        // assembly resources
-        private static readonly ResourceManager s_resources = new ResourceManager("MSBuild.Strings", typeof(AssemblyResources).GetTypeInfo().Assembly);
-        // shared resources
-        private static readonly ResourceManager s_sharedResources = new ResourceManager("MSBuild.Strings.shared", typeof(AssemblyResources).GetTypeInfo().Assembly);
     }
 }

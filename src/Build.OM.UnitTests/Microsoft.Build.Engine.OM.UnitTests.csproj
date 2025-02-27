@@ -36,9 +36,7 @@
     <Compile Include="..\Shared\EncodingStringWriter.cs">
       <Link>EncodingStringWriter.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\Shared\FileDelegates.cs" />
-    <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>

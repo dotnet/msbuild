@@ -29,7 +29,7 @@
   <ItemGroup>
     <Compile Include="..\Shared\EscapingUtilities.cs" />
     <Compile Include="..\Shared\ProcessExtensions.cs" />
-    <Compile Include="..\Shared\ResourceUtilities.cs" />
+    <Compile Include="..\Framework\Resources\ResourceUtilities.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
   </ItemGroup>
 

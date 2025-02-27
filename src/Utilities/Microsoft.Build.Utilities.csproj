@@ -63,9 +63,6 @@
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
       <Link>Shared\CopyOnWriteDictionary.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ErrorUtilities.cs">
-      <Link>Shared\ErrorUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>Shared\EscapingUtilities.cs</Link>
     </Compile>
@@ -117,9 +114,6 @@
     <Compile Include="..\Shared\RegistryHelper.cs">
       <Link>Shared\RegistryHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ResourceUtilities.cs">
-      <Link>Shared\ResourceUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>Shared\TaskLoggingHelper.cs</Link>
     </Compile>
@@ -140,17 +134,5 @@
   <ItemGroup>
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
-
-    <EmbeddedResource Update="Resources\Strings.resx">
-      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
-      <SubType>Designer</SubType>
-      <Generator></Generator>
-    </EmbeddedResource>
-
-    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
-      <Link>Resources\Strings.shared.resx</Link>
-      <SubType>Designer</SubType>
-      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
-    </EmbeddedResource>
   </ItemGroup>
 </Project>
