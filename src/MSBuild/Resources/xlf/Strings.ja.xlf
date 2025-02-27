@@ -15,65 +15,6 @@
         <target state="translated">ビルドに失敗しました。プロパティ、項目、ターゲットの結果を取得できません。上の stderr で詳細を参照してください。</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildFinished">
-        <source>Build {0} in {1}s</source>
-        <target state="translated">{1} 秒後に {0} をビルド</target>
-        <note>
-      Overall build summary
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Failed">
-        <source>failed</source>
-        <target state="translated">失敗しました</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with {0} error(s)</source>
-        <target state="translated">{0} 件のエラーで失敗しました</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
-        <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="translated">{0} 件のエラーと {1} 件の警告で失敗しました</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with {0} warning(s)</source>
-        <target state="translated">{0} 件の警告付きで失敗しました</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Succeeded">
-        <source>succeeded</source>
-        <target state="translated">成功しました</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with {0} warning(s)</source>
-        <target state="translated">{0} 件の警告付きで成功しました</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildSummary">
-        <source>Build summary:</source>
-        <target state="translated">ビルドの概要:</target>
-        <note>
-      A header used by Terminal Logger to introduce the build summary.
-    </note>
-      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">コマンド ライン引数 = "{0}"</target>
@@ -91,14 +32,6 @@
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
         <target state="translated">MSBUILD : error MSB1027: MSBuild.rsp 自動応答ファイルや、自動応答ファイルによって参照される応答ファイルに -noAutoResponse スイッチを指定することはできません。</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="DurationDisplay">
-        <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
-        <note>
-        {0}: duration in seconds with 1 decimal point
-        's' should reflect the localized abbreviation for seconds
-      </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
@@ -130,7 +63,7 @@
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
                      MSBuild が、構成されているプロジェクト キャッシュ プラグインへの
-                     ファイル アクセスを報告するようにします。
+                     ファイル アクセスを報告します。
 
                      このフラグは実験的なものであり、意図したとおりに動作しない可能性があります。
     </target>
@@ -147,11 +80,11 @@
                      used, write out the values after the build.
     </source>
         <target state="translated">  -getProperty:propertyName,...
-                     評価後にビルドを実行せずに、1 つ以上の
-                     指定されたプロパティの値を書き出します。
-                     または、-targets オプションまたは -getTargetResult オプションが
-                     使用されている場合は、ビルド後に値を書き出します。
-    </target>
+                    1 つ以上の指定されたプロパティの値を書き出し
+                    評価後、ビルドを実行せずに、または
+                    -targets オプションまたは -getTargetResult オプションが
+                    使用して、ビルド後に値を書き出します。
+   </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -166,12 +99,12 @@
                      the values after the build.
     </source>
         <target state="translated">  -getItem:itemName,...
-                     評価後にビルドを実行せずに、1 つ以上の指定された項目の値と
-                     関連付けられたメタデータを書き出します。
-                     または、-targets オプションまたは -getTargetResult オプションが
-                     使用されている場合は、ビルド後に
-                     値を書き出します。
-    </target>
+                    1 つ以上の指定された項目の値を書き出し、
+                    評価後に関連付けられたメタデータを
+                    ビルドを実行せずに、または -targets オプション
+                    または -getTargetResult オプションが使用されている場合は、書き込み
+                    ビルド後の値。
+   </target>
         <note>
       LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -183,9 +116,9 @@
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                     1 つ以上のターゲットの出力値を書き出し、
-                     指定したターゲットが実行されます。
-    </target>
+                    1 つ以上のターゲットの出力値を書き出し、
+                    指定したターゲットが実行されます。
+   </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -208,20 +141,20 @@
                      (Short form: -fa)
     </source>
         <target state="translated">  -featureAvailability:featureName,...
-                     機能の可用性を確認します。結果は、文字列 "Undefined"、
-                     "Available"、"NotAvailable"、"Preview" の
-                     いずれかになります。
-                     - Undefined - 機能の可用性は未定義です
-                     (機能名は機能の可用性チェッカーに対して
-                     不明です)
-                     - NotAvailable - この機能は使用できません
-                     Undefined とは異なり、機能名は機能の可用性チェッカーが
-                     認識しており、このチェッカーは、この機能が現在の MSBuild エンジンで
-                     サポートされていないことを理解しています)
-                     - Available - この機能は使用可能です
-                     - Preview - 機能はプレビュー段階です (安定していません)
-                     (短い形式: -fa)
-    </target>
+                    機能の可用性を確認します。結果は、次のいずれかになります。
+                    文字列 "Undefined"、"Available"、"NotAvailable"、および
+                    "Preview" です。
+                    - Undefined - 機能の可用性は未定義です
+                    (機能名が機能の可用性に関して不明です
+                    チェッカー)
+                    - NotAvailable - この機能は使用できません
+                    Undefined とは異なり、機能名は機能に認識されています
+                    可用性チェッカーは、この機能が
+                    現在の MSBuild エンジンでサポートされていないことを理解しています)
+                    - Available - この機能は使用可能です
+                    - Preview - 機能はプレビュー段階です (安定していません)
+                    (短い形式: -fa)
+   </target>
         <note>
       LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -241,17 +174,17 @@
                      (Short form: -tl)
     </source>
         <target state="translated">  -terminalLogger[:auto,on,off]
-                     ターミナル ロガーを有効または無効にします。ターミナル ロガーは、
-                     本体で強化されたビルド出力をリアルタイムに提供します。
-                     この出力は、プロジェクトごとに論理的に整理されており、アクション可能な情報を
-                     強調表示するように設計されています。標準出力がリダイレクトされない場合のみ、
-                     auto を指定 (または引数を指定せずにオプションを使用) して、
-                     ターミナル ロガーを使用します。出力を解析しないでください。
-                     別の方法で出力を利用してください。残りの部分は将来のバージョンで
-                     変更されずに残ります。このオプションは、MSBuild 17.8 以降で
-                     利用可能です。
-                     (短い形式: -tl)
-    </target>
+                    ターミナル ロガーを有効または無効にします。ターミナル ロガーは
+                    本体のビルド出力がリアルタイムで強化され、
+                    プロジェクトごとに論理的に整理され、強調表示するように設計されています
+                    アクション可能な情報です。auto を指定する (またはオプションを使用する)
+                    引数を指定せずに) ターミナル ロガーを使用する場合は、
+                    標準出力はリダイレクトされません。出力を解析しないでください
+                    それ以外の場合は、将来変更されずに残っている
+                    バージョン。このオプションは、MSBuild 17.8 以降で利用可能です
+                    以降で。
+                    (短い形式: -tl)
+   </target>
         <note>
       LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -278,24 +211,25 @@
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                     ターミナル ロガーへのパラメーター。(短い形式: -tlp) 
-                     使用可能なパラメーター。
-                        default -- ターミナル ロガーの既定の動作を
-                        指定します。次のいずれかの値が必要です。
-                           - `on`、`true` の場合、TerminalLogger が無効である場合も
-                            TerminalLogger を強制的に使用します。
-                           - `off`、`false` の場合、TerminalLogger が有効である場合も
-                            TerminalLogger を使用しないように強制します。
-                           - `auto` の場合、ターミナルで TerminalLogger がサポートされており、
-                            セッションが stdout/stderr をリダイレクトしていない場合、
-                            TerminalLogger を有効にします
-                        verbosity-- このロガーの -verbosity 設定を
-                        オーバーライドします
-                        showCommandLine -- TaskCommandLineEvent メッセージを表示します
+                    ターミナル ロガーへのパラメーター。(短い形式: -tlp) 
+                    使用可能なパラメーター。
+                       default -- ターミナル 
+ の既定の動作を指定します
+                       ロガー。次のいずれかの値が必要です:
+                          - `on`、`true` は TerminalLogger を強制的に使用します
+                           無効である場合も同様です。
+                          - `off`、`false` は TerminalLogger を使用しないように強制します
+                           有効である場合も同様です。
+                          - `auto` は、次の場合にターミナルで TerminalLogger を有効にします
+                           サポートされており、セッションがリダイレクトされていない場合です
+                           stdout/stderr
+                       verbosity-- 下記の verbosity 設定をオーバーライドします
+                       logger
+                       showCommandLine -- TaskCommandLineEvent メッセージを表示します
 
-                      例: 
-                        -tlp:default=auto;verbosity=diag;shownCommandLine
-    </target>
+                     例: 
+                       -tlp:default=auto;verbosity=diag;shownCommandLine
+   </target>
         <note>
       LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -310,12 +244,12 @@
                      This writes the value of property Bar into Biz.txt.
     </source>
         <target state="translated">  -getResultOutputFile:file
-                     get* からの出力をファイルにリダイレクトします。
+                    get* からの出力をファイルにリダイレクトします。
 
-                     例: 
-                     -getProperty:Bar -getResultOutputFile:Biz.txt
-                     これにより、プロパティ Bar の値が Biz.txt に書き込まれます。
-    </target>
+                    例: 
+                    -getProperty:Bar -getResultOutputFile:Biz.txt
+                    これにより、プロパティ Bar の値が Biz.txt に書き込まれます。
+   </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -330,7 +264,7 @@
         <target state="translated">  -check
                      ビルド中に BuildChecks を有効にします。
                      BuildCheck を使用すると、ビルドのプロパティを保証するための
-                     ルールを評価できます。詳細については、aka.ms/buildcheck を参照してください
+                     評価ルールが有効になります。詳細については、aka.ms/buildcheck を参照してください
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -349,7 +283,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: ターミナル ロガーの値が無効です。'auto'、'true'、または 'false' のいずれかである必要があります。{0}</target>
+        <target state="translated">MSBUILD : error MSB1065: ターミナル ロガーの値が無効です。'auto'、'true'、または 'false' のいずれかである必要があります。 {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1735,39 +1669,6 @@
         <target state="translated">プロセス = "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectFinished_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3} 秒)</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_OutputPath">
-        <source> → {0}</source>
-        <target state="translated"> → {0}</target>
-        <note>
-      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
-      {0}: VT100 coded hyperlink to project output directory
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4} 秒)</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
       <trans-unit id="ProjectNotFoundError">
         <source>MSBUILD : error MSB1009: Project file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1009: プロジェクト ファイルが存在しません。</target>
@@ -1835,7 +1736,7 @@
       </trans-unit>
       <trans-unit id="SAC">
         <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
-        <target state="translated">Windows レジストリ キー VerifiedAndReputablePolicyState に基づいており、SAC 状態 = {0} です。</target>
+        <target state="translated">Windows レジストリ キー VerifiedAndReputablePolicyState に基づいて、SAC 状態 = {0}。</target>
         <note>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Enforcement">
@@ -1916,59 +1817,6 @@
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
         <target state="translated">出力がファイルにリダイレクトされているため、ターミナル ロガーは使用されませんでした。</target>
         <note />
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_NoTF">
-        <source>{0}{1} test {2} ({3}s)</source>
-        <target state="translated">{0}{1} テスト {2} ({3} 秒)</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_WithTF">
-        <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} テスト {2} {3} ({4} 秒)</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="TestSummary_BannerAndTotal">
-        <source>Test summary: total: {0}</source>
-        <target state="translated">テスト概要: 合計: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Duration">
-        <source>duration: {0}s</source>
-        <target state="translated">期間: {0} 秒</target>
-        <note>
-      {0} whole number
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Failed">
-        <source>failed: {0}</source>
-        <target state="translated">失敗数: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Skipped">
-        <source>skipped: {0}</source>
-        <target state="translated">スキップ済み数: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Succeeded">
-        <source>succeeded: {0}</source>
-        <target state="translated">成功数: {0}</target>
-        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
@@ -2051,29 +1899,6 @@
         <source>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1047: 前処理するファイルが無効です。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1047: "}</note>
-      </trans-unit>
-      <trans-unit id="LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: Logger のインスタンスを作成できません。{0}</target>
-        <note>{StrBegin="MSBUILD : error MSB1021: "}
-      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
-      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
-      </trans-unit>
-      <trans-unit id="LoggerNotFoundError">
-        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="translated">MSBUILD : error MSB1020: Logger が見つかりませんでした。次のことを確認してください。1.)指定した logger 名が logger クラス名と同一であること。2.)logger クラスが public であり Microsoft.Build.Framework.ILogger インターフェイスを実装すること。3.)logger アセンブリへのパスが正しいこと、または指定されたアセンブリ名のみを使って logger が読み込まれること。</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
-      logger class must exist in the given assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectUpgradeNeededToVcxProj">
-        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
-        <target state="translated">MSBUILD : error MSB4192: プロジェクト ファイル "{0}" は ".vcproj" または ".dsp" ファイル形式であり、MSBuild では直接ビルドできません。Visual Studio IDE でファイルを開くか、変換ツールを実行して、プロジェクトを変換してください。または、".vcproj" の場合は、MSBuild を使用して、このプロジェクトを含むソリューション ファイルを代わりにビルドできます。</target>
-        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
       <trans-unit id="NeedJustMyCode">
         <source>If MSBuild debugging does not work correctly, please verify that the "Just My Code" feature is enabled in Visual Studio, and that you have selected the managed debugger.</source>
@@ -2368,6 +2193,29 @@
         <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
         <target state="translated">MSBUILD : エラー MSB1054: プロファイラーの結果を生成するには、ファイル名を指定する必要があります。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XMake.LoggerCreationError">
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
+        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1021: "}
+      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
+      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
+      </trans-unit>
+      <trans-unit id="XMake.LoggerNotFoundError">
+        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
+        <target state="new">MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
+      logger class must exist in the given assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="XMake.ProjectUpgradeNeededToVcxProj">
+        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
+        <target state="new">MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</target>
+        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
     </body>
   </file>

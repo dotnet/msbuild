@@ -15,6 +15,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.TelemetryInfra;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
 #nullable disable
@@ -286,6 +287,9 @@ namespace Microsoft.Build.BackEnd
                     IBuildCheckManagerProvider buildCheckProvider = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider);
                     var buildCheckManager = buildCheckProvider!.Instance;
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
+                    // Flush and send the final telemetry data if they are being collected
+                    ITelemetryForwarder telemetryForwarder = (_componentHost.GetComponent(BuildComponentType.TelemetryForwarder) as TelemetryForwarderProvider)!.Instance;
+                    telemetryForwarder.FinalizeProcessing(_nodeLoggingContext);
                     // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
                     buildCheckProvider.ShutdownComponent();
                 },
@@ -1426,7 +1430,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
-                    using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
+                    using (StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true))
                     {
                         string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
                         file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, DateTime.UtcNow.Ticks, message);
