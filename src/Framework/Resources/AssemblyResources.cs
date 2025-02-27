@@ -25,19 +25,12 @@ namespace Microsoft.Build.Shared
             // NOTE: the ResourceManager.GetString() method is thread-safe
             string resource = s_resources.GetString(name, CultureInfo.CurrentUICulture);
 
-            if (resource == null)
-            {
-                resource = s_sharedResources.GetString(name, CultureInfo.CurrentUICulture);
-            }
-
             ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", name);
 
             return resource;
         }
 
         // assembly resources
-        private static readonly ResourceManager s_resources = new ResourceManager("MSBuild.Strings", typeof(AssemblyResources).GetTypeInfo().Assembly);
-        // shared resources
-        private static readonly ResourceManager s_sharedResources = new ResourceManager("MSBuild.Strings.shared", typeof(AssemblyResources).GetTypeInfo().Assembly);
+        private static readonly ResourceManager s_resources = new ResourceManager("Micrisift.Build.Framework.Strings", typeof(AssemblyResources).GetTypeInfo().Assembly);
     }
 }

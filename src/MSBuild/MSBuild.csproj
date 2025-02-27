@@ -130,7 +130,6 @@
     <Compile Include="..\Shared\StringExtensions.cs" />
     <Compile Include="..\Shared\ConversionUtilities.cs" />
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="AssemblyResources.cs" />
     <Compile Include="AutomaticEncodingRestorer.cs" />
     <Compile Include="CommandLineSwitches.cs" />
     <Compile Include="CommandLineSwitchException.cs" />
@@ -151,15 +150,6 @@
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
     <!-- Resource Files -->
-    <EmbeddedResource Include="Resources\Strings.resx">
-      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
-      <Link>Resources\Strings.shared.resx</Link>
-      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <!-- Content Files -->
     <Content Include="MSBuild.ico" Pack="false" />
     <Content Include="MSBuild.rsp" Pack="false">
@@ -208,7 +198,7 @@
 
   <Target Name="AvoidValueTupleConflict" BeforeTargets="ResolveAssemblyReferences">
     <ItemGroup>
-      <Reference Remove="@(Reference->WithMetadataValue(`NuGetPackageId`, `System.ValueTuple`))" />
+      <Reference Remove="@(Reference-&gt;WithMetadataValue(`NuGetPackageId`, `System.ValueTuple`))" />
     </ItemGroup>
   </Target>
 
