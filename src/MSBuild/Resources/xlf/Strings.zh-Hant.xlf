@@ -2196,7 +2196,7 @@
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</target>
+        <target state="translated">MSBUILD : error MSB1021: 無法建立記錄器的執行個體。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
@@ -2204,7 +2204,7 @@
       </trans-unit>
       <trans-unit id="XMake.LoggerNotFoundError">
         <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="new">MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</target>
+        <target state="translated">MSBUILD : error MSB1020: 找不到記錄器。請檢查下列事項: 1.) 指定的記錄器名稱與記錄器類別的名稱相同。2.) 記錄器類別為 "public" 且實作 Microsoft.Build.Framework.ILogger 介面。3.) 記錄器組件的路徑為正確，或記錄器只能使用所提供的組件名稱載入。</target>
         <note>
       {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
@@ -2214,7 +2214,7 @@
       </trans-unit>
       <trans-unit id="XMake.ProjectUpgradeNeededToVcxProj">
         <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
-        <target state="new">MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</target>
+        <target state="translated">MSBUILD : error MSB4192: 專案檔 "{0}" 的檔案格式為 ".vcproj" 或 ".dsp"，MSBuild 無法直接加以建置。請在 Visual Studio IDE 中開啟此專案或執行轉換工具加以轉換，若是 ".vcproj"，則改為使用 MSBuild 建置包含專案的方案檔。</target>
         <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
     </body>
