@@ -3258,13 +3258,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>All build submissions in a build must use project instances originating from the same project collection.</value>
     <comment>This occurs if a client tries to add two BuildSubmissions to a build, each involving a ProjectInstance originating in different ProjectCollection. This is not allowed.</comment>
   </data>
-  <data name="BuildStarted" xml:space="preserve">
-    <value>Build started.</value>
-  </data>
-  <data name="FileLocation" xml:space="preserve">
-    <value>{0} ({1},{2})</value>
-    <comment>A file location to be embedded in a string.</comment>
-  </data>
   <data name="MSBuild.CannotRebaseOutputItemPath" xml:space="preserve">
     <value>MSB3203: The output path "{0}" cannot be rebased. {1}</value>
     <comment>{StrBegin="MSB3203: "}UE: This message is shown when the user asks the "MSBuild" task to rebase the paths of its output items relative to the project from where the "MSBuild" task is called (as opposed to the project(s) on which the "MSBuild" task is called), and one of the output item paths is invalid. LOCALIZATION: "{1}" is a localized message from a CLR/FX exception explaining the problem.</comment>
@@ -4422,30 +4415,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB3099: Invalid assembly name "{0}". {1}</value>
     <comment>{StrBegin="MSB3099: "}UE: This message is shown when RegisterAssembly or UnregisterAssembly is passed an assembly with an invalid filename. "{0}" is the name of the file, and "{1}" is a message explaining the problem. LOCALIZATION: "{1}" is a localized message.</comment>
   </data>
-  <data name="General.InvalidPropertyError" UESanitized="false" Visibility="Public">
-    <value>MSB3100: Syntax for "{0}" parameter is not valid ({1}). Correct syntax is {0}="&lt;name&gt;=&lt;value&gt;".</value>
-    <comment>
-      {StrBegin="MSB3100: "}This error is shown if the user does any of the following:
-      Properties="foo"              (missing property value)
-      Properties="=4"               (missing property name)
-      The user must pass in an actual property name and value, as in Properties="Configuration=Debug".
-    </comment>
-  </data>
-  <data name="General.GlobalProperties">
-    <value>Global Properties:</value>
-  </data>
-  <data name="General.UndefineProperties">
-    <value>Removing Properties:</value>
-  </data>
-  <data name="General.OverridingProperties">
-    <value>Overriding Global Properties for project "{0}" with:</value>
-  </data>
-  <data name="General.AdditionalProperties">
-    <value>Additional Properties for project "{0}":</value>
-  </data>
-  <data name="General.ProjectUndefineProperties">
-    <value>Removing Properties for project "{0}":</value>
-  </data>
   <data name="General.InvalidResxFile">
     <value>MSB3103: Invalid Resx file. {0}</value>
     <comment>{StrBegin="MSB3103: "}</comment>
@@ -4487,10 +4456,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="General.ToolCommandFailed">
     <value>MSB3093: The command exited with code {0}.</value>
     <comment>{StrBegin="MSB3093: "}</comment>
-  </data>
-  <data name="General.TwoVectorsMustHaveSameLength">
-    <value>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</value>
-    <comment>{StrBegin="MSB3094: "}</comment>
   </data>
   <data name="General.TaskRequiresWindows">
     <value>MSB3096: Task "{0}" is only supported when building on Windows.</value>
@@ -5166,50 +5131,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="Move.SourceIsDirectory">
     <value>MSB3681: The source file "{0}" is a directory. The "Move" task does not support moving directories.</value>
     <comment>{StrBegin="MSB3681: "}</comment>
-  </data>
-  <!--
-        The MSBuild message bucket is: MSB3201 - MSB3210
-
-        If this bucket overflows, pls. contact 'vsppbdev'.
-  -->
-  <data name="MSBuild.CannotRebaseOutputItemPath" UESanitized="false" Visibility="Public">
-    <value>MSB3203: The output path "{0}" cannot be rebased. {1}</value>
-    <comment>{StrBegin="MSB3203: "}UE: This message is shown when the user asks the "MSBuild" task to rebase the paths of its output items relative to the project from where the "MSBuild" task is called (as opposed to the project(s) on which the "MSBuild" task is called), and one of the output item paths is invalid. LOCALIZATION: "{1}" is a localized message from a CLR/FX exception explaining the problem.</comment>
-  </data>
-  <data name="MSBuild.ProjectFileNotFound" UESanitized="false" Visibility="Public">
-    <value>MSB3202: The project file "{0}" was not found.</value>
-    <comment>
-      {StrBegin="MSB3202: "}UE: This message is shown when the user passes a non-existent project file to the MSBuild task, in the "Projects" parameter.
-      and they have not specified the SkipNonexistentProjects parameter, or it is set to false.
-    </comment>
-  </data>
-  <data name="MSBuild.ProjectFileNotFoundMessage" UESanitized="false" Visibility="Public">
-    <value>Skipping project "{0}" because it was not found.</value>
-    <comment>UE: This message is shown when the user passes a non-existent project file to the MSBuild task, in the "Projects" parameter, and they have specified the SkipNonexistentProjects parameter.</comment>
-  </data>
-  <data name="MSBuild.ProjectUpgradeNeededToVcxProj">
-    <value>MSB3204: The project file "{0}" is in the ".vcproj" file format, which MSBuild no longer supports. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or use MSBuild 3.5 or earlier to build it.</value>
-    <comment>{StrBegin="MSB3204: "} LOC: ".vcproj" should not be localized</comment>
-  </data>
-  <data name="MSBuild.InvalidSkipNonexistentProjectValue">
-    <value>MSB3205: SkipNonexistentProject can only accept values of "True", "False" and "Build".</value>
-    <comment>{StrBegin="MSB3205: "} LOC: "SkipNonexistentProject", "True", "False" and "Build" should not be localized</comment>
-  </data>
-  <data name="MSBuild.SkippingRemainingProjects">
-    <value>The MSBuild task is skipping the remaining projects because the StopOnFirstFailure parameter was set to true.</value>
-    <comment>LOCALIZATION:  Do not localize the words "MSBuild" or "StopOnFirstFailure".</comment>
-  </data>
-  <data name="MSBuild.SkippingRemainingTargets">
-    <value>The MSBuild task is skipping the remaining targets because the StopOnFirstFailure parameter was set to true.</value>
-    <comment>LOCALIZATION:  Do not localize the words "MSBuild" or "StopOnFirstFailure".</comment>
-  </data>
-  <data name="MSBuild.NotBuildingInParallel">
-    <value>Overriding the BuildingInParallel property by setting it to false. This is due to the system being run in single process mode with StopOnFirstFailure set to true.</value>
-    <comment>LOCALIZATION:  Do not localize the words "MSBuild", "BuildingInParallel", or "StopOnFirstFailure".</comment>
-  </data>
-  <data name="MSBuild.NoStopOnFirstFailure">
-    <value>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</value>
-    <comment>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</comment>
   </data>
   <!--
         The ReadLinesFromFile message bucket is: MSB3501 - MSB3510.
@@ -7345,9 +7266,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</value>
     <comment>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</comment>
   </data>
-  <data name="BuildStarted" xml:space="preserve">
-    <value>Build started.</value>
-  </data>
   <data name="ConflictingTaskAssembly" xml:space="preserve">
     <value>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</value>
     <comment>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</comment>
@@ -7357,10 +7275,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="DeprecatedEventSerialization" xml:space="preserve">
     <value>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</value>
-  </data>
-  <data name="FileLocation" xml:space="preserve">
-    <value>{0} ({1},{2})</value>
-    <comment>A file location to be embedded in a string.</comment>
   </data>
   <data name="ModifyingTaskHostEnvironmentHeader" xml:space="preserve">
     <value>Making the following modifications to the environment received from the parent node before applying it to the task host:</value>
@@ -7391,10 +7305,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="UnrecognizedToolsVersion" xml:space="preserve">
     <value>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</value>
     <comment>{StrBegin="MSB4132: "}LOCALIZATION: {1} contains a comma separated list.</comment>
-  </data>
-  <data name="NameInvalid" xml:space="preserve">
-    <value>MSB5016: The name "{0}" contains an invalid character "{1}".</value>
-    <comment>{StrBegin="MSB5016: "}</comment>
   </data>
   <data name="Shared.CannotChangeItemSpecModifiers" xml:space="preserve">
     <value>"{0}" is a reserved item metadata, and cannot be modified or deleted.</value>
