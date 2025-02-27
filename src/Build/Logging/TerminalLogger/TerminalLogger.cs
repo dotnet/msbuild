@@ -1064,6 +1064,7 @@ public sealed partial class TerminalLogger : INodeLogger
             count++;
             lock (_lock)
             {
+                // Querying the terminal for it's dimensions is expensive, so we only do it every 30 frames e.g. once a second.
                 if (count >= 30)
                 {
                     count = 0;
