@@ -1,4 +1,4 @@
-﻿# editorconfig.org
+# editorconfig.org
 
 # top-most EditorConfig file
 root = true
@@ -448,3 +448,18 @@ dotnet_diagnostic.xUnit1031.severity = none
 # The latter brings incosistency in the codebase and some times in one test case.
 # So we are disabling this rule with respect to the above mentioned reasons.
 dotnet_diagnostic.xUnit2013.severity = none
+
+
+# Build Checks
+[*.{csproj,proj,metaproj,props,swixproj}]
+build_check.BC0201.Severity=none
+build_check.BC0202.Severity=none
+build_check.BC0203.Severity=none
+
+build_check.BC0101.Severity=suggestion
+build_check.BC0102.Severity=suggestion
+build_check.BC0103.Severity=suggestion
+build_check.BC0104.Severity=suggestion
+build_check.BC0105.Severity=suggestion
+build_check.BC0106.Severity=suggestion
+build_check.BC0107.Severity=suggestion
