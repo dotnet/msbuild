@@ -106,10 +106,10 @@ internal sealed class ExecCliBuildCheck : Check
             _knownBuildCommand = knownBuildCommand;
         }
 
-        public KnownBuildCommand(string knownBuildCommand, string[]? excludedSwitches = null)
+        public KnownBuildCommand(string knownBuildCommand, string[] excludedSwitches)
             : this(knownBuildCommand)
         {
-            _excludedSwitches = excludedSwitches ?? [];
+            _excludedSwitches = excludedSwitches;
         }
 
         public string ToolName => _knownBuildCommand.Split(' ').FirstOrDefault()!;
