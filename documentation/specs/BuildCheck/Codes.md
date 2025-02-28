@@ -12,7 +12,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0106](#bc0106---copytooutputdirectoryalways-should-be-avoided) | Warning | N/A | 9.0.200 | CopyToOutputDirectory='Always' should be avoided. |
 | [BC0107](#bc0107---targetframework-and-targetframeworks-specified-together) | Warning | N/A | 9.0.200 | TargetFramework and TargetFrameworks specified together. |
 | [BC0108](#bc0108---targetframework-or-targetframeworks-specified-in-non-sdk-style-project) | Warning | N/A | 9.0.300 | TargetFramework or TargetFrameworks specified in non-SDK style project. |
-| [BC0109](#bc0109---building-using-the-exec-task) | Warning | N/A | 9.0.300 | Building using dotnet CLI in the Exec task. |
+| [BC0109](#bc0109---building-using-the-exec-task) | Warning | N/A | 9.0.300 | Building using the Exec task. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
 | [BC0203](#bc0203----property-declared-but-never-used) | None | Project | 9.0.100 | Property declared but never used. |
