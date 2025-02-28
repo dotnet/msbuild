@@ -17,9 +17,12 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Add tags to the activity from a <see cref="IActivityTelemetryDataHolder"/>.
         /// </summary>
-        public static Activity WithTags(this Activity activity, IActivityTelemetryDataHolder dataHolder)
+        public static Activity WithTags(this Activity activity, IActivityTelemetryDataHolder? dataHolder)
         {
-            activity.WithTags(dataHolder.GetActivityProperties());
+            if (dataHolder != null)
+            {
+                activity.WithTags(dataHolder.GetActivityProperties());
+            }
             return activity;
         }
 
@@ -59,7 +62,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Depending on the platform, hash the value using an available mechanism.
         /// </summary>
-        private static object GetHashed(object value)
+        internal static string GetHashed(object value)
         {
             return Sha256Hasher.Hash(value.ToString() ?? "");
         }
