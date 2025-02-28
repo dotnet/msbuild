@@ -141,9 +141,9 @@ Make sure the Target Framework is specified appropriately for your project.
 <a name="BC0109"></a>
 ## BC0109 - Building using the Exec task.
 
-"The 'Exec' task should be used to build projects."
+"The 'Exec' task should not be used to build projects."
 
-Building projects using the dotnet/msbuild/nuget CLI in the `Exec` task is not recommended, as it spawns a separate build process that the MSBuild engine cannot track. Please use the [MSBuild task](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-task) instead.
+Building projects using the dotnet/msbuild/nuget CLI in the `Exec` task is not recommended, as it spawns a separate build process that the MSBuild engine cannot track. Please use the [MSBuild task](https://learn.microsoft.com/visualstudio/msbuild/msbuild-task) instead.
 
 
 <a name="BC0201"></a>
