@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading;
 
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
@@ -1423,9 +1424,26 @@ namespace Microsoft.Build.BackEnd
 
                                     static IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(IDictionary customMetadata)
                                     {
-                                        foreach (DictionaryEntry de in customMetadata)
+                                        if (customMetadata is CopyOnWriteDictionary<string> copyOnWriteDictionary)
                                         {
-                                            yield return new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value));
+                                            foreach (KeyValuePair<string, string> kvp in copyOnWriteDictionary)
+                                            {
+                                                yield return new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.Escape(kvp.Value));
+                                            }
+                                        }
+                                        else if (customMetadata is Dictionary<string, string> dictionary)
+                                        {
+                                            foreach (KeyValuePair<string, string> kvp in dictionary)
+                                            {
+                                                yield return new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.Escape(kvp.Value));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            foreach (DictionaryEntry de in customMetadata)
+                                            {
+                                                yield return new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value));
+                                            }
                                         }
                                     }
                                 }
