@@ -112,7 +112,7 @@ internal sealed class ExecCliBuildCheck : Check
             _excludedSwitches = excludedSwitches;
         }
 
-        public string ToolName => _knownBuildCommand.Split(' ').FirstOrDefault()!;
+        public string ToolName => _knownBuildCommand.Split(' ').First();
 
         public bool IsMatch(string execCommand)
         {
