@@ -539,7 +539,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 var content = """
                 <Project>
                     <PropertyGroup>
-                       <NoWarn>NAT011,NAT012</NoWarn>
+                       <MSBuildWarningsAsMessages>NAT011,NAT012</MSBuildWarningsAsMessages>
                     </PropertyGroup>
 
                     <Target Name='Build'>
