@@ -551,7 +551,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(content);
 
                 MockLogger logger = proj.BuildProjectExpectSuccess();
-                logger.WarningCount.ShouldBe(2);
+                logger.WarningCount.ShouldBe(0);
                 logger.ErrorCount.ShouldBe(0);
             }
         }
