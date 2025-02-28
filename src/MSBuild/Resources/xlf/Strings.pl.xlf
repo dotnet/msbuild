@@ -2188,7 +2188,7 @@ dzienników                     tekstowych i wykorzystać w innych narzędziach 
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</target>
+        <target state="translated">MSBUILD : error MSB1021: nie można utworzyć wystąpienia rejestratora. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
@@ -2196,7 +2196,7 @@ dzienników                     tekstowych i wykorzystać w innych narzędziach 
       </trans-unit>
       <trans-unit id="XMake.LoggerNotFoundError">
         <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="new">MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</target>
+        <target state="translated">MSBUILD : error MSB1020: Nie można odnaleźć rejestratora. Sprawdź, czy: 1.) Określona nazwa rejestratora jest taka sama jak nazwa klasy rejestratora. 2.) Klasą rejestratora jest klasa „public”, która implementuje interfejs Microsoft.Build.Framework.ILogger. 3.) Ścieżka do zestawu rejestratora jest prawidłowa lub rejestrator można załadować wyłącznie przy użyciu podanej nazwy zestawu.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
@@ -2206,7 +2206,7 @@ dzienników                     tekstowych i wykorzystać w innych narzędziach 
       </trans-unit>
       <trans-unit id="XMake.ProjectUpgradeNeededToVcxProj">
         <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
-        <target state="new">MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</target>
+        <target state="translated">MSBUILD : error MSB4192: Plik projektu „{0}” ma format „.vcproj” lub „.dsp”, którego program MSBuild nie może skompilować bezpośrednio. Przekonwertuj projekt, otwierając go w programie Visual Studio IDE lub uruchamiając narzędzie konwersji, albo (w przypadku pliku „.vcproj”) użyj programu MSBuild, aby utworzyć plik rozwiązania zawierający ten projekt.</target>
         <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
     </body>
