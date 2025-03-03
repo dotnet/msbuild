@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - vs1**
     paths:
       - 'eng/Versions.props'
 
