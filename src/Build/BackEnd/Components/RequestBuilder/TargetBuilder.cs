@@ -91,6 +91,11 @@ namespace Microsoft.Build.BackEnd
         private bool _legacyCallTargetContinueOnError;
 
         /// <summary>
+        /// Flag indicating whether telemetry is requested.
+        /// </summary>
+        private bool _isTelemetryRequested;
+
+        /// <summary>
         /// Builds the specified targets.
         /// </summary>
         /// <param name="loggingContext">The logging context for the project.</param>
@@ -214,6 +219,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(host);
             _componentHost = host;
+            _isTelemetryRequested = host.BuildParameters.IsTelemetryEnabled;
         }
 
         /// <summary>
@@ -518,6 +524,11 @@ namespace Microsoft.Build.BackEnd
                         // CallTarget, make sure we don't contribute this failure to the overall success of the build.
                         targetResult.TargetFailureDoesntCauseBuildFailure = _legacyCallTargetContinueOnError;
 
+                        if (_isTelemetryRequested)
+                        {
+                            targetResult.TargetLocation = currentTargetEntry.Target.Location;
+                        }
+
                         // This target is no longer actively building.
                         _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);
 
@@ -546,9 +557,8 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True to skip the target, false otherwise.</returns>
         private bool CheckSkipTarget(ref bool stopProcessingStack, TargetEntry currentTargetEntry)
         {
-            if (_buildResult.HasResultsForTarget(currentTargetEntry.Name))
+            if (_buildResult.TryGetResultsForTarget(currentTargetEntry.Name, out TargetResult targetResult))
             {
-                TargetResult targetResult = _buildResult[currentTargetEntry.Name] as TargetResult;
                 ErrorUtilities.VerifyThrowInternalNull(targetResult, "targetResult");
 
                 if (targetResult.ResultCode != TargetResultCode.Skipped)
@@ -665,12 +675,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Don't build any Before or After targets for which we already have results.  Unlike other targets,
                     // we don't explicitly log a skipped-with-results message because it is not interesting.
-                    if (_buildResult.HasResultsForTarget(targetSpecification.TargetName))
+                    if (_buildResult.TryGetResultsForTarget(targetSpecification.TargetName, out TargetResult targetResult) && targetResult.ResultCode != TargetResultCode.Skipped)
                     {
-                        if (_buildResult[targetSpecification.TargetName].ResultCode != TargetResultCode.Skipped)
-                        {
-                            continue;
-                        }
+                        continue;
                     }
                 }
 

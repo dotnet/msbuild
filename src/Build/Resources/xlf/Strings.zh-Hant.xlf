@@ -261,6 +261,16 @@
         <target state="translated">專案建置不受信任的下載資料夾。</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildFinished">
+        <source>Build {0} in {1}s</source>
+        <target state="translated">在 {1} 秒內建置 {0}</target>
+        <note>
+      Overall build summary
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">問題建立失敗。建置提早結束，因為它遇到不是最新的目標或工作。</target>
@@ -275,6 +285,55 @@
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">無法完成作業，因為建置已經在進行中。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildResult_Failed">
+        <source>failed</source>
+        <target state="translated">失敗</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrors">
+        <source>failed with {0} error(s)</source>
+        <target state="translated">失敗，有 {0} 個錯誤</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
+        <source>failed with {0} error(s) and {1} warning(s)</source>
+        <target state="translated">失敗，有 {0} 個錯誤和 {1} 個警告</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithWarnings">
+        <source>failed with {0} warning(s)</source>
+        <target state="translated">失敗，有 {0} 個警告</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_Succeeded">
+        <source>succeeded</source>
+        <target state="translated">成功</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_SucceededWithWarnings">
+        <source>succeeded with {0} warning(s)</source>
+        <target state="translated">成功但有 {0} 個警告</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildSummary">
+        <source>Build summary:</source>
+        <target state="translated">組建摘要:</target>
+        <note>
+      A header used by Terminal Logger to introduce the build summary.
+    </note>
       </trans-unit>
       <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
         <source>MSB4252: Project "{0}" with global properties
@@ -386,6 +445,14 @@
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: 已嘗試建立相同工作的多個覆寫: {0}</target>
         <note>{StrBegin="MSB4275: "}</note>
+      </trans-unit>
+      <trans-unit id="DurationDisplay">
+        <source>({0:F1}s)</source>
+        <target state="translated">({0:F1} 秒)</target>
+        <note>
+        {0}: duration in seconds with 1 decimal point
+        's' should reflect the localized abbreviation for seconds
+      </note>
       </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
@@ -656,6 +723,39 @@
         <target state="translated">MSB4268: 無法正確關閉專案快取。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectFinished_NoTF">
+        <source>{0}{1} {2} ({3}s)</source>
+        <target state="translated">{0}{1} {2} ({3} 秒)</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_OutputPath">
+        <source> → {0}</source>
+        <target state="translated"> → {0}</target>
+        <note>
+      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
+      {0}: VT100 coded hyperlink to project output directory
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_WithTF">
+        <source>{0}{1} {2} {3} ({4}s)</source>
+        <target state="translated">{0}{1} {2} {3} ({4} 秒)</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph 不支援設有 ToolsVersion 中繼資料的 ProjectReference 項目。在檔案 "{1}" 中找到具有 ToolsVersion 的 ProjectReference "{0}"</target>
@@ -693,6 +793,24 @@
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
         <target state="translated">目前只支援使用 MSBuild 的 x64 變體來報告檔案存取。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="RestoreComplete">
+        <source>Restore complete ({0}s)</source>
+        <target state="new">Restore complete ({0}s)</target>
+        <note>
+      {0}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="RestoreCompleteWithMessage">
+        <source>Restore {0} in {1}s</source>
+        <target state="new">Restore {0} in {1}s</target>
+        <note>
+      Restore summary when finished with warning or error
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
       </trans-unit>
       <trans-unit id="SDKResolverAttempt">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
@@ -812,6 +930,59 @@ Errors: {3}</source>
         <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
         <target state="translated">MSB4181: "{0}" 工作傳回了 False，但未記錄錯誤。</target>
         <note>{StrBegin="MSB4181: "}</note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_NoTF">
+        <source>{0}{1} test {2} ({3}s)</source>
+        <target state="translated">{0}{1} 測試 {2} ({3} 秒)</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_WithTF">
+        <source>{0}{1} test {2} {3} ({4}s)</source>
+        <target state="translated">{0}{1} 測試 {2} {3} ({4} 秒)</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestSummary_BannerAndTotal">
+        <source>Test summary: total: {0}</source>
+        <target state="translated">測試摘要: 總計: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Duration">
+        <source>duration: {0}s</source>
+        <target state="translated">持續時間: {0} 秒</target>
+        <note>
+      {0} whole number
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Failed">
+        <source>failed: {0}</source>
+        <target state="translated">失敗: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Skipped">
+        <source>skipped: {0}</source>
+        <target state="translated">已跳過: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Succeeded">
+        <source>succeeded: {0}</source>
+        <target state="translated">成功: {0}</target>
+        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>

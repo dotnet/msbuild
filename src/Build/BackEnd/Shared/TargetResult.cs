@@ -190,6 +190,13 @@ namespace Microsoft.Build.Execution
             set => _afterTargetsHaveFailed = value;
         }
 
+        /// <summary>
+        /// The defining location of the target for which this is a result.
+        /// This is not intended to be remoted via node-2-node remoting - it's intended only for in-node telemetry.
+        /// Warning!: This data is not guaranteed to be populated when Telemetry is not being collected (e.g. this is "sampled out")
+        /// </summary>
+        internal IElementLocation TargetLocation { get; set; }
+
         #region INodePacketTranslatable Members
 
         /// <summary>

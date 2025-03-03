@@ -54,6 +54,8 @@
     <SystemTextJsonVersion>8.0.5</SystemTextJsonVersion>
     <SystemThreadingChannelsVersion>8.0.0</SystemThreadingChannelsVersion>
     <SystemThreadingTasksDataflowVersion>8.0.0</SystemThreadingTasksDataflowVersion>
+    <SystemDiagnosticsDiagnosticSourceVersion>8.0.1</SystemDiagnosticsDiagnosticSourceVersion>
+    <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
@@ -63,7 +65,7 @@
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.25111.5</MicrosoftDotNetXUnitExtensionsVersion>
     <MicrosoftNetCompilersToolsetVersion>4.14.0-2.25111.1</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.13.0-rc.113</NuGetBuildTasksVersion>
+    <NuGetBuildTasksVersion>6.14.0-preview.1.53</NuGetBuildTasksVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
     <BootstrapSdkVersion>9.0.200-preview.0.24603.3</BootstrapSdkVersion>

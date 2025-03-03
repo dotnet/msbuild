@@ -24,6 +24,15 @@
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
     <PackageReference Include="System.Text.Json" />
     <Reference Include="System.Xaml" />
+    <PackageReference Include="System.Text.Json" />
+    <!-- Telemetry in Framework-->
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Framework and standard don't have DiagnosticSource. -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">

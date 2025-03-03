@@ -69,6 +69,10 @@
       <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
       <Sha>2aade6beb02ea367fd97c4070a4198802fe61c03</Sha>
     </Dependency>
+    <Dependency Name="System.Diagnostics.DiagnosticSource" Version="8.0.1">
+      <Uri>https://dev.azure.com/dnceng/internal/_git/dotnet-runtime</Uri>
+      <Sha>2d7eea252964e69be94cb9c847b371b23e4dd470</Sha>
+    </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="9.0.0-beta.25111.5">
@@ -85,9 +89,9 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>5da211e1c42254cb35e7ef3d5a8428fb24853169</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.13.1-rc.1">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.14.0-preview.1.53">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>3d42754f2962b30deac1ec48e5415aa83c071b37</Sha>
+      <Sha>9202ddad5fabd4d7737fa0c717524fbe2455c972</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.14.0-2.25111.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
