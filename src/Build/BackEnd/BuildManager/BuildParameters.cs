@@ -147,6 +147,11 @@ namespace Microsoft.Build.Execution
         private PropertyDictionary<ProjectPropertyInstance> _globalProperties = new PropertyDictionary<ProjectPropertyInstance>();
 
         /// <summary>
+        /// Properties passed from the command line (e.g. by using /p:).
+        /// </summary>
+        private ICollection<string> _propertiesFromCommandLine;
+
+        /// <summary>
         /// The loggers.
         /// </summary>
         private IEnumerable<ILogger> _loggers;
@@ -211,6 +216,8 @@ namespace Microsoft.Build.Execution
 
         private bool _isBuildCheckEnabled;
 
+        private bool _isTelemetryEnabled;
+
         /// <summary>
         /// The settings used to load the project under build
         /// </summary>
@@ -250,6 +257,7 @@ namespace Microsoft.Build.Execution
             _defaultToolsVersion = projectCollection.DefaultToolsVersion;
 
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(projectCollection.GlobalPropertiesCollection);
+            _propertiesFromCommandLine = projectCollection.PropertiesFromCommandLine;
         }
 
         /// <summary>
@@ -279,6 +287,7 @@ namespace Microsoft.Build.Execution
             _environmentProperties = other._environmentProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._environmentProperties) : null;
             _forwardingLoggers = other._forwardingLoggers != null ? new List<ForwardingLoggerRecord>(other._forwardingLoggers) : null;
             _globalProperties = other._globalProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._globalProperties) : null;
+            _propertiesFromCommandLine = other._propertiesFromCommandLine != null ? new HashSet<string>(other._propertiesFromCommandLine, StringComparer.OrdinalIgnoreCase) : null;
             HostServices = other.HostServices;
             _loggers = other._loggers != null ? new List<ILogger>(other._loggers) : null;
             _maxNodeCount = other._maxNodeCount;
@@ -314,6 +323,7 @@ namespace Microsoft.Build.Execution
             LowPriority = other.LowPriority;
             Question = other.Question;
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
+            IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
@@ -332,6 +342,10 @@ namespace Microsoft.Build.Execution
             set => _useSynchronousLogging = value;
         }
 
+        /// <summary>
+        /// Properties passed from the command line (e.g. by using /p:).
+        /// </summary>
+        public ICollection<string> PropertiesFromCommandLine => _propertiesFromCommandLine;
 
         /// <summary>
         /// Indicates whether to emit a default error if a task returns false without logging an error.
@@ -849,6 +863,17 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Gets or sets an indication if telemetry is enabled.
+        /// This is reserved for future usage - we will likely add a whole dictionary of enablement per telemetry namespace
+        ///  as we plan to have variable sampling rate per various sources.
+        /// </summary>
+        internal bool IsTelemetryEnabled
+        {
+            get => _isTelemetryEnabled;
+            set => _isTelemetryEnabled = value;
+        }
+
+        /// <summary>
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>
         /// in addition to any potential project caches described in each project.
         /// </summary>
@@ -913,6 +938,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _interactive);
             translator.Translate(ref _question);
             translator.Translate(ref _isBuildCheckEnabled);
+            translator.Translate(ref _isTelemetryEnabled);
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
             translator.Translate(ref _reportFileAccesses);
 

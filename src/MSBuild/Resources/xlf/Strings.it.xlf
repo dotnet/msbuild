@@ -15,65 +15,6 @@
         <target state="translated">Compilazione non riuscita. Non è possibile ottenere proprietà, elementi e risultati di destinazione. Vedere i dettagli in stderr sopra.</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildFinished">
-        <source>Build {0} in {1}s</source>
-        <target state="translated">Compilazione {0} in {1}s</target>
-        <note>
-      Overall build summary
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Failed">
-        <source>failed</source>
-        <target state="translated">non riuscito</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with {0} error(s)</source>
-        <target state="translated">non riuscito con {0} errori</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
-        <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="translated">non riuscito con {0} errori e {1} avvisi</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with {0} warning(s)</source>
-        <target state="translated">non riuscito con {0} avvisi</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Succeeded">
-        <source>succeeded</source>
-        <target state="translated">operazione riuscita</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with {0} warning(s)</source>
-        <target state="translated">completato con {0} avvisi</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildSummary">
-        <source>Build summary:</source>
-        <target state="translated">Riepilogo build:</target>
-        <note>
-      A header used by Terminal Logger to introduce the build summary.
-    </note>
-      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">Argomenti della riga di comando = "{0}"</target>
@@ -91,14 +32,6 @@
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
         <target state="translated">MSBUILD : error MSB1027: non è possibile specificare l'opzione -noAutoResponse nel file di risposta automatica MSBuild.rsp o in file di risposta a cui il file di risposta automatica fa riferimento.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="DurationDisplay">
-        <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
-        <note>
-        {0}: duration in seconds with 1 decimal point
-        's' should reflect the localized abbreviation for seconds
-      </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
@@ -1747,39 +1680,6 @@ Nota: livello di dettaglio dei logger di file
         <target state="translated">Processo = "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectFinished_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3}s)</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_OutputPath">
-        <source> → {0}</source>
-        <target state="translated"> → {0}</target>
-        <note>
-      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
-      {0}: VT100 coded hyperlink to project output directory
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
       <trans-unit id="ProjectNotFoundError">
         <source>MSBUILD : error MSB1009: Project file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1009: il file di progetto non esiste.</target>
@@ -1825,24 +1725,6 @@ Nota: livello di dettaglio dei logger di file
         <target state="translated">'{0}' proviene da '{1}'</target>
         <note>
       These are response file switches with the location of the response file on disk.
-    </note>
-      </trans-unit>
-      <trans-unit id="RestoreComplete">
-        <source>Restore complete ({0}s)</source>
-        <target state="translated">Ripristino completato ({0})</target>
-        <note>
-      {0}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="RestoreCompleteWithMessage">
-        <source>Restore {0} in {1}s</source>
-        <target state="translated">Ripristinare {0} in {1}s</target>
-        <note>
-      Restore summary when finished with warning or error
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="SAC">
@@ -1929,59 +1811,6 @@ Nota: livello di dettaglio dei logger di file
         <target state="translated">Il logger del terminale non è stato usato perché l'output viene reindirizzato a un file.</target>
         <note />
       </trans-unit>
-      <trans-unit id="TestProjectFinished_NoTF">
-        <source>{0}{1} test {2} ({3}s)</source>
-        <target state="translated">{0}{1} test {2} {3}</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_WithTF">
-        <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} test {2} {3} {4}</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="TestSummary_BannerAndTotal">
-        <source>Test summary: total: {0}</source>
-        <target state="translated">Riepilogo test: totale: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Duration">
-        <source>duration: {0}s</source>
-        <target state="translated">durata: {0}s</target>
-        <note>
-      {0} whole number
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Failed">
-        <source>failed: {0}</source>
-        <target state="translated">non riuscito: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Skipped">
-        <source>skipped: {0}</source>
-        <target state="translated">ignorato: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Succeeded">
-        <source>succeeded: {0}</source>
-        <target state="translated">riuscito: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
         <target state="translated">MSBUILD : error MSB1002: questa opzione non accetta parametri.</target>
@@ -2063,29 +1892,6 @@ Nota: livello di dettaglio dei logger di file
         <source>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1047: file da pre-elaborare non valido. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1047: "}</note>
-      </trans-unit>
-      <trans-unit id="LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: non è possibile creare un'istanza del logger. {0}</target>
-        <note>{StrBegin="MSBUILD : error MSB1021: "}
-      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
-      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
-      </trans-unit>
-      <trans-unit id="LoggerNotFoundError">
-        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="translated">MSBUILD : error MSB1020: il logger non è stato trovato. Verificare quanto segue: 1.) Il nome del logger specificato è uguale al nome della classe logger. 2.) La classe logger è "public" e implementa l'interfaccia Microsoft.Build.Framework.ILogger. 3.) Il percorso dell'assembly logger è corretto o è possibile caricare il logger usando esclusivamente il nome di assembly fornito.</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
-      logger class must exist in the given assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectUpgradeNeededToVcxProj">
-        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
-        <target state="translated">MSBUILD : error MSB4192: il file di progetto "{0}" è in formato ".vcproj" o ".dsp", che non è possibile compilare direttamente con MSBuild. Per convertire il progetto, aprirlo in Visual Studio IDE o eseguire lo strumento di conversione oppure, per ".vcproj", usare MSBuild per compilare il file della soluzione contenente il progetto.</target>
-        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
       <trans-unit id="NeedJustMyCode">
         <source>If MSBuild debugging does not work correctly, please verify that the "Just My Code" feature is enabled in Visual Studio, and that you have selected the managed debugger.</source>
@@ -2385,6 +2191,29 @@ Esegue la profilatura della valutazione di MSBuild e scrive
         <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
         <target state="translated">MSBUILD :error MSB1054: per generare il risultato del profiler, è necessario specificare un nome file.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XMake.LoggerCreationError">
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
+        <target state="translated">MSBUILD : error MSB1021: non è possibile creare un'istanza del logger. {0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1021: "}
+      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
+      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
+      </trans-unit>
+      <trans-unit id="XMake.LoggerNotFoundError">
+        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
+        <target state="translated">MSBUILD : error MSB1020: il logger non è stato trovato. Verificare quanto segue: 1.) Il nome del logger specificato è uguale al nome della classe logger. 2.) La classe logger è "public" e implementa l'interfaccia Microsoft.Build.Framework.ILogger. 3.) Il percorso dell'assembly logger è corretto o è possibile caricare il logger usando esclusivamente il nome di assembly fornito.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
+      logger class must exist in the given assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="XMake.ProjectUpgradeNeededToVcxProj">
+        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
+        <target state="translated">MSBUILD : error MSB4192: il file di progetto "{0}" è in formato ".vcproj" o ".dsp", che non è possibile compilare direttamente con MSBuild. Per convertire il progetto, aprirlo in Visual Studio IDE o eseguire lo strumento di conversione oppure, per ".vcproj", usare MSBuild per compilare il file della soluzione contenente il progetto.</target>
+        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
     </body>
   </file>

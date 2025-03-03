@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -193,7 +193,7 @@ namespace Microsoft.Build.Construction
 
         internal bool UseNewParser => ShouldUseNewParser(_solutionFile);
 
-        internal static bool ShouldUseNewParser(string solutionFile) => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14) || FileUtilities.IsSolutionXFilename(solutionFile);
+        internal static bool ShouldUseNewParser(string solutionFile) => FileUtilities.IsSolutionXFilename(solutionFile);
 
         /// <summary>
         /// All projects in this solution, in the order they appeared in the solution file
@@ -221,10 +221,6 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14) && string.IsNullOrEmpty(value))
-                {
-                    throw new ArgumentNullException(nameof(FullPath));
-                }
                 // Should already be canonicalized to a full path
                 ErrorUtilities.VerifyThrowInternalRooted(value);
                 // To reduce code duplication, this should be
@@ -302,27 +298,35 @@ namespace Microsoft.Build.Construction
         {
             ISolutionSerializer serializer = SolutionSerializers.GetSerializerByMoniker(FullPath);
 
-            if (serializer != null)
-            {
-                try
-                {
-                    SolutionModel solutionModel = serializer.OpenAsync(FullPath, CancellationToken.None).Result;
-                    ReadSolutionModel(solutionModel);
-                }
-                catch (Exception ex)
-                {
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
-                            new BuildEventFileInfo(FullPath),
-                            $"InvalidProjectFile",
-                            ex.ToString());
-                }
-            }
-            else if (serializer == null)
+            if (serializer == null)
             {
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                     new BuildEventFileInfo(FullPath),
                     $"InvalidProjectFile",
                     $"No solution serializer was found for {FullPath}");
+            }
+            else
+            {
+                try
+                {
+                    SolutionModel solutionModel = serializer.OpenAsync(FullPath, CancellationToken.None).GetAwaiter().GetResult();
+                    ReadSolutionModel(solutionModel);
+                }
+                catch (SolutionException solutionEx)
+                {
+                    var errorLocation = ElementLocation.Create(FullPath, solutionEx.Line ?? 0, solutionEx.Column ?? 0);
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                        new BuildEventFileInfo(errorLocation),
+                        "InvalidProjectFile",
+                        solutionEx.ToString());
+                }
+                catch (Exception ex)
+                {
+                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                        new BuildEventFileInfo(FullPath),
+                        "InvalidProjectFile",
+                        ex.ToString());
+                }
             }
         }
 
