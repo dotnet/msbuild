@@ -4,12 +4,14 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
-
+using Microsoft.Build.UnitTests.Shared;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -22,12 +24,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         private ITestOutputHelper _output;
 
-        public TaskHostFactory_Tests(ITestOutputHelper testOutputHelper)
-        {
-            _output = testOutputHelper;
-        }
+        public TaskHostFactory_Tests(ITestOutputHelper testOutputHelper) => _output = testOutputHelper;
 
-        [Fact]
+        [WindowsFullFrameworkOnlyFact]
         public void TaskNodesDieAfterBuild()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -41,6 +40,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         </ProcessIdTask>
     </Target>
 </Project>";
+
                 TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
                 ProjectInstance projectInstance = new(project.Path);
                 projectInstance.Build().ShouldBeTrue();
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [WindowsFullFrameworkOnlyFact]
         private void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
