@@ -261,6 +261,16 @@
         <target state="translated">La cartella Dei download non è attendibile per la compilazione di progetti.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildFinished">
+        <source>Build {0} in {1}s</source>
+        <target state="translated">Compilazione {0} in {1}s</target>
+        <note>
+      Overall build summary
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">Compilazione della domanda NON RIUSCITA. La compilazione è terminata in anticipo perché è stata rilevata una destinazione o un'attività non aggiornata.</target>
@@ -275,6 +285,55 @@
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">Non è possibile completare l'operazione perché è già in corso una compilazione.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildResult_Failed">
+        <source>failed</source>
+        <target state="translated">non riuscito</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrors">
+        <source>failed with {0} error(s)</source>
+        <target state="translated">non riuscito con {0} errori</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
+        <source>failed with {0} error(s) and {1} warning(s)</source>
+        <target state="translated">non riuscito con {0} errori e {1} avvisi</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithWarnings">
+        <source>failed with {0} warning(s)</source>
+        <target state="translated">non riuscito con {0} avvisi</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_Succeeded">
+        <source>succeeded</source>
+        <target state="translated">operazione riuscita</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_SucceededWithWarnings">
+        <source>succeeded with {0} warning(s)</source>
+        <target state="translated">completato con {0} avvisi</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildSummary">
+        <source>Build summary:</source>
+        <target state="translated">Riepilogo build:</target>
+        <note>
+      A header used by Terminal Logger to introduce the build summary.
+    </note>
       </trans-unit>
       <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
         <source>MSB4252: Project "{0}" with global properties
@@ -386,6 +445,14 @@
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: tentativo di creare più sostituzioni della stessa attività: {0}</target>
         <note>{StrBegin="MSB4275: "}</note>
+      </trans-unit>
+      <trans-unit id="DurationDisplay">
+        <source>({0:F1}s)</source>
+        <target state="translated">({0:F1}s)</target>
+        <note>
+        {0}: duration in seconds with 1 decimal point
+        's' should reflect the localized abbreviation for seconds
+      </note>
       </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
@@ -656,6 +723,39 @@
         <target state="translated">MSB4268: non è stato possibile arrestare correttamente la cache del progetto.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectFinished_NoTF">
+        <source>{0}{1} {2} ({3}s)</source>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_OutputPath">
+        <source> → {0}</source>
+        <target state="translated"> → {0}</target>
+        <note>
+      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
+      {0}: VT100 coded hyperlink to project output directory
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_WithTF">
+        <source>{0}{1} {2} {3} ({4}s)</source>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph non supporta elementi ProjectReference con metadati ToolsVersion impostati. L'elemento ProjectReference "{0}" con ToolsVersion è stato trovato nel file "{1}"</target>
@@ -693,6 +793,24 @@
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
         <target state="translated">Gli accessi ai file di report sono attualmente supportati solo con la versione x64 di MSBuild.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="RestoreComplete">
+        <source>Restore complete ({0}s)</source>
+        <target state="new">Restore complete ({0}s)</target>
+        <note>
+      {0}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="RestoreCompleteWithMessage">
+        <source>Restore {0} in {1}s</source>
+        <target state="new">Restore {0} in {1}s</target>
+        <note>
+      Restore summary when finished with warning or error
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
       </trans-unit>
       <trans-unit id="SDKResolverAttempt">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
@@ -812,6 +930,59 @@ Errori: {3}</target>
         <source>MSB4181: The "{0}" task returned false but did not log an error.</source>
         <target state="translated">MSB4181: l'attività "{0}" ha restituito false, ma non è stato registrato alcun errore.</target>
         <note>{StrBegin="MSB4181: "}</note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_NoTF">
+        <source>{0}{1} test {2} ({3}s)</source>
+        <target state="translated">{0}{1} test {2} {3}</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_WithTF">
+        <source>{0}{1} test {2} {3} ({4}s)</source>
+        <target state="translated">{0}{1} test {2} {3} {4}</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestSummary_BannerAndTotal">
+        <source>Test summary: total: {0}</source>
+        <target state="translated">Riepilogo test: totale: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Duration">
+        <source>duration: {0}s</source>
+        <target state="translated">durata: {0}s</target>
+        <note>
+      {0} whole number
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Failed">
+        <source>failed: {0}</source>
+        <target state="translated">non riuscito: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Skipped">
+        <source>skipped: {0}</source>
+        <target state="translated">ignorato: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Succeeded">
+        <source>succeeded: {0}</source>
+        <target state="translated">riuscito: {0}</target>
+        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>

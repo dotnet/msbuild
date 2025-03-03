@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -59,9 +59,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\EnvironmentUtilities.cs">
-      <Link>SharedUtilities\EnvironmentUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
     </Compile>
@@ -176,6 +173,11 @@
     <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
+    <Compile Include="Logging\TerminalLogger\**\*.cs" />
+    <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
+    <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />
+    <Compile Include="TelemetryInfra\TelemetryDataUtils.cs" />
+    <Compile Include="TelemetryInfra\TelemetryForwarderProvider.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />

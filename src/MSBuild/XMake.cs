@@ -41,7 +41,7 @@ using FileLogger = Microsoft.Build.Logging.FileLogger;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
-using TerminalLogger = Microsoft.Build.Logging.TerminalLogger.TerminalLogger;
+using TerminalLogger = Microsoft.Build.Logging.TerminalLogger;
 
 #if NETFRAMEWORK
 // Use I/O operations from Microsoft.IO.Redist which is generally higher perf
@@ -248,6 +248,8 @@ namespace Microsoft.Build.CommandLine
 
             // Initialize new build telemetry and record start of this build.
             KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
+            // Initialize OpenTelemetry infrastructure
+            OpenTelemetryManager.Instance.Initialize(isStandalone: true);
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -295,6 +297,7 @@ namespace Microsoft.Build.CommandLine
             {
                 DumpCounters(false /* log to console */);
             }
+            OpenTelemetryManager.Instance.Shutdown();
 
             return exitCode;
         }
@@ -431,7 +434,7 @@ namespace Microsoft.Build.CommandLine
         /// </comments>
         private static void DumpCounters(bool initializeOnly)
         {
-            Process currentProcess = Process.GetCurrentProcess();
+            using Process currentProcess = Process.GetCurrentProcess();
 
             if (!initializeOnly)
             {
@@ -461,7 +464,7 @@ namespace Microsoft.Build.CommandLine
                 using PerformanceCounter counter = new PerformanceCounter(".NET CLR Memory", "Process ID", instance, true);
                 try
                 {
-                    if ((int)counter.RawValue == currentProcess.Id)
+                    if ((int)counter.RawValue == EnvironmentUtilities.CurrentProcessId)
                     {
                         currentInstance = instance;
                         break;
@@ -627,9 +630,9 @@ namespace Microsoft.Build.CommandLine
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule.FileName} PID {currentProcess.Id}).  Press enter to continue...");
+                    Console.WriteLine($"Waiting for debugger to attach ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId}).  Press enter to continue...");
                     Console.ReadLine();
+
                     break;
             }
         }
@@ -1306,7 +1309,7 @@ namespace Microsoft.Build.CommandLine
         {
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
             {
-                InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectUpgradeNeededToVcxProj", projectFile), null);
+                InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);
             }
 
             bool success = true;
@@ -1742,7 +1745,7 @@ namespace Microsoft.Build.CommandLine
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "Process",
-                        Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty),
+                        EnvironmentUtilities.ProcessPath ?? string.Empty),
                     MessageImportance.Low),
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
@@ -2533,8 +2536,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (!Debugger.IsAttached)
                 {
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach... ({currentProcess.MainModule.FileName} PID {currentProcess.Id})");
+                    Console.WriteLine($"Waiting for debugger to attach... ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId})");
                     while (!Debugger.IsAttached)
                     {
                         Thread.Sleep(100);
@@ -2561,9 +2563,13 @@ namespace Microsoft.Build.CommandLine
             }
             try
             {
-                if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle)
+                if (lowPriority)
                 {
-                    Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
+                    using Process currentProcess = Process.GetCurrentProcess();
+                    if (currentProcess.PriorityClass != ProcessPriorityClass.Idle)
+                    {
+                        currentProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
+                    }
                 }
             }
             // We avoid increasing priority because that causes failures on mac/linux, but there is no good way to
@@ -4025,11 +4031,10 @@ namespace Microsoft.Build.CommandLine
         {
             if (!noConsoleLogger)
             {
-                // A central logger will be created for both single proc and multiproc.
-                TerminalLogger logger = new TerminalLogger(verbosity)
-                {
-                    Parameters = aggregatedLoggerParameters
-                };
+                // We can't use InternalsVisibleTo to access the internal TerminalLogger ctor from here, so we use reflection.
+                // This can be fixed when we remove shared files across projects.
+                var logger = (TerminalLogger)Activator.CreateInstance(typeof(TerminalLogger), BindingFlags.Instance | BindingFlags.NonPublic, null, [verbosity], null);
+                logger.Parameters = aggregatedLoggerParameters;
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
                 // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
@@ -4039,8 +4044,26 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
+                    /// If TerminalLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main
+                    /// node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
+                    /// Important: Note that TerminalLogger is special-cased in <see cref="BackEnd.Logging.LoggingService.UpdateMinimumMessageImportance"/>
+                    /// so changing this list may impact the minimum message importance logging optimization.
+                    string[] configurableForwardingLoggerParameters =
+                    [
+                        "BUILDSTARTEDEVENT",
+                        "BUILDFINISHEDEVENT",
+                        "PROJECTSTARTEDEVENT",
+                        "PROJECTFINISHEDEVENT",
+                        "TARGETSTARTEDEVENT",
+                        "TARGETFINISHEDEVENT",
+                        "TASKSTARTEDEVENT",
+                        "HIGHMESSAGEEVENT",
+                        "WARNINGEVENT",
+                        "ERROREVENT"
+                    ];
+
                     // For performance, register this logger using the forwarding logger mechanism.
-                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", TerminalLogger.ConfigurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
+                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", configurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
                     distributedLoggerRecords.Add(forwardingLoggerRecord);
                 }
             }
@@ -4391,27 +4414,27 @@ namespace Microsoft.Build.CommandLine
             {
                 logger = loggerDescription.CreateLogger();
 
-                InitializationException.VerifyThrow(logger != null, "LoggerNotFoundError", unquotedParameter);
+                InitializationException.VerifyThrow(logger != null, "XMake.LoggerNotFoundError", unquotedParameter);
             }
             catch (IOException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
             }
             catch (BadImageFormatException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
             }
             catch (SecurityException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
             }
             catch (ReflectionTypeLoadException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
             }
             catch (MemberAccessException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
             }
             catch (TargetInvocationException e) when (!loggerDescription.IsOptional)
             {
