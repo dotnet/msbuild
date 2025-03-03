@@ -200,6 +200,17 @@ namespace Microsoft.Build.Framework
             WriteToStreamWithExplicitMessage(writer, RawMessage);
         }
 
+
+        /// <summary>
+        /// Convenience access point for CreateFromStream method to avoid making everything public.
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="version"></param>
+        public void PublicCreateFromStream(BinaryReader reader, int version)
+        {
+            CreateFromStream(reader, version);
+        }
+
         /// <summary>
         /// Deserializes from a stream through a binary reader
         /// </summary>
