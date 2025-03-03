@@ -241,9 +241,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for serialization.
         /// </summary>
-        internal static INodePacket FactoryForDeserialization(ITranslator translator)
+        internal static INodePacket FactoryForDeserialization(ITranslatorBase translator)
         {
-            return new BuildRequestBlocker(translator);
+            return new BuildRequestBlocker((ITranslator)translator);
         }
     }
 }

@@ -73,9 +73,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return new SdkResolverRequest(submissionId, sdkReference.Name, sdkReference.Version, sdkReference.MinimumVersion, buildEventContext, elementLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
         }
 
-        public static INodePacket FactoryForDeserialization(ITranslator translator)
+        public static INodePacket FactoryForDeserialization(ITranslatorBase translator)
         {
-            return new SdkResolverRequest(translator);
+            return new SdkResolverRequest((ITranslator)translator);
         }
 
         public void Translate(ITranslator translator)

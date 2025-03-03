@@ -26,11 +26,8 @@ namespace Microsoft.Build.CommandLine
         #endregion // Constructors and Factories
 
         /// <summary>
-        /// Returns the host handshake for this node endpoint
+        /// Returns the host handshake for this node endpoint.
         /// </summary>
-        protected override Handshake GetHandshake()
-        {
-            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: true));
-        }
+        protected override Handshake GetHandshake() => new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: true));
     }
 }

@@ -57,11 +57,6 @@ namespace Microsoft.Build.BackEnd
         private class BinaryReadTranslator : ITranslator
         {
             /// <summary>
-            /// The stream used as a source or destination for data.
-            /// </summary>
-            private Stream _packetStream;
-
-            /// <summary>
             /// The binary reader used in read mode.
             /// </summary>
             private BinaryReader _reader;
@@ -72,7 +67,6 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public BinaryReadTranslator(Stream packetStream, BinaryReaderFactory buffer)
             {
-                _packetStream = packetStream;
                 _reader = buffer.Create(packetStream);
             }
 #nullable disable
@@ -114,6 +108,11 @@ namespace Microsoft.Build.BackEnd
                 get
                 { return TranslationDirection.ReadFromStream; }
             }
+
+            /// <summary>
+            /// Gets the protocol type.
+            /// </summary>
+            public ProtocolType Protocol => ProtocolType.Binary;
 
             /// <summary>
             /// Translates a boolean.
@@ -823,6 +822,11 @@ namespace Microsoft.Build.BackEnd
             {
                 _writer.Close();
             }
+
+            /// <summary>
+            /// Gets the protocol type.
+            /// </summary>
+            public ProtocolType Protocol => ProtocolType.Binary;
 
             /// <summary>
             /// Gets the reader, if any.

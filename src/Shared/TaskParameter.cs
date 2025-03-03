@@ -4,9 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
 using System.Security;
@@ -719,7 +717,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Super simple ITaskItem derivative that we can use as a container for read items.
         /// </summary>
-        private class TaskParameterTaskItem :
+        internal class TaskParameterTaskItem :
 #if FEATURE_APPDOMAIN
             MarshalByRefObject,
 #endif

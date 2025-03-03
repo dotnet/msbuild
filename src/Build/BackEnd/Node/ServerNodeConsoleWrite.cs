@@ -37,10 +37,10 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateEnum(ref _outputType, (int)_outputType);
         }
 
-        internal static INodePacket FactoryForDeserialization(ITranslator translator)
+        internal static INodePacket FactoryForDeserialization(ITranslatorBase translator)
         {
             ServerNodeConsoleWrite command = new();
-            command.Translate(translator);
+            command.Translate((ITranslator)translator);
 
             return command;
         }

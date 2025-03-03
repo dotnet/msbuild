@@ -13,6 +13,7 @@ using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using System.Collections.Generic;
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
@@ -114,8 +115,12 @@ namespace Microsoft.Build.BackEnd
         /// A binary writer to help write into <see cref="_packetStream"/>
         /// </summary>
         private BinaryWriter _binaryWriter;
-
         #endregion
+
+
+        private readonly IList<string> _versionHandshakeGroup = ["fileVersionMajor", "fileVersionMinor", "fileVersionBuild", "fileVersionPrivate"];
+
+        private const int NetTaskHostHandshakeVersion = 99;
 
         #region INodeEndpoint Events
 
@@ -259,7 +264,7 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         /// <summary>
-        /// Returns the host handshake for this node endpoint
+        /// Returns the host handshake for this node endpoint.
         /// </summary>
         protected abstract Handshake GetHandshake();
 
@@ -353,6 +358,7 @@ namespace Microsoft.Build.BackEnd
 
             DateTime originalWaitStartTime = DateTime.UtcNow;
             bool gotValidConnection = false;
+            bool isNetHost = false;
             while (!gotValidConnection)
             {
                 gotValidConnection = true;
@@ -393,7 +399,7 @@ namespace Microsoft.Build.BackEnd
                     Handshake handshake = GetHandshake();
                     try
                     {
-                        int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
+                        KeyValuePair<string, int>[] handshakeComponents = handshake.RetrieveHandshakeComponents();
                         for (int i = 0; i < handshakeComponents.Length; i++)
                         {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
@@ -405,12 +411,28 @@ namespace Microsoft.Build.BackEnd
                             );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
-                            if (handshakePart != handshakeComponents[i])
+                            // TODO better way to define net host ???
+                            if (handshakeComponents[i].Key == "fileVersionMajor" && handshakeComponents[i].Value == NetTaskHostHandshakeVersion)
                             {
-                                CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, handshakeComponents[i]);
-                                _pipeServer.WriteIntForHandshake(i + 1);
-                                gotValidConnection = false;
-                                break;
+                                isNetHost = true;
+                            }
+
+                            if (handshakePart != handshakeComponents[i].Value)
+                            {
+                                // NET Task host allows to connect to MSBuild.dll with the different handshake version.
+                                // We agreed to hardcode a value of 99 to bypass the protection for this scenario.
+                                if (_versionHandshakeGroup.Contains(handshakeComponents[i].Key)
+                                    && handshakeComponents[i].Value == NetTaskHostHandshakeVersion)
+                                {
+                                    CommunicationsUtilities.Trace("Handshake for NET Host. Child host {0} for {1}.", handshakePart, handshakeComponents[i].Key);
+                                }
+                                else
+                                {
+                                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, handshakeComponents[i]);
+                                    _pipeServer.WriteIntForHandshake(i + 1);
+                                    gotValidConnection = false;
+                                    break;
+                                }
                             }
                         }
 
@@ -484,6 +506,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             RunReadLoop(
+                isNetHost,
                 new BufferedReadStream(_pipeServer),
                 _pipeServer,
                 localPacketQueue, localPacketAvailable, localTerminatePacketPump);
@@ -510,11 +533,16 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private void RunReadLoop(BufferedReadStream localReadPipe, NamedPipeServerStream localWritePipe,
-            ConcurrentQueue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
+        private void RunReadLoop(
+            bool isNetHost,
+            BufferedReadStream localReadPipe,
+            NamedPipeServerStream localWritePipe,
+            ConcurrentQueue<INodePacket> localPacketQueue,
+            AutoResetEvent localPacketAvailable,
+            AutoResetEvent localTerminatePacketPump)
         {
-            // Ordering of the wait handles is important.  The first signalled wait handle in the array
-            // will be returned by WaitAny if multiple wait handles are signalled.  We prefer to have the
+            // Ordering of the wait handles is important.  The first signaled wait handle in the array
+            // will be returned by WaitAny if multiple wait handles are signaled.  We prefer to have the
             // terminate event triggered so that we cannot get into a situation where packets are being
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
@@ -599,7 +627,15 @@ namespace Microsoft.Build.BackEnd
 
                             try
                             {
+#if !TASKHOST
+                                // Read the packet length (4 bytes after type)
+                                byte[] lengthBytes = new byte[4];
+                                int packetLength = BitConverter.ToInt32(headerByte, 1);
+                                ITranslatorBase translator = isNetHost ? JsonTranslator.GetReadTranslator(localReadPipe, packetLength) : BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer);
+                                _packetFactory.DeserializeAndRoutePacket(0, packetType, translator);
+#else
                                 _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
+#endif
                             }
                             catch (Exception e)
                             {
@@ -639,35 +675,61 @@ namespace Microsoft.Build.BackEnd
                                 var packetStream = _packetStream;
                                 packetStream.SetLength(0);
 
-                                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(packetStream);
+#if !TASKHOST
+                                if (packet is ITranslatable2 jsonTranslatable)
+                                {
+                                    // Write packet type
+                                    packetStream.WriteByte((byte)packet.Type);
 
-                                packetStream.WriteByte((byte)packet.Type);
+                                    // Pad for packet length (4 bytes)
+                                    _binaryWriter.Write(0);
 
-                                // Pad for packet length
-                                _binaryWriter.Write(0);
+                                    // Create JSON translator and write packet
+                                    var writeTranslator = JsonTranslator.GetWriteTranslator(packetStream);
+                                    jsonTranslatable.Translate(writeTranslator);
 
-                                // Reset the position in the write buffer.
-                                packet.Translate(writeTranslator);
+                                    int packetStreamLength = (int)packetStream.Position;
 
-                                int packetStreamLength = (int)packetStream.Position;
+                                    // Write the actual packet length (excluding header)
+                                    packetStream.Position = 1;
+                                    _binaryWriter.Write(packetStreamLength - 5);
 
-                                // Now write in the actual packet length
-                                packetStream.Position = 1;
-                                _binaryWriter.Write(packetStreamLength - 5);
+                                    // Write the complete packet
+                                    localWritePipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+                                }
+                                else
+#endif
+                                {
+                                    // Write packet type
+                                    packetStream.WriteByte((byte)packet.Type);
 
-                                localWritePipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+                                    // Pad for packet length
+                                    _binaryWriter.Write(0);
+
+                                    // Create binary translator and write packet
+                                    var writeTranslator = BinaryTranslator.GetWriteTranslator(packetStream);
+                                    packet.Translate(writeTranslator);
+
+                                    int packetStreamLength = (int)packetStream.Position;
+
+                                    // Write the actual packet length (excluding header)
+                                    packetStream.Position = 1;
+                                    _binaryWriter.Write(packetStreamLength - 5);
+
+                                    // Write the complete packet
+                                    localWritePipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+                                }
                             }
                         }
                         catch (Exception e)
                         {
-                            // Error while deserializing or handling packet.  Abort.
+                            // Error while serializing or handling packet. Abort.
                             CommunicationsUtilities.Trace("Exception while serializing packets: {0}", e);
                             ExceptionHandling.DumpExceptionToFile(e);
                             ChangeLinkStatus(LinkStatus.Failed);
                             exitLoop = true;
                             break;
                         }
-
                         if (waitId == 2)
                         {
                             CommunicationsUtilities.Trace("Disconnecting voluntarily");
