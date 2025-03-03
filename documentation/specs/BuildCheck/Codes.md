@@ -12,6 +12,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0106](#bc0106---copytooutputdirectoryalways-should-be-avoided) | Warning | N/A | 9.0.200 | CopyToOutputDirectory='Always' should be avoided. |
 | [BC0107](#bc0107---targetframework-and-targetframeworks-specified-together) | Warning | N/A | 9.0.200 | TargetFramework and TargetFrameworks specified together. |
 | [BC0108](#bc0108---targetframework-or-targetframeworks-specified-in-non-sdk-style-project) | Warning | N/A | 9.0.300 | TargetFramework or TargetFrameworks specified in non-SDK style project. |
+| [BC0109](#bc0109---building-using-the-exec-task) | Warning | N/A | 9.0.300 | Building using the Exec task. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
 | [BC0203](#bc0203----property-declared-but-never-used) | None | Project | 9.0.100 | Property declared but never used. |
@@ -136,6 +137,13 @@ dotnet build my-multi-target.csproj /p:TargetFramework=net9.0
 'TargetFramework' or 'TargetFrameworks' control the project output targets in modern .NET SDK projects. The older SDK-less projects interprets different properties for similar mechanism (like 'TargetFrameworkVersion') and the 'TargetFramework' or 'TargetFrameworks' are silently ignored.
 
 Make sure the Target Framework is specified appropriately for your project.
+
+<a name="BC0109"></a>
+## BC0109 - Building using the Exec task.
+
+"The 'Exec' task should not be used to build projects."
+
+Building projects using the dotnet/msbuild/nuget CLI in the `Exec` task is not recommended, as it spawns a separate build process that the MSBuild engine cannot track. Please use the [MSBuild task](https://learn.microsoft.com/visualstudio/msbuild/msbuild-task) instead.
 
 
 <a name="BC0201"></a>
