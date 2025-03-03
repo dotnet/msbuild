@@ -749,10 +749,10 @@ namespace Microsoft.Build.BackEnd
                     // average latency between the moment this runs and when the delegate starts
                     // running is about 100-200 microseconds (unless there's thread pool saturation)
                     _packetWriteDrainTask = _packetWriteDrainTask.ContinueWith(
-                    (task, tuple) =>
+                    (_, dataSettings) =>
                     {
-                        var (context, options) = ((NodeContext, HandshakeOptions))tuple;
-                        return SendDataCoreAsync(task, context, options);
+                        var (context, options) = ((NodeContext, HandshakeOptions))dataSettings;
+                        return SendDataCoreAsync(_, context, options);
                     },
                     (this, _handshakeOptions),
                     TaskScheduler.Default).Unwrap();
