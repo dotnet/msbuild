@@ -1520,7 +1520,9 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
+            return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings)
+            .SelectMany(w => w.Split([','], StringSplitOptions.RemoveEmptyEntries))
+            .Select(w => w.Trim()), StringComparer.OrdinalIgnoreCase);
         }
 
         private sealed class DedicatedThreadsTaskScheduler : TaskScheduler
