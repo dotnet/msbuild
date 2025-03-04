@@ -155,14 +155,17 @@ extends:
             script: |
               $versionsPath = "eng/Versions.props"
               [xml]$xml = Get-Content $versionsPath
-              $propertyGroup = $xml.Project.PropertyGroup | Where-Object { $_ -ne $null }
-              $node = $propertyGroup.SelectSingleNode("DotNetFinalVersionKind")
-              if ($node -ne $null) {
-              $node.ParentNode.RemoveChild($node)
-              $xml.Save($versionsPath)
-              Write-Host "Removed DotNetFinalVersionKind from $versionsPath"
+
+              # Find and remove the DotNetFinalVersionKind node no matter where it is
+              $nodes = $xml.SelectNodes("//DotNetFinalVersionKind")
+              if ($nodes -and $nodes.Count -gt 0) {
+                foreach ($node in $nodes) {
+                  $node.ParentNode.RemoveChild($node) | Out-Null
+                }
+                $xml.Save($versionsPath)
+                Write-Host "Removed DotNetFinalVersionKind from $versionsPath"
               } else {
-              Write-Host "DotNetFinalVersionKind not found in $versionsPath"
+                Write-Host "DotNetFinalVersionKind not found in $versionsPath"
               }
 
         - script: eng/CIBuild.cmd
