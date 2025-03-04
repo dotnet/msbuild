@@ -146,6 +146,25 @@ extends:
           inputs:
             dropName: $(VisualStudio.DropName)
 
+        # ensures we don't build and push experimental versions to official feeds as release versions
+        - task: PowerShell@2
+          displayName: 'Remove DotNetFinalVersionKind from Versions.props on experimental branch'
+          condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')
+          inputs:
+            targetType: 'inline'
+            script: |
+              $versionsPath = "eng/Versions.props"
+              [xml]$xml = Get-Content $versionsPath
+              $propertyGroup = $xml.Project.PropertyGroup | Where-Object { $_ -ne $null }
+              $node = $propertyGroup.SelectSingleNode("DotNetFinalVersionKind")
+              if ($node -ne $null) {
+              $node.ParentNode.RemoveChild($node)
+              $xml.Save($versionsPath)
+              Write-Host "Removed DotNetFinalVersionKind from $versionsPath"
+              } else {
+              Write-Host "DotNetFinalVersionKind not found in $versionsPath"
+              }
+
         - script: eng/CIBuild.cmd
                     -configuration $(BuildConfiguration)
                     -officialBuildId $(Build.BuildNumber)
