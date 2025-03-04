@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
 namespace Microsoft.Build.Framework.Telemetry
 {
     internal static class TelemetryDataUtils
@@ -247,12 +248,12 @@ namespace Microsoft.Build.Framework.Telemetry
                 {
                     UpdateSingleStatistics(key.IsCustom ? customTaskInfo : builtinTaskInfo, taskExecutionStats, key);
 
-                    void UpdateSingleStatistics(TasksInfo summarizedTaskInfo, TaskExecutionStats infoToAdd, TaskOrTargetTelemetryKey kkey)
+                    void UpdateSingleStatistics(TasksInfo summarizedTaskInfo, TaskExecutionStats infoToAdd, TaskOrTargetTelemetryKey key)
                     {
-                        summarizedTaskInfo.Total.AddAnother(infoToAdd);
-                        if (kkey.IsFromNugetCache)
+                        summarizedTaskInfo.Total.Accumulate(infoToAdd);
+                        if (key.IsFromNugetCache)
                         {
-                            summarizedTaskInfo.FromNuget.AddAnother(infoToAdd);
+                            summarizedTaskInfo.FromNuget.Accumulate(infoToAdd);
                         }
                     }
                 }

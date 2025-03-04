@@ -3,14 +3,20 @@
 
 using System;
 
-namespace Microsoft.Build.Framework;
+namespace Microsoft.Build.Framework.Telemetry;
 
+/// <summary>
+/// Represents the stats of tasks executed on a node.
+/// </summary>
 internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumption)
 {
     private TaskExecutionStats()
         : this(TimeSpan.Zero, 0, 0)
     { }
-
+    /// <summary>
+    /// Creates an empty instance of <see cref="TaskExecutionStats"/>.
+    /// </summary>
+    /// <returns>Empty stats.</returns>
     internal static TaskExecutionStats CreateEmpty()
         => new();
 
@@ -29,14 +35,18 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executio
     /// </summary>
     public int ExecutionsCount { get; set; } = executionsCount;
 
-    internal void AddAnother(TaskExecutionStats another)
+    /// <summary>
+    /// Merges stats from another node to this instance.
+    /// </summary>
+    /// <param name="another">Stats from another node.</param>
+    internal void Accumulate(TaskExecutionStats another)
     {
         this.CumulativeExecutionTime += another.CumulativeExecutionTime;
         this.TotalMemoryConsumption += another.TotalMemoryConsumption;
         this.ExecutionsCount += another.ExecutionsCount;
     }
 
-    // We need custom Equals for easier assertations in tests
+    // We need custom Equals for easier assertions in tests
     public override bool Equals(object? obj)
     {
         if (obj is TaskExecutionStats other)

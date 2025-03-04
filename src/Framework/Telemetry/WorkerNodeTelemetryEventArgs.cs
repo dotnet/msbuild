@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Framework;
+namespace Microsoft.Build.Framework.Telemetry;
 
 internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData workerNodeTelemetryData) : BuildEventArgs
 {
