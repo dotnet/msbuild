@@ -22,10 +22,14 @@
     <PackageReference Include="FakeItEasy" />
     <PackageReference Include="System.Net.Http" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
+    <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
 
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
@@ -34,7 +38,7 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
-
+    
     <ProjectReference Include="..\Samples\TaskWithDependency\TaskWithDependency.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="TaskWithDependencyResolvedProjectReferencePath">
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=$(LatestDotNetCoreForMSBuild)</SetTargetFramework>
@@ -45,7 +49,7 @@
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=$(LatestDotNetCoreForMSBuild)</SetTargetFramework>
     </ProjectReference>
-
+    
     <Reference Include="System.IO.Compression" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' " />
   </ItemGroup>
 

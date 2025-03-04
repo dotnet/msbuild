@@ -130,3 +130,9 @@ Timing based on the [(Microsoft-internal) release schedule](https://dev.azure.co
   git push upstream v{{THIS_RELEASE_VERSION}}.3
   ```
   - [ ]  Create Release in Github with `Create Release from Tag` GH option (https://github.com/dotnet/msbuild/releases/new?tag=v17.9.3) - the release notes can be prepopulated (`Generate Release Notes`)
+
+## After release
+
+If v{{NEXT_VERSION}} is a new major version
+
+- [ ] do Major version extra update steps from [release.md](./release.md)

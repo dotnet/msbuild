@@ -572,19 +572,21 @@ namespace Microsoft.Build.Logging
             WriteDeduplicatedString(e.PreviousValue);
             WriteDeduplicatedString(e.NewValue);
             WriteDeduplicatedString(e.Location);
+
             return BinaryLogRecordKind.PropertyReassignment;
         }
 
         private BinaryLogRecordKind Write(UninitializedPropertyReadEventArgs e)
         {
-            WriteMessageFields(e, writeImportance: true);
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
             WriteDeduplicatedString(e.PropertyName);
+
             return BinaryLogRecordKind.UninitializedPropertyRead;
         }
 
         private BinaryLogRecordKind Write(PropertyInitialValueSetEventArgs e)
         {
-            WriteMessageFields(e, writeImportance: true);
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
             WriteDeduplicatedString(e.PropertyName);
             WriteDeduplicatedString(e.PropertyValue);
             WriteDeduplicatedString(e.PropertySource);
