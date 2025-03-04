@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests.Construction
             }
         }
 
-        private static string ConvertToSlnx(string slnPath)
+        internal static string ConvertToSlnx(string slnPath)
         {
             string slnxPath = slnPath + "x";
             ISolutionSerializer serializer = SolutionSerializers.GetSerializerByMoniker(slnPath).ShouldNotBeNull();
