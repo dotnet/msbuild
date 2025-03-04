@@ -341,7 +341,7 @@ namespace Microsoft.Build.Internal
                     (fileList, _, _, string globFailure) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
                     // log globing failure with the present logging mechanism
-                    if (globFailure != null)
+                    if (globFailure != null && loggingMechanism != null)
                     {
                         switch (loggingMechanism)
                         {
