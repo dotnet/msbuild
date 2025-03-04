@@ -146,6 +146,8 @@ namespace Microsoft.Build.Framework
         // for VS17.14
         public readonly bool TelemetryOptIn = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTIN");
 
+        public readonly bool SlnParsingWithSolutionPersistenceOptIn = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_SLN_PARSING_SOLUTIONPERSISTENCE_OPTIN"));
+
         public static void UpdateFromEnvironment()
         {
             // Re-create Traits instance to update values in Traits according to current environment.
