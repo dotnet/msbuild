@@ -1716,24 +1716,6 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       These are response file switches with the location of the response file on disk.
     </note>
       </trans-unit>
-      <trans-unit id="RestoreComplete">
-        <source>Restore complete ({0}s)</source>
-        <target state="translated">Restauration terminée ({0}s)</target>
-        <note>
-      {0}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="RestoreCompleteWithMessage">
-        <source>Restore {0} in {1}s</source>
-        <target state="translated">Restaurer {0} en {1}s</target>
-        <note>
-      Restore summary when finished with warning or error
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
       <trans-unit id="SAC">
         <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
         <target state="translated">Basé sur la clé de Registre Windows VerifiedAndReputablePolicyState, état SAC = {0}.</target>
@@ -2214,7 +2196,7 @@ fois plus petit que le journal
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</target>
+        <target state="translated">MSBUILD : error MSB1021: Impossible de créer une instance du journal. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
@@ -2222,7 +2204,7 @@ fois plus petit que le journal
       </trans-unit>
       <trans-unit id="XMake.LoggerNotFoundError">
         <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="new">MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</target>
+        <target state="translated">MSBUILD : error MSB1020: Le journal est introuvable. Vérifiez les points suivants : 1.) Le nom du journal est le même que celui de la classe de journalisation. 2.) La classe de journalisation est "public" et implémente l'interface Microsoft.Build.Framework.ILogger. 3.) Le chemin de l'assembly de journalisation est correct ou le journal peut uniquement être chargé à l'aide du nom d'assembly fourni.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
@@ -2232,7 +2214,7 @@ fois plus petit que le journal
       </trans-unit>
       <trans-unit id="XMake.ProjectUpgradeNeededToVcxProj">
         <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
-        <target state="new">MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</target>
+        <target state="translated">MSBUILD : error MSB4192: Le fichier projet "{0}" utilise le format de fichier ".vcproj" ou ".dsp", que MSBuild ne peut pas générer directement. Convertissez le projet en l'ouvrant dans l'IDE de Visual Studio ou en exécutant l'outil de conversion. Pour ".vcproj", utilisez à la place MSBuild pour générer le fichier solution contenant le projet.</target>
         <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
     </body>
