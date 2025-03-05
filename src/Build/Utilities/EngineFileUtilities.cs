@@ -98,7 +98,7 @@ namespace Microsoft.Build.Internal
         /// for the Exclude attribute after detecting a drive enumerating wildcard.</param>
         /// <returns>Array of file paths, escaped.</returns>
         internal static string[] GetFileListEscaped(
-            string directoryEscaped,
+            string? directoryEscaped,
             string filespecEscaped,
             IEnumerable<string>? excludeSpecsEscaped = null,
             bool forceEvaluate = false,
@@ -169,7 +169,7 @@ namespace Microsoft.Build.Internal
         /// for the Exclude attribute after detecting a drive enumerating wildcard.</param>
         /// <returns>Array of file paths.</returns>
         private static string[] GetFileList(
-            string directoryEscaped,
+            string? directoryEscaped,
             string? filespecEscaped,
             bool returnEscaped,
             bool forceEvaluateWildCards,
@@ -599,7 +599,7 @@ namespace Microsoft.Build.Internal
         /// <param name="filespecsEscaped"></param>
         /// <param name="currentDirectory"></param>
         /// <returns>A Func that will return true IFF its argument matches any of the specified filespecs.</returns>
-        internal static Func<string, bool> GetFileSpecMatchTester(IList<string> filespecsEscaped, string currentDirectory)
+        internal static Func<string, bool> GetFileSpecMatchTester(IList<string> filespecsEscaped, string? currentDirectory)
         {
             var matchers = filespecsEscaped
                 .Select(fs => new Lazy<FileSpecMatcherTester>(() => FileSpecMatcherTester.Parse(currentDirectory, fs)))
