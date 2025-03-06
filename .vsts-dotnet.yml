@@ -40,6 +40,7 @@ variables:
     value: false
   - name: Codeql.Enabled
     value: true
+  # ensures we don't build and push experimental versions to official feeds as release versions
   - name: IsExperimental
     value: ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}
   - group: DotNet-MSBuild-SDLValidation-Params
@@ -148,7 +149,6 @@ extends:
           inputs:
             dropName: $(VisualStudio.DropName)
 
-        # ensures we don't build and push experimental versions to official feeds as release versions
         - script: eng/CIBuild.cmd
                     -configuration $(BuildConfiguration)
                     -officialBuildId $(Build.BuildNumber)
