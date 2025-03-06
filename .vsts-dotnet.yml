@@ -40,6 +40,9 @@ variables:
     value: false
   - name: Codeql.Enabled
     value: true
+  # ensures we don't build and push experimental versions to official feeds as release versions
+  - name: IsExperimental
+    value: ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}
   - group: DotNet-MSBuild-SDLValidation-Params
 
 resources:
@@ -165,6 +168,7 @@ extends:
                     /p:DotNetPublishUsingPipelines=true
                     /p:VisualStudioIbcDrop=$(OptProfDrop)
                     /p:GenerateSbom=true
+                    /p:SuppressFinalPackageVersion=$(IsExperimental)
           displayName: Build
           condition: succeeded()
 
