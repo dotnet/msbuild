@@ -92,7 +92,6 @@
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
@@ -102,6 +101,9 @@
     <Compile Include="..\Shared\IKeyed.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
+    <Compile Include="..\Shared\NodePipeBase.cs" />
+    <Compile Include="..\Shared\NodePipeClient.cs" />
+    <Compile Include="..\Shared\NodePipeServer.cs" />
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
