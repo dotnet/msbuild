@@ -40,6 +40,8 @@ variables:
     value: false
   - name: Codeql.Enabled
     value: true
+  - name: IsExperimental
+    value: ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}
   - group: DotNet-MSBuild-SDLValidation-Params
 
 resources:
@@ -147,27 +149,6 @@ extends:
             dropName: $(VisualStudio.DropName)
 
         # ensures we don't build and push experimental versions to official feeds as release versions
-        - task: PowerShell@2
-          displayName: 'Remove DotNetFinalVersionKind from Versions.props on experimental branch'
-          condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')
-          inputs:
-            targetType: 'inline'
-            script: |
-              $versionsPath = "eng/Versions.props"
-              [xml]$xml = Get-Content $versionsPath
-
-              # Find and remove the DotNetFinalVersionKind node no matter where it is
-              $nodes = $xml.SelectNodes("//DotNetFinalVersionKind")
-              if ($nodes -and $nodes.Count -gt 0) {
-                foreach ($node in $nodes) {
-                  $node.ParentNode.RemoveChild($node) | Out-Null
-                }
-                $xml.Save($versionsPath)
-                Write-Host "Removed DotNetFinalVersionKind from $versionsPath"
-              } else {
-                Write-Host "DotNetFinalVersionKind not found in $versionsPath"
-              }
-
         - script: eng/CIBuild.cmd
                     -configuration $(BuildConfiguration)
                     -officialBuildId $(Build.BuildNumber)
@@ -187,6 +168,7 @@ extends:
                     /p:DotNetPublishUsingPipelines=true
                     /p:VisualStudioIbcDrop=$(OptProfDrop)
                     /p:GenerateSbom=true
+                    /p:SuppressFinalPackageVersion=$(IsExperimental)
           displayName: Build
           condition: succeeded()
 
