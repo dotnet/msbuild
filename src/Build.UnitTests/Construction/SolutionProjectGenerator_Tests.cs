@@ -83,6 +83,36 @@ namespace Microsoft.Build.UnitTests.Construction
             }
         }
 
+        /// <summary>
+        /// Test that targets in before.{sln}.targets and after.{sln}.targets files are included in the project.
+        /// </summary>
+        [Theory]
+        [InlineData("before.MySln.sln.targets", false)]
+        [InlineData("before.MySln.sln.targets", true)]
+        [InlineData("after.MySln.sln.targets", false)]
+        [InlineData("after.MySln.sln.targets", true)]
+        public void SolutionProjectIncludesBeforeAndAfterTargets(string name, bool convertToSlnx)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+                string solutionFileContents = "Microsoft Visual Studio Solution File, Format Version 12.00";
+                TransientTestFile sln = testEnvironment.CreateFile(folder, "MySln.sln", solutionFileContents);
+                string solutionPath = convertToSlnx ? SolutionFile_NewParser_Tests.ConvertToSlnx(sln.Path) : sln.Path;
+                testEnvironment.CreateFile(folder, name,
+                      """
+                      <Project>
+                          <Target Name="TestTarget" />
+                      </Project>
+                      """);
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(SolutionFile.Parse(solutionPath), null, null, _buildEventContext, CreateMockLoggingService());
+                instances.ShouldHaveSingleItem();
+                instances[0].Targets.ShouldContainKey("TestTarget");
+                MockLogger logger = new MockLogger(output);
+                instances[0].Build(targets: null, new List<ILogger> { logger }).ShouldBeTrue();
+            }
+        }
+
         [Fact]
         public void BuildProjectAsTarget()
         {
