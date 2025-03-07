@@ -350,7 +350,7 @@ namespace Microsoft.Build.Experimental
             using var serverBusyMutex = ServerNamedMutex.OpenOrCreateMutex(name: _serverBusyMutexName, createdNew: out var holdsMutex);
             if (!holdsMutex)
             {
-                // Client must have send request message to server even though serer is busy.
+                // Client must have send request message to server even though server is busy.
                 // It is not a race condition, as client exclusivity is also guaranteed by name pipe which allows only one client to connect.
                 _shutdownException = new InvalidOperationException("Client requested build while server is busy processing previous client build request.");
                 _shutdownReason = NodeEngineShutdownReason.Error;

@@ -40,6 +40,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InternalErrorException>(() =>
             {
                 TaskHostConfiguration config = new TaskHostConfiguration(
+                    runtime: "TaskHost",
                     nodeId: 1,
                     startupDirectory: Directory.GetCurrentDirectory(),
                     buildProcessEnvironment: null,
@@ -75,6 +76,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InternalErrorException>(() =>
             {
                 TaskHostConfiguration config = new TaskHostConfiguration(
+                    runtime: "TaskHost",
                     nodeId: 1,
                     startupDirectory: Directory.GetCurrentDirectory(),
                     buildProcessEnvironment: null,
@@ -110,6 +112,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InternalErrorException>(() =>
             {
                 TaskHostConfiguration config = new TaskHostConfiguration(
+                    runtime: "TaskHost",
                     nodeId: 1,
                     startupDirectory: Directory.GetCurrentDirectory(),
                     buildProcessEnvironment: null,
@@ -147,6 +150,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InternalErrorException>(() =>
             {
                 TaskHostConfiguration config = new TaskHostConfiguration(
+                    runtime: "TaskHost",
                     nodeId: 1,
                     startupDirectory: Directory.GetCurrentDirectory(),
                     buildProcessEnvironment: null,
@@ -182,6 +186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestValidConstructors()
         {
             TaskHostConfiguration config = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
@@ -208,6 +213,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 warningsAsMessages: null);
 
             TaskHostConfiguration config2 = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
@@ -235,6 +241,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             IDictionary<string, object> parameters = new Dictionary<string, object>();
             TaskHostConfiguration config3 = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
@@ -267,6 +274,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             parameters2.Add("ItemArray", new ITaskItem[] { new TaskItem("DEF"), new TaskItem("GHI"), new TaskItem("JKL") });
 
             TaskHostConfiguration config4 = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
@@ -299,6 +307,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             WarningsAsErrors.Add("MSB1237");
 
             TaskHostConfiguration config5 = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
@@ -338,6 +347,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             };
 
             TaskHostConfiguration config = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
@@ -389,6 +399,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             AppDomainSetup setup = new AppDomainSetup();
 
             TaskHostConfiguration config = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
@@ -435,6 +446,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestTranslationWithEmptyDictionary()
         {
             TaskHostConfiguration config = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
@@ -486,6 +498,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             parameters.Add("Text", "Foo");
             parameters.Add("BoolValue", false);
             TaskHostConfiguration config = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
@@ -535,6 +548,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             IDictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("TaskItemValue", new TaskItem("Foo"));
             TaskHostConfiguration config = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
@@ -583,6 +597,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             IDictionary<string, object> parameters = new Dictionary<string, object>();
             parameters.Add("TaskItemArrayValue", new ITaskItem[] { new TaskItem("Foo"), new TaskItem("Baz") });
             TaskHostConfiguration config = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
@@ -638,6 +653,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             WarningsAsErrors.Add("MSB1236");
             WarningsAsErrors.Add("MSB1237");
             TaskHostConfiguration config = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
@@ -688,6 +704,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             WarningsAsMessages.Add("MSB1236");
             WarningsAsMessages.Add("MSB1237");
             TaskHostConfiguration config = new TaskHostConfiguration(
+                runtime: "TaskHost",
                 nodeId: 1,
                 startupDirectory: Directory.GetCurrentDirectory(),
                 buildProcessEnvironment: null,
