@@ -2355,7 +2355,6 @@ EndGlobal
 #if !FEATURE_ASPNET_COMPILER
                     });
 #endif
-                }
 #pragma warning restore format
 
 #if FEATURE_ASPNET_COMPILER
@@ -2363,6 +2362,7 @@ EndGlobal
                 string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", solution.ProjectsInOrder[0].ProjectName, ver.ToString());
                 logger.AssertLogContains(message);
 #endif
+                }
             }
             finally
             {
