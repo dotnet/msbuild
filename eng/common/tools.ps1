@@ -307,6 +307,7 @@ function InstallDotNet([string] $dotnetRoot,
 
   $variations = @()
   $variations += @($installParameters)
+  $variations += @($fixedVersionInstallParameters)
 
   $dotnetBuilds = $installParameters.Clone()
   $dotnetbuilds.AzureFeed = "https://ci.dot.net/public"
@@ -332,8 +333,8 @@ function InstallDotNet([string] $dotnetRoot,
     }
     Write-Host "Attempting to install dotnet from $location."
     try {
+      Write-Host "SDK version being installed $version"
       & $installScript @variation
-      & $installScript @fixedVersionInstallParameters
       $installSuccess = $true
       break
     }
