@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -7,6 +7,7 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <!-- MSBuild.csproj no longer uses apphost. This fixes an issue where certain tests would find
          MSBuild.exe AND MSBuild.dll when they should only find MSBuild.dll. -->

@@ -192,6 +192,8 @@ function InitializeDotNetCli([bool]$install, [bool]$createSdkLocationFile) {
     if (-not (Test-Path(Join-Path $dotnetRoot "sdk\$dotnetSdkVersion"))) {
       if ($install) {
         InstallDotNetSdk $dotnetRoot $dotnetSdkVersion
+        # Installing SDK 5 to cover the build of all projects within the repo 
+        InstallDotNetSdk $dotnetRoot "5.0.408"
       } else {
         Write-PipelineTelemetryError -Category 'InitializeToolset' -Message "Unable to find dotnet with SDK version '$dotnetSdkVersion'"
         ExitWithExitCode 1

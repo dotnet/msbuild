@@ -3,6 +3,8 @@
     <OutputType>Exe</OutputType>
     <UseAppHost>false</UseAppHost>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     
     <IsPackable>false</IsPackable>

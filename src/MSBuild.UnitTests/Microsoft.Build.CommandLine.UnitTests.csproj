@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
   </PropertyGroup>

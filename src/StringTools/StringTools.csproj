@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
     <TargetFrameworks Condition="'$(MSBuildRuntimeType)' != 'Core' and '$(MonoBuild)' != 'true'">$(LibraryTargetFrameworks);net35</TargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <WarningsAsErrors>true</WarningsAsErrors>

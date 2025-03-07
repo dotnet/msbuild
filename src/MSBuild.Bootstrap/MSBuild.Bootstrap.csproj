@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
 
     <!-- Don't warn on incompatability MSIL vs x86 since this isn't an actual working DLL -->
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
@@ -48,7 +50,7 @@
   <Target Name="UpdateMSBuildDepsFile" AfterTargets="Build" Condition="'$(MonoBuild)' != 'true' and ($([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1')) or '$(TargetFramework)' == 'netstandard2.0')">
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).deps.json" DestinationFiles="$(OutputPath)MSBuild.deps.json" />
   </Target>
-  <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish" Condition="'$(TargetFramework)' == 'net5.0'">
+  <Target Name="UpdatePublishedMSBuildDepsFile" AfterTargets="Publish" Condition="'$(TargetFramework)' == 'net6.0'">
     <Copy SourceFiles="$(PublishDir)$(AssemblyName).deps.json" DestinationFiles="$(PublishDir)MSBuild.deps.json" />
   </Target>
 

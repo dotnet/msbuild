@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <CreateTlb>true</CreateTlb>
     <IsPackable>true</IsPackable>
