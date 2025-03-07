@@ -2937,13 +2937,23 @@ EndGlobal
             Assert.Equal(count, itemGroup.Count());
         }
 
-        private SolutionFile ParseSolutionHelper(string solutionFileContents, bool useNewParser, TestEnvironment testEnvironment = null)
+        private static SolutionFile ParseSolutionHelper(string solutionFileContents, bool isOptInSlnParsingWithNewParser)
         {
-            return useNewParser ?
-                testEnvironment is null ?
-                    SolutionFile_NewParser_Tests.ParseSolutionHelper(solutionFileContents) :
-                    SolutionFile_NewParser_Tests.ParseSolutionHelper(testEnvironment, solutionFileContents) :
-                SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                return ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, testEnvironment);
+            }
+        }
+
+        private static SolutionFile ParseSolutionHelper(string solutionFileContents, bool isOptInSlnParsingWithNewParser, TestEnvironment testEnvironment)
+        {
+            solutionFileContents = solutionFileContents.Replace('\'', '"');
+            if (isOptInSlnParsingWithNewParser)
+            {
+                testEnvironment.SetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE", "1");
+            }
+            TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
+            return SolutionFile.Parse(sln.Path);
         }
 
         #endregion // Helper Functions
