@@ -20,21 +20,13 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
-    public class SolutionFile_NewParser_Tests : IDisposable
+    public class SolutionFile_NewParser_Tests
     {
         public ITestOutputHelper TestOutputHelper { get; }
-
-        private readonly TestEnvironment _testEnvironment;
 
         public SolutionFile_NewParser_Tests(ITestOutputHelper testOutputHelper)
         {
             TestOutputHelper = testOutputHelper;
-            _testEnvironment = TestEnvironment.Create();
-        }
-
-        public void Dispose()
-        {
-            _testEnvironment.Dispose();
         }
 
         /// <summary>
@@ -88,7 +80,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(_testEnvironment, solutionFileContents.Replace('`', '"'), convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents.Replace('`', '"'), convertToSlnx);
 
             solution.ProjectsInOrder.ShouldHaveSingleItem();
 
@@ -137,6 +129,15 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Helper method to create a SolutionFile object, and call it to parse the SLN file
         /// represented by the string contents passed in. Optionally can convert the SLN to SLNX and then parse the solution.
         /// </summary>
+        internal static SolutionFile ParseSolutionHelper(string solutionFileContents, bool convertToSlnx = false)
+        {
+            solutionFileContents = solutionFileContents.Replace('\'', '"');
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                return ParseSolutionHelper(testEnvironment, solutionFileContents, convertToSlnx);
+            }
+        }
+
         internal static SolutionFile ParseSolutionHelper(TestEnvironment testEnvironment, string solutionFileContents, bool convertToSlnx = false)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
