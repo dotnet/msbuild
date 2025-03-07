@@ -200,7 +200,6 @@ namespace Microsoft.Build.UnitTests.Construction
             }
         }
 
-
         /// <summary>
         /// Build Solution with Multiple Targets (ex. Clean;Build;Custom).
         /// </summary>
@@ -2356,8 +2355,8 @@ EndGlobal
 #if !FEATURE_ASPNET_COMPILER
                     });
 #endif
-#pragma warning restore format
                 }
+#pragma warning restore format
 
 #if FEATURE_ASPNET_COMPILER
                 Version ver = new Version("4.34");
@@ -2940,7 +2939,7 @@ EndGlobal
 
         private SolutionFile ParseSolutionHelper(string solutionFileContents, bool useNewParser, TestEnvironment testEnvironment = null)
         {
-            return useNewParser ? 
+            return useNewParser ?
                 testEnvironment is null ?
                     SolutionFile_NewParser_Tests.ParseSolutionHelper(solutionFileContents) :
                     SolutionFile_NewParser_Tests.ParseSolutionHelper(testEnvironment, solutionFileContents) :
