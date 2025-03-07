@@ -367,11 +367,15 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
 
-            Assert.Equal("3.5", instances[0].ToolsVersion);
+                Assert.Equal("3.5", instances[0].ToolsVersion);
+            }
         }
 
         /// <summary>
@@ -404,11 +408,15 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
 
-            Assert.Equal("3.5", instances[0].ToolsVersion);
+                Assert.Equal("3.5", instances[0].ToolsVersion);
+            }
         }
 
         /// <summary>
@@ -1276,37 +1284,41 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
-
-            var instance = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, _buildEventContext, CreateMockLoggingService())[0];
-
-            foreach (ITaskItem item in instance.Items)
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
-                string skipNonexistentProjects = item.GetMetadata("SkipNonexistentProjects");
-                if (item.ItemSpec.EndsWith("ClassLibrary1.csproj"))
+                // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
+
+                var instance = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, _buildEventContext, CreateMockLoggingService())[0];
+
+                foreach (ITaskItem item in instance.Items)
                 {
-                    Assert.Equal("False", skipNonexistentProjects);
-                }
-                else if (item.ItemSpec.EndsWith("MainApp.metaproj"))
-                {
-                    Assert.Equal("Build", skipNonexistentProjects);
-                }
-                else if (item.ItemSpec == "Debug|Mixed Platforms")
-                {
-                    Assert.Equal("Debug", item.GetMetadata("Configuration"));
-                    Assert.Equal("Mixed Platforms", item.GetMetadata("Platform"));
-                    Assert.Contains("<SolutionConfiguration>", item.GetMetadata("Content"));
-                }
-                else if (item.ItemSpec == "Release|Any CPU")
-                {
-                    Assert.Equal("Release", item.GetMetadata("Configuration"));
-                    Assert.Equal("Any CPU", item.GetMetadata("Platform"));
-                    Assert.Contains("<SolutionConfiguration>", item.GetMetadata("Content"));
-                }
-                else
-                {
-                    Assert.Fail("Unexpected project seen:" + item.ItemSpec);
+                    string skipNonexistentProjects = item.GetMetadata("SkipNonexistentProjects");
+                    if (item.ItemSpec.EndsWith("ClassLibrary1.csproj"))
+                    {
+                        Assert.Equal("False", skipNonexistentProjects);
+                    }
+                    else if (item.ItemSpec.EndsWith("MainApp.metaproj"))
+                    {
+                        Assert.Equal("Build", skipNonexistentProjects);
+                    }
+                    else if (item.ItemSpec == "Debug|Mixed Platforms")
+                    {
+                        Assert.Equal("Debug", item.GetMetadata("Configuration"));
+                        Assert.Equal("Mixed Platforms", item.GetMetadata("Platform"));
+                        Assert.Contains("<SolutionConfiguration>", item.GetMetadata("Content"));
+                    }
+                    else if (item.ItemSpec == "Release|Any CPU")
+                    {
+                        Assert.Equal("Release", item.GetMetadata("Configuration"));
+                        Assert.Equal("Any CPU", item.GetMetadata("Platform"));
+                        Assert.Contains("<SolutionConfiguration>", item.GetMetadata("Content"));
+                    }
+                    else
+                    {
+                        Assert.Fail("Unexpected project seen:" + item.ItemSpec);
+                    }
                 }
             }
         }
@@ -1424,34 +1436,38 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
-
-            string[] solutionToolsVersions = { "4.0", ObjectModelHelpers.MSBuildDefaultToolsVersion };
-
-            foreach (string solutionToolsVersion in solutionToolsVersions)
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, solutionToolsVersion, _buildEventContext, CreateMockLoggingService());
+                // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-                Assert.Equal(2, instances.Length);
+                string[] solutionToolsVersions = { "4.0", ObjectModelHelpers.MSBuildDefaultToolsVersion };
 
-                // Solution metaproj
-                Assert.Equal(solutionToolsVersion, instances[0].ToolsVersion);
-
-                ICollection<ProjectItemInstance> projectReferences = instances[0].GetItems("ProjectReference");
-
-                foreach (ProjectItemInstance projectReference in projectReferences)
+                foreach (string solutionToolsVersion in solutionToolsVersions)
                 {
-                    // If this is the reference to the metaproj, its ToolsVersion metadata needs to match
-                    // the solution ToolsVersion -- that's how the build knows which ToolsVersion to use.
-                    if (projectReference.EvaluatedInclude.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase))
-                    {
-                        Assert.Equal(solutionToolsVersion, projectReference.GetMetadataValue("ToolsVersion"));
-                    }
-                }
+                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, solutionToolsVersion, _buildEventContext, CreateMockLoggingService());
 
-                // Project metaproj for project with dependencies
-                Assert.Equal(solutionToolsVersion, instances[1].ToolsVersion);
+                    Assert.Equal(2, instances.Length);
+
+                    // Solution metaproj
+                    Assert.Equal(solutionToolsVersion, instances[0].ToolsVersion);
+
+                    ICollection<ProjectItemInstance> projectReferences = instances[0].GetItems("ProjectReference");
+
+                    foreach (ProjectItemInstance projectReference in projectReferences)
+                    {
+                        // If this is the reference to the metaproj, its ToolsVersion metadata needs to match
+                        // the solution ToolsVersion -- that's how the build knows which ToolsVersion to use.
+                        if (projectReference.EvaluatedInclude.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase))
+                        {
+                            Assert.Equal(solutionToolsVersion, projectReference.GetMetadataValue("ToolsVersion"));
+                        }
+                    }
+
+                    // Project metaproj for project with dependencies
+                    Assert.Equal(solutionToolsVersion, instances[1].ToolsVersion);
+                }
             }
         }
 #endif
@@ -1486,6 +1502,8 @@ namespace Microsoft.Build.UnitTests.Construction
                     EndGlobalSection
                 EndGlobal
                 """;
+
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
             SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
             bool caughtException = false;
 
@@ -2321,22 +2339,25 @@ EndGlobal
                 globalProperties["Configuration"] = "Release";
                 globalProperties["SkipInvalidConfigurations"] = "true";
 
+                // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+                using (TestEnvironment testEnvironment = TestEnvironment.Create())
+                {
+                    SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
-
-                using ProjectCollection collection = new ProjectCollection();
-                collection.RegisterLogger(logger);
+                    using ProjectCollection collection = new ProjectCollection();
+                    collection.RegisterLogger(logger);
 
 #pragma warning disable format
 #if !FEATURE_ASPNET_COMPILER
-                Assert.Throws<InvalidProjectFileException>(() =>
-                {
+                    Assert.Throws<InvalidProjectFileException>(() =>
+                    {
 #endif
-                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
+                        ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
 #if !FEATURE_ASPNET_COMPILER
-                });
+                    });
 #endif
 #pragma warning restore format
+                }
 
 #if FEATURE_ASPNET_COMPILER
                 Version ver = new Version("4.34");
@@ -2866,12 +2887,16 @@ EndGlobal
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, toolsVersion, BuildEventContext.Invalid, CreateMockLoggingService());
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, toolsVersion, BuildEventContext.Invalid, CreateMockLoggingService());
 
-            // Index 0 is the traversal project, which will reference the sole Venus project.
-            return instances[1];
+                // Index 0 is the traversal project, which will reference the sole Venus project.
+                return instances[1];
+            }
         }
 
         private ILoggingService CreateMockLoggingService()
