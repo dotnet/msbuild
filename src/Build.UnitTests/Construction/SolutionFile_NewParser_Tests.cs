@@ -141,7 +141,7 @@ namespace Microsoft.Build.UnitTests.Construction
         internal static SolutionFile ParseSolutionHelper(TestEnvironment testEnvironment, string solutionFileContents, bool convertToSlnx = false)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
-            testEnvironment.SetEnvironmentVariable("MSBUILD_SLN_PARSING_SOLUTIONPERSISTENCE_OPTIN", "1");
+            testEnvironment.SetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE", "1");
             TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
             string solutionPath = convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path;
             SolutionFile solutionFile = new SolutionFile { FullPath = solutionPath };
