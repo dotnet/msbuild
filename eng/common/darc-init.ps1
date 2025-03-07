@@ -1,6 +1,6 @@
 param (
     $darcVersion = $null,
-    $versionEndpoint = 'https://maestro-prod.westus2.cloudapp.azure.com/api/assets/darc-version?api-version=2019-01-16',
+    $versionEndpoint = 'https://maestro.dot.net/api/assets/darc-version?api-version=2019-01-16',
     $verbosity = 'minimal',
     $toolpath = $null
 )
@@ -10,7 +10,8 @@ param (
 function InstallDarcCli ($darcVersion, $toolpath) {
   $darcCliPackageName = 'microsoft.dotnet.darc'
 
-  $dotnet = "dotnet"
+  $dotnetRoot = InitializeDotNetCli -install:$true
+  $dotnet = "$dotnetRoot\dotnet.exe"
   $toolList = & "$dotnet" tool list -g
 
   if ($toolList -like "*$darcCliPackageName*") {
