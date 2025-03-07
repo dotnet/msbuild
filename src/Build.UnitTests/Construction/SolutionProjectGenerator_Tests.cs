@@ -34,8 +34,6 @@ namespace Microsoft.Build.UnitTests.Construction
     {
         private readonly ITestOutputHelper output;
 
-        private readonly TestEnvironment _testEnvironment;
-
         private string _originalVisualStudioVersion = null;
 
         private static readonly BuildEventContext _buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
@@ -46,8 +44,6 @@ namespace Microsoft.Build.UnitTests.Construction
         {
             this.output = output;
 
-            _testEnvironment = TestEnvironment.Create();
-
             // Save off the value for use during cleanup
             _originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
         }
@@ -57,7 +53,6 @@ namespace Microsoft.Build.UnitTests.Construction
             // Need to make sure the environment is cleared up for later tests
             Environment.SetEnvironmentVariable("VisualStudioVersion", _originalVisualStudioVersion);
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
-            _testEnvironment.Dispose();
         }
 
         /// <summary>
@@ -438,7 +433,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
@@ -482,17 +477,21 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
-
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
-
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
-
-            // being cautious -- we can't expect the sub-toolset to be picked if it doesn't exist in the first place
-            if (instances[0].Toolset.SubToolsets.ContainsKey("11.0"))
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
-                Assert.Equal("11.0", instances[0].SubToolsetVersion);
-                Assert.Equal("11.0", instances[0].GetPropertyValue("VisualStudioVersion"));
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
+
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
+
+                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
+
+                // being cautious -- we can't expect the sub-toolset to be picked if it doesn't exist in the first place
+                if (instances[0].Toolset.SubToolsets.ContainsKey("11.0"))
+                {
+                    Assert.Equal("11.0", instances[0].SubToolsetVersion);
+                    Assert.Equal("11.0", instances[0].GetPropertyValue("VisualStudioVersion"));
+                }
             }
         }
 
@@ -519,13 +518,17 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
-            Assert.Equal("ABC", instances[0].SubToolsetVersion);
-            Assert.Equal("ABC", instances[0].GetPropertyValue("VisualStudioVersion"));
+                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
+                Assert.Equal("ABC", instances[0].SubToolsetVersion);
+                Assert.Equal("ABC", instances[0].GetPropertyValue("VisualStudioVersion"));
+            }
         }
 
         /// <summary>
@@ -780,7 +783,7 @@ namespace Microsoft.Build.UnitTests.Construction
                     EndGlobal
                     """;
 
-                SolutionFile sp = SolutionFile_OldParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents);
+                SolutionFile sp = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
             });
         }
@@ -1341,39 +1344,43 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
-
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, _buildEventContext, CreateMockLoggingService());
-
-            int i = 0;
-            foreach (ProjectInstance instance in instances)
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
-                if (i == 0)
-                {
-                    continue;
-                }
+                // We're not passing in a /tv:xx switch, so the solution project will have tools version 2.0
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-                foreach (ProjectTargetInstance target in instance.Targets.Values)
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, ObjectModelHelpers.MSBuildDefaultToolsVersion, _buildEventContext, CreateMockLoggingService());
+
+                int i = 0;
+                foreach (ProjectInstance instance in instances)
                 {
-                    foreach (ProjectTaskInstance childNode in target.Tasks)
+                    if (i == 0)
                     {
-                        if (String.Equals(childNode.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
-                        {
-                            string projectsParameter = childNode.GetParameter("Projects");
-                            if (projectsParameter != "@(ProjectReference)")
-                            {
-                                // we found an MSBuild task invocation, now let's verify that it has the correct
-                                // ToolsVersion parameter set
-                                string toolsVersionParameter = childNode.GetParameter("ToolsVersion");
+                        continue;
+                    }
 
-                                Assert.Equal(toolsVersionParameter, instances[0].GetPropertyValue("ProjectToolsVersion"));
+                    foreach (ProjectTargetInstance target in instance.Targets.Values)
+                    {
+                        foreach (ProjectTaskInstance childNode in target.Tasks)
+                        {
+                            if (String.Equals(childNode.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                            {
+                                string projectsParameter = childNode.GetParameter("Projects");
+                                if (projectsParameter != "@(ProjectReference)")
+                                {
+                                    // we found an MSBuild task invocation, now let's verify that it has the correct
+                                    // ToolsVersion parameter set
+                                    string toolsVersionParameter = childNode.GetParameter("ToolsVersion");
+
+                                    Assert.Equal(toolsVersionParameter, instances[0].GetPropertyValue("ProjectToolsVersion"));
+                                }
                             }
                         }
                     }
-                }
 
-                i++;
+                    i++;
+                }
             }
         }
 
@@ -1527,53 +1534,57 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
-            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)));
-            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase)));
-            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
-            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)));
 
-            ProjectTargetInstance buildTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)).First().Value;
-            ProjectTargetInstance cleanTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase)).First().Value;
-            ProjectTargetInstance rebuildTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)).First().Value;
-            ProjectTargetInstance publishTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)).First().Value;
+                ProjectTargetInstance buildTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)).First().Value;
+                ProjectTargetInstance cleanTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase)).First().Value;
+                ProjectTargetInstance rebuildTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)).First().Value;
+                ProjectTargetInstance publishTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)).First().Value;
 
-            // Check that the appropriate target is being passed to the child projects
-            Assert.Null(buildTarget.Tasks.Where(
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
-                .First().GetParameter("Targets"));
+                // Check that the appropriate target is being passed to the child projects
+                Assert.Null(buildTarget.Tasks.Where(
+                    task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                    .First().GetParameter("Targets"));
 
-            Assert.Equal("Clean", cleanTarget.Tasks.Where(
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
-                .First().GetParameter("Targets"));
+                Assert.Equal("Clean", cleanTarget.Tasks.Where(
+                    task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                    .First().GetParameter("Targets"));
 
-            Assert.Equal("Rebuild", rebuildTarget.Tasks.Where(
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
-                .First().GetParameter("Targets"));
+                Assert.Equal("Rebuild", rebuildTarget.Tasks.Where(
+                    task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                    .First().GetParameter("Targets"));
 
-            Assert.Equal("Publish", publishTarget.Tasks.Where(
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
-                .First().GetParameter("Targets"));
+                Assert.Equal("Publish", publishTarget.Tasks.Where(
+                    task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                    .First().GetParameter("Targets"));
 
-            // Check that the child projects in question are the members of the "ProjectReference" item group
-            Assert.Equal("@(ProjectReference)", buildTarget.Tasks.Where(
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
-                .First().GetParameter("Projects"));
+                // Check that the child projects in question are the members of the "ProjectReference" item group
+                Assert.Equal("@(ProjectReference)", buildTarget.Tasks.Where(
+                    task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                    .First().GetParameter("Projects"));
 
-            Assert.Equal("@(ProjectReference->Reverse())", cleanTarget.Tasks.Where(
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
-                .First().GetParameter("Projects"));
+                Assert.Equal("@(ProjectReference->Reverse())", cleanTarget.Tasks.Where(
+                    task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                    .First().GetParameter("Projects"));
 
-            Assert.Equal("@(ProjectReference)", rebuildTarget.Tasks.Where(
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
-                .First().GetParameter("Projects"));
+                Assert.Equal("@(ProjectReference)", rebuildTarget.Tasks.Where(
+                    task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                    .First().GetParameter("Projects"));
 
-            Assert.Equal("@(ProjectReference)", publishTarget.Tasks.Where(
-                task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
-                .First().GetParameter("Projects"));
+                Assert.Equal("@(ProjectReference)", publishTarget.Tasks.Where(
+                    task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
+                    .First().GetParameter("Projects"));
+            }
 
             // We should have only the four standard targets plus the two validation targets (ValidateSolutionConfiguration and ValidateToolsVersions).
         }
@@ -1601,7 +1612,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             // These used to exist on the engine, but now need to be passed in explicitly
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
@@ -1639,7 +1650,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
@@ -1850,7 +1861,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents);
+            SolutionFile solution = SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
 
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
 
@@ -1897,18 +1908,22 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-            // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
-            Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
+                // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
+                Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
-            Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
+                Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
 
-            // Ensure that the value has been correctly stored in the ProjectReference item list
-            // Since there is only one project in the solution, there will be only one project reference
-            Assert.Contains("%abtest", instances[0].GetItems("ProjectReference").ElementAt(0).EvaluatedInclude);
+                // Ensure that the value has been correctly stored in the ProjectReference item list
+                // Since there is only one project in the solution, there will be only one project reference
+                Assert.Contains("%abtest", instances[0].GetItems("ProjectReference").ElementAt(0).EvaluatedInclude);
+            }
         }
 
         /// <summary>
@@ -1954,12 +1969,16 @@ namespace Microsoft.Build.UnitTests.Construction
             {
                 Environment.SetEnvironmentVariable("MSBuildEmitSolution", "1");
 
-                solution = ParseSolutionHelper(solutionFileContents, useNewParser);
+                // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+                using (TestEnvironment testEnvironment = TestEnvironment.Create())
+                {
+                    solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-                // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
-                Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
+                    // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
+                    Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
 
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
+                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
+                }
 
                 // Instantiating the
                 Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
@@ -2039,12 +2058,16 @@ namespace Microsoft.Build.UnitTests.Construction
                 globalProperties["Configuration"] = "Nonexistent";
                 globalProperties["SkipInvalidConfigurations"] = "true";
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService());
-                ProjectInstance msbuildProject = instances[0];
+                // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+                using (TestEnvironment testEnvironment = TestEnvironment.Create())
+                {
+                    SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
+                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService());
+                    ProjectInstance msbuildProject = instances[0];
 
-                // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
-                Assert.True(msbuildProject.Build(new ILogger[] { logger }));
+                    // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
+                    Assert.True(msbuildProject.Build(new ILogger[] { logger }));
+                }
 
                 // We should get the invalid solution configuration warning
                 Assert.Single(logger.Warnings);
@@ -2353,30 +2376,34 @@ EndGlobal
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-            ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "One" });
+                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "One" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase)));
 
-            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Two", "Three", "Four" });
+                instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Two", "Three", "Four" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase)));
-            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase)));
-            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase)));
 
-            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Build" });
+                instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Build" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)));
 
-            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Five", "Rebuild" });
+                instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Five", "Rebuild" });
 
-            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase)));
-            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
 
-            instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "My_Project:Six" });
-
-            Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase)));
+                instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "My_Project:Six" });
+        
+                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase)));
+            }
         }
 
         /// <summary>
@@ -2408,21 +2435,25 @@ EndGlobal
                     EndGlobal
                     """;
 
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
-
-                ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), null);
-
-                foreach (string targetName in ProjectInSolution.projectNamesToDisambiguate)
+                // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+                using (TestEnvironment testEnvironment = TestEnvironment.Create())
                 {
-                    // The entry point still exists normally.
-                    Assert.True(instances[0].Targets.ContainsKey(targetName));
+                    SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-                    // The traversal target should be disambiguated with a "Solution:" prefix.
-                    // Note: The default targets are used instead of "Build".
-                    string traversalTargetName = targetName.Equals("Build", StringComparison.OrdinalIgnoreCase)
-                        ? $"Solution:{projectName}"
-                        : $"Solution:{projectName}:{targetName}";
-                    Assert.True(instances[0].Targets.ContainsKey(traversalTargetName));
+                    ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), null);
+
+                    foreach (string targetName in ProjectInSolution.projectNamesToDisambiguate)
+                    {
+                        // The entry point still exists normally.
+                        Assert.True(instances[0].Targets.ContainsKey(targetName));
+
+                        // The traversal target should be disambiguated with a "Solution:" prefix.
+                        // Note: The default targets are used instead of "Build".
+                        string traversalTargetName = targetName.Equals("Build", StringComparison.OrdinalIgnoreCase)
+                            ? $"Solution:{projectName}"
+                            : $"Solution:{projectName}:{targetName}";
+                        Assert.True(instances[0].Targets.ContainsKey(traversalTargetName));
+                    }
                 }
             }
         }
@@ -2457,51 +2488,55 @@ EndGlobal
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser);
-
-            ProjectInstance[] instances;
-
-            // Avoid any unexpected targets getting pulled in
-            var globalProperties = new Dictionary<string, string> { { "ImportByWildcardBeforeSolution", "false" } };
-
-            foreach (string builtInTargetName in new[]
+            // SolutionProjectGenerator.Generate calls SolutionFile.UseNewParser, so we need TestEnvironment with the environment variable available.
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
-                null,
-                "Build",
-                "Rebuild",
-                "Clean",
-                "Publish",
-                "ClassLibrary1",
-                "ClassLibrary1:Clean",
-                "ClassLibrary1:Rebuild",
-                "GetSolutionConfigurationContents",
-                "ValidateProjects",
-            })
-            {
-                string[] targetNames;
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
-                if (builtInTargetName == null)
+                ProjectInstance[] instances;
+
+                // Avoid any unexpected targets getting pulled in
+                var globalProperties = new Dictionary<string, string> { { "ImportByWildcardBeforeSolution", "false" } };
+
+                foreach (string builtInTargetName in new[]
                 {
-                    targetNames = null;
-                }
-                else
+                    null,
+                    "Build",
+                    "Rebuild",
+                    "Clean",
+                    "Publish",
+                    "ClassLibrary1",
+                    "ClassLibrary1:Clean",
+                    "ClassLibrary1:Rebuild",
+                    "GetSolutionConfigurationContents",
+                    "ValidateProjects",
+                })
                 {
-                    string targetName = forceCaseDifference ? builtInTargetName.ToUpperInvariant() : builtInTargetName;
-                    targetNames = new[] { targetName };
+                    string[] targetNames;
+
+                    if (builtInTargetName == null)
+                    {
+                        targetNames = null;
+                    }
+                    else
+                    {
+                        string targetName = forceCaseDifference ? builtInTargetName.ToUpperInvariant() : builtInTargetName;
+                        targetNames = new[] { targetName };
+                    }
+
+                    instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), targetNames);
+
+                    Assert.Single(instances);
+
+                    Assert.Equal(12, instances[0].TargetsCount);
                 }
 
-                instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), targetNames);
+                instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), new[] { "Foo" });
 
                 Assert.Single(instances);
 
-                Assert.Equal(12, instances[0].TargetsCount);
+                Assert.Equal(14, instances[0].TargetsCount);
             }
-
-            instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), new[] { "Foo" });
-
-            Assert.Single(instances);
-
-            Assert.Equal(14, instances[0].TargetsCount);
         }
 
         /// <summary>
@@ -2878,10 +2913,13 @@ EndGlobal
             Assert.Equal(count, itemGroup.Count());
         }
 
-        private SolutionFile ParseSolutionHelper(string solutionFileContents, bool useNewParser)
+        private SolutionFile ParseSolutionHelper(string solutionFileContents, bool useNewParser, TestEnvironment testEnvironment = null)
         {
-            return useNewParser ? SolutionFile_NewParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents) :
-                SolutionFile_OldParser_Tests.ParseSolutionHelper(_testEnvironment, solutionFileContents);
+            return useNewParser ? 
+                testEnvironment is null ?
+                    SolutionFile_NewParser_Tests.ParseSolutionHelper(solutionFileContents) :
+                    SolutionFile_NewParser_Tests.ParseSolutionHelper(testEnvironment, solutionFileContents) :
+                SolutionFile_OldParser_Tests.ParseSolutionHelper(solutionFileContents);
         }
 
         #endregion // Helper Functions
