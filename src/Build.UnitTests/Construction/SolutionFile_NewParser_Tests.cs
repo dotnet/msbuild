@@ -129,16 +129,15 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Helper method to create a SolutionFile object, and call it to parse the SLN file
         /// represented by the string contents passed in. Optionally can convert the SLN to SLNX and then parse the solution.
         /// </summary>
-        internal static SolutionFile ParseSolutionHelper(string solutionFileContents, bool convertToSlnx = false)
+        private static SolutionFile ParseSolutionHelper(string solutionFileContents, bool convertToSlnx = false)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
-
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
+                solutionFileContents = solutionFileContents.Replace('\'', '"');
+                testEnvironment.SetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE", "1");
                 TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
-
                 string solutionPath = convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path;
-
                 SolutionFile solutionFile = new SolutionFile { FullPath = solutionPath };
                 solutionFile.ParseUsingNewParser();
                 return solutionFile;
