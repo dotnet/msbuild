@@ -753,13 +753,14 @@ namespace Microsoft.Build.Shared
         /// <param name="fileSpec">The file spec to get the full path of.</param>
         /// <param name="currentDirectory"></param>
         /// <param name="escape">Whether to escape the path after getting the full path.</param>
-        /// <returns>Full path to the file, escaped.</returns>
+        /// <returns>Full path to the file, escaped if not specified otherwise.</returns>
         internal static string GetFullPath(string fileSpec, string currentDirectory, bool escape = true)
         {
             // Sending data out of the engine into the filesystem, so time to unescape.
             fileSpec = FixFilePath(EscapingUtilities.UnescapeAll(fileSpec));
 
             string fullPath = NormalizePath(Path.Combine(currentDirectory, fileSpec));
+            // In some cases we might want to NOT escape in order to preserve symbols like @, %, $ etc.
             if (escape)
             {
                 // Data coming back from the filesystem into the engine, so time to escape it back.
