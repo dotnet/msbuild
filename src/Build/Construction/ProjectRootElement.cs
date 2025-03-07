@@ -176,6 +176,14 @@ namespace Microsoft.Build.Construction
             ProjectParser.Parse(document, this);
         }
 
+        private readonly bool _isEphemeral = false;
+
+        private ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions, bool isEphemeral)
+            : this(projectRootElementCache, projectFileOptions)
+        {
+            _isEphemeral = isEphemeral;
+        }
+
         /// <summary>
         /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later.
         /// Leaves the project dirty, indicating there are unsaved changes.
@@ -320,6 +328,8 @@ namespace Microsoft.Build.Construction
         /// Get a read-only collection of the child imports
         /// </summary>
         public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>(GetAllChildrenOfType<ProjectImportElement>());
+
+        internal bool IsEphemeral => _isEphemeral;
 
         /// <summary>
         /// Get a read-only collection of the child property groups, if any.
@@ -711,6 +721,18 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal string LastDirtyReason
             => _dirtyReason == null ? null : String.Format(CultureInfo.InvariantCulture, _dirtyReason, _dirtyParameter);
+
+        /// <summary>
+        /// Initialize an in-memory empty ProjectRootElement instance that CANNOT be saved later.
+        /// The ProjectRootElement will not be marked dirty.
+        /// Uses the global project collection.
+        /// </summary>
+        internal static ProjectRootElement CreateEphemeral(ProjectRootElementCacheBase projectRootElementCache)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
+
+            return new ProjectRootElement(projectRootElementCache, Project.DefaultNewProjectTemplateOptions, isEphemeral: true);
+        }
 
         /// <summary>
         /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later.
@@ -1817,6 +1839,11 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal sealed override void MarkDirty(string reason, string param)
         {
+            if (_isEphemeral)
+            {
+                return;
+            }
+
             if (Link != null)
             {
                 RootLink.MarkDirty(reason, param);
