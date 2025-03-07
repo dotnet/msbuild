@@ -295,6 +295,11 @@ function InstallDotNet([string] $dotnetRoot,
     InstallDir = $dotnetRoot
   }
 
+  $fixedVersionInstallParameters = @{
+    Version = $version
+    InstallDir = "5.0.408"
+  }
+
   if ($architecture) { $installParameters.Architecture = $architecture }
   if ($runtime) { $installParameters.Runtime = $runtime }
   if ($skipNonVersionedFiles) { $installParameters.SkipNonVersionedFiles = $skipNonVersionedFiles }
@@ -328,6 +333,7 @@ function InstallDotNet([string] $dotnetRoot,
     Write-Host "Attempting to install dotnet from $location."
     try {
       & $installScript @variation
+      & $installScript @fixedVersionInstallParameters
       $installSuccess = $true
       break
     }
