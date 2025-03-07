@@ -5,6 +5,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <AssemblyName>Microsoft.Build.Framework.UnitTests</AssemblyName>

@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <CreateTlb>true</CreateTlb>
     <IsPackable>true</IsPackable>
