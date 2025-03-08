@@ -35,9 +35,9 @@ public sealed partial class TerminalLogger : INodeLogger
     private const string FilePathPattern = " -> ";
 
 #if NET
-    private static readonly SearchValues<string> _immediateMessageKeywords = SearchValues.Create(["[CredentialProvider]", "--interactive"], StringComparison.OrdinalIgnoreCase);
+    private static readonly SearchValues<string> _authProviderMessageKeywords = SearchValues.Create(["[CredentialProvider]", "--interactive"], StringComparison.OrdinalIgnoreCase);
 #else
-    private static readonly string[] _immediateMessageKeywords = ["[CredentialProvider]", "--interactive"];
+    private static readonly string[] _authProviderMessageKeywords = ["[CredentialProvider]", "--interactive"];
 #endif
 
     private static readonly string[] newLineStrings = { "\r\n", "\n" };
@@ -874,14 +874,15 @@ public sealed partial class TerminalLogger : INodeLogger
                 }
             }
 
+            // auth provider messages should always be shown to the user.
+            if (IsAuthProviderMessage(message))
+            {
+                RenderImmediateMessage(message);
+                return;
+            }
+
             if (Verbosity > LoggerVerbosity.Quiet)
             {
-                // Show immediate messages to the user.
-                if (IsImmediateMessage(message))
-                {
-                    RenderImmediateMessage(message);
-                    return;
-                }
                 if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
                 {
                     // The SDK will log the high-pri "not-a-warning" message NETSDK1057
@@ -985,16 +986,23 @@ public sealed partial class TerminalLogger : INodeLogger
         BuildEventContext? buildEventContext = e.BuildEventContext;
 
         if (buildEventContext is not null
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project)
-            && Verbosity > LoggerVerbosity.Quiet)
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
         {
-            if ((!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message!)) ||
-                IsImmediateWarning(e.Code))
+            if (IsAuthProviderMessage(e.Message))
             {
                 RenderImmediateMessage(FormatWarningMessage(e, Indentation));
+                return;
+            }
+            else if (IsImmediateWarning(e.Code))
+            {
+                RenderImmediateMessage(FormatWarningMessage(e, Indentation));
+                return;
             }
 
-            project.AddBuildMessage(TerminalMessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
+            if (Verbosity >= LoggerVerbosity.Quiet)
+            {
+                project.AddBuildMessage(TerminalMessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
+            }
         }
         else
         {
@@ -1009,11 +1017,11 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     /// <param name="message">Raised event.</param>
     /// <returns>true if marker is detected.</returns>
-    private bool IsImmediateMessage(string message) =>
+    private bool IsAuthProviderMessage(string? message) =>
 #if NET
-        message.AsSpan().ContainsAny(_immediateMessageKeywords);
+        message is not null && message.AsSpan().ContainsAny(_authProviderMessageKeywords);
 #else
-        _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
+        message is not null && _authProviderMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
 #endif
 
 
