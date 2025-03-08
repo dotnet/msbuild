@@ -299,7 +299,11 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 int count = _reader.ReadInt32();
+#if NET472_OR_GREATER || NET9_0_OR_GREATER
+                set = new HashSet<string>(count);
+#else
                 set = new HashSet<string>();
+#endif
 
                 for (int i = 0; i < count; i++)
                 {
