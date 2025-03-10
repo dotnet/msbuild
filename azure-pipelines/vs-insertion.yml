@@ -17,7 +17,7 @@ schedules:
     displayName: Daily VS insertion main
     branches:
       include:
-        - main
+        - vs17.14
     always: false # Don't run if there are no code changes
 
 resources:
