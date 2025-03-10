@@ -2257,7 +2257,7 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (ResolvedImport import in _data.ImportClosure)
                     {
-                        if (import.ImportingElement != null) // Exclude outer project itself
+                        if (import.ImportingElement != null && !import.ImportedProject.IsEphemeral) // Exclude outer project itself and SDK-resolver synthesized imports
                         {
                             imports.Add(import);
                         }
@@ -2280,7 +2280,7 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (var import in _data.ImportClosureWithDuplicates)
                     {
-                        if (import.ImportingElement != null) // Exclude outer project itself
+                        if (import.ImportingElement != null && !import.ImportedProject.IsEphemeral) // Exclude outer project itself and SDK-resolver synthesized imports
                         {
                             imports.Add(import);
                         }
@@ -3721,6 +3721,7 @@ namespace Microsoft.Build.Evaluation
                     loadSettings,
                     ProjectCollection.MaxNodeCount,
                     ProjectCollection.EnvironmentProperties,
+                    ProjectCollection.PropertiesFromCommandLine,
                     loggingServiceForEvaluation,
                     new ProjectItemFactory(Owner),
                     ProjectCollection,
@@ -4437,7 +4438,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Sets a property which is not derived from Xml.
             /// </summary>
-            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false)
+            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false, bool isCommandLineProperty = false)
             {
                 ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext);
                 Properties.Set(property);

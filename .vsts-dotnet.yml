@@ -37,6 +37,13 @@ variables:
     value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
     value: true
+  - group: AzureDevOps-Artifact-Feeds-Pats
+  - name: cfsNugetWarnLevel
+    value: warn
+  - name: nugetMultiFeedWarnLevel
+    value: none
+  - name: NugetSecurityAnalysisWarningLevel
+    value: none
 
 resources:
   repositories:
@@ -119,6 +126,17 @@ extends:
         steps:
         - task: NuGetToolInstaller@1
           displayName: 'Install NuGet.exe'
+        - pwsh: Get-MpComputerStatus
+
+        - pwsh: Set-MpPreference -DisableRealtimeMonitoring $true
+
+        - task: PowerShell@2
+          displayName: Setup Private Feeds Credentials
+          inputs:
+            filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+            arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+          env:
+            Token: $(dn-bot-dnceng-artifact-feeds-rw)
 
         - task: NuGetCommand@2
           displayName: Restore internal tools
@@ -126,7 +144,7 @@ extends:
             command: restore
             feedsToUse: config
             restoreSolution: 'eng\common\internal\Tools.csproj'
-            nugetConfigPath: 'NuGet.config'
+            nugetConfigPath: 'eng\common\internal\NuGet.config'
             restoreDirectory: '$(Build.SourcesDirectory)\.packages'
 
         - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1

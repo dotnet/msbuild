@@ -36,6 +36,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
 using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
@@ -257,6 +258,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private BuildTelemetry? _buildTelemetry;
 
+        /// <summary>
+        /// Logger, that if instantiated - will receive and expose telemetry data from worker nodes.
+        /// </summary>
+        private InternalTelemetryConsumingLogger? _telemetryConsumingLogger;
+
         private ProjectCacheService? _projectCacheService;
 
         private bool _hasProjectCacheServiceInitializedVsScenario;
@@ -453,6 +459,7 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
+            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -562,6 +569,7 @@ namespace Microsoft.Build.Execution
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
+                _buildParameters.IsTelemetryEnabled |= OpenTelemetryManager.Instance.IsActive();
                 var loggingService = InitializeLoggingService();
 
                 // Log deferred messages and response files
@@ -759,8 +767,8 @@ namespace Microsoft.Build.Execution
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule!.FileName} PID {currentProcess.Id}).  Press enter to continue...");
+                    Console.WriteLine($"Waiting for debugger to attach ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId}).  Press enter to continue...");
+
                     Console.ReadLine();
                     break;
             }
@@ -910,8 +918,8 @@ namespace Microsoft.Build.Execution
                 {
                     // Project graph can have multiple entry points, for purposes of identifying event for same build project,
                     // we believe that including only one entry point will provide enough precision.
-                    _buildTelemetry.Project ??= requestData.EntryProjectsFullPath.FirstOrDefault();
-                    _buildTelemetry.Target ??= string.Join(",", requestData.TargetNames);
+                    _buildTelemetry.ProjectPath ??= requestData.EntryProjectsFullPath.FirstOrDefault();
+                    _buildTelemetry.BuildTarget ??= string.Join(",", requestData.TargetNames);
                 }
 
                 _buildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
@@ -1055,10 +1063,10 @@ namespace Microsoft.Build.Execution
                         if (_buildTelemetry != null)
                         {
                             _buildTelemetry.FinishedAt = DateTime.UtcNow;
-                            _buildTelemetry.Success = _overallBuildSuccess;
-                            _buildTelemetry.Version = ProjectCollection.Version;
-                            _buildTelemetry.DisplayVersion = ProjectCollection.DisplayVersion;
-                            _buildTelemetry.FrameworkName = NativeMethodsShared.FrameworkName;
+                            _buildTelemetry.BuildSuccess = _overallBuildSuccess;
+                            _buildTelemetry.BuildEngineVersion = ProjectCollection.Version;
+                            _buildTelemetry.BuildEngineDisplayVersion = ProjectCollection.DisplayVersion;
+                            _buildTelemetry.BuildEngineFrameworkName = NativeMethodsShared.FrameworkName;
 
                             string? host = null;
                             if (BuildEnvironmentState.s_runningInVisualStudio)
@@ -1073,7 +1081,7 @@ namespace Microsoft.Build.Execution
                             {
                                 host = "VSCode";
                             }
-                            _buildTelemetry.Host = host;
+                            _buildTelemetry.BuildEngineHost = host;
 
                             _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
                             var sacState = NativeMethodsShared.GetSACState();
@@ -1081,6 +1089,11 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
+                            if (OpenTelemetryManager.Instance.IsActive())
+                            {
+                                EndBuildTelemetry();
+                            }
+
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
                         }
@@ -1121,6 +1134,20 @@ namespace Microsoft.Build.Execution
                     LogErrorAndShutdown(errorMessage);
                 }
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads of System.Diagnostics.DiagnosticSource, TODO: when this is agreed to perf-wise enable instrumenting using activities anywhere...
+        private void EndBuildTelemetry()
+        {
+            OpenTelemetryManager.Instance.DefaultActivitySource?
+                .StartActivity("Build")?
+                .WithTags(_buildTelemetry)
+                .WithTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
+                    includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
+                    includeTargetDetails: false))
+                .WithStartTime(_buildTelemetry!.InnerStartAt)
+                .Dispose();
+            OpenTelemetryManager.Instance.ForceFlush();
         }
 
         /// <summary>
@@ -2940,7 +2967,7 @@ namespace Microsoft.Build.Execution
                     ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider;
                 buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
 
-                // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportnace.Low is used)
+                // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportance.Low is used)
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
                     loggerClassName: typeof(BuildCheckForwardingLogger).FullName,
@@ -2954,6 +2981,25 @@ namespace Microsoft.Build.Execution
                         buildCheckManagerProvider.Instance);
 
                 ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(buildCheckLogger, forwardingLoggerDescription) };
+
+                forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
+            }
+
+            if (_buildParameters.IsTelemetryEnabled)
+            {
+                // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportance.Low is used)
+                // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
+                LoggerDescription forwardingLoggerDescription = new LoggerDescription(
+                    loggerClassName: typeof(InternalTelemeteryForwardingLogger).FullName,
+                    loggerAssemblyName: typeof(InternalTelemeteryForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                    loggerAssemblyFile: null,
+                    loggerSwitchParameters: null,
+                    verbosity: LoggerVerbosity.Quiet);
+
+                _telemetryConsumingLogger =
+                    new InternalTelemetryConsumingLogger();
+
+                ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(_telemetryConsumingLogger, forwardingLoggerDescription) };
 
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
