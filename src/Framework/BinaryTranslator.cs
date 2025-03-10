@@ -35,9 +35,9 @@ namespace Microsoft.Build.BackEnd
         /// Returns a read-only serializer.
         /// </summary>
         /// <returns>The serializer.</returns>
-        internal static ITranslator GetReadTranslator(Stream stream, BinaryReaderFactory buffer)
+        internal static ITranslator GetReadTranslator(Stream stream, BinaryReaderFactory buffer, byte packetVersion = 0)
         {
-            return new BinaryReadTranslator(stream, buffer);
+            return new BinaryReadTranslator(stream, buffer, packetVersion);
         }
 #nullable disable
 
@@ -45,10 +45,11 @@ namespace Microsoft.Build.BackEnd
         /// Returns a write-only serializer.
         /// </summary>
         /// <param name="stream">The stream containing data to serialize.</param>
+        /// <param name="packetVersion">The packet version associated with the stream.</param>
         /// <returns>The serializer.</returns>
-        internal static ITranslator GetWriteTranslator(Stream stream)
+        internal static ITranslator GetWriteTranslator(Stream stream, byte packetVersion = 0)
         {
-            return new BinaryWriteTranslator(stream);
+            return new BinaryWriteTranslator(stream, packetVersion);
         }
 
         /// <summary>
@@ -56,11 +57,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private class BinaryReadTranslator : ITranslator
         {
-            /// <summary>
-            /// The stream used as a source or destination for data.
-            /// </summary>
-            private Stream _packetStream;
-
             /// <summary>
             /// The binary reader used in read mode.
             /// </summary>
@@ -70,10 +66,10 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Constructs a serializer from the specified stream, operating in the designated mode.
             /// </summary>
-            public BinaryReadTranslator(Stream packetStream, BinaryReaderFactory buffer)
+            public BinaryReadTranslator(Stream packetStream, BinaryReaderFactory buffer, byte packetVersion = 0)
             {
-                _packetStream = packetStream;
                 _reader = buffer.Create(packetStream);
+                PacketVersion = packetVersion;
             }
 #nullable disable
 
@@ -114,6 +110,8 @@ namespace Microsoft.Build.BackEnd
                 get
                 { return TranslationDirection.ReadFromStream; }
             }
+
+            public byte PacketVersion { get; }
 
             /// <summary>
             /// Translates a boolean.
@@ -797,11 +795,6 @@ namespace Microsoft.Build.BackEnd
         private class BinaryWriteTranslator : ITranslator
         {
             /// <summary>
-            /// The stream used as a source or destination for data.
-            /// </summary>
-            private Stream _packetStream;
-
-            /// <summary>
             /// The binary writer used in write mode.
             /// </summary>
             private BinaryWriter _writer;
@@ -810,10 +803,11 @@ namespace Microsoft.Build.BackEnd
             /// Constructs a serializer from the specified stream, operating in the designated mode.
             /// </summary>
             /// <param name="packetStream">The stream serving as the source or destination of data.</param>
-            public BinaryWriteTranslator(Stream packetStream)
+            /// <param name="packetVersion">The packet version associated with the stream.</param>
+            public BinaryWriteTranslator(Stream packetStream, byte packetVersion)
             {
-                _packetStream = packetStream;
                 _writer = new BinaryWriter(packetStream);
+                PacketVersion = packetVersion;
             }
 
             /// <summary>
@@ -853,6 +847,8 @@ namespace Microsoft.Build.BackEnd
                 get
                 { return TranslationDirection.WriteToStream; }
             }
+
+            public byte PacketVersion { get; }
 
             /// <summary>
             /// Translates a boolean.

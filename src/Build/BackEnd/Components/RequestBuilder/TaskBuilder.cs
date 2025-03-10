@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 #if FEATURE_APARTMENT_STATE
 using System.Diagnostics.CodeAnalysis;
 #endif
 using System.Linq;
+using System.Net.Sockets;
 using System.Reflection;
 #if FEATURE_APARTMENT_STATE
 using System.Runtime.ExceptionServices;
@@ -20,6 +22,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
@@ -420,7 +423,7 @@ namespace Microsoft.Build.BackEnd
                 if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)
                 {
                     // We need to find the task before logging the task started event so that the using task statement comes before the task started event
-                    IDictionary<string, string> taskIdentityParameters = GatherTaskIdentityParameters(bucket.Expander);
+                    IDictionary<string, string> taskIdentityParameters = GatherTaskIdentityParameters(bucket.Expander, bucket.Lookup);
                     (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) = _taskExecutionHost.FindTask(taskIdentityParameters);
                     string taskAssemblyLocation = taskFactoryWrapper?.TaskFactoryLoadedType?.Path;
 
@@ -521,26 +524,33 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the set of parameters that can contribute to a task's identity, and their values for this particular task.
         /// </summary>
-        private IDictionary<string, string> GatherTaskIdentityParameters(Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
+        private IDictionary<string, string> GatherTaskIdentityParameters(Expander<ProjectPropertyInstance, ProjectItemInstance> expander, Lookup lookup)
         {
             ErrorUtilities.VerifyThrowInternalNull(_taskNode, "taskNode"); // taskNode should never be null when we're calling this method.
 
             string msbuildArchitecture = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildArchitecture ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildArchitectureLocation ?? ElementLocation.EmptyLocation);
             string msbuildRuntime = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildRuntime ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildRuntimeLocation ?? ElementLocation.EmptyLocation);
 
-            IDictionary<string, string> taskIdentityParameters = null;
+            IDictionary<string, string> taskIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
 
             // only bother to create a task identity parameter set if we're putting anything in there -- otherwise,
             // a null set will be treated as equivalent to all parameters being "don't care".
             if (msbuildRuntime != String.Empty || msbuildArchitecture != String.Empty)
             {
-                taskIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
                 msbuildArchitecture = msbuildArchitecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : msbuildArchitecture.Trim();
                 msbuildRuntime = msbuildRuntime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : msbuildRuntime.Trim();
 
                 taskIdentityParameters.Add(XMakeAttributes.runtime, msbuildRuntime);
                 taskIdentityParameters.Add(XMakeAttributes.architecture, msbuildArchitecture);
+            }
+
+            string hostPath = lookup.GetProperty("DOTNET_EXPERIMENTAL_HOST_PATH")?.EvaluatedValue;
+            string msBuildAssemblyPath = Path.GetDirectoryName(lookup.GetProperty("RuntimeIdentifierGraphPath")?.EvaluatedValue) ?? string.Empty;
+            if (!string.IsNullOrEmpty(hostPath) && !string.IsNullOrEmpty(msBuildAssemblyPath))
+            {
+                taskIdentityParameters.Add(Constants.DotnetHostPath, hostPath);
+                taskIdentityParameters.Add(Constants.MSBuildAssemblyPath, msBuildAssemblyPath);
             }
 
             return taskIdentityParameters;
