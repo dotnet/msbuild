@@ -8,8 +8,7 @@
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" />
-    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
+    <PackageReference Include="Microsoft.Build" Version="16.11.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Shouldly" Version="4.2.1" />
