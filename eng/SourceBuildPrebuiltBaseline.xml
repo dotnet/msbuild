@@ -19,7 +19,6 @@
     <UsagePattern IdentityGlob="System.Text.Json/*9.0.0*" />
     <UsagePattern IdentityGlob="System.Threading.Channels/*9.0.0*" />
     <UsagePattern IdentityGlob="System.Threading.Tasks.Dataflow/*9.0.0*" />
-    <UsagePattern IdentityGlob="Microsoft.VisualStudio.SolutionPersistence/*1.0.*" />
 
     <!-- dependency of System.Configuration.ConfigurationManager -->
     <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*9.0.0*" />
