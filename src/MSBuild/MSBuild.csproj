@@ -175,7 +175,7 @@
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
     <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
-    <PackageReference Include="NETStandard.Library" Version="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
+    <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
