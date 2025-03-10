@@ -14,7 +14,7 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executio
         : this(TimeSpan.Zero, 0, 0)
     { }
     /// <summary>
-    /// Creates an empty instance of <see cref="TaskExecutionStats"/>.
+    /// Creates an instance of <see cref="TaskExecutionStats"/> initialized to 0s.
     /// </summary>
     /// <returns>Empty stats.</returns>
     internal static TaskExecutionStats CreateEmpty()

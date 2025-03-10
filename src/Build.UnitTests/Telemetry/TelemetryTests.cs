@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.Json;
 using Microsoft.Build.Execution;
@@ -82,7 +83,7 @@ namespace Microsoft.Build.Engine.UnitTests
             ((int)workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].ExecutionsCount).ShouldBe(1);
             workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
 
-            workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsCustom && !k.IsFromNugetCache);
+            workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsCustom && !k.IsNuget);
             workerNodeTelemetryData.TasksExecutionData.Values
                 .Count(v => v.CumulativeExecutionTime > TimeSpan.Zero || v.ExecutionsCount > 0).ShouldBe(2);
         }
@@ -106,7 +107,7 @@ namespace Microsoft.Build.Engine.UnitTests
                                             </Code>
                                           </Task>
                                        </UsingTask>
-                                       
+
                                        <UsingTask
                                          TaskName="Task02"
                                          TaskFactory="RoslynCodeTaskFactory"
@@ -118,7 +119,7 @@ namespace Microsoft.Build.Engine.UnitTests
                                            </Code>
                                          </Task>
                                       </UsingTask>
-                                      
+
                                           <Target Name="Build" DependsOnTargets="BeforeBuild">
                                               <Message Text="Hello World"/>
                                               <CreateItem Include="foo.bar">
@@ -127,12 +128,12 @@ namespace Microsoft.Build.Engine.UnitTests
                                               <Task01 />
                                               <Message Text="Bye World"/>
                                           </Target>
-                                          
+
                                           <Target Name="BeforeBuild">
                                               <Message Text="Hello World"/>
                                               <Task01 />
                                           </Target>
-                                          
+
                                           <Target Name="NotExecuted">
                                               <Message Text="Hello World"/>
                                           </Target>
@@ -166,32 +167,150 @@ namespace Microsoft.Build.Engine.UnitTests
             workerNodeTelemetryData.TasksExecutionData.Values
                 .Count(v => v.CumulativeExecutionTime > TimeSpan.Zero || v.ExecutionsCount > 0).ShouldBe(3);
 
-            workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsFromNugetCache);
+            workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsNuget);
         }
 
+#if NET
         [Fact]
-        public void Foo()
+        public void NodeTelemetryE2E()
         {
-            WorkerNodeTelemetryData wd = new WorkerNodeTelemetryData(
-                new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>()
-                {
-                    {
-                        new TaskOrTargetTelemetryKey("TaskA", false, true),
-                        new TaskExecutionStats(TimeSpan.FromSeconds(2.1554548), 5, 545)
-                    },
-                    {
-                        new TaskOrTargetTelemetryKey("TaskA", true, false),
-                        new TaskExecutionStats(TimeSpan.FromSeconds(254548), 6, 54545451)
-                    },
-                },
-                new Dictionary<TaskOrTargetTelemetryKey, bool>()
-                {
-                    { new TaskOrTargetTelemetryKey("TargetA", false, true, false), false },
-                    { new TaskOrTargetTelemetryKey("TargetA", true, true, false), false },
-                    { new TaskOrTargetTelemetryKey("TargetB", false, false, true), false }
-                });
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTIN", "1");
+            env.SetEnvironmentVariable("MSBUILD_TELEMETRY_SAMPLE_RATE", "1.0");
+            env.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTOUT", null);
+            env.SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", null);
 
-            var holder = TelemetryDataUtils.AsActivityDataHolder(wd, true, true);
+            // Reset the OpenTelemetryManager state to ensure clean test
+            var instance = OpenTelemetryManager.Instance;
+            typeof(OpenTelemetryManager)
+                .GetField("_telemetryState", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.SetValue(instance, OpenTelemetryManager.TelemetryState.Uninitialized);
+
+            typeof(OpenTelemetryManager)
+                .GetProperty("DefaultActivitySource",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                ?.SetValue(instance, null);
+
+            // track activities through an ActivityListener
+            var capturedActivities = new List<Activity>();
+            using var listener = new ActivityListener
+            {
+                ShouldListenTo = source => source.Name.StartsWith(TelemetryConstants.DefaultActivitySourceNamespace),
+                Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllData,
+                ActivityStarted = capturedActivities.Add,
+                ActivityStopped = _ => { }
+            };
+            ActivitySource.AddActivityListener(listener);
+
+            var testProject = @"
+            <Project>
+                <Target Name='Build'>
+                    <Message Text='Start'/>
+                    <CreateItem Include='test.txt'>
+                        <Output TaskParameter='Include' ItemName='TestItem' />
+                    </CreateItem>
+                    <Message Text='End'/>
+                </Target>
+                <Target Name='Clean'>
+                    <Message Text='Cleaning...'/>
+                </Target>
+            </Project>";
+
+            using var testEnv = TestEnvironment.Create(_output);
+            var projectFile = testEnv.CreateFile("test.proj", testProject).Path;
+
+            // Set up loggers
+            var projectFinishedLogger = new ProjectFinishedCapturingLogger();
+            var buildParameters = new BuildParameters
+            {
+                Loggers = new ILogger[] { projectFinishedLogger },
+                IsTelemetryEnabled = true
+            };
+
+            // Act
+            using (var buildManager = new BuildManager())
+            {
+                // Phase 1: Begin Build - This initializes telemetry infrastructure
+                buildManager.BeginBuild(buildParameters);
+
+                // Phase 2: Execute build requests
+                var buildRequestData1 = new BuildRequestData(
+                    projectFile,
+                    new Dictionary<string, string?>(),
+                    null,
+                    new[] { "Build" },
+                    null);
+
+                buildManager.BuildRequest(buildRequestData1);
+
+                var buildRequestData2 = new BuildRequestData(
+                    projectFile,
+                    new Dictionary<string, string?>(),
+                    null,
+                    new[] { "Clean" },
+                    null);
+
+                buildManager.BuildRequest(buildRequestData2);
+
+                // Phase 3: End Build - This puts telemetry to an system.diagnostics activity 
+                buildManager.EndBuild();
+
+                // Verify build activity were captured by the listener and contain task and target info
+                capturedActivities.ShouldNotBeEmpty();
+                var activity = capturedActivities.FindLast(a => a.DisplayName == "VS/MSBuild/Build").ShouldNotBeNull();
+                var tags = activity.Tags.ToDictionary(t => t.Key, t => t.Value);
+                tags.ShouldNotBeNull();
+
+                tags.ShouldContainKey("VS.MSBuild.BuildTarget");
+                tags["VS.MSBuild.BuildTarget"].ShouldNotBeNullOrEmpty();
+
+                // Verify task data
+                tags.ShouldContainKey("VS.MSBuild.Tasks");
+                var tasksJson = tags["VS.MSBuild.Tasks"];
+                tasksJson.ShouldContain("Microsoft.Build.Tasks.Message");
+                tasksJson.ShouldContain("Microsoft.Build.Tasks.CreateItem");
+
+                // Parse tasks data for detailed assertions
+                var tasksData = JsonSerializer.Deserialize<JsonElement>(tasksJson);
+
+                // Verify Message task execution metrics - updated for object structure
+                tasksData.TryGetProperty("Microsoft.Build.Tasks.Message", out var messageTask).ShouldBeTrue();
+                // Map JSON property names to TaskExecutionStats properties - they may differ
+                messageTask.GetProperty("ExecCnt").GetInt32().ShouldBe(3);  // Maps to ExecutionsCount
+                messageTask.GetProperty("ExecTimeMs").GetDouble().ShouldBeGreaterThan(0);  // Maps to CumulativeExecutionTime in ms
+                messageTask.GetProperty("MemKBs").GetInt32().ShouldBeGreaterThan(0);  // Maps to TotalMemoryConsumption in KB
+                messageTask.GetProperty(nameof(TaskOrTargetTelemetryKey.IsCustom)).GetBoolean().ShouldBeFalse();
+                messageTask.GetProperty(nameof(TaskOrTargetTelemetryKey.IsNuget)).GetBoolean().ShouldBeFalse();
+
+                // Verify CreateItem task execution metrics - updated for object structure
+                tasksData.TryGetProperty("Microsoft.Build.Tasks.CreateItem", out var createItemTask).ShouldBeTrue();
+                createItemTask.GetProperty("ExecCnt").GetInt32().ShouldBe(1);  // Maps to ExecutionsCount
+                createItemTask.GetProperty("ExecTimeMs").GetDouble().ShouldBeGreaterThan(0);  // Maps to CumulativeExecutionTime in ms
+                createItemTask.GetProperty("MemKBs").GetInt32().ShouldBeGreaterThan(0);  // Maps to TotalMemoryConsumption in KB
+
+                // Verify Targets summary information
+                tags.ShouldContainKey("VS.MSBuild.TargetsSummary");
+                var targetsSummaryJson = tags["VS.MSBuild.TargetsSummary"];
+                var targetsSummary = JsonSerializer.Deserialize<JsonElement>(targetsSummaryJson);
+
+                // Verify loaded and executed targets counts
+                targetsSummary.GetProperty("Loaded").GetProperty("Total").GetInt32().ShouldBe(2);
+                targetsSummary.GetProperty("Executed").GetProperty("Total").GetInt32().ShouldBe(2);
+                targetsSummary.GetProperty("Loaded").GetProperty("Microsoft").GetProperty("Total").GetInt32().ShouldBe(2);
+                targetsSummary.GetProperty("Executed").GetProperty("Microsoft").GetProperty("Total").GetInt32().ShouldBe(2);
+
+                // Verify Tasks summary information
+                tags.ShouldContainKey("VS.MSBuild.TasksSummary");
+                var tasksSummaryJson = tags["VS.MSBuild.TasksSummary"];
+                var tasksSummary = JsonSerializer.Deserialize<JsonElement>(tasksSummaryJson);
+
+                // Verify task execution summary metrics
+                tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("TotalExecutionsCount").GetInt32().ShouldBe(4);
+                tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("CumulativeExecutionTimeMs").GetInt32().ShouldBeGreaterThan(0);
+                tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("CumulativeConsumedMemoryKB").GetInt32().ShouldBeGreaterThan(0);
+            }
         }
+
+#endif
     }
 }

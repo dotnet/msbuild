@@ -10,6 +10,13 @@ namespace Microsoft.Build.Framework.Telemetry
 {
     internal static class TelemetryDataUtils
     {
+        /// <summary>
+        /// Transforms collected telemetry data to format recognized by the telemetry infrastructure.
+        /// </summary>
+        /// <param name="telemetryData">Data about tasks and target forwarded from nodes.</param>
+        /// <param name="includeTasksDetails">Controls whether Task details should attached to the telemetry event.</param>
+        /// <param name="includeTargetDetails">Controls whether Target details should be attached to the telemetry event.</param>
+        /// <returns></returns>
         public static IActivityTelemetryDataHolder? AsActivityDataHolder(this IWorkerNodeTelemetryData? telemetryData, bool includeTasksDetails, bool includeTargetDetails)
         {
             if (telemetryData == null)
@@ -50,8 +57,6 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             var opt = new JsonSerializerOptions
             {
-                // Add following if user-friendly indentation would be needed
-                // WriteIndented = true,
                 Converters =
                 {
                     new TargetDataConverter(),
@@ -85,19 +90,19 @@ namespace Microsoft.Build.Framework.Telemetry
 
                 // Following needed - as System.Text.Json doesn't support indexing dictionary by composite types
 
-                writer.WriteStartArray();
+                writer.WriteStartObject();
 
                 foreach (KeyValuePair<TaskOrTargetTelemetryKey, bool> valuePair in value)
                 {
-                    writer.WriteStartObject(valuePair.Key.IsCustom || valuePair.Key.IsFromMetaProject ? ActivityExtensions.GetHashed(valuePair.Key.Name) : valuePair.Key.Name);
+                    writer.WriteStartObject(valuePair.Key.IsCustom || valuePair.Key.IsMetaProj ? ActivityExtensions.GetHashed(valuePair.Key.Name) : valuePair.Key.Name);
                     writer.WriteBoolean("WasExecuted", valuePair.Value);
-                    writer.WriteBoolean("IsCustom", valuePair.Key.IsCustom);
-                    writer.WriteBoolean("IsFromNuget", valuePair.Key.IsFromNugetCache);
-                    writer.WriteBoolean("IsMetaproj", valuePair.Key.IsFromMetaProject);
+                    writer.WriteBoolean(nameof(valuePair.Key.IsCustom), valuePair.Key.IsCustom);
+                    writer.WriteBoolean(nameof(valuePair.Key.IsNuget), valuePair.Key.IsNuget);
+                    writer.WriteBoolean(nameof(valuePair.Key.IsMetaProj), valuePair.Key.IsMetaProj);
                     writer.WriteEndObject();
                 }
 
-                writer.WriteEndArray();
+                writer.WriteEndObject();
             }
         }
 
@@ -122,7 +127,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
                 // Following needed - as System.Text.Json doesn't support indexing dictionary by composite types
 
-                writer.WriteStartArray();
+                writer.WriteStartObject();
 
                 foreach (KeyValuePair<TaskOrTargetTelemetryKey, TaskExecutionStats> valuePair in value)
                 {
@@ -132,12 +137,12 @@ namespace Microsoft.Build.Framework.Telemetry
                     writer.WriteNumber("ExecCnt", valuePair.Value.ExecutionsCount);
                     // We do not want decimals
                     writer.WriteNumber("MemKBs", valuePair.Value.TotalMemoryConsumption / 1024);
-                    writer.WriteBoolean("IsCustom", valuePair.Key.IsCustom);
-                    writer.WriteBoolean("IsFromNuget", valuePair.Key.IsFromNugetCache);
+                    writer.WriteBoolean(nameof(valuePair.Key.IsCustom), valuePair.Key.IsCustom);
+                    writer.WriteBoolean(nameof(valuePair.Key.IsNuget), valuePair.Key.IsNuget);
                     writer.WriteEndObject();
                 }
 
-                writer.WriteEndArray();
+                writer.WriteEndObject();
             }
         }
 
@@ -145,34 +150,39 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             public void Initialize(Dictionary<TaskOrTargetTelemetryKey, bool> targetsExecutionData)
             {
-                foreach (var targetInfo in targetsExecutionData)
+                foreach (var targetPair in targetsExecutionData)
                 {
-                    UpdateStatistics(LoadedBuiltinTargetInfo, LoadedCustomTargetInfo, targetInfo.Key);
-                    if (targetInfo.Value)
+                    var key = targetPair.Key;
+                    var wasExecuted = targetPair.Value;
+
+                    // Update loaded targets statistics (all targets are loaded)
+                    UpdateTargetStatistics(key, isExecuted: false);
+
+                    // Update executed targets statistics (only targets that were actually executed)
+                    if (wasExecuted)
                     {
-                        UpdateStatistics(ExecutedBuiltinTargetInfo, ExecutedCustomTargetInfo, targetInfo.Key);
+                        UpdateTargetStatistics(key, isExecuted: true);
                     }
                 }
+            }
 
-                void UpdateStatistics(
-                    TargetInfo builtinTargetInfo,
-                    TargetInfo customTargetInfo,
-                    TaskOrTargetTelemetryKey key)
+            private void UpdateTargetStatistics(TaskOrTargetTelemetryKey key, bool isExecuted)
+            {
+                // Select the appropriate target info collections based on execution state
+                var builtinTargetInfo = isExecuted ? ExecutedBuiltinTargetInfo : LoadedBuiltinTargetInfo;
+                var customTargetInfo = isExecuted ? ExecutedCustomTargetInfo : LoadedCustomTargetInfo;
+
+                // Update either custom or builtin target info based on target type
+                var targetInfo = key.IsCustom ? customTargetInfo : builtinTargetInfo;
+
+                targetInfo.Total++;
+                if (key.IsNuget)
                 {
-                    UpdateSingleStatistics(key.IsCustom ? customTargetInfo : builtinTargetInfo, key);
-
-                    void UpdateSingleStatistics(TargetInfo targetInfo, TaskOrTargetTelemetryKey kkey)
-                    {
-                        targetInfo.Total++;
-                        if (kkey.IsFromNugetCache)
-                        {
-                            targetInfo.FromNuget++;
-                        }
-                        if (kkey.IsFromMetaProject)
-                        {
-                            targetInfo.FromMetaproj++;
-                        }
-                    }
+                    targetInfo.FromNuget++;
+                }
+                if (key.IsMetaProj)
+                {
+                    targetInfo.FromMetaproj++;
                 }
             }
 
@@ -251,7 +261,7 @@ namespace Microsoft.Build.Framework.Telemetry
                     void UpdateSingleStatistics(TasksInfo summarizedTaskInfo, TaskExecutionStats infoToAdd, TaskOrTargetTelemetryKey key)
                     {
                         summarizedTaskInfo.Total.Accumulate(infoToAdd);
-                        if (key.IsFromNugetCache)
+                        if (key.IsNuget)
                         {
                             summarizedTaskInfo.FromNuget.Accumulate(infoToAdd);
                         }
@@ -287,12 +297,12 @@ namespace Microsoft.Build.Framework.Telemetry
                 void WriteStat(Utf8JsonWriter writer, TasksInfo tasksInfo, string name)
                 {
                     writer.WriteStartObject(name);
-                    WriteSingleStat(writer, tasksInfo.Total, "Total", true);
-                    WriteSingleStat(writer, tasksInfo.FromNuget, "FromNuget", false);
+                    WriteSingleStat(writer, tasksInfo.Total, "Total");
+                    WriteSingleStat(writer, tasksInfo.FromNuget, "FromNuget");
                     writer.WriteEndObject();
                 }
 
-                void WriteSingleStat(Utf8JsonWriter writer, TaskExecutionStats stats, string name, bool writeIfEmpty)
+                void WriteSingleStat(Utf8JsonWriter writer, TaskExecutionStats stats, string name)
                 {
                     if (stats.ExecutionsCount > 0)
                     {

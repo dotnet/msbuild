@@ -62,8 +62,8 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
     {
         writer.Write(key.Name);
         writer.Write(key.IsCustom);
-        writer.Write(key.IsFromNugetCache);
-        writer.Write(key.IsFromMetaProject);
+        writer.Write(key.IsNuget);
+        writer.Write(key.IsMetaProj);
     }
 
     private static TaskOrTargetTelemetryKey ReadFromStream(BinaryReader reader)
