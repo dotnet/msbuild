@@ -111,7 +111,7 @@ jobs:
 
               // Check if the branch PR already exists on the remote
               const shouldOpenPullRequest = await checkBranchPRExists(newBranch,baseBranch);
-              const shouldOpenPullRequest1 = await checkBranchPRExists(main-update-msbuild-version-for-analyzer-template,"main");
+              const shouldOpenPullRequest1 = await checkBranchPRExists("main-update-msbuild-version-for-analyzer-template","main");
 
               // Stage and commit the changes
               await stageAndCommitChanges(filePath, commitMessage);
