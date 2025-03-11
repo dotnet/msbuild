@@ -193,7 +193,7 @@ namespace Microsoft.Build.Construction
 
         internal bool UseNewParser => ShouldUseNewParser(_solutionFile);
 
-        internal static bool ShouldUseNewParser(string solutionFile) => FileUtilities.IsSolutionXFilename(solutionFile);
+        internal static bool ShouldUseNewParser(string solutionFile) => Traits.Instance.SlnParsingWithSolutionPersistenceOptIn || FileUtilities.IsSolutionXFilename(solutionFile);
 
         /// <summary>
         /// All projects in this solution, in the order they appeared in the solution file
@@ -221,6 +221,10 @@ namespace Microsoft.Build.Construction
 
             set
             {
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14) && string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentNullException(nameof(FullPath));
+                }
                 // Should already be canonicalized to a full path
                 ErrorUtilities.VerifyThrowInternalRooted(value);
                 // To reduce code duplication, this should be
@@ -654,7 +658,8 @@ namespace Microsoft.Build.Construction
                 JsonDocumentOptions options = new JsonDocumentOptions() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
                 JsonDocument text = JsonDocument.Parse(File.ReadAllText(solutionFilterFile), options);
                 solution = text.RootElement.GetProperty("solution");
-                return FileUtilities.GetFullPath(solution.GetProperty("path").GetString(), Path.GetDirectoryName(solutionFilterFile));
+                // We do NOT want to escape in order to preserve symbols like @, %, $ etc.
+                return FileUtilities.GetFullPath(solution.GetProperty("path").GetString(), Path.GetDirectoryName(solutionFilterFile), escape: false);
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
             {
