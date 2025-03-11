@@ -17,11 +17,11 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
-    public class TelemetryTests
+    public class Telemetry_Tests
     {
         private readonly ITestOutputHelper _output;
 
-        public TelemetryTests(ITestOutputHelper output)
+        public Telemetry_Tests(ITestOutputHelper output)
         {
             _output = output;
         }
@@ -171,6 +171,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if NET
+        // test in .net core with opentelemetry opted in to avoid sending it but enable listening to it
         [Fact]
         public void NodeTelemetryE2E()
         {
@@ -252,7 +253,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 buildManager.BuildRequest(buildRequestData2);
 
-                // Phase 3: End Build - This puts telemetry to an system.diagnostics activity 
+                // Phase 3: End Build - This puts telemetry to an system.diagnostics activity
                 buildManager.EndBuild();
 
                 // Verify build activity were captured by the listener and contain task and target info
@@ -267,6 +268,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 // Verify task data
                 tags.ShouldContainKey("VS.MSBuild.Tasks");
                 var tasksJson = tags["VS.MSBuild.Tasks"];
+                tasksJson.ShouldNotBeNullOrEmpty();
                 tasksJson.ShouldContain("Microsoft.Build.Tasks.Message");
                 tasksJson.ShouldContain("Microsoft.Build.Tasks.CreateItem");
 
@@ -291,6 +293,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 // Verify Targets summary information
                 tags.ShouldContainKey("VS.MSBuild.TargetsSummary");
                 var targetsSummaryJson = tags["VS.MSBuild.TargetsSummary"];
+                targetsSummaryJson.ShouldNotBeNullOrEmpty();
                 var targetsSummary = JsonSerializer.Deserialize<JsonElement>(targetsSummaryJson);
 
                 // Verify loaded and executed targets counts
@@ -302,6 +305,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 // Verify Tasks summary information
                 tags.ShouldContainKey("VS.MSBuild.TasksSummary");
                 var tasksSummaryJson = tags["VS.MSBuild.TasksSummary"];
+                tasksSummaryJson.ShouldNotBeNullOrEmpty();
                 var tasksSummary = JsonSerializer.Deserialize<JsonElement>(tasksSummaryJson);
 
                 // Verify task execution summary metrics
