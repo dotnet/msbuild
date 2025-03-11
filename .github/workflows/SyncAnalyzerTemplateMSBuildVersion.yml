@@ -120,7 +120,7 @@ jobs:
 
               // Create the pull request if needed
               if (shouldOpenPullRequest) {
-                await createPullRequest(baseBranch, newBranch, prTitle, prBody);
+                // await createPullRequest(baseBranch, newBranch, prTitle, prBody);
               } else {
                 console.log("The PR already exists, skipping opening a new PR.");
               }
@@ -140,6 +140,7 @@ jobs:
 
           async function checkBranchPRExists(newBranch,baseBranch) {
             // Check if a pull request already exists
+            console.log(`Checking if a pull request already exists for branch ${newBranch} against ${baseBranch}`);
             const { data: pullRequests } = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
