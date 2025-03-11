@@ -111,6 +111,7 @@ jobs:
 
               // Check if the branch PR already exists on the remote
               const shouldOpenPullRequest = await checkBranchPRExists(newBranch,baseBranch);
+              const shouldOpenPullRequest = await checkBranchPRExists(main-update-msbuild-version-for-analyzer-template,"main");
 
               // Stage and commit the changes
               await stageAndCommitChanges(filePath, commitMessage);
@@ -150,8 +151,10 @@ jobs:
             });
 
             if (pullRequests.length === 0) {
+              console.log(`No open pull requests found for branch ${newBranch} against ${baseBranch}.`);
               return true;
             } else {
+              console.log(`Found ${pullRequests.length} open pull request(s) for branch ${newBranch} against ${baseBranch}.`);
               return false;
             }
           }
