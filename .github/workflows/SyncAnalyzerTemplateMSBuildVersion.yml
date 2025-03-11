@@ -154,6 +154,11 @@ jobs:
               console.log(`No open pull requests found for branch ${newBranch} against ${baseBranch}.`);
               return true;
             } else {
+              // Log pull request details
+              pullRequests.forEach(pr => {
+                console.log(`Pull request #${pr.number}: ${pr.title} (created by ${pr.user.login})`);
+              });
+              // Log the number of pull requests found
               console.log(`Found ${pullRequests.length} open pull request(s) for branch ${newBranch} against ${baseBranch}.`);
               return false;
             }
