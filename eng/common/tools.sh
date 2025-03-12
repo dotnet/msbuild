@@ -207,6 +207,7 @@ function InstallDotNet {
 
   local dotnetbuilds=("${installParameters[@]}" --azure-feed "https://ci.dot.net/public")
   variations+=(dotnetbuilds)
+  variations+=(--version 5.0.400 --install-dir "$root")
 
   if [[ -n "${6:-}" ]]; then
     variations+=(private_feed)
