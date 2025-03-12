@@ -202,16 +202,6 @@ namespace Microsoft.Build.Framework
 
 
         /// <summary>
-        /// Convenience access point for CreateFromStream method to avoid making everything public.
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="version"></param>
-        public void PublicCreateFromStream(BinaryReader reader, int version)
-        {
-            CreateFromStream(reader, version);
-        }
-
-        /// <summary>
         /// Deserializes from a stream through a binary reader
         /// </summary>
         /// <param name="reader">Binary reader which is attached to the stream the event will be deserialized from</param>

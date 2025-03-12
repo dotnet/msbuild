@@ -496,7 +496,7 @@ namespace Microsoft.Build.Shared
                 readerMethod(translator.Reader, packetVersion);
 
 #else
-                _buildEvent.PublicCreateFromStream(translator.Reader, packetVersion);
+                _buildEvent.CreateFromStream(translator.Reader, packetVersion);
 #endif
 
                 
