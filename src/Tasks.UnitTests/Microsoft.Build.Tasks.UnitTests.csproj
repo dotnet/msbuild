@@ -14,6 +14,8 @@
   <ItemGroup>
     <PackageReference Include="System.Security.Principal.Windows" Version="4.3.0" />
     <PackageReference Include="System.Xml.XPath" Version="4.3.0" />
+    <PackageReference Include="xunit.runner.console" Version="2.1.0" />
+    <PackageReference Include="xunit.runner.utility" Version="2.1.0" />
     <PackageReference Include="Shouldly" Version="$(ShouldlyVersion)" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
