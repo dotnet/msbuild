@@ -469,7 +469,6 @@ namespace Microsoft.Build.Shared
 
             _buildEvent = GetBuildEventArgFromId();
 
-
             // The other side is telling us whether the event knows how to log itself, or whether we're going to have
             // to do it manually
             int packetVersion = s_defaultPacketVersion;
