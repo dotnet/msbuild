@@ -6,6 +6,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="xunit" Version="2.1.0" />
+    <PackageReference Include="xunit.core" Version="2.1.0" />
+    <PackageReference Include="xunit.assert" Version="2.1.0" />
     <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 </Project>
