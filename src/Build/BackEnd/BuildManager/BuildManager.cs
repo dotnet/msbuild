@@ -560,6 +560,19 @@ namespace Microsoft.Build.Execution
                     _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath("msbuild-cache");
                 }
 
+                // Launch the RAR node before the detoured launcher overrides the default node launcher.
+                if (_buildParameters.EnableRarNode)
+                {
+                    NodeLauncher nodeLauncher = ((IBuildComponentHost)this).GetComponent<NodeLauncher>(BuildComponentType.NodeLauncher);
+                    RarNodeLauncher rarNodeLauncher = new(nodeLauncher);
+
+                    // TODO: Evaluate making this fire-and-forget so we can continue with the build.
+                    if (!rarNodeLauncher.Start())
+                    {
+                        _buildParameters.EnableRarNode = false;
+                    }
+                }
+
 #if FEATURE_REPORTFILEACCESSES
                 if (_buildParameters.ReportFileAccesses)
                 {

@@ -16,6 +16,7 @@ using System.Xml.Linq;
 
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
@@ -919,6 +920,11 @@ namespace Microsoft.Build.Tasks
         }
 
         public bool FailIfNotIncremental { get; set; }
+
+        /// <summary>
+        /// Executes the task in an out-of-proc RAR node if enabled by the BuildEngine.
+        /// </summary>
+        public bool ExecuteOutOfProcess { get; set; }
 
         /// <summary>
         /// This is a list of all primary references resolved to full paths.
@@ -3243,6 +3249,28 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
+            if (ExecuteOutOfProcess
+                && BuildEngine is IBuildEngine10 buildEngine10
+                && buildEngine10.EngineServices.IsOutOfProcRarNodeEnabled)
+            {
+                OutOfProcRarClient rarClient = GetOutOfProcClient(buildEngine10);
+
+                try
+                {
+                    bool result = rarClient.Execute(this);
+                }
+                catch (Exception ex)
+                {
+                    // If the out-of-proc connection failed, fall back to in-proc.
+                    CommunicationsUtilities.Trace("RAR out-of-proc connection failed, failing back to in-proc. Exception: {0}", ex);
+                }
+            }
+
+            return ExecuteInProcess();
+        }
+
+        public bool ExecuteInProcess()
+        {
             return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
                 p => FileUtilities.DirectoryExistsNoThrow(p),
@@ -3264,6 +3292,23 @@ namespace Microsoft.Build.Tasks
                 (string fullPath, GetAssemblyRuntimeVersion getAssemblyRuntimeVersion, FileExists fileExists, out string imageRuntimeVersion, out bool isManagedWinmd)
                     => AssemblyInformation.IsWinMDFile(fullPath, getAssemblyRuntimeVersion, fileExists, out imageRuntimeVersion, out isManagedWinmd),
                 p => ReferenceTable.ReadMachineTypeFromPEHeader(p));
+        }
+
+        private OutOfProcRarClient GetOutOfProcClient(IBuildEngine10 buildEngine)
+        {
+            // Create a single cached instance of the RAR out-of-proc client for this build node.
+            const string OutOfProcRarClientKey = "OutOfProcRarClient";
+
+            OutOfProcRarClient rarClient = (OutOfProcRarClient)buildEngine.GetRegisteredTaskObject(OutOfProcRarClientKey, RegisteredTaskObjectLifetime.Build);
+
+            if (rarClient == null)
+            {
+                rarClient = new OutOfProcRarClient();
+                buildEngine.RegisterTaskObject(OutOfProcRarClientKey, rarClient, RegisteredTaskObjectLifetime.Build, allowEarlyCollection: false);
+                CommunicationsUtilities.Trace("Initialized new RAR client.");
+            }
+
+            return rarClient;
         }
 
         #endregion
