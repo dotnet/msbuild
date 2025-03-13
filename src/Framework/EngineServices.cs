@@ -48,5 +48,7 @@ namespace Microsoft.Build.Framework
         /// This is a performance optimization allowing tasks to skip expensive double-logging.
         /// </remarks>
         public virtual bool IsTaskInputLoggingEnabled => throw new NotImplementedException();
+
+        public virtual bool IsOutOfProcRarNodeEnabled => throw new NotImplementedException();
     }
 }
