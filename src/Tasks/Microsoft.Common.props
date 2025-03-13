@@ -108,6 +108,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <WMSJSProjectDirectory Condition="'$(WMSJSProjectDirectory)' == ''">JavaScript</WMSJSProjectDirectory>
   </PropertyGroup>
 
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.VisualStudioVersion.v*.Common.props" />
+
   <Import Project="$(CustomAfterMicrosoftCommonProps)" Condition="'$(CustomAfterMicrosoftCommonProps)' != '' and Exists('$(CustomAfterMicrosoftCommonProps)')" />
 
   <Import Project="$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter\*" Condition="'$(ImportUserLocationsByWildcardAfterMicrosoftCommonProps)' == 'true' and exists('$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter')"/>
