@@ -228,7 +228,7 @@ function InstallDotNet {
   local installSuccess=0
 
   echo "Attempting to install dotnet from $variationName."
-  bash "$install_script" "--version 5.0.400 --install-dir "$root"" && installSuccess=1
+  bash "$install_script" "--version 5.0.400" && installSuccess=1
   if [[ "$installSuccess" -eq 1 ]]; then
     echo "Failed to install dotnet from $variationName."
   fi
