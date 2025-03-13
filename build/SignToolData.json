@@ -1,7 +1,7 @@
 {
     "sign": [
         {
-            "certificate": "Microsoft",
+            "certificate": "Microsoft400",
             "strongName": "StrongName",
             "values": [
                 "bin/MSBuild/net46/MSBuild.exe",
