@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.IO;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Shared
 {
@@ -43,5 +44,11 @@ namespace Microsoft.Build.Shared
                 return pipeName;
             }
         }
+
+        internal static string GetRarNodePipeName(ServerNodeHandshake handshake)
+            => GetPlatformSpecificPipeName($"MSBuildRarNode-{handshake.ComputeHash()}");
+
+        internal static string GetRarNodeEndpointPipeName(ServerNodeHandshake handshake)
+            => GetPlatformSpecificPipeName($"MSBuildRarNodeEndpoint-{handshake.ComputeHash()}");
     }
 }
