@@ -50,7 +50,7 @@ extends:
             displayName: 'Upload VSTS Drop'
             dropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
         steps:        
-        - task: ms-vseng.MicroBuildTasks.a9799c06-320f-4175-8756-31cd731bd5f3.MicroBuildIBCMergePlugin@0
+        - task: MicroBuildIBCMergePlugin@1
           displayName: Install IBCMerge Plugin
 
         - task: CmdLine@1
@@ -74,7 +74,7 @@ extends:
             platform: 'AnyCPU'
             configuration: 'Release'
 
-        - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
+        - task: MicroBuildSwixPlugin@4
           displayName: Install Swix Plugin
           inputs:
             dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
@@ -112,7 +112,7 @@ extends:
             TargetFolder: '$(Build.ArtifactStagingDirectory)/symbols'
             CleanTargetFolder: true
 
-        - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
+        - task: MicroBuildSwixPlugin@4
           displayName: Reinstall Swix Plugin (to pick up new build number)
           inputs:
             dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
@@ -138,5 +138,5 @@ extends:
           enabled: false
           continueOnError: true
 
-        - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
+        - task: MicroBuildCleanup@1
           displayName: Execute cleanup tasks
