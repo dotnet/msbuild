@@ -9,7 +9,7 @@
     <RestoreSources>$(DotNetRestoreSources)</RestoreSources>
     <RestoreSources  Condition="'$(DotNetBuildOffline)' != 'true'">
         $(RestoreSources);
-        https://devdiv.pkgs.visualstudio.com/_packaging/dotnet-aggregate/nuget/v3/index.json;
+        https://devdiv.pkgs.visualstudio.com/_packaging/container-tools-shared/nuget/v3/index.json;
     </RestoreSources>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>

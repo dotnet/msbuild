@@ -15,6 +15,7 @@
     <PackageReference Include="System.Security.Principal.Windows" Version="4.3.0" />
     <PackageReference Include="System.Xml.XPath" Version="4.3.0" />
     <PackageReference Include="Shouldly" Version="$(ShouldlyVersion)" />
+    <PackageReference Include="xunit.abstractions" Version="2.0.1" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
@@ -59,7 +60,7 @@
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
 
     <EmbeddedResource Include="SampleResx" />
-    
+
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>

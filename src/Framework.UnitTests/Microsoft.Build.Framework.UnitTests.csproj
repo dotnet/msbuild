@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(VisualStudioSetupInteropVersion)" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     <PackageReference Include="Shouldly" Version="$(ShouldlyVersion)" />
+    <PackageReference Include="xunit.abstractions" Version="2.0.1" />
   </ItemGroup>
 
   <ItemGroup>

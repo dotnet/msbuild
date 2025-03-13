@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="Shouldly" Version="$(ShouldlyVersion)" />
+    <PackageReference Include="xunit.abstractions" Version="2.0.1" />
     <PackageReference Include="System.IO.FileSystem.Primitives " Version="4.3.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftCodeAnalysisBuildTasksVersion)" />
 
