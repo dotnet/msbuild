@@ -122,6 +122,12 @@ namespace Microsoft.Build.Framework
         public readonly int DictionaryBasedItemRemoveThreshold = ParseIntFromEnvironmentVariableOrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
 
         /// <summary>
+        /// Launches a persistent RAR process.
+        /// </summary>
+        /// TODO: Replace with command line flag when feature is completed. The environment variable is intented to avoid exposing the flag early.
+        public readonly bool EnableRarNode = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildRarNode"));
+
+        /// <summary>
         /// Name of environment variables used to enable MSBuild server.
         /// </summary>
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
