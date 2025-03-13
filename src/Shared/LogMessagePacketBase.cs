@@ -500,7 +500,6 @@ namespace Microsoft.Build.Shared
                 _buildEvent.CreateFromStream(translator.Reader, packetVersion);
 #endif
 
-                
                 if (_eventType == LoggingEventType.TargetFinishedEvent && _targetFinishedTranslator != null)
                 {
                     _targetFinishedTranslator(translator, (TargetFinishedEventArgs)_buildEvent);
