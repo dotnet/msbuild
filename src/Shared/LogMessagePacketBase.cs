@@ -473,6 +473,7 @@ namespace Microsoft.Build.Shared
             // to do it manually
             int packetVersion = s_defaultPacketVersion;
             translator.Translate(ref packetVersion);
+
             bool eventCanSerializeItself = true;
             translator.Translate(ref eventCanSerializeItself);
 
@@ -490,6 +491,7 @@ namespace Microsoft.Build.Shared
                         s_readMethodCache.Add(_eventType, methodInfo);
                     }
                 }
+
                 ArgsReaderDelegate readerMethod = (ArgsReaderDelegate)CreateDelegateRobust(typeof(ArgsReaderDelegate), _buildEvent, methodInfo);
 
                 readerMethod(translator.Reader, packetVersion);
