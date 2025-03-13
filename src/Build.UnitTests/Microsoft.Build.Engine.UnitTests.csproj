@@ -11,7 +11,6 @@
   <ItemGroup>
     <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
     <PackageReference Include="Shouldly" Version="$(ShouldlyVersion)" />
-    <PackageReference Include="xunit.abstractions" Version="2.0.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftCodeAnalysisBuildTasksVersion)" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
@@ -30,6 +29,15 @@
 
     <Reference Include="System.Configuration" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="xunit.core" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <PackageReference Include="xunit.core" Version="2.3.0" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">

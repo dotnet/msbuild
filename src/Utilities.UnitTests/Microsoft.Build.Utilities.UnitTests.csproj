@@ -11,7 +11,6 @@
 
   <ItemGroup>
     <PackageReference Include="Shouldly" Version="$(ShouldlyVersion)" />
-    <PackageReference Include="xunit.abstractions" Version="2.0.1" />
     <PackageReference Include="System.IO.FileSystem.Primitives " Version="4.3.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftCodeAnalysisBuildTasksVersion)" />
 
@@ -22,6 +21,15 @@
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" ReferenceOutputAssembly="false" OutputItemType="ReferenceCopyLocalPaths" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
   </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="xunit.core" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <PackageReference Include="xunit.core" Version="2.3.0" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs" />
