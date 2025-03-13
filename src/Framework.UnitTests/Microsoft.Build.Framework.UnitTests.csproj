@@ -12,6 +12,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(VisualStudioSetupInteropVersion)" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     <PackageReference Include="Shouldly" Version="$(ShouldlyVersion)" />
+    <PackageReference Include="xunit.console" Version="2.1.0" />
+    <PackageReference Include="xunit.runner.utility" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
