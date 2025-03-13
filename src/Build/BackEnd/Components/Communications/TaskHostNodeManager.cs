@@ -141,10 +141,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Takes a serializer, deserializes the packet and routes it to the appropriate handler.
         /// </summary>
-        /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packetType">The packet type.</param>
         /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
-        public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
         {
             throw new NotSupportedException("not used");
         }
