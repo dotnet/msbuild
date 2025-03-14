@@ -207,7 +207,6 @@ function InstallDotNet {
 
   local dotnetbuilds=("${installParameters[@]}" --azure-feed "https://ci.dot.net/public")
   variations+=(dotnetbuilds)
-  # variations+=(--version 5.0.400 --install-dir "$root")
 
   if [[ -n "${6:-}" ]]; then
     variations+=(private_feed)
@@ -226,18 +225,10 @@ function InstallDotNet {
   fi
 
   local installSuccess=0
-
-  echo "Attempting to install dotnet from $variationName."
-  bash "$install_script" "--version 5.0.400" && installSuccess=1
-  if [[ "$installSuccess" -eq 1 ]]; then
-    echo "Failed to install dotnet from $variationName."
-  fi
-
   for variationName in "${variations[@]}"; do
     local name="$variationName[@]"
     local variation=("${!name}")
     echo "Attempting to install dotnet from $variationName."
-    echo "Variation: $variation"
     bash "$install_script" "${variation[@]}" && installSuccess=1
     if [[ "$installSuccess" -eq 1 ]]; then
       break
