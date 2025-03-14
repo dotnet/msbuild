@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -270,11 +270,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static readonly int s_defaultPacketVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
 
+#if TASKHOST
         /// <summary>
         /// Dictionary of methods used to read BuildEventArgs.
         /// </summary>
         private static readonly Dictionary<LoggingEventType, MethodInfo> s_readMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
 
+#endif
         /// <summary>
         /// Dictionary of methods used to write BuildEventArgs.
         /// </summary>
@@ -478,6 +480,8 @@ namespace Microsoft.Build.Shared
 
             if (eventCanSerializeItself)
             {
+
+#if TASKHOST
                 MethodInfo methodInfo = null;
                 lock (s_readMethodCache)
                 {
@@ -492,6 +496,11 @@ namespace Microsoft.Build.Shared
                 ArgsReaderDelegate readerMethod = (ArgsReaderDelegate)CreateDelegateRobust(typeof(ArgsReaderDelegate), _buildEvent, methodInfo);
 
                 readerMethod(translator.Reader, packetVersion);
+
+#else
+                _buildEvent.CreateFromStream(translator.Reader, packetVersion);
+#endif
+
                 if (_eventType == LoggingEventType.TargetFinishedEvent && _targetFinishedTranslator != null)
                 {
                     _targetFinishedTranslator(translator, (TargetFinishedEventArgs)_buildEvent);
