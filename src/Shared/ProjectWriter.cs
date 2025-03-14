@@ -29,7 +29,6 @@ namespace Microsoft.Build.Shared
         internal const string itemTypeOrMetadataNameSpecification = @"[A-Za-z_][A-Za-z_0-9\-]*";
 
         // regular expression used to match item vector transforms
-        // internal for unit testing only
         // description of an item vector transform, including the optional separator specification
         private const string itemVectorTransformSpecification =
             @"(?<PREFIX>@\(\s*)
