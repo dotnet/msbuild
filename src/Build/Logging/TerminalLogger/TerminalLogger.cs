@@ -163,11 +163,6 @@ public sealed partial class TerminalLogger : INodeLogger
     private bool _loggedPreviewMessage;
 
     /// <summary>
-    /// The two directory separator characters to be passed to methods like <see cref="String.IndexOfAny(char[])"/>.
-    /// </summary>
-    private static readonly char[] PathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
-
-    /// <summary>
     /// One summary per finished project test run.
     /// </summary>
     private List<TestSummary> _testRunSummaries = new();
