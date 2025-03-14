@@ -71,7 +71,7 @@ try {
 
   if ($buildStage1)
   {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci -msbuildEngine $msbuildEngine /p:CreateBootstrap=true @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci -msbuildEngine $msbuildEngine /p:CreateBootstrap=false @properties
   }
 
   $bootstrapRoot = Join-Path $Stage1BinDir "bootstrap"
@@ -131,7 +131,7 @@ try {
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Do run tests
   # - Don't try to create a bootstrap deployment
-  & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=false /nr:false @properties
+  # & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=false /nr:false @properties
 
   exit $lastExitCode
 }
