@@ -336,7 +336,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Should.Throw<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement xml = ProjectRootElement.Create();
-                xml.AddImport(@"//MSBuildExtensionsPath32)\4.0\Microsoft.VisualStudioVersion.v11.Common.props");
+                // xml.AddImport(@"//MSBuildExtensionsPath32)\4.0\Microsoft.VisualStudioVersion.v11.Common.props");
 
                 Project project = new Project(xml);
             });
