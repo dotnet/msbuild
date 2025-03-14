@@ -30,7 +30,7 @@
                 "bin/MSBuild/netcoreapp2.1/Microsoft.Build.Tasks.Core.dll",
                 "bin/MSBuild/netcoreapp2.1/Microsoft.Build.Utilities.Core.dll",
 
-                "bin/MSBuild/netcoreapp2.1/*/*.resources.dll",
+                "bin/MSBuild/netcoreapp2.1/*/*.resources.dll"
             ]
         },
         {
