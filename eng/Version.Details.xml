@@ -2,9 +2,9 @@
 <Dependencies>
   <ProductDependencies>
     <!-- Intermediate is necessary for source build. -->
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="9.0.0-alpha.1.25081.6">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="9.0.0-alpha.1.25163.3">
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>1cec3b4a8fb07138136a1ca1e04763bfcf7841db</Sha>
+      <Sha>27dfbb8d8a0344d845948109a5a1f0d9c7f17fa9</Sha>
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <!-- Intermediate is necessary for source build. -->
@@ -16,92 +16,110 @@
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="Microsoft.Bcl.Cryptography" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Collections.Immutable" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Configuration.ConfigurationManager" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Diagnostics.DiagnosticSource" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Diagnostics.EventLog" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Formats.Asn1" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Formats.Nrbf" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Reflection.Metadata" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Reflection.MetadataLoadContext" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Resources.Extensions" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Security.Cryptography.ProtectedData" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Security.Cryptography.Pkcs" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Security.Cryptography.Xml" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Text.Encoding.CodePages" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Text.Json" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Threading.Channels" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.Threading.Tasks.Dataflow" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha></Sha>
+      <Sha>
+      </Sha>
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
