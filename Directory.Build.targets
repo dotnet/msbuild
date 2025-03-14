@@ -12,4 +12,6 @@
     <None Include="$(ThirdPartyNotice)" Pack="true" PackagePath="notices" Visible="false" Condition=" '$(IsPackable)' == 'true' " />
   </ItemGroup>
 
+  <Target Name="GetVsixVersion" />
+
 </Project>
