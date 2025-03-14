@@ -141,7 +141,7 @@ namespace Microsoft.Build.Shared
         {
             if (cacheDirectory == null)
             {
-                cacheDirectory = Path.Combine(TempFileDirectory, String.Format(CultureInfo.CurrentUICulture, "MSBuild{0}-{1}", Process.GetCurrentProcess().Id, AppDomain.CurrentDomain.Id));
+                cacheDirectory = Path.Combine(TempFileDirectory, string.Format(CultureInfo.CurrentUICulture, "MSBuild{0}-{1}", EnvironmentUtilities.CurrentProcessId, AppDomain.CurrentDomain.Id));
             }
 
             return cacheDirectory;
@@ -195,7 +195,7 @@ namespace Microsoft.Build.Shared
                 string testFilePath = Path.Combine(directory, $"MSBuild_{Guid.NewGuid():N}_testFile.txt");
                 FileInfo file = new(testFilePath);
                 file.Directory.Create(); // If the directory already exists, this method does nothing.
-                File.WriteAllText(testFilePath, $"MSBuild process {Process.GetCurrentProcess().Id} successfully wrote to file.");
+                File.WriteAllText(testFilePath, $"MSBuild process {EnvironmentUtilities.CurrentProcessId} successfully wrote to file.");
                 File.Delete(testFilePath);
                 return true;
             }
@@ -773,14 +773,20 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="fileSpec">The file spec to get the full path of.</param>
         /// <param name="currentDirectory"></param>
-        /// <returns>full path</returns>
-        internal static string GetFullPath(string fileSpec, string currentDirectory)
+        /// <param name="escape">Whether to escape the path after getting the full path.</param>
+        /// <returns>Full path to the file, escaped if not specified otherwise.</returns>
+        internal static string GetFullPath(string fileSpec, string currentDirectory, bool escape = true)
         {
             // Sending data out of the engine into the filesystem, so time to unescape.
             fileSpec = FixFilePath(EscapingUtilities.UnescapeAll(fileSpec));
 
-            // Data coming back from the filesystem into the engine, so time to escape it back.
-            string fullPath = EscapingUtilities.Escape(NormalizePath(Path.Combine(currentDirectory, fileSpec)));
+            string fullPath = NormalizePath(Path.Combine(currentDirectory, fileSpec));
+            // In some cases we might want to NOT escape in order to preserve symbols like @, %, $ etc.
+            if (escape)
+            {
+                // Data coming back from the filesystem into the engine, so time to escape it back.
+                fullPath = EscapingUtilities.Escape(fullPath);
+            }
 
             if (NativeMethodsShared.IsWindows && !EndsWithSlash(fullPath))
             {

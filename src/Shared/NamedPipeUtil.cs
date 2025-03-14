@@ -11,12 +11,10 @@ namespace Microsoft.Build.Shared
     {
         internal static string GetPlatformSpecificPipeName(int? processId = null)
         {
-            processId ??=
-#if NET
-                Environment.ProcessId;
-#else
-                Process.GetCurrentProcess().Id;
-#endif
+            if (processId is null)
+            {
+                processId = EnvironmentUtilities.CurrentProcessId;
+            }
 
             string pipeName = $"MSBuild{processId}";
 

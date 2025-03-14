@@ -1929,7 +1929,7 @@ namespace Microsoft.Build.Evaluation
 
             ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)
             {
-                ProjectRootElement project = ProjectRootElement.Create();
+                ProjectRootElement project = ProjectRootElement.CreateEphemeral(_projectRootElementCache);
                 project.FullPath = projectPath;
 
                 if (sdkResult.PropertiesToAdd?.Any() == true)

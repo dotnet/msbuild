@@ -29,8 +29,10 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test that a project with the C++ project guid and an extension of vcproj is seen as invalid.
         /// </summary>
-        [Fact]
-        public void ParseSolution_VC()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseSolution_VC(bool isOptInSlnParsingWithNewParser)
         {
             string solutionFileContents =
             """
@@ -57,18 +59,20 @@ namespace Microsoft.Build.UnitTests.Construction
 
             Assert.Throws<InvalidProjectFileException>(() =>
             {
-                ParseSolutionHelper(solutionFileContents);
+                ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser);
                 Assert.Fail("Should not get here");
             });
         }
+
         /// <summary>
         /// Test that a project with the C++ project guid and an arbitrary extension is seen as valid --
         /// we assume that all C++ projects except .vcproj are MSBuild format.
         /// </summary>
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void ParseSolution_VC2(bool convertToSlnx)
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        public void ParseSolution_VC2(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
                 """
@@ -93,11 +97,11 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
             string expectedProjectName = convertToSlnx ? "Project name" : "Project name.myvctype";
             Assert.Equal(expectedProjectName, solution.ProjectsInOrder[0].ProjectName);
-            Assert.Equal(ConvertToUnixPathIfNeeded("Relative path\\to\\Project name.myvctype"), solution.ProjectsInOrder[0].RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("Relative path\\to\\Project name.myvctype", convertToSlnx || isOptInSlnParsingWithNewParser), solution.ProjectsInOrder[0].RelativePath);
             if (!convertToSlnx)
             {
                 // When converting to SLNX, the project GUID is not preserved.
@@ -106,11 +110,14 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
-        /// Solution with an empty project name.  This is somewhat malformed, but we should
-        /// still behave reasonably instead of crashing.
+        /// Solution with an empty project name.  
+        // This is somewhat malformed, but with old parser we should still behave reasonably instead of crashing.
+        // The new parser throws an exception.
         /// </summary>
-        [Fact]
-        public void ParseSolution_EmptyProjectName()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ParseSolution_EmptyProjectName(bool isOptInSlnParsingWithNewParser)
         {
             string solutionFileContents =
             """
@@ -135,19 +142,30 @@ namespace Microsoft.Build.UnitTests.Construction
             EndGlobal
             """;
 
-            Assert.Throws<InvalidProjectFileException>(() =>
+            if (isOptInSlnParsingWithNewParser)
             {
-                SolutionFile solution = ParseSolutionHelper(solutionFileContents);
-            });
+                Assert.Throws<InvalidProjectFileException>(() =>
+                {
+                    SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser);
+                });
+            }
+            else
+            {
+                SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser);
+                Assert.StartsWith("EmptyProjectName", solution.ProjectsInOrder[0].ProjectName);
+                Assert.Equal("src\\.proj", solution.ProjectsInOrder[0].RelativePath);
+                Assert.Equal("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
+            }
         }
 
         /// <summary>
         /// Tests the parsing of a very basic .SLN file with three independent projects.
         /// </summary>
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void BasicSolution(bool convertToSlnx)
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        public void BasicSolution(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
                 """
@@ -184,23 +202,24 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
             Assert.Equal(3, solution.ProjectsInOrder.Count);
 
             // When converting to slnx, the order of the projects is not preserved.
+            bool usesNewParser = convertToSlnx || isOptInSlnParsingWithNewParser;
             ProjectInSolution consoleApplication1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ConsoleApplication1");
-            Assert.Equal(ConvertToUnixPathIfNeeded("ConsoleApplication1\\ConsoleApplication1.vbproj"), consoleApplication1.RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("ConsoleApplication1\\ConsoleApplication1.vbproj", usesNewParser), consoleApplication1.RelativePath);
             Assert.Empty(consoleApplication1.Dependencies);
             Assert.Null(consoleApplication1.ParentProjectGuid);
 
             ProjectInSolution vbClassLibrary = solution.ProjectsInOrder.First(p => p.ProjectName == "vbClassLibrary");
-            Assert.Equal(ConvertToUnixPathIfNeeded("vbClassLibrary\\vbClassLibrary.vbproj"), vbClassLibrary.RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("vbClassLibrary\\vbClassLibrary.vbproj", usesNewParser), vbClassLibrary.RelativePath);
             Assert.Empty(vbClassLibrary.Dependencies);
             Assert.Null(vbClassLibrary.ParentProjectGuid);
 
             ProjectInSolution classLibrary1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj"), classLibrary1.RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj", usesNewParser), classLibrary1.RelativePath);
             Assert.Empty(classLibrary1.Dependencies);
             Assert.Null(classLibrary1.ParentProjectGuid);
 
@@ -216,6 +235,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Exercises solution folders, and makes sure that samely named projects in different
         /// solution folders will get correctly uniquified.
         /// For the new parser, solution folders are not included to ProjectsInOrder or ProjectsByGuid.
+        /// See the test with the same name in SolutionFile_Tests_OldParser.
         /// </summary>
         [Theory]
         [InlineData(false)]
@@ -266,23 +286,25 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            bool isOptInSlnParsingWithNewParser = !convertToSlnx;
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
             Assert.Equal(3, solution.ProjectsInOrder.Count);
 
+            bool usesNewParser = convertToSlnx || isOptInSlnParsingWithNewParser;
             var classLibrary1 = solution.ProjectsInOrder
-                .FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj"));
+                .FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj", usesNewParser));
             Assert.NotNull(classLibrary1);
             Assert.Empty(classLibrary1.Dependencies);
             Assert.Null(classLibrary1.ParentProjectGuid);
 
             var myPhysicalFolderClassLibrary1 = solution.ProjectsInOrder
-                .FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("MyPhysicalFolder\\ClassLibrary1\\ClassLibrary1.csproj"));
+                .FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("MyPhysicalFolder\\ClassLibrary1\\ClassLibrary1.csproj", usesNewParser));
             Assert.NotNull(myPhysicalFolderClassLibrary1);
             Assert.Empty(myPhysicalFolderClassLibrary1.Dependencies);
 
             var classLibrary2 = solution.ProjectsInOrder
-                .FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj"));
+                .FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj", usesNewParser));
             Assert.NotNull(classLibrary2);
             Assert.Empty(classLibrary2.Dependencies);
 
@@ -305,9 +327,10 @@ namespace Microsoft.Build.UnitTests.Construction
         /// are correctly recognized by the solution parser.
         /// </summary>
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void SolutionDependencies(bool convertToSlnx)
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        public void SolutionDependencies(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
                 """
@@ -351,7 +374,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
             Assert.Equal(3, solution.ProjectsInOrder.Count);
 
@@ -359,19 +382,20 @@ namespace Microsoft.Build.UnitTests.Construction
             var classLibrary2 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary2");
             var classLibrary3 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary3");
 
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj"), classLibrary1.RelativePath);
+            bool usesNewParser = convertToSlnx || isOptInSlnParsingWithNewParser;
+            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj", usesNewParser), classLibrary1.RelativePath);
             Assert.Single(classLibrary1.Dependencies);
             Assert.Equal(classLibrary3.ProjectGuid, classLibrary1.Dependencies[0]);
             Assert.Null(solution.ProjectsInOrder[0].ParentProjectGuid);
 
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj"), classLibrary2.RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj", usesNewParser), classLibrary2.RelativePath);
             Assert.Equal(2, classLibrary2.Dependencies.Count);
             // When converting to SLNX, the projects dependencies order is not preserved.
             Assert.Contains(classLibrary3.ProjectGuid, classLibrary2.Dependencies);
             Assert.Contains(classLibrary1.ProjectGuid, classLibrary2.Dependencies);
             Assert.Null(solution.ProjectsInOrder[1].ParentProjectGuid);
 
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary3\\ClassLibrary3.csproj"), solution.ProjectsInOrder[2].RelativePath);
+            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary3\\ClassLibrary3.csproj", usesNewParser), solution.ProjectsInOrder[2].RelativePath);
             Assert.Empty(solution.ProjectsInOrder[2].Dependencies);
             Assert.Null(solution.ProjectsInOrder[2].ParentProjectGuid);
         }
@@ -380,9 +404,10 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Make sure the solution configurations get parsed correctly for a simple mixed C#/VC solution
         /// </summary>
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void ParseSolutionConfigurations(bool convertToSlnx)
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        public void ParseSolutionConfigurations(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
                 """
@@ -432,7 +457,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
             Assert.Equal(7, solution.SolutionConfigurations.Count);
 
@@ -457,9 +482,10 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Make sure the solution configurations get parsed correctly for a simple C# application
         /// </summary>
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void ParseSolutionConfigurationsNoMixedPlatform(bool convertToSlnx)
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        public void ParseSolutionConfigurationsNoMixedPlatform(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
                 """
@@ -494,7 +520,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
             Assert.Equal(6, solution.SolutionConfigurations.Count);
 
@@ -520,9 +546,10 @@ namespace Microsoft.Build.UnitTests.Construction
         /// for a simple mixed C#/VC solution
         /// </summary>
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void ParseProjectConfigurationsInSolutionConfigurations1(bool convertToSlnx)
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        public void ParseProjectConfigurationsInSolutionConfigurations1(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
                 """
@@ -569,7 +596,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
             ProjectInSolution csharpProject = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
             ProjectInSolution vcProject = solution.ProjectsInOrder.First(p => p.ProjectName == "MainApp");
@@ -616,9 +643,10 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void ParseProjectConfigurationsInSolutionConfigurations2(bool convertToSlnx)
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        public void ParseProjectConfigurationsInSolutionConfigurations2(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
                 """
@@ -626,9 +654,9 @@ namespace Microsoft.Build.UnitTests.Construction
                 # Visual Studio Version 17
                 VisualStudioVersion = 17.11.35111.106
                 MinimumVisualStudioVersion = 10.0.40219.1
-                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""WinFormsApp1"", ""WinFormsApp1\WinFormsApp1.csproj"", ""{3B592A6A-6215-4675-9237-7FEB36BDB4F1}""
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFormsApp1", "WinFormsApp1\WinFormsApp1.csproj", "{3B592A6A-6215-4675-9237-7FEB36BDB4F1}"
                 EndProject
-                Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""ClassLibrary1"", ""ClassLibrary1\ClassLibrary1.csproj"", ""{C25056E0-405C-4476-9B22-839264A8530C}""
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1\ClassLibrary1.csproj", "{C25056E0-405C-4476-9B22-839264A8530C}"
                 EndProject
                 Global
                     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -654,7 +682,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 EndGlobal
                 """;
 
-            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx);
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
             ProjectInSolution winFormsApp1 = solution.ProjectsInOrder.First(p => p.ProjectName == "WinFormsApp1");
             ProjectInSolution classLibrary1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
@@ -680,16 +708,17 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Helper method to create a SolutionFile object, and call it to parse the SLN file
         /// represented by the string contents passed in. Optionally can convert the SLN to SLNX and then parse the solution.
         /// </summary>
-        private static SolutionFile ParseSolutionHelper(string solutionFileContents, bool convertToSlnx = false)
+        private static SolutionFile ParseSolutionHelper(string solutionFileContents, bool isOptInSlnParsingWithNewParser, bool convertToSlnx = false)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
-
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
+                if (isOptInSlnParsingWithNewParser)
+                {
+                    testEnvironment.SetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE", "1");
+                }
                 TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
-
                 string solutionPath = convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path;
-
                 return SolutionFile.Parse(solutionPath);
             }
         }
@@ -703,10 +732,10 @@ namespace Microsoft.Build.UnitTests.Construction
             return slnxPath;
         }
 
-        private static string ConvertToUnixPathIfNeeded(string path)
+        private static string ConvertToUnixPathIfNeeded(string path, bool usesNewParser)
         {
             // In the new parser, ProjectModel.FilePath is converted to Unix-style.
-            return !NativeMethodsShared.IsWindows ? path.Replace('\\', '/') : path;
+            return usesNewParser && !NativeMethodsShared.IsWindows ? path.Replace('\\', '/') : path;
         }
     }
 }
