@@ -130,6 +130,7 @@ extends:
             symbolServiceURI: 'https://microsoft.artifacts.visualstudio.com/DefaultCollection'
             sourcePath: '$(Build.ArtifactStagingDirectory)\symbols'
             usePat: false
+          enabled: false
 
         - task: PowerShell@1
           displayName: Microbuild health checks
