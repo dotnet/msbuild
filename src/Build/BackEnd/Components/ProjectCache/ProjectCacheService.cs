@@ -24,7 +24,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
 
-namespace Microsoft.Build.Experimental.ProjectCache
+namespace Microsoft.Build.ProjectCache
 {
     internal record CacheRequest(BuildSubmission Submission, BuildRequestConfiguration Configuration);
 

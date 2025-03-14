@@ -7,7 +7,7 @@ using Microsoft.Build.Shared;
 
 #nullable disable
 
-namespace Microsoft.Build.ProjectCache
+namespace Microsoft.Build.Experimental.ProjectCache
 {
     /// <summary>
     /// This exception is used to wrap an unhandled exception from a project cache plugin. This exception aborts the build, and it can only be

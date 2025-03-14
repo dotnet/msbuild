@@ -159,6 +159,15 @@
     <Compile Include="BackEnd\Components\FileAccesses\FileAccessReport.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\OutOfProcNodeFileAccessManager.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\ProcessReport.cs" />
+    <Compile Include="BackEnd\Components\ProjectCacheExperimental\CacheContext.cs" />
+    <Compile Include="BackEnd\Components\ProjectCacheExperimental\CacheResult.cs" />
+    <Compile Include="BackEnd\Components\ProjectCacheExperimental\FileAccessContext.cs" />
+    <Compile Include="BackEnd\Components\ProjectCacheExperimental\PluginLoggerBase.cs" />
+    <Compile Include="BackEnd\Components\ProjectCacheExperimental\PluginTargetResult.cs" />
+    <Compile Include="BackEnd\Components\ProjectCacheExperimental\ProjectCacheDescriptor.cs" />
+    <Compile Include="BackEnd\Components\ProjectCacheExperimental\ProjectCacheException.cs" />
+    <Compile Include="BackEnd\Components\ProjectCacheExperimental\ProjectCachePluginBase.cs" />
+    <Compile Include="BackEnd\Components\ProjectCacheExperimental\ProxyTargets.cs" />
     <Compile Include="BackEnd\Shared\EventsCreatorHelper.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\AssemblyLoadsTracker.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
@@ -703,6 +712,10 @@
       <SubType>Designer</SubType>
       <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="BackEnd\Components\NewFolder\" />
   </ItemGroup>
 
   <PropertyGroup>
