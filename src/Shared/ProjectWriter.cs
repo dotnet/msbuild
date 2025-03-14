@@ -42,7 +42,6 @@ namespace Microsoft.Build.Shared
         // description of an item vector transform, including the optional separator specification, but with no (named) capturing
         // groups -- see the WriteString() method for details
         // regular expression used to match item vector transforms, with no (named) capturing groups
-        // internal for unit testing only
         private const string itemVectorTransformRawSpecification =
             @"@\(\s*
                 (" + itemTypeOrMetadataNameSpecification + @")
