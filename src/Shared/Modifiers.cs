@@ -69,7 +69,7 @@ namespace Microsoft.Build.Shared
                     DefiningProjectExtension
                 };
 
-            private static HashSet<string> s_tableOfItemSpecModifiers = new HashSet<string>(All, StringComparer.OrdinalIgnoreCase);
+            private static readonly HashSet<string> s_tableOfItemSpecModifiers = new HashSet<string>(All, StringComparer.OrdinalIgnoreCase);
 
             /// <summary>
             /// Indicates if the given name is reserved for an item-spec modifier.

@@ -64,7 +64,7 @@ namespace Microsoft.Build.Graph
                 ErrorUtilities.VerifyThrow(
                     !skipIfNonexistent || (!target.Equals(MSBuildConstants.DefaultTargetsMarker)
                     && !target.Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker)),
-                    target + " cannot be marked as SkipNonexistentTargets");
+                    $"{target} cannot be marked as SkipNonexistentTargets");
                 Target = target;
                 SkipIfNonexistent = skipIfNonexistent;
             }
