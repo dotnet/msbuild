@@ -136,6 +136,22 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        public string TargetResultCodeToString()
+        {
+            switch (ResultCode)
+            {
+                case TargetResultCode.Failure:
+                    return nameof(TargetResultCode.Failure);
+                case TargetResultCode.Skipped:
+                    return nameof(TargetResultCode.Skipped);
+                case TargetResultCode.Success:
+                    return nameof(TargetResultCode.Success);
+                default:
+                    Debug.Fail($"Unknown enum value: {ResultCode}");
+                    return ResultCode.ToString();
+            }
+        }
+
         /// <summary>
         /// Returns the internal result for the target.
         /// </summary>
@@ -173,6 +189,13 @@ namespace Microsoft.Build.Execution
             [DebuggerStepThrough]
             set => _afterTargetsHaveFailed = value;
         }
+
+        /// <summary>
+        /// The defining location of the target for which this is a result.
+        /// This is not intended to be remoted via node-2-node remoting - it's intended only for in-node telemetry.
+        /// Warning!: This data is not guaranteed to be populated when Telemetry is not being collected (e.g. this is "sampled out")
+        /// </summary>
+        internal IElementLocation TargetLocation { get; set; }
 
         #region INodePacketTranslatable Members
 

@@ -87,6 +87,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Telemetry events aren't part of "all" so they need to be forwarded separately
                 eventSource2.TelemetryLogged += EventSource_AnyEventRaised;
             }
+
+            if (eventSource is IEventSource5 eventSource5)
+            {
+                // Internal telemetry events aren't part of "all" so they need to be forwarded separately
+                eventSource5.WorkerNodeTelemetryLogged += EventSource_AnyEventRaised;
+            }
         }
 
         /// <summary>

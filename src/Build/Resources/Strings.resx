@@ -2147,7 +2147,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="BuildCheck_BC0101_Title" xml:space="preserve">
     <value>Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</value>
-	<comment>'OutputPath' and 'IntermediateOutputPath' not to be translated.</comment>
+    <comment>'OutputPath' and 'IntermediateOutputPath' not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0101_MessageFmt" xml:space="preserve">
     <value>Projects {0} and {1} have conflicting output paths: {2}.</value>
@@ -2166,7 +2166,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="BuildCheck_BC0103_MessageAddendum" xml:space="preserve">
     <value>'{0}' with value: '{1}'</value>
-	<comment>Will be used as a parameter {0} in previous message.</comment>
+    <comment>Will be used as a parameter {0} in previous message.</comment>
   </data>
   <data name="BuildCheck_BC0104_Title" xml:space="preserve">
     <value>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</value>
@@ -2192,11 +2192,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="BuildCheck_BC0107_Title" xml:space="preserve">
     <value>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</value>
-	  <comment>Terms in quotes are not to be translated.</comment>
+    <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0107_MessageFmt" xml:space="preserve">
     <value>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</value>
-	  <comment>Terms in quotes are not to be translated.</comment>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0108_Title" xml:space="preserve">
+    <value>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0108_MessageFmt" xml:space="preserve">
+    <value>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0201_Title" xml:space="preserve">
     <value>A property that is accessed should be declared first.</value>
@@ -2215,6 +2223,168 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="BuildCheck_BC0203_MessageFmt" xml:space="preserve">
     <value>Property: '{0}' was declared/initialized, but it was never used.</value>
+  </data>
+  <data name="BuildCheck_BC0301_Title" xml:space="preserve">
+    <value>Downloads folder is untrusted for projects building.</value>
+  </data>
+  <data name="BuildCheck_BC0301_MessageFmt" xml:space="preserve">
+    <value>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</value>
+  </data>
+  <data name="GlobExpansionFailed" xml:space="preserve">
+    <value>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</value>
+  </data>
+  <data name="UnknownLoggingType" xml:space="preserve">
+    <value>Logging type {0} is not understood by {1}.</value>
+  </data>
+  <data name="DurationDisplay" xml:space="preserve">
+    <value>({0:F1}s)</value>
+    <comment>
+        {0}: duration in seconds with 1 decimal point
+        's' should reflect the localized abbreviation for seconds
+      </comment>
+  </data>
+  <data name="RestoreComplete" xml:space="preserve">
+    <value>Restore complete ({0}s)</value>
+    <comment>
+      {0}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="RestoreCompleteWithMessage" xml:space="preserve">
+    <value>Restore {0} in {1}s</value>
+    <comment>
+      Restore summary when finished with warning or error
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="BuildFinished" xml:space="preserve">
+    <value>Build {0} in {1}s</value>
+    <comment>
+      Overall build summary
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="ProjectFinished_NoTF" xml:space="preserve">
+    <value>{0}{1} {2} ({3}s)</value>
+    <comment>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="ProjectFinished_WithTF" xml:space="preserve">
+    <value>{0}{1} {2} {3} ({4}s)</value>
+    <comment>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="BuildResult_FailedWithErrors" xml:space="preserve">
+    <value>failed with {0} error(s)</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_FailedWithErrorsAndWarnings" xml:space="preserve">
+    <value>failed with {0} error(s) and {1} warning(s)</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_FailedWithWarnings" xml:space="preserve">
+    <value>failed with {0} warning(s)</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_Failed" xml:space="preserve">
+    <value>failed</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_Succeeded" xml:space="preserve">
+    <value>succeeded</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_SucceededWithWarnings" xml:space="preserve">
+    <value>succeeded with {0} warning(s)</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="TestProjectFinished_NoTF" xml:space="preserve">
+    <value>{0}{1} test {2} ({3}s)</value>
+    <comment>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="TestProjectFinished_WithTF" xml:space="preserve">
+    <value>{0}{1} test {2} {3} ({4}s)</value>
+    <comment>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="ProjectFinished_OutputPath" xml:space="preserve">
+    <value> → {0}</value>
+    <comment>
+      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
+      {0}: VT100 coded hyperlink to project output directory
+    </comment>
+  </data>
+  <data name="BuildSummary" xml:space="preserve">
+    <value>Build summary:</value>
+    <comment>
+      A header used by Terminal Logger to introduce the build summary.
+    </comment>
+  </data>
+  <data name="TestSummary_BannerAndTotal" xml:space="preserve">
+    <value>Test summary: total: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Duration" xml:space="preserve">
+    <value>duration: {0}s</value>
+    <comment>
+      {0} whole number
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="TestSummary_Failed" xml:space="preserve">
+    <value>failed: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Skipped" xml:space="preserve">
+    <value>skipped: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Succeeded" xml:space="preserve">
+    <value>succeeded: {0}</value>
+    <comment>{0} whole number</comment>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

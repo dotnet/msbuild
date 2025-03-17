@@ -72,14 +72,14 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                     ");
                 // Slashes here (and in the .slnf) are hardcoded as backslashes intentionally to support the common case.
                 TransientTestFile solutionFile = testEnvironment.CreateFile(simpleProjectFolder, "SimpleProject.sln",
-                    @"
+                    """
                     Microsoft Visual Studio Solution File, Format Version 12.00
                     # Visual Studio Version 16
                     VisualStudioVersion = 16.0.29326.124
                     MinimumVisualStudioVersion = 10.0.40219.1
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""SimpleProject"", ""SimpleProject\SimpleProject.csproj"", ""{79B5EBA6-5D27-4976-BC31-14422245A59A}""
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleProject", "SimpleProject\SimpleProject.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
                     EndProject
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""ClassLibrary"", ""..\ClassLibrary\ClassLibrary\ClassLibrary.csproj"", ""{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}""
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassLibrary", "..\ClassLibrary\ClassLibrary\ClassLibrary.csproj", "{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}"
                     EndProject
                     Global
                         GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -107,7 +107,7 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                             SolutionGuid = {DE7234EC-0C4D-4070-B66A-DCF1B4F0CFEF}
                         EndGlobalSection
                     EndGlobal
-                ");
+                    """);
                 TransientTestFile filterFile = testEnvironment.CreateFile(folder, "solutionFilter.slnf",
                     /*lang=json*/
                                   """
@@ -282,6 +282,56 @@ EndGlobal
                  || sp.ProjectShouldBuild(Path.Combine("src", "notAProject.csproj")))
                     .ShouldBeFalse();
             }
+        }
+
+        [Fact]
+        public void SolutionFilterWithSpecialSymbolInThePath()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+            // Create folder with special symbols in the name
+            folder = testEnvironment.CreateFolder(Path.Combine(folder.Path, $"test@folder%special$symbols"), createFolder: true);
+            // Create simple solution and simple solution filter
+            TransientTestFile sln = testEnvironment.CreateFile(folder, "SimpleSolution.sln",
+            """
+            Microsoft Visual Studio Solution File, Format Version 12.00
+            # Visual Studio Version 17
+            VisualStudioVersion = 17.0.31903.59
+            MinimumVisualStudioVersion = 10.0.40219.1
+            Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolutionTest", "SolutionTest.csproj", "{767AA460-C33F-41C3-A8B6-4DA283263A51}"
+            EndProject
+            Global
+                GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                    Debug|Any CPU = Debug|Any CPU
+                    Release|Any CPU = Release|Any CPU
+                EndGlobalSection
+                GlobalSection(SolutionProperties) = preSolution
+                    HideSolutionNode = FALSE
+                EndGlobalSection
+                GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                    {767AA460-C33F-41C3-A8B6-4DA283263A51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                    {767AA460-C33F-41C3-A8B6-4DA283263A51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                    {767AA460-C33F-41C3-A8B6-4DA283263A51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+                    {767AA460-C33F-41C3-A8B6-4DA283263A51}.Release|Any CPU.Build.0 = Release|Any CPU
+                EndGlobalSection
+            EndGlobal
+            """);
+            TransientTestFile slnf = testEnvironment.CreateFile(folder, "SimpleSolution.slnf",
+            """
+            {
+                "solution": {
+                    "path": "SimpleSolution.sln",
+                    "projects": [
+                        "SolutionTest.csproj"
+                    ]
+                }
+            }
+            """);
+
+            SolutionFile sp = SolutionFile.Parse(slnf.Path);
+
+            // just assert that no error is thrown
+            Assert.True(sp.ProjectShouldBuild("SolutionTest.csproj"));
         }
 
         private static string ConvertToSlnx(string slnPath)
