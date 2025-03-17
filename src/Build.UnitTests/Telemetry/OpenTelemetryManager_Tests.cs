@@ -51,12 +51,13 @@ namespace Microsoft.Build.Engine.UnitTests.Telemetry
             OpenTelemetryManager.Instance.IsActive().ShouldBeFalse();
         }
 
-#if NET
+#if NETCOREAPP
         [Fact]
         public void Initialize_ShouldSetStateToUnsampled_WhenNoOverrideOnNetCore()
         {
             using TestEnvironment environment = TestEnvironment.Create();
             environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, null);
+            environment.SetEnvironmentVariable(DotnetOptOut, null);
 
             OpenTelemetryManager.Instance.Initialize(isStandalone: false);
 
@@ -74,6 +75,7 @@ namespace Microsoft.Build.Engine.UnitTests.Telemetry
             using TestEnvironment environment = TestEnvironment.Create();
             environment.SetEnvironmentVariable(VS1714TelemetryOptInEnvVarName, "1");
             environment.SetEnvironmentVariable(TelemetrySampleRateOverrideEnvVarName, "1.0");
+            environment.SetEnvironmentVariable(DotnetOptOut, null);
 
             // Act
             OpenTelemetryManager.Instance.Initialize(isStandalone: standalone);
