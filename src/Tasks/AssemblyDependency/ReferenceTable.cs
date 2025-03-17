@@ -135,7 +135,7 @@ namespace Microsoft.Build.Tasks
         private readonly bool _doNotCopyLocalIfInGac;
 
         /// <summary>
-        ///  Shoould the framework attribute version mismatch be ignored.
+        ///  Should the framework attribute version mismatch be ignored.
         /// </summary>
         private readonly bool _ignoreFrameworkAttributeVersionMismatch;
 
@@ -145,7 +145,12 @@ namespace Microsoft.Build.Tasks
         private readonly GetAssemblyPathInGac _getAssemblyPathInGac;
 
         /// <summary>
-        /// Should a warning or error be emitted on architecture mismatch
+        /// Contains the list of directories that should NOT be considered as custom culture directories.
+        /// </summary>
+        private readonly string[] _nonCultureResourceDirectories = [];
+
+        /// <summary>
+        /// Should a warning or error be emitted on architecture mismatch.
         /// </summary>
         private readonly WarnOrErrorOnTargetArchitectureMismatchBehavior _warnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatchBehavior.Warning;
 
@@ -206,6 +211,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="readMachineTypeFromPEHeader"></param>
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
+        /// <param name="nonCultureResourceDirectories"></param>
 #else
         /// <summary>
         /// Construct.
@@ -221,7 +227,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="resolvedSDKItems">Resolved sdk items</param>
         /// <param name="frameworkPaths">Path to the FX.</param>
         /// <param name="installedAssemblies">Installed assembly XML tables.</param>
-        /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targetted.</param>
+        /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targeted.</param>
         /// <param name="fileExists">Delegate used for checking for the existence of a file.</param>
         /// <param name="directoryExists">Delegate used for files.</param>
         /// <param name="getDirectories">Delegate used for getting directories.</param>
@@ -234,7 +240,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="targetedRuntimeVersion">Version of the runtime to target.</param>
         /// <param name="projectTargetFramework">Version of the framework targeted by the project.</param>
         /// <param name="targetFrameworkMoniker">Target framework moniker we are targeting.</param>
-        /// <param name="log">Logging helper to allow the logging of meessages from the Reference Table.</param>
+        /// <param name="log">Logging helper to allow the logging of messages from the Reference Table.</param>
         /// <param name="latestTargetFrameworkDirectories"></param>
         /// <param name="copyLocalDependenciesWhenParentReferenceInGac"></param>
         /// <param name="doNotCopyLocalIfInGac"></param>
@@ -244,6 +250,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="readMachineTypeFromPEHeader"></param>
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
+        /// <param name="nonCultureResourceDirectories"></param>
 #endif
         internal ReferenceTable(
             IBuildEngine buildEngine,
@@ -284,7 +291,8 @@ namespace Microsoft.Build.Tasks
             WarnOrErrorOnTargetArchitectureMismatchBehavior warnOrErrorOnTargetArchitectureMismatch,
             bool ignoreFrameworkAttributeVersionMismatch,
             bool unresolveFrameworkAssembliesFromHigherFrameworks,
-            ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache)
+            ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
+            string[] nonCultureResourceDirectories)
         {
             _log = log;
             _findDependencies = findDependencies;
@@ -317,6 +325,7 @@ namespace Microsoft.Build.Tasks
             _warnOrErrorOnTargetArchitectureMismatch = warnOrErrorOnTargetArchitectureMismatch;
             _ignoreFrameworkAttributeVersionMismatch = ignoreFrameworkAttributeVersionMismatch;
             _assemblyMetadataCache = assemblyMetadataCache;
+            _nonCultureResourceDirectories = nonCultureResourceDirectories;
 
             // Set condition for when to check assembly version against the target framework version
             _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
@@ -971,8 +980,9 @@ namespace Microsoft.Build.Tasks
                     // Is there a candidate satellite in that folder?
                     string cultureName = Path.GetFileName(subDirectory);
 
-                    // Custom or unknown cultures can be met as well
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14) || CultureInfoCache.IsValidCultureString(cultureName))
+                    // Custom or unknown cultures can be met only if the feature is enabled and the directory was not added to the exclusion list.
+                    if ((Traits.EnableCustomCultures && !_nonCultureResourceDirectories.Contains(cultureName))
+                        || CultureInfoCache.IsValidCultureString(cultureName))
                     {
                         string satelliteAssembly = Path.Combine(subDirectory, satelliteFilename);
                         if (_fileExists(satelliteAssembly))
