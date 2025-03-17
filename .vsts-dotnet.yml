@@ -3,6 +3,10 @@ variables:
   value: 'Release'
 - name: TeamName
   value: MSBuild
+- name: ArtifactServices.Symbol.AccountName
+  value: microsoft
+- name: ArtifactServices.Symbol.PAT
+  value: '$(System.AccessToken)'
 
 resources:
   repositories:
@@ -134,7 +138,6 @@ extends:
             symbolServiceURI: 'https://microsoft.artifacts.visualstudio.com/DefaultCollection'
             sourcePath: '$(Build.ArtifactStagingDirectory)\symbols'
             usePat: false
-          enabled: false
 
         - task: PowerShell@1
           displayName: Microbuild health checks
