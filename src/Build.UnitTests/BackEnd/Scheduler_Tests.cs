@@ -8,7 +8,7 @@ using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;

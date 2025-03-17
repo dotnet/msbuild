@@ -7,7 +7,7 @@ namespace Microsoft.Build.ProjectCache
 {
     public class ProjectCacheDescriptor
     {
-        private ProjectCacheDescriptor(
+        internal ProjectCacheDescriptor(
             string? pluginAssemblyPath,
             IReadOnlyDictionary<string, string>? pluginSettings,
             ProjectCachePluginBase? pluginInstance)

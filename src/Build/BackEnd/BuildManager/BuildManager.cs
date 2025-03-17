@@ -27,7 +27,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
-//using Microsoft.Build.ProjectCache;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
