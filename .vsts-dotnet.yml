@@ -3,10 +3,6 @@ variables:
   value: 'Release'
 - name: TeamName
   value: MSBuild
-- name: ArtifactServices.Symbol.AccountName
-  value: microsoft
-- name: ArtifactServices.Symbol.PAT
-  value: '$(System.AccessToken)'
 
 resources:
   repositories:
@@ -126,18 +122,12 @@ extends:
             dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
           enabled: false
 
-        - task: PublishSymbols@1
-          displayName: Index Sources
+        - task: PublishSymbols@2
+          displayName: Index Sources & Publish Symbols to Artifact Services
           inputs:
             SearchPattern: '**/*.pdb'
             SymbolsFolder: '$(Build.ArtifactStagingDirectory)\symbols'
-
-        - task: ms-vscs-artifact.build-tasks.artifactSymbolTask-1.artifactSymbolTask@0
-          displayName: Publish Symbols to Artifact Services
-          inputs:
-            symbolServiceURI: 'https://microsoft.artifacts.visualstudio.com/DefaultCollection'
-            sourcePath: '$(Build.ArtifactStagingDirectory)\symbols'
-            usePat: false
+            SymbolServerType: 'TeamServices'
 
         - task: PowerShell@1
           displayName: Microbuild health checks
