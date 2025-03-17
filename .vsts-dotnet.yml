@@ -49,6 +49,10 @@ extends:
           - output: microBuildVstsDrop
             displayName: 'Upload VSTS Drop'
             dropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
+            dropRetentionDays: 90
+            accessToken: '$(System.AccessToken)'
+            dropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
+            vsDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
         steps:        
         - task: MicroBuildIBCMergePlugin@1
           displayName: Install IBCMerge Plugin
