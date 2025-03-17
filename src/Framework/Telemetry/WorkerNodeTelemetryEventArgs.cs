@@ -24,7 +24,7 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
             WriteToStream(writer, entry.Key);
             writer.Write(entry.Value.CumulativeExecutionTime.Ticks);
             writer.Write(entry.Value.ExecutionsCount);
-            writer.Write(entry.Value.TotalMemoryConsumption);
+            writer.Write(entry.Value.TotalMemoryBytes);
         }
 
         writer.Write7BitEncodedInt(WorkerNodeTelemetryData.TargetsExecutionData.Count);

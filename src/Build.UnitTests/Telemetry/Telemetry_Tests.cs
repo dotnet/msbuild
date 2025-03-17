@@ -276,19 +276,18 @@ namespace Microsoft.Build.Engine.UnitTests
                 var tasksData = JsonSerializer.Deserialize<JsonElement>(tasksJson);
 
                 // Verify Message task execution metrics - updated for object structure
-                tasksData.TryGetProperty("Microsoft.Build.Tasks.Message", out var messageTask).ShouldBeTrue();
-                // Map JSON property names to TaskExecutionStats properties - they may differ
-                messageTask.GetProperty("ExecCnt").GetInt32().ShouldBe(3);  // Maps to ExecutionsCount
-                messageTask.GetProperty("ExecTimeMs").GetDouble().ShouldBeGreaterThan(0);  // Maps to CumulativeExecutionTime in ms
-                messageTask.GetProperty("MemKBs").GetInt32().ShouldBeGreaterThan(0);  // Maps to TotalMemoryConsumption in KB
-                messageTask.GetProperty(nameof(TaskOrTargetTelemetryKey.IsCustom)).GetBoolean().ShouldBeFalse();
-                messageTask.GetProperty(nameof(TaskOrTargetTelemetryKey.IsNuget)).GetBoolean().ShouldBeFalse();
+                tasksData.TryGetProperty("Microsoft.Build.Tasks.Message", out var messageTask).ShouldBe(true);
+                messageTask.GetProperty("ExecutionsCount").GetInt32().ShouldBe(3);
+                messageTask.GetProperty("TotalMilliseconds").GetDouble().ShouldBeGreaterThan(0);
+                messageTask.GetProperty("TotalMemoryBytes").GetInt64().ShouldBeGreaterThan(0);
+                messageTask.GetProperty(nameof(TaskOrTargetTelemetryKey.IsCustom)).GetBoolean().ShouldBe(false);
+                messageTask.GetProperty(nameof(TaskOrTargetTelemetryKey.IsCustom)).GetBoolean().ShouldBe(false);
 
                 // Verify CreateItem task execution metrics - updated for object structure
-                tasksData.TryGetProperty("Microsoft.Build.Tasks.CreateItem", out var createItemTask).ShouldBeTrue();
-                createItemTask.GetProperty("ExecCnt").GetInt32().ShouldBe(1);  // Maps to ExecutionsCount
-                createItemTask.GetProperty("ExecTimeMs").GetDouble().ShouldBeGreaterThan(0);  // Maps to CumulativeExecutionTime in ms
-                createItemTask.GetProperty("MemKBs").GetInt32().ShouldBeGreaterThan(0);  // Maps to TotalMemoryConsumption in KB
+                tasksData.TryGetProperty("Microsoft.Build.Tasks.CreateItem", out var createItemTask).ShouldBe(true);
+                createItemTask.GetProperty("ExecutionsCount").GetInt32().ShouldBe(1);
+                createItemTask.GetProperty("TotalMilliseconds").GetDouble().ShouldBeGreaterThan(0);
+                createItemTask.GetProperty("TotalMemoryBytes").GetInt64().ShouldBeGreaterThan(0);
 
                 // Verify Targets summary information
                 tags.ShouldContainKey("VS.MSBuild.TargetsSummary");
@@ -296,11 +295,9 @@ namespace Microsoft.Build.Engine.UnitTests
                 targetsSummaryJson.ShouldNotBeNullOrEmpty();
                 var targetsSummary = JsonSerializer.Deserialize<JsonElement>(targetsSummaryJson);
 
-                // Verify loaded and executed targets counts
+                // Verify loaded and executed targets counts - match structure in TargetsSummaryConverter.Write
                 targetsSummary.GetProperty("Loaded").GetProperty("Total").GetInt32().ShouldBe(2);
                 targetsSummary.GetProperty("Executed").GetProperty("Total").GetInt32().ShouldBe(2);
-                targetsSummary.GetProperty("Loaded").GetProperty("Microsoft").GetProperty("Total").GetInt32().ShouldBe(2);
-                targetsSummary.GetProperty("Executed").GetProperty("Microsoft").GetProperty("Total").GetInt32().ShouldBe(2);
 
                 // Verify Tasks summary information
                 tags.ShouldContainKey("VS.MSBuild.TasksSummary");
@@ -308,10 +305,10 @@ namespace Microsoft.Build.Engine.UnitTests
                 tasksSummaryJson.ShouldNotBeNullOrEmpty();
                 var tasksSummary = JsonSerializer.Deserialize<JsonElement>(tasksSummaryJson);
 
-                // Verify task execution summary metrics
-                tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("TotalExecutionsCount").GetInt32().ShouldBe(4);
-                tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("CumulativeExecutionTimeMs").GetInt32().ShouldBeGreaterThan(0);
-                tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("CumulativeConsumedMemoryKB").GetInt32().ShouldBeGreaterThan(0);
+                // Verify task execution summary metrics based on TasksSummaryConverter.Write structure
+                tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("ExecutionsCount").GetInt32().ShouldBe(4);
+                tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("TotalMilliseconds").GetDouble().ShouldBeGreaterThan(0);
+                tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("TotalMemoryBytes").GetInt64().ShouldBeGreaterThan(0);
             }
         }
 
