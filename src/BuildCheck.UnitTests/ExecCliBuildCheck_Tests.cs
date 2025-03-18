@@ -60,6 +60,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         [InlineData("dotnet help")]
         [InlineData("where dotnet")]
         [InlineData("where msbuild")]
+        [InlineData("msbuild --help")]
         [InlineData("where nuget")]
         [InlineData("dotnet bin/net472/project.dll")]
         [InlineData("")]
