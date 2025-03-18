@@ -96,10 +96,10 @@ namespace Microsoft.Build.Internal
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-            CommunicationsUtilities.Trace("Handshake salt is " + handshakeSalt);
+            CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
             string toolsDirectory = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-            CommunicationsUtilities.Trace("Tools directory root is " + toolsDirectory);
-            salt = CommunicationsUtilities.GetHashCode(handshakeSalt + toolsDirectory);
+            CommunicationsUtilities.Trace("Tools directory root is {0}", toolsDirectory);
+            salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
             Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
             fileVersionMajor = fileVersion.Major;
             fileVersionMinor = fileVersion.Minor;
@@ -112,7 +112,7 @@ namespace Microsoft.Build.Internal
         // This is used as a key, so it does not need to be human readable.
         public override string ToString()
         {
-            return String.Format("{0} {1} {2} {3} {4} {5} {6}", options, salt, fileVersionMajor, fileVersionMinor, fileVersionBuild, fileVersionPrivate, sessionId);
+            return $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}";
         }
 
         public virtual int[] RetrieveHandshakeComponents()
@@ -175,8 +175,14 @@ namespace Microsoft.Build.Internal
             if (_computedHash == null)
             {
                 var input = GetKey();
+                byte[] utf8 = Encoding.UTF8.GetBytes(input);
+#if NET
+                Span<byte> bytes = stackalloc byte[SHA256.HashSizeInBytes];
+                SHA256.HashData(utf8, bytes);
+#else
                 using var sha = SHA256.Create();
-                var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+                var bytes = sha.ComputeHash(utf8);
+#endif
                 _computedHash = Convert.ToBase64String(bytes)
                     .Replace("/", "_")
                     .Replace("=", string.Empty);
@@ -208,7 +214,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Whether to trace communications
         /// </summary>
-        private static bool s_trace = Traits.Instance.DebugNodeCommunication;
+        private static readonly bool s_trace = Traits.Instance.DebugNodeCommunication;
 
         /// <summary>
         /// Lock trace to ensure we are logging in serial fashion.

@@ -186,7 +186,7 @@ namespace Microsoft.Build.BackEnd
                     if (// If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
                         bucket.BucketSequenceNumber == 0 &&
                         // Referring to unqualified metadata of other item (transform) is fine.
-                        child.Include.IndexOf("@(", StringComparison.Ordinal) == -1)
+                        !child.Include.Contains("@("))
                     {
                         expanderOptions |= ExpanderOptions.LogOnItemMetadataSelfReference;
                     }

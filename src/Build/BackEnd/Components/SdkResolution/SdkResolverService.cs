@@ -136,7 +136,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             //
             // Overall, while Sdk resolvers look like a general plug-in system, there are good reasons why some of the logic is hard-coded.
             // It's not really meant to be modified outside of very special/internal scenarios.
-#if NETCOREAPP
+#if NET
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
             {
                 if (TryResolveSdkUsingSpecifiedResolvers(
@@ -479,7 +479,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
 
                 SdkResolverManifest sdkDefaultResolversManifest = null;
-#if NETCOREAPP
+#if NET
                 if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
 #endif
                 {

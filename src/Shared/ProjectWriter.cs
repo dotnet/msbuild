@@ -15,7 +15,7 @@ namespace Microsoft.Build.Shared
     /// This class is used to save MSBuild project files. It contains special handling for MSBuild notations that are not saved
     /// correctly by the XML DOM's default save mechanism.
     /// </summary>
-    internal sealed class ProjectWriter : XmlTextWriter
+    internal sealed partial class ProjectWriter : XmlTextWriter
     {
         #region Regular expressions for item vector transforms
 
@@ -28,9 +28,7 @@ namespace Microsoft.Build.Shared
         // Note that the pattern is more strict than the rules for valid XML element names.
         internal const string itemTypeOrMetadataNameSpecification = @"[A-Za-z_][A-Za-z_0-9\-]*";
 
-        // the portion of an item transform that is the function that we wish to execute on the item
-        internal const string itemFunctionNameSpecification = @"[A-Za-z]*";
-
+        // regular expression used to match item vector transforms
         // description of an item vector transform, including the optional separator specification
         private const string itemVectorTransformSpecification =
             @"(?<PREFIX>@\(\s*)
@@ -40,15 +38,9 @@ namespace Microsoft.Build.Shared
               (?<SUFFIX>\s*\))";
         // )
 
-        // regular expression used to match item vector transforms
-        // internal for unit testing only
-        internal static readonly Lazy<Regex> itemVectorTransformPattern = new Lazy<Regex>(
-            () =>
-                new Regex(itemVectorTransformSpecification,
-                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
-
         // description of an item vector transform, including the optional separator specification, but with no (named) capturing
         // groups -- see the WriteString() method for details
+        // regular expression used to match item vector transforms, with no (named) capturing groups
         private const string itemVectorTransformRawSpecification =
             @"@\(\s*
                 (" + itemTypeOrMetadataNameSpecification + @")
@@ -56,12 +48,21 @@ namespace Microsoft.Build.Shared
                 (\s*,\s*'[^']*')?
               \s*\)";
 
-        // regular expression used to match item vector transforms, with no (named) capturing groups
-        // internal for unit testing only
-        internal static readonly Lazy<Regex> itemVectorTransformRawPattern = new Lazy<Regex>(
-            () =>
-                new Regex(itemVectorTransformRawSpecification,
-                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+#if NET
+        [GeneratedRegex(itemVectorTransformSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
+        private static partial Regex ItemVectorTransformRegex { get; }
+
+        [GeneratedRegex(itemVectorTransformRawSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
+        private static partial Regex ItemVectorTransformRawRegex { get; }
+#else
+        private static Regex ItemVectorTransformRegex => itemVectorTransformPattern ??=
+            new Regex(itemVectorTransformSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled);
+        private static Regex itemVectorTransformPattern;
+
+        private static Regex ItemVectorTransformRawRegex => itemVectorTransformRawPattern ??=
+            new Regex(itemVectorTransformRawSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled);
+        private static Regex itemVectorTransformRawPattern;
+#endif
 
         /**************************************************************************************************************************
          * WARNING: The regular expressions above MUST be kept in sync with the expressions in the ItemExpander class.
@@ -130,14 +131,14 @@ namespace Microsoft.Build.Shared
         /// <param name="text"></param>
         public override void WriteString(string text)
         {
-            MatchCollection itemVectorTransforms = itemVectorTransformRawPattern.Value.Matches(text);
+            MatchCollection itemVectorTransforms = ItemVectorTransformRawRegex.Matches(text);
 
             // if the string contains any item vector transforms
             if (itemVectorTransforms.Count > 0)
             {
                 // separate out the text that surrounds the transforms
                 // NOTE: use the Regex with no (named) capturing groups, otherwise Regex.Split() will split on them
-                string[] surroundingTextPieces = itemVectorTransformRawPattern.Value.Split(text);
+                string[] surroundingTextPieces = ItemVectorTransformRawRegex.Split(text);
 
                 ErrorUtilities.VerifyThrow(itemVectorTransforms.Count == (surroundingTextPieces.Length - 1),
                     "We must have two pieces of surrounding text for every item vector transform found.");
@@ -149,7 +150,7 @@ namespace Microsoft.Build.Shared
                     base.WriteString(surroundingTextPieces[i]);
 
                     // break up the transform into its constituent pieces
-                    Match itemVectorTransform = itemVectorTransformPattern.Value.Match(itemVectorTransforms[i].Value);
+                    Match itemVectorTransform = ItemVectorTransformRegex.Match(itemVectorTransforms[i].Value);
 
                     ErrorUtilities.VerifyThrow(itemVectorTransform.Success,
                         "Item vector transform must be matched by both the raw and decorated regular expressions.");

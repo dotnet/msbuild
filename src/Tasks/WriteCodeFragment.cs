@@ -210,7 +210,13 @@ namespace Microsoft.Build.Tasks
 
                         if (name.StartsWith("_Parameter", StringComparison.OrdinalIgnoreCase))
                         {
-                            if (!Int32.TryParse(name.Substring("_Parameter".Length), out int index))
+                            if (!Int32.TryParse(
+#if NET
+                                name.AsSpan("_Parameter".Length),
+#else
+                                name.Substring("_Parameter".Length),
+#endif
+                                out int index))
                             {
                                 Log.LogErrorWithCodeFromResources("General.InvalidValue", name, "WriteCodeFragment");
                                 return null;

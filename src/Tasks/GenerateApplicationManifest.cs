@@ -241,7 +241,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "GenerateApplicationManifest.AddIsolatedComReferences t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"GenerateApplicationManifest.AddIsolatedComReferences t={Environment.TickCount - t1}");
             return success;
         }
 
@@ -326,7 +326,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "GenerateApplicationManifest.AddClickOnceFiles t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"GenerateApplicationManifest.AddClickOnceFiles t={Environment.TickCount - t1}");
             return true;
         }
 
