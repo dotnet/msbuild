@@ -461,7 +461,7 @@ internal static class NativeMethods
             {
                 ProcessorArchitectures processorArchitecture = ProcessorArchitectures.Unknown;
 
-#if NETCOREAPP || NETSTANDARD1_1_OR_GREATER
+#if NET || NETSTANDARD1_1_OR_GREATER
                 // Get the architecture from the runtime.
                 processorArchitecture = RuntimeInformation.OSArchitecture switch
                 {
@@ -469,13 +469,9 @@ internal static class NativeMethods
                     Architecture.Arm64 => ProcessorArchitectures.ARM64,
                     Architecture.X64 => ProcessorArchitectures.X64,
                     Architecture.X86 => ProcessorArchitectures.X86,
-#if NET5_0_OR_GREATER
+#if NET
                     Architecture.Wasm => ProcessorArchitectures.WASM,
-#endif
-#if NET6_0_OR_GREATER
                     Architecture.S390x => ProcessorArchitectures.S390X,
-#endif
-#if NET7_0_OR_GREATER
                     Architecture.LoongArch64 => ProcessorArchitectures.LOONGARCH64,
                     Architecture.Armv6 => ProcessorArchitectures.ARMV6,
                     Architecture.Ppc64le => ProcessorArchitectures.PPC64LE,
@@ -1394,7 +1390,7 @@ internal static class NativeMethods
                 // using (var r = FileUtilities.OpenRead("/proc/" + processId + "/stat"))
                 // and could be again when FileUtilities moves to Framework
 
-                using var fileStream = new FileStream("/proc/" + processId + "/stat", FileMode.Open, System.IO.FileAccess.Read);
+                using var fileStream = new FileStream($"/proc/{processId}/stat", FileMode.Open, System.IO.FileAccess.Read);
                 using StreamReader r = new(fileStream);
 
                 line = r.ReadLine();
@@ -1522,9 +1518,18 @@ internal static class NativeMethods
     [SupportedOSPlatform("windows")]
     internal static unsafe string GetFullPath(string path)
     {
-        int bufferSize = GetFullPathWin32(path, 0, null, IntPtr.Zero);
-        char* buffer = stackalloc char[bufferSize];
-        int fullPathLength = GetFullPathWin32(path, bufferSize, buffer, IntPtr.Zero);
+        char* buffer = stackalloc char[MAX_PATH];
+        int fullPathLength = GetFullPathWin32(path, MAX_PATH, buffer, IntPtr.Zero);
+
+        // if user is using long paths we could need to allocate a larger buffer
+        if (fullPathLength > MAX_PATH)
+        {
+            char* newBuffer = stackalloc char[fullPathLength];
+            fullPathLength = GetFullPathWin32(path, fullPathLength, newBuffer, IntPtr.Zero);
+
+            buffer = newBuffer;
+        }
+
         // Avoid creating new strings unnecessarily
         return AreStringsEqual(buffer, fullPathLength, path) ? path : new string(buffer, startIndex: 0, length: fullPathLength);
     }
@@ -1562,7 +1567,7 @@ internal static class NativeMethods
 
         return true;
 #else
-        return MemoryExtensions.SequenceEqual(new ReadOnlySpan<char>(buffer, len), s.AsSpan());
+        return s.AsSpan().SequenceEqual(new ReadOnlySpan<char>(buffer, len));
 #endif
     }
 

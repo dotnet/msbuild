@@ -584,7 +584,7 @@ namespace Microsoft.Build.Construction
 
             var leadingWhiteSpace = xmlElement.PreviousSibling.Value;
 
-            var lastIndexOfNewLine = leadingWhiteSpace.LastIndexOf("\n", StringComparison.Ordinal);
+            var lastIndexOfNewLine = leadingWhiteSpace.LastIndexOf('\n');
 
             if (lastIndexOfNewLine == -1)
             {

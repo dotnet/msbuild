@@ -56,6 +56,7 @@ namespace Microsoft.Build.UnitTests
             // Clear these two environment variables first in case pre-setting affects the test.
             env.SetEnvironmentVariable("MSBUILDLIVELOGGER", null);
             env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", null);
+            env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
 
             return env;
         }

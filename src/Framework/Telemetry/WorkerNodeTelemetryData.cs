@@ -27,7 +27,7 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         }
     }
 
-    public void AddTask(TaskOrTargetTelemetryKey task, TimeSpan cumulativeExectionTime, short executionsCount, long totalMemoryConsumption)
+    public void AddTask(TaskOrTargetTelemetryKey task, TimeSpan cumulativeExectionTime, int executionsCount, long totalMemoryConsumption)
     {
         TaskExecutionStats? taskExecutionStats;
         if (!TasksExecutionData.TryGetValue(task, out taskExecutionStats))

@@ -1019,11 +1019,8 @@ namespace Microsoft.Build.BackEnd
         private void AssignUnscheduledRequestsWithConfigurationCountLevelling(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
             // Assign requests but try to keep the same number of configurations on each node
-            List<int> nodesByConfigurationCountAscending = new List<int>(_availableNodes.Keys);
-            nodesByConfigurationCountAscending.Sort(delegate (int left, int right)
-            {
-                return Comparer<int>.Default.Compare(_schedulingData.GetConfigurationsCountByNode(left, true /* excludeTraversals */, _configCache), _schedulingData.GetConfigurationsCountByNode(right, true /* excludeTraversals */, _configCache));
-            });
+            // Use OrderBy to sort since it will cache the lookup in configCache which. This reduces the number of times we have to acquire the lock.
+            IEnumerable<int> nodesByConfigurationCountAscending = _availableNodes.Keys.OrderBy(x => _schedulingData.GetConfigurationsCountByNode(x, excludeTraversals: true, _configCache));
 
             // Assign projects to nodes, preferring to assign work to nodes with the fewest configurations first.
             foreach (int nodeId in nodesByConfigurationCountAscending)
@@ -2434,7 +2431,7 @@ namespace Microsoft.Build.BackEnd
 
             bool haveNonIdleNode = false;
             StringBuilder stringBuilder = new StringBuilder(64);
-            stringBuilder.AppendFormat("{0}:   ", previousEventTime.Ticks);
+            stringBuilder.Append(previousEventTime.Ticks).Append(":   ");
             for (int i = 0; i < currentWork.Length; i++)
             {
                 if (currentWork[i] == invalidWorkId)
@@ -2570,7 +2567,7 @@ namespace Microsoft.Build.BackEnd
                     FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
                     using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
-                    file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, _schedulingData.EventTime.Ticks);
+                    file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, _schedulingData.EventTime.Ticks);
                     file.WriteLine(format, stuff);
                     file.Flush();
                 }
@@ -2817,7 +2814,7 @@ namespace Microsoft.Build.BackEnd
                 request.State,
                 buildRequest.ConfigurationId,
                 _configCache[buildRequest.ConfigurationId].ProjectFullPath,
-                string.Join(", ", buildRequest.Targets.ToArray()));
+                string.Join(", ", buildRequest.Targets));
         }
 
         /// <summary>

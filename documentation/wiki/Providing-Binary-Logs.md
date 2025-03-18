@@ -54,3 +54,12 @@ Further reading:
 ### Capturing specific logs for chosen build invocations
 
 See [this guide](https://github.com/dotnet/project-system-tools) in the Project System Tools repo for capturing binlogs through Visual Studio.
+
+> [!TIP]
+> You can share your logs with us anonymously [via MS developer community](https://developercommunity.microsoft.com/dotnet/report).
+![share_binlog](share_binlog.png)
+
+
+> [!CAUTION]
+> Only attach sensitive information in the comments after the initial post to ensure anonymity.
+
