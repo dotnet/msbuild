@@ -25,8 +25,9 @@
        already consuming the newest version of these same dependencies. -->
   <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' == 'true'">
     <!-- Use newest package versions. -->
-    <SystemMemoryVersion>4.6.0</SystemMemoryVersion>
+    <SystemMemoryVersion>4.6.1</SystemMemoryVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.1.1</SystemRuntimeCompilerServicesUnsafeVersion>
+    <MicrosoftIORedistVersion>6.1.1</MicrosoftIORedistVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
     <!-- Keep using older versions. Upgrade carefully. -->
@@ -37,10 +38,10 @@
     -->
     <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
+    <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- manually maintained versions -->
-    <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
     <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
   </PropertyGroup>
