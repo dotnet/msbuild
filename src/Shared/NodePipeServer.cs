@@ -156,7 +156,7 @@ namespace Microsoft.Build.Internal
             {
                 if (_pipeServer.IsConnected)
                 {
-#if NETCOREAPP // OperatingSystem.IsWindows() is new in .NET 5.0
+#if NET // OperatingSystem.IsWindows() is new in .NET 5.0
                     if (OperatingSystem.IsWindows())
 #endif
                     {

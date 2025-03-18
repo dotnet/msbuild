@@ -146,7 +146,7 @@ namespace Microsoft.Build.Internal
             for (int i = 0; i < messageLength; i += MaxPacketWriteSize)
             {
                 int lengthToWrite = Math.Min(messageLength - i, MaxPacketWriteSize);
-#if NETCOREAPP
+#if NET
                 await NodeStream.WriteAsync(buffer.AsMemory(i, lengthToWrite), cancellationToken).ConfigureAwait(false);
 #else
                 await NodeStream.WriteAsync(buffer, i, lengthToWrite, cancellationToken).ConfigureAwait(false);
@@ -227,12 +227,12 @@ namespace Microsoft.Build.Internal
         }
 
 #if !TASKHOST
-        private async Task<int> ReadAsync(byte[] buffer, int bytesToRead, CancellationToken cancellationToken)
+        private async ValueTask<int> ReadAsync(byte[] buffer, int bytesToRead, CancellationToken cancellationToken)
         {
             int totalBytesRead = 0;
             while (totalBytesRead < bytesToRead)
             {
-#if NETCOREAPP
+#if NET
                 int bytesRead = await NodeStream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesToRead - totalBytesRead), cancellationToken).ConfigureAwait(false);
 #else
                 int bytesRead = await NodeStream.ReadAsync(buffer, totalBytesRead, bytesToRead - totalBytesRead, cancellationToken).ConfigureAwait(false);
