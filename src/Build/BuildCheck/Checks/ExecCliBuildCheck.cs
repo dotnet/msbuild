@@ -6,8 +6,6 @@ using System.Collections.Generic;
 #if !FEATURE_MSIOREDIST
 using System.IO;
 #endif
-using System.Linq;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Shared;
 
 #if FEATURE_MSIOREDIST
@@ -66,27 +64,77 @@ internal sealed class ExecCliBuildCheck : Check
         if (context.Data.TaskName == ExecTaskName
             && context.Data.Parameters.TryGetValue(CommandParameterName, out TaskInvocationCheckData.TaskParameter? commandArgument))
         {
-            var execCommands = (commandArgument.EnumerateStringValues().FirstOrDefault() ?? string.Empty)
-                .Split(s_knownCommandSeparators, StringSplitOptions.RemoveEmptyEntries)
-                .Select(c => Regex.Replace(c, @"\s+", " "));
+            var execCommandValue = commandArgument.Value?.ToString() ?? string.Empty;
 
-            foreach (var execCommand in execCommands)
+            var commandSpan = execCommandValue.AsSpan();
+            int start = 0;
+
+            while (start < commandSpan.Length)
             {
-                var buildCommand = s_knownBuildCommands.FirstOrDefault(c => c.IsMatch(execCommand));
+                var nextSeparatorIndex = commandSpan.Slice(start, commandSpan.Length - start).IndexOfAny(s_knownCommandSeparators);
 
-                if (!buildCommand.Equals(default))
+                if (nextSeparatorIndex == -1)
                 {
-                    context.ReportResult(BuildCheckResult.CreateBuiltIn(
-                        SupportedRule,
-                        context.Data.TaskInvocationLocation,
-                        context.Data.TaskName,
-                        Path.GetFileName(context.Data.ProjectFilePath),
-                        buildCommand.ToolName));
+                    if (TryGetMatchingKnownBuildCommand(commandSpan, out var knownBuildCommand))
+                    {
+                        context.ReportResult(BuildCheckResult.CreateBuiltIn(
+                            SupportedRule,
+                            context.Data.TaskInvocationLocation,
+                            context.Data.TaskName,
+                            Path.GetFileName(context.Data.ProjectFilePath),
+                            knownBuildCommand.ToolName));
+                    }
 
                     break;
                 }
+                else
+                {
+                    var command = commandSpan.Slice(start, nextSeparatorIndex);
+
+                    if (TryGetMatchingKnownBuildCommand(command, out var knownBuildCommand))
+                    {
+                        context.ReportResult(BuildCheckResult.CreateBuiltIn(
+                            SupportedRule,
+                            context.Data.TaskInvocationLocation,
+                            context.Data.TaskName,
+                            Path.GetFileName(context.Data.ProjectFilePath),
+                            knownBuildCommand.ToolName));
+
+                        break;
+                    }
+
+                    start += nextSeparatorIndex + 1;
+                }
             }
         }
+    }
+
+    private static bool TryGetMatchingKnownBuildCommand(ReadOnlySpan<char> command, out KnownBuildCommand knownBuildCommand)
+    {
+        Span<char> normalizedCommand = stackalloc char[command.Length];
+        int normalizedCommandIndex = 0;
+
+        foreach (var c in command)
+        {
+            if (char.IsWhiteSpace(c) && (normalizedCommandIndex == 0 || char.IsWhiteSpace(normalizedCommand[normalizedCommandIndex - 1])))
+            {
+                continue;
+            }
+
+            normalizedCommand[normalizedCommandIndex++] = c;
+        }
+
+        foreach (var buildCommand in s_knownBuildCommands)
+        {
+            if (buildCommand.IsMatch(normalizedCommand))
+            {
+                knownBuildCommand = buildCommand;
+                return true;
+            }
+        }
+
+        knownBuildCommand = default;
+        return false;
     }
 
     private readonly record struct KnownBuildCommand
@@ -112,27 +160,86 @@ internal sealed class ExecCliBuildCheck : Check
             _excludedSwitches = excludedSwitches;
         }
 
-        public string ToolName => _knownBuildCommand.Split(' ').First();
-
-        public bool IsMatch(string execCommand)
+        public string ToolName
         {
-            if (!execCommand.StartsWith(_knownBuildCommand, StringComparison.OrdinalIgnoreCase))
+            get
+            {
+                int nextSpaceIndex = _knownBuildCommand.IndexOf(' ');
+
+                return nextSpaceIndex == -1
+                    ? _knownBuildCommand
+                    : _knownBuildCommand.AsSpan().Slice(0, nextSpaceIndex).ToString();
+            }
+        }
+
+        public bool IsMatch(ReadOnlySpan<char> execCommand)
+        {
+            if (!execCommand.StartsWith(_knownBuildCommand.AsSpan(), StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
 
-            var execCommandArguments = execCommand.Split(' ').Skip(1);
-
-            if (_excludedSwitches.Length == 0 || !execCommandArguments.Any())
+            if (_excludedSwitches.Length == 0 || execCommand.Length == _knownBuildCommand.Length)
             {
                 return true;
             }
 
-            var excludedSwitches = _excludedSwitches.SelectMany(excludedSwitch =>
-                s_knownSwitchPrefixes.Select(knownSwitchPrefix => $"{knownSwitchPrefix}{excludedSwitch}"));
+            return !ContainsExcludedArguments(execCommand);
+        }
 
-            return execCommandArguments
-                .All(argument => !excludedSwitches.Contains(argument, StringComparer.OrdinalIgnoreCase));
+        private bool ContainsExcludedArguments(ReadOnlySpan<char> execCommand)
+        {
+            int start = _knownBuildCommand.Length + 1;
+
+            while (start < execCommand.Length)
+            {
+                int nextSpaceIndex = execCommand.Slice(start).IndexOf(' ');
+
+                if (nextSpaceIndex == -1)
+                {
+                    var argument = execCommand.Slice(start);
+
+                    if (EqualsToAnyExcludedArguments(argument))
+                    {
+                        return true;
+                    }
+
+                    break;
+                }
+                else
+                {
+                    var argument = execCommand.Slice(start, nextSpaceIndex);
+
+                    if (EqualsToAnyExcludedArguments(argument))
+                    {
+                        return true;
+                    }
+
+                    start += nextSpaceIndex + 1;
+                }
+            }
+
+            return false;
+        }
+
+        private bool EqualsToAnyExcludedArguments(ReadOnlySpan<char> argument)
+        {
+            foreach (var knownSwitch in s_knownSwitchPrefixes)
+            {
+                if (argument.StartsWith(knownSwitch.AsSpan()))
+                {
+                    foreach (var excludedSwitch in _excludedSwitches)
+                    {
+                        if (argument.EndsWith(excludedSwitch.AsSpan(), StringComparison.OrdinalIgnoreCase)
+                            && argument.Length == knownSwitch.Length + excludedSwitch.Length)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }
