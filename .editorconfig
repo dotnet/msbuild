@@ -454,7 +454,6 @@ dotnet_diagnostic.xUnit1031.severity = none
 # So we are disabling this rule with respect to the above mentioned reasons.
 dotnet_diagnostic.xUnit2013.severity = none
 
-
 # Build Checks
 [*.{csproj,proj,metaproj,props,swixproj}]
 build_check.BC0101.Severity=suggestion
