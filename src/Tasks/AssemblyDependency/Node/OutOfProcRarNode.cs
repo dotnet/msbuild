@@ -12,6 +12,8 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 {
     /// <summary>
     /// Implements a persistent node for the ResolveAssemblyReferences task.
+    /// This manages the lifecycle of the multi-instance pipe server which executes RAR requests
+    /// and does not invoke the task itself.
     /// </summary>
     public class OutOfProcRarNode
     {

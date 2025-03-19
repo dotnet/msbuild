@@ -9,6 +9,9 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks.AssemblyDependency
 {
+    /// <summary>
+    /// Implements a single instance of a pipe server which executes the ResolveAssemblyReference task.
+    /// </summary>
     internal class OutOfProcRarNodeEndpoint : IDisposable
     {
         private readonly int _endpointId;
@@ -47,20 +50,28 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                LinkStatus linkStatus = _pipeServer.WaitForConnection();
-
-                if (linkStatus != LinkStatus.Active)
+                while (!_pipeServer.IsConnected)
                 {
-                    // We either timed out or failed to connect to a client.
-                    // Just continue running since the RAR endpoint isn't tied to a specific client.
-                    continue;
+                    _ = _pipeServer.WaitForConnection();
                 }
 
-                CommunicationsUtilities.Trace("({0}) Connected to RAR client.", _endpointId);
+                CommunicationsUtilities.Trace("({0}) Received RAR request.", _endpointId);
 
                 try
                 {
-                    RarNodeExecuteRequest request = (RarNodeExecuteRequest)_pipeServer.ReadPacket();
+                    INodePacket packet = _pipeServer.ReadPacket();
+
+                    if (packet.Type == NodePacketType.NodeShutdown)
+                    {
+                        // Although the client has already disconnected, it is still necessary to Diconnect() so the
+                        // pipe can transition into PipeState.Disonnected, which is treated as an intentional pipe break.
+                        // Otherwise, all future operations on the pipe will throw an exception.
+                        CommunicationsUtilities.Trace("({0}) RAR client disconnected.", _endpointId);
+                        _pipeServer.Disconnect();
+                        continue;
+                    }
+
+                    RarNodeExecuteRequest request = (RarNodeExecuteRequest)packet;
 
                     // TODO: Use request packet to set inputs on the RAR task.
                     ResolveAssemblyReference rarTask = new();
@@ -75,9 +86,9 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                 {
                     CommunicationsUtilities.Trace("({0}) Exception while executing RAR request: {1}", _endpointId, e);
                 }
-
-                _pipeServer.Disconnect();
             }
+
+            _pipeServer.Disconnect();
         }
     }
 }
