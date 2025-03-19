@@ -2,6 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>OutputPathPlaceholder</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NonCultureResourceDirectories>NonCultureResourceDirectoriesPlaceholder</NonCultureResourceDirectories>
   </PropertyGroup>
 
   <ItemGroup>
