@@ -3253,11 +3253,12 @@ namespace Microsoft.Build.Tasks
                 && BuildEngine is IBuildEngine10 buildEngine10
                 && buildEngine10.EngineServices.IsOutOfProcRarNodeEnabled)
             {
-                OutOfProcRarClient rarClient = GetOutOfProcClient(buildEngine10);
-
                 try
                 {
-                    bool result = rarClient.Execute(this);
+#pragma warning disable CA2000 // Dispose objects before losing scope
+                    _ = OutOfProcRarClient.GetInstance(buildEngine10).Execute(this);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+                    CommunicationsUtilities.Trace("RAR out-of-proc test connection completed. Executing task in-proc.");
                 }
                 catch (Exception ex)
                 {
@@ -3266,11 +3267,6 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return ExecuteInProcess();
-        }
-
-        public bool ExecuteInProcess()
-        {
             return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
                 p => FileUtilities.DirectoryExistsNoThrow(p),
@@ -3293,24 +3289,6 @@ namespace Microsoft.Build.Tasks
                     => AssemblyInformation.IsWinMDFile(fullPath, getAssemblyRuntimeVersion, fileExists, out imageRuntimeVersion, out isManagedWinmd),
                 p => ReferenceTable.ReadMachineTypeFromPEHeader(p));
         }
-
-        private OutOfProcRarClient GetOutOfProcClient(IBuildEngine10 buildEngine)
-        {
-            // Create a single cached instance of the RAR out-of-proc client for this build node.
-            const string OutOfProcRarClientKey = "OutOfProcRarClient";
-
-            OutOfProcRarClient rarClient = (OutOfProcRarClient)buildEngine.GetRegisteredTaskObject(OutOfProcRarClientKey, RegisteredTaskObjectLifetime.Build);
-
-            if (rarClient == null)
-            {
-                rarClient = new OutOfProcRarClient();
-                buildEngine.RegisterTaskObject(OutOfProcRarClientKey, rarClient, RegisteredTaskObjectLifetime.Build, allowEarlyCollection: false);
-                CommunicationsUtilities.Trace("Initialized new RAR client.");
-            }
-
-            return rarClient;
-        }
-
         #endregion
     }
 }
