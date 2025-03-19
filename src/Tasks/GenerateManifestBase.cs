@@ -519,7 +519,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "GenerateManifestBase.ResolveFiles t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"GenerateManifestBase.ResolveFiles t={Environment.TickCount - t1}");
             return true;
         }
 
@@ -625,8 +625,8 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "GenerateManifestBase.WriteManifest t={0}", Environment.TickCount - t1));
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "Total time to generate manifest '{1}': t={0}", Environment.TickCount - _startTime, Path.GetFileName(OutputManifest.ItemSpec)));
+            Util.WriteLog($"GenerateManifestBase.WriteManifest t={Environment.TickCount - t1}");
+            Util.WriteLog($"Total time to generate manifest '{Path.GetFileName(OutputManifest.ItemSpec)}': t={Environment.TickCount - _startTime}");
             return true;
         }
     }

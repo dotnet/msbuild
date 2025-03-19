@@ -68,23 +68,10 @@ internal class TerminalNodeStatus
         TargetPrefixColor == status.TargetPrefixColor &&
         TargetPrefix == status.TargetPrefix;
 
-    public override string ToString()
-    {
-        string duration = Stopwatch.ElapsedSeconds.ToString("F1");
-
-        return string.IsNullOrEmpty(TargetFramework)
-            ? string.Format("{0}{1} {2} ({3}s)",
-                TerminalLogger.Indentation,
-                Project,
-                Target,
-                duration)
-            : string.Format("{0}{1} {2} {3} ({4}s)",
-                TerminalLogger.Indentation,
-                Project,
-                AnsiCodes.Colorize(TargetFramework, TerminalLogger.TargetFrameworkColor),
-                Target,
-                duration);
-    }
+    public override string ToString() =>
+        string.IsNullOrEmpty(TargetFramework) ?
+            $"{TerminalLogger.Indentation}{Project} {Target} ({Stopwatch.ElapsedSeconds:F1}s)" :
+            $"{TerminalLogger.Indentation}{Project} {AnsiCodes.Colorize(TargetFramework, TerminalLogger.TargetFrameworkColor)} {Target} ({Stopwatch.ElapsedSeconds:F1}s)";
 
     public override int GetHashCode()
     {

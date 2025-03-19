@@ -145,7 +145,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESGEN
         // Our calculation is not quite correct. Using a number substantially less than 32768 in order to
         // be sure we don't exceed it.
-        private static int s_maximumCommandLength = 28000;
+        private const int s_maximumCommandLength = 28000;
 #endif // FEATURE_RESGEN
 
         // Contains the list of paths from which inputs will not be taken into account during up-to-date check.
@@ -1793,7 +1793,7 @@ namespace Microsoft.Build.Tasks
                                             string resolvedTypeName = typeName;
 
                                             // This type name might be an alias, so first resolve that if any.
-                                            int indexOfSeperator = typeName.IndexOf(",", StringComparison.Ordinal);
+                                            int indexOfSeperator = typeName.IndexOf(',');
 
                                             if (indexOfSeperator != -1)
                                             {
@@ -2018,17 +2018,12 @@ namespace Microsoft.Build.Tasks
 #endif
 
         /// <summary>
-        /// Chars that should be ignored in the nicely justified block of base64
-        /// </summary>
-        private static readonly char[] s_specialChars = [' ', '\r', '\n'];
-
-        /// <summary>
         /// Turns the nicely justified block of base64 found in a resx into a byte array.
         /// Copied from fx\src\winforms\managed\system\winforms\control.cs
         /// </summary>
         private static byte[] ByteArrayFromBase64WrappedString(string text)
         {
-            if (text.IndexOfAny(s_specialChars) != -1)
+            if (text.AsSpan().IndexOfAny(' ', '\r', '\n') != -1) // Chars that should be ignored in the nicely justified block of base64
             {
                 StringBuilder sb = new StringBuilder(text.Length);
                 for (int i = 0; i < text.Length; i++)
@@ -3044,7 +3039,7 @@ namespace Microsoft.Build.Tasks
 
                     default:
                         // We should never get here, we've already checked the format
-                        Debug.Fail("Unknown format " + format.ToString());
+                        Debug.Fail($"Unknown format {format}");
                         return;
                 }
                 _logger.LogMessageFromResources(MessageImportance.Low, "GenerateResource.ReadResourceMessage", reader.resources.Count, filename);
@@ -3325,7 +3320,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
                     WriteResources(reader, new ResXResourceWriter(filename)); // closes writer for us
 #else
-                    _logger.LogError(format.ToString() + " not supported on .NET Core MSBuild");
+                    _logger.LogError($"{format} not supported on .NET Core MSBuild");
 #endif
                     break;
 
@@ -3339,7 +3334,7 @@ namespace Microsoft.Build.Tasks
 
                 default:
                     // We should never get here, we've already checked the format
-                    Debug.Fail("Unknown format " + format.ToString());
+                    Debug.Fail($"Unknown format {format}");
                     break;
             }
         }
@@ -3695,7 +3690,13 @@ namespace Microsoft.Build.Tasks
                                     }
                                     try
                                     {
-                                        ch = (char)UInt16.Parse(new String(hex), NumberStyles.HexNumber, CultureInfo.CurrentCulture);
+                                        ch = (char)UInt16.Parse(
+#if NET
+                                            hex,
+#else
+                                            new String(hex),
+#endif
+                                            NumberStyles.HexNumber, CultureInfo.CurrentCulture);
                                     }
                                     catch (FormatException)
                                     {
@@ -4013,7 +4014,7 @@ namespace Microsoft.Build.Tasks
                 get { return column; }
             }
         }
-        #endregion // Code from ResGen.EXE
+#endregion // Code from ResGen.EXE
     }
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
@@ -4150,7 +4151,7 @@ namespace Microsoft.Build.Tasks
                             result = a.GetType(name, false, ignoreCase);
                             if (result == null)
                             {
-                                int indexOfComma = name.IndexOf(",", StringComparison.Ordinal);
+                                int indexOfComma = name.IndexOf(',');
                                 if (indexOfComma != -1)
                                 {
                                     string shortName = name.Substring(0, indexOfComma);

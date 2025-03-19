@@ -520,7 +520,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Interop methods.
     /// </summary>
-    internal static class NativeMethods
+    internal static partial class NativeMethods
     {
         #region Constants
 
@@ -1160,7 +1160,7 @@ namespace Microsoft.Build.Tasks
                             }
 
                             // And convert it to the output string.
-                            strValue = new String(Encoding.UTF8.GetChars(bytes));
+                            strValue = Encoding.UTF8.GetString(bytes);
                         }
                         else
                         {
@@ -1235,19 +1235,24 @@ namespace Microsoft.Build.Tasks
         /// This class is a wrapper over the native GAC enumeration API.
         /// </summary>
         [ComVisible(false)]
-        internal class AssemblyCacheEnum : IEnumerable<AssemblyNameExtension>
+        internal partial class AssemblyCacheEnum : IEnumerable<AssemblyNameExtension>
         {
             /// <summary>
             /// Path to the gac
             /// </summary>
             private static readonly string s_gacPath = Path.Combine(NativeMethodsShared.FrameworkBasePath, "gac");
 
+            private const string AssemblyVersionPattern = @"^([.\d]+)_([^_]*)_([a-fA-F\d]{16})$";
+
             /// <summary>
             /// Regex for directory version parsing
             /// </summary>
-            private static readonly Regex s_assemblyVersionRegex = new Regex(
-                @"^([.\d]+)_([^_]*)_([a-fA-F\d]{16})$",
-                RegexOptions.CultureInvariant | RegexOptions.Compiled);
+#if NET
+            [GeneratedRegex(AssemblyVersionPattern, RegexOptions.CultureInvariant)]
+            private static partial Regex AssemblyVersionRegex { get; }
+#else
+            private static Regex AssemblyVersionRegex { get; } = new Regex(AssemblyVersionPattern, RegexOptions.CultureInvariant | RegexOptions.Compiled);
+#endif
 
             /// <summary>
             /// The IAssemblyEnum interface which allows us to ask for the next assembly from the GAC enumeration.
@@ -1387,7 +1392,7 @@ namespace Microsoft.Build.Tasks
                                 var versionString = Path.GetFileName(version);
                                 if (!string.IsNullOrWhiteSpace(versionString))
                                 {
-                                    var match = s_assemblyVersionRegex.Match(versionString);
+                                    var match = AssemblyVersionRegex.Match(versionString);
                                     if (match.Success)
                                     {
                                         var name = new AssemblyName
@@ -1407,10 +1412,16 @@ namespace Microsoft.Build.Tasks
                                         if (!string.IsNullOrWhiteSpace(match.Groups[3].Value))
                                         {
                                             var value = match.Groups[3].Value;
-                                            name.SetPublicKeyToken(
+                                            byte[] key =
+#if NET
+                                                Convert.FromHexString(value.AsSpan(0, 16));
+#else
                                                 Enumerable.Range(0, 16)
-                                                    .Where(x => x % 2 == 0)
-                                                    .Select(x => Convert.ToByte(value.Substring(x, 2), 16)).ToArray());
+                                                .Where(x => x % 2 == 0)
+                                                .Select(x => Convert.ToByte(value.Substring(x, 2), 16))
+                                                .ToArray();
+#endif
+                                            name.SetPublicKeyToken(key);
                                         }
 
                                         yield return new AssemblyNameExtension(name);
@@ -1455,8 +1466,12 @@ namespace Microsoft.Build.Tasks
                             "{0}_{1}_{2}",
                             assemblyNameVersion.Version.ToString(4),
                             assemblyNameVersion.CultureName != "neutral" ? assemblyNameVersion.CultureName : string.Empty,
+#if NET
+                            Convert.ToHexStringLower(assemblyNameVersion.GetPublicKeyToken())),
+#else
                             assemblyNameVersion.GetPublicKeyToken()
                                 .Aggregate(new StringBuilder(), (builder, v) => builder.Append(v.ToString("x2")))),
+#endif
                         assemblyNameVersion.Name + ".dll");
 
                     if (FileSystems.Default.FileExists(path))
