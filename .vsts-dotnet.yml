@@ -84,7 +84,7 @@ stages:
       displayName: 'Install OptProf Plugin'
 
     # Required by MicroBuildBuildVSBootstrapper
-    - task: ms-vseng.MicroBuildTasks.32f78468-e895-4f47-962c-58a699361df8.MicroBuildSwixPlugin@1
+    - task: MicroBuildSwixPlugin@4
       inputs:
         dropName: $(VisualStudio.DropName)
 
@@ -122,7 +122,7 @@ stages:
 
     # Build VS bootstrapper
     # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-    - task: ms-vseng.MicroBuildTasks.0e9d0d4d-71ec-4e4e-ae40-db9896f1ae74.MicroBuildBuildVSBootstrapper@2
+    - task: MicroBuildBuildVSBootstrapper@3
       inputs:
         vsMajorVersion: $(VisualStudio.MajorVersion)
         channelName: $(VisualStudio.ChannelName)
