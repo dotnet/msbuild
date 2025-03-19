@@ -3,11 +3,10 @@
 
 using System;
 using System.IO;
-using System.Xml;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using static Microsoft.Build.Tasks.UnitTests.AddToWin32Manifest_Tests;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -22,72 +21,77 @@ namespace Microsoft.Build.Tasks.UnitTests
             "CustomCulture");
 
         [WindowsFullFrameworkOnlyTheory]
-        [InlineData(null, true)]
-        [InlineData("buildIn.manifest", true)]
-        [InlineData("testManifestWithValidSupportedArchs.manifest", true)]
-        public void E2EScenarioTests(string? manifestName, bool expectedResult)
+        [InlineData(true, "", true, true)]
+        [InlineData(false)]
+        [InlineData(true, "yue", false, true)]
+        [InlineData(false, "yue", false, true)]
+        [InlineData(true, "euy", true)]
+        [InlineData(true, "yue;euy")]
+        [InlineData(true, "euy;yue")]
+        public void E2EScenarioTests(bool enableCustomCulture, string customCultureExclusions = "", bool isYueCultureExpected = false, bool isEuyCultureExpected = false)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                var outputPath = env.CreateFolder().Path;
-                string projectContent = @$"
-                <Project DefaultTargets=""Build"">
-                    <Import Project=""$(MSBuildBinPath)\Microsoft.Common.props"" />
+                env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", enableCustomCulture ? "1" : "");
 
-                    <PropertyGroup>
-                        <Platform>AnyCPU</Platform>
-                        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-                        <OutputType>Library</OutputType>
-                        <PreferNativeArm64>true</PreferNativeArm64>
-                        <Prefer32Bit>false</Prefer32Bit>
-                        {(!string.IsNullOrEmpty(manifestName) ? $"<ApplicationManifest>{manifestName}</ApplicationManifest>" : "")}
-                        <IntermediateOutputPath>{outputPath}</IntermediateOutputPath>
-                    </PropertyGroup>
+                // Set up project paths
+                var testAssetsPath = TestAssetsRootPath;
+                var solutionFolder = env.CreateFolder();
+                var solutionPath = solutionFolder.Path;
 
-                    <Target Name=""Build""/>
-                    <Import Project=""$(MSBuildBinPath)\Microsoft.CSharp.targets"" />
+                // Create and configure ProjectB
+                var projectBName = "ProjectB.csproj";
+                var projBOutputPath = env.CreateFolder().Path;
+                var projectBFolder = Path.Combine(solutionPath, projectBName);
+                Directory.CreateDirectory(projectBFolder);
+                var projBContent = File.ReadAllText(Path.Combine(testAssetsPath, projectBName))
+                    .Replace("OutputPathPlaceholder", projBOutputPath)
+                    .Replace("NonCultureResourceDirectoriesPlaceholder", customCultureExclusions);
+                env.CreateFile(Path.Combine(projectBFolder, projectBName), projBContent);
 
-                </Project>
-                ";
+                // Copy ProjectA files to test solution folder
+                CopyTestAsset(testAssetsPath, "ProjectA.csproj", solutionPath);
+                CopyTestAsset(testAssetsPath, "Test.resx", solutionPath);
+                CopyTestAsset(testAssetsPath, "Test.yue.resx", solutionPath);
+                CopyTestAsset(testAssetsPath, "Test.euy.resx", solutionPath);
 
-                var projectFolder = env.CreateFolder();
-                var projectFile = env.CreateFile(projectFolder, "test.csproj", projectContent).Path;
+                env.SetCurrentDirectory(projectBFolder);
+                _ = RunnerUtilities.ExecBootstrapedMSBuild("-restore", out bool buildSucceeded);
 
-                // copy application manifest
-                if (!string.IsNullOrEmpty(manifestName))
-                {
-                    File.Copy(Path.Combine(TestAssetsRootPath, manifestName), Path.Combine(projectFolder.Path, manifestName));
-                }
+                buildSucceeded.ShouldBeTrue("MSBuild should complete successfully");
 
-                Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(projectFile, touchProject: false);
+                var yueCultureResourceDll = Path.Combine(projBOutputPath, "yue", "ProjectA.resources.dll");
+                AssertCustomCulture(isYueCultureExpected, "yue", yueCultureResourceDll);
 
-                bool result = project.Build(new MockLogger(_testOutput));
-                result.ShouldBe(expectedResult);
+                var euyCultureResourceDll = Path.Combine(projBOutputPath, "euy", "ProjectA.resources.dll");
+                AssertCustomCulture(isEuyCultureExpected, "euy", euyCultureResourceDll);
 
-                // #2 - represents the name for native resource (Win 32 resource), #24 - the type (Manifest) 
-                byte[]? actualManifestBytes = AssemblyNativeResourceManager.GetResourceFromExecutable(Path.Combine(outputPath, "test.dll"), "#2", "#24");
-
-                // check manifest content
-                if (actualManifestBytes != null)
-                {
-                    string expectedManifest = Path.Combine(TestAssetsRootPath, $"{manifestName ?? "default.win32manifest"}_expected");
-
-                    XmlDocument expectedDoc = new XmlDocument();
-                    XmlDocument actualDoc = new XmlDocument();
-
-                    expectedDoc.Load(expectedManifest);
-                    using (MemoryStream stream = new MemoryStream(actualManifestBytes))
-                    {
-                        actualDoc.Load(stream);
-                    }
-
-                    NormalizeLineEndings(expectedDoc.OuterXml).ShouldBe(NormalizeLineEndings(actualDoc.OuterXml));
-                    NormalizeLineEndings(expectedDoc.InnerText).ShouldBe(NormalizeLineEndings(actualDoc.InnerText));
-                }
+                env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", "");
             }
 
-            static string NormalizeLineEndings(string input) => input.Replace("\r\n", "\n").Replace("\r", "\n");
+            void AssertCustomCulture(bool isCultureExpectedToExist, string customCultureName, string cultureResourcePath)
+            {
+                if (enableCustomCulture && isCultureExpectedToExist)
+                {
+                    File.Exists(cultureResourcePath).ShouldBeTrue($"Expected '{customCultureName}' resource DLL not found at: {cultureResourcePath}");
+                }
+                else
+                {
+                    File.Exists(cultureResourcePath).ShouldBeFalse($"Unexpected '{customCultureName}' culture DLL was found at: {cultureResourcePath}");
+                }
+            }
         }
 
+        private void CopyTestAsset(string sourceFolder, string fileName, string destinationFolder)
+        {
+            var sourcePath = Path.Combine(sourceFolder, fileName);
+
+            if (!File.Exists(sourcePath))
+            {
+                throw new FileNotFoundException($"Test asset not found: {sourcePath}");
+            }
+
+            File.Copy(sourcePath, Path.Combine(destinationFolder, fileName));
+        }
     }
 }
