@@ -103,13 +103,12 @@ namespace Microsoft.Build.Tasks
             dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
             Culture.ItemCultureInfo info;
 
-            if (!string.IsNullOrEmpty(culture) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
+            if (!string.IsNullOrEmpty(culture) && Traits.EnableCustomCultures)
             {
                 info = new Culture.ItemCultureInfo()
                 {
                     culture = culture,
-                    cultureNeutralFilename =
-                        embeddedFileName.RemoveLastInstanceOf("." + culture, StringComparison.OrdinalIgnoreCase),
+                    cultureNeutralFilename = embeddedFileName.RemoveLastInstanceOf("." + culture, StringComparison.OrdinalIgnoreCase),
                 };
             }
             else

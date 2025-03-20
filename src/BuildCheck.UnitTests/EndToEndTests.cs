@@ -119,6 +119,7 @@ public class EndToEndTests : IDisposable
         string expectedDiagnostic,
         bool resourceExpectedToBeRecognizedAsSatelite)
     {
+        _env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", "1");
         EmbedResourceTestOutput output = RunEmbeddedResourceTest(resourceElement, resourceExtension, respectAssignedCulturePropSet);
 
         int expectedWarningsCount = 0;
@@ -148,6 +149,8 @@ public class EndToEndTests : IDisposable
                     $"Unexpected resource for culture {culture} was found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");
             }
         }
+
+        _env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", "");
     }
 
     private readonly record struct EmbedResourceTestOutput(String LogOutput, JsonObject DepsJsonResources);

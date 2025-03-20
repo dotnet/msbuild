@@ -2412,6 +2412,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </Reference>
     </ItemGroup>
 
+    <!--Converts string property NonCultureResourceDirectories to array if present. NonCultureResourceDirectories defines exclusions for the custom cultures.  -->
+    <ItemGroup Condition="'$(NonCultureResourceDirectories)' != ''">
+      <NonCultureResourceDirectory Include="$(NonCultureResourceDirectories)" />
+    </ItemGroup>
+
     <!--
       Normally, as an optimization, finding dependencies of references marked with ExternallyResolved=true metadata is skipped.
       However, skipping that step breaks binding redirect generation when there are conflicting versions within the externally
@@ -2465,6 +2470,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         FindDependenciesOfExternallyResolvedReferences="$(FindDependenciesOfExternallyResolvedReferences)"
         ContinueOnError="$(ContinueOnError)"
         OutputUnresolvedAssemblyConflicts="$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)"
+        NonCultureResourceDirectories="@(NonCultureResourceDirectory)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >
 
@@ -5411,11 +5417,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--
         Not using SkipUnchangedFiles="true" by default for backwards compatibility.
         -->
-        
+
     <PropertyGroup>
       <SkipUnchangedFilesOnCopyAlways Condition="'$(SkipUnchangedFilesOnCopyAlways)' == ''">false</SkipUnchangedFilesOnCopyAlways>
     </PropertyGroup>
-        
+
     <Copy
         SourceFiles = "@(_SourceItemsToCopyToOutputDirectoryAlways)"
         DestinationFiles = "@(_SourceItemsToCopyToOutputDirectoryAlways->'$(OutDir)%(TargetPath)')"
@@ -5463,7 +5469,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Copy>
 
   </Target>
-  
+
   <!--
     ============================================================
                                         _CopyAppConfigFile
