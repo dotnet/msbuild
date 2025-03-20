@@ -10,6 +10,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 
 #if !TASKHOST
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Experimental.BuildCheck;
 #endif
 
