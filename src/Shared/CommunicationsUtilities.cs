@@ -22,9 +22,6 @@ using System.Text;
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Debugging;
 #endif
-#if !FEATURE_APM
-using System.Threading.Tasks;
-#endif
 
 #nullable disable
 
@@ -472,25 +469,9 @@ namespace Microsoft.Build.Internal
             stream.Write(bytes, 0, bytes.Length);
         }
 
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-        internal static void ReadEndOfHandshakeSignal(
-            this PipeStream stream,
-            bool isProvider
-#if NETCOREAPP2_1_OR_GREATER
-            , int timeout
-#endif
-            )
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        internal static void ReadEndOfHandshakeSignal(this PipeStream stream, bool isProvider, int timeout)
         {
-            // Accept only the first byte of the EndOfHandshakeSignal
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-            int valueRead = stream.ReadIntForHandshake(
-                byteToAccept: null
-#if NETCOREAPP2_1_OR_GREATER
-            , timeout
-#endif
-                );
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            int valueRead = stream.ReadIntForHandshake(byteToAccept: null, timeout);
 
             if (valueRead != EndOfHandshakeSignal)
             {
@@ -506,17 +487,11 @@ namespace Microsoft.Build.Internal
             }
         }
 
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         /// <summary>
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
         /// </summary>
-        internal static int ReadIntForHandshake(this PipeStream stream, byte? byteToAccept
-#if NETCOREAPP2_1_OR_GREATER
-            , int timeout
-#endif
-            )
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        internal static int ReadIntForHandshake(this PipeStream stream, byte? byteToAccept, int timeout)
         {
             byte[] bytes = new byte[4];
 
@@ -585,23 +560,6 @@ namespace Microsoft.Build.Internal
             return result;
         }
 #nullable disable
-
-#if !FEATURE_APM
-        internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
-        {
-            int totalBytesRead = 0;
-            while (totalBytesRead < bytesToRead)
-            {
-                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesToRead - totalBytesRead), CancellationToken.None);
-                if (bytesRead == 0)
-                {
-                    return totalBytesRead;
-                }
-                totalBytesRead += bytesRead;
-            }
-            return totalBytesRead;
-        }
-#endif
 
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.
