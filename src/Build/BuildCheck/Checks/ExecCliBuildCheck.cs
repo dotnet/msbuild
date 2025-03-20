@@ -133,7 +133,7 @@ internal sealed class ExecCliBuildCheck : Check
             }
         }
 
-        knownBuildCommand = null;
+        knownBuildCommand = string.Empty;
         return false;
     }
 
