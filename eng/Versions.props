@@ -25,9 +25,9 @@
        already consuming the newest version of these same dependencies. -->
   <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' == 'true'">
     <!-- Use newest package versions. -->
-    <SystemMemoryVersion>4.6.1</SystemMemoryVersion>
+    <SystemMemoryVersion>4.6.2</SystemMemoryVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.1.1</SystemRuntimeCompilerServicesUnsafeVersion>
-    <MicrosoftIORedistVersion>6.1.1</MicrosoftIORedistVersion>
+    <MicrosoftIORedistVersion>6.1.2</MicrosoftIORedistVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
     <!-- Keep using older versions. Upgrade carefully. -->
