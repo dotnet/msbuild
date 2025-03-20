@@ -7,10 +7,10 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+#if !NET
     /// <summary>
     /// Unit tests for the ResolveAssemblyReference task.
     /// </summary>
@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [InlineData(true, "yue;euy")]
         [InlineData(true, "euy;yue")]
         public void E2EScenarioTests(bool enableCustomCulture, string customCultureExclusions = "", bool isYueCultureExpected = false, bool isEuyCultureExpected = false)
-        {
+        { 
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", enableCustomCulture ? "1" : "");
@@ -70,6 +70,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", "");
             }
 
+
             void AssertCustomCulture(bool isCultureExpectedToExist, string customCultureName, string cultureResourcePath)
             {
                 if (enableCustomCulture && isCultureExpectedToExist)
@@ -95,4 +96,5 @@ namespace Microsoft.Build.Tasks.UnitTests
             File.Copy(sourcePath, Path.Combine(destinationFolder, fileName));
         }
     }
+    #endif
 }
