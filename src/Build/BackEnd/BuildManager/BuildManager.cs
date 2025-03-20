@@ -459,7 +459,8 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
-            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
+            InitializeTelemetry();
+
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -720,6 +721,25 @@ namespace Microsoft.Build.Execution
 
                     _buildParameters.ProjectRootElementCache.DiscardImplicitReferences();
                 }
+            }
+        }
+
+        private void InitializeTelemetry()
+        {
+            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
+            if (_deferredBuildMessages != null &&
+                OpenTelemetryManager.Instance.LoadFailureExceptionMessage != null &&
+                _deferredBuildMessages is ICollection<DeferredBuildMessage> deferredBuildMessagesCollection)
+            {
+                deferredBuildMessagesCollection.Add(
+                    new DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            "OpenTelemetryLoadFailed",
+                            OpenTelemetryManager.Instance.LoadFailureExceptionMessage),
+                    MessageImportance.Low));
+
+                // clean up the message from OpenTelemetryManager to avoid double logging it
+                OpenTelemetryManager.Instance.LoadFailureExceptionMessage = null;
             }
         }
 

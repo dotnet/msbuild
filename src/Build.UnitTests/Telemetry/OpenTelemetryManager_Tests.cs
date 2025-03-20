@@ -9,6 +9,10 @@ using Xunit.Abstractions;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Build.Engine.UnitTests.Telemetry
 {
@@ -101,6 +105,24 @@ namespace Microsoft.Build.Engine.UnitTests.Telemetry
             state1.ShouldBe(false);
             state2.ShouldBe(false);
         }
+
+        [Fact]
+        public void TelemetryLoadFailureIsLoggedOnce()
+        {
+            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
+            OpenTelemetryManager.Instance.LoadFailureExceptionMessage = new System.IO.FileNotFoundException().ToString();
+            BuildManager bm = BuildManager.DefaultBuildManager;
+            var deferredMessages = new List<BuildManager.DeferredBuildMessage>();
+            bm.BeginBuild(new BuildParameters(), deferredMessages);
+            deferredMessages.ShouldContain(x => x.Text.Contains("FileNotFound"));
+            bm.EndBuild();
+            bm.BeginBuild(new BuildParameters());
+
+            // should not add message twice
+            int count = deferredMessages.Count(x => x.Text.Contains("FileNotFound"));
+            count.ShouldBe(1);
+        }
+
 
         /* Helper methods */
 
