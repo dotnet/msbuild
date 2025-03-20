@@ -28,19 +28,19 @@ internal sealed class ExecCliBuildCheck : Check
 
     private static readonly char[] s_knownCommandSeparators = ['&', ';', '|'];
 
-    private static readonly KnownBuildCommand[] s_knownBuildCommands =
+    private static readonly string[] s_knownBuildCommands =
     [
-        new KnownBuildCommand("dotnet build"),
-        new KnownBuildCommand("dotnet clean"),
-        new KnownBuildCommand("dotnet msbuild"),
-        new KnownBuildCommand("dotnet restore"),
-        new KnownBuildCommand("dotnet publish"),
-        new KnownBuildCommand("dotnet pack"),
-        new KnownBuildCommand("dotnet vstest"),
-        new KnownBuildCommand("nuget restore"),
-        new KnownBuildCommand("msbuild", excludedSwitches: ["version", "ver", "help", "h", "?"]),
-        new KnownBuildCommand("dotnet test"),
-        new KnownBuildCommand("dotnet run"),
+        "dotnet build",
+        "dotnet clean",
+        "dotnet msbuild",
+        "dotnet restore",
+        "dotnet publish",
+        "dotnet pack",
+        "dotnet vstest",
+        "nuget restore",
+        "msbuild",
+        "dotnet test",
+        "dotnet run",
     ];
 
     public override string FriendlyName => "MSBuild.ExecCliBuildCheck";
@@ -82,7 +82,7 @@ internal sealed class ExecCliBuildCheck : Check
                             context.Data.TaskInvocationLocation,
                             context.Data.TaskName,
                             Path.GetFileName(context.Data.ProjectFilePath),
-                            knownBuildCommand.ToolName));
+                            GetToolName(knownBuildCommand)));
                     }
 
                     break;
@@ -98,7 +98,7 @@ internal sealed class ExecCliBuildCheck : Check
                             context.Data.TaskInvocationLocation,
                             context.Data.TaskName,
                             Path.GetFileName(context.Data.ProjectFilePath),
-                            knownBuildCommand.ToolName));
+                            GetToolName(knownBuildCommand)));
 
                         break;
                     }
@@ -109,137 +109,40 @@ internal sealed class ExecCliBuildCheck : Check
         }
     }
 
-    private static bool TryGetMatchingKnownBuildCommand(ReadOnlySpan<char> command, out KnownBuildCommand knownBuildCommand)
+    private static bool TryGetMatchingKnownBuildCommand(ReadOnlySpan<char> command, out string knownBuildCommand)
     {
-        Span<char> normalizedCommand = stackalloc char[command.Length];
+        Span<char> normalizedBuildCommand = stackalloc char[command.Length];
         int normalizedCommandIndex = 0;
 
         foreach (var c in command)
         {
-            if (char.IsWhiteSpace(c) && (normalizedCommandIndex == 0 || char.IsWhiteSpace(normalizedCommand[normalizedCommandIndex - 1])))
+            if (char.IsWhiteSpace(c) && (normalizedCommandIndex == 0 || char.IsWhiteSpace(normalizedBuildCommand[normalizedCommandIndex - 1])))
             {
                 continue;
             }
 
-            normalizedCommand[normalizedCommandIndex++] = c;
+            normalizedBuildCommand[normalizedCommandIndex++] = c;
         }
 
         foreach (var buildCommand in s_knownBuildCommands)
         {
-            if (buildCommand.IsMatch(normalizedCommand))
+            if (normalizedBuildCommand.StartsWith(buildCommand.AsSpan()))
             {
                 knownBuildCommand = buildCommand;
                 return true;
             }
         }
 
-        knownBuildCommand = default;
+        knownBuildCommand = null;
         return false;
     }
 
-    private readonly record struct KnownBuildCommand
+    private static string GetToolName(string knownBuildCommand)
     {
-        private static readonly string[] s_knownSwitchPrefixes = ["/", "--", "-"];
+        int nextSpaceIndex = knownBuildCommand.IndexOf(' ');
 
-        private readonly string _knownBuildCommand;
-        private readonly string[] _excludedSwitches = [];
-
-        public KnownBuildCommand(string knownBuildCommand)
-        {
-            if (string.IsNullOrEmpty(knownBuildCommand))
-            {
-                throw new ArgumentNullException(nameof(knownBuildCommand));
-            }
-
-            _knownBuildCommand = knownBuildCommand;
-        }
-
-        public KnownBuildCommand(string knownBuildCommand, string[] excludedSwitches)
-            : this(knownBuildCommand)
-        {
-            _excludedSwitches = excludedSwitches;
-        }
-
-        public string ToolName
-        {
-            get
-            {
-                int nextSpaceIndex = _knownBuildCommand.IndexOf(' ');
-
-                return nextSpaceIndex == -1
-                    ? _knownBuildCommand
-                    : _knownBuildCommand.AsSpan().Slice(0, nextSpaceIndex).ToString();
-            }
-        }
-
-        public bool IsMatch(ReadOnlySpan<char> execCommand)
-        {
-            if (!execCommand.StartsWith(_knownBuildCommand.AsSpan(), StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            if (_excludedSwitches.Length == 0 || execCommand.Length == _knownBuildCommand.Length)
-            {
-                return true;
-            }
-
-            return !ContainsExcludedArguments(execCommand);
-        }
-
-        private bool ContainsExcludedArguments(ReadOnlySpan<char> execCommand)
-        {
-            int start = _knownBuildCommand.Length + 1;
-
-            while (start < execCommand.Length)
-            {
-                int nextSpaceIndex = execCommand.Slice(start).IndexOf(' ');
-
-                if (nextSpaceIndex == -1)
-                {
-                    var argument = execCommand.Slice(start);
-
-                    if (EqualsToAnyExcludedArguments(argument))
-                    {
-                        return true;
-                    }
-
-                    break;
-                }
-                else
-                {
-                    var argument = execCommand.Slice(start, nextSpaceIndex);
-
-                    if (EqualsToAnyExcludedArguments(argument))
-                    {
-                        return true;
-                    }
-
-                    start += nextSpaceIndex + 1;
-                }
-            }
-
-            return false;
-        }
-
-        private bool EqualsToAnyExcludedArguments(ReadOnlySpan<char> argument)
-        {
-            foreach (var knownSwitch in s_knownSwitchPrefixes)
-            {
-                if (argument.StartsWith(knownSwitch.AsSpan()))
-                {
-                    foreach (var excludedSwitch in _excludedSwitches)
-                    {
-                        if (argument.EndsWith(excludedSwitch.AsSpan(), StringComparison.OrdinalIgnoreCase)
-                            && argument.Length == knownSwitch.Length + excludedSwitch.Length)
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
-        }
+        return nextSpaceIndex == -1
+            ? knownBuildCommand
+            : knownBuildCommand.AsSpan().Slice(0, nextSpaceIndex).ToString();
     }
 }
