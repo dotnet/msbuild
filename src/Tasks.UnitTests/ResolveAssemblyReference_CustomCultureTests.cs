@@ -1,14 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if NETFRAMEWORK
-
 using System;
 using System.IO;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -58,9 +57,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 CopyTestAsset(testAssetsPath, "Test.euy.resx", solutionPath);
 
                 env.SetCurrentDirectory(projectBFolder);
-                _ = RunnerUtilities.ExecBootstrapedMSBuild("-restore", out bool buildSucceeded);
+                var output = RunnerUtilities.ExecBootstrapedMSBuild("-restore", out bool buildSucceeded);
 
-                buildSucceeded.ShouldBeTrue("MSBuild should complete successfully");
+                buildSucceeded.ShouldBeTrue($"MSBuild should complete successfully. Build output: {output}");
 
                 var yueCultureResourceDll = Path.Combine(projBOutputPath, "yue", "ProjectA.resources.dll");
                 AssertCustomCulture(isYueCultureExpected, "yue", yueCultureResourceDll);
@@ -97,5 +96,3 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
     }
 }
-
-#endif
