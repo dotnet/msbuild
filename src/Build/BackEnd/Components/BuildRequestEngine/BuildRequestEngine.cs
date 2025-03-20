@@ -1132,8 +1132,8 @@ namespace Microsoft.Build.BackEnd
             // to the entry rather than a series of them.
             lock (issuingEntry.GlobalLock)
             {
-                var existingResultsToReport = new List<BuildResult>();
-                var unresolvedConfigurationsAdded = new HashSet<int>();
+                List<BuildResult> existingResultsToReport = null;
+                HashSet<int> unresolvedConfigurationsAdded = new HashSet<int>();
 
                 foreach (FullyQualifiedBuildRequest request in newRequests)
                 {
@@ -1236,6 +1236,7 @@ namespace Microsoft.Build.BackEnd
 
                             // Can't report the result directly here, because that could cause the request to go from
                             // Waiting to Ready.
+                            existingResultsToReport ??= new List<BuildResult>();
                             existingResultsToReport.Add(response.Results);
                         }
                         else
@@ -1247,9 +1248,12 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // If we have any results we had to report, do so now.
-                foreach (BuildResult existingResult in existingResultsToReport)
+                if (existingResultsToReport is not null)
                 {
-                    issuingEntry.ReportResult(existingResult);
+                    foreach (BuildResult existingResult in existingResultsToReport)
+                    {
+                        issuingEntry.ReportResult(existingResult);
+                    }
                 }
 
                 // Issue any configuration requests we may still need.
