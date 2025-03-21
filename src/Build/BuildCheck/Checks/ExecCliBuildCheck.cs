@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -111,7 +111,9 @@ internal sealed class ExecCliBuildCheck : Check
 
     private static bool TryGetMatchingKnownBuildCommand(ReadOnlySpan<char> command, out string knownBuildCommand)
     {
-        Span<char> normalizedBuildCommand = stackalloc char[command.Length];
+        const int maxStackLimit = 1024;
+
+        Span<char> normalizedBuildCommand = command.Length <= maxStackLimit ? stackalloc char[command.Length] : new char[command.Length];
         int normalizedCommandIndex = 0;
 
         foreach (var c in command)
