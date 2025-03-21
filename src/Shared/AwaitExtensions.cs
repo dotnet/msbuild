@@ -177,7 +177,7 @@ namespace Microsoft.Build.Shared
                     Task t;
                     if (_queuedTasks.TryDequeue(out t))
                     {
-                        base.TryExecuteTask(t);
+                        TryExecuteTask(t);
                     }
                 });
 

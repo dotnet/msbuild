@@ -22,19 +22,19 @@ namespace Microsoft.Build.UnitTests
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                this.Skip = "This test only runs on Windows and when long path support is disabled.".AppendAdditionalMessage(additionalMessage);
+                Skip = "This test only runs on Windows and when long path support is disabled.".AppendAdditionalMessage(additionalMessage);
                 return;
             }
 
             if (fullFrameworkOnly && !CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
             {
-                this.Skip = "This test only runs on full .NET Framework and when long path support is disabled.".AppendAdditionalMessage(additionalMessage);
+                Skip = "This test only runs on full .NET Framework and when long path support is disabled.".AppendAdditionalMessage(additionalMessage);
                 return;
             }
 
             if (!NativeMethodsShared.IsMaxPathLegacyWindows())
             {
-                this.Skip = "This test only runs when long path support is disabled.".AppendAdditionalMessage(additionalMessage);
+                Skip = "This test only runs when long path support is disabled.".AppendAdditionalMessage(additionalMessage);
             }
         }
     }

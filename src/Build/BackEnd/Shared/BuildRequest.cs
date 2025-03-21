@@ -64,10 +64,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int _nodeRequestId;
 
-        /// <inheritdoc cref="BuildRequest.Targets"/>
+        /// <inheritdoc cref="Targets"/>
         private List<string> _targets;
 
-        /// <inheritdoc cref="BuildRequest.ProxyTargets"/>
+        /// <inheritdoc cref="ProxyTargets"/>
         private ProxyTargets _proxyTargets;
 
         /// <summary>

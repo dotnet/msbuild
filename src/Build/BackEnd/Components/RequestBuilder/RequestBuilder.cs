@@ -257,8 +257,8 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         public void CancelRequest()
         {
-            this.BeginCancel();
-            this.WaitForCancelCompletion();
+            BeginCancel();
+            WaitForCancelCompletion();
         }
 
         /// <summary>
@@ -691,7 +691,7 @@ namespace Microsoft.Build.BackEnd
                     _requestTask = Task.Factory.StartNew(
                         () =>
                         {
-                            return this.RequestThreadProc(setThreadParameters: true);
+                            return RequestThreadProc(setThreadParameters: true);
                         },
                         _cancellationTokenSource.Token,
                         TaskCreationOptions.None,
@@ -703,7 +703,7 @@ namespace Microsoft.Build.BackEnd
                     _requestTask = Task.Factory.StartNew(
                         () =>
                         {
-                            return this.RequestThreadProc(setThreadParameters: true);
+                            return RequestThreadProc(setThreadParameters: true);
                         },
                         _cancellationTokenSource.Token,
                         TaskCreationOptions.None,
@@ -963,7 +963,7 @@ namespace Microsoft.Build.BackEnd
                 int handle;
                 if (IsBuilderUsingLegacyThreadingSemantics(_componentHost, _requestEntry))
                 {
-                    handle = RequestBuilder.WaitWithBuilderThreadStart(handles, true, _componentHost.LegacyThreadingData, _requestEntry.Request.SubmissionId);
+                    handle = WaitWithBuilderThreadStart(handles, true, _componentHost.LegacyThreadingData, _requestEntry.Request.SubmissionId);
                 }
                 else if (_inMSBuildCallback)
                 {
@@ -1182,7 +1182,7 @@ namespace Microsoft.Build.BackEnd
                     (_requestEntry.RequestConfiguration.ResultsNodeId != _componentHost.BuildParameters.NodeId))
                 {
                     // This indicates to the system that we will block waiting for a results transfer.  We will block here until those results become available.
-                    await BlockOnTargetInProgress(Microsoft.Build.BackEnd.BuildRequest.InvalidGlobalRequestId, null);
+                    await BlockOnTargetInProgress(BackEnd.BuildRequest.InvalidGlobalRequestId, null);
 
                     // All of the results should now be on this node.
                     ErrorUtilities.VerifyThrow(

@@ -109,8 +109,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectItem(ProjectItemElement xml, Project project)
         {
-            this._project = project;
-            this._xml = xml;
+            _project = project;
+            _xml = xml;
         }
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                bool isImported = !Object.ReferenceEquals(_xml.ContainingProject, _project.Xml);
+                bool isImported = !ReferenceEquals(_xml.ContainingProject, _project.Xml);
 
                 return isImported;
             }
@@ -813,7 +813,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Creates new xml objects for itself, disconnecting from the old xml objects.
-        /// Called ONLY by <see cref="Microsoft.Build.Evaluation.Project.SplitItemElementIfNecessary(ProjectItemElement)"/>
+        /// Called ONLY by <see cref="Project.SplitItemElementIfNecessary(ProjectItemElement)"/>
         /// </summary>
         /// <remarks>
         /// Called when breaking up a single ProjectItemElement that evaluates into several ProjectItems.
@@ -859,7 +859,7 @@ namespace Microsoft.Build.Evaluation
 
             if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name))
             {
-                value = BuiltInMetadata.GetMetadataValueEscaped(_project.DirectoryPath, _evaluatedIncludeBeforeWildcardExpansionEscaped, _evaluatedIncludeEscaped, this.Xml.ContainingProject.FullPath, name, ref _fullPath);
+                value = BuiltInMetadata.GetMetadataValueEscaped(_project.DirectoryPath, _evaluatedIncludeBeforeWildcardExpansionEscaped, _evaluatedIncludeEscaped, Xml.ContainingProject.FullPath, name, ref _fullPath);
             }
 
             return value;

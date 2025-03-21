@@ -658,8 +658,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void TestGetImageRuntimeVersion()
         {
-            string imageRuntimeReportedByAsssembly = this.GetType().Assembly.ImageRuntimeVersion;
-            string pathForAssembly = this.GetType().Assembly.Location;
+            string imageRuntimeReportedByAsssembly = GetType().Assembly.ImageRuntimeVersion;
+            string pathForAssembly = GetType().Assembly.Location;
 
             string inspectedRuntimeVersion = AssemblyInformation.GetRuntimeVersion(pathForAssembly);
             Assert.Equal(inspectedRuntimeVersion, imageRuntimeReportedByAsssembly);
@@ -2737,7 +2737,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Assert.Empty(errorFileNames); // "Expected no Error file names"
                 Assert.Single(remap);
 
-                AssemblyRemapping pair = remap.First<AssemblyRemapping>();
+                AssemblyRemapping pair = remap.First();
                 Assert.Equal("System.Xml", pair.From.Name);
                 Assert.Equal("Remapped", pair.To.Name);
                 Assert.True(pair.From.Retargetable);
@@ -2823,7 +2823,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Assert.Empty(errorFileNames); // "Expected no Error file names"
                 Assert.Single(remap);
 
-                AssemblyRemapping pair = remap.First<AssemblyRemapping>();
+                AssemblyRemapping pair = remap.First();
                 Assert.Equal("Remapped", pair.To.Name);
                 Assert.False(pair.To.Retargetable);
             }
@@ -2891,7 +2891,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 Assert.Empty(errorFileNames); // "Expected no Error file names"
                 Assert.Single(remap);
 
-                AssemblyRemapping pair = remap.First<AssemblyRemapping>();
+                AssemblyRemapping pair = remap.First();
                 Assert.Equal("System.Xml", pair.From.Name);
                 Assert.Equal("Remapped", pair.To.Name);
                 Assert.True(pair.From.Retargetable);
@@ -3442,11 +3442,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             MockEngine engine = new MockEngine(_output);
 
             // Create the mocks.
-            Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
-            Microsoft.Build.Shared.DirectoryExists directoryExists = new Microsoft.Build.Shared.DirectoryExists(DirectoryExists);
-            Microsoft.Build.Tasks.GetDirectories getDirectories = new Microsoft.Build.Tasks.GetDirectories(GetDirectories);
-            Microsoft.Build.Tasks.GetAssemblyName getAssemblyName = new Microsoft.Build.Tasks.GetAssemblyName(GetAssemblyName);
-            Microsoft.Build.Tasks.GetAssemblyMetadata getAssemblyMetadata = new Microsoft.Build.Tasks.GetAssemblyMetadata(GetAssemblyMetadata);
+            FileExists fileExists = new FileExists(FileExists);
+            DirectoryExists directoryExists = new DirectoryExists(DirectoryExists);
+            Tasks.GetDirectories getDirectories = new Tasks.GetDirectories(GetDirectories);
+            GetAssemblyName getAssemblyName = new GetAssemblyName(GetAssemblyName);
+            GetAssemblyMetadata getAssemblyMetadata = new GetAssemblyMetadata(GetAssemblyMetadata);
 
             // Also construct a set of assembly names to pass in.
             ITaskItem[] assemblyNames = new TaskItem[]
@@ -4893,7 +4893,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new (_output);
+            MockEngine e = new(_output);
             t.BuildEngine = e;
 
             t.Assemblies = [new TaskItem("A")]; // Resolved by HintPath
@@ -6323,7 +6323,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             referenceTable.MarkReferencesForExclusion(null);
             referenceTable.RemoveReferencesMarkedForExclusion(false, String.Empty);
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
-            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected Dictionary to be a different instance"
+            Assert.False(ReferenceEquals(table, table2)); // "Expected Dictionary to be a different instance"
             Assert.Equal(2, table2.Count); // "Expected there to be two elements in the Dictionary"
             Assert.True(table2.ContainsKey(engineAssemblyName)); // "Expected to find the engineAssemblyName in the referenceList"
             Assert.True(table2.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"
@@ -6348,7 +6348,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             referenceTable.MarkReferencesForExclusion(new Dictionary<string, string>());
             referenceTable.RemoveReferencesMarkedForExclusion(false, String.Empty);
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
-            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected Dictionary to be a different instance"
+            Assert.False(ReferenceEquals(table, table2)); // "Expected Dictionary to be a different instance"
             Assert.Equal(2, table2.Count); // "Expected there to be two elements in the Dictionary"
             Assert.True(table2.ContainsKey(engineAssemblyName)); // "Expected to find the engineAssemblyName in the referenceList"
             Assert.True(table2.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"
@@ -6386,7 +6386,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailedToResolveReferenceBecausePrimaryAssemblyInExclusionList", taskItem.ItemSpec, subSetName);
-            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected dictionary to be a different instance"
+            Assert.False(ReferenceEquals(table, table2)); // "Expected dictionary to be a different instance"
             Assert.Single(table2); // "Expected there to be one elements in the dictionary"
             Assert.False(table2.ContainsKey(engineAssemblyName)); // "Expected to not find the engineAssemblyName in the referenceList"
             Assert.True(table2.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"
@@ -6425,7 +6425,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailedToResolveReferenceBecausePrimaryAssemblyInExclusionList", taskItem.ItemSpec, subSetName);
-            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected dictionary to be a different instance"
+            Assert.False(ReferenceEquals(table, table2)); // "Expected dictionary to be a different instance"
             Assert.Equal(2, table2.Count); // "Expected there to be two elements in the dictionary"
             Assert.True(table2.ContainsKey(engineAssemblyName)); // "Expected to find the engineAssemblyName in the referenceList"
             Assert.True(table2.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"
@@ -6500,7 +6500,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
             string subSetName = ResolveAssemblyReference.GenerateSubSetName(Array.Empty<string>(), null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailedToResolveReferenceBecausePrimaryAssemblyInExclusionList", taskItem.ItemSpec, subSetName);
-            Assert.False(Object.ReferenceEquals(table, table2)); // "Expected dictionary to be a different instance"
+            Assert.False(ReferenceEquals(table, table2)); // "Expected dictionary to be a different instance"
             Assert.Single(table2); // "Expected there to be one elements in the dictionary"
             Assert.False(table2.ContainsKey(engineAssemblyName)); // "Expected to not find the engineAssemblyName in the referenceList"
             Assert.True(table2.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"

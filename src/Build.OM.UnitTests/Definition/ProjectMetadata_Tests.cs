@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectItem item = project.AddItem("i", "i1")[0];
             ProjectMetadata metadatum = item.SetMetadataValue("m", "m1");
 
-            Assert.True(Object.ReferenceEquals(project, metadatum.Project));
+            Assert.True(ReferenceEquals(project, metadatum.Project));
         }
 
         /// <summary>
@@ -502,13 +502,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SpecialCharactersInMetadataValueEvaluation()
         {
-            Microsoft.Build.Evaluation.Project project = new Microsoft.Build.Evaluation.Project();
+            Project project = new Project();
             var metadata = new Dictionary<string, string>
             {
                 { "EscapedSemicolon", "%3B" }, // Microsoft.Build.Internal.Utilities.Escape(";")
                 { "EscapedDollarSign", "%24" }, // Microsoft.Build.Internal.Utilities.Escape("$")
             };
-            Microsoft.Build.Evaluation.ProjectItem item = project.AddItem(
+            ProjectItem item = project.AddItem(
                 "None",
                 "MetadataTests",
                 metadata).Single();
@@ -521,7 +521,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Helper for metadata escaping tests
         /// </summary>
-        private void SpecialCharactersInMetadataValueTests(Microsoft.Build.Evaluation.ProjectItem item)
+        private void SpecialCharactersInMetadataValueTests(ProjectItem item)
         {
             Assert.Equal("%3B", item.GetMetadata("EscapedSemicolon").UnevaluatedValue);
             Assert.Equal(";", item.GetMetadata("EscapedSemicolon").EvaluatedValue);

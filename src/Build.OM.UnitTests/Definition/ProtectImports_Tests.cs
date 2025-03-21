@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>";
 
             importContents = Expand(importContents);
-            _importFilename = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName() + ".targets";
+            _importFilename = Build.Shared.FileUtilities.GetTemporaryFileName() + ".targets";
             File.WriteAllText(_importFilename, importContents);
         }
 

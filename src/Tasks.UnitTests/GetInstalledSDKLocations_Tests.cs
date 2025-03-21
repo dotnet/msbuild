@@ -23,8 +23,8 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
 
         public FakeSDKStructure()
         {
-            FakeSdkStructureRoot = FakeSDKStructure.MakeFakeSDKStructure();
-            FakeSdkStructureRoot2 = FakeSDKStructure.MakeFakeSDKStructure2();
+            FakeSdkStructureRoot = MakeFakeSDKStructure();
+            FakeSdkStructureRoot2 = MakeFakeSDKStructure2();
         }
 
         public void Dispose()

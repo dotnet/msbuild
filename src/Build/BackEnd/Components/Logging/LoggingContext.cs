@@ -328,7 +328,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if (!_isValid)
             {
                 ErrorUtilities.ThrowInternalError("LoggingContext (type: {0}) was not valid during logging attempt.",
-                    this.GetType());
+                    GetType());
             }
         }
     }

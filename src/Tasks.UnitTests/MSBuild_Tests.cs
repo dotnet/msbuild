@@ -1533,7 +1533,7 @@ namespace Microsoft.Build.UnitTests
 
         public override bool Execute()
         {
-            this.BuildEngine.BuildProjectFile(Project, Targets, null, null);
+            BuildEngine.BuildProjectFile(Project, Targets, null, null);
 
             return true;
         }

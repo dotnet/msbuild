@@ -14,17 +14,17 @@ namespace Microsoft.Build.Unittest
     {
         public static TargetResult GetEmptyFailingTargetResult()
         {
-            return new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetStopWithErrorResult());
+            return new TargetResult(Array.Empty<TaskItem>(), GetStopWithErrorResult());
         }
 
         public static TargetResult GetEmptySucceedingTargetResult()
         {
-            return new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetSuccessResult());
+            return new TargetResult(Array.Empty<TaskItem>(), GetSuccessResult());
         }
 
         public static TargetResult GetNonEmptySucceedingTargetResult()
         {
-            return new TargetResult(new TaskItem[1] { new TaskItem("i", "v") }, BuildResultUtilities.GetSuccessResult());
+            return new TargetResult(new TaskItem[1] { new TaskItem("i", "v") }, GetSuccessResult());
         }
 
         public static WorkUnitResult GetSuccessResult()

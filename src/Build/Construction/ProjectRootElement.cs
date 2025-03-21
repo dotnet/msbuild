@@ -1358,7 +1358,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue)
         {
-            return this.CreateMetadataElement(name, unevaluatedValue, null);
+            return CreateMetadataElement(name, unevaluatedValue, null);
         }
 
         /// <summary>
@@ -1647,7 +1647,7 @@ namespace Microsoft.Build.Construction
         /// Reload the existing project root element from its file.
         /// An <see cref="InvalidOperationException"/> is thrown if the project root element is not associated with any file on disk.
         ///
-        /// See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool, bool?)"/>
+        /// See <see cref="ReloadFrom(XmlReader, bool, bool?)"/>
         /// </summary>
         public void Reload(bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
         {
@@ -1660,7 +1660,7 @@ namespace Microsoft.Build.Construction
         /// Reload the existing project root element from the given path
         /// An <see cref="InvalidOperationException"/> is thrown if the path does not exist.
         ///
-        /// See <see cref="ProjectRootElement.ReloadFrom(XmlReader, bool, bool?)"/>
+        /// See <see cref="ReloadFrom(XmlReader, bool, bool?)"/>
         /// </summary>
         public void ReloadFrom(string path, bool throwIfUnsavedChanges = true, bool? preserveFormatting = null)
         {

@@ -609,11 +609,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             IList<ResolvedImport> imports = project.Imports;
             imports.ShouldHaveSingleItem();
-            object.ReferenceEquals(imports.First().ImportingElement, xml.Imports.ElementAt(0)).ShouldBeTrue();
+            ReferenceEquals(imports.First().ImportingElement, xml.Imports.ElementAt(0)).ShouldBeTrue();
 
             // We can take advantage of the fact that we will get the same ProjectRootElement from the cache if we try to
             // open it with a path; get that and then compare it to what project.Imports gave us.
-            object.ReferenceEquals(imports.First().ImportedProject, ProjectRootElement.Open(importPath)).ShouldBeTrue();
+            ReferenceEquals(imports.First().ImportedProject, ProjectRootElement.Open(importPath)).ShouldBeTrue();
 
             // Test the logical project iterator
             List<ProjectElement> logicalElements = new List<ProjectElement>(project.GetLogicalProject());
@@ -1649,7 +1649,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectProperty property2 = project.GetProperty("p");
 
-            object.ReferenceEquals(property1, property2).ShouldBeFalse(); // different object indicates reevaluation occurred
+            ReferenceEquals(property1, property2).ShouldBeFalse(); // different object indicates reevaluation occurred
         }
 
         /// <summary>
@@ -2089,7 +2089,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'>
                 </Project>");
 
-            string importFileName = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName() + ".proj";
+            string importFileName = FileUtilities.GetTemporaryFileName() + ".proj";
             File.WriteAllText(importFileName, importProjectContent);
 
             string projectContent =
@@ -2573,14 +2573,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             List<ProjectElement> logicalProject = new List<ProjectElement>(project.GetLogicalProject());
 
             logicalProject.Count.ShouldBe(8); // 4 properties + 4 property groups
-            object.ReferenceEquals(zero, logicalProject[0].ContainingProject).ShouldBeTrue();
-            object.ReferenceEquals(zero, logicalProject[1].ContainingProject).ShouldBeTrue();
-            object.ReferenceEquals(one, logicalProject[2].ContainingProject).ShouldBeTrue();
-            object.ReferenceEquals(one, logicalProject[3].ContainingProject).ShouldBeTrue();
-            object.ReferenceEquals(three, logicalProject[4].ContainingProject).ShouldBeTrue();
-            object.ReferenceEquals(three, logicalProject[5].ContainingProject).ShouldBeTrue();
-            object.ReferenceEquals(two, logicalProject[6].ContainingProject).ShouldBeTrue();
-            object.ReferenceEquals(two, logicalProject[7].ContainingProject).ShouldBeTrue();
+            ReferenceEquals(zero, logicalProject[0].ContainingProject).ShouldBeTrue();
+            ReferenceEquals(zero, logicalProject[1].ContainingProject).ShouldBeTrue();
+            ReferenceEquals(one, logicalProject[2].ContainingProject).ShouldBeTrue();
+            ReferenceEquals(one, logicalProject[3].ContainingProject).ShouldBeTrue();
+            ReferenceEquals(three, logicalProject[4].ContainingProject).ShouldBeTrue();
+            ReferenceEquals(three, logicalProject[5].ContainingProject).ShouldBeTrue();
+            ReferenceEquals(two, logicalProject[6].ContainingProject).ShouldBeTrue();
+            ReferenceEquals(two, logicalProject[7].ContainingProject).ShouldBeTrue();
 
             // Clear the cache
             project.ProjectCollection.UnloadAllProjects();
@@ -2619,12 +2619,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 List<ProjectElement> logicalProject = new List<ProjectElement>(project.GetLogicalProject());
 
                 logicalProject.Count.ShouldBe(6); // 3 properties + 3 property groups
-                object.ReferenceEquals(zero, logicalProject[0].ContainingProject).ShouldBeTrue(); // PropertyGroup
-                object.ReferenceEquals(zero, logicalProject[1].ContainingProject).ShouldBeTrue(); // p = 0
-                object.ReferenceEquals(one, logicalProject[2].ContainingProject).ShouldBeTrue();  // PropertyGroup
-                object.ReferenceEquals(one, logicalProject[3].ContainingProject).ShouldBeTrue();  // p = 1
-                object.ReferenceEquals(two, logicalProject[4].ContainingProject).ShouldBeTrue();  // PropertyGroup
-                object.ReferenceEquals(two, logicalProject[5].ContainingProject).ShouldBeTrue();  // p = 2
+                ReferenceEquals(zero, logicalProject[0].ContainingProject).ShouldBeTrue(); // PropertyGroup
+                ReferenceEquals(zero, logicalProject[1].ContainingProject).ShouldBeTrue(); // p = 0
+                ReferenceEquals(one, logicalProject[2].ContainingProject).ShouldBeTrue();  // PropertyGroup
+                ReferenceEquals(one, logicalProject[3].ContainingProject).ShouldBeTrue();  // p = 1
+                ReferenceEquals(two, logicalProject[4].ContainingProject).ShouldBeTrue();  // PropertyGroup
+                ReferenceEquals(two, logicalProject[5].ContainingProject).ShouldBeTrue();  // p = 2
 
                 // Clear the cache
                 project.ProjectCollection.UnloadAllProjects();

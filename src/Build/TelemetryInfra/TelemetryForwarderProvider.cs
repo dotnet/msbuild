@@ -74,7 +74,7 @@ internal class TelemetryForwarderProvider : IBuildComponent
         public void FinalizeProcessing(LoggingContext loggingContext)
         {
             WorkerNodeTelemetryEventArgs telemetryArgs = new(_workerNodeTelemetryData)
-                { BuildEventContext = loggingContext.BuildEventContext };
+            { BuildEventContext = loggingContext.BuildEventContext };
             loggingContext.LogBuildEvent(telemetryArgs);
         }
     }

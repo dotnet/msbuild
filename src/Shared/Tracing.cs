@@ -118,7 +118,7 @@ namespace Microsoft.Build.Internal
                     Trace.WriteLine(s_slot);
                     s_slot = String.Empty;
                     Dump();
-                    Trace.WriteLine(System.Environment.StackTrace);
+                    Trace.WriteLine(Environment.StackTrace);
                     s_last = now;
                 }
             }

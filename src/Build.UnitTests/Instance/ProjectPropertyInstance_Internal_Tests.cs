@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectPropertyInstance clone = property.DeepClone();
 
-            Assert.False(Object.ReferenceEquals(property, clone));
+            Assert.False(ReferenceEquals(property, clone));
             Assert.Equal("p", clone.Name);
             Assert.Equal("v1", clone.EvaluatedValue);
         }

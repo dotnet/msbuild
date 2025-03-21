@@ -458,7 +458,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             public Func<Assembly, IEnumerable<Type>> GetResolverTypesFunc { get; set; }
 
-            public Action<string, ElementLocation, List<SdkResolver>> LoadResolversAction { get; set; }
+            public Action<string, ElementLocation, List<SdkResolverBase>> LoadResolversAction { get; set; }
 
             protected override Assembly LoadResolverAssembly(string resolverPath)
             {
@@ -490,7 +490,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 return base.FindPotentialSdkResolvers(rootFolder, location);
             }
 
-            protected override void LoadResolvers(string resolverPath, ElementLocation location, List<SdkResolver> resolvers)
+            protected override void LoadResolvers(string resolverPath, ElementLocation location, List<SdkResolverBase> resolvers)
             {
                 if (LoadResolversAction != null)
                 {

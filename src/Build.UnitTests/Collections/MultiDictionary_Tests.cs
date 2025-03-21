@@ -102,19 +102,19 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dictionary.Add("x", "x2");
             dictionary.Add("y", "y1");
 
-            List<string> values = Helpers.MakeList<string>(dictionary["x"]);
+            List<string> values = Helpers.MakeList(dictionary["x"]);
             values.Sort();
 
             Assert.Equal(2, values.Count);
             Assert.Equal("x1", values[0]);
             Assert.Equal("x2", values[1]);
 
-            values = Helpers.MakeList<string>(dictionary["y"]);
+            values = Helpers.MakeList(dictionary["y"]);
 
             Assert.Single(values);
             Assert.Equal("y1", values[0]);
 
-            values = Helpers.MakeList<string>(dictionary["z"]);
+            values = Helpers.MakeList(dictionary["z"]);
 
             Assert.Empty(values);
         }
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Equal(1, dictionary.KeyCount);
             Assert.Equal(1, dictionary.ValueCount);
 
-            List<string> values = Helpers.MakeList<string>(dictionary["x"]);
+            List<string> values = Helpers.MakeList(dictionary["x"]);
 
             Assert.Single(values);
             Assert.Equal("x2", values[0]);

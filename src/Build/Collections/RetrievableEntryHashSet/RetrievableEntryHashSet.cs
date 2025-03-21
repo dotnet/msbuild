@@ -75,7 +75,7 @@ namespace Microsoft.Build.Collections
     /// the same time.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    [DebuggerTypeProxy(typeof(Microsoft.Build.Collections.HashSetDebugView<>))]
+    [DebuggerTypeProxy(typeof(HashSetDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "By design")]
     [Serializable()]
@@ -180,7 +180,7 @@ namespace Microsoft.Build.Collections
             }
             Initialize(suggestedCapacity);
 
-            this.UnionWith(collection);
+            UnionWith(collection);
             if ((_count == 0 && _slots.Length > HashHelpers.GetMinPrime()) ||
                 (_count > 0 && _slots.Length / _count > ShrinkThreshold))
             {
@@ -867,12 +867,12 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool EntriesAreReferenceEquals(RetrievableEntryHashSet<T> other)
         {
-            if (Object.ReferenceEquals(this, other))
+            if (ReferenceEquals(this, other))
             {
                 return true;
             }
 
-            if (this.Count != other.Count)
+            if (Count != other.Count)
             {
                 return false;
             }
@@ -880,7 +880,7 @@ namespace Microsoft.Build.Collections
             T ours;
             foreach (T element in other)
             {
-                if (!TryGetValue(element.Key, out ours) || !Object.ReferenceEquals(element, ours))
+                if (!TryGetValue(element.Key, out ours) || !ReferenceEquals(element, ours))
                 {
                     return false;
                 }
@@ -948,7 +948,7 @@ namespace Microsoft.Build.Collections
         [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
 #endif
 #endif
-        public struct Enumerator : IEnumerator<T>, System.Collections.IEnumerator
+        public struct Enumerator : IEnumerator<T>, IEnumerator
         {
             private RetrievableEntryHashSet<T> _set;
             private int _index;
@@ -997,7 +997,7 @@ namespace Microsoft.Build.Collections
                 }
             }
 
-            Object System.Collections.IEnumerator.Current
+            Object IEnumerator.Current
             {
                 get
                 {
@@ -1009,7 +1009,7 @@ namespace Microsoft.Build.Collections
                 }
             }
 
-            void System.Collections.IEnumerator.Reset()
+            void IEnumerator.Reset()
             {
                 if (_version != _set._version)
                 {

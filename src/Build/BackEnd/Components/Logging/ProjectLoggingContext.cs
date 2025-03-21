@@ -104,10 +104,10 @@ namespace Microsoft.Build.BackEnd.Logging
             // No need to log a redundant message in the common case
             if (projectStarted.ToolsVersion != "Current")
             {
-                LoggingService.LogComment(this.BuildEventContext, MessageImportance.Low, "ToolsVersionInEffectForBuild", projectStarted.ToolsVersion);
+                LoggingService.LogComment(BuildEventContext, MessageImportance.Low, "ToolsVersionInEffectForBuild", projectStarted.ToolsVersion);
             }
 
-            this.IsValid = true;
+            IsValid = true;
         }
 
         /// <summary>
@@ -143,10 +143,10 @@ namespace Microsoft.Build.BackEnd.Logging
             // No need to log a redundant message in the common case
             if (toolsVersion != "Current")
             {
-                LoggingService.LogComment(this.BuildEventContext, MessageImportance.Low, "ToolsVersionInEffectForBuild", toolsVersion);
+                LoggingService.LogComment(BuildEventContext, MessageImportance.Low, "ToolsVersionInEffectForBuild", toolsVersion);
             }
 
-            this.IsValid = true;
+            IsValid = true;
         }
 
         private static BuildEventContext CreateInitialContext(
@@ -260,9 +260,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="success">Did the build succeede or not</param>
         internal void LogProjectFinished(bool success)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "invalid");
+            ErrorUtilities.VerifyThrow(IsValid, "invalid");
             LoggingService.LogProjectFinished(BuildEventContext, _projectFullPath, success);
-            this.IsValid = false;
+            IsValid = false;
         }
 
         /// <summary>
@@ -270,7 +270,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal TargetLoggingContext LogTargetBatchStarted(string projectFullPath, ProjectTargetInstance target, string parentTargetName, TargetBuiltReason buildReason)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "invalid");
+            ErrorUtilities.VerifyThrow(IsValid, "invalid");
             return new TargetLoggingContext(this, projectFullPath, target, parentTargetName, buildReason);
         }
     }

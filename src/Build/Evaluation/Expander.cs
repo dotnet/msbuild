@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -24,11 +25,10 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
+using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
-using System.Buffers;
 
 #nullable disable
 
@@ -494,7 +494,7 @@ namespace Microsoft.Build.Evaluation
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, _loggingContext);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
-            result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
+            result = ItemExpander.ExpandItemVectorsIntoString(this, result, _items, options, elementLocation);
             result = FileUtilities.MaybeAdjustFilePath(result);
 
             return result;
@@ -576,7 +576,7 @@ namespace Microsoft.Build.Evaluation
             foreach (string split in splits)
             {
                 bool isTransformExpression;
-                IList<T> itemsToAdd = ItemExpander.ExpandSingleItemVectorExpressionIntoItems<I, T>(this, split, _items, itemFactory, options, false /* do not include null items */, out isTransformExpression, elementLocation);
+                IList<T> itemsToAdd = ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, split, _items, itemFactory, options, false /* do not include null items */, out isTransformExpression, elementLocation);
 
                 if ((itemsToAdd == null /* broke out early non empty */ || (itemsToAdd.Count > 0)) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
                 {
@@ -650,7 +650,7 @@ namespace Microsoft.Build.Evaluation
             where S : class, IItem
             where T : class, IItem
         {
-            return ItemExpander.ExpandExpressionCaptureIntoItems<S, T>(expressionCapture, this, items, itemFactory, options,
+            return ItemExpander.ExpandExpressionCaptureIntoItems(expressionCapture, this, items, itemFactory, options,
                 includeNullEntries, out isTransformExpression, elementLocation);
         }
 
@@ -1213,7 +1213,7 @@ namespace Microsoft.Build.Evaluation
                 // so that we can either maintain the object's type in the event
                 // that we have a single component, or convert to a string
                 // if concatenation is required.
-                using Expander<P, I>.SpanBasedConcatenator results = new Expander<P, I>.SpanBasedConcatenator();
+                using SpanBasedConcatenator results = new SpanBasedConcatenator();
 
                 // The sourceIndex is the zero-based index into the expression,
                 // where we've essentially read up to and copied into the target string.
@@ -2056,7 +2056,7 @@ namespace Microsoft.Build.Evaluation
                     Stack<TransformFunction<S>> transformFunctionStack = PrepareTransformStackFromMatch<S>(elementLocation, expressionCapture);
 
                     // iterate over the tranform chain, creating the final items from its results
-                    foreach (KeyValuePair<string, S> itemTuple in Transform<S>(expander, includeNullEntries, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemPairEnumerable(itemsOfType)))
+                    foreach (KeyValuePair<string, S> itemTuple in Transform(expander, includeNullEntries, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemPairEnumerable(itemsOfType)))
                     {
                         if (!string.IsNullOrEmpty(itemTuple.Key) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
                         {
@@ -2776,7 +2776,7 @@ namespace Microsoft.Build.Evaluation
 
                         object result = function.Execute(item.Key, expander._properties, ExpanderOptions.ExpandAll, elementLocation);
 
-                        string include = Expander<P, I>.PropertyExpander<P>.ConvertToString(result);
+                        string include = PropertyExpander<P>.ConvertToString(result);
 
                         // We pass in the existing item so we can copy over its metadata
                         if (include.Length > 0)

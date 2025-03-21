@@ -141,7 +141,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestEmptyProjectNameForTargetStarted()
         {
-            Microsoft.Build.Evaluation.Project project = new Microsoft.Build.Evaluation.Project();
+            Build.Evaluation.Project project = new Build.Evaluation.Project();
 
             ProjectTargetElement target = project.Xml.AddTarget("T");
             ProjectTaskElement task = target.AddTask("Message");
@@ -2459,7 +2459,7 @@ namespace Microsoft.Build.UnitTests
             // Get the std out handle
             IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
 
-            if (stdHandle != Microsoft.Build.BackEnd.NativeMethods.InvalidHandle)
+            if (stdHandle != Build.BackEnd.NativeMethods.InvalidHandle)
             {
                 uint fileType = NativeMethodsShared.GetFileType(stdHandle);
 

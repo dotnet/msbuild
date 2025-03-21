@@ -39,7 +39,7 @@ internal sealed class UntrustedLocationCheck : Check
     private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
     {
         if (checkedProjects.Add(context.Data.ProjectFilePath) &&
-            context.Data.ProjectFileDirectory.StartsWith(PathsHelper.Downloads, Shared.FileUtilities.PathComparison))
+            context.Data.ProjectFileDirectory.StartsWith(PathsHelper.Downloads, FileUtilities.PathComparison))
         {
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,
@@ -81,7 +81,7 @@ internal sealed class UntrustedLocationCheck : Check
                 string? locationFromEnv = Environment.GetEnvironmentVariable("XDG_DOWNLOAD_DIR");
                 if (locationFromEnv != null && Directory.Exists(locationFromEnv))
                 {
-                    return locationFromEnv.TrimEnd(['\\','/']);
+                    return locationFromEnv.TrimEnd(['\\', '/']);
                 }
             }
 

@@ -496,11 +496,11 @@ namespace Microsoft.Build.Internal
             {
                 if (isProvider)
                 {
-                    CommunicationsUtilities.Trace("Handshake failed on part {0}. Probably the client is a different MSBuild build.", valueRead);
+                    Trace("Handshake failed on part {0}. Probably the client is a different MSBuild build.", valueRead);
                 }
                 else
                 {
-                    CommunicationsUtilities.Trace("Expected end of handshake signal but received {0}. Probably the host is a different MSBuild build.", valueRead);
+                    Trace("Expected end of handshake signal but received {0}. Probably the host is a different MSBuild build.", valueRead);
                 }
                 throw new InvalidOperationException();
             }

@@ -36,7 +36,7 @@ internal static class EnumerableExtensions
         => NewHashSet<T>(capacity, null);
 
     public static HashSet<T> NewHashSet<T>(IEqualityComparer<T> equalityComparer)
-        => NewHashSet<T>(0, equalityComparer);
+        => NewHashSet(0, equalityComparer);
 
     public static HashSet<T> NewHashSet<T>(int capacity, IEqualityComparer<T>? equalityComparer)
     {

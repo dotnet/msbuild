@@ -224,7 +224,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
     /// </summary>
     [ComVisible(true)]
     [Guid("586B842C-D9C7-43b8-84E4-9CFC3AF9F13B")]
-    [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsDual)]
+    [InterfaceType(ComInterfaceType.InterfaceIsDual)]
     public interface IBuildResults
     {
         /// <summary>

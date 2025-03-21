@@ -77,9 +77,9 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             properties.Set(p1);
             properties.Set(p4);
 
-            TranslationHelpers.GetWriteTranslator().TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref properties, ProjectPropertyInstance.FactoryForDeserialization);
+            TranslationHelpers.GetWriteTranslator().TranslateDictionary(ref properties, ProjectPropertyInstance.FactoryForDeserialization);
             PropertyDictionary<ProjectPropertyInstance> deserializedProperties = null;
-            TranslationHelpers.GetReadTranslator().TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref deserializedProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            TranslationHelpers.GetReadTranslator().TranslateDictionary(ref deserializedProperties, ProjectPropertyInstance.FactoryForDeserialization);
 
             Assert.Equal(properties, deserializedProperties);
         }
@@ -92,9 +92,9 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
 
-            TranslationHelpers.GetWriteTranslator().TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref properties, ProjectPropertyInstance.FactoryForDeserialization);
+            TranslationHelpers.GetWriteTranslator().TranslateDictionary(ref properties, ProjectPropertyInstance.FactoryForDeserialization);
             PropertyDictionary<ProjectPropertyInstance> deserializedProperties = null;
-            TranslationHelpers.GetReadTranslator().TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref deserializedProperties, ProjectPropertyInstance.FactoryForDeserialization);
+            TranslationHelpers.GetReadTranslator().TranslateDictionary(ref deserializedProperties, ProjectPropertyInstance.FactoryForDeserialization);
 
             Assert.Equal(properties, deserializedProperties);
         }

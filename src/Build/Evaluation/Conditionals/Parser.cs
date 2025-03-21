@@ -271,7 +271,7 @@ namespace Microsoft.Build.Evaluation
         private GenericExpressionNode Factor(string expression)
         {
             // Checks for TokenTypes String, Numeric, Property, ItemMetadata, and ItemList.
-            GenericExpressionNode arg = this.Arg(expression);
+            GenericExpressionNode arg = Arg(expression);
 
             // If it's one of those, return it.
             if (arg != null)

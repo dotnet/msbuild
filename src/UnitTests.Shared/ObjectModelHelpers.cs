@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests
             {
                 s_builtInMetadataNames = new Hashtable();
 
-                Utilities.TaskItem dummyTaskItem = new Utilities.TaskItem();
+                TaskItem dummyTaskItem = new TaskItem();
                 foreach (string builtInMetadataName in dummyTaskItem.MetadataNames)
                 {
                     s_builtInMetadataNames[builtInMetadataName] = string.Empty;
@@ -519,7 +519,7 @@ namespace Microsoft.Build.UnitTests
                     int indexOfColon = singleExpectedItemStringTrimmed.IndexOf(": ");
                     if (indexOfColon == -1)
                     {
-                        expectedItems.Add(new Utilities.TaskItem(singleExpectedItemStringTrimmed));
+                        expectedItems.Add(new TaskItem(singleExpectedItemStringTrimmed));
                     }
                     else
                     {
@@ -531,7 +531,7 @@ namespace Microsoft.Build.UnitTests
                         // The metadata is the part after the colon.
                         string itemMetadataString = singleExpectedItemStringTrimmed.Substring(indexOfColon + 1);
 
-                        ITaskItem expectedItem = new Utilities.TaskItem(itemSpec);
+                        ITaskItem expectedItem = new TaskItem(itemSpec);
 
                         string[] itemMetadataPieces = itemMetadataString.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
                         foreach (string itemMetadataPiece in itemMetadataPieces)
@@ -590,7 +590,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         public static string CleanupFileContents([StringSyntax(StringSyntaxAttribute.Xml)] string projectFileContents)
         {
-            StringBuilder temp = new (projectFileContents);
+            StringBuilder temp = new(projectFileContents);
 
             // Replace reverse-single-quotes with double-quotes.
             temp.Replace('`', '"');

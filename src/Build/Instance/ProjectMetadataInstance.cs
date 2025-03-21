@@ -194,7 +194,7 @@ namespace Microsoft.Build.Execution
         /// <returns>True if they are equivalent, false otherwise.</returns>
         bool IEquatable<ProjectMetadataInstance>.Equals(ProjectMetadataInstance other)
         {
-            if (Object.ReferenceEquals(this, other))
+            if (ReferenceEquals(this, other))
             {
                 return true;
             }

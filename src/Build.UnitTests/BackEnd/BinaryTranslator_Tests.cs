@@ -512,10 +512,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             value["foo"] = new BaseClass(1);
             value["alpha"] = new BaseClass(2);
 
-            TranslationHelpers.GetWriteTranslator().TranslateDictionary<Dictionary<string, BaseClass>, BaseClass>(ref value, BaseClass.FactoryForDeserialization);
+            TranslationHelpers.GetWriteTranslator().TranslateDictionary(ref value, BaseClass.FactoryForDeserialization);
 
             Dictionary<string, BaseClass> deserializedValue = null;
-            TranslationHelpers.GetReadTranslator().TranslateDictionary<Dictionary<string, BaseClass>, BaseClass>(ref deserializedValue, BaseClass.FactoryForDeserialization);
+            TranslationHelpers.GetReadTranslator().TranslateDictionary(ref deserializedValue, BaseClass.FactoryForDeserialization);
 
             Assert.Equal(value.Count, deserializedValue.Count);
             Assert.Equal(0, BaseClass.Comparer.Compare(value["foo"], deserializedValue["foo"]));
@@ -532,10 +532,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Dictionary<string, BaseClass> value = null;
 
-            TranslationHelpers.GetWriteTranslator().TranslateDictionary<Dictionary<string, BaseClass>, BaseClass>(ref value, BaseClass.FactoryForDeserialization);
+            TranslationHelpers.GetWriteTranslator().TranslateDictionary(ref value, BaseClass.FactoryForDeserialization);
 
             Dictionary<string, BaseClass> deserializedValue = null;
-            TranslationHelpers.GetReadTranslator().TranslateDictionary<Dictionary<string, BaseClass>, BaseClass>(ref deserializedValue, BaseClass.FactoryForDeserialization);
+            TranslationHelpers.GetReadTranslator().TranslateDictionary(ref deserializedValue, BaseClass.FactoryForDeserialization);
 
             Assert.Equal(value, deserializedValue);
         }
@@ -892,7 +892,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     return true;
                 }
 
-                if (obj.GetType() != this.GetType())
+                if (obj.GetType() != GetType())
                 {
                     return false;
                 }

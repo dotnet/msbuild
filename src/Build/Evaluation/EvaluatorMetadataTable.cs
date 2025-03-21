@@ -112,8 +112,8 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public EvaluatorMetadata(ProjectMetadataElement xml, string evaluatedValueEscaped)
             {
-                this.Xml = xml;
-                this.EvaluatedValueEscaped = evaluatedValueEscaped;
+                Xml = xml;
+                EvaluatedValueEscaped = evaluatedValueEscaped;
             }
 
             /// <summary>

@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public TestCollectionGroup StdGroup { get; }
         public LinkedEvaluationModify_Tests(MyTestCollectionGroup group)
         {
-            this.StdGroup = group;
+            StdGroup = group;
             group.Clear();
         }
 
@@ -31,17 +31,17 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectModifyRenameAndSafeAs()
         {
-            var pcLocal = this.StdGroup.Local;
-            var pcRemote = this.StdGroup.Remote[0];
+            var pcLocal = StdGroup.Local;
+            var pcRemote = StdGroup.Remote[0];
 
-            var proj1Path = this.StdGroup.StdProjectFiles[0];
+            var proj1Path = StdGroup.StdProjectFiles[0];
             var realProj = pcRemote.LoadProject(proj1Path);
             pcLocal.Importing = true;
             var viewProj = pcLocal.Collection.GetLoadedProjects(proj1Path).FirstOrDefault();
 
 
             ViewValidation.Verify(viewProj, realProj);
-            var savedPath = this.StdGroup.Disk.GetAbsolutePath("Saved.proj");
+            var savedPath = StdGroup.Disk.GetAbsolutePath("Saved.proj");
 
             Assert.NotEqual(proj1Path, savedPath);
             Assert.Equal(proj1Path, viewProj.FullPath);
@@ -105,10 +105,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectItemModify()
         {
-            var pcLocal = this.StdGroup.Local;
-            var pcRemote = this.StdGroup.Remote[0];
+            var pcLocal = StdGroup.Local;
+            var pcRemote = StdGroup.Remote[0];
 
-            var proj1Path = this.StdGroup.StdProjectFiles[0];
+            var proj1Path = StdGroup.StdProjectFiles[0];
             var realProj = pcRemote.LoadProject(proj1Path);
             pcLocal.Importing = true;
             var viewProj = pcLocal.Collection.GetLoadedProjects(proj1Path).FirstOrDefault();
@@ -301,10 +301,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectGlobalPropertyModify()
         {
-            var pcLocal = this.StdGroup.Local;
-            var pcRemote = this.StdGroup.Remote[0];
+            var pcLocal = StdGroup.Local;
+            var pcRemote = StdGroup.Remote[0];
 
-            var proj1Path = this.StdGroup.StdProjectFiles[0];
+            var proj1Path = StdGroup.StdProjectFiles[0];
             var realProj = pcRemote.LoadProject(proj1Path);
             pcLocal.Importing = true;
             var viewProj = pcLocal.Collection.GetLoadedProjects(proj1Path).FirstOrDefault();
@@ -337,10 +337,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectPropertyModify()
         {
-            var pcLocal = this.StdGroup.Local;
-            var pcRemote = this.StdGroup.Remote[0];
+            var pcLocal = StdGroup.Local;
+            var pcRemote = StdGroup.Remote[0];
 
-            var proj1Path = this.StdGroup.StdProjectFiles[0];
+            var proj1Path = StdGroup.StdProjectFiles[0];
             var realProj = pcRemote.LoadProject(proj1Path);
             pcLocal.Importing = true;
             var viewProj = pcLocal.Collection.GetLoadedProjects(proj1Path).FirstOrDefault();

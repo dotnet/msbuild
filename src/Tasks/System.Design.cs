@@ -92,13 +92,13 @@ namespace Microsoft.Build.Tasks
         {
             public MainAssemblyFallbackResourceManager(string baseName, Assembly assembly) : base(baseName, assembly)
             {
-                this.FallbackLocation = UltimateResourceFallbackLocation.MainAssembly;
+                FallbackLocation = UltimateResourceFallbackLocation.MainAssembly;
             }
         }
 
         internal SR()
         {
-            _resources = new MainAssemblyFallbackResourceManager("System.Design", this.GetType().Assembly);
+            _resources = new MainAssemblyFallbackResourceManager("System.Design", GetType().Assembly);
         }
 
         private static SR GetLoader()
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
-            string res = sys._resources.GetString(name, SR.Culture);
+            string res = sys._resources.GetString(name, Culture);
 
             if (args?.Length > 0)
             {
@@ -160,7 +160,7 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
-            return sys._resources.GetString(name, SR.Culture);
+            return sys._resources.GetString(name, Culture);
         }
 
         public static string GetString(string name, out bool usedFallback)
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
-            return sys._resources.GetObject(name, SR.Culture);
+            return sys._resources.GetObject(name, Culture);
         }
     }
 }

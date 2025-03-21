@@ -114,8 +114,8 @@ namespace Microsoft.Build.Framework
             string? toolsVersion)
             : this(projectId, message, helpKeyword, projectFile, targetNames, properties, items, parentBuildEventContext)
         {
-            this.GlobalProperties = globalProperties;
-            this.ToolsVersion = toolsVersion;
+            GlobalProperties = globalProperties;
+            ToolsVersion = toolsVersion;
         }
 
         /// <summary>
@@ -502,7 +502,7 @@ namespace Microsoft.Build.Framework
             else
             {
                 int count = reader.ReadInt32();
-                HashSet<string> set = EnumerableExtensions.NewHashSet<string>(count, StringComparer.OrdinalIgnoreCase);
+                HashSet<string> set = EnumerableExtensions.NewHashSet(count, StringComparer.OrdinalIgnoreCase);
                 for (int i = 0; i < count; i++)
                 {
                     set.Add(reader.ReadString());

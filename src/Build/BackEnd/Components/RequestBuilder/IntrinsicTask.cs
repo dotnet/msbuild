@@ -25,9 +25,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="logTaskInputs">Flag to determine whether or not to log task inputs.</param>
         protected IntrinsicTask(TargetLoggingContext loggingContext, ProjectInstance projectInstance, bool logTaskInputs)
         {
-            this.LoggingContext = loggingContext;
-            this.Project = projectInstance;
-            this.LogTaskInputs = logTaskInputs;
+            LoggingContext = loggingContext;
+            Project = projectInstance;
+            LogTaskInputs = logTaskInputs;
         }
 
         /// <summary>

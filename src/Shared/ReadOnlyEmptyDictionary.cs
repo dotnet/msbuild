@@ -262,7 +262,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Get empty enumerator
         /// </summary>
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
@@ -302,7 +302,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// CopyTo
         /// </summary>
-        public void CopyTo(System.Array array, int index)
+        public void CopyTo(Array array, int index)
         {
             // Nothing to do
         }

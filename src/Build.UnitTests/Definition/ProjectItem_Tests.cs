@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal(1 + 15 /* built-in metadata */, item2.MetadataCount);
 
             // Should still point at the same XML items
-            Assert.True(Object.ReferenceEquals(item1.DirectMetadata.First().Xml, item2.DirectMetadata.First().Xml));
+            Assert.True(ReferenceEquals(item1.DirectMetadata.First().Xml, item2.DirectMetadata.First().Xml));
         }
 
         /// <summary>

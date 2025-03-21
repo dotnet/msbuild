@@ -68,12 +68,12 @@ namespace Microsoft.Build.Logging
         /// <param name="fileFormatVersion">The file format version of the log file being read.</param>
         public BuildEventArgsReader(BinaryReader binaryReader, int fileFormatVersion)
         {
-            this._readStream = TransparentReadStream.EnsureTransparentReadStream(binaryReader.BaseStream);
+            _readStream = TransparentReadStream.EnsureTransparentReadStream(binaryReader.BaseStream);
             // make sure the reader we're going to use wraps the transparent stream wrapper
-            this._binaryReader = binaryReader.BaseStream == _readStream
+            _binaryReader = binaryReader.BaseStream == _readStream
                 ? binaryReader
                 : new BinaryReader(_readStream);
-            this._fileFormatVersion = fileFormatVersion;
+            _fileFormatVersion = fileFormatVersion;
         }
 
         /// <summary>
@@ -1658,7 +1658,7 @@ namespace Microsoft.Build.Logging
         private string ReadString()
         {
             string text = _binaryReader.ReadString();
-            if (this.StringReadDone != null)
+            if (StringReadDone != null)
             {
                 stringReadEventArgs.Reuse(text);
                 StringReadDone(stringReadEventArgs);
@@ -1709,7 +1709,7 @@ namespace Microsoft.Build.Logging
             // we reserve numbers 2-9 for future use.
             // the writer assigns 10 as the index of the first string
             index -= BuildEventArgsWriter.StringStartIndex;
-            if (index >= 0 && index < this.stringRecords.Count)
+            if (index >= 0 && index < stringRecords.Count)
             {
                 object storedString = stringRecords[index];
                 string result = stringStorage.Get(storedString);

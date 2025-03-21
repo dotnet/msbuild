@@ -13,7 +13,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     [Serializable]
     internal class AppConfigException :
-        System.ApplicationException
+        ApplicationException
     {
         /// <summary>
         /// The name of the app.config file.
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct the exception.
         /// </summary>
-        public AppConfigException(string message, string fileName, int line, int column, System.Exception inner) : base(message, inner)
+        public AppConfigException(string message, string fileName, int line, int column, Exception inner) : base(message, inner)
         {
             this.fileName = fileName;
             this.line = line;

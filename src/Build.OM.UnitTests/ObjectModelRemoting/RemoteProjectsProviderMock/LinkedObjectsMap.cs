@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             lock (Lock)
             {
-                if (this.CollectionId == 0)
+                if (CollectionId == 0)
                 {
                     throw new ObjectDisposedException(GetType().Name);
                 }
@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         private LinkedObjectsMap(UInt32 id)
         {
-            this.CollectionId = id;
+            CollectionId = id;
         }
         private UInt32 CollectionId { get; set; }
 
@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             lock (Lock)
             {
-                if (!this.activeLinks.TryGetValue(localId, out var holder))
+                if (!activeLinks.TryGetValue(localId, out var holder))
                 {
                     throw new ObjectDisposedException(typeof(SourceType).Name);
                 }
@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             lock (Lock)
             {
-                if (this.CollectionId == 0)
+                if (CollectionId == 0)
                 {
                     throw new ObjectDisposedException(GetType().Name);
                 }
@@ -228,11 +228,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             public virtual void Initialize(KeyType key, SourceType source, object context)
             {
-                this.Key = key;
-                this.Source = source;
+                Key = key;
+                Source = source;
             }
 
-            public override object StrongReference => this.Source;
+            public override object StrongReference => Source;
             public SourceType Source { get; protected set; }
         }
 
@@ -240,14 +240,14 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             public void ActivateFast(LinkedObjectsMap<KeyType> map)
             {
-                this.CollectionId = map.CollectionId;
-                map.AddUnderLock(this, (id) => this.LocalId = id);
+                CollectionId = map.CollectionId;
+                map.AddUnderLock(this, (id) => LocalId = id);
             }
 
             public LinkedObject ActivateSlow(LinkedObjectsMap<KeyType> map)
             {
-                this.CollectionId = map.CollectionId;
-                return map.GetOrAdd(this, (id) => this.LocalId = id);
+                CollectionId = map.CollectionId;
+                return map.GetOrAdd(this, (id) => LocalId = id);
             }
 
             ~LinkedObject()
@@ -273,10 +273,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             public WeakHolder(LinkedObject ro)
             {
-                this.StrongReference = ro.StrongReference;
-                this.LocalLinkId = ro.LocalId;
-                this.Key = ro.Key;
-                this.RemoterWeak = new WeakReference<LinkedObject>(ro);
+                StrongReference = ro.StrongReference;
+                LocalLinkId = ro.LocalId;
+                Key = ro.Key;
+                RemoterWeak = new WeakReference<LinkedObject>(ro);
             }
 
             public object StrongReference { get; private set; }
@@ -291,10 +291,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             public void Invalidate()
             {
-                this.StrongReference = null;
-                this.LocalLinkId = 0;
-                this.Key = default(KeyType);
-                this.RemoterWeak = null;
+                StrongReference = null;
+                LocalLinkId = 0;
+                Key = default(KeyType);
+                RemoterWeak = null;
             }
         }
     }

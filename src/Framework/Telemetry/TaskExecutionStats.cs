@@ -31,9 +31,9 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executio
 
     internal void AddAnother(TaskExecutionStats another)
     {
-        this.CumulativeExecutionTime += another.CumulativeExecutionTime;
-        this.TotalMemoryConsumption += another.TotalMemoryConsumption;
-        this.ExecutionsCount += another.ExecutionsCount;
+        CumulativeExecutionTime += another.CumulativeExecutionTime;
+        TotalMemoryConsumption += another.TotalMemoryConsumption;
+        ExecutionsCount += another.ExecutionsCount;
     }
 
     // We need custom Equals for easier assertations in tests

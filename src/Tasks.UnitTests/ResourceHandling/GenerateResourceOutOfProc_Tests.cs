@@ -287,7 +287,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
-                System.Threading.Thread.Sleep(200);
+                Thread.Sleep(200);
                 File.SetLastWriteTime(resxFile, DateTime.Now);
 
                 Utilities.ExecuteTask(t2);
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
-                System.Threading.Thread.Sleep(200);
+                Thread.Sleep(200);
                 File.SetLastWriteTime(bitmap, DateTime.Now);
 
                 Utilities.ExecuteTask(t2);
@@ -391,7 +391,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t2.StateFile = new TaskItem(createResources.StateFile.ItemSpec);
                 t2.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
 
-                System.Threading.Thread.Sleep(200);
+                Thread.Sleep(200);
                 _output.WriteLine("Touch one input");
                 File.SetLastWriteTime(firstResx, DateTime.Now);
 
@@ -465,7 +465,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
-                System.Threading.Thread.Sleep(200);
+                Thread.Sleep(200);
 
                 Utilities.ExecuteTask(t2);
 
@@ -524,7 +524,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
                 DateTime time2 = File.GetLastWriteTime(t.OutputResources[1].ItemSpec);
-                System.Threading.Thread.Sleep(200);
+                Thread.Sleep(200);
 
                 Utilities.ExecuteTask(t2);
                 // Although everything was up to date, OutputResources and FilesWritten
@@ -3133,7 +3133,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 // the 28,000 command line max length limit in order to validate that resgen is behaving properly in that scenario
                 for (int x = 0; x < filesToBeCreated; x++)
                 {
-                    string fileName = new String('c', 133) + String.Format("{0:00}", x);
+                    string fileName = new String('c', 133) + String.Format(/*lang=json*/ "{0:00}", x);
                     string resxFile = MyResxFileCreator(tempFolder, fileName);
                     string resourcesFile = Path.ChangeExtension(fileName, ".resources");
                     sources.Add(new TaskItem(resxFile));

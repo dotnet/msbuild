@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
 
-                Assert.True(Object.ReferenceEquals(project, project2));
+                Assert.True(ReferenceEquals(project, project2));
             }
             finally
             {

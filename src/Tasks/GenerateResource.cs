@@ -839,8 +839,8 @@ namespace Microsoft.Build.Tasks
                                         OutputDirectory,
                                         WarnOnBinaryFormatterUse);
 
-                            this.StronglyTypedClassName = process.StronglyTypedClassName; // in case a default was chosen
-                            this.StronglyTypedFileName = process.StronglyTypedFilename;   // in case a default was chosen
+                            StronglyTypedClassName = process.StronglyTypedClassName; // in case a default was chosen
+                            StronglyTypedFileName = process.StronglyTypedFilename;   // in case a default was chosen
                             _stronglyTypedResourceSuccessfullyCreated = process.StronglyTypedResourceSuccessfullyCreated;
                             if (process.UnsuccessfullyCreatedOutFiles != null)
                             {
@@ -1080,7 +1080,7 @@ namespace Microsoft.Build.Tasks
             {
                 _resgenPath = SdkToolsPathUtility.GeneratePathToTool(
                     SdkToolsPathUtility.FileInfoExists,
-                    Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
+                    Utilities.ProcessorArchitecture.CurrentProcessArchitecture,
                     SdkToolsPath,
                     "resgen.exe",
                     Log,
@@ -1705,7 +1705,7 @@ namespace Microsoft.Build.Tasks
 
             // Check the timestamp of each of the passed-in references to find the newest;
             // and then the additional inputs
-            ITaskItem[] inputs = this.References ?? [.. (this.AdditionalInputs ?? [])];
+            ITaskItem[] inputs = References ?? [.. (AdditionalInputs ?? [])];
 
             foreach (ITaskItem input in inputs)
             {
@@ -2131,9 +2131,9 @@ namespace Microsoft.Build.Tasks
         {
             // Add any output resources that were successfully created,
             // or would have been if they weren't already up to date (important for Clean)
-            if (this.OutputResources != null)
+            if (OutputResources != null)
             {
-                foreach (ITaskItem item in this.OutputResources)
+                foreach (ITaskItem item in OutputResources)
                 {
                     _filesWritten.Add(item);
                 }
@@ -2168,7 +2168,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                _filesWritten.Add(new TaskItem(this.StronglyTypedFileName));
+                _filesWritten.Add(new TaskItem(StronglyTypedFileName));
             }
         }
 
@@ -3440,7 +3440,7 @@ namespace Microsoft.Build.Tasks
                 {
                     _stronglyTypedFilename = GenerateDefaultStronglyTypedFilename(provider, outFile);
                 }
-                sourceFile = this.StronglyTypedFilename;
+                sourceFile = StronglyTypedFilename;
 
                 _logger.LogMessageFromResources("GenerateResource.CreatingSTR", _stronglyTypedFilename);
 
@@ -4014,7 +4014,7 @@ namespace Microsoft.Build.Tasks
                 get { return column; }
             }
         }
-#endregion // Code from ResGen.EXE
+        #endregion // Code from ResGen.EXE
     }
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
@@ -4145,7 +4145,7 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (ITaskItem referencePath in _referencePaths)
                     {
-                        Assembly a = this.GetAssemblyByPath(referencePath.ItemSpec, throwOnError);
+                        Assembly a = GetAssemblyByPath(referencePath.ItemSpec, throwOnError);
                         if (a != null)
                         {
                             result = a.GetType(name, false, ignoreCase);

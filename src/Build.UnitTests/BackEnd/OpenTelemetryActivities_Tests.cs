@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Xunit;
 using Shouldly;
+using Xunit;
 
 namespace Microsoft.Build.Framework.Telemetry.Tests
 {
@@ -17,7 +17,7 @@ namespace Microsoft.Build.Framework.Telemetry.Tests
         public void WithTag_ShouldSetUnhashedValue()
         {
             var activity = new Activity("TestActivity");
-            activity.Start(); 
+            activity.Start();
 
             var telemetryItem = new TelemetryItem(
                 Name: "TestItem",

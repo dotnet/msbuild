@@ -775,7 +775,7 @@ namespace InlineTask
 
             TaskLoggingHelper log = new TaskLoggingHelper(buildEngine, TaskName)
             {
-                TaskResources = Shared.AssemblyResources.PrimaryResources
+                TaskResources = AssemblyResources.PrimaryResources
             };
 
             bool success = RoslynCodeTaskFactory.TryLoadTaskBody(log, TaskName, taskBody, new List<TaskPropertyInfo>(), out RoslynCodeTaskFactoryTaskInfo _);
@@ -801,7 +801,7 @@ namespace InlineTask
 
             TaskLoggingHelper log = new TaskLoggingHelper(buildEngine, TaskName)
             {
-                TaskResources = Shared.AssemblyResources.PrimaryResources
+                TaskResources = AssemblyResources.PrimaryResources
             };
 
             bool success = RoslynCodeTaskFactory.TryLoadTaskBody(log, TaskName, taskBody, parameters ?? new List<TaskPropertyInfo>(), out RoslynCodeTaskFactoryTaskInfo taskInfo);

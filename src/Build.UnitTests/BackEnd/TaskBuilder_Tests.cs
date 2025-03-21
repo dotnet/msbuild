@@ -434,7 +434,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TasksCanAddRecursiveDirBuiltInMetadata()
         {
-            MockLogger logger = new MockLogger(this._testOutput);
+            MockLogger logger = new MockLogger(_testOutput);
 
             string projectFileContents = ObjectModelHelpers.CleanupFileContents($@"
 <Project>

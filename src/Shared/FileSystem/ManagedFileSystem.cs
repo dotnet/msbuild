@@ -16,7 +16,7 @@ namespace Microsoft.Build.Shared.FileSystem
     {
         private static readonly ManagedFileSystem Instance = new ManagedFileSystem();
 
-        public static ManagedFileSystem Singleton() => ManagedFileSystem.Instance;
+        public static ManagedFileSystem Singleton() => Instance;
 
         private static bool ShouldUseMicrosoftIO
         {
@@ -56,10 +56,10 @@ namespace Microsoft.Build.Shared.FileSystem
 
 #if FEATURE_MSIOREDIST
         private static IEnumerable<string> HandleFileLoadException(
-            Func<string, string, Microsoft.IO.SearchOption, IEnumerable<string>> enumerateFunctionDelegate,
+            Func<string, string, IO.SearchOption, IEnumerable<string>> enumerateFunctionDelegate,
             string path,
             string searchPattern,
-            Microsoft.IO.SearchOption searchOption)
+            IO.SearchOption searchOption)
         {
             try
             {
@@ -85,10 +85,10 @@ namespace Microsoft.Build.Shared.FileSystem
 #if FEATURE_MSIOREDIST
             return ShouldUseMicrosoftIO
                 ? HandleFileLoadException(
-                    (path, searchPattern, searchOption) => Microsoft.IO.Directory.EnumerateFiles(path, searchPattern, searchOption),
+                    (path, searchPattern, searchOption) => IO.Directory.EnumerateFiles(path, searchPattern, searchOption),
                     path,
                     searchPattern,
-                    (Microsoft.IO.SearchOption)searchOption)
+                    (IO.SearchOption)searchOption)
                 : Directory.EnumerateFiles(path, searchPattern, searchOption);
 #else
             return Directory.EnumerateFiles(path, searchPattern, searchOption);
@@ -100,10 +100,10 @@ namespace Microsoft.Build.Shared.FileSystem
 #if FEATURE_MSIOREDIST
             return ShouldUseMicrosoftIO
                 ? HandleFileLoadException(
-                    (path, searchPattern, searchOption) => Microsoft.IO.Directory.EnumerateDirectories(path, searchPattern, searchOption),
+                    (path, searchPattern, searchOption) => IO.Directory.EnumerateDirectories(path, searchPattern, searchOption),
                     path,
                     searchPattern,
-                    (Microsoft.IO.SearchOption)searchOption)
+                    (IO.SearchOption)searchOption)
                 : Directory.EnumerateDirectories(path, searchPattern, searchOption);
 #else
             return Directory.EnumerateDirectories(path, searchPattern, searchOption);
@@ -115,9 +115,9 @@ namespace Microsoft.Build.Shared.FileSystem
 #if FEATURE_MSIOREDIST
             return ShouldUseMicrosoftIO
                 ? HandleFileLoadException(
-                    (path, searchPattern, searchOption) => Microsoft.IO.Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption),
+                    (path, searchPattern, searchOption) => IO.Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption),
                     path,
-                    searchPattern, (Microsoft.IO.SearchOption)searchOption)
+                    searchPattern, (IO.SearchOption)searchOption)
                 : Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption);
 #else
             return Directory.EnumerateFileSystemEntries(path, searchPattern, searchOption);

@@ -558,7 +558,7 @@ namespace Microsoft.Build.Evaluation
             ProjectRootElement existingWeakEntry;
             _weakCache.TryGetValue(projectRootElement.FullPath, out existingWeakEntry);
 
-            if (existingWeakEntry != null && !object.ReferenceEquals(existingWeakEntry, projectRootElement))
+            if (existingWeakEntry != null && !ReferenceEquals(existingWeakEntry, projectRootElement))
             {
                 _strongCache.Remove(existingWeakEntry);
             }
@@ -586,7 +586,7 @@ namespace Microsoft.Build.Evaluation
 
             while (node != null)
             {
-                if (Object.ReferenceEquals(node.Value, projectRootElement))
+                if (ReferenceEquals(node.Value, projectRootElement))
                 {
                     // DebugTraceCache("Boosting: ", projectRootElement.FullPath);
                     _strongCache.Remove(node);

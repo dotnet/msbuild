@@ -41,8 +41,8 @@ namespace Microsoft.Build.Framework
         {
             if (capacity <= MAX_BUILDER_SIZE)
             {
-                StringBuilder sb = StringBuilderCache.t_cachedInstance;
-                StringBuilderCache.t_cachedInstance = null;
+                StringBuilder sb = t_cachedInstance;
+                t_cachedInstance = null;
                 if (sb != null)
                 {
                     // Avoid StringBuilder block fragmentation by getting a new StringBuilder
@@ -89,8 +89,8 @@ namespace Microsoft.Build.Framework
             {
                 // Assert we are not replacing another string builder. That could happen when Acquire is reentered.
                 // User of StringBuilderCache has to make sure that calling method call stacks do not also use StringBuilderCache.
-                Debug.Assert(StringBuilderCache.t_cachedInstance == null, "Unexpected replacing of other StringBuilder.");
-                StringBuilderCache.t_cachedInstance = sb;
+                Debug.Assert(t_cachedInstance == null, "Unexpected replacing of other StringBuilder.");
+                t_cachedInstance = sb;
             }
 #if DEBUG && !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
             MSBuildEventSource.Log.ReusableStringBuilderFactoryStop(hash: sb.GetHashCode(), returningCapacity: sb.Capacity, returningLength: sb.Length, type: sb.Capacity <= MAX_BUILDER_SIZE ? "sbc-return" : "sbc-discard");

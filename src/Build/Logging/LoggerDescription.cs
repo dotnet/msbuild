@@ -163,7 +163,7 @@ namespace Microsoft.Build.Logging
                 // Check if the class was not found in the assembly
                 if (forwardingLogger == null)
                 {
-                    InternalLoggerException.Throw(null, null, "LoggerNotFoundError", true, this.Name);
+                    InternalLoggerException.Throw(null, null, "LoggerNotFoundError", true, Name);
                 }
             }
             catch (Exception e) // Wrap other exceptions in a more meaningful exception. LoggerException and InternalLoggerException are already meaningful.

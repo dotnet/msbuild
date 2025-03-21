@@ -40,9 +40,9 @@ namespace Microsoft.Build.Tasks
         public TaskLoggingHelperExtension(ITask taskInstance, ResourceManager primaryResources, ResourceManager sharedResources, string helpKeywordPrefix) :
             base(taskInstance)
         {
-            this.TaskResources = primaryResources;
-            this.TaskSharedResources = sharedResources;
-            this.HelpKeywordPrefix = helpKeywordPrefix;
+            TaskResources = primaryResources;
+            TaskSharedResources = sharedResources;
+            HelpKeywordPrefix = helpKeywordPrefix;
         }
 
         #endregion

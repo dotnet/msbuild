@@ -176,12 +176,12 @@ namespace Microsoft.Build.BackEnd
 
                 int childProcessId = processInfo.dwProcessId;
 
-                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
+                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != BackendNativeMethods.InvalidHandle)
                 {
                     NativeMethodsShared.CloseHandle(processInfo.hProcess);
                 }
 
-                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
+                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != BackendNativeMethods.InvalidHandle)
                 {
                     NativeMethodsShared.CloseHandle(processInfo.hThread);
                 }

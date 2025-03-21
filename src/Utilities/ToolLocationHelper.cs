@@ -449,7 +449,7 @@ namespace Microsoft.Build.Utilities
             {
                 foreach (KeyValuePair<string, string> extension in moniker.ExtensionSDKs)
                 {
-                    extensionSDKsAndVersions[extension.Key] = Tuple.Create<string, string>(extension.Value, moniker.TargetPlatformVersion.ToString());
+                    extensionSDKsAndVersions[extension.Key] = Tuple.Create(extension.Value, moniker.TargetPlatformVersion.ToString());
                 }
             }
             return extensionSDKsAndVersions;
@@ -469,13 +469,13 @@ namespace Microsoft.Build.Utilities
             IEnumerable<TargetPlatformSDK> targetPlatformSDKs = RetrieveTargetPlatformList(diskRoots, extensionDiskRoots, registryRoot);
 
             return targetPlatformSDKs
-                .Where<TargetPlatformSDK>(platformSDK =>
+                .Where(platformSDK =>
                     string.IsNullOrEmpty(platformSDK.TargetPlatformIdentifier)
                     ||
                     (
                         platformSDK.TargetPlatformIdentifier.Equals(targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
                         && platformSDK.TargetPlatformVersion <= targetPlatformVersion) || platformSDK.ContainsPlatform(targetPlatformIdentifier, targetPlatformVersionString))
-                .OrderBy<TargetPlatformSDK, Version>(platform => platform.TargetPlatformVersion);
+                .OrderBy(platform => platform.TargetPlatformVersion);
         }
 
         /// <summary>
@@ -523,7 +523,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentLength(sdkMoniker);
 
             IEnumerable<TargetPlatformSDK> targetPlatforms = RetrieveTargetPlatformList(diskRoots, extensionDiskRoots, registryRoot);
-            var targetPlatformMoniker = targetPlatforms.Where<TargetPlatformSDK>(
+            var targetPlatformMoniker = targetPlatforms.Where(
                 platform =>
                     (
                         string.IsNullOrEmpty(platform.TargetPlatformIdentifier)
@@ -531,8 +531,8 @@ namespace Microsoft.Build.Utilities
                         (platform.TargetPlatformIdentifier.Equals(targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
                         && platform.TargetPlatformVersion <= targetPlatformVersion))
                     && platform.ExtensionSDKs.ContainsKey(sdkMoniker))
-                .OrderByDescending<TargetPlatformSDK, Version>(platform => platform.TargetPlatformVersion)
-                .DefaultIfEmpty(null).FirstOrDefault<TargetPlatformSDK>();
+                .OrderByDescending(platform => platform.TargetPlatformVersion)
+                .DefaultIfEmpty(null).FirstOrDefault();
 
             if (targetPlatformMoniker != null)
             {
@@ -769,7 +769,7 @@ namespace Microsoft.Build.Utilities
         public static IList<TargetPlatformSDK> GetTargetPlatformSdks(string[] diskRoots, string registryRoot)
         {
             IEnumerable<TargetPlatformSDK> targetPlatforms = RetrieveTargetPlatformList(diskRoots, null, registryRoot);
-            return targetPlatforms.Where<TargetPlatformSDK>(platform => platform.Path != null).ToList<TargetPlatformSDK>();
+            return targetPlatforms.Where(platform => platform.Path != null).ToList();
         }
 
         /// <summary>
@@ -1588,7 +1588,7 @@ namespace Microsoft.Build.Utilities
             IEnumerable<TargetPlatformSDK> targetPlatforms = RetrieveTargetPlatformList(diskRoots, multiPlatformDiskRoots, registryRoot);
 
             TargetPlatformSDK matchingSdk = targetPlatforms
-                .FirstOrDefault<TargetPlatformSDK>(platform =>
+                .FirstOrDefault(platform =>
                     string.Equals(platform.TargetPlatformIdentifier, targetPlatformIdentifier, StringComparison.OrdinalIgnoreCase)
                     && Equals(platform.TargetPlatformVersion, targetPlatformVersion));
 
@@ -1598,7 +1598,7 @@ namespace Microsoft.Build.Utilities
             if (matchingSdk == null)
             {
                 string versionString = targetPlatformVersion.ToString();
-                matchingSdk = targetPlatforms.FirstOrDefault<TargetPlatformSDK>(platform => platform.ContainsPlatform(targetPlatformIdentifier, versionString));
+                matchingSdk = targetPlatforms.FirstOrDefault(platform => platform.ContainsPlatform(targetPlatformIdentifier, versionString));
             }
             return matchingSdk;
         }
@@ -2597,7 +2597,7 @@ namespace Microsoft.Build.Utilities
                     // Get a list of subdirectories under the root path and identifier, Ie. c:\Program files\Microsoft SDKs\Windows we should see things like, V8.0, 8.0, 9.0 ect.
                     // Only grab the folders that have a version number (they can start with a v or not).
 
-                    SortedDictionary<Version, List<string>> versionsInRoot = VersionUtilities.GatherVersionStrings(null, rootPathWithIdentifier.GetDirectories().Select<DirectoryInfo, string>(directory => directory.Name));
+                    SortedDictionary<Version, List<string>> versionsInRoot = VersionUtilities.GatherVersionStrings(null, rootPathWithIdentifier.GetDirectories().Select(directory => directory.Name));
 
                     ErrorUtilities.DebugTraceMessage("GatherSDKListFromDirectory", "Found '{0}' version folders under the identifier path '{1}'. ", versionsInRoot.Count, rootPathWithIdentifier);
 
@@ -3370,18 +3370,18 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="architecture"></param>
         /// <returns></returns>
-        internal static string ConvertDotNetFrameworkArchitectureToProcessorArchitecture(DotNetFrameworkArchitecture architecture)
+        internal static string ConvertDotNetFrameworkArchitectureToProcessorArchitecture(UtilitiesDotNetFrameworkArchitecture architecture)
         {
             switch (architecture)
             {
-                case DotNetFrameworkArchitecture.Bitness32:
+                case UtilitiesDotNetFrameworkArchitecture.Bitness32:
                     if (ProcessorArchitecture.CurrentProcessArchitecture == ProcessorArchitecture.ARM ||
                         ProcessorArchitecture.CurrentProcessArchitecture == ProcessorArchitecture.ARM64)
                     {
                         return ProcessorArchitecture.ARM;
                     }
                     return ProcessorArchitecture.X86;
-                case DotNetFrameworkArchitecture.Bitness64:
+                case UtilitiesDotNetFrameworkArchitecture.Bitness64:
                     // We need to know which 64-bit architecture we're on.
                     return NativeMethodsShared.ProcessorArchitectureNative switch
                     {
@@ -3395,7 +3395,7 @@ namespace Microsoft.Build.Utilities
                         // unknown architecture? return null
                         _ => null,
                     };
-                case DotNetFrameworkArchitecture.Current:
+                case UtilitiesDotNetFrameworkArchitecture.Current:
                     return ProcessorArchitecture.CurrentProcessArchitecture;
             }
 
@@ -3441,7 +3441,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="architecture">Desired architecture of the resultant file.</param>
         /// <returns>Path to the appropriate Windows SDK file</returns>
         [Obsolete("Consider using GetPlatformSDKLocationFile instead")]
-        public static string GetPathToWindowsSdkFile(string fileName, TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion, DotNetFrameworkArchitecture architecture)
+        public static string GetPathToWindowsSdkFile(string fileName, TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion, UtilitiesDotNetFrameworkArchitecture architecture)
             => GetPathToWindowsSdkFile(
                 fileName,
                 version,
@@ -3460,7 +3460,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="canFallBackIfNecessary"><code>true</code> to fallback, otherwise <code>false</code>.</param>
         /// <returns>Path to the appropriate Windows SDK file</returns>
         [Obsolete("Consider using GetPlatformSDKLocationFile instead")]
-        private static string GetPathToWindowsSdkFile(string fileName, TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion, DotNetFrameworkArchitecture architecture, bool canFallBackIfNecessary)
+        private static string GetPathToWindowsSdkFile(string fileName, TargetDotNetFrameworkVersion version, VisualStudioVersion visualStudioVersion, UtilitiesDotNetFrameworkArchitecture architecture, bool canFallBackIfNecessary)
         {
             string pathToSdk = GetPathToWindowsSdk(version, visualStudioVersion);
             string filePath = null;
@@ -3999,6 +3999,6 @@ namespace Microsoft.Build.Utilities
             }
         }
 
-#endregion
+        #endregion
     }
 }

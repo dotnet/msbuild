@@ -63,7 +63,7 @@ namespace Microsoft.Build.Evaluation
             P prop = _wrapped.GetProperty(name);
             if (IsPropertyReadTrackingRequested)
             {
-                this.TrackPropertyRead(name, prop);
+                TrackPropertyRead(name, prop);
             }
 
             return prop;
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Evaluation
             P prop = _wrapped.GetProperty(name, startIndex, endIndex);
             if (IsPropertyReadTrackingRequested)
             {
-                this.TrackPropertyRead(name.Substring(startIndex, endIndex - startIndex + 1), prop);
+                TrackPropertyRead(name.Substring(startIndex, endIndex - startIndex + 1), prop);
             }
 
             return prop;
@@ -99,11 +99,11 @@ namespace Microsoft.Build.Evaluation
             P? originalProperty = _wrapped.GetProperty(name);
             P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, _evaluationLoggingContext, isEnvironmentVariable, isCommandLineProperty);
 
-            this.TrackPropertyWrite(
+            TrackPropertyWrite(
                 originalProperty,
                 newProperty,
                 null,
-                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable, isCommandLineProperty),
+                DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable, isCommandLineProperty),
                 loggingContext);
 
             return newProperty;
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Evaluation
             P? originalProperty = _wrapped.GetProperty(propertyElement.Name);
             P newProperty = _wrapped.SetProperty(propertyElement, evaluatedValueEscaped, loggingContext);
 
-            this.TrackPropertyWrite(
+            TrackPropertyWrite(
                 originalProperty,
                 newProperty,
                 propertyElement.Location,
@@ -199,11 +199,11 @@ namespace Microsoft.Build.Evaluation
             // track it as an environment variable read.
             if (IsEnvironmentVariableReadTrackingRequested && _wrapped.EnvironmentVariablePropertiesDictionary.Contains(name) && !_overwrittenEnvironmentVariables.Contains(name))
             {
-                this.TrackEnvironmentVariableRead(name);
+                TrackEnvironmentVariableRead(name);
             }
             else if (property == null)
             {
-                this.TrackUninitializedPropertyRead(name);
+                TrackUninitializedPropertyRead(name);
             }
         }
 
@@ -459,7 +459,8 @@ namespace Microsoft.Build.Evaluation
                         location.File,
                         location.Line,
                         location.Column,
-                        message: null) { BuildEventContext = loggingContext.BuildEventContext };
+                        message: null)
+                    { BuildEventContext = loggingContext.BuildEventContext };
 
                     loggingContext.LogBuildEvent(args);
                 }
@@ -478,7 +479,8 @@ namespace Microsoft.Build.Evaluation
                             location.File,
                             location.Line,
                             location.Column,
-                            message: null) { BuildEventContext = loggingContext.BuildEventContext, };
+                            message: null)
+                        { BuildEventContext = loggingContext.BuildEventContext, };
 
                         loggingContext.LogBuildEvent(args);
                     }

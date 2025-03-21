@@ -19,15 +19,15 @@ namespace Microsoft.Build.UnitTests
 
         private DirectoryInfo EnsureTempRoot()
         {
-            if (this.root == null)
+            if (root == null)
             {
-                this.root = new DirectoryInfo(
-                    this.Parent != null ?
-                          this.Parent.GetAbsolutePath(this.SubFolder)
+                root = new DirectoryInfo(
+                    Parent != null ?
+                          Parent.GetAbsolutePath(SubFolder)
                         : FileUtilities.GetTemporaryDirectory(true));
             }
 
-            return this.root;
+            return root;
         }
 
         private static bool IsDirSlash(char c) => c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar;
@@ -38,18 +38,18 @@ namespace Microsoft.Build.UnitTests
 
         private TransientIO(TransientIO parent, string subFolder)
         {
-            this.SubFolder = subFolder;
-            this.Parent = parent;
+            SubFolder = subFolder;
+            Parent = parent;
         }
 
         public bool IsControled(string path)
         {
-            if (this.root == null || path == null)
+            if (root == null || path == null)
             {
                 return false;
             }
 
-            var tempRoot = this.RootFolder;
+            var tempRoot = RootFolder;
             path = Path.GetFullPath(path);
             return path != null && tempRoot != null
                 && path.Length > tempRoot.Length
@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests
 
         public void EnsureFileLocation(string path)
         {
-            var absolute = this.GetAbsolutePath(path);
+            var absolute = GetAbsolutePath(path);
             var parent = Path.GetDirectoryName(absolute);
             if (!Directory.Exists(parent))
             {
@@ -73,11 +73,11 @@ namespace Microsoft.Build.UnitTests
         {
             var absolute = GetAbsolutePath(path);
 
-            return absolute.Substring(this.RootFolder.Length + 1);
+            return absolute.Substring(RootFolder.Length + 1);
         }
         public string GetAbsolutePath(string relative)
         {
-            var tempRoot = this.RootFolder;
+            var tempRoot = RootFolder;
 
             var absolute = Path.GetFullPath(Path.IsPathRooted(relative) ? relative : Path.Combine(tempRoot, relative));
             if (!IsControled(absolute))
@@ -90,11 +90,11 @@ namespace Microsoft.Build.UnitTests
 
         public TransientIO GetSubFolder(string path)
         {
-            var subFolder = this.GetRelativePath(path);
-            if (!this.Children.TryGetValue(subFolder, out var result))
+            var subFolder = GetRelativePath(path);
+            if (!Children.TryGetValue(subFolder, out var result))
             {
                 result = new TransientIO(this, subFolder);
-                this.Children.Add(subFolder, result);
+                Children.Add(subFolder, result);
             }
 
             return result;
@@ -102,20 +102,20 @@ namespace Microsoft.Build.UnitTests
 
         public string WriteProjectFile(string path, string content)
         {
-            var absolute = this.GetAbsolutePath(path);
+            var absolute = GetAbsolutePath(path);
             content = ObjectModelHelpers.CleanupFileContents(content);
-            this.EnsureFileLocation(absolute);
+            EnsureFileLocation(absolute);
             File.WriteAllText(absolute, content);
             return absolute;
         }
 
         public void Clear()
         {
-            if (this.root != null && Directory.Exists(this.root.FullName))
+            if (root != null && Directory.Exists(root.FullName))
             {
                 // Note: FileUtilities.DeleteDirectoryNoThrow will be very slow if the directory does not exists. (it will retry with timeout in this case for ~0.5 sec).
                 // not sure if that was intentional, so have not fixed it there but instead we check exist here.
-                FileUtilities.DeleteDirectoryNoThrow(this.root.FullName, true);
+                FileUtilities.DeleteDirectoryNoThrow(root.FullName, true);
             }
 
             Reset();
@@ -123,8 +123,8 @@ namespace Microsoft.Build.UnitTests
 
         private void Reset()
         {
-            this.root = null;
-            foreach (var child in this.Children.Values)
+            root = null;
+            foreach (var child in Children.Values)
             {
                 child.Reset();
             }
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests
 
         public void Dispose()
         {
-            this.Clear();
+            Clear();
             // this object still can be used ...
         }
     }

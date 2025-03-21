@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             try
             {
-                path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
+                path = Build.Shared.FileUtilities.GetTemporaryFileName();
                 ProjectRootElement projectXml = ProjectRootElement.Create(path);
                 projectXml.Save();
 

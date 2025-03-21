@@ -1303,7 +1303,7 @@ namespace Microsoft.Build.UnitTests.Logging
             if (properties != null)
             {
                 // Ensure the properties were cloned into a new dictionary
-                Assert.False(Object.ReferenceEquals(actualEventArgs.Properties, properties));
+                Assert.False(ReferenceEquals(actualEventArgs.Properties, properties));
             }
         }
 

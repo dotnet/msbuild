@@ -99,7 +99,7 @@ namespace Microsoft.Build.Framework
         /// <param name="info">Serialization info</param>
         /// <param name="context">Streaming context</param>
 #if FEATURE_SECURITY_PERMISSIONS
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
 #if NET8_0_OR_GREATER
         [Obsolete(DiagnosticId = "SYSLIB0051")]

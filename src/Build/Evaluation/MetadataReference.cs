@@ -32,8 +32,8 @@ namespace Microsoft.Build.Evaluation
             string itemName,
             string metadataName)
         {
-            this.ItemName = itemName;
-            this.MetadataName = metadataName;
+            ItemName = itemName;
+            MetadataName = metadataName;
         }
     }
 }

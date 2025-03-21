@@ -23,6 +23,6 @@ public static class DummyMappedDriveUtils
 
     public static Lazy<DummyMappedDrive?> GetLazyDummyMappedDrive() => new Lazy<DummyMappedDrive?>(() =>
         {
-            return NativeMethods.IsWindows ? new DummyMappedDrive() : default;
+            return NativeMethodsShared.IsWindows ? new DummyMappedDrive() : default;
         });
 }

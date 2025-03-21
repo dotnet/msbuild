@@ -177,7 +177,7 @@ public class EndToEndTests : IDisposable
         string[] depsFiles = Directory.GetFiles(Path.Combine(workFolder.Path, entryProjectName), $"{entryProjectName}.deps.json", SearchOption.AllDirectories);
         depsFiles.Length.ShouldBe(1);
 
-        JsonNode? depsJson = JsonObject.Parse(File.ReadAllText(depsFiles[0]));
+        JsonNode? depsJson = JsonNode.Parse(File.ReadAllText(depsFiles[0]));
 
         depsJson.ShouldNotBeNull("Valid deps.json file expected");
 

@@ -358,7 +358,7 @@ namespace Microsoft.Build.Shared
                 // For code access security.
                 return [];
             }
-            catch (System.UnauthorizedAccessException)
+            catch (UnauthorizedAccessException)
             {
                 // For OS security.
                 return [];
@@ -414,7 +414,7 @@ namespace Microsoft.Build.Shared
                 // For code access security.
                 return [];
             }
-            catch (System.UnauthorizedAccessException)
+            catch (UnauthorizedAccessException)
             {
                 // For OS security.
                 return [];
@@ -564,7 +564,7 @@ namespace Microsoft.Build.Shared
                 filenamePart = "*.*";
             }
 
-            fixedDirectoryPart = FileMatcher.GetLongPathName(fixedDirectoryPart, _getFileSystemEntries);
+            fixedDirectoryPart = GetLongPathName(fixedDirectoryPart, _getFileSystemEntries);
         }
 
         /// <summary>
@@ -1633,7 +1633,7 @@ namespace Microsoft.Build.Shared
         {
             // Use a span-based Path.GetFileName if it is available.
 #if FEATURE_MSIOREDIST
-            return IsMatch(Microsoft.IO.Path.GetFileName(path.AsSpan()), pattern);
+            return IsMatch(IO.Path.GetFileName(path.AsSpan()), pattern);
 #elif NETSTANDARD2_0 || NETFRAMEWORK
             return IsMatch(Path.GetFileName(path), pattern);
 #else

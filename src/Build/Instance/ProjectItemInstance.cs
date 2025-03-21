@@ -880,7 +880,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private TaskItem(ITranslator translator, LookasideStringInterner interner)
             {
-                this.TranslateWithInterning(translator, interner);
+                TranslateWithInterning(translator, interner);
             }
 
             /// <summary>
@@ -999,7 +999,7 @@ namespace Microsoft.Build.Execution
             /// Returns some value useful for a key in a dictionary
             /// </summary>
             [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-            string Microsoft.Build.Collections.IKeyed.Key
+            string IKeyed.Key
             {
                 get { return _includeEscaped; }
             }
@@ -1586,7 +1586,7 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public override bool Equals(object obj)
             {
-                return this.Equals(obj as TaskItem);
+                return Equals(obj as TaskItem);
             }
 
             /// <summary>
@@ -1606,7 +1606,7 @@ namespace Microsoft.Build.Execution
                     return false;
                 }
 
-                if (Object.ReferenceEquals(this, other))
+                if (ReferenceEquals(this, other))
                 {
                     return true;
                 }
@@ -1986,7 +1986,7 @@ namespace Microsoft.Build.Execution
                     : this(project)
                 {
                     ErrorUtilities.VerifyThrowInternalLength(itemType, nameof(itemType));
-                    this.ItemType = itemType;
+                    ItemType = itemType;
                 }
 
                 /// <summary>

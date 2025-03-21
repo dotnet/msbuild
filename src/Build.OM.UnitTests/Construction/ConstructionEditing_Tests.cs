@@ -2195,7 +2195,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.True(Object.ReferenceEquals(property1, property2));
+            Assert.True(ReferenceEquals(property1, property2));
         }
 
         /// <summary>

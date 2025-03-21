@@ -407,7 +407,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         private bool ParseProperty()
         {
-            string propertyExpression = this.ParsePropertyOrItemMetadata();
+            string propertyExpression = ParsePropertyOrItemMetadata();
 
             if (propertyExpression == null)
             {
@@ -426,7 +426,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         private bool ParseItemMetadata()
         {
-            string itemMetadataExpression = this.ParsePropertyOrItemMetadata();
+            string itemMetadataExpression = ParsePropertyOrItemMetadata();
 
             if (itemMetadataExpression == null)
             {

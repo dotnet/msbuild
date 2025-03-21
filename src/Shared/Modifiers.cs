@@ -107,7 +107,7 @@ namespace Microsoft.Build.Shared
                             default:
                                 return false;
                             case 'R': // RootDir
-                                if (name == FileUtilities.ItemSpecModifiers.RootDir)
+                                if (name == RootDir)
                                 {
                                     return true;
                                 }
@@ -123,11 +123,11 @@ namespace Microsoft.Build.Shared
                             default:
                                 return false;
                             case 'F': // Filename, FullPath
-                                if (name == FileUtilities.ItemSpecModifiers.FullPath)
+                                if (name == FullPath)
                                 {
                                     return true;
                                 }
-                                if (name == FileUtilities.ItemSpecModifiers.Filename)
+                                if (name == Filename)
                                 {
                                     return true;
                                 }
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Shared
                             case 'f':
                                 break;
                             case 'I': // Identity
-                                if (name == FileUtilities.ItemSpecModifiers.Identity)
+                                if (name == Identity)
                                 {
                                     return true;
                                 }
@@ -150,7 +150,7 @@ namespace Microsoft.Build.Shared
                             default:
                                 return false;
                             case 'D': // Directory
-                                if (name == FileUtilities.ItemSpecModifiers.Directory)
+                                if (name == Directory)
                                 {
                                     return true;
                                 }
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Shared
                             case 'd':
                                 break;
                             case 'E': // Extension
-                                if (name == FileUtilities.ItemSpecModifiers.Extension)
+                                if (name == Extension)
                                 {
                                     return true;
                                 }
@@ -173,7 +173,7 @@ namespace Microsoft.Build.Shared
                             default:
                                 return false;
                             case 'C': // CreatedTime
-                                if (name == FileUtilities.ItemSpecModifiers.CreatedTime)
+                                if (name == CreatedTime)
                                 {
                                     return true;
                                 }
@@ -181,7 +181,7 @@ namespace Microsoft.Build.Shared
                             case 'c':
                                 break;
                             case 'R': // RelativeDir
-                                if (name == FileUtilities.ItemSpecModifiers.RelativeDir)
+                                if (name == RelativeDir)
                                 {
                                     return true;
                                 }
@@ -197,7 +197,7 @@ namespace Microsoft.Build.Shared
                             default:
                                 return false;
                             case 'A': // AccessedTime
-                                if (name == FileUtilities.ItemSpecModifiers.AccessedTime)
+                                if (name == AccessedTime)
                                 {
                                     return true;
                                 }
@@ -205,7 +205,7 @@ namespace Microsoft.Build.Shared
                             case 'a':
                                 break;
                             case 'M': // ModifiedTime
-                                if (name == FileUtilities.ItemSpecModifiers.ModifiedTime)
+                                if (name == ModifiedTime)
                                 {
                                     return true;
                                 }
@@ -213,7 +213,7 @@ namespace Microsoft.Build.Shared
                             case 'm':
                                 break;
                             case 'R': // RecursiveDir
-                                if (name == FileUtilities.ItemSpecModifiers.RecursiveDir)
+                                if (name == RecursiveDir)
                                 {
                                     return true;
                                 }
@@ -253,13 +253,13 @@ namespace Microsoft.Build.Shared
                 switch (name.Length)
                 {
                     case 19: // DefiningProjectName
-                        if (name == FileUtilities.ItemSpecModifiers.DefiningProjectName)
+                        if (name == DefiningProjectName)
                         {
                             return true;
                         }
                         break;
                     case 23: // DefiningProjectFullPath
-                        if (name == FileUtilities.ItemSpecModifiers.DefiningProjectFullPath)
+                        if (name == DefiningProjectFullPath)
                         {
                             return true;
                         }
@@ -271,7 +271,7 @@ namespace Microsoft.Build.Shared
                             default:
                                 return false;
                             case 'D': // DefiningProjectDirectory
-                                if (name == FileUtilities.ItemSpecModifiers.DefiningProjectDirectory)
+                                if (name == DefiningProjectDirectory)
                                 {
                                     return true;
                                 }
@@ -279,7 +279,7 @@ namespace Microsoft.Build.Shared
                             case 'd':
                                 break;
                             case 'E': // DefiningProjectExtension
-                                if (name == FileUtilities.ItemSpecModifiers.DefiningProjectExtension)
+                                if (name == DefiningProjectExtension)
                                 {
                                     return true;
                                 }
@@ -389,7 +389,7 @@ namespace Microsoft.Build.Shared
 
                 try
                 {
-                    if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.FullPath, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(modifier, FullPath, StringComparison.OrdinalIgnoreCase))
                     {
                         if (fullPath != null)
                         {
@@ -406,9 +406,9 @@ namespace Microsoft.Build.Shared
 
                         ThrowForUrl(modifiedItemSpec, itemSpec, currentDirectory);
                     }
-                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.RootDir, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(modifier, RootDir, StringComparison.OrdinalIgnoreCase))
                     {
-                        GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, ItemSpecModifiers.FullPath, ref fullPath);
+                        GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, FullPath, ref fullPath);
 
                         modifiedItemSpec = Path.GetPathRoot(fullPath);
 
@@ -422,7 +422,7 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec += Path.DirectorySeparatorChar;
                         }
                     }
-                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Filename, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(modifier, Filename, StringComparison.OrdinalIgnoreCase))
                     {
                         // if the item-spec is a root directory, it can have no filename
                         if (IsRootDirectory(itemSpec))
@@ -437,7 +437,7 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = Path.GetFileNameWithoutExtension(FixFilePath(itemSpec));
                         }
                     }
-                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Extension, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(modifier, Extension, StringComparison.OrdinalIgnoreCase))
                     {
                         // if the item-spec is a root directory, it can have no extension
                         if (IsRootDirectory(itemSpec))
@@ -451,13 +451,13 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = Path.GetExtension(itemSpec);
                         }
                     }
-                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.RelativeDir, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(modifier, RelativeDir, StringComparison.OrdinalIgnoreCase))
                     {
                         modifiedItemSpec = GetDirectory(itemSpec);
                     }
-                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Directory, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(modifier, Directory, StringComparison.OrdinalIgnoreCase))
                     {
-                        GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, ItemSpecModifiers.FullPath, ref fullPath);
+                        GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, FullPath, ref fullPath);
 
                         modifiedItemSpec = GetDirectory(fullPath);
 
@@ -492,22 +492,22 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = modifiedItemSpec.Substring(1);
                         }
                     }
-                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(modifier, RecursiveDir, StringComparison.OrdinalIgnoreCase))
                     {
                         // only the BuildItem class can compute this modifier -- so leave empty
                         modifiedItemSpec = String.Empty;
                     }
-                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Identity, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(modifier, Identity, StringComparison.OrdinalIgnoreCase))
                     {
                         modifiedItemSpec = itemSpec;
                     }
-                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.ModifiedTime, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(modifier, ModifiedTime, StringComparison.OrdinalIgnoreCase))
                     {
                         // About to go out to the filesystem.  This means data is leaving the engine, so need
                         // to unescape first.
                         string unescapedItemSpec = EscapingUtilities.UnescapeAll(itemSpec);
 
-                        FileInfo info = FileUtilities.GetFileInfoNoThrow(unescapedItemSpec);
+                        FileInfo info = GetFileInfoNoThrow(unescapedItemSpec);
 
                         if (info != null)
                         {
@@ -519,7 +519,7 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = String.Empty;
                         }
                     }
-                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.CreatedTime, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(modifier, CreatedTime, StringComparison.OrdinalIgnoreCase))
                     {
                         // About to go out to the filesystem.  This means data is leaving the engine, so need
                         // to unescape first.
@@ -535,7 +535,7 @@ namespace Microsoft.Build.Shared
                             modifiedItemSpec = String.Empty;
                         }
                     }
-                    else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.AccessedTime, StringComparison.OrdinalIgnoreCase))
+                    else if (string.Equals(modifier, AccessedTime, StringComparison.OrdinalIgnoreCase))
                     {
                         // About to go out to the filesystem.  This means data is leaving the engine, so need
                         // to unescape first.
@@ -560,28 +560,28 @@ namespace Microsoft.Build.Shared
                         }
                         else
                         {
-                            if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectDirectory, StringComparison.OrdinalIgnoreCase))
+                            if (string.Equals(modifier, DefiningProjectDirectory, StringComparison.OrdinalIgnoreCase))
                             {
                                 // ItemSpecModifiers.Directory does not contain the root directory
                                 modifiedItemSpec = Path.Combine(
-                                        GetItemSpecModifier(currentDirectory, definingProjectEscaped, null, ItemSpecModifiers.RootDir),
-                                        GetItemSpecModifier(currentDirectory, definingProjectEscaped, null, ItemSpecModifiers.Directory));
+                                        GetItemSpecModifier(currentDirectory, definingProjectEscaped, null, RootDir),
+                                        GetItemSpecModifier(currentDirectory, definingProjectEscaped, null, Directory));
                             }
                             else
                             {
                                 string additionalModifier = null;
 
-                                if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectFullPath, StringComparison.OrdinalIgnoreCase))
+                                if (string.Equals(modifier, DefiningProjectFullPath, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    additionalModifier = ItemSpecModifiers.FullPath;
+                                    additionalModifier = FullPath;
                                 }
-                                else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectName, StringComparison.OrdinalIgnoreCase))
+                                else if (string.Equals(modifier, DefiningProjectName, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    additionalModifier = ItemSpecModifiers.Filename;
+                                    additionalModifier = Filename;
                                 }
-                                else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.DefiningProjectExtension, StringComparison.OrdinalIgnoreCase))
+                                else if (string.Equals(modifier, DefiningProjectExtension, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    additionalModifier = ItemSpecModifiers.Extension;
+                                    additionalModifier = Extension;
                                 }
                                 else
                                 {

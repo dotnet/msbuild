@@ -13,16 +13,16 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     {
         public MockProjectElementLinkRemoter Export(ProjectElement xml)
         {
-            return this.OwningCollection.ExportElement(xml);
+            return OwningCollection.ExportElement(xml);
         }
 
         public abstract ProjectElement ImportImpl(ProjectCollectionLinker remote);
 
 
         // ProjectElementLink remoting
-        public MockProjectElementContainerLinkRemoter Parent => (MockProjectElementContainerLinkRemoter)this.Export(Source.Parent);
+        public MockProjectElementContainerLinkRemoter Parent => (MockProjectElementContainerLinkRemoter)Export(Source.Parent);
 
-        public MockProjectRootElementLinkRemoter ContainingProject => (MockProjectRootElementLinkRemoter)this.Export(Source.ContainingProject);
+        public MockProjectRootElementLinkRemoter ContainingProject => (MockProjectRootElementLinkRemoter)Export(Source.ContainingProject);
 
         public string ElementName => Source.ElementName;
 
@@ -30,19 +30,19 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public bool ExpressedAsAttribute { get => ProjectElementLink.GetExpressedAsAttribute(Source); set => ProjectElementLink.SetExpressedAsAttribute(Source, value); }
 
-        public MockProjectElementLinkRemoter PreviousSibling => this.Export(Source.PreviousSibling);
+        public MockProjectElementLinkRemoter PreviousSibling => Export(Source.PreviousSibling);
 
-        public MockProjectElementLinkRemoter NextSibling => this.Export(Source.NextSibling);
+        public MockProjectElementLinkRemoter NextSibling => Export(Source.NextSibling);
 
         public ElementLocation Location => Source.Location;
 
-        public IReadOnlyCollection<XmlAttributeLink> Attributes => ProjectItemElementLink.GetAttributes(this.Source);
+        public IReadOnlyCollection<XmlAttributeLink> Attributes => ProjectElementLink.GetAttributes(Source);
 
-        public string PureText => ProjectItemElementLink.GetPureText(this.Source);
+        public string PureText => ProjectElementLink.GetPureText(Source);
 
         public void CopyFrom(MockProjectElementLinkRemoter element)
         {
-            this.Source.CopyFrom(element.Import(this.OwningCollection));
+            Source.CopyFrom(element.Import(OwningCollection));
         }
 
         public MockProjectElementLinkRemoter CreateNewInstance(MockProjectRootElementLinkRemoter owner)
@@ -53,19 +53,19 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
         public ElementLocation GetAttributeLocation(string attributeName)
-            => ProjectElementLink.GetAttributeLocation(this.Source, attributeName);
+            => ProjectElementLink.GetAttributeLocation(Source, attributeName);
 
         public string GetAttributeValue(string attributeName, bool nullIfNotExists)
         {
-            return ProjectElementLink.GetAttributeValue(this.Source, attributeName, nullIfNotExists);
+            return ProjectElementLink.GetAttributeValue(Source, attributeName, nullIfNotExists);
         }
 
         public void SetOrRemoveAttribute(string name, string value, bool clearAttributeCache, string reason, string param)
         {
-            ProjectElementLink.SetOrRemoveAttribute(this.Source, name, value, clearAttributeCache, reason, param);
+            ProjectElementLink.SetOrRemoveAttribute(Source, name, value, clearAttributeCache, reason, param);
             if (reason != null)
             {
-                ProjectElementLink.MarkDirty(this.Source, reason, param);
+                ProjectElementLink.MarkDirty(Source, reason, param);
             }
         }
     }
@@ -75,15 +75,15 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     {
         public TemplateProjectElementLink(MockProjectElementLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectElementLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
-        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
+        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => Proxy;
 
 
         #region standard ProjectElementLink implementation

@@ -3861,7 +3861,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
             t.Sources = new ITaskItem[] { new TaskItem(sourceFile) };
 
             // phase 1, generate the .resources file (we don't care about outcomes)
-            Utilities.ExecuteTask(t);
+            ExecuteTask(t);
 
             File.Delete(sourceFile);
             return t.OutputResources[0].ItemSpec;
@@ -4002,7 +4002,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// </summary>
         public static string WriteTestText(string tagName, string oneLine)
         {
-            string textFile = Utilities.GetTempFileName(".txt");
+            string textFile = GetTempFileName(".txt");
             File.Delete(textFile);
             File.WriteAllText(textFile, GetTestTextContent(tagName, oneLine));
             return textFile;
@@ -4133,7 +4133,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <returns>The name of the copied file.</returns>
         public static string GetPathToCopiedSystemDLL()
         {
-            string tempSystemDLL = Utilities.GetTempFileName(".dll");
+            string tempSystemDLL = GetTempFileName(".dll");
 
             string pathToSystemDLL =
 #if FEATURE_INSTALLED_MSBUILD
@@ -4152,7 +4152,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <returns>The name of the bitmap.</returns>
         public static string CreateWorldsSmallestBitmap()
         {
-            string smallestBitmapFile = Utilities.GetTempFileName(".bmp");
+            string smallestBitmapFile = GetTempFileName(".bmp");
 
             byte[] bmp = new byte[66];
             bmp[0x00] = 0x42; bmp[0x01] = 0x4D; bmp[0x02] = 0x42;
@@ -4204,12 +4204,12 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
             Assert.NotNull(strLanguage);
             Assert.NotNull(resourcesNamespace);
             // Generate Task
-            GenerateResource t = Utilities.CreateTask(output);
+            GenerateResource t = CreateTask(output);
             try
             {
-                t.StateFile = new TaskItem(Utilities.GetTempFileName(".cache"));
+                t.StateFile = new TaskItem(GetTempFileName(".cache"));
                 // Create an input text file
-                string textFile = Utilities.WriteTestText(null, null);
+                string textFile = WriteTestText(null, null);
                 // set the Sources parameter
                 t.Sources = new ITaskItem[] { new TaskItem(textFile) };
                 // Set the StronglyTypedLanguage parameter
@@ -4231,7 +4231,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 }
 
                 // Execute task
-                Utilities.ExecuteTask(t);
+                ExecuteTask(t);
 
                 // Get the OutputResources
                 string resourcesFile = t.OutputResources[0].ItemSpec;
@@ -4250,7 +4250,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
 
-                Utilities.AssertStateFileWasWritten(t);
+                AssertStateFileWasWritten(t);
 
                 // Files written should contain STR class file
                 Assert.Equal(Path.ChangeExtension(t.Sources[0].ItemSpec, codeFileExtension), t.StronglyTypedFileName);
@@ -4262,20 +4262,20 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 // Verify that the STR File was generated correctly
                 string STRFile = Path.ChangeExtension(textFile, codeFileExtension);
                 // Verify that the ResourceManager in the STR class is instantiated correctly
-                Assert.Contains("ResourceManager(\"" + resourcesNamespace + "." + t.StronglyTypedClassName, Utilities.ReadFileContent(STRFile));
+                Assert.Contains("ResourceManager(\"" + resourcesNamespace + "." + t.StronglyTypedClassName, ReadFileContent(STRFile));
                 // Verify that the class name of the STR class is as expected
-                Assert.Contains("class " + Path.GetFileNameWithoutExtension(textFile).ToLower(), Utilities.ReadFileContent(STRFile).ToLower());
+                Assert.Contains("class " + Path.GetFileNameWithoutExtension(textFile).ToLower(), ReadFileContent(STRFile).ToLower());
                 // Verify that the namespace of the STR class is as expected
 
-                Assert.DoesNotContain("namespace " + resourcesNamespace.ToLower(), Utilities.ReadFileContent(STRFile).ToLower());
+                Assert.DoesNotContain("namespace " + resourcesNamespace.ToLower(), ReadFileContent(STRFile).ToLower());
                 if (classNamespace != null)
                 {
-                    Assert.Contains("namespace " + classNamespace.ToLower(), Utilities.ReadFileContent(STRFile).ToLower());
+                    Assert.Contains("namespace " + classNamespace.ToLower(), ReadFileContent(STRFile).ToLower());
                 }
 
                 // Verify log is as expected
-                Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", textFile, resourcesFile);
-                Utilities.AssertLogContainsResource(t, "GenerateResource.ReadResourceMessage", 4, textFile);
+                AssertLogContainsResource(t, "GenerateResource.ProcessingFile", textFile, resourcesFile);
+                AssertLogContainsResource(t, "GenerateResource.ReadResourceMessage", 4, textFile);
 
                 string typeName;
                 if (t.StronglyTypedNamespace != null)
@@ -4289,7 +4289,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
                 typeName += t.StronglyTypedClassName;
                 // Verify that the type is generated correctly
-                Utilities.AssertLogContainsResource(t, "GenerateResource.CreatingSTR", t.StronglyTypedFileName);
+                AssertLogContainsResource(t, "GenerateResource.CreatingSTR", t.StronglyTypedFileName);
             }
             finally
             {
@@ -4329,7 +4329,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <returns>true, if given path needs to be quoted.</returns>
         internal bool DoesPathNeedQuotes(string path)
         {
-            return base.IsQuotingRequired(path);
+            return IsQuotingRequired(path);
         }
     }
 }

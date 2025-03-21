@@ -490,7 +490,7 @@ namespace Microsoft.Build.BackEnd
         /// Connect to named pipe stream and ensure validate handshake and security.
         /// </summary>
         /// <remarks>
-        /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
+        /// Reused by MSBuild server client <see cref="Experimental.MSBuildClient"/>.
         /// </remarks>
         internal static void ConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout)
         {
@@ -821,7 +821,7 @@ namespace Microsoft.Build.BackEnd
             private void Close()
             {
                 _clientToServerStream.Dispose();
-                if (!object.ReferenceEquals(_clientToServerStream, _serverToClientStream))
+                if (!ReferenceEquals(_clientToServerStream, _serverToClientStream))
                 {
                     _serverToClientStream.Dispose();
                 }

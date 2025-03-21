@@ -37,7 +37,7 @@ namespace Microsoft.Build.Shared
             {
                 if (version.Length > 0)
                 {
-                    Version candidateVersion = VersionUtilities.ConvertToVersion(version);
+                    Version candidateVersion = ConvertToVersion(version);
 
                     if (candidateVersion != null && (targetPlatformVersion == null || (candidateVersion <= targetPlatformVersion)))
                     {

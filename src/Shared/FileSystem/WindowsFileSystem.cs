@@ -34,7 +34,7 @@ namespace Microsoft.Build.Shared.FileSystem
     {
         private static readonly WindowsFileSystem Instance = new();
 
-        public static new WindowsFileSystem Singleton() => WindowsFileSystem.Instance;
+        public static new WindowsFileSystem Singleton() => Instance;
 
         private WindowsFileSystem() { }
 
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Shared.FileSystem
         public override bool FileExists(string path)
         {
 #if NETFRAMEWORK
-            return Microsoft.IO.File.Exists(path);
+            return IO.File.Exists(path);
 #else
             return File.Exists(path);
 #endif

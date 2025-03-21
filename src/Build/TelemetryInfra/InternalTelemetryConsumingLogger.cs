@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
-using System.IO;
 
 namespace Microsoft.Build.TelemetryInfra;
 
@@ -14,7 +14,7 @@ internal sealed class InternalTelemetryConsumingLogger : ILogger
 {
     public LoggerVerbosity Verbosity { get; set; }
     public string? Parameters { get; set; }
-    internal static event Action<WorkerNodeTelemetryData>? TestOnly_InternalTelemetryAggregted; 
+    internal static event Action<WorkerNodeTelemetryData>? TestOnly_InternalTelemetryAggregted;
 
     public void Initialize(IEventSource eventSource)
     {

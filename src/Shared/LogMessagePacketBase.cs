@@ -432,14 +432,14 @@ namespace Microsoft.Build.Shared
             bool eventCanSerializeItself = methodInfo != null;
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
-                if (_buildEvent is ProjectEvaluationStartedEventArgs
-                    or ProjectEvaluationFinishedEventArgs
-                    or ResponseFileUsedEventArgs)
-                {
-                    // switch to serialization methods that we provide in this file
-                    // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
-                    eventCanSerializeItself = false;
-                }
+            if (_buildEvent is ProjectEvaluationStartedEventArgs
+                or ProjectEvaluationFinishedEventArgs
+                or ResponseFileUsedEventArgs)
+            {
+                // switch to serialization methods that we provide in this file
+                // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
+                eventCanSerializeItself = false;
+            }
 #endif
 
             translator.Translate(ref eventCanSerializeItself);

@@ -218,7 +218,7 @@ namespace Microsoft.Build.Tasks
             string[] redistListPaths = [];
             if (frameworkVersion20Path != null)
             {
-                redistListPaths = RedistList.GetRedistListPathsFromDisk(frameworkVersion20Path);
+                redistListPaths = GetRedistListPathsFromDisk(frameworkVersion20Path);
             }
 
             var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];

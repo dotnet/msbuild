@@ -211,7 +211,7 @@ namespace Microsoft.Build.Evaluation
             /// <returns>element</returns>
             public ExtensionsPathElement GetElement(string os)
             {
-                return (ExtensionsPathElement)this.BaseGet(os);
+                return (ExtensionsPathElement)BaseGet(os);
             }
 
             /// <summary>
@@ -221,7 +221,7 @@ namespace Microsoft.Build.Evaluation
             /// <returns>element</returns>
             public ExtensionsPathElement GetElement(int index)
             {
-                return (ExtensionsPathElement)this.BaseGet(index);
+                return (ExtensionsPathElement)BaseGet(index);
             }
 
             /// <summary>
@@ -394,7 +394,7 @@ namespace Microsoft.Build.Evaluation
             /// <returns>element</returns>
             public PropertyElement GetElement(string name)
             {
-                return (PropertyElement)this.BaseGet(name);
+                return (PropertyElement)BaseGet(name);
             }
 
             /// <summary>
@@ -404,7 +404,7 @@ namespace Microsoft.Build.Evaluation
             /// <returns>element</returns>
             public PropertyElement GetElement(int index)
             {
-                return (PropertyElement)this.BaseGet(index);
+                return (PropertyElement)BaseGet(index);
             }
 
             /// <summary>
@@ -565,7 +565,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>element</returns>
         public ToolsetElement GetElement(string toolsVersion)
         {
-            return (ToolsetElement)this.BaseGet(toolsVersion);
+            return (ToolsetElement)BaseGet(toolsVersion);
         }
 
         /// <summary>
@@ -575,7 +575,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>element</returns>
         public ToolsetElement GetElement(int index)
         {
-            return (ToolsetElement)this.BaseGet(index);
+            return (ToolsetElement)BaseGet(index);
         }
 
         /// <summary>

@@ -61,7 +61,7 @@ namespace Microsoft.Build.Tasks
             this.fileExists = fileExists;
             this.getRuntimeVersion = getRuntimeVersion;
             this.targetedRuntimeVersion = targetedRuntimeVersion;
-            this.targetProcessorArchitecture = targetedProcessorArchitecture;
+            targetProcessorArchitecture = targetedProcessorArchitecture;
             this.compareProcessorArchitecture = compareProcessorArchitecture;
         }
 

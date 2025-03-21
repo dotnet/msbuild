@@ -123,7 +123,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             // Show the performance summary if the verbosity is diagnostic or the user specifically asked for it
             // with a logger parameter.
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 ShowPerfSummary();
             }
@@ -225,7 +225,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (!contextStack.IsEmpty())
             {
-                this.VerifyStack(contextStack.Peek().type == FrameType.Target, "Bad stack -- Top is project {0}", contextStack.Peek().ID);
+                VerifyStack(contextStack.Peek().type == FrameType.Target, "Bad stack -- Top is project {0}", contextStack.Peek().ID);
             }
 
             // if verbosity is normal, detailed or diagnostic
@@ -236,12 +236,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 // check for stack corruption
                 if (!contextStack.IsEmpty())
                 {
-                    this.VerifyStack(contextStack.Peek().type == FrameType.Target, "Bad stack -- Top is target {0}", contextStack.Peek().ID);
+                    VerifyStack(contextStack.Peek().type == FrameType.Target, "Bad stack -- Top is target {0}", contextStack.Peek().ID);
                 }
 
                 contextStack.Push(new Frame(FrameType.Project,
                                             false, // message not yet displayed
-                                            this.currentIndentLevel,
+                                            currentIndentLevel,
                                             e.ProjectFile,
                                             e.TargetNames,
                                             null,
@@ -252,14 +252,14 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 contextStack.Push(new Frame(FrameType.Project,
                                             false, // message not yet displayed
-                                            this.currentIndentLevel,
+                                            currentIndentLevel,
                                             e.ProjectFile,
                                             e.TargetNames,
                                             null,
                                             GetCurrentlyBuildingProjectFile()));
             }
 
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 PerformanceCounter counter = GetPerformanceCounter(e.ProjectFile, ref projectPerformanceCounters);
 
@@ -290,7 +290,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="e">event arguments</param>
         public override void ProjectFinishedHandler(object sender, ProjectFinishedEventArgs e)
         {
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 PerformanceCounter counter = GetPerformanceCounter(e.ProjectFile, ref projectPerformanceCounters);
 
@@ -317,8 +317,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
             Frame top = contextStack.Pop();
 
-            this.VerifyStack(top.type == FrameType.Project, "Unexpected project frame {0}", top.ID);
-            this.VerifyStack(top.ID == e.ProjectFile, "Project frame {0} expected, but was {1}.", e.ProjectFile, top.ID);
+            VerifyStack(top.type == FrameType.Project, "Unexpected project frame {0}", top.ID);
+            VerifyStack(top.ID == e.ProjectFile, "Project frame {0} expected, but was {1}.", e.ProjectFile, top.ID);
         }
 
         /// <summary>
@@ -330,7 +330,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             contextStack.Push(new Frame(FrameType.Target,
                                         false,
-                                        this.currentIndentLevel,
+                                        currentIndentLevel,
                                         e.TargetName,
                                         null,
                                         e.TargetFile,
@@ -342,7 +342,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 WriteTargetStarted();
             }
 
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 PerformanceCounter counter = GetPerformanceCounter(e.TargetName, ref targetPerformanceCounters);
 
@@ -352,7 +352,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Bump up the overall number of indents, so that anything within this target will show up
             // indented.
-            this.currentIndentLevel++;
+            currentIndentLevel++;
         }
 
         /// <summary>
@@ -363,9 +363,9 @@ namespace Microsoft.Build.BackEnd.Logging
         public override void TargetFinishedHandler(object sender, TargetFinishedEventArgs e)
         {
             // Done with the target, so shift everything left again.
-            this.currentIndentLevel--;
+            currentIndentLevel--;
 
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 PerformanceCounter counter = GetPerformanceCounter(e.TargetName, ref targetPerformanceCounters);
 
@@ -401,8 +401,8 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             Frame top = contextStack.Pop();
-            this.VerifyStack(top.type == FrameType.Target, "bad stack frame type");
-            this.VerifyStack(top.ID == e.TargetName, "bad stack frame id");
+            VerifyStack(top.type == FrameType.Target, "bad stack frame type");
+            VerifyStack(top.ID == e.TargetName, "bad stack frame id");
 
             // set the value on the Project frame, for the ProjectFinished handler
             if (targetHasErrorsOrWarnings)
@@ -426,7 +426,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 resetColor();
             }
 
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 PerformanceCounter counter = GetPerformanceCounter(e.TaskName, ref taskPerformanceCounters);
 
@@ -436,7 +436,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Bump up the overall number of indents, so that anything within this task will show up
             // indented.
-            this.currentIndentLevel++;
+            currentIndentLevel++;
         }
 
         /// <summary>
@@ -447,9 +447,9 @@ namespace Microsoft.Build.BackEnd.Logging
         public override void TaskFinishedHandler(object sender, TaskFinishedEventArgs e)
         {
             // Done with the task, so shift everything left again.
-            this.currentIndentLevel--;
+            currentIndentLevel--;
 
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 PerformanceCounter counter = GetPerformanceCounter(e.TaskName, ref taskPerformanceCounters);
 
@@ -598,19 +598,19 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WriteProjectStarted()
         {
-            this.VerifyStack(!contextStack.IsEmpty(), "Bad project stack");
+            VerifyStack(!contextStack.IsEmpty(), "Bad project stack");
 
             // Pop the current project
             Frame outerMost = contextStack.Pop();
 
-            this.VerifyStack(!outerMost.displayed, "Bad project stack on {0}", outerMost.ID);
-            this.VerifyStack(outerMost.type == FrameType.Project, "Bad project stack");
+            VerifyStack(!outerMost.displayed, "Bad project stack on {0}", outerMost.ID);
+            VerifyStack(outerMost.type == FrameType.Project, "Bad project stack");
 
             outerMost.displayed = true;
             contextStack.Push(outerMost);
 
             WriteProjectStartedText(outerMost.ID, outerMost.targetNames, outerMost.parentProjectFile,
-                this.IsVerbosityAtLeast(LoggerVerbosity.Normal) ? outerMost.indentLevel : 0);
+                IsVerbosityAtLeast(LoggerVerbosity.Normal) ? outerMost.indentLevel : 0);
         }
 
         /// <summary>
@@ -626,7 +626,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 setColor(ConsoleColor.Cyan);
 
-                this.VerifyStack(current != null, "Unexpected null project stack");
+                VerifyStack(current != null, "Unexpected null project stack");
 
                 WriteLinePretty(projectSeparatorLine);
 
@@ -671,13 +671,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
             setColor(ConsoleColor.Cyan);
 
-            if (this.Verbosity == LoggerVerbosity.Diagnostic)
+            if (Verbosity == LoggerVerbosity.Diagnostic)
             {
                 WriteLinePrettyFromResource(f.indentLevel, "TargetStartedFromFile", f.ID, f.file);
             }
             else
             {
-                WriteLinePrettyFromResource(this.IsVerbosityAtLeast(LoggerVerbosity.Normal) ? f.indentLevel : 0,
+                WriteLinePrettyFromResource(IsVerbosityAtLeast(LoggerVerbosity.Normal) ? f.indentLevel : 0,
                     "TargetStartedPrefix", f.ID);
             }
 
@@ -750,7 +750,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         // we're at a higher verbosity, we can assume that all
                         // targets have already be printed.  If we're at lower
                         // verbosity we don't need to print at all.
-                        ErrorUtilities.VerifyThrow(this.Verbosity < LoggerVerbosity.Detailed,
+                        ErrorUtilities.VerifyThrow(Verbosity < LoggerVerbosity.Detailed,
                             "This target should have already been printed at a higher verbosity.");
 
                         if (IsVerbosityAtLeast(LoggerVerbosity.Normal))

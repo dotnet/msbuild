@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks
                 // Launcher lives next to ClickOnce bootstrapper.
                 // GetDefaultPath obtains the root ClickOnce boostrapper path.
                 LauncherPath = Path.Combine(
-                    Microsoft.Build.Tasks.Deployment.Bootstrapper.Util.GetDefaultPath(VisualStudioVersion),
+                    Deployment.Bootstrapper.Util.GetDefaultPath(VisualStudioVersion),
                     ENGINE_PATH,
                     LAUNCHER_EXE);
             }

@@ -96,7 +96,7 @@ namespace Microsoft.Build.Exceptions
         /// <param name="info"></param>
         /// <param name="context"></param>
 #if FEATURE_SECURITY_PERMISSIONS
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
 #if NET8_0_OR_GREATER
         [Obsolete(DiagnosticId = "SYSLIB0051")]

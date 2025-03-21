@@ -1070,7 +1070,7 @@ namespace Microsoft.Build.BackEnd
                     if (requiredNodeId == InvalidNodeId || idleNodes.Contains(requiredNodeId))
                     {
                         // Look for a request with the smallest source file
-                        System.IO.FileInfo f = new FileInfo(_configCache[unscheduledRequest.BuildRequest.ConfigurationId].ProjectFullPath);
+                        FileInfo f = new FileInfo(_configCache[unscheduledRequest.BuildRequest.ConfigurationId].ProjectFullPath);
                         if (f.Length < sizeOfSmallestSourceFile)
                         {
                             sizeOfSmallestSourceFile = f.Length;
@@ -1112,7 +1112,7 @@ namespace Microsoft.Build.BackEnd
                     if (requiredNodeId == InvalidNodeId || idleNodes.Contains(requiredNodeId))
                     {
                         // Look for a request with the largest source file
-                        System.IO.FileInfo f = new FileInfo(_configCache[unscheduledRequest.BuildRequest.ConfigurationId].ProjectFullPath);
+                        FileInfo f = new FileInfo(_configCache[unscheduledRequest.BuildRequest.ConfigurationId].ProjectFullPath);
                         if (f.Length > sizeOfLargestSourceFile)
                         {
                             sizeOfLargestSourceFile = f.Length;
@@ -1485,7 +1485,7 @@ namespace Microsoft.Build.BackEnd
                 // Although this request has not been scheduled, this configuration may previously have been
                 // scheduled to an existing node.  If so, we shouldn't count it in our checks for new node
                 // creation, because it'll only eventually get assigned to its existing node anyway.
-                if (assignedNodeForConfiguration != Scheduler.InvalidNodeId)
+                if (assignedNodeForConfiguration != InvalidNodeId)
                 {
                     continue;
                 }
@@ -1723,7 +1723,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         bool affinityMismatch = false;
                         int assignedNodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(request.ConfigurationId);
-                        if (assignedNodeId != Scheduler.InvalidNodeId)
+                        if (assignedNodeId != InvalidNodeId)
                         {
                             if (!_availableNodes[assignedNodeId].CanServiceRequestWithAffinity(GetNodeAffinityForRequest(request)))
                             {
@@ -2526,8 +2526,8 @@ namespace Microsoft.Build.BackEnd
                 prePadString.ToString(),
                 useConfigurations ? request.BuildRequest.ConfigurationId : request.BuildRequest.GlobalRequestId,
                 new String(' ', postPad),
-                String.Format(CultureInfo.InvariantCulture, "{0:0.000}", request.GetTimeSpentInState(SchedulableRequestState.Executing).TotalSeconds),
-                String.Format(CultureInfo.InvariantCulture, "{0:0.000}", request.GetTimeSpentInState(SchedulableRequestState.Executing).TotalSeconds + request.GetTimeSpentInState(SchedulableRequestState.Blocked).TotalSeconds + request.GetTimeSpentInState(SchedulableRequestState.Ready).TotalSeconds),
+                String.Format(CultureInfo.InvariantCulture, /*lang=json*/ "{0:0.000}", request.GetTimeSpentInState(SchedulableRequestState.Executing).TotalSeconds),
+                String.Format(CultureInfo.InvariantCulture, /*lang=json*/ "{0:0.000}", request.GetTimeSpentInState(SchedulableRequestState.Executing).TotalSeconds + request.GetTimeSpentInState(SchedulableRequestState.Blocked).TotalSeconds + request.GetTimeSpentInState(SchedulableRequestState.Ready).TotalSeconds),
                 _configCache[request.BuildRequest.ConfigurationId].ProjectFullPath,
                 String.Join(", ", request.BuildRequest.Targets));
 

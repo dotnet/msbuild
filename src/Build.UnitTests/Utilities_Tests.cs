@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
 
         public UtilitiesTestStandard(ITestOutputHelper output)
         {
-            this.loadAsReadOnly = false;
+            loadAsReadOnly = false;
             _output = output;
         }
 
@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests
     {
         public UtilitiesTestReadOnlyLoad()
         {
-            this.loadAsReadOnly = true;
+            loadAsReadOnly = true;
         }
 
         /// <summary>

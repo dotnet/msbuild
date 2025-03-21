@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string dir = NativeMethodsShared.IsWindows ? "c:\\directory1\\directory2" : "/directory1/directory2";
             string overrideDir = NativeMethodsShared.IsWindows ? "c:\\msbuildoverridetasks" : "/msbuildoverridetasks";
             using var collection = new ProjectCollection();
-            Toolset t = new Toolset("toolsversionname", dir, new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), overrideDir, new DirectoryExists(this.directoryExists));
+            Toolset t = new Toolset("toolsversionname", dir, new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(getFiles), new LoadXmlFromPath(loadXmlFromPath), overrideDir, new DirectoryExists(directoryExists));
 
             LoggingContext loggingContext = TestLoggingContext.CreateTestContext(new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
             TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, e.ProjectRootElementCache);
@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests.Definition
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
             using ProjectCollection e = new ProjectCollection();
             using var collection = new ProjectCollection();
-            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), "msbuildoverridetasks", new DirectoryExists(this.directoryExists));
+            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(getFiles), new LoadXmlFromPath(loadXmlFromPath), "msbuildoverridetasks", new DirectoryExists(directoryExists));
 
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             using ProjectCollection e = new ProjectCollection();
             using var collection = new ProjectCollection();
-            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), "k:\\||^%$#*msbuildoverridetasks", new DirectoryExists(this.directoryExists));
+            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(getFiles), new LoadXmlFromPath(loadXmlFromPath), "k:\\||^%$#*msbuildoverridetasks", new DirectoryExists(directoryExists));
 
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string tooLong = "c:\\" + new string('C', 6000);
             using ProjectCollection e = new ProjectCollection();
             using var collection = new ProjectCollection();
-            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), tooLong, new DirectoryExists(this.directoryExists));
+            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(getFiles), new LoadXmlFromPath(loadXmlFromPath), tooLong, new DirectoryExists(directoryExists));
 
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests.Definition
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
             using ProjectCollection e = new ProjectCollection();
             using var collection = new ProjectCollection();
-            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), "k:\\Thecatinthehat", new DirectoryExists(this.directoryExists));
+            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(getFiles), new LoadXmlFromPath(loadXmlFromPath), "k:\\Thecatinthehat", new DirectoryExists(directoryExists));
 
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -161,10 +161,10 @@ namespace Microsoft.Build.UnitTests.Definition
                 NativeMethodsShared.IsWindows ? "c:\\directory1\\directory2" : "/directory1/directory2",
                 new PropertyDictionary<ProjectPropertyInstance>(),
                 collection,
-                new DirectoryGetFiles(this.getFiles),
-                new LoadXmlFromPath(this.loadXmlFromPath),
+                new DirectoryGetFiles(getFiles),
+                new LoadXmlFromPath(loadXmlFromPath),
                 null,
-                new DirectoryExists(this.directoryExists));
+                new DirectoryExists(directoryExists));
 
             LoggingContext loggingContext = TestLoggingContext.CreateTestContext(new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
             TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests.Definition
             LoggingContext loggingContext = new TestLoggingContext(service, BuildEventContext.Invalid);
 
             using var colleciton = new ProjectCollection();
-            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2\\doesntexist", new PropertyDictionary<ProjectPropertyInstance>(), colleciton, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), null, new DirectoryExists(this.directoryExists));
+            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2\\doesntexist", new PropertyDictionary<ProjectPropertyInstance>(), colleciton, new DirectoryGetFiles(getFiles), new LoadXmlFromPath(loadXmlFromPath), null, new DirectoryExists(directoryExists));
 
             TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests.Definition
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
             LoggingContext loggingContext = new TestLoggingContext(service, BuildEventContext.Invalid);
-            Toolset t = new Toolset("toolsversionname", "invalid||path", new PropertyDictionary<ProjectPropertyInstance>(), p, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), null, new DirectoryExists(this.directoryExists));
+            Toolset t = new Toolset("toolsversionname", "invalid||path", new PropertyDictionary<ProjectPropertyInstance>(), p, new DirectoryGetFiles(getFiles), new LoadXmlFromPath(loadXmlFromPath), null, new DirectoryExists(directoryExists));
 
             TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
@@ -242,13 +242,13 @@ namespace Microsoft.Build.UnitTests.Definition
             string dir = NativeMethodsShared.IsWindows ? "c:\\directory1\\directory2" : "/directory1/directory2";
             string overrideDir = NativeMethodsShared.IsWindows ? "c:\\msbuildoverridetasks" : "/msbuildoverridetasks";
             string[] foundFiles = Toolset.GetTaskFiles(
-                new DirectoryGetFiles(this.getFiles),
+                new DirectoryGetFiles(getFiles),
                 loggingContext,
                 "*.tasks",
                 dir,
                 String.Empty);
             string[] foundoverrideFiles = Toolset.GetTaskFiles(
-                new DirectoryGetFiles(this.getFiles),
+                new DirectoryGetFiles(getFiles),
                 loggingContext,
                 "*.overridetasks",
                 overrideDir,
@@ -928,8 +928,8 @@ namespace Microsoft.Build.UnitTests.Definition
                 NativeMethodsShared.IsWindows ? "c:\\inline" : "/inline",
                 new PropertyDictionary<ProjectPropertyInstance>(),
                 collection,
-                new DirectoryGetFiles(this.getFiles),
-                new LoadXmlFromPath(this.loadXmlFromPath),
+                new DirectoryGetFiles(getFiles),
+                new LoadXmlFromPath(loadXmlFromPath),
                 null,
                 new DirectoryExists(directoryExists));
 
@@ -1089,8 +1089,8 @@ namespace Microsoft.Build.UnitTests.Definition
             public string XmlContents;
             public DefaultTasksFile(string path, string xmlContents)
             {
-                this.Path = path;
-                this.XmlContents = xmlContents;
+                Path = path;
+                XmlContents = xmlContents;
             }
         }
     }

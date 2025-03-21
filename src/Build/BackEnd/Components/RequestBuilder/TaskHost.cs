@@ -257,7 +257,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="targetOutputs">The outputs from the targets</param>
         /// <param name="toolsVersion">The tools version to use</param>
         /// <returns>True on success, false otherwise.</returns>
-        public bool BuildProjectFile(string projectFileName, string[] targetNames, System.Collections.IDictionary globalProperties, System.Collections.IDictionary targetOutputs, string toolsVersion)
+        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs, string toolsVersion)
         {
             VerifyActiveProxy();
             return BuildProjectFilesInParallel(
@@ -282,7 +282,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="useResultsCache">Whether to use the results cache</param>
         /// <param name="unloadProjectsOnCompletion">Whether to unload projects when we are done.</param>
         /// <returns>True on success, false otherwise.</returns>
-        public bool BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, System.Collections.IDictionary[] globalProperties, System.Collections.IDictionary[] targetOutputsPerProject, string[] toolsVersion, bool useResultsCache, bool unloadProjectsOnCompletion)
+        public bool BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IDictionary[] targetOutputsPerProject, string[] toolsVersion, bool useResultsCache, bool unloadProjectsOnCompletion)
         {
             bool includeTargetOutputs = (targetOutputsPerProject != null);
 
@@ -330,7 +330,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="toolsVersion">The tools versions to use</param>
         /// <param name="returnTargetOutputs">Should the target outputs be returned in the BuildEngineResult</param>
         /// <returns>A structure containing the result of the build, success or failure and the list of target outputs per project</returns>
-        public BuildEngineResult BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, System.Collections.IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs)
+        public BuildEngineResult BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs)
         {
             lock (_callbackMonitor)
             {
@@ -404,7 +404,7 @@ namespace Microsoft.Build.BackEnd
         /// Thread safe.
         /// </summary>
         /// <param name="e">The event args</param>
-        public void LogErrorEvent(Microsoft.Build.Framework.BuildErrorEventArgs e)
+        public void LogErrorEvent(BuildErrorEventArgs e)
         {
             lock (_callbackMonitor)
             {
@@ -474,7 +474,7 @@ namespace Microsoft.Build.BackEnd
         /// Thread safe.
         /// </summary>
         /// <param name="e">The event args</param>
-        public void LogWarningEvent(Microsoft.Build.Framework.BuildWarningEventArgs e)
+        public void LogWarningEvent(BuildWarningEventArgs e)
         {
             lock (_callbackMonitor)
             {
@@ -515,7 +515,7 @@ namespace Microsoft.Build.BackEnd
         /// Thread safe.
         /// </summary>
         /// <param name="e">The event args</param>
-        public void LogMessageEvent(Microsoft.Build.Framework.BuildMessageEventArgs e)
+        public void LogMessageEvent(BuildMessageEventArgs e)
         {
             lock (_callbackMonitor)
             {
@@ -556,7 +556,7 @@ namespace Microsoft.Build.BackEnd
         /// Thread safe.
         /// </summary>
         /// <param name="e">The event args</param>
-        public void LogCustomEvent(Microsoft.Build.Framework.CustomBuildEventArgs e)
+        public void LogCustomEvent(CustomBuildEventArgs e)
         {
             lock (_callbackMonitor)
             {
@@ -601,7 +601,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="globalProperties">The global properties to use</param>
         /// <param name="targetOutputs">The outputs from the targets</param>
         /// <returns>True on success, false otherwise.</returns>
-        public bool BuildProjectFile(string projectFileName, string[] targetNames, System.Collections.IDictionary globalProperties, System.Collections.IDictionary targetOutputs)
+        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs)
         {
             VerifyActiveProxy();
             return BuildProjectFile(projectFileName, targetNames, globalProperties, targetOutputs, null);

@@ -80,7 +80,7 @@ namespace Microsoft.Build
             char[] resultBuffer = null;
             try
             {
-                MemoryStream memoryStream = this.BaseStream as MemoryStream;
+                MemoryStream memoryStream = BaseStream as MemoryStream;
 
                 int currPos = 0;
                 int n = 0;

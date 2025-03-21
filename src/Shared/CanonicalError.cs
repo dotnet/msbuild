@@ -220,22 +220,22 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// The line number.
             /// </summary>
-            internal int line = Parts.numberNotSpecified;
+            internal int line = numberNotSpecified;
 
             /// <summary>
             /// The column number.
             /// </summary>
-            internal int column = Parts.numberNotSpecified;
+            internal int column = numberNotSpecified;
 
             /// <summary>
             /// The ending line number.
             /// </summary>
-            internal int endLine = Parts.numberNotSpecified;
+            internal int endLine = numberNotSpecified;
 
             /// <summary>
             /// The ending column number.
             /// </summary>
-            internal int endColumn = Parts.numberNotSpecified;
+            internal int endColumn = numberNotSpecified;
 
             /// <summary>
             /// The category/severity level
@@ -271,7 +271,7 @@ namespace Microsoft.Build.Shared
 
             if (!success || (result < 0))
             {
-                result = CanonicalError.Parts.numberNotSpecified;
+                result = Parts.numberNotSpecified;
             }
 
             return result;

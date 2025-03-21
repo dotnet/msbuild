@@ -34,7 +34,7 @@ namespace Microsoft.NET.StringTools.Tests
             internedString1.Equals(str).ShouldBeTrue();
             string internedString2 = Strings.WeakIntern(str);
             internedString1.Equals(str).ShouldBeTrue();
-            Object.ReferenceEquals(internedString1, internedString2).ShouldBeTrue();
+            ReferenceEquals(internedString1, internedString2).ShouldBeTrue();
 
 #if !NET35_UNITTEST
             ReadOnlySpan<char> span = str.AsSpan();
@@ -42,7 +42,7 @@ namespace Microsoft.NET.StringTools.Tests
             internedString1.Equals(str).ShouldBeTrue();
             internedString2 = Strings.WeakIntern(span);
             internedString1.Equals(str).ShouldBeTrue();
-            Object.ReferenceEquals(internedString1, internedString2).ShouldBeTrue();
+            ReferenceEquals(internedString1, internedString2).ShouldBeTrue();
 #endif
         }
 

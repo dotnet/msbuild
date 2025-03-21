@@ -531,7 +531,7 @@ namespace Microsoft.Build.BackEnd
                 SchedulableRequest requestToEvaluate = requestsToEvaluate.Pop();
 
                 // If we make it to a child which is us, then it's a circular dependency.
-                if (requestToEvaluate.BuildRequest.GlobalRequestId == this.BuildRequest.GlobalRequestId)
+                if (requestToEvaluate.BuildRequest.GlobalRequestId == BuildRequest.GlobalRequestId)
                 {
                     ThrowIndirectCircularDependency(blockingRequest, requestToEvaluate);
                 }

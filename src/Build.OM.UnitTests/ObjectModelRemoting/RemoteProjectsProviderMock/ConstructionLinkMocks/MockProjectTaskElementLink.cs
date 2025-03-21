@@ -28,38 +28,38 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             get
             {
-                var local = this.TaskXml.Parameters;
+                var local = TaskXml.Parameters;
                 return local == null ? local : new Dictionary<string, string>(local);
             }
         }
-        public IEnumerable<KeyValuePair<string, ElementLocation>> ParameterLocations => this.TaskXml.ParameterLocations;
-        public string GetParameter(string name) { return this.TaskXml.GetParameter(name); }
-        public void SetParameter(string name, string unevaluatedValue) { this.TaskXml.SetParameter(name, unevaluatedValue); }
-        public void RemoveParameter(string name) { this.TaskXml.RemoveParameter(name); }
-        public void RemoveAllParameters() { this.TaskXml.RemoveAllParameters(); }
+        public IEnumerable<KeyValuePair<string, ElementLocation>> ParameterLocations => TaskXml.ParameterLocations;
+        public string GetParameter(string name) { return TaskXml.GetParameter(name); }
+        public void SetParameter(string name, string unevaluatedValue) { TaskXml.SetParameter(name, unevaluatedValue); }
+        public void RemoveParameter(string name) { TaskXml.RemoveParameter(name); }
+        public void RemoveAllParameters() { TaskXml.RemoveAllParameters(); }
     }
 
     internal sealed class MockProjectTaskElementLink : ProjectTaskElementLink, ILinkMock, IProjectElementLinkHelper, IProjectElementContainerLinkHelper
     {
         public MockProjectTaskElementLink(MockProjectTaskElementLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectTaskElementLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
-        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
-        MockProjectElementContainerLinkRemoter IProjectElementContainerLinkHelper.ContainerProxy => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
+        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => Proxy;
+        MockProjectElementContainerLinkRemoter IProjectElementContainerLinkHelper.ContainerProxy => Proxy;
 
         // ProjectTaskElementLink -----
-        public override IDictionary<string, string> Parameters => this.Proxy.Parameters;
-        public override IEnumerable<KeyValuePair<string, ElementLocation>> ParameterLocations => this.Proxy.ParameterLocations;
-        public override string GetParameter(string name) { return this.Proxy.GetParameter(name); }
+        public override IDictionary<string, string> Parameters => Proxy.Parameters;
+        public override IEnumerable<KeyValuePair<string, ElementLocation>> ParameterLocations => Proxy.ParameterLocations;
+        public override string GetParameter(string name) { return Proxy.GetParameter(name); }
         // hmm did not know can use => on functions, can clean the milion other cases some tiem ...
-        public override void SetParameter(string name, string unevaluatedValue) => this.Proxy.SetParameter(name, unevaluatedValue);
+        public override void SetParameter(string name, string unevaluatedValue) => Proxy.SetParameter(name, unevaluatedValue);
         public override void RemoveParameter(string name) => Proxy.RemoveParameter(name);
         public override void RemoveAllParameters() => Proxy.RemoveAllParameters();
 

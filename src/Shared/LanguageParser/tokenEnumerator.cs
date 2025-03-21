@@ -43,15 +43,15 @@ namespace Microsoft.Build.Shared.LanguageParser
             bool found = FindNextToken();
 
             // If a token was found, record the line number and text into
-            if (found && this.current != null)
+            if (found && current != null)
             {
-                this.current.Line = startLine;
+                current.Line = startLine;
 
                 // Don't record if there is already something there.
                 // This is so that FindNextToken can set the value if it wants to.
-                if (this.current.InnerText == null)
+                if (current.InnerText == null)
                 {
-                    this.current.InnerText = Reader.GetCurrentMatchedString(startPosition);
+                    current.InnerText = Reader.GetCurrentMatchedString(startPosition);
                 }
             }
             return found;
@@ -65,7 +65,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         public void Reset()
         {
             Reader.Reset();
-            this.current = null;
+            current = null;
         }
 
         /*

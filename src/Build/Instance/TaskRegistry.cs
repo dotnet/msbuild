@@ -273,7 +273,7 @@ namespace Microsoft.Build.Execution
             }
 #if DEBUG
             taskRegistry._isInitialized = true;
-            taskRegistry._taskRegistrations ??= TaskRegistry.CreateRegisteredTaskDictionary();
+            taskRegistry._taskRegistrations ??= CreateRegisteredTaskDictionary();
 #endif
         }
 
@@ -426,7 +426,7 @@ namespace Microsoft.Build.Execution
             if (projectUsingTaskXml.Count > 0)
             {
                 parameterGroupAndTaskElementRecord = new RegisteredTaskRecord.ParameterGroupAndTaskElementRecord();
-                parameterGroupAndTaskElementRecord.ExpandUsingTask<P, I>(projectUsingTaskXml, expander, expanderOptions);
+                parameterGroupAndTaskElementRecord.ExpandUsingTask(projectUsingTaskXml, expander, expanderOptions);
             }
 
             Dictionary<string, string> taskFactoryParameters = null;
@@ -655,7 +655,7 @@ namespace Microsoft.Build.Execution
         {
             return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
-                typeof(Microsoft.Build.Framework.ITaskFactory).IsAssignableFrom(type);
+                typeof(ITaskFactory).IsAssignableFrom(type);
         }
 
         /// <summary>
@@ -1183,7 +1183,7 @@ namespace Microsoft.Build.Execution
             {
                 public short ExecutedCount { get; private set; } = 0;
                 public long TotalMemoryConsumption { get; private set; } = 0;
-                private readonly Stopwatch _executedSw  = new Stopwatch();
+                private readonly Stopwatch _executedSw = new Stopwatch();
                 private long _memoryConsumptionOnStart;
 
                 public TimeSpan ExecutedTime => _executedSw.Elapsed;
@@ -1377,7 +1377,7 @@ namespace Microsoft.Build.Execution
                                 // and the identity parameters don't match the factory's declared parameters.
                                 // This is because when the task factory is instantiated we try and load the Registered name from the task factory and fail it it cannot be loaded
                                 // therefore the fact that we have a factory means the Registered type and parameters can be created by the factory.
-                                if (RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Fuzzy.Equals(this.TaskIdentity, taskIdentity))
+                                if (RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Fuzzy.Equals(TaskIdentity, taskIdentity))
                                 {
                                     creatableByFactory = this;
                                 }
@@ -1705,14 +1705,14 @@ namespace Microsoft.Build.Execution
                     ProjectUsingTaskBodyElement taskElement = projectUsingTaskXml.TaskBody;
                     if (taskElement != null)
                     {
-                        EvaluateTaskBody<P, I>(expander, taskElement, expanderOptions);
+                        EvaluateTaskBody(expander, taskElement, expanderOptions);
                     }
 
                     UsingTaskParameterGroupElement parameterGroupElement = projectUsingTaskXml.ParameterGroup;
 
                     if (parameterGroupElement != null)
                     {
-                        ParseUsingTaskParameterGroupElement<P, I>(parameterGroupElement, expander, expanderOptions);
+                        ParseUsingTaskParameterGroupElement(parameterGroupElement, expander, expanderOptions);
                     }
                 }
 

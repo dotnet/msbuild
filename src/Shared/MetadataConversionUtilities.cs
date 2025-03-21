@@ -39,9 +39,9 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                return Microsoft.Build.Shared.ConversionUtilities.ConvertStringToBool(metadataValue);
+                return ConversionUtilities.ConvertStringToBool(metadataValue);
             }
-            catch (System.ArgumentException e)
+            catch (ArgumentException e)
             {
                 throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("General.InvalidAttributeMetadata", item.ItemSpec, itemMetadataName, metadataValue, "bool"), e);
             }

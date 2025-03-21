@@ -158,9 +158,9 @@ namespace Microsoft.Build.ObjectModelRemoting
     {
         public XmlAttributeLink(string localName, string value, string namespaceUri)
         {
-            this.LocalName = localName;
-            this.Value = value;
-            this.NamespaceURI = namespaceUri;
+            LocalName = localName;
+            Value = value;
+            NamespaceURI = namespaceUri;
         }
 
         public string LocalName { get; }

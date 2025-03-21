@@ -33,20 +33,20 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     {
         public MockProjectMetadataElementLink(MockProjectMetadataElementLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectMetadataElementLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
-        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
+        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => Proxy;
 
-        public override string Value { get => this.Proxy.Value; set => this.Proxy.Value = value; }
+        public override string Value { get => Proxy.Value; set => Proxy.Value = value; }
         public override void ChangeName(string newName)
         {
-            this.Proxy.ChangeName(newName);
+            Proxy.ChangeName(newName);
         }
 
         #region ProjectElementLink redirectors

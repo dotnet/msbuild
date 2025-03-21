@@ -2698,7 +2698,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // All the tlogs need to still be there even after compaction
             // It's OK for them to be empty, but their absence might mean a partial clean
             // A missing tlog would mean a clean build
-            Assert.True(Microsoft.Build.Utilities.TrackedDependencies.ItemsExist(tlogs));
+            Assert.True(Utilities.TrackedDependencies.ItemsExist(tlogs));
 
             // There should be no difference in the out of date files after compaction
             CanonicalTrackedInputFiles d1 = new CanonicalTrackedInputFiles(
@@ -2816,7 +2816,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
             // All the tlogs need to still be there even after compaction
             // It's OK for them to be empty, but their absence might mean a partial clean
             // A missing tlog would mean a clean build
-            Assert.True(Microsoft.Build.Utilities.TrackedDependencies.ItemsExist(tlogs));
+            Assert.True(Utilities.TrackedDependencies.ItemsExist(tlogs));
 
             // All log information should now be in the tlog[0]
             ITaskItem[] tlogs2 = {

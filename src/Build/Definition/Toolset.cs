@@ -276,7 +276,7 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
 
             _toolsVersion = toolsVersion;
-            this.ToolsPath = toolsPath;
+            ToolsPath = toolsPath;
             _globalProperties = globalProperties;
             _environmentProperties = environmentProperties;
             _overrideTasksPath = msbuildOverrideTasksPath;
@@ -736,7 +736,7 @@ namespace Microsoft.Build.Evaluation
             // Sort the file names to give a deterministic order
             if (defaultTasksFiles != null)
             {
-                Array.Sort<string>(defaultTasksFiles, StringComparer.OrdinalIgnoreCase);
+                Array.Sort(defaultTasksFiles, StringComparer.OrdinalIgnoreCase);
                 return defaultTasksFiles;
             }
             return [];
@@ -932,7 +932,7 @@ namespace Microsoft.Build.Evaluation
 
                 // GenerateSubToolsetVersion checks the environment and global properties, so it's safe to go ahead and gather the
                 // subtoolset properties here without fearing that we'll have somehow come up with the wrong subtoolset version.
-                string subToolsetVersion = this.GenerateSubToolsetVersion();
+                string subToolsetVersion = GenerateSubToolsetVersion();
                 SubToolset subToolset;
                 ICollection<ProjectPropertyInstance> subToolsetProperties = null;
 
@@ -1044,7 +1044,7 @@ namespace Microsoft.Build.Evaluation
             string currentTasksFile = null;
             try
             {
-                TaskRegistry.InitializeTaskRegistryFromUsingTaskElements<ProjectPropertyInstance, ProjectItemInstance>(
+                TaskRegistry.InitializeTaskRegistryFromUsingTaskElements(
                     loggingContext,
                     EnumerateTasksRegistrations(),
                     registry,

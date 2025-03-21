@@ -152,7 +152,7 @@ namespace Microsoft.Build.BackEnd
         /// Logs an error event for the current task
         /// </summary>
         /// <param name="e">The event args</param>
-        public void LogErrorEvent(Microsoft.Build.Framework.BuildErrorEventArgs e)
+        public void LogErrorEvent(BuildErrorEventArgs e)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e);
             VerifyActiveProxy();
@@ -173,7 +173,7 @@ namespace Microsoft.Build.BackEnd
         /// Logs a warning event for the current task
         /// </summary>
         /// <param name="e">The event args</param>
-        public void LogWarningEvent(Microsoft.Build.Framework.BuildWarningEventArgs e)
+        public void LogWarningEvent(BuildWarningEventArgs e)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e);
             VerifyActiveProxy();
@@ -194,7 +194,7 @@ namespace Microsoft.Build.BackEnd
         /// Logs a message event for the current task
         /// </summary>
         /// <param name="e">The event args</param>
-        public void LogMessageEvent(Microsoft.Build.Framework.BuildMessageEventArgs e)
+        public void LogMessageEvent(BuildMessageEventArgs e)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e);
             VerifyActiveProxy();
@@ -215,7 +215,7 @@ namespace Microsoft.Build.BackEnd
         /// Logs a custom event for the current task
         /// </summary>
         /// <param name="e">The event args</param>
-        public void LogCustomEvent(Microsoft.Build.Framework.CustomBuildEventArgs e)
+        public void LogCustomEvent(CustomBuildEventArgs e)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e);
             VerifyActiveProxy();

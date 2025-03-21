@@ -392,7 +392,7 @@ namespace Microsoft.Build.BackEnd
             public void Translate(ref DateTime value)
             {
                 DateTimeKind kind = DateTimeKind.Unspecified;
-                TranslateEnum<DateTimeKind>(ref kind, 0);
+                TranslateEnum(ref kind, 0);
                 value = new DateTime(_reader.ReadInt64(), kind);
             }
 
@@ -404,7 +404,7 @@ namespace Microsoft.Build.BackEnd
             {
                 long ticks = 0;
                 Translate(ref ticks);
-                value = new System.TimeSpan(ticks);
+                value = new TimeSpan(ticks);
             }
 
             // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext.
@@ -1110,7 +1110,7 @@ namespace Microsoft.Build.BackEnd
             public void Translate(ref DateTime value)
             {
                 DateTimeKind kind = value.Kind;
-                TranslateEnum<DateTimeKind>(ref kind, (int)kind);
+                TranslateEnum(ref kind, (int)kind);
                 _writer.Write(value.Ticks);
             }
 

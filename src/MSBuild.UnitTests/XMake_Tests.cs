@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests
         public XMakeAppTests(ITestOutputHelper output)
         {
             _output = output;
-            _env = UnitTests.TestEnvironment.Create(_output);
+            _env = TestEnvironment.Create(_output);
         }
 
         private const string AutoResponseFileName = "MSBuild.rsp";
@@ -2643,7 +2643,7 @@ EndGlobal
         [InlineData("/getProperty:p", false)]
         public void EndToEndVersionMessage(string arguments, bool shouldContainVersionMessage)
         {
-            using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
 
             string projectContents = ObjectModelHelpers.CleanupFileContents("""
                                                                             <Project>
@@ -2697,7 +2697,7 @@ EndGlobal
         [InlineData("/v:quiet /tl", MessageImportance.High - 1)]
         public void EndToEndMinimumMessageImportance(string arguments, MessageImportance expectedMinimumMessageImportance)
         {
-            using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
 
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
 

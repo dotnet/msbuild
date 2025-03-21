@@ -61,7 +61,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            translator.Translate<TaskItem>(ref targetOutputs, TaskItem.FactoryForDeserialization);
+            translator.Translate(ref targetOutputs, TaskItem.FactoryForDeserialization);
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {

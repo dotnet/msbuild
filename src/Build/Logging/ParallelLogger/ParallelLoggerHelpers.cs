@@ -514,7 +514,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _targetName = startedEvent.TargetName;
             _targetFile = startedEvent.TargetFile;
             _projectFile = startedEvent.ProjectFile;
-            this.ShowTargetFinishedEvent = false;
+            ShowTargetFinishedEvent = false;
             _errorInTarget = false;
             _message = startedEvent.Message;
             _buildEventContext = startedEvent.BuildEventContext;
@@ -628,7 +628,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (verbosity > LoggerVerbosity.Normal)
             {
-                fullProjectKey = this.ToString();
+                fullProjectKey = ToString();
             }
             else
             {

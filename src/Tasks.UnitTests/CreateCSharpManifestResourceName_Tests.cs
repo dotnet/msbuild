@@ -365,7 +365,7 @@ namespace Microsoft.Build.UnitTests
             t.ResourceFiles = new ITaskItem[] { i };
             t.RootNamespace = "CustomToolTest";
             bool success = t.Execute(
-                new Microsoft.Build.Tasks.CreateFileStream(CreateFileStream));
+                new CreateFileStream(CreateFileStream));
 
             Assert.True(success); // "Expected the task to succeed."
 

@@ -543,7 +543,7 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ProjectTaskInstance task = new ProjectTaskInstance(taskName, _location, condition ?? String.Empty, continueOnError ?? String.Empty, msbuildRuntime ?? String.Empty, msbuildArchitecture ?? String.Empty);
-            this.AddProjectTargetInstanceChild(task);
+            AddProjectTargetInstanceChild(task);
             return task;
         }
 

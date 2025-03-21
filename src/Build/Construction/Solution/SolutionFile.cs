@@ -98,7 +98,7 @@ namespace Microsoft.Build.Construction
         private const string sharedProjectGuid = "{D954291E-2A0B-460D-934E-DC6B0785DB48}";
 
         private const char CommentStartChar = '#';
-#endregion
+        #endregion
         #region Member data
         private string _solutionFile;                 // Could be absolute or relative path to the .SLN file.
         private string _solutionFilterFile;          // Could be absolute or relative path to the .SLNF file.
@@ -1467,7 +1467,7 @@ namespace Microsoft.Build.Construction
                     // However, 3.5 version of Solution parser can't handle a equal sign in the value.
                     // The "=" in targetframeworkMoniker was escaped to "%3D" for Orcas
                     string targetFrameworkMoniker = TrimQuotes(propertyValue);
-                    proj.TargetFrameworkMoniker = Shared.EscapingUtilities.UnescapeAll(targetFrameworkMoniker);
+                    proj.TargetFrameworkMoniker = EscapingUtilities.UnescapeAll(targetFrameworkMoniker);
                 }
             }
         }
@@ -1893,6 +1893,6 @@ namespace Microsoft.Build.Construction
             return null;
         }
 
-#endregion
+        #endregion
     } // class SolutionFile
 } // namespace Microsoft.Build.Construction

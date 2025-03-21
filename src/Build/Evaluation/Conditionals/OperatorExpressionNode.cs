@@ -81,9 +81,9 @@ namespace Microsoft.Build.Evaluation
         internal override bool DetectAnd()
         {
             // Read the state of the current node
-            bool detectedAnd = this.PossibleAndCollision;
+            bool detectedAnd = PossibleAndCollision;
             // Reset the flags on the current node
-            this.PossibleAndCollision = false;
+            PossibleAndCollision = false;
             // Process the children of the node if preset
             bool detectAndRChild = false;
             bool detectAndLChild = false;
@@ -101,9 +101,9 @@ namespace Microsoft.Build.Evaluation
         internal override bool DetectOr()
         {
             // Read the state of the current node
-            bool detectedOr = this.PossibleOrCollision;
+            bool detectedOr = PossibleOrCollision;
             // Reset the flags on the current node
-            this.PossibleOrCollision = false;
+            PossibleOrCollision = false;
             // Process the children of the node if preset
             bool detectOrRChild = false;
             bool detectOrLChild = false;

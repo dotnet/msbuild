@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests
             public override long Seek(long offset, SeekOrigin origin)
             {
                 ++_resetCount;
-                return this.Seek(offset, origin);
+                return Seek(offset, origin);
             }
 
             public override void SetLength(long value)

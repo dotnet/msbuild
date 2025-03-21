@@ -19,52 +19,52 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
         // ProjectItemLink remoting
-        public MockProjectLinkRemoter Project => this.OwningCollection.Export<Project, MockProjectLinkRemoter>(this.Source.Project);
-        public MockProjectItemElementLinkRemoter Xml => (MockProjectItemElementLinkRemoter)this.OwningCollection.ExportElement(this.Source.Xml);
-        public string EvaluatedInclude => this.Source.EvaluatedInclude;
-        public ICollection<MockProjectMetadataLinkRemoter> MetadataCollection => this.OwningCollection.ExportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.Metadata);
-        public ICollection<MockProjectMetadataLinkRemoter> DirectMetadata => this.OwningCollection.ExportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.DirectMetadata);
-        public bool HasMetadata(string name) => this.Source.HasMetadata(name);
+        public MockProjectLinkRemoter Project => OwningCollection.Export<Project, MockProjectLinkRemoter>(Source.Project);
+        public MockProjectItemElementLinkRemoter Xml => (MockProjectItemElementLinkRemoter)OwningCollection.ExportElement(Source.Xml);
+        public string EvaluatedInclude => Source.EvaluatedInclude;
+        public ICollection<MockProjectMetadataLinkRemoter> MetadataCollection => OwningCollection.ExportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(Source.Metadata);
+        public ICollection<MockProjectMetadataLinkRemoter> DirectMetadata => OwningCollection.ExportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(Source.DirectMetadata);
+        public bool HasMetadata(string name) => Source.HasMetadata(name);
         public MockProjectMetadataLinkRemoter GetMetadata(string name)
-            => this.OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.GetMetadata(name));
-        public string GetMetadataValue(string name) => this.Source.GetMetadataValue(name);
+            => OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(Source.GetMetadata(name));
+        public string GetMetadataValue(string name) => Source.GetMetadataValue(name);
         public MockProjectMetadataLinkRemoter SetMetadataValue(string name, string unevaluatedValue, bool propagateMetadataToSiblingItems)
-            => this.OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.SetMetadataValue(name, unevaluatedValue, propagateMetadataToSiblingItems));
-        public bool RemoveMetadata(string name) => this.Source.RemoveMetadata(name);
-        public void Rename(string name) => this.Source.Rename(name);
-        public void ChangeItemType(string newItemType) => this.Source.ItemType = newItemType;
+            => OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(Source.SetMetadataValue(name, unevaluatedValue, propagateMetadataToSiblingItems));
+        public bool RemoveMetadata(string name) => Source.RemoveMetadata(name);
+        public void Rename(string name) => Source.Rename(name);
+        public void ChangeItemType(string newItemType) => Source.ItemType = newItemType;
     }
 
     internal sealed class MockProjectItemLink : ProjectItemLink, ILinkMock
     {
         public MockProjectItemLink(MockProjectItemLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectItemLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
 
         // ProjectItemLink
 
-        public override Project Project => this.Linker.Import<Project, MockProjectLinkRemoter>(this.Proxy.Project);
-        public override ProjectItemElement Xml => (ProjectItemElement)this.Proxy.Xml.Import(this.Linker);
-        public override string EvaluatedInclude => this.Proxy.EvaluatedInclude;
+        public override Project Project => Linker.Import<Project, MockProjectLinkRemoter>(Proxy.Project);
+        public override ProjectItemElement Xml => (ProjectItemElement)Proxy.Xml.Import(Linker);
+        public override string EvaluatedInclude => Proxy.EvaluatedInclude;
         public override ICollection<ProjectMetadata> MetadataCollection
-            => this.Linker.ImportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Proxy.MetadataCollection);
+            => Linker.ImportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(Proxy.MetadataCollection);
         public override ICollection<ProjectMetadata> DirectMetadata
-            => this.Linker.ImportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Proxy.DirectMetadata);
-        public override bool HasMetadata(string name) => this.Proxy.HasMetadata(name);
+            => Linker.ImportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(Proxy.DirectMetadata);
+        public override bool HasMetadata(string name) => Proxy.HasMetadata(name);
         public override ProjectMetadata GetMetadata(string name)
-            => this.Linker.Import<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Proxy.GetMetadata(name));
-        public override string GetMetadataValue(string name) => this.Proxy.GetMetadataValue(name);
+            => Linker.Import<ProjectMetadata, MockProjectMetadataLinkRemoter>(Proxy.GetMetadata(name));
+        public override string GetMetadataValue(string name) => Proxy.GetMetadataValue(name);
         public override ProjectMetadata SetMetadataValue(string name, string unevaluatedValue, bool propagateMetadataToSiblingItems)
-            => this.Linker.Import<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Proxy.SetMetadataValue(name, unevaluatedValue, propagateMetadataToSiblingItems));
-        public override bool RemoveMetadata(string name) => this.Proxy.RemoveMetadata(name);
-        public override void Rename(string name) => this.Proxy.Rename(name);
-        public override void ChangeItemType(string newItemType) => this.Proxy.ChangeItemType(newItemType);
+            => Linker.Import<ProjectMetadata, MockProjectMetadataLinkRemoter>(Proxy.SetMetadataValue(name, unevaluatedValue, propagateMetadataToSiblingItems));
+        public override bool RemoveMetadata(string name) => Proxy.RemoveMetadata(name);
+        public override void Rename(string name) => Proxy.Rename(name);
+        public override void ChangeItemType(string newItemType) => Proxy.ChangeItemType(newItemType);
     }
 }

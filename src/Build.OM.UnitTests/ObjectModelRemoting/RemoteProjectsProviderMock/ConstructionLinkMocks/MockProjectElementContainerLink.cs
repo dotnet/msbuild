@@ -15,35 +15,35 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         // ProjectElementContainerLink support
         public int Count => ContainerXml.Count;
-        public MockProjectElementLinkRemoter FirstChild => this.Export(ContainerXml.FirstChild);
-        public MockProjectElementLinkRemoter LastChild => this.Export(ContainerXml.LastChild);
+        public MockProjectElementLinkRemoter FirstChild => Export(ContainerXml.FirstChild);
+        public MockProjectElementLinkRemoter LastChild => Export(ContainerXml.LastChild);
 
         public void InsertAfterChild(MockProjectElementLinkRemoter child, MockProjectElementLinkRemoter reference)
         {
-            this.ContainerXml.InsertAfterChild(child.Import(OwningCollection), reference.Import(OwningCollection));
+            ContainerXml.InsertAfterChild(child.Import(OwningCollection), reference.Import(OwningCollection));
         }
 
         public void InsertBeforeChild(MockProjectElementLinkRemoter child, MockProjectElementLinkRemoter reference)
         {
-            this.ContainerXml.InsertBeforeChild(child.Import(OwningCollection), reference.Import(OwningCollection));
+            ContainerXml.InsertBeforeChild(child.Import(OwningCollection), reference.Import(OwningCollection));
         }
 
         public void AddInitialChild(MockProjectElementLinkRemoter child)
         {
-            ProjectElementContainerLink.AddInitialChild(this.ContainerXml, child.Import(OwningCollection));
+            ProjectElementContainerLink.AddInitialChild(ContainerXml, child.Import(OwningCollection));
         }
 
         public MockProjectElementContainerLinkRemoter DeepClone(MockProjectRootElementLinkRemoter factory, MockProjectElementContainerLinkRemoter parent)
         {
             var pre = (ProjectRootElement)factory.Import(OwningCollection);
             var pec = (ProjectElementContainer)parent.Import(OwningCollection);
-            var result = ProjectElementContainerLink.DeepClone(this.ContainerXml, pre, pec);
-            return (MockProjectElementContainerLinkRemoter)this.Export(result);
+            var result = ProjectElementContainerLink.DeepClone(ContainerXml, pre, pec);
+            return (MockProjectElementContainerLinkRemoter)Export(result);
         }
 
         public void RemoveChild(MockProjectElementLinkRemoter child)
         {
-            this.ContainerXml.RemoveChild(child.Import(this.OwningCollection));
+            ContainerXml.RemoveChild(child.Import(OwningCollection));
         }
     }
 
@@ -52,16 +52,16 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     {
         public TemplateProjectElementContainerLink(MockProjectElementContainerLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectElementContainerLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
-        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
-        MockProjectElementContainerLinkRemoter IProjectElementContainerLinkHelper.ContainerProxy => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
+        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => Proxy;
+        MockProjectElementContainerLinkRemoter IProjectElementContainerLinkHelper.ContainerProxy => Proxy;
 
 
         #region ProjectElementLink redirectors

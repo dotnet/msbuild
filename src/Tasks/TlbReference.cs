@@ -375,7 +375,7 @@ namespace Microsoft.Build.Tasks
         {
             // get attributes for our dependent typelib
             ITypeLib typeLib = (ITypeLib)objTypeLib;
-            ComReference.GetTypeLibAttrForTypeLib(ref typeLib, out TYPELIBATTR attr);
+            GetTypeLibAttrForTypeLib(ref typeLib, out TYPELIBATTR attr);
 
             // call our callback to do the dirty work for us
             if (!ResolverCallback.ResolveComClassicReference(attr, base.OutputDirectory, null, null, out ComReferenceWrapperInfo wrapperInfo))

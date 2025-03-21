@@ -84,7 +84,7 @@ namespace Microsoft.Build.BackEnd
         /// If we ever add new members to this class, we'll need to update this.
         /// </summary>
 #if FEATURE_SECURITY_PERMISSIONS
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
 #if NET8_0_OR_GREATER
         [Obsolete(DiagnosticId = "SYSLIB0051")]

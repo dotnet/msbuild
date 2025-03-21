@@ -293,7 +293,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         // So we use the ReadOnly flag to tell the difference between the two cases...
                         if (_readOnly)
                         {
-                            OutputMessages.AddErrorMessage("GenerateManifest.ResolveFailedInReadOnlyMode", f.ToString(), this.ToString());
+                            OutputMessages.AddErrorMessage("GenerateManifest.ResolveFailedInReadOnlyMode", f.ToString(), ToString());
                         }
                         else
                         {

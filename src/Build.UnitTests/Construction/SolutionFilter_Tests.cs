@@ -15,9 +15,9 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.UnitTests;
+using Microsoft.VisualStudio.SolutionPersistence;
 using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
-using Microsoft.VisualStudio.SolutionPersistence;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                     EndGlobal
                     """);
                 TransientTestFile filterFile = testEnvironment.CreateFile(folder, "solutionFilter.slnf",
-                    /*lang=json*/
+                                  /*lang=json*/
                                   """
                                   {
                                     "solution": {
@@ -317,7 +317,8 @@ EndGlobal
             EndGlobal
             """);
             TransientTestFile slnf = testEnvironment.CreateFile(folder, "SimpleSolution.slnf",
-            """
+            /*lang=json,strict*/
+                                 """
             {
                 "solution": {
                     "path": "SimpleSolution.sln",

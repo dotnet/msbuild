@@ -4392,7 +4392,7 @@ $@"<Project InitialTargets=`Sleep`>
         [InlineData("TaskHostFactory", true)] // OOP task host, input logging enabled
         public void TaskInputLoggingIsExposedToTasks(string taskFactory, bool taskInputLoggingEnabled)
         {
-            string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
+            string projectContents = CleanupFileContents(@"<Project>
 
   <UsingTask
     TaskName=""" + typeof(LogTaskInputsCheckingTask).FullName + @"""

@@ -178,7 +178,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             List<SdkResolverManifest> matchingResolversManifests = new();
             foreach (SdkResolverManifest manifest in _specificResolversManifestsRegistry)
             {
-                WaitIfTestRequires(); 
+                WaitIfTestRequires();
                 try
                 {
                     if (manifest.ResolvableSdkRegex.IsMatch(sdk.Name))

@@ -248,7 +248,7 @@ namespace Microsoft.Build.Logging
 
             if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
             {
-                if (this._rawLogRecordReceived != null)
+                if (_rawLogRecordReceived != null)
                 {
                     throw new NotSupportedException(
                         ResourceUtilities.GetResourceString("Binlog_Source_MultiSubscribeError"));
@@ -266,10 +266,10 @@ namespace Microsoft.Build.Logging
             }
             else
             {
-                if (this._rawLogRecordReceived == null &&
-                    this._embeddedContentRead == null &&
-                    this._stringReadDone == null &&
-                    this._archiveFileEncountered == null)
+                if (_rawLogRecordReceived == null &&
+                    _embeddedContentRead == null &&
+                    _stringReadDone == null &&
+                    _archiveFileEncountered == null)
                 {
                     throw new NotSupportedException(
                         ResourceUtilities.GetResourceString("Binlog_Source_MissingSubscribeError"));
@@ -302,8 +302,8 @@ namespace Microsoft.Build.Logging
             Action onRawReadingPossible,
             Action onStructuredReadingOnly)
         {
-            this._onRawReadingPossible += onRawReadingPossible;
-            this._onStructuredReadingOnly += onStructuredReadingOnly;
+            _onRawReadingPossible += onRawReadingPossible;
+            _onStructuredReadingOnly += onStructuredReadingOnly;
         }
 
         private Action<EmbeddedContentEventArgs>? _embeddedContentRead;

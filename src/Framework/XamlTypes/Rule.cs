@@ -167,7 +167,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// </remarks>
         /// <example>
         /// For the VC++ CL task, <c>WholeProgramOptimization</c> is a boolean parameter. It's switch is <c>GL</c> and its
-        /// switch prefix (inherited from the parent <see cref="Rule.SwitchPrefix"/> since it is not overridden by <c>WholeProgramOptimization</c>)
+        /// switch prefix (inherited from the parent <see cref="SwitchPrefix"/> since it is not overridden by <c>WholeProgramOptimization</c>)
         /// is <c>/</c>. Thus the complete switch in the command line for this property would be <c>/GL</c>
         /// </example>
         public string SwitchPrefix
@@ -494,8 +494,8 @@ namespace Microsoft.Build.Framework.XamlTypes
                 {
                     if (_propertiesByNameMap == null)
                     {
-                        var map = new Dictionary<string, BaseProperty>(this.Properties.Count, StringComparer.OrdinalIgnoreCase);
-                        foreach (var property in this.Properties)
+                        var map = new Dictionary<string, BaseProperty>(Properties.Count, StringComparer.OrdinalIgnoreCase);
+                        foreach (var property in Properties)
                         {
                             map[property.Name] = property;
                         }

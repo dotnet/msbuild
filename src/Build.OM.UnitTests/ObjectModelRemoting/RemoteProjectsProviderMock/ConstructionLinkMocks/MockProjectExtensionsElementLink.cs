@@ -25,29 +25,29 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
         // ProjectExtensionsElementLink support
-        public string Content { get => this.ExtensionXml.Content; set => this.ExtensionXml.Content = value; }
-        public string GetSubElement(string name) { return this.ExtensionXml[name]; }
-        public void SetSubElement(string name, string value) { this.ExtensionXml[name] = value; }
+        public string Content { get => ExtensionXml.Content; set => ExtensionXml.Content = value; }
+        public string GetSubElement(string name) { return ExtensionXml[name]; }
+        public void SetSubElement(string name, string value) { ExtensionXml[name] = value; }
     }
 
     internal sealed class MockProjectExtensionsElementLink : ProjectExtensionsElementLink, ILinkMock, IProjectElementLinkHelper
     {
         public MockProjectExtensionsElementLink(MockProjectExtensionsElementLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectExtensionsElementLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
-        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
+        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => Proxy;
 
         // - ProjectExtensionsElementLink ------
         public override string Content { get => Proxy.Content; set => Proxy.Content = value; }
-        public override string GetSubElement(string name) { return this.Proxy.GetSubElement(name); }
-        public override void SetSubElement(string name, string value) { this.Proxy.SetSubElement(name, value); }
+        public override string GetSubElement(string name) { return Proxy.GetSubElement(name); }
+        public override void SetSubElement(string name, string value) { Proxy.SetSubElement(name, value); }
         // -------------------------------------
 
         #region ProjectElementLink redirectors

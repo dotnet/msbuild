@@ -160,11 +160,11 @@ namespace Microsoft.Build.Shared
 
         internal static bool TryConvertDecimalOrHexToDouble(string number, out double doubleValue)
         {
-            if (ConversionUtilities.ValidDecimalNumber(number, out doubleValue))
+            if (ValidDecimalNumber(number, out doubleValue))
             {
                 return true;
             }
-            else if (ConversionUtilities.ValidHexNumber(number, out int hexValue))
+            else if (ValidHexNumber(number, out int hexValue))
             {
                 doubleValue = (double)hexValue;
                 return true;

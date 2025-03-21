@@ -104,19 +104,19 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     internal abstract class MockLinkRemoter<T> : ExportedLinksMap.LinkedObject<T>, IRemoterSource
         where T : class
     {
-        object IRemoterSource.RealObject => this.Source;
+        object IRemoterSource.RealObject => Source;
 
         public ProjectCollectionLinker OwningCollection { get; private set; }
 
         public MockProjectElementLinkRemoter ExportElement(ProjectElement obj)
-            => this.OwningCollection.ExportElement(obj);
+            => OwningCollection.ExportElement(obj);
 
-        public UInt32 HostCollectionId => this.OwningCollection.CollectionId;
+        public UInt32 HostCollectionId => OwningCollection.CollectionId;
 
         public override void Initialize(object key, T source, object context)
         {
             base.Initialize(key, source, context);
-            this.OwningCollection = (ProjectCollectionLinker)context;
+            OwningCollection = (ProjectCollectionLinker)context;
         }
 
         public abstract T CreateLinkedObject(IImportHolder holder);
@@ -154,17 +154,17 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         private ProjectCollectionLinker(ConnectedProjectCollections group)
         {
-            this.LinkedCollections = group;
-            this.CollectionId = (UInt32)Interlocked.Increment(ref _collecitonId);
-            this.Collection = new ProjectCollection();
-            this.LinkFactory = LinkedObjectsFactory.Get(this.Collection);
+            LinkedCollections = group;
+            CollectionId = (UInt32)Interlocked.Increment(ref _collecitonId);
+            Collection = new ProjectCollection();
+            LinkFactory = LinkedObjectsFactory.Get(Collection);
         }
 
-        public Project LoadProject(string path) => this.Collection.LoadProject(path);
+        public Project LoadProject(string path) => Collection.LoadProject(path);
 
         public Project LoadProjectIgnoreMissingImports(string path) => LoadProjectWithSettings(path, ProjectLoadSettings.IgnoreMissingImports);
 
-        public Project LoadProjectWithSettings(string path, ProjectLoadSettings settings) => new Project(path, null, null, this.Collection, settings);
+        public Project LoadProjectWithSettings(string path, ProjectLoadSettings settings) => new Project(path, null, null, Collection, settings);
 
 
         public Project LoadInMemoryWithSettings(string content, ProjectLoadSettings settings = ProjectLoadSettings.Default)
@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             content = ObjectModelHelpers.CleanupFileContents(content);
             using ProjectRootElementFromString projectRootElementFromString = new(content);
             ProjectRootElement xml = projectRootElementFromString.Project;
-            Project project = new Project(xml, null, null, this.Collection, settings);
+            Project project = new Project(xml, null, null, Collection, settings);
             return project;
         }
 
@@ -186,20 +186,20 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public bool Importing
         {
-            get => this.importing;
+            get => importing;
             set
             {
-                if (value != this.importing)
+                if (value != importing)
                 {
-                    ExternalProjectsProvider.SetExternalProjectsProvider(this.Collection, value ? this : null);
-                    this.importing = value;
+                    SetExternalProjectsProvider(Collection, value ? this : null);
+                    importing = value;
                 }
             }
         }
 
         private void ConnectTo(ProjectCollectionLinker other)
         {
-            if (other.CollectionId == this.CollectionId)
+            if (other.CollectionId == CollectionId)
             {
                 throw new Exception("Can not connect to self");
             }
@@ -279,9 +279,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 return null;
             }
 
-            if (remoter.HostCollectionId == this.CollectionId)
+            if (remoter.HostCollectionId == CollectionId)
             {
-                this.exported.GetActive(remoter.LocalId, out T result);
+                exported.GetActive(remoter.LocalId, out T result);
                 return result;
             }
 
@@ -345,11 +345,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             List<Project> result = new List<Project>();
 
-            foreach (var external in this.imported.Values)
+            foreach (var external in imported.Values)
             {
                 foreach (var remote in external.Linker.ExportLoadedProjects(filePath))
                 {
-                    result.Add(this.Import<Project, MockProjectLinkRemoter>(remote));
+                    result.Add(Import<Project, MockProjectLinkRemoter>(remote));
                 }
             }
 
@@ -359,11 +359,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         private IReadOnlyCollection<MockProjectLinkRemoter> ExportLoadedProjects(string filePath)
         {
             List<MockProjectLinkRemoter> remoted = new List<MockProjectLinkRemoter>();
-            var toRemote = LinkedObjectsFactory.GetLocalProjects(this.Collection, filePath);
+            var toRemote = LinkedObjectsFactory.GetLocalProjects(Collection, filePath);
 
             foreach (var p in toRemote)
             {
-                remoted.Add(this.Export<Project, MockProjectLinkRemoter>(p));
+                remoted.Add(Export<Project, MockProjectLinkRemoter>(p));
             }
 
             return remoted;
@@ -383,12 +383,12 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             {
                 base.Initialize(key, source, context);
 
-                this.Remoter = source;
-                this.Linker = (ProjectCollectionLinker)context;
-                this.Linked = source.CreateLinkedObject(this);
+                Remoter = source;
+                Linker = (ProjectCollectionLinker)context;
+                Linked = source.CreateLinkedObject(this);
             }
 
-            object IActiveImportDBG.Linked => this.Linked;
+            object IActiveImportDBG.Linked => Linked;
 
             public ProjectCollectionLinker Linker { get; private set; }
 
@@ -439,7 +439,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         private void ClearAllRemotes()
         {
-            this.exported = ExportedLinksMap.Create();
+            exported = ExportedLinksMap.Create();
             foreach (var i in imported)
             {
                 i.Value.Clear();
@@ -451,8 +451,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             public ExternalConnection(ProjectCollectionLinker linker)
             {
-                this.Linker = linker;
-                this.ActiveImports = ImportedLinksMap.Create();
+                Linker = linker;
+                ActiveImports = ImportedLinksMap.Create();
             }
 
             public ProjectCollectionLinker Linker { get; }
@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             public void Clear()
             {
-                this.ActiveImports = ImportedLinksMap.Create();
+                ActiveImports = ImportedLinksMap.Create();
             }
         }
     }

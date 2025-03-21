@@ -73,8 +73,8 @@ namespace Microsoft.Build.UnitTests.Construction
             ElementLocation e1 = target.Location;
             ElementLocation e2 = target.OutputsLocation;
 
-            Assert.True(Object.ReferenceEquals(e1, target.Location));
-            Assert.True(Object.ReferenceEquals(e2, target.OutputsLocation));
+            Assert.True(ReferenceEquals(e1, target.Location));
+            Assert.True(ReferenceEquals(e2, target.OutputsLocation));
         }
 
         /// <summary>

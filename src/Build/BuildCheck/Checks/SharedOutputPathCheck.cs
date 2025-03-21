@@ -3,9 +3,9 @@
 
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 

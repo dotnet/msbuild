@@ -211,7 +211,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                bool isImported = !Object.ReferenceEquals(_xml.ContainingProject, _parent.Project.Xml);
+                bool isImported = !ReferenceEquals(_xml.ContainingProject, _parent.Project.Xml);
 
                 return isImported;
             }
@@ -277,7 +277,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>True if they are equivalent, false otherwise.</returns>
         bool IEquatable<ProjectMetadata>.Equals(ProjectMetadata other)
         {
-            if (Object.ReferenceEquals(this, other))
+            if (ReferenceEquals(this, other))
             {
                 return true;
             }
@@ -300,7 +300,7 @@ namespace Microsoft.Build.Evaluation
         {
             // The new metadatum's predecessor is the same as its original's predecessor, just as the XML is the same
             // as its original's XML. Predecessors map to XML elements.
-            return new ProjectMetadata(_parent, this.Xml, this.EvaluatedValueEscaped, this.Predecessor);
+            return new ProjectMetadata(_parent, Xml, EvaluatedValueEscaped, Predecessor);
         }
     }
 }

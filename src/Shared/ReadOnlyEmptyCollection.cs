@@ -130,7 +130,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Get an enumerator over an empty collection
         /// </summary>
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }

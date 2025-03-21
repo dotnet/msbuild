@@ -190,7 +190,7 @@ namespace Microsoft.Build.BackEnd
             _state = TargetEntryState.Dependencies;
             _baseLookup = baseLookup;
             _host = host;
-            this.StopProcessingOnCompletion = stopProcessingOnCompletion;
+            StopProcessingOnCompletion = stopProcessingOnCompletion;
         }
 
         /// <summary>
@@ -325,7 +325,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if they are equivalent, false otherwise.</returns>
         public bool Equals(TargetEntry other)
         {
-            return String.Equals(this.Name, other.Name, StringComparison.OrdinalIgnoreCase);
+            return String.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase);
         }
 
         #endregion

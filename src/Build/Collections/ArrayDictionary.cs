@@ -112,7 +112,7 @@ namespace Microsoft.Build.Collections
 
         public void Clear()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
@@ -171,12 +171,12 @@ namespace Microsoft.Build.Collections
 
         public bool Remove(TKey key)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public bool TryGetValue(TKey key, out TValue value)
@@ -228,9 +228,9 @@ namespace Microsoft.Build.Collections
 
             public Enumerator(ArrayDictionary<TKey, TValue> dictionary, bool emitDictionaryEntries = false)
             {
-                this._dictionary = dictionary;
-                this._position = -1;
-                this._emitDictionaryEntries = emitDictionaryEntries;
+                _dictionary = dictionary;
+                _position = -1;
+                _emitDictionaryEntries = emitDictionaryEntries;
             }
 
             public KeyValuePair<TKey, TValue> Current =>

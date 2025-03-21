@@ -53,7 +53,7 @@ namespace Microsoft.Build.BackEnd
         {
             _configCache = configCache;
             _schedulingData = schedulingData;
-            this.MaximumConfigurationId = BuildRequestConfiguration.InvalidConfigurationId;
+            MaximumConfigurationId = BuildRequestConfiguration.InvalidConfigurationId;
         }
 
         public PlanConfigData GetConfiguration(int configId)

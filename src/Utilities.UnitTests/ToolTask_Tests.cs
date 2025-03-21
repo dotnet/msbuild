@@ -1065,7 +1065,7 @@ namespace Microsoft.Build.UnitTests
             public ToolTaskSetsTerminationTimeout()
                 : base()
             {
-                base.TaskResources = AssemblyResources.PrimaryResources;
+                TaskResources = AssemblyResources.PrimaryResources;
             }
 
             /// <summary>

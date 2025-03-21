@@ -25,26 +25,26 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
         public ImplicitImportLocation ImplicitImportLocation => ImportElementXml.ImplicitImportLocation;
-        public MockProjectElementLinkRemoter OriginalElement => this.Export(ImportElementXml.OriginalElement);
+        public MockProjectElementLinkRemoter OriginalElement => Export(ImportElementXml.OriginalElement);
     }
 
     internal sealed class MockProjectImportElementLink : ProjectImportElementLink, ILinkMock, IProjectElementLinkHelper
     {
         public MockProjectImportElementLink(MockProjectImportElementLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectImportElementLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
-        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
+        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => Proxy;
 
         // ProjectImportElementLink
         public override ImplicitImportLocation ImplicitImportLocation => Proxy.ImplicitImportLocation;
-        public override ProjectElement OriginalElement => Proxy.OriginalElement.Import(this.Linker);
+        public override ProjectElement OriginalElement => Proxy.OriginalElement.Import(Linker);
         //---------------------------
 
         #region ProjectElementLink redirectors

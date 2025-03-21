@@ -12,7 +12,7 @@ using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
-    /// An internal implementation of <see cref="Microsoft.Build.Framework.SdkResultFactory"/>.
+    /// An internal implementation of <see cref="Framework.SdkResultFactory"/>.
     /// </summary>
     internal class SdkResultFactory : SdkResultFactoryBase
     {

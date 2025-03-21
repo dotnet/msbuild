@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns>True if the object values are identical, false if they are not identical</returns>
         public static bool IsEquivalent(this BuildEventArgs args, BuildEventArgs other)
         {
-            if (Object.ReferenceEquals(args, other))
+            if (ReferenceEquals(args, other))
             {
                 return true;
             }
@@ -343,7 +343,7 @@ namespace Microsoft.Build.UnitTests
             }
 
 
-            if (!Object.ReferenceEquals(args.TargetOutputs, other.TargetOutputs))
+            if (!ReferenceEquals(args.TargetOutputs, other.TargetOutputs))
             {
                 // See if one is null, if so they are not equal
                 if (args.TargetOutputs == null || other.TargetOutputs == null)

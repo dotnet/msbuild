@@ -686,7 +686,7 @@ namespace Microsoft.Build.Tasks
                 }
                 finally
                 {
-                    int count = System.Threading.Interlocked.Decrement(ref activeCopyThreads);
+                    int count = Interlocked.Decrement(ref activeCopyThreads);
                     if (count == 0)
                     {
                         _signalCopyTasksCompleted.Set();

@@ -76,7 +76,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         /// </summary>
         /// <remarks>If the property is defined and identical in the parent, no action is taken.</remarks>
         /// <param name="newProperties">The new properties.</param>
-        /// <exception cref="System.ArgumentException">newProperties</exception>
+        /// <exception cref="ArgumentException">newProperties</exception>
         public void AddProperties(IEnumerable<DictionaryEntry> newProperties)
         {
             if (newProperties == null)

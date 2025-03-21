@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             // Now look for the same key we inserted
             object v2 = dictionary[k1];
 
-            Assert.True(Object.ReferenceEquals(v1, v2));
+            Assert.True(ReferenceEquals(v1, v2));
             Assert.True(dictionary.ContainsKey(k1));
         }
 
@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             bool result = dictionary.TryGetValue(k1, out v2);
 
             Assert.True(result);
-            Assert.True(Object.ReferenceEquals(v1, v2));
+            Assert.True(ReferenceEquals(v1, v2));
         }
 
         /// <summary>
@@ -101,11 +101,11 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             // Don't create it with a literal or the compiler will intern it!
             string k2 = String.Concat("k", "ey");
 
-            Assert.False(Object.ReferenceEquals(k1, k2));
+            Assert.False(ReferenceEquals(k1, k2));
 
             object v2 = dictionary[k2];
 
-            Assert.True(Object.ReferenceEquals(v1, v2));
+            Assert.True(ReferenceEquals(v1, v2));
         }
 
         /// <summary>

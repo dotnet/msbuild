@@ -82,7 +82,7 @@ namespace Microsoft.Build.CommandLine
             XmlReaderSettings validatorSettings = new XmlReaderSettings();
             validatorSettings.ValidationType = ValidationType.Schema;
             validatorSettings.XmlResolver = null;
-            validatorSettings.ValidationEventHandler += this.OnSchemaValidationError;
+            validatorSettings.ValidationEventHandler += OnSchemaValidationError;
 
             XmlTextReader schemaReader = new XmlTextReader(schemaFile);
             schemaReader.DtdProcessing = DtdProcessing.Ignore;

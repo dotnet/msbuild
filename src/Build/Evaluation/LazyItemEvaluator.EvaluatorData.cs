@@ -306,7 +306,7 @@ namespace Microsoft.Build.Evaluation
                 _wrappedData.RecordImportWithDuplicates(importElement, import, versionEvaluated);
             }
 
-            public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, BackEnd.Logging.LoggingContext loggingContext)
+            public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, LoggingContext loggingContext)
             {
                 return _wrappedData.SetProperty(propertyElement, evaluatedValueEscaped, loggingContext);
             }

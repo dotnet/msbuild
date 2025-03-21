@@ -237,7 +237,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(project, "i");
 
             IList<ProjectItemInstance> itemsEmpty = expander.ExpandIntoItemsLeaveEscaped("@(unsetItem->AnyHaveMetadataValue('Metadatum', 'value'))", itemFactory, ExpanderOptions.ExpandItems, MockElementLocation.Instance);
-            ProjectItemInstance pii = itemsEmpty.ShouldHaveSingleItem<ProjectItemInstance>();
+            ProjectItemInstance pii = itemsEmpty.ShouldHaveSingleItem();
             pii.EvaluatedInclude.ShouldBe("false");
         }
 
@@ -1257,7 +1257,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     </Target>
                 </Project>", false);
             }
-            catch (Microsoft.Build.Exceptions.InvalidProjectFileException e)
+            catch (InvalidProjectFileException e)
             {
                 Assert.NotEqual(-1, e.Message.IndexOf("[System.IO.Path]::Combine(null, '')", StringComparison.OrdinalIgnoreCase));
                 return;
@@ -1284,7 +1284,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     </Target>
                 </Project>", false);
             }
-            catch (Microsoft.Build.Exceptions.InvalidProjectFileException e)
+            catch (InvalidProjectFileException e)
             {
                 Assert.NotEqual(-1, e.Message.IndexOf("System.IO.Path::Combine('a','b')", StringComparison.OrdinalIgnoreCase));
                 return;
@@ -1647,7 +1647,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Null(string.IsInterned(expandedString));
 
             // Finally verify Expander indeed didn't create a new string.
-            Assert.True(Object.ReferenceEquals(xmlattribute.Value, expandedString));
+            Assert.True(ReferenceEquals(xmlattribute.Value, expandedString));
         }
 
         /// <summary>
@@ -2751,7 +2751,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string dateTime = "'" + _dateToParse + "'";
             string result = expander.ExpandIntoStringLeaveEscaped("$([System.DateTime]::Parse(" + dateTime + ").ToString(\"yyyy/MM/dd HH:mm:ss\"))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.Equal(System.DateTime.Parse(_dateToParse).ToString("yyyy/MM/dd HH:mm:ss"), result);
+            Assert.Equal(DateTime.Parse(_dateToParse).ToString("yyyy/MM/dd HH:mm:ss"), result);
         }
 
         /// <summary>
@@ -2766,7 +2766,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string dateTime = "'" + _dateToParse + "'";
             string result = expander.ExpandIntoStringLeaveEscaped("$([System.DateTime]::Parse(" + dateTime + ").ToString(\"MM.dd.yyyy\"))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.Equal(System.DateTime.Parse(_dateToParse).ToString("MM.dd.yyyy"), result);
+            Assert.Equal(DateTime.Parse(_dateToParse).ToString("MM.dd.yyyy"), result);
         }
 
         /// <summary>
@@ -2855,7 +2855,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.Environment]::GetFolderPath(SpecialFolder.System))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-            Assert.Equal(System.Environment.GetFolderPath(Environment.SpecialFolder.System), result);
+            Assert.Equal(Environment.GetFolderPath(Environment.SpecialFolder.System), result);
         }
 
         /// <summary>
@@ -2959,7 +2959,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             const string propertyFunction = "$([System.OperatingSystem]::IsFreeBSD())";
             bool result = false;
 #if NET5_0_OR_GREATER
-            result = System.OperatingSystem.IsFreeBSD();
+            result = OperatingSystem.IsFreeBSD();
 #else
             result = Microsoft.Build.Framework.OperatingSystem.IsFreeBSD();
 #endif
@@ -3396,7 +3396,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 string result = expander.ExpandIntoStringAndUnescape(@"$([MSBuild]::GetDirectoryNameOfFileAbove($(StartingDirectory), $(FileToFind)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-                Assert.Equal(Microsoft.Build.Shared.FileUtilities.EnsureTrailingSlash(tempPath), Microsoft.Build.Shared.FileUtilities.EnsureTrailingSlash(result));
+                Assert.Equal(FileUtilities.EnsureTrailingSlash(tempPath), FileUtilities.EnsureTrailingSlash(result));
 
                 result = expander.ExpandIntoStringAndUnescape(@"$([MSBuild]::GetDirectoryNameOfFileAbove($(StartingDirectory), Hobbits))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 

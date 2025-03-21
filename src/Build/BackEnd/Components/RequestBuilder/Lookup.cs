@@ -71,7 +71,7 @@ namespace Microsoft.Build.BackEnd
         /// We have to keep them separate, because the adds and removes etc need to be applied to the table
         /// below when we leave a scope.
         /// </summary>
-        private LinkedList<Lookup.Scope> _lookupScopes = new LinkedList<Lookup.Scope>();
+        private LinkedList<Scope> _lookupScopes = new LinkedList<Scope>();
 
         /// <summary>
         /// When we are asked for all the items of a certain type using the GetItems() method, we may have to handle items
@@ -94,7 +94,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowInternalNull(projectItems);
             ErrorUtilities.VerifyThrowInternalNull(properties);
 
-            Lookup.Scope scope = new Lookup.Scope(this, "Lookup()", projectItems, properties);
+            Scope scope = new Scope(this, "Lookup()", projectItems, properties);
             _lookupScopes.AddFirst(scope);
         }
 
@@ -104,7 +104,7 @@ namespace Microsoft.Build.BackEnd
         private Lookup(Lookup that)
         {
             // Add the same tables from the original
-            foreach (Lookup.Scope scope in that._lookupScopes)
+            foreach (Scope scope in that._lookupScopes)
             {
                 _lookupScopes.AddLast(scope);
             }
@@ -244,7 +244,7 @@ namespace Microsoft.Build.BackEnd
         /// Enters the scope using the specified description.
         /// Callers keep the scope in order to pass it to <see cref="LeaveScope">LeaveScope</see>.
         /// </summary>
-        internal Lookup.Scope EnterScope(string description)
+        internal Scope EnterScope(string description)
         {
             // We don't create the tables unless we need them
             Scope scope = new Scope(this, description, null, null);
@@ -258,10 +258,10 @@ namespace Microsoft.Build.BackEnd
         /// and secondary table are merged. This has the effect of "applying" the adds applied to the primary
         /// table into the secondary table.
         /// </summary>
-        private void LeaveScope(Lookup.Scope scopeToLeave)
+        private void LeaveScope(Scope scopeToLeave)
         {
             ErrorUtilities.VerifyThrow(_lookupScopes.Count >= 2, "Too many calls to Leave().");
-            ErrorUtilities.VerifyThrow(Object.ReferenceEquals(scopeToLeave, _lookupScopes.First.Value), "Attempting to leave with scope '{0}' but scope '{1}' is on top of the stack.", scopeToLeave.Description, _lookupScopes.First.Value.Description);
+            ErrorUtilities.VerifyThrow(ReferenceEquals(scopeToLeave, _lookupScopes.First.Value), "Attempting to leave with scope '{0}' but scope '{1}' is on top of the stack.", scopeToLeave.Description, _lookupScopes.First.Value.Description);
 
             // Our lookup works by stopping the first time it finds an item group of the appropriate type.
             // So we can't apply an add directly into the table below because that could create a new group
@@ -337,9 +337,9 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    foreach (KeyValuePair<string, Dictionary<ProjectItemInstance, MetadataModifications>> entry in PrimaryModifyTable)
+                    foreach (KeyValuePair<string, ItemsMetadataUpdateDictionary> entry in PrimaryModifyTable)
                     {
-                        Dictionary<ProjectItemInstance, MetadataModifications> modifiesOfType;
+                        ItemsMetadataUpdateDictionary modifiesOfType;
                         if (SecondaryModifyTable.TryGetValue(entry.Key, out modifiesOfType))
                         {
                             // There are already modifies of this type: add to the existing table
@@ -392,7 +392,7 @@ namespace Microsoft.Build.BackEnd
 
             if (PrimaryModifyTable != null)
             {
-                foreach (KeyValuePair<string, Dictionary<ProjectItemInstance, MetadataModifications>> entry in PrimaryModifyTable)
+                foreach (KeyValuePair<string, ItemsMetadataUpdateDictionary> entry in PrimaryModifyTable)
                 {
                     SecondaryTable ??= new ItemDictionary<ProjectItemInstance>();
                     ApplyModificationsToTable(SecondaryTable, entry.Key, entry.Value);
@@ -470,7 +470,7 @@ namespace Microsoft.Build.BackEnd
 
             List<ProjectItemInstance> allAdds = null;
             List<ProjectItemInstance> allRemoves = null;
-            Dictionary<ProjectItemInstance, MetadataModifications> allModifies = null;
+            ItemsMetadataUpdateDictionary allModifies = null;
             ICollection<ProjectItemInstance> groupFound = null;
 
             foreach (Scope scope in _lookupScopes)
@@ -500,12 +500,12 @@ namespace Microsoft.Build.BackEnd
                 // Accumulate modifications as we look downwards
                 if (scope.Modifies != null)
                 {
-                    Dictionary<ProjectItemInstance, MetadataModifications> modifies;
+                    ItemsMetadataUpdateDictionary modifies;
                     if (scope.Modifies.TryGetValue(itemType, out modifies))
                     {
                         if (modifies.Count != 0)
                         {
-                            allModifies ??= new Dictionary<ProjectItemInstance, MetadataModifications>(modifies.Count);
+                            allModifies ??= new ItemsMetadataUpdateDictionary(modifies.Count);
 
                             // We already have some modifies for this type
                             foreach (KeyValuePair<ProjectItemInstance, MetadataModifications> modify in modifies)
@@ -776,10 +776,10 @@ namespace Microsoft.Build.BackEnd
             // We don't need to check whether the item is in the add table vs. the main table; either
             // way the modification will be applied.
             PrimaryModifyTable ??= new ItemTypeToItemsMetadataUpdateDictionary(MSBuildNameIgnoreCaseComparer.Default);
-            Dictionary<ProjectItemInstance, MetadataModifications> modifiesOfType;
+            ItemsMetadataUpdateDictionary modifiesOfType;
             if (!PrimaryModifyTable.TryGetValue(itemType, out modifiesOfType))
             {
-                modifiesOfType = new Dictionary<ProjectItemInstance, MetadataModifications>();
+                modifiesOfType = new ItemsMetadataUpdateDictionary();
                 PrimaryModifyTable[itemType] = modifiesOfType;
             }
 
@@ -805,7 +805,7 @@ namespace Microsoft.Build.BackEnd
         /// Apply modifies to a temporary result group.
         /// Items to be modified are virtual-cloned so the original isn't changed.
         /// </summary>
-        private void ApplyModifies(ItemDictionary<ProjectItemInstance> result, Dictionary<ProjectItemInstance, MetadataModifications> allModifies)
+        private void ApplyModifies(ItemDictionary<ProjectItemInstance> result, ItemsMetadataUpdateDictionary allModifies)
         {
             // Clone, because we're modifying actual items, and this would otherwise be visible to other batches,
             // and would be "published" even if a target fails.
@@ -912,7 +912,7 @@ namespace Microsoft.Build.BackEnd
         /// If the item already exists in the table, merges in the modifications; if there is a conflict
         /// the mergeType indicates which should win.
         /// </summary>
-        private void MergeModificationsIntoModificationTable(Dictionary<ProjectItemInstance, MetadataModifications> modifiesOfType,
+        private void MergeModificationsIntoModificationTable(ItemsMetadataUpdateDictionary modifiesOfType,
                                                              KeyValuePair<ProjectItemInstance, MetadataModifications> modify,
                                                              ModifyMergeType mergeType)
         {
@@ -1156,7 +1156,7 @@ namespace Microsoft.Build.BackEnd
             /// <returns>If <see cref="KeepOnlySpecified"/> is true, this will return a modification with <see cref="MetadataModification.Remove"/>
             /// set to true if the metadata has no other explicitly-specified modification.  Otherwise it will return only the explicitly-specified
             /// modification if one exists.</returns>
-            /// <exception cref="System.Collections.Generic.KeyNotFoundException">When <see cref="KeepOnlySpecified"/> if false, this is thrown if the metadata
+            /// <exception cref="KeyNotFoundException">When <see cref="KeepOnlySpecified"/> if false, this is thrown if the metadata
             /// specified does not exist when attempting to retrieve a metadata modification.</exception>
             public MetadataModification this[string metadataName]
             {

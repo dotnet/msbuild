@@ -178,7 +178,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Starts the request and blocks until results are available.
         /// </summary>
-        /// <exception cref="System.InvalidOperationException">The request has already been started or is already complete.</exception>
+        /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
         public override BuildResult Execute()
         {
             LegacyThreadingData legacyThreadingData = ((IBuildComponentHost)BuildManager).LegacyThreadingData;

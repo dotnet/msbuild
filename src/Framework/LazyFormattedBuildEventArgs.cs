@@ -109,7 +109,7 @@ namespace Microsoft.Build.Framework
             object? argsOrMessage = argumentsOrFormattedMessage;
             if (argsOrMessage is object[] arguments && arguments.Length > 0)
             {
-                base.WriteToStreamWithExplicitMessage(writer, base.Message);
+                WriteToStreamWithExplicitMessage(writer, base.Message);
                 writer.Write(arguments.Length);
 
                 foreach (object argument in arguments)
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Framework
             }
             else
             {
-                base.WriteToStreamWithExplicitMessage(writer, (argsOrMessage is string formattedMessage) ? formattedMessage : base.Message);
+                WriteToStreamWithExplicitMessage(writer, (argsOrMessage is string formattedMessage) ? formattedMessage : base.Message);
                 writer.Write(-1);
             }
         }

@@ -25,7 +25,7 @@ internal abstract class WorkerNodeCheck : Check
             throw new ArgumentException("The registration context for InternalBuildAnalyzer must be of type IInternalBuildCheckRegistrationContext.", nameof(registrationContext));
         }
 
-        this.RegisterInternalActions(internalRegistrationContext);
+        RegisterInternalActions(internalRegistrationContext);
     }
 
     internal override bool IsBuiltIn => true;

@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 try
                 {
-                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    file = FileUtilities.GetTemporaryFile();
                     ProjectRootElement import = ProjectRootElement.Create(file);
                     import.AddItemDefinitionGroup().AddItemDefinition("i").AddMetadata("m", "m0");
                     import.Save();
@@ -152,7 +152,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFile();
                 ProjectRootElement import = ProjectRootElement.Create(file);
                 import.AddItemDefinitionGroup().AddItemDefinition("i").AddMetadata("m", "m0");
                 import.Save();
