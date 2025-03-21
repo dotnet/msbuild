@@ -82,14 +82,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             int t2 = Environment.TickCount;
             XPathDocument d = new XPathDocument(s);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "new XPathDocument(1) t={0}", Environment.TickCount - t2));
+            Util.WriteLog($"new XPathDocument(1) t={Environment.TickCount - t2}");
 
             int t3 = Environment.TickCount;
             var xslc = new XslCompiledTransform();
             // Using the Trusted Xslt is fine as the style sheet comes from our own assemblies.
             // This is similar to the prior this.GetType().Assembly/Evidence method that was used in the now depricated XslTransform.
             xslc.Load(d, XsltSettings.TrustedXslt, s_resolver);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform.Load t={0}", Environment.TickCount - t3));
+            Util.WriteLog($"XslCompiledTransform.Load t={Environment.TickCount - t3}");
 
             // Need to copy input stream because XmlReader will close it,
             // causing errors for later callers that access the same stream
@@ -99,7 +99,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             int t4 = Environment.TickCount;
             using (XmlReader reader = XmlReader.Create(clonedInput))
             {
-                Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "new XmlReader(2) t={0}", Environment.TickCount - t4));
+                Util.WriteLog($"new XmlReader(2) t={Environment.TickCount - t4}");
 
                 XsltArgumentList args = null;
                 if (entries.Length > 0)
@@ -110,7 +110,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         string key = entry.Key.ToString();
                         object val = entry.Value.ToString();
                         args.AddParam(key, "", val);
-                        Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "arg: key='{0}' value='{1}'", key, val.ToString()));
+                        Util.WriteLog($"arg: key='{key}' value='{val}'");
                     }
                 }
 
@@ -122,13 +122,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
                 int t5 = Environment.TickCount;
                 xslc.Transform(reader, args, w, s_resolver);
-                Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform.Transform t={0}", Environment.TickCount - t4));
+                Util.WriteLog($"XslCompiledTransform.Transform t={Environment.TickCount - t4}");
 
                 w.WriteEndDocument();
                 w.Flush();
                 m.Position = 0;
 
-                Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform(\"{0}\") t={1}", resource, Environment.TickCount - t1));
+                Util.WriteLog($"XslCompiledTransform(\"{resource}\") t={Environment.TickCount - t1}");
 
                 return m;
             }
@@ -153,7 +153,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 {
                     // First look in assembly resources...
                     Assembly a = Assembly.GetExecutingAssembly();
-                    s = a.GetManifestResourceStream(String.Format(CultureInfo.InvariantCulture, "{0}.{1}", typeof(Util).Namespace, filename));
+                    s = a.GetManifestResourceStream($"{typeof(Util).Namespace}.{filename}");
 
                     if (s != null)
                     {
@@ -191,7 +191,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
 
                 // Didn't find the resource...
-                Debug.Fail(String.Format(CultureInfo.CurrentCulture, "ResourceResolver could not find file '{0}'", filename));
+                Debug.Fail($"ResourceResolver could not find file '{filename}'");
                 return null;
             }
         }

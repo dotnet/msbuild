@@ -195,7 +195,7 @@ namespace Microsoft.Build.BackEnd.Client
 #if FEATURE_APM
                 IAsyncResult result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-                Task<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length);
+                Task<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
 #endif
 
                 bool continueReading = true;
@@ -294,7 +294,7 @@ namespace Microsoft.Build.BackEnd.Client
 #if FEATURE_APM
                                     result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length);
+                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
 #endif
                                 }
                             }

@@ -2431,7 +2431,7 @@ namespace Microsoft.Build.BackEnd
 
             bool haveNonIdleNode = false;
             StringBuilder stringBuilder = new StringBuilder(64);
-            stringBuilder.AppendFormat("{0}:   ", previousEventTime.Ticks);
+            stringBuilder.Append(previousEventTime.Ticks).Append(":   ");
             for (int i = 0; i < currentWork.Length; i++)
             {
                 if (currentWork[i] == invalidWorkId)
@@ -2567,7 +2567,7 @@ namespace Microsoft.Build.BackEnd
                     FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
                     using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
-                    file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, _schedulingData.EventTime.Ticks);
+                    file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, _schedulingData.EventTime.Ticks);
                     file.WriteLine(format, stuff);
                     file.Flush();
                 }
@@ -2814,7 +2814,7 @@ namespace Microsoft.Build.BackEnd
                 request.State,
                 buildRequest.ConfigurationId,
                 _configCache[buildRequest.ConfigurationId].ProjectFullPath,
-                string.Join(", ", buildRequest.Targets.ToArray()));
+                string.Join(", ", buildRequest.Targets));
         }
 
         /// <summary>
