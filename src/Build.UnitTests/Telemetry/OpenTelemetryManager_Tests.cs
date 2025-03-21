@@ -109,20 +109,19 @@ namespace Microsoft.Build.Engine.UnitTests.Telemetry
         [Fact]
         public void TelemetryLoadFailureIsLoggedOnce()
         {
-            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
             OpenTelemetryManager.Instance.LoadFailureExceptionMessage = new System.IO.FileNotFoundException().ToString();
-            BuildManager bm = BuildManager.DefaultBuildManager;
+            using BuildManager bm = new BuildManager();
             var deferredMessages = new List<BuildManager.DeferredBuildMessage>();
             bm.BeginBuild(new BuildParameters(), deferredMessages);
             deferredMessages.ShouldContain(x => x.Text.Contains("FileNotFound"));
             bm.EndBuild();
             bm.BeginBuild(new BuildParameters());
+            bm.EndBuild();
 
             // should not add message twice
             int count = deferredMessages.Count(x => x.Text.Contains("FileNotFound"));
             count.ShouldBe(1);
         }
-
 
         /* Helper methods */
 
