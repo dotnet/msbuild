@@ -3,14 +3,21 @@
 
 using System;
 
-namespace Microsoft.Build.Framework;
+namespace Microsoft.Build.Framework.Telemetry;
 
+/// <summary>
+/// Represents the execution statistics of tasks executed on a node.
+/// </summary>
 internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumption)
 {
     private TaskExecutionStats()
         : this(TimeSpan.Zero, 0, 0)
     { }
 
+    /// <summary>
+    /// Creates an instance of <see cref="TaskExecutionStats"/> initialized to zero values.
+    /// </summary>
+    /// <returns>Empty task execution statistics.</returns>
     internal static TaskExecutionStats CreateEmpty()
         => new();
 
@@ -22,21 +29,25 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executio
     /// <summary>
     /// Total memory consumption (across all executions) in bytes.
     /// </summary>
-    public long TotalMemoryConsumption { get; set; } = totalMemoryConsumption;
+    public long TotalMemoryBytes { get; set; } = totalMemoryConsumption;
 
     /// <summary>
-    /// Total number of execution of the tasks in all nodes for all projects.
+    /// Total number of executions of the task.
     /// </summary>
     public int ExecutionsCount { get; set; } = executionsCount;
 
-    internal void AddAnother(TaskExecutionStats another)
+    /// <summary>
+    /// Accumulates statistics from another instance into this one.
+    /// </summary>
+    /// <param name="other">Statistics to add to this instance.</param>
+    internal void Accumulate(TaskExecutionStats other)
     {
-        this.CumulativeExecutionTime += another.CumulativeExecutionTime;
-        this.TotalMemoryConsumption += another.TotalMemoryConsumption;
-        this.ExecutionsCount += another.ExecutionsCount;
+        this.CumulativeExecutionTime += other.CumulativeExecutionTime;
+        this.TotalMemoryBytes += other.TotalMemoryBytes;
+        this.ExecutionsCount += other.ExecutionsCount;
     }
 
-    // We need custom Equals for easier assertations in tests
+    // We need custom Equals for easier assertions in tests
     public override bool Equals(object? obj)
     {
         if (obj is TaskExecutionStats other)
@@ -48,7 +59,7 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executio
 
     protected bool Equals(TaskExecutionStats other)
         => CumulativeExecutionTime.Equals(other.CumulativeExecutionTime) &&
-           TotalMemoryConsumption == other.TotalMemoryConsumption &&
+           TotalMemoryBytes == other.TotalMemoryBytes &&
            ExecutionsCount == other.ExecutionsCount;
 
     // Needed since we override Equals
@@ -57,7 +68,7 @@ internal class TaskExecutionStats(TimeSpan cumulativeExecutionTime, int executio
         unchecked
         {
             var hashCode = CumulativeExecutionTime.GetHashCode();
-            hashCode = (hashCode * 397) ^ TotalMemoryConsumption.GetHashCode();
+            hashCode = (hashCode * 397) ^ TotalMemoryBytes.GetHashCode();
             hashCode = (hashCode * 397) ^ ExecutionsCount.GetHashCode();
             return hashCode;
         }
