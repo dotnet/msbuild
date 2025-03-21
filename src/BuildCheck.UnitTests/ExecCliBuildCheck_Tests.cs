@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Checks;
 using Shouldly;
@@ -11,9 +12,50 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 {
     public sealed class ExecCliBuildCheck_Tests
     {
+        private const int MaxStackSizeWindows = 1024 * 1024; // 1 MB
+        private const int MaxStackSizeLinux = 1024 * 1024 * 8; // 8 MB
+
         private readonly ExecCliBuildCheck _check;
 
         private readonly MockBuildCheckRegistrationContext _registrationContext;
+
+        public static TheoryData<string?> BuildCommandTestData => new TheoryData<string?>(
+            "dotnet build",
+            "dotnet build&dotnet build",
+            "dotnet     build",
+            "dotnet clean",
+            "dotnet msbuild",
+            "dotnet restore",
+            "dotnet publish",
+            "dotnet pack",
+            "dotnet test",
+            "dotnet vstest",
+            "dotnet build -p:Configuration=Release",
+            "dotnet build /t:Restore;Clean",
+            "dotnet build&some command",
+            "some command&dotnet build&some other command",
+            "some command&dotnet build",
+            "some command&amp;dotnet build&amp;some other command",
+            "msbuild",
+            "msbuild /t:Build",
+            "msbuild --t:Restore;Clean",
+            "nuget restore",
+            "dotnet run --project project.SLN",
+            "dotnet run project.csproj",
+            "dotnet run project.proj",
+            "dotnet run",
+            string.Join(";", new string('a', 1025), "dotnet build", new string('a', 1025)),
+            string.Join(";", new string('a', RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? MaxStackSizeWindows * 2 : MaxStackSizeLinux * 2), "dotnet build"));
+
+        public static TheoryData<string?> NonBuildCommandTestData => new TheoryData<string?>(
+            "dotnet help",
+            "where dotnet",
+            "where msbuild",
+            "where nuget",
+            "dotnet bin/net472/project.dll",
+            string.Empty,
+            null,
+            new string('a', RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? MaxStackSizeWindows * 2 : MaxStackSizeLinux * 2));
 
         public ExecCliBuildCheck_Tests()
         {
@@ -23,29 +65,8 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         }
 
         [Theory]
-        [InlineData("dotnet build")]
-        [InlineData("dotnet build&dotnet build")]
-        [InlineData("dotnet     build")]
-        [InlineData("dotnet clean")]
-        [InlineData("dotnet msbuild")]
-        [InlineData("dotnet restore")]
-        [InlineData("dotnet publish")]
-        [InlineData("dotnet pack")]
-        [InlineData("dotnet test")]
-        [InlineData("dotnet vstest")]
-        [InlineData("dotnet build -p:Configuration=Release")]
-        [InlineData("dotnet build /t:Restore;Clean")]
-        [InlineData("some command&dotnet build&some other command")]
-        [InlineData("some command&amp;dotnet build&amp;some other command")]
-        [InlineData("msbuild")]
-        [InlineData("msbuild /t:Build")]
-        [InlineData("msbuild --t:Restore;Clean")]
-        [InlineData("nuget restore")]
-        [InlineData("dotnet run --project project.SLN")]
-        [InlineData("dotnet run project.csproj")]
-        [InlineData("dotnet run project.proj")]
-        [InlineData("dotnet run")]
-        public void ExecTask_WithCommandExecutingBuild_ShouldShowWarning(string command)
+        [MemberData(nameof(BuildCommandTestData))]
+        public void ExecTask_WithCommandExecutingBuild_ShouldShowWarning(string? command)
         {
             _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData("Exec", new Dictionary<string, TaskInvocationCheckData.TaskParameter>
             {
@@ -57,13 +78,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
         }
 
         [Theory]
-        [InlineData("dotnet help")]
-        [InlineData("where dotnet")]
-        [InlineData("where msbuild")]
-        [InlineData("where nuget")]
-        [InlineData("dotnet bin/net472/project.dll")]
-        [InlineData("")]
-        [InlineData(null)]
+        [MemberData(nameof(NonBuildCommandTestData))]
         public void ExecTask_WithCommandNotExecutingBuild_ShouldNotShowWarning(string? command)
         {
             _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData("Exec", new Dictionary<string, TaskInvocationCheckData.TaskParameter>
