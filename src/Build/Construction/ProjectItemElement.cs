@@ -412,7 +412,7 @@ namespace Microsoft.Build.Construction
             base.CopyFrom(element);
 
             // clear cached fields
-            this.ClearAttributeCache();
+            ClearAttributeCache();
         }
 
         /// <summary>

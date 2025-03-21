@@ -162,7 +162,7 @@ namespace Microsoft.Build.Construction
 
             using (var xtr = XmlReaderExtension.Create(fullPath, _loadAsReadOnly ?? false))
             {
-                this.Load(xtr.Reader);
+                Load(xtr.Reader);
             }
         }
 
@@ -179,7 +179,7 @@ namespace Microsoft.Build.Construction
         {
             if (location != null)
             {
-                this._elementLocation.Value = location;
+                _elementLocation.Value = location;
             }
             try
             {
@@ -187,7 +187,7 @@ namespace Microsoft.Build.Construction
             }
             finally
             {
-                this._elementLocation.Value = null;
+                _elementLocation.Value = null;
             }
         }
 

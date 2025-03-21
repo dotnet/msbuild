@@ -828,7 +828,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The ID of the last evaluation for this Project.
         /// A project is always evaluated upon construction and can subsequently get evaluated multiple times via
-        /// <see cref="Project.ReevaluateIfNecessary()" />
+        /// <see cref="ReevaluateIfNecessary()" />
         ///
         /// It is an arbitrary number that changes when this project reevaluates.
         /// Hosts don't know whether an evaluation actually happened in an interval, but they can compare this number to
@@ -4070,7 +4070,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// A dictionary of all of the properties read from environment variables during evaluation.
             /// </summary>
-            public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => this.Project.ProjectCollection.EnvironmentProperties;
+            public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => Project.ProjectCollection.EnvironmentProperties;
 
             /// <summary>
             /// List of names of the properties that, while global, are still treated as overridable.

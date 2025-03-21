@@ -103,7 +103,7 @@ namespace Microsoft.Build.Evaluation
 
             _tokenType = type;
             _tokenString = tokenString;
-            this.Expandable = expandable;
+            Expandable = expandable;
         }
 
         /// <summary>

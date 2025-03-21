@@ -55,7 +55,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">Message is null</exception>
         public void LogCommentFromText(BuildEventContext buildEventContext, MessageImportance importance, string message)
         {
-            this.LogCommentFromText(buildEventContext, importance, message, messageArgs: null);
+            LogCommentFromText(buildEventContext, importance, message, messageArgs: null);
         }
 
         /// <summary>
@@ -509,7 +509,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 evaluationId,
                 projectContextId);
 
-            this.LogProjectStarted(args);
+            LogProjectStarted(args);
 
             return args.BuildEventContext;
         }

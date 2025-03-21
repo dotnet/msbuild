@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests
         {
             internal string CommandLine()
             {
-                return base.GenerateCommandLineCommands();
+                return GenerateCommandLineCommands();
             }
         }
 

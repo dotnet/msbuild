@@ -150,7 +150,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="args"></param>
         internal void WriteLinePrettyFromResource(string resourceString, params object[] args)
         {
-            int indentLevel = IsVerbosityAtLeast(LoggerVerbosity.Normal) ? this.currentIndentLevel : 0;
+            int indentLevel = IsVerbosityAtLeast(LoggerVerbosity.Normal) ? currentIndentLevel : 0;
             WriteLinePrettyFromResource(indentLevel, resourceString, args);
         }
 
@@ -169,7 +169,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WritePretty(string formattedString)
         {
-            int indentLevel = IsVerbosityAtLeast(LoggerVerbosity.Normal) ? this.currentIndentLevel : 0;
+            int indentLevel = IsVerbosityAtLeast(LoggerVerbosity.Normal) ? currentIndentLevel : 0;
             WritePretty(indentLevel, formattedString);
         }
 
@@ -430,20 +430,20 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (colorSet != null && canSetColor)
             {
-                this.setColor = colorSet;
+                setColor = colorSet;
             }
             else
             {
-                this.setColor = DontSetColor;
+                setColor = DontSetColor;
             }
 
             if (colorReset != null && canSetColor)
             {
-                this.resetColor = colorReset;
+                resetColor = colorReset;
             }
             else
             {
-                this.resetColor = DontResetColor;
+                resetColor = DontResetColor;
             }
         }
 
@@ -901,7 +901,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // Always show perf summary for diagnostic verbosity.
             if (IsVerbosityAtLeast(LoggerVerbosity.Diagnostic))
             {
-                this.showPerfSummary = true;
+                showPerfSummary = true;
             }
 
             ParseParameters();
@@ -917,7 +917,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     ShowSummary = false;
                 }
 
-                this.showPerfSummary = false;
+                showPerfSummary = false;
             }
 
             // If not specifically instructed otherwise, show a summary in normal

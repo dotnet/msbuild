@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 LoggingService.LogBuildStarted();
             }
 
-            this.IsValid = true;
+            IsValid = true;
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="success">Did the build succeed or not</param>
         internal void LogBuildFinished(bool success)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
+            ErrorUtilities.VerifyThrow(IsValid, "Build not started.");
 
             // The in-proc node will have its BuildStarted, BuildFinished events sent by the BuildManager itself.
             if (!IsInProcNode)
@@ -48,7 +48,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 LoggingService.LogBuildFinished(success);
             }
 
-            this.IsValid = false;
+            IsValid = false;
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         internal (ProjectStartedEventArgs, ProjectLoggingContext) CreateProjectLoggingContext(BuildRequestEntry requestEntry)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
+            ErrorUtilities.VerifyThrow(IsValid, "Build not started.");
             return ProjectLoggingContext.CreateLoggingContext(this, requestEntry);
         }
 
@@ -77,7 +77,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns>The BuildEventContext to use for this project.</returns>
         internal ProjectLoggingContext LogProjectStarted(BuildRequest request, BuildRequestConfiguration configuration)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
+            ErrorUtilities.VerifyThrow(IsValid, "Build not started.");
 
             // If we can retrieve the evaluationId from the project, do so. Don't if it's not available or
             // if we'd have to retrieve it from the cache in order to access it.

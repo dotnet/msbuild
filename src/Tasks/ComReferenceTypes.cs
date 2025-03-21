@@ -22,7 +22,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static bool IsTlbImp(string refType)
         {
-            return string.Equals(refType, ComReferenceTypes.tlbimp, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(refType, tlbimp, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static bool IsAxImp(string refType)
         {
-            return string.Equals(refType, ComReferenceTypes.aximp, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(refType, aximp, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static bool IsPia(string refType)
         {
-            return string.Equals(refType, ComReferenceTypes.primary, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(refType, primary, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static bool IsPiaOrTlbImp(string refType)
         {
-            return string.Equals(refType, ComReferenceTypes.primaryortlbimp, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(refType, primaryortlbimp, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

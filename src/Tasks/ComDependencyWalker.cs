@@ -60,8 +60,8 @@ namespace Microsoft.Build.Tasks
             public AnalyzedTypesInfoKey(Guid guid, short major, short minor, int lcid, int index)
             {
                 this.guid = guid;
-                this.wMajorVerNum = major;
-                this.wMinorVerNum = minor;
+                wMajorVerNum = major;
+                wMinorVerNum = minor;
                 this.lcid = lcid;
                 this.index = index;
             }
@@ -69,8 +69,8 @@ namespace Microsoft.Build.Tasks
             public override readonly string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}.{3}:{4}",
-                    this.guid, this.wMajorVerNum,
-                    this.wMinorVerNum, this.lcid, this.index);
+                    guid, wMajorVerNum,
+                    wMinorVerNum, lcid, index);
             }
         }
 

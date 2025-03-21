@@ -36,7 +36,7 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectXml);
 
-            this.ProjectXml = projectXml;
+            ProjectXml = projectXml;
             _unformattedReason = unformattedReason;
             _formattingParameter = formattingParameter;
         }

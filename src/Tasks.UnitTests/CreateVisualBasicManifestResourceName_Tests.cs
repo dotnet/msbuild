@@ -353,7 +353,7 @@ End Namespace
             t.ResourceFiles = new ITaskItem[] { i };
             t.RootNamespace = "CustomToolTest";
 
-            bool success = t.Execute(new Microsoft.Build.Tasks.CreateFileStream(CreateFileStream));
+            bool success = t.Execute(new CreateFileStream(CreateFileStream));
 
             Assert.True(success); // "Expected the task to succeed."
 

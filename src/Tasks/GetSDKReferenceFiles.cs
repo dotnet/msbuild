@@ -1234,9 +1234,9 @@ namespace Microsoft.Build.Tasks
 
             public SDKInfo(IDictionary<string, SdkReferenceInfo> pathToReferenceMetadata, IDictionary<string, List<string>> directoryToFileList, int cacheHash)
             {
-                this._pathToReferenceMetadata = pathToReferenceMetadata;
-                this._directoryToFileList = directoryToFileList;
-                this._hash = cacheHash;
+                _pathToReferenceMetadata = pathToReferenceMetadata;
+                _directoryToFileList = directoryToFileList;
+                _hash = cacheHash;
             }
 
             /// <summary>

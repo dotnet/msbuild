@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             _nodeRequestId = 1;
             _host = new MockHost();
-            _host.OnLoggingThreadException += this.LoggingException;
+            _host.OnLoggingThreadException += LoggingException;
         }
 
         /// <summary>

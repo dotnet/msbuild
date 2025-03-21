@@ -268,7 +268,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Show the performance summary if the verbosity is diagnostic or the user specifically asked for it
             // with a logger parameter.
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 ShowPerfSummary();
             }
@@ -517,7 +517,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // Add the project to the BuildManager so we can use the start information later in the build process
             _buildEventManager.AddProjectStartedEvent(e, _showTimeStamp || IsVerbosityAtLeast(LoggerVerbosity.Detailed));
 
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 // Create a new project performance counter for this project
                 MPPerformanceCounter counter = GetPerformanceCounter(e.ProjectFile, ref projectPerformanceCounters);
@@ -532,7 +532,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     foreach (BuildMessageEventArgs message in deferredMessages)
                     {
                         // This will display the project started event before the messages is shown
-                        this.MessageHandler(sender, message);
+                        MessageHandler(sender, message);
                     }
                 }
                 _deferredMessages.Remove(e.BuildEventContext);
@@ -657,7 +657,7 @@ namespace Microsoft.Build.BackEnd.Logging
             ProjectStartedEventMinimumFields startedEvent = _buildEventManager.GetProjectStartedEvent(e.BuildEventContext);
             ErrorUtilities.VerifyThrow(startedEvent != null, "Project finished event for {0} received without matching start event", e.ProjectFile);
 
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 // Stop the performance counter which was created in the project started event handler
                 MPPerformanceCounter counter = GetPerformanceCounter(e.ProjectFile, ref projectPerformanceCounters);
@@ -847,7 +847,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // later in the build
             _buildEventManager.AddTargetStartedEvent(e, _showTimeStamp || IsVerbosityAtLeast(LoggerVerbosity.Detailed));
 
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 // Create a new performance counter for this target
                 MPPerformanceCounter counter = GetPerformanceCounter(e.TargetName, ref targetPerformanceCounters);
@@ -864,7 +864,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
 
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 // Stop the performance counter started in the targetStartedEventHandler
                 MPPerformanceCounter counter = GetPerformanceCounter(e.TargetName, ref targetPerformanceCounters);
@@ -960,7 +960,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 ShownBuildEventContext(e.BuildEventContext);
             }
 
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 // Create a new performance counter for this task
                 MPPerformanceCounter counter = GetPerformanceCounter(e.TaskName, ref taskPerformanceCounters);
@@ -976,7 +976,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public override void TaskFinishedHandler(object sender, TaskFinishedEventArgs e)
         {
             ErrorUtilities.VerifyThrowArgumentNull(e.BuildEventContext, "BuildEventContext");
-            if (this.showPerfSummary)
+            if (showPerfSummary)
             {
                 // Stop the task performance counter which was started in the task started event
                 MPPerformanceCounter counter = GetPerformanceCounter(e.TaskName, ref taskPerformanceCounters);

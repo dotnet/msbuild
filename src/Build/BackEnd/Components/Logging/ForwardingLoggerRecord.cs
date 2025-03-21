@@ -23,8 +23,8 @@ namespace Microsoft.Build.Logging
             // The logging service allows a null central logger, so we don't check for it here.
             ErrorUtilities.VerifyThrowArgumentNull(forwardingLoggerDescription);
 
-            this.CentralLogger = centralLogger;
-            this.ForwardingLoggerDescription = forwardingLoggerDescription;
+            CentralLogger = centralLogger;
+            ForwardingLoggerDescription = forwardingLoggerDescription;
         }
 
         /// <summary>

@@ -131,12 +131,12 @@ namespace Microsoft.Build.Framework
             if (string.IsNullOrEmpty(msbuildDisableFeaturesFromVersion))
             {
                 ConversionState = ChangeWaveConversionState.Valid;
-                _cachedWave = ChangeWaves.EnableAllFeatures;
+                _cachedWave = EnableAllFeatures;
             }
             else if (!TryParseVersion(msbuildDisableFeaturesFromVersion, out _cachedWave))
             {
                 ConversionState = ChangeWaveConversionState.InvalidFormat;
-                _cachedWave = ChangeWaves.EnableAllFeatures;
+                _cachedWave = EnableAllFeatures;
             }
             else if (_cachedWave == EnableAllFeatures || AllWaves.Contains(_cachedWave))
             {

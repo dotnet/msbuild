@@ -185,45 +185,45 @@ namespace Microsoft.Build.Framework.Profiler
         /// <nodoc/>
         public readonly EvaluationLocation WithEvaluationPass(EvaluationPass evaluationPass, string passDescription = null)
         {
-            return new EvaluationLocation(this.Id, evaluationPass, passDescription ?? PassDefaultDescription[evaluationPass],
-                this.File, this.Line, this.ElementName, this.ElementDescription, this.Kind);
+            return new EvaluationLocation(Id, evaluationPass, passDescription ?? PassDefaultDescription[evaluationPass],
+                File, Line, ElementName, ElementDescription, Kind);
         }
 
         /// <nodoc/>
         public EvaluationLocation WithParentId(long? parentId)
         {
             // Simple optimization. If the new parent id is the same as the current one, then we just return this
-            if (parentId == this.ParentId)
+            if (parentId == ParentId)
             {
                 return this;
             }
 
-            return new EvaluationLocation(this.Id, parentId, this.EvaluationPass, this.EvaluationPassDescription,
-                this.File, this.Line, this.ElementName, this.ElementDescription, this.Kind);
+            return new EvaluationLocation(Id, parentId, EvaluationPass, EvaluationPassDescription,
+                File, Line, ElementName, ElementDescription, Kind);
         }
 
         /// <nodoc/>
         public EvaluationLocation WithFile(string file)
         {
-            return new EvaluationLocation(this.Id, this.EvaluationPass, this.EvaluationPassDescription, file, null, null, null, this.Kind);
+            return new EvaluationLocation(Id, EvaluationPass, EvaluationPassDescription, file, null, null, null, Kind);
         }
 
         /// <nodoc/>
         public EvaluationLocation WithFileLineAndElement(string file, int? line, IProjectElement element)
         {
-            return CreateLocationForProject(this.Id, this.EvaluationPass, this.EvaluationPassDescription, file, line, element);
+            return CreateLocationForProject(Id, EvaluationPass, EvaluationPassDescription, file, line, element);
         }
 
         /// <nodoc/>
         public EvaluationLocation WithFileLineAndCondition(string file, int? line, string condition)
         {
-            return CreateLocationForCondition(this.Id, this.EvaluationPass, this.EvaluationPassDescription, file, line, condition);
+            return CreateLocationForCondition(Id, EvaluationPass, EvaluationPassDescription, file, line, condition);
         }
 
         /// <nodoc/>
         public EvaluationLocation WithGlob(string globDescription)
         {
-            return CreateLocationForGlob(this.Id, this.EvaluationPass, this.EvaluationPassDescription, this.File, this.Line, globDescription);
+            return CreateLocationForGlob(Id, EvaluationPass, EvaluationPassDescription, File, Line, globDescription);
         }
 
         /// <nodoc/>
@@ -249,7 +249,7 @@ namespace Microsoft.Build.Framework.Profiler
         public override string ToString()
         {
             return
-                $"{Id}\t{ParentId?.ToString() ?? string.Empty}\t{EvaluationPassDescription ?? string.Empty}\t{File ?? string.Empty}\t{Line?.ToString() ?? string.Empty}\t{ElementName ?? string.Empty}\tDescription:{ElementDescription}\t{this.EvaluationPassDescription}";
+                $"{Id}\t{ParentId?.ToString() ?? string.Empty}\t{EvaluationPassDescription ?? string.Empty}\t{File ?? string.Empty}\t{Line?.ToString() ?? string.Empty}\t{ElementName ?? string.Empty}\tDescription:{ElementDescription}\t{EvaluationPassDescription}";
         }
 
         /// <nodoc/>

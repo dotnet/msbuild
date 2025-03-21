@@ -13,7 +13,7 @@ using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
-    /// An internal implementation of <see cref="Microsoft.Build.Framework.SdkResult"/>.
+    /// An internal implementation of <see cref="Framework.SdkResult"/>.
     /// </summary>
     internal sealed class SdkResult : SdkResultBase, INodePacket
     {

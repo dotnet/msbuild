@@ -252,7 +252,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                if (!Enum.TryParse<WarnOrErrorOnTargetArchitectureMismatchBehavior>(value, /*ignoreCase*/true, out _warnOrErrorOnTargetArchitectureMismatch))
+                if (!Enum.TryParse(value, /*ignoreCase*/true, out _warnOrErrorOnTargetArchitectureMismatch))
                 {
                     _warnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatchBehavior.Warning;
                 }
@@ -1215,7 +1215,7 @@ namespace Microsoft.Build.Tasks
                                         assemblyIdentityAttributes.Add(new XAttribute("culture", String.IsNullOrEmpty(idealRemappingPartialAssemblyName.CultureName) ? "neutral" : idealRemappingPartialAssemblyName.CultureName));
 
                                         var publicKeyToken = idealRemappingPartialAssemblyName.GetPublicKeyToken();
-                                        assemblyIdentityAttributes.Add(new XAttribute("publicKeyToken", ResolveAssemblyReference.ByteArrayToString(publicKeyToken)));
+                                        assemblyIdentityAttributes.Add(new XAttribute("publicKeyToken", ByteArrayToString(publicKeyToken)));
 
                                         var node = new XElement(
                                             ns + "assemblyBinding",
@@ -2045,7 +2045,7 @@ namespace Microsoft.Build.Tasks
                     break;
             }
         }
-#endregion
+        #endregion
 
         #region StateFile
         /// <summary>
@@ -2053,7 +2053,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void ReadStateFile(FileExists fileExists)
         {
-            _cache = SystemState.DeserializeCache<SystemState>(_stateFile, Log);
+            _cache = StateFileBase.DeserializeCache<SystemState>(_stateFile, Log);
 
             // Construct the cache only if we can't find any caches.
             if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
@@ -2577,8 +2577,8 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
-                    this.DependsOnSystemRuntime = useSystemRuntime.ToString();
-                    this.DependsOnNETStandard = useNetStandard.ToString();
+                    DependsOnSystemRuntime = useSystemRuntime.ToString();
+                    DependsOnNETStandard = useNetStandard.ToString();
 
                     WriteStateFile();
 
@@ -2605,7 +2605,7 @@ namespace Microsoft.Build.Tasks
                                 {
                                     assemblyName = getAssemblyName(item.ItemSpec);
                                 }
-                                catch (System.IO.FileLoadException)
+                                catch (FileLoadException)
                                 {
                                     // Its pretty hard to get here, you need an assembly that contains a valid reference
                                     // to a dependent assembly that, in turn, throws a FileLoadException during GetAssemblyName.
@@ -2613,7 +2613,7 @@ namespace Microsoft.Build.Tasks
 
                                     // ...falling through and relying on the targetAssemblyName==null behavior below...
                                 }
-                                catch (System.IO.FileNotFoundException)
+                                catch (FileNotFoundException)
                                 {
                                     // Its pretty hard to get here, also since we do a file existence check right before calling this method so it can only happen if the file got deleted between that check and this call.
                                 }
@@ -3137,23 +3137,23 @@ namespace Microsoft.Build.Tasks
         {
             if (SystemProcessorArchitecture.Amd64 == processorArchitecture)
             {
-                return Microsoft.Build.Utilities.ProcessorArchitecture.AMD64;
+                return Utilities.ProcessorArchitecture.AMD64;
             }
             else if (SystemProcessorArchitecture.IA64 == processorArchitecture)
             {
-                return Microsoft.Build.Utilities.ProcessorArchitecture.IA64;
+                return Utilities.ProcessorArchitecture.IA64;
             }
             else if (SystemProcessorArchitecture.MSIL == processorArchitecture)
             {
-                return Microsoft.Build.Utilities.ProcessorArchitecture.MSIL;
+                return Utilities.ProcessorArchitecture.MSIL;
             }
             else if (SystemProcessorArchitecture.X86 == processorArchitecture)
             {
-                return Microsoft.Build.Utilities.ProcessorArchitecture.X86;
+                return Utilities.ProcessorArchitecture.X86;
             }
             else if (SystemProcessorArchitecture.Arm == processorArchitecture)
             {
-                return Microsoft.Build.Utilities.ProcessorArchitecture.ARM;
+                return Utilities.ProcessorArchitecture.ARM;
             }
             return String.Empty;
         }
@@ -3163,27 +3163,27 @@ namespace Microsoft.Build.Tasks
         {
             if (targetedProcessorArchitecture != null)
             {
-                if (targetedProcessorArchitecture.Equals(Microsoft.Build.Utilities.ProcessorArchitecture.AMD64, StringComparison.OrdinalIgnoreCase))
+                if (targetedProcessorArchitecture.Equals(Utilities.ProcessorArchitecture.AMD64, StringComparison.OrdinalIgnoreCase))
                 {
                     return SystemProcessorArchitecture.Amd64;
                 }
-                else if (targetedProcessorArchitecture.Equals(Microsoft.Build.Utilities.ProcessorArchitecture.IA64, StringComparison.OrdinalIgnoreCase))
+                else if (targetedProcessorArchitecture.Equals(Utilities.ProcessorArchitecture.IA64, StringComparison.OrdinalIgnoreCase))
                 {
                     return SystemProcessorArchitecture.IA64;
                 }
-                else if (targetedProcessorArchitecture.Equals(Microsoft.Build.Utilities.ProcessorArchitecture.MSIL, StringComparison.OrdinalIgnoreCase))
+                else if (targetedProcessorArchitecture.Equals(Utilities.ProcessorArchitecture.MSIL, StringComparison.OrdinalIgnoreCase))
                 {
                     return SystemProcessorArchitecture.MSIL;
                 }
-                else if (targetedProcessorArchitecture.Equals(Microsoft.Build.Utilities.ProcessorArchitecture.X86, StringComparison.OrdinalIgnoreCase))
+                else if (targetedProcessorArchitecture.Equals(Utilities.ProcessorArchitecture.X86, StringComparison.OrdinalIgnoreCase))
                 {
                     return SystemProcessorArchitecture.X86;
                 }
-                else if (targetedProcessorArchitecture.Equals(Microsoft.Build.Utilities.ProcessorArchitecture.ARM, StringComparison.OrdinalIgnoreCase))
+                else if (targetedProcessorArchitecture.Equals(Utilities.ProcessorArchitecture.ARM, StringComparison.OrdinalIgnoreCase))
                 {
                     return SystemProcessorArchitecture.Arm;
                 }
-                else if (targetedProcessorArchitecture.Equals(Microsoft.Build.Utilities.ProcessorArchitecture.ARM64, StringComparison.OrdinalIgnoreCase))
+                else if (targetedProcessorArchitecture.Equals(Utilities.ProcessorArchitecture.ARM64, StringComparison.OrdinalIgnoreCase))
                 {
                     return (SystemProcessorArchitecture)6;
                 }

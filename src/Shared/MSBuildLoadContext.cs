@@ -83,7 +83,7 @@ namespace Microsoft.Build.Shared
                     continue;
                 }
 
-                AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
+                AssemblyName candidateAssemblyName = GetAssemblyName(candidatePath);
                 if (candidateAssemblyName.Version != assemblyName.Version)
                 {
                     continue;
@@ -101,7 +101,7 @@ namespace Microsoft.Build.Shared
 
             if (FileSystems.Default.FileExists(assemblyNameInExecutableDirectory))
             {
-                return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyNameInExecutableDirectory);
+                return Default.LoadFromAssemblyPath(assemblyNameInExecutableDirectory);
             }
 
             return null;

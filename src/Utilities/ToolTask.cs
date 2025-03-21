@@ -212,7 +212,7 @@ namespace Microsoft.Build.Utilities
         /// Project visible property that allows the user to specify an amount of time after which the task executable
         /// is terminated.
         /// </summary>
-        /// <value>Time-out in milliseconds. Default is <see cref="System.Threading.Timeout.Infinite"/> (no time-out).</value>
+        /// <value>Time-out in milliseconds. Default is <see cref="Timeout.Infinite"/> (no time-out).</value>
         public virtual int Timeout { set; get; } = System.Threading.Timeout.Infinite;
 
         /// <summary>
@@ -770,7 +770,7 @@ namespace Microsoft.Build.Utilities
                 }
 
                 // Call user-provided hook for code that should execute immediately after the process starts
-                this.ProcessStarted();
+                ProcessStarted();
 
                 // sign up for stderr callbacks
                 proc.BeginErrorReadLine();
@@ -1351,7 +1351,7 @@ namespace Microsoft.Build.Utilities
                 // parameters; if it didn't, at least emit a generic message.
                 if (!Log.HasLoggedErrors)
                 {
-                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.ValidateParametersFailed", this.GetType().FullName);
+                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.ValidateParametersFailed", GetType().FullName);
                 }
                 return false;
             }

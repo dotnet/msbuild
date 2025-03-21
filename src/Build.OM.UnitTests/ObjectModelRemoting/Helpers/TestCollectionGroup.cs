@@ -201,49 +201,49 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         protected void TakeSnapshot()
         {
-            Assert.Null(this.ImmutableProjects);
+            Assert.Null(ImmutableProjects);
             var result = new Dictionary<ProjectCollectionLinker, HashSet<Project>>();
-            this.Local.Importing = false;
-            result.Add(this.Local, new HashSet<Project>(this.Local.Collection.LoadedProjects));
-            foreach (var r in this.Remote)
+            Local.Importing = false;
+            result.Add(Local, new HashSet<Project>(Local.Collection.LoadedProjects));
+            foreach (var r in Remote)
             {
                 r.Importing = false;
                 result.Add(r, new HashSet<Project>(r.Collection.LoadedProjects));
             }
 
-            this.ImmutableProjects = result;
+            ImmutableProjects = result;
         }
 
         public TestCollectionGroup(int remoteCount, int stdFilesCount)
         {
-            this.RemoteCount = 2;
+            RemoteCount = 2;
 
-            this.Group = ProjectCollectionLinker.CreateGroup();
+            Group = ProjectCollectionLinker.CreateGroup();
 
-            this.Local = this.Group.AddNew();
-            this.Remote = new ProjectCollectionLinker[this.RemoteCount];
-            for (int i = 0; i < this.RemoteCount; i++)
+            Local = Group.AddNew();
+            Remote = new ProjectCollectionLinker[RemoteCount];
+            for (int i = 0; i < RemoteCount; i++)
             {
-                this.Remote[i] = this.Group.AddNew();
+                Remote[i] = Group.AddNew();
             }
 
-            this.ImmutableDisk = new TransientIO();
-            this.Disk = this.ImmutableDisk.GetSubFolder("Mutable");
+            ImmutableDisk = new TransientIO();
+            Disk = ImmutableDisk.GetSubFolder("Mutable");
 
             List<string> stdFiles = new List<string>();
             for (int i = 0; i < stdFilesCount; i++)
             {
-                stdFiles.Add(this.ImmutableDisk.WriteProjectFile($"Proj{i}.proj", TestCollectionGroup.SampleProjectFile));
+                stdFiles.Add(ImmutableDisk.WriteProjectFile($"Proj{i}.proj", SampleProjectFile));
             }
 
-            this.StdProjectFiles = stdFiles;
+            StdProjectFiles = stdFiles;
         }
 
         private void Clear(ProjectCollectionLinker linker)
         {
             linker.Importing = false;
             HashSet<Project> toKeep = null;
-            this.ImmutableProjects?.TryGetValue(linker, out toKeep);
+            ImmutableProjects?.TryGetValue(linker, out toKeep);
             if (toKeep == null)
             {
                 linker.Collection.UnloadAllProjects();
@@ -268,20 +268,20 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
         public void Clear()
         {
-            this.Clear(this.Local);
-            foreach (var remote in this.Remote)
+            Clear(Local);
+            foreach (var remote in Remote)
             {
-                this.Clear(remote);
+                Clear(remote);
             }
 
-            this.Group.ClearAllRemotes();
-            this.Disk.Clear();
+            Group.ClearAllRemotes();
+            Disk.Clear();
         }
 
         public void Dispose()
         {
-            this.Clear();
-            this.ImmutableDisk.Dispose();
+            Clear();
+            ImmutableDisk.Dispose();
         }
     }
 }

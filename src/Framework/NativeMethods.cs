@@ -1188,9 +1188,9 @@ internal static class NativeMethods
                 }
 
                 WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-                bool success = NativeMethods.GetFileAttributesEx(path, 0, ref data);
+                bool success = GetFileAttributesEx(path, 0, ref data);
 
-                if (success && (data.fileAttributes & NativeMethods.FILE_ATTRIBUTE_DIRECTORY) == 0)
+                if (success && (data.fileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
                 {
                     long dt = ((long)(data.ftLastWriteTimeHigh) << 32) | ((long)data.ftLastWriteTimeLow);
                     fileModifiedTime = DateTime.FromFileTimeUtc(dt);
@@ -1390,7 +1390,7 @@ internal static class NativeMethods
                 // using (var r = FileUtilities.OpenRead("/proc/" + processId + "/stat"))
                 // and could be again when FileUtilities moves to Framework
 
-                using var fileStream = new FileStream($"/proc/{processId}/stat", FileMode.Open, System.IO.FileAccess.Read);
+                using var fileStream = new FileStream($"/proc/{processId}/stat", FileMode.Open, FileAccess.Read);
                 using StreamReader r = new(fileStream);
 
                 line = r.ReadLine();

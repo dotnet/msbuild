@@ -112,12 +112,12 @@ namespace Microsoft.Build.Construction
                 return false;
             }
 
-            if (this.Line != that.Line || this.Column != that.Column)
+            if (Line != that.Line || Column != that.Column)
             {
                 return false;
             }
 
-            if (!String.Equals(this.File, that.File, StringComparison.OrdinalIgnoreCase))
+            if (!String.Equals(File, that.File, StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }

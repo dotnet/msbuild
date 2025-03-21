@@ -27,10 +27,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     {
         public RemotedResolvedImport(ResolvedImport resolvedImport, ProjectCollectionLinker exporter)
         {
-            this.ImportingElement = exporter.Export<ProjectElement, MockProjectImportElementLinkRemoter>(resolvedImport.ImportingElement);
-            this.ImportedProject = exporter.Export<ProjectElement, MockProjectRootElementLinkRemoter>(resolvedImport.ImportedProject);
-            this.IsImported = resolvedImport.IsImported;
-            this.SdkResult = resolvedImport.SdkResult;
+            ImportingElement = exporter.Export<ProjectElement, MockProjectImportElementLinkRemoter>(resolvedImport.ImportingElement);
+            ImportedProject = exporter.Export<ProjectElement, MockProjectRootElementLinkRemoter>(resolvedImport.ImportedProject);
+            IsImported = resolvedImport.IsImported;
+            SdkResult = resolvedImport.SdkResult;
         }
 
         public MockProjectImportElementLinkRemoter ImportingElement { get; }
@@ -43,9 +43,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         private ResolvedImport Import(ProjectCollectionLinker importer)
         {
-            var importElement = (ProjectImportElement)importer.Import<ProjectElement, MockProjectImportElementLinkRemoter>(this.ImportingElement);
-            var projectElement = (ProjectRootElement)importer.Import<ProjectElement, MockProjectRootElementLinkRemoter>(this.ImportedProject);
-            return importer.LinkFactory.Create(importElement, projectElement, 0, this.SdkResult, this.IsImported);
+            var importElement = (ProjectImportElement)importer.Import<ProjectElement, MockProjectImportElementLinkRemoter>(ImportingElement);
+            var projectElement = (ProjectRootElement)importer.Import<ProjectElement, MockProjectRootElementLinkRemoter>(ImportedProject);
+            return importer.LinkFactory.Create(importElement, projectElement, 0, SdkResult, IsImported);
         }
     }
 }

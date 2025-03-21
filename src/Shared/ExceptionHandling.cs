@@ -176,7 +176,7 @@ namespace Microsoft.Build.Shared
         {
             return e is XmlException
 #if FEATURE_SECURITY_PERMISSIONS
-                || e is System.Security.XmlSyntaxException
+                || e is XmlSyntaxException
 #endif
                 || e is XmlSchemaException
                 || e is UriFormatException; // XmlTextReader for example uses this under the covers

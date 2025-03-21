@@ -34,7 +34,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <returns></returns>
         internal static bool IsLetter(char c)
         {
-            UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            UnicodeCategory cat = CharUnicodeInfo.GetUnicodeCategory(c);
 
             // From 2.4.2 of the C# Language Specification
             // letter-character:
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <returns></returns>
         internal static bool IsDecimalDigit(char c)
         {
-            UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            UnicodeCategory cat = CharUnicodeInfo.GetUnicodeCategory(c);
 
             // From 2.4.2 of the C# Language Specification
             // decimal-digit-character:
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <returns></returns>
         internal static bool IsConnecting(char c)
         {
-            UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            UnicodeCategory cat = CharUnicodeInfo.GetUnicodeCategory(c);
 
             // From 2.4.2 of the C# Language Specification
             // connecting-character:
@@ -97,7 +97,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <returns></returns>
         internal static bool IsCombining(char c)
         {
-            UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            UnicodeCategory cat = CharUnicodeInfo.GetUnicodeCategory(c);
 
             // From 2.4.2 of the C# Language Specification
             // combining-character:
@@ -117,7 +117,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// <returns></returns>
         internal static bool IsFormatting(char c)
         {
-            UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            UnicodeCategory cat = CharUnicodeInfo.GetUnicodeCategory(c);
 
             // From 2.4.2 of the C# Language Specification
             // formatting-character:

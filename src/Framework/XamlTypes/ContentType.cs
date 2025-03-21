@@ -27,10 +27,10 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// </summary>
         public ContentType()
         {
-            this.Metadata = new List<NameValuePair>();
+            Metadata = new List<NameValuePair>();
 
             // We must use ExecutionAndPublication thread safety here because the initializer is a destructive operation.
-            _metadata = new Lazy<Dictionary<string, string>>(this.InitializeMetadata, System.Threading.LazyThreadSafetyMode.ExecutionAndPublication);
+            _metadata = new Lazy<Dictionary<string, string>>(InitializeMetadata, System.Threading.LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
         /// <summary>
@@ -156,8 +156,8 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// </remarks>
         private Dictionary<string, string> InitializeMetadata()
         {
-            var metadata = new Dictionary<string, string>(this.Metadata.Count, StringComparer.OrdinalIgnoreCase);
-            foreach (NameValuePair pair in this.Metadata)
+            var metadata = new Dictionary<string, string>(Metadata.Count, StringComparer.OrdinalIgnoreCase);
+            foreach (NameValuePair pair in Metadata)
             {
                 metadata.Add(pair.Name, pair.Value);
             }

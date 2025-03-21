@@ -53,14 +53,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _host.RequestBuilder = new RequestBuilder();
             ((IBuildComponent)_host.RequestBuilder).InitializeComponent(_host);
 
-            _host.OnLoggingThreadException += this.LoggingException;
+            _host.OnLoggingThreadException += LoggingException;
 
             _newBuildRequestsEvent = new AutoResetEvent(false);
             _buildRequestCompletedEvent = new AutoResetEvent(false);
 
             _requestBuilder = (IRequestBuilder)_host.GetComponent(BuildComponentType.RequestBuilder);
-            _requestBuilder.OnBuildRequestCompleted += this.BuildRequestCompletedCallback;
-            _requestBuilder.OnNewBuildRequests += this.NewBuildRequestsCallback;
+            _requestBuilder.OnBuildRequestCompleted += BuildRequestCompletedCallback;
+            _requestBuilder.OnNewBuildRequests += NewBuildRequestsCallback;
         }
 
         public void Dispose()
@@ -367,7 +367,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     result.AddResultsForTarget(target.name, BuildResultUtilities.GetEmptyFailingTargetResult());
                 }
-                return Task<BuildResult>.FromResult(result);
+                return Task.FromResult(result);
             }
 
             if (_newRequests != null)
@@ -392,11 +392,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     {
                         result.AddResultsForTarget(target.name, BuildResultUtilities.GetEmptyFailingTargetResult());
                     }
-                    return Task<BuildResult>.FromResult(result);
+                    return Task.FromResult(result);
                 }
             }
 
-            return Task<BuildResult>.FromResult(_cache.GetResultForRequest(entry.Request));
+            return Task.FromResult(_cache.GetResultForRequest(entry.Request));
         }
 
         #endregion

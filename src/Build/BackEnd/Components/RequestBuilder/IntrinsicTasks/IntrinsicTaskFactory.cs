@@ -22,7 +22,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public IntrinsicTaskFactory(Type intrinsicType)
         {
-            this.TaskType = intrinsicType;
+            TaskType = intrinsicType;
         }
 
         /// <summary>

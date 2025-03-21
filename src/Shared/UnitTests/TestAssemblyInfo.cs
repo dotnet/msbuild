@@ -36,7 +36,14 @@ namespace Microsoft.Build.UnitTests
         {
             // Set field to indicate tests are running in the TestInfo class in Microsoft.Build.Framework.
             //  See the comments on the TestInfo class for an explanation of why it works this way.
+
+/* Unmerged change from project 'Microsoft.Build.Engine.UnitTests(net9.0)'
+Before:
             var frameworkAssembly = typeof(Microsoft.Build.Framework.ITask).Assembly;
+After:
+            var frameworkAssembly = typeof(Framework.ITask).Assembly;
+*/
+            var frameworkAssembly = typeof(Build.Framework.ITask).Assembly;
             var testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.TestInfo");
             var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             runningTestsField.SetValue(null, true);

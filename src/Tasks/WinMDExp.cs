@@ -242,7 +242,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         protected override string GenerateFullPathToTool()
         {
-            return SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Microsoft.Build.Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
+            return SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, Utilities.ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
         }
 
         /// <summary>

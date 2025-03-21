@@ -20,30 +20,30 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             public ROTestCollectionGroup()
                 : base(1, 0)
             {
-                this.BigFile = this.ImmutableDisk.WriteProjectFile($"Big.proj", TestCollectionGroup.BigProjectFile);
-                var projReal = this.Remote[0].LoadProjectWithSettings(this.BigFile, ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.RecordDuplicateButNotCircularImports);
-                this.Local.Importing = true;
+                BigFile = ImmutableDisk.WriteProjectFile($"Big.proj", BigProjectFile);
+                var projReal = Remote[0].LoadProjectWithSettings(BigFile, ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.RecordDuplicateButNotCircularImports);
+                Local.Importing = true;
                 Assert.NotNull(projReal);
-                this.Real = projReal;
-                Assert.NotNull(this.Real);
-                var projView = this.Local.GetLoadedProjects(this.BigFile).FirstOrDefault();
+                Real = projReal;
+                Assert.NotNull(Real);
+                var projView = Local.GetLoadedProjects(BigFile).FirstOrDefault();
                 Assert.NotNull(projView);
-                this.View = projView;
+                View = projView;
 
-                ViewValidation.VerifyNotLinkedNotNull(this.Real);
-                ViewValidation.VerifyLinkedNotNull(this.View);
+                ViewValidation.VerifyNotLinkedNotNull(Real);
+                ViewValidation.VerifyLinkedNotNull(View);
             }
 
             public void ResetBeforeTests()
             {
-                this.Group.ClearAllRemotes();
+                Group.ClearAllRemotes();
 
-                var projView = this.Local.GetLoadedProjects(this.BigFile).FirstOrDefault();
+                var projView = Local.GetLoadedProjects(BigFile).FirstOrDefault();
                 Assert.NotNull(projView);
-                Assert.NotSame(projView, this.View);
-                this.View = projView;
+                Assert.NotSame(projView, View);
+                View = projView;
 
-                ViewValidation.VerifyLinkedNotNull(this.View);
+                ViewValidation.VerifyLinkedNotNull(View);
             }
         }
 
@@ -51,22 +51,22 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public LinkedEvaluationReadOnly_Tests(ROTestCollectionGroup group)
         {
-            this.StdGroup = group;
-            this.StdGroup.ResetBeforeTests();
+            StdGroup = group;
+            StdGroup.ResetBeforeTests();
         }
 
         [Fact]
         public void ProjectReadOnly_Tests()
         {
             // this is actually very elaborate and caught quite a few issues.
-            ViewValidation.Verify(this.StdGroup.View, this.StdGroup.Real);
+            ViewValidation.Verify(StdGroup.View, StdGroup.Real);
         }
 
         [Fact]
         public void ProjectItemReadOnly_Tests()
         {
-            var viewItems = this.StdGroup.View.AllEvaluatedItems;
-            var realItems = this.StdGroup.Real.AllEvaluatedItems;
+            var viewItems = StdGroup.View.AllEvaluatedItems;
+            var realItems = StdGroup.Real.AllEvaluatedItems;
 
             Assert.NotEmpty(viewItems);
             ViewValidation.Verify(viewItems, realItems);
@@ -75,8 +75,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectItemDefinitionReadOnly_Tests()
         {
-            var viewItemDefinitions = this.StdGroup.View.ItemDefinitions;
-            var realItemDefinitions = this.StdGroup.Real.ItemDefinitions;
+            var viewItemDefinitions = StdGroup.View.ItemDefinitions;
+            var realItemDefinitions = StdGroup.Real.ItemDefinitions;
 
             Assert.NotEmpty(viewItemDefinitions);
             ViewValidation.Verify(viewItemDefinitions, realItemDefinitions, ViewValidation.Verify);
@@ -85,8 +85,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectPropertiesReadOnly_Tests()
         {
-            var viewProperties = this.StdGroup.View.Properties;
-            var realProperties = this.StdGroup.Real.Properties;
+            var viewProperties = StdGroup.View.Properties;
+            var realProperties = StdGroup.Real.Properties;
 
             Assert.NotEmpty(viewProperties);
             ViewValidation.Verify(viewProperties, realProperties);
@@ -95,8 +95,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectMetadataReadOnly_Tests()
         {
-            var viewMetadata = this.StdGroup.View.AllEvaluatedItemDefinitionMetadata;
-            var realMetadata = this.StdGroup.Real.AllEvaluatedItemDefinitionMetadata;
+            var viewMetadata = StdGroup.View.AllEvaluatedItemDefinitionMetadata;
+            var realMetadata = StdGroup.Real.AllEvaluatedItemDefinitionMetadata;
 
             Assert.NotEmpty(viewMetadata);
             ViewValidation.Verify(viewMetadata, realMetadata);

@@ -371,8 +371,8 @@ namespace Microsoft.Build.Shared
                 "MSBuild",
                 CurrentToolsVersion,
                 "Bin",
-                NativeMethodsShared.ProcessorArchitecture == Framework.NativeMethods.ProcessorArchitectures.X64 ? "amd64" :
-                NativeMethodsShared.ProcessorArchitecture == Framework.NativeMethods.ProcessorArchitectures.ARM64 ? "arm64" : string.Empty,
+                NativeMethodsShared.ProcessorArchitecture == NativeMethodsShared.ProcessorArchitectures.X64 ? "amd64" :
+                NativeMethodsShared.ProcessorArchitecture == NativeMethodsShared.ProcessorArchitectures.ARM64 ? "arm64" : string.Empty,
                 "MSBuild.exe");
         }
 
@@ -395,7 +395,7 @@ namespace Microsoft.Build.Shared
 
                 // Check if running tests via the TestInfo class in Microsoft.Build.Framework.
                 //  See the comments on the TestInfo class for an explanation of why it works this way.
-                var frameworkAssembly = typeof(Framework.ITask).Assembly;
+                var frameworkAssembly = typeof(ITask).Assembly;
                 var testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.TestInfo");
                 var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 
@@ -551,8 +551,8 @@ namespace Microsoft.Build.Shared
             VisualStudioInstallRootDirectory = visualStudioPath;
 
 #if !NO_FRAMEWORK_IVT
-            Framework.BuildEnvironmentState.s_runningTests = runningTests;
-            Framework.BuildEnvironmentState.s_runningInVisualStudio = runningInVisualStudio;
+            BuildEnvironmentState.s_runningTests = runningTests;
+            BuildEnvironmentState.s_runningInVisualStudio = runningInVisualStudio;
 #endif
 
             if (!string.IsNullOrEmpty(currentMSBuildExePath))

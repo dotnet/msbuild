@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(_output.WriteLine), 1, true);
             context.HasLoggedErrors.ShouldBeFalse();
 
-            context.LogCommentFromText(Framework.MessageImportance.High, "Test message");
+            context.LogCommentFromText(MessageImportance.High, "Test message");
             context.HasLoggedErrors.ShouldBeFalse();
 
             context.LogWarningFromText(null, null, null, null, "Test warning");

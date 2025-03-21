@@ -587,7 +587,7 @@ namespace Microsoft.Build.Evaluation
             {
                 foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)
                 {
-                    this.Add(metadata.Select(m => referencedItem.Item.GetMetadataValue(m)), comparer);
+                    Add(metadata.Select(m => referencedItem.Item.GetMetadataValue(m)), comparer);
                 }
             }
         }

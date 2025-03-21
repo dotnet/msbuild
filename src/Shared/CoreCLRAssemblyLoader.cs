@@ -26,7 +26,7 @@ namespace Microsoft.Build.Shared
 
         private bool _resolvingHandlerHookedUp = false;
 
-        private static readonly Version _currentAssemblyVersion = new Version(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion);
+        private static readonly Version _currentAssemblyVersion = new Version(MSBuildConstants.CurrentAssemblyVersion);
 
         public void AddDependencyLocation(string fullPath)
         {

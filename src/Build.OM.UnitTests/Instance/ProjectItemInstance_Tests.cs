@@ -361,7 +361,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal("esca%20ped%3bitem", taskItem.EvaluatedIncludeEscaped);
             Assert.Equal("esca ped;item", taskItem.ItemSpec);
 
-            ITaskItem2 taskItem2 = new Microsoft.Build.Utilities.TaskItem(taskItem);
+            ITaskItem2 taskItem2 = new Utilities.TaskItem(taskItem);
 
             taskItem2.SetMetadataValueLiteral("m;", "m;2");
 
@@ -517,7 +517,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectItemInstance item = GetOneItem(content);
 
-            Microsoft.Build.Utilities.TaskItem taskItem = new Microsoft.Build.Utilities.TaskItem(item);
+            Utilities.TaskItem taskItem = new Utilities.TaskItem(item);
 
             Assert.Equal(";x86;", taskItem.GetMetadata("m0"));
             Assert.Equal("foo.extension", taskItem.GetMetadata("m1"));

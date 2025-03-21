@@ -25,28 +25,28 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
 
-        public string Name { get => this.TargetXml.Name; set => this.TargetXml.Name = value; }
-        public string Returns { set => this.TargetXml.Returns = value; }
+        public string Name { get => TargetXml.Name; set => TargetXml.Name = value; }
+        public string Returns { set => TargetXml.Returns = value; }
     }
 
     internal sealed class MockProjectTargetElementLink : ProjectTargetElementLink, ILinkMock, IProjectElementLinkHelper, IProjectElementContainerLinkHelper
     {
         public MockProjectTargetElementLink(MockProjectTargetElementLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectTargetElementLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
-        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
-        MockProjectElementContainerLinkRemoter IProjectElementContainerLinkHelper.ContainerProxy => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
+        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => Proxy;
+        MockProjectElementContainerLinkRemoter IProjectElementContainerLinkHelper.ContainerProxy => Proxy;
 
         // ProjectTargetElementLink -----
-        public override string Name { get => this.Proxy.Name; set => this.Proxy.Name = value; }
-        public override string Returns { set => this.Proxy.Returns = value; }
+        public override string Name { get => Proxy.Name; set => Proxy.Name = value; }
+        public override string Returns { set => Proxy.Returns = value; }
         // ----------------------------
 
         #region ProjectElementLink redirectors

@@ -36,7 +36,7 @@ namespace Microsoft.Build.Shared.Debugging
 
             public IdBasedFilesWriter(string logFileRoot)
             {
-                this.LogFileRoot = logFileRoot;
+                LogFileRoot = logFileRoot;
                 Directory.CreateDirectory(logFileRoot);
             }
 

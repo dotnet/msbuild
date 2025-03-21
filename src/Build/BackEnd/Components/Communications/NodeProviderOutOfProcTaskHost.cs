@@ -224,7 +224,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            this.ComponentHost = host;
+            ComponentHost = host;
             _nodeContexts = new Dictionary<HandshakeOptions, NodeContext>();
             _nodeIdToPacketFactory = new Dictionary<int, INodePacketFactory>();
             _nodeIdToPacketHandler = new Dictionary<int, INodePacketHandler>();

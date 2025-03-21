@@ -481,7 +481,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.True(object.ReferenceEquals(item1, item2));
+            Assert.True(ReferenceEquals(item1, item2));
         }
 
         /// <summary>
@@ -544,7 +544,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.True(object.ReferenceEquals(item1, item2));
+            Assert.True(ReferenceEquals(item1, item2));
         }
 
         /// <summary>
@@ -569,7 +569,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.False(object.ReferenceEquals(item1, item2));
+            Assert.False(ReferenceEquals(item1, item2));
         }
 
         /// <summary>
@@ -896,7 +896,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             // The ProjectItemElement should be the same
             ProjectItemElement newItemElement = Helpers.GetFirst((Helpers.GetFirst(project.Xml.ItemGroups)).Items);
-            Assert.True(object.ReferenceEquals(item.Xml, newItemElement));
+            Assert.True(ReferenceEquals(item.Xml, newItemElement));
         }
 
         /// <summary>
@@ -924,7 +924,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             // The ProjectItemElement should be the same
             ProjectItemElement newItemElement = Helpers.GetLast((Helpers.GetLast(project.Xml.ItemGroups)).Items);
-            Assert.True(object.ReferenceEquals(item.Xml, newItemElement));
+            Assert.True(ReferenceEquals(item.Xml, newItemElement));
         }
 
         /// <summary>
@@ -950,7 +950,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             // The ProjectItemElement should be the same
             ProjectItemElement newItemElement = Helpers.GetLast((Helpers.GetLast(project.Xml.ItemGroups)).Items);
-            Assert.True(object.ReferenceEquals(item.Xml, newItemElement));
+            Assert.True(ReferenceEquals(item.Xml, newItemElement));
         }
 
         /// <summary>
@@ -1187,7 +1187,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItemGroupElement itemGroupElement = Helpers.GetFirst(project.Xml.ItemGroups);
             Assert.Single(Helpers.MakeList(itemGroupElement.Items));
-            Assert.True(object.ReferenceEquals(itemGroupElement, item.Xml.Parent));
+            Assert.True(ReferenceEquals(itemGroupElement, item.Xml.Parent));
 
             Assert.Single(Helpers.MakeList(project.Items));
             Assert.Single(Helpers.MakeList(project.ItemsIgnoringCondition));
@@ -1195,9 +1195,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Assert.Empty(Helpers.MakeList(project.GetItems("i")));
             Assert.Empty(Helpers.MakeList(project.GetItemsIgnoringCondition("i")));
 
-            Assert.True(object.ReferenceEquals(item, Helpers.GetFirst(project.GetItems("j"))));
-            Assert.True(object.ReferenceEquals(item, Helpers.GetFirst(project.GetItemsIgnoringCondition("j"))));
-            Assert.True(object.ReferenceEquals(item, Helpers.GetFirst(project.GetItemsByEvaluatedInclude("i1"))));
+            Assert.True(ReferenceEquals(item, Helpers.GetFirst(project.GetItems("j"))));
+            Assert.True(ReferenceEquals(item, Helpers.GetFirst(project.GetItemsIgnoringCondition("j"))));
+            Assert.True(ReferenceEquals(item, Helpers.GetFirst(project.GetItemsByEvaluatedInclude("i1"))));
         }
 
         /// <summary>
@@ -1234,7 +1234,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             // Item element identity changed unfortunately, but metadata elements should be the same objects.
             ProjectItemElement itemElement = Helpers.GetFirst(Helpers.GetFirst(project.Xml.ItemGroups).Items);
-            Assert.True(object.ReferenceEquals(itemElement, metadatumElement1.Parent));
+            Assert.True(ReferenceEquals(itemElement, metadatumElement1.Parent));
 
             Assert.Equal(2, Helpers.MakeList(itemElement.Metadata).Count);
 
@@ -1281,8 +1281,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             ProjectItemGroupElement itemGroupElement = Helpers.GetFirst(project.Xml.ItemGroups);
             Assert.Equal(2, Helpers.MakeList(itemGroupElement.Items).Count);
-            Assert.True(object.ReferenceEquals(itemGroupElement, item.Xml.Parent));
-            Assert.True(object.ReferenceEquals(itemGroupElement, Helpers.GetFirst(project.GetItems("i")).Xml.Parent));
+            Assert.True(ReferenceEquals(itemGroupElement, item.Xml.Parent));
+            Assert.True(ReferenceEquals(itemGroupElement, Helpers.GetFirst(project.GetItems("i")).Xml.Parent));
         }
 
         [Theory]
@@ -1939,7 +1939,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             List<ProjectItem> items = Helpers.MakeList(project.Items);
             Assert.Equal("m2", items[0].GetMetadataValue("m"));
-            Assert.True(object.ReferenceEquals(metadatum1, metadatum2));
+            Assert.True(ReferenceEquals(metadatum1, metadatum2));
         }
 
         /// <summary>
@@ -1952,7 +1952,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project();
             IList<ProjectItem> items = project.AddItem("i", "a;b");
 
-            Assert.True(object.ReferenceEquals(items[0].Xml, items[1].Xml));
+            Assert.True(ReferenceEquals(items[0].Xml, items[1].Xml));
             Assert.Equal("a;b", items[0].UnevaluatedInclude);
 
             items = Helpers.MakeList(project.Items);
@@ -2402,7 +2402,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.True(object.ReferenceEquals(item1, item2));
+            Assert.True(ReferenceEquals(item1, item2));
         }
 
         /// <summary>
@@ -2461,7 +2461,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.True(object.ReferenceEquals(item1, item2));
+            Assert.True(ReferenceEquals(item1, item2));
         }
 
         /// <summary>
@@ -2486,7 +2486,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 </Project>");
 
             Helpers.VerifyAssertProjectContent(expected, project);
-            Assert.False(object.ReferenceEquals(item1, item2));
+            Assert.False(ReferenceEquals(item1, item2));
         }
 
         /// <summary>

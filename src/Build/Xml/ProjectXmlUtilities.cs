@@ -184,7 +184,7 @@ namespace Microsoft.Build.Internal
         {
             foreach (XmlAttributeWithLocation attribute in element.Attributes)
             {
-                ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute(validAttributes.Contains(attribute.Name), attribute);
+                VerifyThrowProjectInvalidAttribute(validAttributes.Contains(attribute.Name), attribute);
             }
         }
 

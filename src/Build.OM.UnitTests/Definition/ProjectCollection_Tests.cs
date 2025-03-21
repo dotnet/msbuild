@@ -1448,7 +1448,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void ProjectCollectionVersionIsCorrect()
         {
-            Version expectedVersion = new Version(this.GetType().GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
+            Version expectedVersion = new Version(GetType().GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
 
             ProjectCollection.Version.Major.ShouldBe(expectedVersion.Major);
             ProjectCollection.Version.Minor.ShouldBe(expectedVersion.Minor);

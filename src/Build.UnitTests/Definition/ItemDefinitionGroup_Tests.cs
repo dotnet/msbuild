@@ -1895,7 +1895,7 @@ namespace Microsoft.Build.UnitTests.Definition
         }
     }
 
-    public class ItemDefinitionGroup : Microsoft.Build.Utilities.Task
+    public class ItemDefinitionGroup : Utilities.Task
     {
         public override bool Execute()
         {

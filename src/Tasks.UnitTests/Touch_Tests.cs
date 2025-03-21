@@ -16,12 +16,12 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class Touch_Tests
     {
-        internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
-        internal static Microsoft.Build.Shared.FileCreate fileCreate = new Microsoft.Build.Shared.FileCreate(FileCreate);
-        internal static Microsoft.Build.Tasks.GetAttributes fileGetAttributes = new Microsoft.Build.Tasks.GetAttributes(GetAttributes);
-        internal static Microsoft.Build.Tasks.SetAttributes fileSetAttributes = new Microsoft.Build.Tasks.SetAttributes(SetAttributes);
-        internal static Microsoft.Build.Tasks.SetLastAccessTime setLastAccessTime = new Microsoft.Build.Tasks.SetLastAccessTime(SetLastAccessTime);
-        internal static Microsoft.Build.Tasks.SetLastWriteTime setLastWriteTime = new Microsoft.Build.Tasks.SetLastWriteTime(SetLastWriteTime);
+        internal static FileExists fileExists = new FileExists(FileExists);
+        internal static FileCreate fileCreate = new FileCreate(FileCreate);
+        internal static GetAttributes fileGetAttributes = new GetAttributes(GetAttributes);
+        internal static SetAttributes fileSetAttributes = new SetAttributes(SetAttributes);
+        internal static SetLastAccessTime setLastAccessTime = new SetLastAccessTime(SetLastAccessTime);
+        internal static SetLastWriteTime setLastWriteTime = new SetLastWriteTime(SetLastWriteTime);
 
         internal static string myexisting_txt = NativeMethodsShared.IsWindows ? @"c:\touch\myexisting.txt" : @"/touch/myexisting.txt";
         internal static string mynonexisting_txt = NativeMethodsShared.IsWindows ? @"c:\touch\mynonexisting.txt" : @"/touch/mynonexisting.txt";
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests
 
             if (path == myreadonly_txt)
             {
-                return System.IO.FileAttributes.ReadOnly;
+                return FileAttributes.ReadOnly;
             }
 
             Assert.Fail("Unexpected file attributes: " + path);

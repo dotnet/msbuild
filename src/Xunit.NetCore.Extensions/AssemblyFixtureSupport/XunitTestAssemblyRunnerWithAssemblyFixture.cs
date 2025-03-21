@@ -39,7 +39,7 @@ namespace Xunit.NetCore.Extensions
                                                                                     .Cast<AssemblyFixtureAttribute>()
                                                                                     .ToList();
 
-                this.assemblyFixtureAttributes = fixturesAttrs;
+                assemblyFixtureAttributes = fixturesAttrs;
 
                 // Instantiate all the fixtures
                 foreach (var fixtureAttr in fixturesAttrs.Where(a => a.LifetimeScope == AssemblyFixtureAttribute.Scope.Assembly))

@@ -20,8 +20,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public void ValidatePropertyValue(string name, string value)
         {
-            Assert.Equal(value, this.View.GetPropertyValue(name));
-            Assert.Equal(value, this.Real.GetPropertyValue(name));
+            Assert.Equal(value, View.GetPropertyValue(name));
+            Assert.Equal(value, Real.GetPropertyValue(name));
         }
 
         private ProjectItem VerifyAfterAddSingleItem(ObjectType where, ICollection<ProjectItem> added, IEnumerable<KeyValuePair<string, string>> metadata)
@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.NotNull(result);
 
             // validate there is exactly 1 item with this include in both view and real and it is the exact same object.
-            Assert.Same(result, this.GetSingleItemWithVerify(where, result.EvaluatedInclude));
+            Assert.Same(result, GetSingleItemWithVerify(where, result.EvaluatedInclude));
 
 
             if (metadata != null)
@@ -51,22 +51,22 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public ProjectItem AddSingleItemWithVerify(ObjectType where, string itemType, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata = null)
         {
-            var toAdd = this.Get(where);
+            var toAdd = Get(where);
             var added = (metadata == null) ? toAdd.AddItem(itemType, unevaluatedInclude) : toAdd.AddItem(itemType, unevaluatedInclude, metadata);
             return VerifyAfterAddSingleItem(where, added, metadata);
         }
 
         public ProjectItem AddSingleItemFastWithVerify(ObjectType where, string itemType, string unevaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata = null)
         {
-            var toAdd = this.Get(where);
+            var toAdd = Get(where);
             var added = (metadata == null) ? toAdd.AddItemFast(itemType, unevaluatedInclude) : toAdd.AddItemFast(itemType, unevaluatedInclude, metadata);
             return VerifyAfterAddSingleItem(where, added, metadata);
         }
 
         public ProjectItem GetSingleItemWithVerify(ObjectType which, string evaluatedInclude)
         {
-            var realItems = this.Real.GetItemsByEvaluatedInclude(evaluatedInclude);
-            var viewItems = this.View.GetItemsByEvaluatedInclude(evaluatedInclude);
+            var realItems = Real.GetItemsByEvaluatedInclude(evaluatedInclude);
+            var viewItems = View.GetItemsByEvaluatedInclude(evaluatedInclude);
 
             ViewValidation.Verify(viewItems, realItems, ViewValidation.Verify, new ValidationContext(this));
             if (viewItems == null || viewItems.Count == 0)
@@ -80,14 +80,14 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public ProjectProperty SetPropertyWithVerify(ObjectType where, string name, string unevaluatedValue)
         {
-            var toAdd = this.Get(where);
+            var toAdd = Get(where);
             var added = toAdd.SetProperty(name, unevaluatedValue);
             Assert.NotNull(added);
             Assert.Same(added, toAdd.GetProperty(name));
             Assert.Equal(unevaluatedValue, added.UnevaluatedValue);
 
-            var view = this.View.GetProperty(name);
-            var real = this.Real.GetProperty(name);
+            var view = View.GetProperty(name);
+            var real = Real.GetProperty(name);
             ViewValidation.Verify(view, real, new ValidationContext(this));
 
             return added;

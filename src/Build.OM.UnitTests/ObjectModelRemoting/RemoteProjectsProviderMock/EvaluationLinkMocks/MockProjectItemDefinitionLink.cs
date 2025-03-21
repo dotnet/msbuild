@@ -18,38 +18,38 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
         // ProjectItemDefinitionLink remoting
-        public MockProjectLinkRemoter Project => this.OwningCollection.Export<Project, MockProjectLinkRemoter>(this.Source.Project);
-        public string ItemType => this.Source.ItemType;
-        public ICollection<MockProjectMetadataLinkRemoter> Metadata => this.OwningCollection.ExportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.Metadata);
+        public MockProjectLinkRemoter Project => OwningCollection.Export<Project, MockProjectLinkRemoter>(Source.Project);
+        public string ItemType => Source.ItemType;
+        public ICollection<MockProjectMetadataLinkRemoter> Metadata => OwningCollection.ExportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(Source.Metadata);
         public MockProjectMetadataLinkRemoter GetMetadata(string name)
-            => this.OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.GetMetadata(name));
-        public string GetMetadataValue(string name) => this.Source.GetMetadataValue(name);
+            => OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(Source.GetMetadata(name));
+        public string GetMetadataValue(string name) => Source.GetMetadataValue(name);
         public MockProjectMetadataLinkRemoter SetMetadataValue(string name, string unevaluatedValue)
-            => this.OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.SetMetadataValue(name, unevaluatedValue));
+            => OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(Source.SetMetadataValue(name, unevaluatedValue));
     }
 
     internal sealed class MockProjectItemDefinitionLink : ProjectItemDefinitionLink, ILinkMock
     {
         public MockProjectItemDefinitionLink(MockProjectItemDefinitionLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectItemDefinitionLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
 
         // ProjectItemDefinitionLink
-        public override Project Project => this.Linker.Import<Project, MockProjectLinkRemoter>(this.Proxy.Project);
-        public override string ItemType => this.Proxy.ItemType;
+        public override Project Project => Linker.Import<Project, MockProjectLinkRemoter>(Proxy.Project);
+        public override string ItemType => Proxy.ItemType;
         public override ICollection<ProjectMetadata> Metadata
-            => this.Linker.ImportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Proxy.Metadata);
+            => Linker.ImportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(Proxy.Metadata);
         public override ProjectMetadata GetMetadata(string name)
-            => this.Linker.Import<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Proxy.GetMetadata(name));
-        public override string GetMetadataValue(string name) => this.Proxy.GetMetadataValue(name);
+            => Linker.Import<ProjectMetadata, MockProjectMetadataLinkRemoter>(Proxy.GetMetadata(name));
+        public override string GetMetadataValue(string name) => Proxy.GetMetadataValue(name);
         public override ProjectMetadata SetMetadataValue(string name, string unevaluatedValue)
-            => this.Linker.Import<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Proxy.SetMetadataValue(name, unevaluatedValue));
+            => Linker.Import<ProjectMetadata, MockProjectMetadataLinkRemoter>(Proxy.SetMetadataValue(name, unevaluatedValue));
     }
 }

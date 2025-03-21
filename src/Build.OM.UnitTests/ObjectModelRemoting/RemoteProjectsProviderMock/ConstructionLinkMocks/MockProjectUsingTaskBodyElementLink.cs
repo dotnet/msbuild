@@ -25,25 +25,25 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
         // ProjectUsingTaskBodyElementLink support
-        public string TaskBody { get => this.UsingTaskBodyXml.TaskBody; set => this.UsingTaskBodyXml.TaskBody = value; }
+        public string TaskBody { get => UsingTaskBodyXml.TaskBody; set => UsingTaskBodyXml.TaskBody = value; }
     }
 
     internal sealed class MockProjectUsingTaskBodyElementLink : ProjectUsingTaskBodyElementLink, ILinkMock, IProjectElementLinkHelper
     {
         public MockProjectUsingTaskBodyElementLink(MockProjectUsingTaskBodyElementLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectUsingTaskBodyElementLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
-        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
+        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => Proxy;
 
         // ProjectUsingTaskBodyElementLink
-        public override string TaskBody { get => this.Proxy.TaskBody; set => this.Proxy.TaskBody = value; }
+        public override string TaskBody { get => Proxy.TaskBody; set => Proxy.TaskBody = value; }
 
         #region ProjectElementLink redirectors
         private IProjectElementLinkHelper EImpl => (IProjectElementLinkHelper)this;

@@ -23,22 +23,22 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return holder.Linker.LinkFactory.Create(link);
         }
 
-        public string Name { get => this.TaskParamXml.Name; set => TaskParamXml.Name = value; }
+        public string Name { get => TaskParamXml.Name; set => TaskParamXml.Name = value; }
     }
 
     internal sealed class MockProjectUsingTaskParameterElementLink : ProjectUsingTaskParameterElementLink, ILinkMock, IProjectElementLinkHelper
     {
         public MockProjectUsingTaskParameterElementLink(MockProjectUsingTaskParameterElementLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectUsingTaskParameterElementLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
-        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
+        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => Proxy;
 
         public override string Name { get => Proxy.Name; set => Proxy.Name = value; }
         #region ProjectElementLink redirectors

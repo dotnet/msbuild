@@ -89,7 +89,7 @@ namespace Microsoft.Build.CommandLine
         /// Serialize the contents of the class.
         /// </summary>
 #if FEATURE_SECURITY_PERMISSIONS
-        [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
 #if NET8_0_OR_GREATER
         [Obsolete(DiagnosticId = "SYSLIB0051")]
@@ -154,7 +154,7 @@ namespace Microsoft.Build.CommandLine
                 errorMessage = ResourceUtilities.FormatString(errorMessage, (e == null) ? String.Empty : e.Message);
             }
 
-            InitializationException.Throw(errorMessage, invalidSwitch);
+            Throw(errorMessage, invalidSwitch);
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace Microsoft.Build.CommandLine
 
                 errorMessage = ResourceUtilities.FormatString(errorMessage, args);
 
-                InitializationException.Throw(errorMessage, invalidSwitch);
+                Throw(errorMessage, invalidSwitch);
             }
         }
 

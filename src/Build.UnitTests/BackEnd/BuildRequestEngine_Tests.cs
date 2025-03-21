@@ -195,8 +195,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             public void CancelRequest()
             {
-                this.BeginCancel();
-                this.WaitForCancelCompletion();
+                BeginCancel();
+                WaitForCancelCompletion();
             }
 
             public void BeginCancel()
@@ -318,13 +318,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private void ConfigureEngine(IBuildRequestEngine engine)
         {
-            engine.OnNewConfigurationRequest += this.Engine_NewConfigurationRequest;
-            engine.OnRequestBlocked += this.Engine_NewRequest;
-            engine.OnRequestComplete += this.Engine_RequestComplete;
-            engine.OnRequestResumed += this.Engine_RequestResumed;
-            engine.OnStatusChanged += this.Engine_EngineStatusChanged;
-            engine.OnEngineException += this.Engine_Exception;
-            engine.OnResourceRequest += this.Engine_ResourceRequest;
+            engine.OnNewConfigurationRequest += Engine_NewConfigurationRequest;
+            engine.OnRequestBlocked += Engine_NewRequest;
+            engine.OnRequestComplete += Engine_RequestComplete;
+            engine.OnRequestResumed += Engine_RequestResumed;
+            engine.OnStatusChanged += Engine_EngineStatusChanged;
+            engine.OnEngineException += Engine_Exception;
+            engine.OnResourceRequest += Engine_ResourceRequest;
         }
 
         /// <summary>

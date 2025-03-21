@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(targetOutputItem.Equals(mockItemInCache));
 
             // Assert they are different instances.
-            Assert.False(object.ReferenceEquals(targetOutputItem, mockItemInCache));
+            Assert.False(ReferenceEquals(targetOutputItem, mockItemInCache));
         }
 
         /// <summary>
@@ -1414,7 +1414,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public Task<BuildResult[]> BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets)
             {
-                return Task<BuildResult[]>.FromResult(_buildResultsToReturn);
+                return Task.FromResult(_buildResultsToReturn);
             }
 
             /// <summary>

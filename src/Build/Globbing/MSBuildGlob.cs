@@ -85,7 +85,7 @@ namespace Microsoft.Build.Globbing
 
         private MSBuildGlob(Lazy<GlobState> state)
         {
-            this._state = state;
+            _state = state;
         }
 
         /// <inheritdoc />
@@ -253,12 +253,12 @@ namespace Microsoft.Build.Globbing
         }
 
         /// <summary>
-        ///     Return type of <see cref="MSBuildGlob.MatchInfo" />
+        ///     Return type of <see cref="MatchInfo" />
         /// </summary>
         public readonly struct MatchInfoResult
         {
             /// <summary>
-            ///     Whether the <see cref="MSBuildGlob.MatchInfo" /> argument was matched against the glob
+            ///     Whether the <see cref="MatchInfo" /> argument was matched against the glob
             /// </summary>
             public bool IsMatch { get; }
 

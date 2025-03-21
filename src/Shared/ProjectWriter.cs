@@ -117,7 +117,7 @@ namespace Microsoft.Build.Shared
             if (!project.PreserveWhitespace)
             {
                 // write out child elements in an indented fashion, instead of jamming all the XML into one line
-                base.Formatting = Formatting.Indented;
+                Formatting = Formatting.Indented;
             }
 
             // don't write an XML declaration unless the project already has one or has non-default encoding
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Shared
                     // write each piece of the transform normally, except for the arrow -- write that without escaping
                     base.WriteString(itemVectorTransform.Groups["PREFIX"].Value);
                     base.WriteString(itemVectorTransform.Groups["TYPE"].Value);
-                    base.WriteRaw(itemVectorTransform.Groups["ARROW"].Value);
+                    WriteRaw(itemVectorTransform.Groups["ARROW"].Value);
                     base.WriteString(itemVectorTransform.Groups["TRANSFORM"].Value);
                     base.WriteString(itemVectorTransform.Groups["SEPARATOR_SPECIFICATION"].Value);
                     base.WriteString(itemVectorTransform.Groups["SUFFIX"].Value);

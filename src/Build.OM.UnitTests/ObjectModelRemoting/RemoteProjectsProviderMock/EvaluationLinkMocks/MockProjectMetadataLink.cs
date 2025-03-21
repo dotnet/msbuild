@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             get
             {
-                var parent = ProjectMetadataLink.GetParent(this.Source);
+                var parent = ProjectMetadataLink.GetParent(Source);
                 if (parent == null)
                 {
                     return null;
@@ -31,37 +31,37 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 var itemParent = parent as ProjectItem;
                 if (itemParent != null)
                 {
-                    return this.OwningCollection.Export<ProjectItem, MockProjectItemLinkRemoter>(itemParent);
+                    return OwningCollection.Export<ProjectItem, MockProjectItemLinkRemoter>(itemParent);
                 }
 
-                return this.OwningCollection.Export<ProjectItemDefinition, MockProjectItemDefinitionLinkRemoter>((ProjectItemDefinition)parent);
+                return OwningCollection.Export<ProjectItemDefinition, MockProjectItemDefinitionLinkRemoter>((ProjectItemDefinition)parent);
             }
         }
 
-        public MockProjectMetadataElementLinkRemoter Xml => (MockProjectMetadataElementLinkRemoter)this.OwningCollection.ExportElement(this.Source.Xml);
-        public string EvaluatedValueEscaped => ProjectMetadataLink.GetEvaluatedValueEscaped(this.Source);
-        public MockProjectMetadataLinkRemoter Predecessor => this.OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.Predecessor);
+        public MockProjectMetadataElementLinkRemoter Xml => (MockProjectMetadataElementLinkRemoter)OwningCollection.ExportElement(Source.Xml);
+        public string EvaluatedValueEscaped => ProjectMetadataLink.GetEvaluatedValueEscaped(Source);
+        public MockProjectMetadataLinkRemoter Predecessor => OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(Source.Predecessor);
     }
 
     internal sealed class MockProjectMetadataLink : ProjectMetadataLink, ILinkMock
     {
         public MockProjectMetadataLink(MockProjectMetadataLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectMetadataLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
 
         // ProjectMetadataLink
         public override object Parent
         {
             get
             {
-                var parentRemoter = this.Proxy.Parent;
+                var parentRemoter = Proxy.Parent;
                 if (parentRemoter == null)
                 {
                     return null;
@@ -70,15 +70,15 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 var itemParent = parentRemoter as MockProjectItemLinkRemoter;
                 if (itemParent != null)
                 {
-                    return this.Linker.Import<ProjectItem, MockProjectItemLinkRemoter>(itemParent);
+                    return Linker.Import<ProjectItem, MockProjectItemLinkRemoter>(itemParent);
                 }
 
-                return this.Linker.Import<ProjectItemDefinition, MockProjectItemDefinitionLinkRemoter>((MockProjectItemDefinitionLinkRemoter)parentRemoter);
+                return Linker.Import<ProjectItemDefinition, MockProjectItemDefinitionLinkRemoter>((MockProjectItemDefinitionLinkRemoter)parentRemoter);
             }
         }
 
-        public override ProjectMetadataElement Xml => (ProjectMetadataElement)this.Proxy.Xml.Import(this.Linker);
-        public override string EvaluatedValueEscaped => this.Proxy.EvaluatedValueEscaped;
-        public override ProjectMetadata Predecessor => this.Linker.Import<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Proxy.Predecessor);
+        public override ProjectMetadataElement Xml => (ProjectMetadataElement)Proxy.Xml.Import(Linker);
+        public override string EvaluatedValueEscaped => Proxy.EvaluatedValueEscaped;
+        public override ProjectMetadata Predecessor => Linker.Import<ProjectMetadata, MockProjectMetadataLinkRemoter>(Proxy.Predecessor);
     }
 }

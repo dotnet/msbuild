@@ -581,7 +581,7 @@ namespace Microsoft.Build.Construction
             return false;
         }
 
-#endregion
+        #endregion
 
         #region Constants
 

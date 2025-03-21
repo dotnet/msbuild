@@ -29,16 +29,16 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             public ElementInfo(Type type, Func<ProjectElement, bool> checker, ExporterFactory factory)
             {
-                this.CanonicalType = type;
-                this.Checker = checker;
-                this.ExportFactory = factory;
+                CanonicalType = type;
+                Checker = checker;
+                ExportFactory = factory;
             }
 
 
             public ElementInfo(Func<ProjectElement, bool> checker, ExporterFactory factory)
             {
-                this.Checker = checker;
-                this.ExportFactory = factory;
+                Checker = checker;
+                ExportFactory = factory;
             }
 
             public Type CanonicalType { get; }

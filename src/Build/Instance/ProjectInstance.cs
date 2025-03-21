@@ -378,13 +378,13 @@ namespace Microsoft.Build.Execution
             EvaluationId = project.EvaluationCounter;
 
             var immutable = (settings & ProjectInstanceSettings.Immutable) == ProjectInstanceSettings.Immutable;
-            this.CreatePropertiesSnapshot(project.Properties, immutable);
-            this.CreateItemDefinitionsSnapshot(project.ItemDefinitions);
+            CreatePropertiesSnapshot(project.Properties, immutable);
+            CreateItemDefinitionsSnapshot(project.ItemDefinitions);
 
             var keepEvaluationCache = (settings & ProjectInstanceSettings.ImmutableWithFastItemLookup) == ProjectInstanceSettings.ImmutableWithFastItemLookup;
-            var projectItemToInstanceMap = this.CreateItemsSnapshot(project.Items, project.ItemTypes.Count, keepEvaluationCache);
+            var projectItemToInstanceMap = CreateItemsSnapshot(project.Items, project.ItemTypes.Count, keepEvaluationCache);
 
-            this.CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, project.Items, projectItemToInstanceMap);
+            CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, project.Items, projectItemToInstanceMap);
 
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalPropertiesCount);
             foreach (var property in project.GlobalPropertiesEnumerable)
@@ -392,20 +392,20 @@ namespace Microsoft.Build.Execution
                 _globalProperties.Set(ProjectPropertyInstance.Create(property.Key, property.Value));
             }
 
-            this.CreateEnvironmentVariablePropertiesSnapshot(project.ProjectCollection.EnvironmentProperties);
-            this.CreateTargetsSnapshot(project.Targets, null, null, null, null);
-            this.CreateImportsSnapshot(project.Imports, project.ImportsIncludingDuplicates);
+            CreateEnvironmentVariablePropertiesSnapshot(project.ProjectCollection.EnvironmentProperties);
+            CreateTargetsSnapshot(project.Targets, null, null, null, null);
+            CreateImportsSnapshot(project.Imports, project.ImportsIncludingDuplicates);
 
-            this.Toolset = project.ProjectCollection.GetToolset(project.ToolsVersion);
-            this.SubToolsetVersion = project.SubToolsetVersion;
-            this.TaskRegistry = new TaskRegistry(Toolset, project.ProjectCollection.ProjectRootElementCache);
+            Toolset = project.ProjectCollection.GetToolset(project.ToolsVersion);
+            SubToolsetVersion = project.SubToolsetVersion;
+            TaskRegistry = new TaskRegistry(Toolset, project.ProjectCollection.ProjectRootElementCache);
 
-            this.ProjectRootElementCache = project.ProjectCollection.ProjectRootElementCache;
+            ProjectRootElementCache = project.ProjectCollection.ProjectRootElementCache;
 
-            this.EvaluatedItemElements = new List<ProjectItemElement>(project.Items.Count);
+            EvaluatedItemElements = new List<ProjectItemElement>(project.Items.Count);
             foreach (var item in project.Items)
             {
-                this.EvaluatedItemElements.Add(item.Xml);
+                EvaluatedItemElements.Add(item.Xml);
             }
 
             _usingDifferentToolsVersionFromProjectFile = false;
@@ -533,8 +533,8 @@ namespace Microsoft.Build.Execution
         {
             _projectFileLocation = ElementLocation.Create(projectFile);
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(globalProperties.Count);
-            this.Toolset = projectToInheritFrom.Toolset;
-            this.SubToolsetVersion = projectToInheritFrom.SubToolsetVersion;
+            Toolset = projectToInheritFrom.Toolset;
+            SubToolsetVersion = projectToInheritFrom.SubToolsetVersion;
             _explicitToolsVersionSpecified = projectToInheritFrom._explicitToolsVersionSpecified;
             _properties = new PropertyDictionary<ProjectPropertyInstance>(projectToInheritFrom._properties); // This brings along the reserved properties, which are important.
             _items = new ItemDictionary<ProjectItemInstance>(); // We don't want any of the items.  That would include things like ProjectReferences, which would just pollute our own.
@@ -543,19 +543,19 @@ namespace Microsoft.Build.Execution
             _environmentVariableProperties = projectToInheritFrom._environmentVariableProperties;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(projectToInheritFrom._itemDefinitions, MSBuildNameIgnoreCaseComparer.Default);
             _hostServices = projectToInheritFrom._hostServices;
-            this.ProjectRootElementCache = projectToInheritFrom.ProjectRootElementCache;
+            ProjectRootElementCache = projectToInheritFrom.ProjectRootElementCache;
             _explicitToolsVersionSpecified = projectToInheritFrom._explicitToolsVersionSpecified;
-            this.InitialTargets = new List<string>();
-            this.DefaultTargets = new List<string>();
-            this.DefaultTargets.Add("Build");
-            this.TaskRegistry = projectToInheritFrom.TaskRegistry;
+            InitialTargets = new List<string>();
+            DefaultTargets = new List<string>();
+            DefaultTargets.Add("Build");
+            TaskRegistry = projectToInheritFrom.TaskRegistry;
             _isImmutable = projectToInheritFrom._isImmutable;
             _importPaths = projectToInheritFrom._importPaths;
             ImportPaths = new ObjectModel.ReadOnlyCollection<string>(_importPaths);
             _importPathsIncludingDuplicates = projectToInheritFrom._importPathsIncludingDuplicates;
             ImportPathsIncludingDuplicates = new ObjectModel.ReadOnlyCollection<string>(_importPathsIncludingDuplicates);
 
-            this.EvaluatedItemElements = new List<ProjectItemElement>();
+            EvaluatedItemElements = new List<ProjectItemElement>();
 
             IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance> thisAsIEvaluatorData = this;
             thisAsIEvaluatorData.AfterTargets = new Dictionary<string, List<TargetSpecification>>();
@@ -638,7 +638,7 @@ namespace Microsoft.Build.Execution
         /// Constructor called by Project's constructor to create a fresh instance.
         /// Properties and items are cloned immediately and only the instance data is stored.
         /// </summary>
-        internal ProjectInstance(Evaluation.Project.Data data, string directory, string fullPath, HostServices hostServices, PropertyDictionary<ProjectPropertyInstance> environmentVariableProperties, ProjectInstanceSettings settings)
+        internal ProjectInstance(Project.Data data, string directory, string fullPath, HostServices hostServices, PropertyDictionary<ProjectPropertyInstance> environmentVariableProperties, ProjectInstanceSettings settings)
         {
             ErrorUtilities.VerifyThrowInternalNull(data);
             ErrorUtilities.VerifyThrowInternalLength(directory, nameof(directory));
@@ -651,28 +651,28 @@ namespace Microsoft.Build.Execution
             EvaluationId = data.EvaluationId;
 
             var immutable = (settings & ProjectInstanceSettings.Immutable) == ProjectInstanceSettings.Immutable;
-            this.CreatePropertiesSnapshot(new ReadOnlyCollection<ProjectProperty>(data.Properties), immutable);
+            CreatePropertiesSnapshot(new ReadOnlyCollection<ProjectProperty>(data.Properties), immutable);
 
-            this.CreateItemDefinitionsSnapshot(data.ItemDefinitions);
+            CreateItemDefinitionsSnapshot(data.ItemDefinitions);
 
             var keepEvaluationCache = (settings & ProjectInstanceSettings.ImmutableWithFastItemLookup) == ProjectInstanceSettings.ImmutableWithFastItemLookup;
-            var projectItemToInstanceMap = this.CreateItemsSnapshot(new ReadOnlyCollection<ProjectItem>(data.Items), data.ItemTypes.Count, keepEvaluationCache);
+            var projectItemToInstanceMap = CreateItemsSnapshot(new ReadOnlyCollection<ProjectItem>(data.Items), data.ItemTypes.Count, keepEvaluationCache);
 
-            this.CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, new ReadOnlyCollection<ProjectItem>(data.Items), projectItemToInstanceMap);
-            this.CreateGlobalPropertiesSnapshot(data.GlobalPropertiesDictionary);
-            this.CreateEnvironmentVariablePropertiesSnapshot(environmentVariableProperties);
-            this.CreateTargetsSnapshot(data.Targets, data.DefaultTargets, data.InitialTargets, data.BeforeTargets, data.AfterTargets);
-            this.CreateImportsSnapshot(data.ImportClosure, data.ImportClosureWithDuplicates);
+            CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, new ReadOnlyCollection<ProjectItem>(data.Items), projectItemToInstanceMap);
+            CreateGlobalPropertiesSnapshot(data.GlobalPropertiesDictionary);
+            CreateEnvironmentVariablePropertiesSnapshot(environmentVariableProperties);
+            CreateTargetsSnapshot(data.Targets, data.DefaultTargets, data.InitialTargets, data.BeforeTargets, data.AfterTargets);
+            CreateImportsSnapshot(data.ImportClosure, data.ImportClosureWithDuplicates);
 
             // Toolset and task registry are logically immutable after creation, and shareable by project instances
             //  with same evaluation (global/local properties) - which is guaranteed here (the passed in data is recreated on evaluation if needed)
-            this.Toolset = data.Toolset;
-            this.SubToolsetVersion = data.SubToolsetVersion;
-            this.TaskRegistry = data.TaskRegistry;
+            Toolset = data.Toolset;
+            SubToolsetVersion = data.SubToolsetVersion;
+            TaskRegistry = data.TaskRegistry;
 
-            this.ProjectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
+            ProjectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
 
-            this.EvaluatedItemElements = new List<ProjectItemElement>(data.EvaluatedItemElements);
+            EvaluatedItemElements = new List<ProjectItemElement>(data.EvaluatedItemElements);
 
             _usingDifferentToolsVersionFromProjectFile = data.UsingDifferentToolsVersionFromProjectFile;
             _originalProjectToolsVersion = data.OriginalProjectToolsVersion;
@@ -737,8 +737,8 @@ namespace Microsoft.Build.Execution
                     _environmentVariableProperties.Set(environmentProperty.DeepClone(_isImmutable));
                 }
 
-                this.DefaultTargets = new List<string>(that.DefaultTargets);
-                this.InitialTargets = new List<string>(that.InitialTargets);
+                DefaultTargets = new List<string>(that.DefaultTargets);
+                InitialTargets = new List<string>(that.InitialTargets);
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
                     ProjectItemDefinitionInstance>)this).BeforeTargets = CreateCloneDictionary(
                     ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
@@ -748,9 +748,9 @@ namespace Microsoft.Build.Execution
                     ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
                         ProjectItemDefinitionInstance>)that).AfterTargets, StringComparer.OrdinalIgnoreCase);
                 // These are immutable (or logically immutable after creation) so we don't need to clone them:
-                this.TaskRegistry = that.TaskRegistry;
-                this.Toolset = that.Toolset;
-                this.SubToolsetVersion = that.SubToolsetVersion;
+                TaskRegistry = that.TaskRegistry;
+                Toolset = that.Toolset;
+                SubToolsetVersion = that.SubToolsetVersion;
                 _targets = that._targets;
                 _itemDefinitions = that._itemDefinitions;
                 _explicitToolsVersionSpecified = that._explicitToolsVersionSpecified;
@@ -759,9 +759,9 @@ namespace Microsoft.Build.Execution
                 _importPathsIncludingDuplicates = that._importPathsIncludingDuplicates;
                 ImportPathsIncludingDuplicates = new ObjectModel.ReadOnlyCollection<string>(_importPathsIncludingDuplicates);
 
-                this.EvaluatedItemElements = that.EvaluatedItemElements;
+                EvaluatedItemElements = that.EvaluatedItemElements;
 
-                this.ProjectRootElementCache = that.ProjectRootElementCache;
+                ProjectRootElementCache = that.ProjectRootElementCache;
             }
             else
             {
@@ -1950,7 +1950,7 @@ namespace Microsoft.Build.Execution
         {
             VerifyThrowNotImmutable();
 
-            ProjectItemInstance item = new ProjectItemInstance(this, itemType, evaluatedInclude, this.FullPath);
+            ProjectItemInstance item = new ProjectItemInstance(this, itemType, evaluatedInclude, FullPath);
             _items.Add(item);
 
             return item;
@@ -1973,7 +1973,7 @@ namespace Microsoft.Build.Execution
         {
             VerifyThrowNotImmutable();
 
-            ProjectItemInstance item = new ProjectItemInstance(this, itemType, evaluatedInclude, metadata, this.FullPath);
+            ProjectItemInstance item = new ProjectItemInstance(this, itemType, evaluatedInclude, metadata, FullPath);
             _items.Add(item);
 
             return item;
@@ -3104,9 +3104,9 @@ namespace Microsoft.Build.Execution
             _environmentVariableProperties = buildParameters.EnvironmentPropertiesInternal;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
             _hostServices = buildParameters.HostServices;
-            this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
+            ProjectRootElementCache = buildParameters.ProjectRootElementCache;
             _loggingContext = new GenericLoggingContext(loggingService, buildEventContext);
-            this.EvaluatedItemElements = new List<ProjectItemElement>();
+            EvaluatedItemElements = new List<ProjectItemElement>();
 
             _explicitToolsVersionSpecified = (explicitToolsVersion != null);
             ElementLocation toolsVersionLocation = xml.Location;
@@ -3126,9 +3126,9 @@ namespace Microsoft.Build.Execution
 
             _usingDifferentToolsVersionFromProjectFile = usingDifferentToolsVersionFromProjectFile;
 
-            this.Toolset = buildParameters.GetToolset(toolsVersionToUse);
+            Toolset = buildParameters.GetToolset(toolsVersionToUse);
 
-            if (this.Toolset == null)
+            if (Toolset == null)
             {
                 string toolsVersionList = Utilities.CreateToolsVersionListString(buildParameters.Toolsets);
                 ProjectErrorUtilities.ThrowInvalidProject(toolsVersionLocation, "UnrecognizedToolsVersion", toolsVersionToUse, toolsVersionList);
@@ -3136,15 +3136,15 @@ namespace Microsoft.Build.Execution
 
             if (explicitSubToolsetVersion != null)
             {
-                this.SubToolsetVersion = explicitSubToolsetVersion;
+                SubToolsetVersion = explicitSubToolsetVersion;
             }
             else
             {
-                this.SubToolsetVersion = this.Toolset.GenerateSubToolsetVersionUsingVisualStudioVersion(globalProperties, visualStudioVersionFromSolution);
+                SubToolsetVersion = Toolset.GenerateSubToolsetVersionUsingVisualStudioVersion(globalProperties, visualStudioVersionFromSolution);
             }
 
             // Create a task registry which will fall back on the toolset task registry if necessary.
-            this.TaskRegistry = new TaskRegistry(this.Toolset, ProjectRootElementCache);
+            TaskRegistry = new TaskRegistry(Toolset, ProjectRootElementCache);
 
             if (globalProperties != null)
             {

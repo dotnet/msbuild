@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             string s = "$(foo)";
             ProjectPropertyInstance value = dictionary.GetProperty(s, 2, 4);
 
-            Assert.True(Object.ReferenceEquals(p, value)); // "Should have returned the same object as was inserted"
+            Assert.True(ReferenceEquals(p, value)); // "Should have returned the same object as was inserted"
 
             Assert.Equal(MSBuildNameIgnoreCaseComparer.Default.GetHashCode("foo"), comparer.GetHashCode(s, 2, 3));
         }

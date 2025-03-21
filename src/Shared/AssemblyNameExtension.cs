@@ -18,7 +18,7 @@ namespace Microsoft.Build.Shared
     /// <summary>
     /// Specifies the parts of the assembly name to partially match
     /// </summary>
-    [FlagsAttribute]
+    [Flags]
     internal enum PartialComparisonFlags : int
     {
         /// <summary>
@@ -448,7 +448,7 @@ namespace Microsoft.Build.Shared
         internal int CompareTo(AssemblyNameExtension that, bool considerRetargetableFlag)
         {
             // Are they identical?
-            if (this.Equals(that, considerRetargetableFlag))
+            if (Equals(that, considerRetargetableFlag))
             {
                 return 0;
             }
@@ -461,20 +461,20 @@ namespace Microsoft.Build.Shared
             }
 
             // We would like to compare the version numerically rather than alphabetically (because for example version 10.0.0. should be below 9 not between 1 and 2)
-            if (this.Version != that.Version)
+            if (Version != that.Version)
             {
-                if (this.Version == null)
+                if (Version == null)
                 {
                     // This is therefore less than that. Since this is null and that is not null
                     return -1;
                 }
 
                 // Will not return 0 as the this != that check above takes care of the case where they are equal.
-                return this.Version.CompareTo(that.Version);
+                return Version.CompareTo(that.Version);
             }
 
             // We need some final collating order for these, alphabetical by FullName seems as good as any.
-            return string.Compare(this.FullName, that.FullName, StringComparison.OrdinalIgnoreCase);
+            return string.Compare(FullName, that.FullName, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -486,7 +486,7 @@ namespace Microsoft.Build.Shared
             // Ok, so this isn't a great hashing algorithm. However, basenames with different
             // versions or PKTs are relatively uncommon and so collisions should be low.
             // Hashing on FullName is wrong because the order of tuple fields is undefined.
-            int hash = StringComparer.OrdinalIgnoreCase.GetHashCode(this.Name);
+            int hash = StringComparer.OrdinalIgnoreCase.GetHashCode(Name);
             return hash;
         }
 
@@ -548,7 +548,7 @@ namespace Microsoft.Build.Shared
             }
 
             // Fall back to comparing by name. This is the slow path.
-            return string.Compare(this.Name, that.Name, StringComparison.OrdinalIgnoreCase);
+            return string.Compare(Name, that.Name, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -686,7 +686,7 @@ namespace Microsoft.Build.Shared
         private bool EqualsImpl(AssemblyNameExtension that, bool ignoreVersion, bool considerRetargetableFlag)
         {
             // Pointer compare.
-            if (object.ReferenceEquals(this, that))
+            if (ReferenceEquals(this, that))
             {
                 return true;
             }
@@ -701,7 +701,7 @@ namespace Microsoft.Build.Shared
             if (asAssemblyName != null && that.asAssemblyName != null)
             {
                 // Pointer compare.
-                if (object.ReferenceEquals(asAssemblyName, that.asAssemblyName))
+                if (ReferenceEquals(asAssemblyName, that.asAssemblyName))
                 {
                     return true;
                 }
@@ -725,7 +725,7 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            if (!ignoreVersion && (this.Version != that.Version))
+            if (!ignoreVersion && (Version != that.Version))
             {
                 return false;
             }
@@ -740,7 +740,7 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            if (considerRetargetableFlag && this.Retargetable != that.Retargetable)
+            if (considerRetargetableFlag && Retargetable != that.Retargetable)
             {
                 return false;
             }
@@ -896,7 +896,7 @@ namespace Microsoft.Build.Shared
         internal bool PartialNameCompare(AssemblyNameExtension that, PartialComparisonFlags comparisonFlags, bool considerRetargetableFlag)
         {
             // Pointer compare.
-            if (object.ReferenceEquals(this, that))
+            if (ReferenceEquals(this, that))
             {
                 return true;
             }
@@ -911,7 +911,7 @@ namespace Microsoft.Build.Shared
             if (asAssemblyName != null && that.asAssemblyName != null)
             {
                 // Pointer compare.
-                if (object.ReferenceEquals(asAssemblyName, that.asAssemblyName))
+                if (ReferenceEquals(asAssemblyName, that.asAssemblyName))
                 {
                     return true;
                 }
@@ -923,7 +923,7 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            if ((comparisonFlags & PartialComparisonFlags.Version) != 0 && Version != null && this.Version != that.Version)
+            if ((comparisonFlags & PartialComparisonFlags.Version) != 0 && Version != null && Version != that.Version)
             {
                 return false;
             }

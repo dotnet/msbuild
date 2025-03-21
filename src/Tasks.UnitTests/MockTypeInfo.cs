@@ -245,16 +245,16 @@ namespace Microsoft.Build.UnitTests
 
         #region IFixedTypeInfo members
 
-        void IFixedTypeInfo.GetRefTypeOfImplType(int index, out System.IntPtr href)
+        void IFixedTypeInfo.GetRefTypeOfImplType(int index, out IntPtr href)
         {
             Assert.True(index >= 0 && index < _typeAttributes.cImplTypes);
 
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeInfo_GetRefTypeOfImplType);
 
-            href = ((System.IntPtr)index + s_HREF_IMPLTYPES_OFFSET);
+            href = ((IntPtr)index + s_HREF_IMPLTYPES_OFFSET);
         }
 
-        void IFixedTypeInfo.GetRefTypeInfo(System.IntPtr hRef, out IFixedTypeInfo ppTI)
+        void IFixedTypeInfo.GetRefTypeInfo(IntPtr hRef, out IFixedTypeInfo ppTI)
         {
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeInfo_GetRefTypeInfo);
             int hRefInt = (int)hRef;

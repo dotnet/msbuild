@@ -289,7 +289,7 @@ namespace Microsoft.Build.Logging
 
                 // If the extension of the file is 'md', markdown content is produced. For any other case,
                 // a tab separated format is generated
-                var content = System.IO.Path.GetExtension(FileToLog) == ".md"
+                var content = Path.GetExtension(FileToLog) == ".md"
                     ? ProfilerResultPrettyPrinter.GetMarkdownContent(GetAggregatedResult())
                     : ProfilerResultPrettyPrinter.GetTsvContent(GetAggregatedResult());
 

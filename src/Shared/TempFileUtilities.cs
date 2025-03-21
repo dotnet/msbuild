@@ -71,7 +71,7 @@ namespace Microsoft.Build.Shared
                 Directory.CreateDirectory(basePath);
             }
 
-            return FileUtilities.EnsureTrailingSlash(basePath);
+            return EnsureTrailingSlash(basePath);
         }
 
         /// <summary>

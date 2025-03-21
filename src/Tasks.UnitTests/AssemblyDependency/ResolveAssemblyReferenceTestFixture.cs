@@ -27,24 +27,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     public class ResolveAssemblyReferenceTestFixture : IDisposable
     {
         // Create the mocks.
-        internal static Microsoft.Build.Shared.FileExists fileExists = new Microsoft.Build.Shared.FileExists(FileExists);
-        internal static Microsoft.Build.Shared.DirectoryExists directoryExists = new Microsoft.Build.Shared.DirectoryExists(DirectoryExists);
-        internal static Microsoft.Build.Tasks.GetDirectories getDirectories = new Microsoft.Build.Tasks.GetDirectories(GetDirectories);
-        internal static Microsoft.Build.Tasks.GetAssemblyName getAssemblyName = new Microsoft.Build.Tasks.GetAssemblyName(GetAssemblyName);
-        internal static Microsoft.Build.Tasks.GetAssemblyMetadata getAssemblyMetadata = new Microsoft.Build.Tasks.GetAssemblyMetadata(GetAssemblyMetadata);
+        internal static FileExists fileExists = new FileExists(FileExists);
+        internal static DirectoryExists directoryExists = new DirectoryExists(DirectoryExists);
+        internal static Tasks.GetDirectories getDirectories = new Tasks.GetDirectories(GetDirectories);
+        internal static GetAssemblyName getAssemblyName = new GetAssemblyName(GetAssemblyName);
+        internal static GetAssemblyMetadata getAssemblyMetadata = new GetAssemblyMetadata(GetAssemblyMetadata);
 #if FEATURE_WIN32_REGISTRY
-        internal static Microsoft.Build.Shared.GetRegistrySubKeyNames getRegistrySubKeyNames = new Microsoft.Build.Shared.GetRegistrySubKeyNames(GetRegistrySubKeyNames);
-        internal static Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue = new Microsoft.Build.Shared.GetRegistrySubKeyDefaultValue(GetRegistrySubKeyDefaultValue);
+        internal static GetRegistrySubKeyNames getRegistrySubKeyNames = new GetRegistrySubKeyNames(GetRegistrySubKeyNames);
+        internal static GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue = new GetRegistrySubKeyDefaultValue(GetRegistrySubKeyDefaultValue);
 #endif
-        internal static Microsoft.Build.Tasks.GetLastWriteTime getLastWriteTime = new Microsoft.Build.Tasks.GetLastWriteTime(GetLastWriteTime);
-        internal static Microsoft.Build.Tasks.GetAssemblyRuntimeVersion getRuntimeVersion = new Microsoft.Build.Tasks.GetAssemblyRuntimeVersion(GetRuntimeVersion);
-        internal static Microsoft.Build.Tasks.GetAssemblyPathInGac checkIfAssemblyIsInGac = new Microsoft.Build.Tasks.GetAssemblyPathInGac(GetPathForAssemblyInGac);
+        internal static GetLastWriteTime getLastWriteTime = new GetLastWriteTime(GetLastWriteTime);
+        internal static GetAssemblyRuntimeVersion getRuntimeVersion = new GetAssemblyRuntimeVersion(GetRuntimeVersion);
+        internal static GetAssemblyPathInGac checkIfAssemblyIsInGac = new GetAssemblyPathInGac(GetPathForAssemblyInGac);
 #if FEATURE_WIN32_REGISTRY
-        internal static Microsoft.Build.Shared.OpenBaseKey openBaseKey = new Microsoft.Build.Shared.OpenBaseKey(GetBaseKey);
+        internal static OpenBaseKey openBaseKey = new OpenBaseKey(GetBaseKey);
 #endif
-        internal Microsoft.Build.UnitTests.MockEngine.GetStringDelegate resourceDelegate = new Microsoft.Build.UnitTests.MockEngine.GetStringDelegate(AssemblyResources.GetString);
-        internal static Microsoft.Build.Tasks.IsWinMDFile isWinMDFile = new Microsoft.Build.Tasks.IsWinMDFile(IsWinMDFile);
-        internal static Microsoft.Build.Tasks.ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader = new Microsoft.Build.Tasks.ReadMachineTypeFromPEHeader(ReadMachineTypeFromPEHeader);
+        internal MockEngine.GetStringDelegate resourceDelegate = new MockEngine.GetStringDelegate(AssemblyResources.GetString);
+        internal static IsWinMDFile isWinMDFile = new IsWinMDFile(IsWinMDFile);
+        internal static ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader = new ReadMachineTypeFromPEHeader(ReadMachineTypeFromPEHeader);
 
         // Performance checks.
         internal static Dictionary<string, int> uniqueFileExists = null;
@@ -1076,7 +1076,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             (
                 String.Equals(path, Path.Combine(s_myVersion20Path, "BadImage.dll"), StringComparison.OrdinalIgnoreCase))
             {
-                throw new System.BadImageFormatException(@"The format of the file '" + Path.Combine(s_myVersion20Path, "BadImage.dll") + "' is invalid");
+                throw new BadImageFormatException(@"The format of the file '" + Path.Combine(s_myVersion20Path, "BadImage.dll") + "' is invalid");
             }
 
             if

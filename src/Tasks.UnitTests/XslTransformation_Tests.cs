@@ -603,7 +603,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MissingOutputFile()
         {
-            Assert.Throws<System.ArgumentNullException>(() =>
+            Assert.Throws<ArgumentNullException>(() =>
             {
                 string dir;
                 TaskItem[] xmlPaths;

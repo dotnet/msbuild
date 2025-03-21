@@ -63,7 +63,7 @@ public abstract class BuildExceptionBase : Exception
         _remoteStackTrace = remoteState.RemoteStackTrace;
         base.Source = remoteState.Source;
         base.HelpLink = remoteState.HelpLink;
-        base.HResult = remoteState.HResult;
+        HResult = remoteState.HResult;
         if (remoteState.Source != null)
         {
             InitializeCustomState(remoteState.CustomKeyedSerializedData);

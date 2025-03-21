@@ -27,16 +27,16 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     {
         public MockProjectItemDefinitionElementLink(MockProjectItemDefinitionElementLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectItemDefinitionElementLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
-        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
-        MockProjectElementContainerLinkRemoter IProjectElementContainerLinkHelper.ContainerProxy => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
+        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => Proxy;
+        MockProjectElementContainerLinkRemoter IProjectElementContainerLinkHelper.ContainerProxy => Proxy;
 
         #region ProjectElementLink redirectors
         private IProjectElementLinkHelper EImpl => (IProjectElementLinkHelper)this;

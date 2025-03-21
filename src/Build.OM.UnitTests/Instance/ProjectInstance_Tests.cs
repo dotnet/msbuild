@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectItemInstance returned = p.AddItem("i", "i1", metadata);
 
-            Assert.True(object.ReferenceEquals(returned, Helpers.MakeList(p.GetItems("i"))[0]));
+            Assert.True(ReferenceEquals(returned, Helpers.MakeList(p.GetItems("i"))[0]));
 
             foreach (ProjectItemInstance item in p.Items)
             {
@@ -223,7 +223,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance first = GetSampleProjectInstance();
             ProjectInstance second = first.DeepCopy();
 
-            Assert.False(Object.ReferenceEquals(first, second));
+            Assert.False(ReferenceEquals(first, second));
         }
 
         /// <summary>
@@ -235,10 +235,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance first = GetSampleProjectInstance();
             ProjectInstance second = first.DeepCopy();
 
-            Assert.False(Object.ReferenceEquals(first.GetProperty("p1"), second.GetProperty("p1")));
+            Assert.False(ReferenceEquals(first.GetProperty("p1"), second.GetProperty("p1")));
 
             ProjectPropertyInstance newProperty = first.SetProperty("p1", "v1b");
-            Assert.True(Object.ReferenceEquals(newProperty, first.GetProperty("p1")));
+            Assert.True(ReferenceEquals(newProperty, first.GetProperty("p1")));
             Assert.Equal("v1b", first.GetPropertyValue("p1"));
             Assert.Equal("v1", second.GetPropertyValue("p1"));
         }
@@ -328,7 +328,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance first = GetSampleProjectInstance();
             ProjectInstance second = first.DeepCopy();
 
-            Assert.False(Object.ReferenceEquals(Helpers.MakeList(first.GetItems("i"))[0], Helpers.MakeList(second.GetItems("i"))[0]));
+            Assert.False(ReferenceEquals(Helpers.MakeList(first.GetItems("i"))[0], Helpers.MakeList(second.GetItems("i"))[0]));
 
             first.AddItem("i", "i3");
             Assert.Equal(4, Helpers.MakeList(first.GetItems("i")).Count);
@@ -911,7 +911,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var instance = protoInstance.DeepCopy(/* inherit */);
 
             // Should not have bothered cloning
-            Assert.True(Object.ReferenceEquals(protoInstance, instance));
+            Assert.True(ReferenceEquals(protoInstance, instance));
 
             Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("g").EvaluatedValue = "v2"; });
             Helpers.VerifyAssertThrowsInvalidOperation(

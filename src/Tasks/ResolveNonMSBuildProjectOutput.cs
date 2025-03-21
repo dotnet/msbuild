@@ -145,7 +145,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (XmlException e)
             {
-                Log.LogErrorWithCodeFromResources("General.ErrorExecutingTask", this.GetType().Name, e.Message);
+                Log.LogErrorWithCodeFromResources("General.ErrorExecutingTask", GetType().Name, e.Message);
                 return false;
             }
 

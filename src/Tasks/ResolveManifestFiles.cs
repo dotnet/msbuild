@@ -806,11 +806,11 @@ namespace Microsoft.Build.Tasks
             }
             public PublishInfo(ITaskItem item)
             {
-                this.key = item.ItemSpec?.ToLowerInvariant();
-                this.group = item.GetMetadata("Group");
-                this.state = StringToPublishState(item.GetMetadata("PublishState"));
-                this.includeHash = item.GetMetadata("IncludeHash");
-                this.targetPath = item.GetMetadata(ItemMetadataNames.targetPath);
+                key = item.ItemSpec?.ToLowerInvariant();
+                group = item.GetMetadata("Group");
+                state = StringToPublishState(item.GetMetadata("PublishState"));
+                includeHash = item.GetMetadata("IncludeHash");
+                targetPath = item.GetMetadata(ItemMetadataNames.targetPath);
             }
         }
         #endregion

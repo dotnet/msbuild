@@ -50,7 +50,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             string rawTime = t.ToString(); // Timespan is a value type and can't be null.
             int rawTimeLength = rawTime.Length;
-            int prettyLength = System.Math.Min(11, rawTimeLength);
+            int prettyLength = Math.Min(11, rawTimeLength);
             return rawTime.Substring(0, prettyLength);
         }
     }

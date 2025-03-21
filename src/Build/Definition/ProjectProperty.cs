@@ -252,7 +252,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>True if the properties are equivalent, false otherwise.</returns>
         bool IEquatable<ProjectProperty>.Equals(ProjectProperty other)
         {
-            if (Object.ReferenceEquals(this, other))
+            if (ReferenceEquals(this, other))
             {
                 return true;
             }
@@ -474,7 +474,7 @@ namespace Microsoft.Build.Evaluation
             {
                 get
                 {
-                    bool isImported = !Object.ReferenceEquals(_xml.ContainingProject, _project.Xml);
+                    bool isImported = !ReferenceEquals(_xml.ContainingProject, _project.Xml);
 
                     return isImported;
                 }

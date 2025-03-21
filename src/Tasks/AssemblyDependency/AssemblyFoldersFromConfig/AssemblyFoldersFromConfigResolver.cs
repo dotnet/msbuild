@@ -97,7 +97,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             _isInitialized = true;
 
             // Crack the search path just one time.
-            Match match = s_crackAssemblyFoldersFromConfigSentinel.Value.Match(this.searchPathElement);
+            Match match = s_crackAssemblyFoldersFromConfigSentinel.Value.Match(searchPathElement);
             _wasMatch = false;
 
             if (match.Success)

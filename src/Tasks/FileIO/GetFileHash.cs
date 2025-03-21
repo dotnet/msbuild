@@ -136,7 +136,7 @@ namespace Microsoft.Build.Tasks
         }
 
         internal static bool TryParseHashEncoding(string value, out HashEncoding encoding)
-            => Enum.TryParse<HashEncoding>(value, /*ignoreCase:*/ true, out encoding);
+            => Enum.TryParse(value, /*ignoreCase:*/ true, out encoding);
 
         internal static byte[] ComputeHash(Func<HashAlgorithm> algorithmFactory, string filePath, CancellationToken ct)
         {

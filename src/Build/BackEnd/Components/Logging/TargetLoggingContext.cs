@@ -42,7 +42,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _projectLoggingContext = projectLoggingContext;
             _target = target;
 
-            this.IsValid = true;
+            IsValid = true;
         }
 
         private static BuildEventContext CreateInitialContext(ProjectLoggingContext projectLoggingContext,
@@ -62,7 +62,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal TargetLoggingContext(ILoggingService loggingService, BuildEventContext outOfProcContext)
             : base(loggingService, outOfProcContext, true)
         {
-            this.IsValid = true;
+            IsValid = true;
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void LogTargetBatchFinished(string projectFullPath, bool success, IEnumerable<TaskItem> targetOutputs)
         {
-            this.CheckValidity();
+            CheckValidity();
 
             TargetOutputItemsInstanceEnumeratorProxy targetOutputWrapper = null;
 
@@ -112,7 +112,7 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             LoggingService.LogTargetFinished(BuildEventContext, _target.Name, projectFullPath, _target.Location.File, success, targetOutputWrapper);
-            this.IsValid = false;
+            IsValid = false;
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal TaskLoggingContext LogTaskBatchStarted(string projectFullPath, ProjectTargetInstanceChild task, string taskAssemblyLocation)
         {
-            this.CheckValidity();
+            CheckValidity();
 
             return new TaskLoggingContext(this, projectFullPath, task, taskAssemblyLocation);
         }

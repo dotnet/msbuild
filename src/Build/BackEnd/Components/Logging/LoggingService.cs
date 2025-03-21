@@ -1356,7 +1356,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _loggingEventProcessingCancellation = new CancellationTokenSource();
 
             _loggingEventProcessingThread = new Thread(LoggingEventProc);
-            _loggingEventProcessingThread.Name = $"MSBuild LoggingService events queue pump: {this.GetHashCode()}";
+            _loggingEventProcessingThread.Name = $"MSBuild LoggingService events queue pump: {GetHashCode()}";
             _loggingEventProcessingThread.IsBackground = true;
             _loggingEventProcessingThread.Start();
 

@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             Project project = new Project();
             ProjectProperty property = project.SetProperty("p", "v");
 
-            Assert.True(Object.ReferenceEquals(project, property.Project));
+            Assert.True(ReferenceEquals(project, property.Project));
         }
 
         /// <summary>
@@ -262,7 +262,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 try
                 {
-                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
+                    file = FileUtilities.GetTemporaryFileName();
                     Project import = new Project();
                     import.SetProperty("p", "v0");
                     import.Save(file);

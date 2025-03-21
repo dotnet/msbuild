@@ -40,9 +40,9 @@ namespace Microsoft.Build.Framework
             MessageImportance importance = MessageImportance.Low)
             : base(message, helpKeyword, senderName, importance)
         {
-            this.PropertyName = propertyName;
-            this.PropertyValue = propertyValue;
-            this.PropertySource = propertySource;
+            PropertyName = propertyName;
+            PropertyValue = propertyValue;
+            PropertySource = propertySource;
         }
 
         /// <summary>

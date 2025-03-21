@@ -37,7 +37,7 @@ namespace Microsoft.Build.Framework
             string senderName = null,
             MessageImportance importance = MessageImportance.Low) : base(message, helpKeyword, senderName, importance)
         {
-            this.PropertyName = propertyName;
+            PropertyName = propertyName;
         }
 
         /// <summary>

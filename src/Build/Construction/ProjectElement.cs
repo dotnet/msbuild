@@ -151,7 +151,7 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             get
             {
-                if (this.Link != null) { return this.Link.Parent; }
+                if (Link != null) { return Link.Parent; }
 
                 if (_parent is WrapperForProjectRootElement)
                 {
@@ -560,7 +560,7 @@ namespace Microsoft.Build.Construction
 
         internal virtual void ClearAttributeCache()
         {
-            this._condition = null;
+            _condition = null;
         }
 
         internal void SetOrRemoveAttributeForLink(string name, string value, bool clearAttributeCache, string reason, string param)
@@ -568,7 +568,7 @@ namespace Microsoft.Build.Construction
             SetOrRemoveAttribute(name, value, reason, param);
             if (clearAttributeCache)
             {
-                this.ClearAttributeCache();
+                ClearAttributeCache();
             }
         }
 

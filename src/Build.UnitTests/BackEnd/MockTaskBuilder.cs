@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task<WorkUnitResult>.FromResult(new WorkUnitResult(WorkUnitResultCode.Canceled, WorkUnitActionCode.Stop, null));
+                return Task.FromResult(new WorkUnitResult(WorkUnitResultCode.Canceled, WorkUnitActionCode.Stop, null));
             }
 
             ProjectOnErrorInstance errorTask = task as ProjectOnErrorInstance;
@@ -117,14 +117,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     if (taskInstance.ContinueOnError == "True")
                     {
-                        return Task<WorkUnitResult>.FromResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Continue, null));
+                        return Task.FromResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Continue, null));
                     }
 
-                    return Task<WorkUnitResult>.FromResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
+                    return Task.FromResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
                 }
             }
 
-            return Task<WorkUnitResult>.FromResult(new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null));
+            return Task.FromResult(new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null));
         }
 
         #endregion

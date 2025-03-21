@@ -128,12 +128,12 @@ namespace Microsoft.Build.Logging
 
             // this doesn't exceed 30K for smaller binlogs so seems like a reasonable
             // starting point to avoid reallocations in the common case
-            this.currentRecordStream = new MemoryStream(65536);
+            currentRecordStream = new MemoryStream(65536);
 
-            this.nameValueListStream = new MemoryStream(256);
+            nameValueListStream = new MemoryStream(256);
 
-            this.originalBinaryWriter = binaryWriter;
-            this.currentRecordWriter = new BinaryWriter(currentRecordStream);
+            originalBinaryWriter = binaryWriter;
+            currentRecordWriter = new BinaryWriter(currentRecordStream);
 
             this.binaryWriter = currentRecordWriter;
         }
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Logging
         public void Write(BuildEventArgs e)
         {
             // reset the temp stream (in case last usage forgot to do so).
-            this.currentRecordStream.SetLength(0);
+            currentRecordStream.SetLength(0);
             BinaryLogRecordKind eventKind = WriteCore(e);
 
             FlushRecordToFinalStream(eventKind, currentRecordStream);

@@ -96,7 +96,7 @@ public sealed class TaskInvocationCheckData : CheckData
     /// </summary>
     /// <param name="Value">The value passed to (when <paramref name="IsOutput"/> is false) or from
     /// (when <paramref name="IsOutput"/> is true) a task. This object can be of any type supported
-    /// in task parameters: <see cref="Framework.ITaskItem"/>, <see cref="Framework.ITaskItem"/>[],
+    /// in task parameters: <see cref="ITaskItem"/>, <see cref="ITaskItem"/>[],
     /// bool, string, or anything else convertible to/from string.</param>
     /// <param name="IsOutput">True for output parameters, false for input parameters.</param>
     public record class TaskParameter(object? Value, bool IsOutput)

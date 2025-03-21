@@ -58,7 +58,7 @@ using System.Windows.Markup;
 // This is the assembly-level GUID, and the GUID for the TypeLib associated with
 // this assembly.  We should specify this explicitly, as opposed to letting
 // tlbexp just pick whatever it wants.
-[assembly: GuidAttribute("D8A9BA71-4724-481d-9CA7-0DA23A1D615C")]
+[assembly: Guid("D8A9BA71-4724-481d-9CA7-0DA23A1D615C")]
 
 #if FEATURE_XAML_TYPES
 [assembly: XmlnsDefinition("http://schemas.microsoft.com/build/2009/properties", "Microsoft.Build.Framework.XamlTypes")]

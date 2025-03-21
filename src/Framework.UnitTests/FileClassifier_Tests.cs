@@ -15,7 +15,7 @@ namespace Microsoft.Build.Framework.UnitTests
         private sealed class FileClassifierUnderTest : FileClassifier
         {
             public void RegisterImmutableDirectory(string directory)
-                => base.RegisterImmutableDirectory(directory, false);
+                => RegisterImmutableDirectory(directory, false);
         }
 
         [Fact]

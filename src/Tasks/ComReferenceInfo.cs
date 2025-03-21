@@ -85,7 +85,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal ComReferenceInfo()
         {
-            this.dependentWrapperPaths = new List<string>();
+            dependentWrapperPaths = new List<string>();
         }
 
         /// <summary>
@@ -93,16 +93,16 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal ComReferenceInfo(ComReferenceInfo copyFrom)
         {
-            this.attr = copyFrom.attr;
-            this.typeLibName = copyFrom.typeLibName;
-            this.strippedTypeLibPath = copyFrom.strippedTypeLibPath;
-            this.fullTypeLibPath = copyFrom.fullTypeLibPath;
-            this.typeLibPointer = copyFrom.typeLibPointer;
-            this.primaryOfAxImpRef = copyFrom.primaryOfAxImpRef;
-            this.resolvedWrapper = copyFrom.resolvedWrapper;
-            this.taskItem = new TaskItem(copyFrom.taskItem);
-            this.dependentWrapperPaths = copyFrom.dependentWrapperPaths;
-            this.referencePathItem = copyFrom.referencePathItem;
+            attr = copyFrom.attr;
+            typeLibName = copyFrom.typeLibName;
+            strippedTypeLibPath = copyFrom.strippedTypeLibPath;
+            fullTypeLibPath = copyFrom.fullTypeLibPath;
+            typeLibPointer = copyFrom.typeLibPointer;
+            primaryOfAxImpRef = copyFrom.primaryOfAxImpRef;
+            resolvedWrapper = copyFrom.resolvedWrapper;
+            taskItem = new TaskItem(copyFrom.taskItem);
+            dependentWrapperPaths = copyFrom.dependentWrapperPaths;
+            referencePathItem = copyFrom.referencePathItem;
         }
 
         #endregion
@@ -119,14 +119,14 @@ namespace Microsoft.Build.Tasks
             ComReference.RemapAdoTypeLib(log, silent, ref remappableTlbAttr);
 
             // for attribute references, the path is not specified, so we need to get it from the registry
-            if (!ComReference.GetPathOfTypeLib(log, silent, ref remappableTlbAttr, out this.fullTypeLibPath))
+            if (!ComReference.GetPathOfTypeLib(log, silent, ref remappableTlbAttr, out fullTypeLibPath))
             {
                 return false;
             }
 
             // Now that we have the path, we can call InitializeWithPath to get the correct TYPELIBATTR set up
             // and the correct ITypeLib pointer.
-            return InitializeWithPath(log, silent, this.fullTypeLibPath, originalTaskItem, targetProcessorArchitecture);
+            return InitializeWithPath(log, silent, fullTypeLibPath, originalTaskItem, targetProcessorArchitecture);
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace Microsoft.Build.Tasks
         {
             ErrorUtilities.VerifyThrowArgumentNull(path);
 
-            this.taskItem = originalTaskItem;
+            taskItem = originalTaskItem;
 
             // Note that currently we DO NOT remap file ADO references. This is because when pointing to a file on disk,
             // it seems unnatural to remap it to something else - a file reference means "use THIS component".
@@ -145,24 +145,24 @@ namespace Microsoft.Build.Tasks
             // save both the stripped and full path in our object -- for the most part we just need the stripped path, but if
             // we're using tlbimp.exe, we need to pass the full path w/ type lib number to it, or it won't generate the interop
             // assembly correctly.
-            this.fullTypeLibPath = path;
-            this.strippedTypeLibPath = ComReference.StripTypeLibNumberFromPath(path, File.Exists);
+            fullTypeLibPath = path;
+            strippedTypeLibPath = ComReference.StripTypeLibNumberFromPath(path, File.Exists);
 
             // use the unstripped path to actually load the library
             switch (targetProcessorArchitecture)
             {
                 case ProcessorArchitecture.AMD64:
                 case ProcessorArchitecture.IA64:
-                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE | (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_64BIT);
+                    typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE | (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_64BIT);
                     break;
                 case ProcessorArchitecture.X86:
-                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE | (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_32BIT);
+                    typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE | (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_32BIT);
                     break;
                 case ProcessorArchitecture.ARM:
                 case ProcessorArchitecture.MSIL:
                 default:
                     // Transmit the flag directly from the .targets files and rely on tlbimp.exe to produce a good error message.
-                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE);
+                    typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE);
                     break;
             }
 
@@ -170,15 +170,15 @@ namespace Microsoft.Build.Tasks
             {
                 // get the type lib attributes from the retrieved interface pointer.
                 // do NOT remap file ADO references, since we'd end up with a totally different reference than specified.
-                ComReference.GetTypeLibAttrForTypeLib(ref this.typeLibPointer, out this.attr);
+                ComReference.GetTypeLibAttrForTypeLib(ref typeLibPointer, out attr);
 
                 // get the type lib name from the retrieved interface pointer
                 if (!ComReference.GetTypeLibNameForITypeLib(
                     log,
                     silent,
-                    this.typeLibPointer,
+                    typeLibPointer,
                     GetTypeLibId(log),
-                    out this.typeLibName))
+                    out typeLibName))
                 {
                     ReleaseTypeLibPtr();
                     return false;

@@ -35,9 +35,9 @@ namespace Microsoft.Build.UnitTests
             "Authentication may require manual action. Consider re-running the command with --interactive for `dotnet`, " +
             "/p:NuGetInteractive=\"true\" for MSBuild or removing the -NonInteractive switch for `NuGet`";
 
-        private readonly string _projectFile = NativeMethods.IsUnixLike ? "/src/project.proj" : @"C:\src\project.proj";
-        private readonly string _projectFile2 = NativeMethods.IsUnixLike ? "/src/project2.proj" : @"C:\src\project2.proj";
-        private readonly string _projectFileWithNonAnsiSymbols = NativeMethods.IsUnixLike ? "/src/проектТерминал/㐇𠁠𪨰𫠊𫦠𮚮⿕.proj" : @"C:\src\проектТерминал\㐇𠁠𪨰𫠊𫦠𮚮⿕.proj";
+        private readonly string _projectFile = NativeMethodsShared.IsUnixLike ? "/src/project.proj" : @"C:\src\project.proj";
+        private readonly string _projectFile2 = NativeMethodsShared.IsUnixLike ? "/src/project2.proj" : @"C:\src\project2.proj";
+        private readonly string _projectFileWithNonAnsiSymbols = NativeMethodsShared.IsUnixLike ? "/src/проектТерминал/㐇𠁠𪨰𫠊𫦠𮚮⿕.proj" : @"C:\src\проектТерминал\㐇𠁠𪨰𫠊𫦠𮚮⿕.proj";
 
         private StringWriter _outputWriter = new();
 

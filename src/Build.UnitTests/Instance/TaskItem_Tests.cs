@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             TaskItem clone = parent.DeepClone();
             Assert.True(parent.Equals(clone)); // "The parent and the clone should be equal"
             Assert.True(clone.Equals(parent)); // "The parent and the clone should be equal"
-            Assert.False(object.ReferenceEquals(parent, clone)); // "The parent and the child should not be the same object"
+            Assert.False(ReferenceEquals(parent, clone)); // "The parent and the child should not be the same object"
         }
 
         /// <summary>

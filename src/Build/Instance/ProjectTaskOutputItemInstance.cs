@@ -137,7 +137,7 @@ namespace Microsoft.Build.Execution
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                var typeName = this.GetType().FullName;
+                var typeName = GetType().FullName;
                 translator.Translate(ref typeName);
             }
 

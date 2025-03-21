@@ -24,80 +24,80 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             ViewValidation.VerifyLinkedNotNull(view);
             ViewValidation.VerifyNotLinkedNotNull(real);
-            this.View = view;
-            this.Real = real;
+            View = view;
+            Real = real;
         }
 
-        public T Get(ObjectType type) => type == ObjectType.Real ? this.Real : this.View;
+        public T Get(ObjectType type) => type == ObjectType.Real ? Real : View;
         public T View { get; }
         public T Real { get; }
 
         public void VerifyNotSame(LinkPair<T> other)
         {
-            Assert.NotEqual((object)this.View, (object)other.View);
-            Assert.NotEqual((object)this.Real, (object)other.Real);
+            Assert.NotEqual((object)View, (object)other.View);
+            Assert.NotEqual((object)Real, (object)other.Real);
         }
 
         public void VerifySame(LinkPair<T> other)
         {
-            Assert.Equal((object)this.View, (object)other.View);
-            Assert.Equal((object)this.Real, (object)other.Real);
+            Assert.Equal((object)View, (object)other.View);
+            Assert.Equal((object)Real, (object)other.Real);
         }
 
         public void VerifySetter(bool finalValue, Func<T, bool> getter, Action<T, bool> setter)
         {
-            var current = getter(this.Real);
-            Assert.Equal(current, getter(this.View));
+            var current = getter(Real);
+            Assert.Equal(current, getter(View));
 
             // set via the view
-            setter(this.View, !current);
+            setter(View, !current);
 
-            Assert.Equal(!current, getter(this.View));
-            Assert.Equal(!current, getter(this.Real));
+            Assert.Equal(!current, getter(View));
+            Assert.Equal(!current, getter(Real));
 
             // set via the real.
-            setter(this.Real, current);
+            setter(Real, current);
 
-            Assert.Equal(current, getter(this.View));
-            Assert.Equal(current, getter(this.Real));
+            Assert.Equal(current, getter(View));
+            Assert.Equal(current, getter(Real));
 
-            setter(this.View, finalValue);
-            Assert.Equal(finalValue, getter(this.View));
-            Assert.Equal(finalValue, getter(this.Real));
+            setter(View, finalValue);
+            Assert.Equal(finalValue, getter(View));
+            Assert.Equal(finalValue, getter(Real));
         }
 
         public void VerifySetter(string newValue, Func<T, string> getter, Action<T, string> setter)
         {
             var newValue1 = newValue.Ver(1);
-            var current = getter(this.Real);
-            Assert.Equal(current, getter(this.View));
+            var current = getter(Real);
+            Assert.Equal(current, getter(View));
             Assert.NotEqual(current, newValue);
             Assert.NotEqual(current, newValue1);
 
             // set via the view
-            setter(this.View, newValue1);
+            setter(View, newValue1);
 
-            Assert.Equal(newValue1, getter(this.View));
-            Assert.Equal(newValue1, getter(this.Real));
+            Assert.Equal(newValue1, getter(View));
+            Assert.Equal(newValue1, getter(Real));
 
             // set via the real.
-            setter(this.Real, newValue);
+            setter(Real, newValue);
 
-            Assert.Equal(newValue, getter(this.View));
-            Assert.Equal(newValue, getter(this.Real));
-            this.Verify();
+            Assert.Equal(newValue, getter(View));
+            Assert.Equal(newValue, getter(Real));
+            Verify();
         }
 
         public virtual void Verify()
         {
-            ViewValidation.VerifyFindType(this.View, this.Real);
+            ViewValidation.VerifyFindType(View, Real);
         }
     }
 
     internal sealed class ValidationContext
     {
         public ValidationContext() { }
-        public ValidationContext(ProjectPair pair) { this.Pair = pair; }
+        public ValidationContext(ProjectPair pair) { Pair = pair; }
         public ProjectPair Pair { get; set; }
         public Action<ElementLocation, ElementLocation> ValidateLocation { get; set; }
     }

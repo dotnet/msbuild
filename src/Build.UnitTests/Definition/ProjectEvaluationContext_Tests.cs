@@ -973,8 +973,8 @@ namespace Microsoft.Build.UnitTests.Definition
 
             public void Deconstruct(out string projectPath, out string projectContents)
             {
-                projectPath = this.ProjectFilePath;
-                projectContents = this.ProjectContents;
+                projectPath = ProjectFilePath;
+                projectContents = ProjectContents;
             }
         }
 

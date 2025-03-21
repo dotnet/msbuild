@@ -434,7 +434,7 @@ namespace TaskUsageLogger
             public override string ToString()
             {
                 // CSV format
-                return String.Format(CultureInfo.CurrentCulture, "{0}, {1}, {2}, {3}, {4}, {5}", this.TaskName, this.TargetName, this.FilePath, this.ProjectPath, this.TaskAssembly, this.TaskId);
+                return String.Format(CultureInfo.CurrentCulture, "{0}, {1}, {2}, {3}, {4}, {5}", TaskName, TargetName, FilePath, ProjectPath, TaskAssembly, TaskId);
             }
         }
 

@@ -32,36 +32,36 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             public MyTestCollectionGroup()
                 : base(2, 0)
             {
-                this.LocalBigPath = this.ImmutableDisk.WriteProjectFile($"BigLocal.proj", TestCollectionGroup.BigProjectFile);
-                this.TargetBigPath = this.ImmutableDisk.WriteProjectFile($"BigTarget.proj", TestCollectionGroup.BigProjectFile);
-                this.GuestBigPath = this.ImmutableDisk.WriteProjectFile($"BigGuest.proj", TestCollectionGroup.BigProjectFile);
+                LocalBigPath = ImmutableDisk.WriteProjectFile($"BigLocal.proj", BigProjectFile);
+                TargetBigPath = ImmutableDisk.WriteProjectFile($"BigTarget.proj", BigProjectFile);
+                GuestBigPath = ImmutableDisk.WriteProjectFile($"BigGuest.proj", BigProjectFile);
 
-                this.Target = this.Remote[0];
-                this.Guest = this.Remote[1];
+                Target = Remote[0];
+                Guest = Remote[1];
 
-                this.LocalBig = this.Local.LoadProjectIgnoreMissingImports(this.LocalBigPath);
-                this.TargetBig = this.Target.LoadProjectIgnoreMissingImports(this.TargetBigPath);
-                this.GuestBig = this.Guest.LoadProjectIgnoreMissingImports(this.GuestBigPath);
+                LocalBig = Local.LoadProjectIgnoreMissingImports(LocalBigPath);
+                TargetBig = Target.LoadProjectIgnoreMissingImports(TargetBigPath);
+                GuestBig = Guest.LoadProjectIgnoreMissingImports(GuestBigPath);
 
-                this.TakeSnapshot();
+                TakeSnapshot();
             }
 
             public void ResetBeforeTests()
             {
-                this.Clear();
-                this.Local.Importing = true;
+                Clear();
+                Local.Importing = true;
                 {
-                    var targetView = this.Local.GetLoadedProjects(this.TargetBigPath).FirstOrDefault();
+                    var targetView = Local.GetLoadedProjects(TargetBigPath).FirstOrDefault();
                     Assert.NotNull(targetView);
-                    var targetPair = new ProjectPair(targetView, this.TargetBig);
-                    this.TargetXmlPair = new ProjectXmlPair(targetPair);
+                    var targetPair = new ProjectPair(targetView, TargetBig);
+                    TargetXmlPair = new ProjectXmlPair(targetPair);
                 }
 
                 {
-                    var guestView = this.Local.GetLoadedProjects(this.GuestBigPath).FirstOrDefault();
+                    var guestView = Local.GetLoadedProjects(GuestBigPath).FirstOrDefault();
                     Assert.NotNull(guestView);
-                    var guestPair = new ProjectPair(guestView, this.GuestBig);
-                    this.GuestXmlPair = new ProjectXmlPair(guestPair);
+                    var guestPair = new ProjectPair(guestView, GuestBig);
+                    GuestXmlPair = new ProjectXmlPair(guestPair);
                 }
             }
         }
@@ -69,17 +69,17 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public MyTestCollectionGroup StdGroup { get; }
         public LinkedSpecialCasesScenarios(MyTestCollectionGroup group)
         {
-            this.StdGroup = group;
+            StdGroup = group;
             group.ResetBeforeTests();
         }
 
         private ProjectPair GetNewInMemoryProject(string path, string content = null)
         {
             content ??= TestCollectionGroup.SampleProjectFile;
-            var tempPath = this.StdGroup.Disk.GetAbsolutePath(path);
-            var newReal = this.StdGroup.Target.LoadInMemoryWithSettings(content, ProjectLoadSettings.IgnoreMissingImports);
+            var tempPath = StdGroup.Disk.GetAbsolutePath(path);
+            var newReal = StdGroup.Target.LoadInMemoryWithSettings(content, ProjectLoadSettings.IgnoreMissingImports);
             newReal.Xml.FullPath = tempPath;
-            var newView = this.StdGroup.Local.GetLoadedProjects(tempPath).FirstOrDefault();
+            var newView = StdGroup.Local.GetLoadedProjects(tempPath).FirstOrDefault();
             Assert.NotNull(newView);
 
             ViewValidation.Verify(newView, newReal);
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             var ourGroup1 = xmlPair.QuerySingleChildrenWithValidation<ProjectItemGroupElement>((ig) => ig.Label == "Group1");
 
-            var newCopyFrom = xmlPair.AddNewLabeledChaildWithVerify<ProjectItemGroupElement>(ObjectType.View, "newGrop", (p, l) => p.AddItemGroup());
+            var newCopyFrom = xmlPair.AddNewLabeledChaildWithVerify(ObjectType.View, "newGrop", (p, l) => p.AddItemGroup());
 
             newCopyFrom.View.CopyFrom(existingItemGroup);
             xmlPair.QueryChildrenWithValidation<ProjectItemGroupElement>((ig) => ig.Label == "Group1", 2);
@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.True(xmlPair.View.HasUnsavedChanges);
             Assert.False(externalSource && sourceProject.HasUnsavedChanges);
 
-            var newDeepCopy = xmlPair.AddNewLabeledChaildWithVerify<ProjectItemGroupElement>(ObjectType.View, "newGrop", (p, l) => p.AddItemGroup());
+            var newDeepCopy = xmlPair.AddNewLabeledChaildWithVerify(ObjectType.View, "newGrop", (p, l) => p.AddItemGroup());
             newDeepCopy.View.DeepCopyFrom(existingItemGroup);
 
             xmlPair.QueryChildrenWithValidation<ProjectItemGroupElement>((ig) => ig.Label == "Group1", 2);
@@ -210,21 +210,21 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public void CloneAndAddCrossProjectSameCollection()
         {
             // view gets "a view" object as argument from different project (but in the same collection)
-            CloneAndAddInternal(this.StdGroup.TargetXmlPair.View);
+            CloneAndAddInternal(StdGroup.TargetXmlPair.View);
         }
 
         [Fact]
         public void CloneAndAddCrossProjectLocalSource()
         {
             // view gets "a real" object as argument
-            CloneAndAddInternal(this.StdGroup.LocalBig.Xml);
+            CloneAndAddInternal(StdGroup.LocalBig.Xml);
         }
 
         [Fact]
         public void CloneAndAddCrossProjectCrossCollection()
         {
             // view gets "a view" object as argument from different project and collection (double proxy)
-            CloneAndAddInternal(this.StdGroup.GuestXmlPair.View);
+            CloneAndAddInternal(StdGroup.GuestXmlPair.View);
         }
 
 
@@ -237,19 +237,19 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void CopyFromCrossProjectSameCollection()
         {
-            CopyFromInternal(this.StdGroup.TargetXmlPair.View);
+            CopyFromInternal(StdGroup.TargetXmlPair.View);
         }
 
         [Fact]
         public void CopyFromCrossProjectLocalSource()
         {
-            CopyFromInternal(this.StdGroup.LocalBig.Xml);
+            CopyFromInternal(StdGroup.LocalBig.Xml);
         }
 
         [Fact]
         public void CopyFromCrossProjectCrossCollection()
         {
-            CopyFromInternal(this.StdGroup.GuestXmlPair.View);
+            CopyFromInternal(StdGroup.GuestXmlPair.View);
         }
     }
 }

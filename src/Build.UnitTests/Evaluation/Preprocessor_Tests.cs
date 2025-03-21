@@ -363,7 +363,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
             Project project;
             using (StringReader sr = new StringReader(one))
             {
-                using (XmlReader xr = XmlTextReader.Create(sr))
+                using (XmlReader xr = XmlReader.Create(sr))
                 {
                     project = new Project(xr);
                 }

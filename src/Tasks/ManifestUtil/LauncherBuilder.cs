@@ -53,7 +53,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
 
                 // Copy setup.bin to the output directory
-                string strOutputExe = System.IO.Path.Combine(outputPath, launcherFilename);
+                string strOutputExe = Path.Combine(outputPath, launcherFilename);
                 if (!CopyLauncherToOutputDirectory(strOutputExe))
                 {
                     // Appropriate messages should have been stuffed into the results already

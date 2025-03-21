@@ -19,20 +19,20 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     {
         public ProjectXmlPair PRE { get; protected set; }
 
-        public ElementLinkPair(ProjectXmlPair pre, T view, T real) : base(view, real) { this.PRE = pre; }
+        public ElementLinkPair(ProjectXmlPair pre, T view, T real) : base(view, real) { PRE = pre; }
 
         // the PRE.CreateXX(), AppendChild, way.
         public ElementLinkPair<CT> AppendNewChaildWithVerify<CT>(ObjectType where, string id, Func<ProjectRootElement, string, CT> adder, Func<CT, string, bool> matcher)
             where CT : ProjectElement
         {
-            var appendWhere = this.Get(where) as ProjectElementContainer;
+            var appendWhere = Get(where) as ProjectElementContainer;
             Assert.NotNull(appendWhere);
 
-            var c1Where = adder(this.PRE.Get(where), id);
+            var c1Where = adder(PRE.Get(where), id);
             Assert.NotNull(c1Where);
             appendWhere.AppendChild(c1Where);
 
-            var c1 = this.QuerySingleChildrenWithValidation<CT>((t) => matcher(t, id));
+            var c1 = QuerySingleChildrenWithValidation<CT>((t) => matcher(t, id));
             Assert.Same(c1Where, c1.Get(where));
 
             return c1;
@@ -58,10 +58,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public ElementLinkPair<CT> AddNewChaildWithVerify<CT>(ObjectType where, string id, Func<T, string, CT> adder, Func<CT, string, bool> matcher)
             where CT : ProjectElement
         {
-            var c1Where = adder(this.Get(where), id);
+            var c1Where = adder(Get(where), id);
             Assert.NotNull(c1Where);
 
-            var c1 = this.QuerySingleChildrenWithValidation<CT>((t) => matcher(t, id));
+            var c1 = QuerySingleChildrenWithValidation<CT>((t) => matcher(t, id));
             Assert.Same(c1Where, c1.Get(where));
 
             return c1;
@@ -149,7 +149,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var realResult = new List<CT>();
             var finalResult = new List<ElementLinkPair<CT>>();
 
-            foreach (var v in getter(this.View))
+            foreach (var v in getter(View))
             {
                 if (v is CT vt)
                 {
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 }
             }
 
-            foreach (var r in getter(this.Real))
+            foreach (var r in getter(Real))
             {
                 if (r is CT rt)
                 {
@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             for (int i = 0; i < viewResult.Count; i++)
             {
-                finalResult.Add(new ElementLinkPair<CT>(this.PRE, viewResult[i], realResult[i]));
+                finalResult.Add(new ElementLinkPair<CT>(PRE, viewResult[i], realResult[i]));
             }
 
             return finalResult;
@@ -184,8 +184,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public ICollection<ElementLinkPair<CT>> QueryChildrenWithValidation<CT>(Func<CT, bool> matcher)
             where CT : ProjectElement
         {
-            Assert.True(this.View is ProjectElementContainer);
-            Assert.True(this.Real is ProjectElementContainer);
+            Assert.True(View is ProjectElementContainer);
+            Assert.True(Real is ProjectElementContainer);
 
             return QueryChildrenWithValidation((t) => (t as ProjectElementContainer).AllChildren, matcher);
         }
@@ -208,15 +208,15 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     internal sealed class ProjectXmlPair : ElementLinkPair<ProjectRootElement>
     {
         private ProjectPair Project { get; }
-        public ProjectXmlPair(ProjectPair pair) : base(null, pair.View.Xml, pair.Real.Xml) { this.Project = pair; this.PRE = this; }
-        public ProjectXmlPair(ProjectRootElement viewXml, ProjectRootElement realXml) : base(null, viewXml, realXml) { this.PRE = this; }
+        public ProjectXmlPair(ProjectPair pair) : base(null, pair.View.Xml, pair.Real.Xml) { Project = pair; PRE = this; }
+        public ProjectXmlPair(ProjectRootElement viewXml, ProjectRootElement realXml) : base(null, viewXml, realXml) { PRE = this; }
 
         public ElementLinkPair<CT> CreateWithVerify<CT>(Func<ProjectRootElement, CT> creator)
             where CT : ProjectElement
         {
-            var view = creator(this.View);
+            var view = creator(View);
             Assert.NotNull(view);
-            var real = creator(this.Real);
+            var real = creator(Real);
             Assert.NotNull(real);
             ViewValidation.VerifyFindType(view, real);
             return new ElementLinkPair<CT>(this, view, real);
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void VerifySameLocation(ElementLocation expected, ElementLocation actual, ValidationContext context = null)
         {
-            if (object.ReferenceEquals(expected, actual))
+            if (ReferenceEquals(expected, actual))
             {
                 return;
             }
@@ -436,7 +436,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 Assert.NotNull(viewChild);
                 Assert.Same(realChild.Parent, realXml);
 
-                if (!object.ReferenceEquals(viewChild.Parent, viewXml))
+                if (!ReferenceEquals(viewChild.Parent, viewXml))
                 {
                     var lm = LinkedObjectsFactory.GetLink(viewXml) as ILinkMock;
                     lm.Linker.ValidateNoDuplicates();
@@ -536,28 +536,28 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.Equal(realXml.TimeLastChanged, viewXml.TimeLastChanged);
             Assert.Equal(realXml.LastWriteTimeWhenRead, viewXml.LastWriteTimeWhenRead);
 
-            ViewValidation.VerifySameLocation(realXml.ProjectFileLocation, viewXml.ProjectFileLocation, context);
-            ViewValidation.VerifySameLocation(realXml.ToolsVersionLocation, viewXml.ToolsVersionLocation, context);
-            ViewValidation.VerifySameLocation(realXml.DefaultTargetsLocation, viewXml.DefaultTargetsLocation, context);
-            ViewValidation.VerifySameLocation(realXml.InitialTargetsLocation, viewXml.InitialTargetsLocation, context);
-            ViewValidation.VerifySameLocation(realXml.SdkLocation, viewXml.SdkLocation, context);
-            ViewValidation.VerifySameLocation(realXml.TreatAsLocalPropertyLocation, viewXml.TreatAsLocalPropertyLocation, context);
+            VerifySameLocation(realXml.ProjectFileLocation, viewXml.ProjectFileLocation, context);
+            VerifySameLocation(realXml.ToolsVersionLocation, viewXml.ToolsVersionLocation, context);
+            VerifySameLocation(realXml.DefaultTargetsLocation, viewXml.DefaultTargetsLocation, context);
+            VerifySameLocation(realXml.InitialTargetsLocation, viewXml.InitialTargetsLocation, context);
+            VerifySameLocation(realXml.SdkLocation, viewXml.SdkLocation, context);
+            VerifySameLocation(realXml.TreatAsLocalPropertyLocation, viewXml.TreatAsLocalPropertyLocation, context);
 
-            ViewValidation.Verify(viewXml.ChooseElements, realXml.ChooseElements, Verify, context);
-            ViewValidation.Verify(viewXml.ItemDefinitionGroups, realXml.ItemDefinitionGroups, Verify, context);
-            ViewValidation.Verify(viewXml.ItemDefinitions, realXml.ItemDefinitions, Verify, context);
-            ViewValidation.Verify(viewXml.ItemGroups, realXml.ItemGroups, Verify, context);
-            ViewValidation.Verify(viewXml.Items, realXml.Items, Verify, context);
-            ViewValidation.Verify(viewXml.ImportGroups, realXml.ImportGroups, Verify, context);
-            ViewValidation.Verify(viewXml.Imports, realXml.Imports, Verify, context);
-            ViewValidation.Verify(viewXml.PropertyGroups, realXml.PropertyGroups, Verify, context);
-            ViewValidation.Verify(viewXml.Properties, realXml.Properties, Verify, context);
-            ViewValidation.Verify(viewXml.Targets, realXml.Targets, Verify, context);
-            ViewValidation.Verify(viewXml.UsingTasks, realXml.UsingTasks, Verify, context);
-            ViewValidation.Verify(viewXml.ItemGroupsReversed, realXml.ItemGroupsReversed, Verify, context);
-            ViewValidation.Verify(viewXml.ItemDefinitionGroupsReversed, realXml.ItemDefinitionGroupsReversed, Verify, context);
-            ViewValidation.Verify(viewXml.ImportGroupsReversed, realXml.ImportGroupsReversed, Verify, context);
-            ViewValidation.Verify(viewXml.PropertyGroupsReversed, realXml.PropertyGroupsReversed, Verify, context);
+            Verify(viewXml.ChooseElements, realXml.ChooseElements, Verify, context);
+            Verify(viewXml.ItemDefinitionGroups, realXml.ItemDefinitionGroups, Verify, context);
+            Verify(viewXml.ItemDefinitions, realXml.ItemDefinitions, Verify, context);
+            Verify(viewXml.ItemGroups, realXml.ItemGroups, Verify, context);
+            Verify(viewXml.Items, realXml.Items, Verify, context);
+            Verify(viewXml.ImportGroups, realXml.ImportGroups, Verify, context);
+            Verify(viewXml.Imports, realXml.Imports, Verify, context);
+            Verify(viewXml.PropertyGroups, realXml.PropertyGroups, Verify, context);
+            Verify(viewXml.Properties, realXml.Properties, Verify, context);
+            Verify(viewXml.Targets, realXml.Targets, Verify, context);
+            Verify(viewXml.UsingTasks, realXml.UsingTasks, Verify, context);
+            Verify(viewXml.ItemGroupsReversed, realXml.ItemGroupsReversed, Verify, context);
+            Verify(viewXml.ItemDefinitionGroupsReversed, realXml.ItemDefinitionGroupsReversed, Verify, context);
+            Verify(viewXml.ImportGroupsReversed, realXml.ImportGroupsReversed, Verify, context);
+            Verify(viewXml.PropertyGroupsReversed, realXml.PropertyGroupsReversed, Verify, context);
         }
 
         public static void Verify(ProjectChooseElement viewXml, ProjectChooseElement realXml, ValidationContext context = null)
@@ -642,14 +642,14 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.Equal(realXml.Name, viewXml.Name);
 
             Assert.Equal(realXml.ContinueOnError, viewXml.ContinueOnError);
-            ViewValidation.VerifySameLocation(realXml.ContinueOnErrorLocation, viewXml.ContinueOnErrorLocation, context);
+            VerifySameLocation(realXml.ContinueOnErrorLocation, viewXml.ContinueOnErrorLocation, context);
             Assert.Equal(realXml.MSBuildRuntime, viewXml.MSBuildRuntime);
-            ViewValidation.VerifySameLocation(realXml.MSBuildRuntimeLocation, viewXml.MSBuildRuntimeLocation, context);
+            VerifySameLocation(realXml.MSBuildRuntimeLocation, viewXml.MSBuildRuntimeLocation, context);
 
             Assert.Equal(realXml.MSBuildArchitecture, viewXml.MSBuildArchitecture);
-            ViewValidation.VerifySameLocation(realXml.MSBuildArchitectureLocation, viewXml.MSBuildArchitectureLocation, context);
+            VerifySameLocation(realXml.MSBuildArchitectureLocation, viewXml.MSBuildArchitectureLocation, context);
 
-            ViewValidation.Verify(viewXml.Outputs, realXml.Outputs, ViewValidation.Verify, context);
+            Verify(viewXml.Outputs, realXml.Outputs, Verify, context);
 
             var realParams = realXml.Parameters;
             var viewParams = viewXml.Parameters;
@@ -689,7 +689,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                     var vkvp = viewPLocList[li];
 
                     Assert.Equal(rkvp.Key, vkvp.Key);
-                    ViewValidation.VerifySameLocation(rkvp.Value, vkvp.Value, context);
+                    VerifySameLocation(rkvp.Value, vkvp.Value, context);
                 }
             }
         }
@@ -767,25 +767,25 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
 
             Assert.Equal(realXml.AssemblyFile, viewXml.AssemblyFile);
-            ViewValidation.VerifySameLocation(realXml.AssemblyFileLocation, viewXml.AssemblyFileLocation, context);
+            VerifySameLocation(realXml.AssemblyFileLocation, viewXml.AssemblyFileLocation, context);
 
             Assert.Equal(realXml.AssemblyName, viewXml.AssemblyName);
-            ViewValidation.VerifySameLocation(realXml.AssemblyNameLocation, viewXml.AssemblyNameLocation, context);
+            VerifySameLocation(realXml.AssemblyNameLocation, viewXml.AssemblyNameLocation, context);
 
             Assert.Equal(realXml.TaskName, viewXml.TaskName);
-            ViewValidation.VerifySameLocation(realXml.TaskNameLocation, viewXml.TaskNameLocation, context);
+            VerifySameLocation(realXml.TaskNameLocation, viewXml.TaskNameLocation, context);
 
             Assert.Equal(realXml.TaskFactory, viewXml.TaskFactory);
-            ViewValidation.VerifySameLocation(realXml.TaskFactoryLocation, viewXml.TaskFactoryLocation, context);
+            VerifySameLocation(realXml.TaskFactoryLocation, viewXml.TaskFactoryLocation, context);
 
             Assert.Equal(realXml.Runtime, viewXml.Runtime);
-            ViewValidation.VerifySameLocation(realXml.RuntimeLocation, viewXml.RuntimeLocation, context);
+            VerifySameLocation(realXml.RuntimeLocation, viewXml.RuntimeLocation, context);
 
             Assert.Equal(realXml.Architecture, viewXml.Architecture);
-            ViewValidation.VerifySameLocation(realXml.ArchitectureLocation, viewXml.ArchitectureLocation, context);
+            VerifySameLocation(realXml.ArchitectureLocation, viewXml.ArchitectureLocation, context);
 
-            ViewValidation.Verify(viewXml.TaskBody, realXml.TaskBody, context);
-            ViewValidation.Verify(viewXml.ParameterGroup, realXml.ParameterGroup, context);
+            Verify(viewXml.TaskBody, realXml.TaskBody, context);
+            Verify(viewXml.ParameterGroup, realXml.ParameterGroup, context);
         }
 
         public static void Verify(ProjectTargetElement viewXml, ProjectTargetElement realXml, ValidationContext context = null)
@@ -799,26 +799,26 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
 
             Assert.Equal(realXml.Name, viewXml.Name);
-            ViewValidation.VerifySameLocation(realXml.NameLocation, viewXml.NameLocation, context);
+            VerifySameLocation(realXml.NameLocation, viewXml.NameLocation, context);
             Assert.Equal(realXml.Inputs, viewXml.Inputs);
-            ViewValidation.VerifySameLocation(realXml.InputsLocation, viewXml.InputsLocation, context);
+            VerifySameLocation(realXml.InputsLocation, viewXml.InputsLocation, context);
             Assert.Equal(realXml.Outputs, viewXml.Outputs);
-            ViewValidation.VerifySameLocation(realXml.OutputsLocation, viewXml.OutputsLocation, context);
+            VerifySameLocation(realXml.OutputsLocation, viewXml.OutputsLocation, context);
             Assert.Equal(realXml.KeepDuplicateOutputs, viewXml.KeepDuplicateOutputs);
-            ViewValidation.VerifySameLocation(realXml.KeepDuplicateOutputsLocation, viewXml.KeepDuplicateOutputsLocation, context);
+            VerifySameLocation(realXml.KeepDuplicateOutputsLocation, viewXml.KeepDuplicateOutputsLocation, context);
             Assert.Equal(realXml.DependsOnTargets, viewXml.DependsOnTargets);
-            ViewValidation.VerifySameLocation(realXml.DependsOnTargetsLocation, viewXml.DependsOnTargetsLocation, context);
+            VerifySameLocation(realXml.DependsOnTargetsLocation, viewXml.DependsOnTargetsLocation, context);
             Assert.Equal(realXml.BeforeTargets, viewXml.BeforeTargets);
-            ViewValidation.VerifySameLocation(realXml.BeforeTargetsLocation, viewXml.BeforeTargetsLocation, context);
+            VerifySameLocation(realXml.BeforeTargetsLocation, viewXml.BeforeTargetsLocation, context);
             Assert.Equal(realXml.AfterTargets, viewXml.AfterTargets);
-            ViewValidation.VerifySameLocation(realXml.AfterTargetsLocation, viewXml.AfterTargetsLocation, context);
+            VerifySameLocation(realXml.AfterTargetsLocation, viewXml.AfterTargetsLocation, context);
             Assert.Equal(realXml.Returns, viewXml.Returns);
-            ViewValidation.VerifySameLocation(realXml.ReturnsLocation, viewXml.ReturnsLocation, context);
+            VerifySameLocation(realXml.ReturnsLocation, viewXml.ReturnsLocation, context);
 
-            ViewValidation.Verify(viewXml.ItemGroups, realXml.ItemGroups, ViewValidation.Verify, context);
-            ViewValidation.Verify(viewXml.PropertyGroups, realXml.PropertyGroups, ViewValidation.Verify, context);
-            ViewValidation.Verify(viewXml.OnErrors, realXml.OnErrors, ViewValidation.Verify, context);
-            ViewValidation.Verify(viewXml.Tasks, realXml.Tasks, ViewValidation.Verify, context);
+            Verify(viewXml.ItemGroups, realXml.ItemGroups, Verify, context);
+            Verify(viewXml.PropertyGroups, realXml.PropertyGroups, Verify, context);
+            Verify(viewXml.OnErrors, realXml.OnErrors, Verify, context);
+            Verify(viewXml.Tasks, realXml.Tasks, Verify, context);
         }
 
         public static void Verify(ProjectImportElement viewXml, ProjectImportElement realXml, ValidationContext context = null)
@@ -832,16 +832,16 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
 
             Assert.Equal(realXml.Project, viewXml.Project);
-            ViewValidation.VerifySameLocation(realXml.ProjectLocation, viewXml.ProjectLocation, context);
+            VerifySameLocation(realXml.ProjectLocation, viewXml.ProjectLocation, context);
 
             // mostly test the remoting infrastructure. Sdk Imports are not really covered by simple samples for now.
             // Todo: add mock SDK import closure to SdtGroup?
             Assert.Equal(realXml.Sdk, viewXml.Sdk);
             Assert.Equal(realXml.Version, viewXml.Version);
             Assert.Equal(realXml.MinimumVersion, viewXml.MinimumVersion);
-            ViewValidation.VerifySameLocation(realXml.SdkLocation, viewXml.SdkLocation, context);
+            VerifySameLocation(realXml.SdkLocation, viewXml.SdkLocation, context);
             Assert.Equal(realXml.ImplicitImportLocation, viewXml.ImplicitImportLocation);
-            ViewValidation.VerifyProjectElement(viewXml.OriginalElement, realXml.OriginalElement, context);
+            VerifyProjectElement(viewXml.OriginalElement, realXml.OriginalElement, context);
         }
 
         public static void Verify(ProjectImportGroupElement viewXml, ProjectImportGroupElement realXml, ValidationContext context = null)
@@ -853,7 +853,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             VerifyProjectElement(viewXml, realXml, context);
 
-            ViewValidation.Verify(viewXml.Imports, realXml.Imports, ViewValidation.Verify, context);
+            Verify(viewXml.Imports, realXml.Imports, Verify, context);
         }
 
         public static void Verify(ProjectItemDefinitionElement viewXml, ProjectItemDefinitionElement realXml, ValidationContext context = null)
@@ -866,7 +866,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             VerifyProjectElement(viewXml, realXml, context);
 
             Assert.Equal(realXml.ItemType, viewXml.ItemType);
-            ViewValidation.Verify(viewXml.Metadata, realXml.Metadata, ViewValidation.Verify, context);
+            Verify(viewXml.Metadata, realXml.Metadata, Verify, context);
         }
 
         public static void Verify(ProjectItemDefinitionGroupElement viewXml, ProjectItemDefinitionGroupElement realXml, ValidationContext context = null)
@@ -878,7 +878,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             VerifyProjectElement(viewXml, realXml, context);
 
-            ViewValidation.Verify(viewXml.ItemDefinitions, realXml.ItemDefinitions, ViewValidation.Verify, context);
+            Verify(viewXml.ItemDefinitions, realXml.ItemDefinitions, Verify, context);
         }
 
         public static void Verify(ProjectItemElement viewXml, ProjectItemElement realXml, ValidationContext context = null)
@@ -900,7 +900,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.Equal(realXml.KeepDuplicates, viewXml.KeepDuplicates);
             Assert.Equal(realXml.HasMetadata, viewXml.HasMetadata);
 
-            Verify(viewXml.Metadata, realXml.Metadata, ViewValidation.Verify, context);
+            Verify(viewXml.Metadata, realXml.Metadata, Verify, context);
 
             VerifySameLocation(realXml.IncludeLocation, viewXml.IncludeLocation, context);
             VerifySameLocation(realXml.ExcludeLocation, viewXml.ExcludeLocation, context);

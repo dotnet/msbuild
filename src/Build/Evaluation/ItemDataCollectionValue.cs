@@ -88,7 +88,7 @@ namespace Microsoft.Build.Evaluation
             {
                 list.Remove(item);
             }
-            else if (object.Equals(_value, item))
+            else if (Equals(_value, item))
             {
                 _value = null;
             }
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Evaluation
                     list[index] = newItem;
                 }
             }
-            else if (object.Equals(_value, oldItem))
+            else if (Equals(_value, oldItem))
             {
                 _value = newItem;
             }

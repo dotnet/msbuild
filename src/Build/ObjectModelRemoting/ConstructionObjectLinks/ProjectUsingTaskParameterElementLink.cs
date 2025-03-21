@@ -14,7 +14,7 @@ namespace Microsoft.Build.ObjectModelRemoting
     public abstract class ProjectUsingTaskParameterElementLink : ProjectElementLink
     {
         /// <summary>
-        /// Access to remote <see cref="ProjectUsingTaskParameterElementLink.Name"/>.
+        /// Access to remote <see cref="Name"/>.
         /// </summary>
         public abstract string Name { get; set; }
     }

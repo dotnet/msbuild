@@ -32,9 +32,9 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentLength(targetName);
             ErrorUtilities.VerifyThrowArgumentNull(referenceLocation);
 
-            this._targetName = targetName;
-            this._referenceLocation = referenceLocation;
-            this._targetBuiltReason = targetBuiltReason;
+            _targetName = targetName;
+            _referenceLocation = referenceLocation;
+            _targetBuiltReason = targetBuiltReason;
         }
 
         private TargetSpecification()

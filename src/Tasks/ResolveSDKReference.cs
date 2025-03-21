@@ -551,7 +551,7 @@ namespace Microsoft.Build.Tasks
         {
             if (!String.IsNullOrEmpty(dependsOnSDK))
             {
-                return dependsOnSDK.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Where(y => y.Length > 0).ToList<string>();
+                return dependsOnSDK.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).Where(y => y.Length > 0).ToList();
             }
 
             return new List<string>();
@@ -968,7 +968,7 @@ namespace Microsoft.Build.Tasks
                     return false;
                 }
 
-                if (Object.ReferenceEquals(other, this))
+                if (ReferenceEquals(other, this))
                 {
                     return true;
                 }
@@ -1124,7 +1124,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    Enum.TryParse<SDKType>(sdkTypeFromMetadata, out SDKType sdkType);
+                    Enum.TryParse(sdkTypeFromMetadata, out SDKType sdkType);
                     SDKType = sdkType;
                 }
 
@@ -1163,7 +1163,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             private bool ParseSupportMultipleVersions(string multipleVersionsValue)
             {
-                return !String.IsNullOrEmpty(multipleVersionsValue) && Enum.TryParse<MultipleVersionSupport>(multipleVersionsValue, /*ignoreCase*/true, out _supportsMultipleVersions);
+                return !String.IsNullOrEmpty(multipleVersionsValue) && Enum.TryParse(multipleVersionsValue, /*ignoreCase*/true, out _supportsMultipleVersions);
             }
 
             /// <summary>

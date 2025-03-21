@@ -9,9 +9,9 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -524,14 +524,14 @@ namespace Microsoft.Build.BackEnd
             switch (logMessagePacket.EventType)
             {
                 case LoggingEventType.BuildErrorEvent:
-                    this.BuildEngine.LogErrorEvent((BuildErrorEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
+                    BuildEngine.LogErrorEvent((BuildErrorEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.BuildWarningEvent:
-                    this.BuildEngine.LogWarningEvent((BuildWarningEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
+                    BuildEngine.LogWarningEvent((BuildWarningEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.TaskCommandLineEvent:
                 case LoggingEventType.BuildMessageEvent:
-                    this.BuildEngine.LogMessageEvent((BuildMessageEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
+                    BuildEngine.LogMessageEvent((BuildMessageEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.CustomEvent:
                     BuildEventArgs buildEvent = logMessagePacket.NodeBuildEvent.Value.Value;
@@ -540,19 +540,19 @@ namespace Microsoft.Build.BackEnd
                     // in which case they need to be dealt with in the same way as their base type of event.
                     if (buildEvent is BuildErrorEventArgs buildErrorEventArgs)
                     {
-                        this.BuildEngine.LogErrorEvent(buildErrorEventArgs);
+                        BuildEngine.LogErrorEvent(buildErrorEventArgs);
                     }
                     else if (buildEvent is BuildWarningEventArgs buildWarningEventArgs)
                     {
-                        this.BuildEngine.LogWarningEvent(buildWarningEventArgs);
+                        BuildEngine.LogWarningEvent(buildWarningEventArgs);
                     }
                     else if (buildEvent is BuildMessageEventArgs buildMessageEventArgs)
                     {
-                        this.BuildEngine.LogMessageEvent(buildMessageEventArgs);
+                        BuildEngine.LogMessageEvent(buildMessageEventArgs);
                     }
                     else if (buildEvent is CustomBuildEventArgs customBuildEventArgs)
                     {
-                        this.BuildEngine.LogCustomEvent(customBuildEventArgs);
+                        BuildEngine.LogCustomEvent(customBuildEventArgs);
                     }
                     else
                     {

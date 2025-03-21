@@ -58,8 +58,8 @@ namespace Microsoft.Build.Tasks
         void ReleaseVarDesc(IntPtr pVarDesc);
     }
 
-    [GuidAttribute("00020406-0000-0000-C000-000000000046")]
-    [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("00020406-0000-0000-C000-000000000046")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     [ComImport]
     internal interface ICreateTypeLib
     {

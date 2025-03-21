@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             LogMessagePacket packet = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, buildEvent));
             Assert.Equal(logEventType, packet.EventType);
             Assert.Equal(NodePacketType.LogMessage, packet.Type);
-            Assert.True(Object.ReferenceEquals(buildEvent, packet.NodeBuildEvent.Value.Value)); // "Expected buildEvent to have the same object reference as packet.BuildEvent"
+            Assert.True(ReferenceEquals(buildEvent, packet.NodeBuildEvent.Value.Value)); // "Expected buildEvent to have the same object reference as packet.BuildEvent"
         }
 
         #endregion

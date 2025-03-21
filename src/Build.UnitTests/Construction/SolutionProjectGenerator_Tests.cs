@@ -2389,8 +2389,8 @@ EndGlobal
 
 #if FEATURE_ASPNET_COMPILER
                 Version ver = new Version("4.34");
-                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", solution.ProjectsInOrder[0].ProjectName, ver.ToString());
-                logger.AssertLogContains(message);
+                    string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AspNetCompiler.TargetingHigherFrameworksDefaultsTo40", solution.ProjectsInOrder[0].ProjectName, ver.ToString());
+                    logger.AssertLogContains(message);
 #endif
                 }
             }
@@ -2451,7 +2451,7 @@ EndGlobal
                 Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
 
                 instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "My_Project:Six" });
-        
+
                 Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase)));
             }
         }

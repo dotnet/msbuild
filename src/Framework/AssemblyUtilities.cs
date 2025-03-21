@@ -152,7 +152,7 @@ namespace Microsoft.Build.Shared
 
         private static Assembly GetEntryAssembly()
         {
-            return System.Reflection.Assembly.GetEntryAssembly();
+            return Assembly.GetEntryAssembly();
         }
 
 #if !FEATURE_CULTUREINFO_GETCULTURES

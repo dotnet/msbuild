@@ -258,7 +258,7 @@ namespace Microsoft.Build.Tasks
             ITaskItem[] resolvedSDKItems,
             string[] frameworkPaths,
             InstalledAssemblies installedAssemblies,
-            System.Reflection.ProcessorArchitecture targetProcessorArchitecture,
+            SystemProcessorArchitecture targetProcessorArchitecture,
             FileExists fileExists,
             DirectoryExists directoryExists,
             GetDirectories getDirectories,
@@ -319,7 +319,7 @@ namespace Microsoft.Build.Tasks
             _assemblyMetadataCache = assemblyMetadataCache;
 
             // Set condition for when to check assembly version against the target framework version
-            _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
+            _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? s_targetFrameworkVersion_40) <= s_targetFrameworkVersion_40);
 
             // Convert the list of installed SDK's to a dictionary for faster lookup
             _resolvedSDKReferences = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
@@ -1027,7 +1027,7 @@ namespace Microsoft.Build.Tasks
                 _assemblyMetadataCache,
                 out AssemblyNameExtension[] dependentAssemblies,
                 out scatterFiles,
-                out FrameworkName frameworkName);
+                out FrameworkNameVersioning frameworkName);
 
             reference.FrameworkNameAttribute = frameworkName;
 
@@ -2027,7 +2027,7 @@ namespace Microsoft.Build.Tasks
                         }
                         else
                         {
-                            referenceAssemblyDirectories = GetHighestVersionReferenceAssemblyDirectories(targetFrameworkMoniker, out FrameworkName highestFrameworkName);
+                            referenceAssemblyDirectories = GetHighestVersionReferenceAssemblyDirectories(targetFrameworkMoniker, out FrameworkNameVersioning highestFrameworkName);
                             if (highestFrameworkName != null)
                             {
                                 otherFrameworkName = highestFrameworkName.FullName;

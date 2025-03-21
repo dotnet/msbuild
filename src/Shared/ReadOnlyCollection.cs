@@ -118,7 +118,7 @@ namespace Microsoft.Build.Collections
             // so we could just use IEnumerable.Contains<T>() here.
             if (!(_backing is ICollection<T>))
             {
-                return _backing.Contains<T>(item);
+                return _backing.Contains(item);
             }
 
             return BackingCollection.Contains(item);

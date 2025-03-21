@@ -1488,7 +1488,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ProjectPropertyElement xml1 = project.Xml.Properties.First();
             Assert.Equal("2;2", property.EvaluatedValue);
             Assert.Equal("1", property.Predecessor.Predecessor.EvaluatedValue);
-            Assert.True(Object.ReferenceEquals(xml1, property.Predecessor.Predecessor.Xml));
+            Assert.True(ReferenceEquals(xml1, property.Predecessor.Predecessor.Xml));
             Assert.Null(property.Predecessor.Predecessor.Predecessor);
         }
 
@@ -1514,7 +1514,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ProjectRootElement importXml = ProjectRootElement.Open(project.Items.ElementAt(0).Xml.ContainingProject.FullPath);
             ProjectRootElement predecessorXmlRoot = project.GetProperty("outdir").Predecessor.Xml.ContainingProject;
 
-            Assert.True(Object.ReferenceEquals(importXml, predecessorXmlRoot));
+            Assert.True(ReferenceEquals(importXml, predecessorXmlRoot));
         }
 
         /// <summary>
@@ -1565,7 +1565,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal("1", metadatum.Predecessor.Predecessor.EvaluatedValue);
 
             ProjectMetadataElement xml1 = project.Xml.ItemDefinitions.ElementAt(0).Metadata.ElementAt(0);
-            Assert.True(Object.ReferenceEquals(xml1, metadatum.Predecessor.Predecessor.Xml));
+            Assert.True(ReferenceEquals(xml1, metadatum.Predecessor.Predecessor.Xml));
             Assert.Null(metadatum.Predecessor.Predecessor.Predecessor);
         }
 
@@ -1625,10 +1625,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal("1", metadatum.Predecessor.Predecessor.EvaluatedValue);
 
             ProjectMetadataElement xml1 = project.Xml.ItemDefinitions.ElementAt(0).Metadata.ElementAt(0);
-            Assert.True(Object.ReferenceEquals(xml1, metadatum.Predecessor.Predecessor.Xml));
+            Assert.True(ReferenceEquals(xml1, metadatum.Predecessor.Predecessor.Xml));
 
             ProjectMetadataElement xml2 = project.Xml.Items.ElementAt(0).Metadata.ElementAt(0);
-            Assert.True(Object.ReferenceEquals(xml2, metadatum.Predecessor.Xml));
+            Assert.True(ReferenceEquals(xml2, metadatum.Predecessor.Xml));
 
             Assert.Null(metadatum.Predecessor.Predecessor.Predecessor);
         }
@@ -1663,7 +1663,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal("1", metadatum.Predecessor.EvaluatedValue);
 
             ProjectMetadataElement xml1 = project.Xml.Items.ElementAt(1).Metadata.ElementAt(0);
-            Assert.True(Object.ReferenceEquals(xml1, metadatum.Predecessor.Xml));
+            Assert.True(ReferenceEquals(xml1, metadatum.Predecessor.Xml));
 
             Assert.Null(metadatum.Predecessor.Predecessor);
         }
@@ -1695,7 +1695,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal("1", metadatum.Predecessor.EvaluatedValue);
 
             ProjectMetadataElement xml1 = project.Xml.Items.ElementAt(0).Metadata.ElementAt(0);
-            Assert.True(Object.ReferenceEquals(xml1, metadatum.Predecessor.Xml));
+            Assert.True(ReferenceEquals(xml1, metadatum.Predecessor.Xml));
 
             Assert.Null(metadatum.Predecessor.Predecessor);
         }
@@ -1882,8 +1882,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 ProjectMetadata predecessor = project.GetItems("i").ElementAt(0).GetMetadata("m").Predecessor;
 
-                Assert.True(Object.ReferenceEquals(import, predecessor.Xml.ContainingProject));
-                Assert.True(Object.ReferenceEquals(project.Xml, predecessor.Predecessor.Xml.ContainingProject));
+                Assert.True(ReferenceEquals(import, predecessor.Xml.ContainingProject));
+                Assert.True(ReferenceEquals(project.Xml, predecessor.Predecessor.Xml.ContainingProject));
             }
             finally
             {
@@ -4804,7 +4804,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingNone()
         {
-            this.VerifyPropertyTrackingLoggingScenario(
+            VerifyPropertyTrackingLoggingScenario(
                 "0",
                  (logger, _) =>
                 {
@@ -4836,7 +4836,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingPropertyInitialValue()
         {
-            this.VerifyPropertyTrackingLoggingScenario(
+            VerifyPropertyTrackingLoggingScenario(
                 "2",
                 (logger, projectPath) =>
                 {
@@ -4888,7 +4888,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingEnvironmentVariableRead()
         {
-            this.VerifyPropertyTrackingLoggingScenario(
+            VerifyPropertyTrackingLoggingScenario(
                 "4",
                 (logger, _) =>
                 {
@@ -4922,7 +4922,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingUninitializedPropertyRead()
         {
-            this.VerifyPropertyTrackingLoggingScenario(
+            VerifyPropertyTrackingLoggingScenario(
                 "8",
                 (logger, _) =>
                 {
@@ -4953,7 +4953,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingAll()
         {
-            this.VerifyPropertyTrackingLoggingScenario(
+            VerifyPropertyTrackingLoggingScenario(
                 "15",
                 (logger, projectPath) =>
                 {

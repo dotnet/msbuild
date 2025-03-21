@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public void ChangeItemType(string newType)
         {
-            this.ItemXml.ItemType = newType;
+            ItemXml.ItemType = newType;
         }
     }
 
@@ -34,19 +34,19 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     {
         public MockProjectItemElementLink(MockProjectItemElementLinkRemoter proxy, IImportHolder holder)
         {
-            this.Holder = holder;
-            this.Proxy = proxy;
+            Holder = holder;
+            Proxy = proxy;
         }
 
         public IImportHolder Holder { get; }
-        public ProjectCollectionLinker Linker => this.Holder.Linker;
+        public ProjectCollectionLinker Linker => Holder.Linker;
         public MockProjectItemElementLinkRemoter Proxy { get; }
-        object ILinkMock.Remoter => this.Proxy;
-        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => this.Proxy;
-        MockProjectElementContainerLinkRemoter IProjectElementContainerLinkHelper.ContainerProxy => this.Proxy;
+        object ILinkMock.Remoter => Proxy;
+        MockProjectElementLinkRemoter IProjectElementLinkHelper.ElementProxy => Proxy;
+        MockProjectElementContainerLinkRemoter IProjectElementContainerLinkHelper.ContainerProxy => Proxy;
 
         // ProjectItemElementLink -----
-        public override void ChangeItemType(string newType) { this.Proxy.ChangeItemType(newType); }
+        public override void ChangeItemType(string newType) { Proxy.ChangeItemType(newType); }
         // ----------------------------
 
         #region ProjectElementLink redirectors

@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// A test data class for providing data to the <see cref="FileMatcherTest.GetFilesComplexGlobbingMatching"/> test.
+        /// A test data class for providing data to the <see cref="GetFilesComplexGlobbingMatching"/> test.
         /// </summary>
         public class GetFilesComplexGlobbingMatchingInfo
         {
@@ -829,7 +829,7 @@ namespace Microsoft.Build.UnitTests
         {
             string longPath = FileMatcher.GetLongPathName(
                 @"D:\LONGDI~1\LONGSU~1\LONGFI~1.TXT",
-                new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
+                new FileMatcher.GetFileSystemEntries(GetFileSystemEntries));
 
             Assert.Equal(@"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
@@ -845,7 +845,7 @@ namespace Microsoft.Build.UnitTests
         {
             string longPath = FileMatcher.GetLongPathName(
                 @"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt",
-                new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
+                new FileMatcher.GetFileSystemEntries(GetFileSystemEntries));
 
             Assert.Equal(@"D:\LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
@@ -861,7 +861,7 @@ namespace Microsoft.Build.UnitTests
         {
             string longPath = FileMatcher.GetLongPathName(
                 @"\\server\share\LONGDI~1\LONGSU~1\LONGFI~1.TXT",
-                new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
+                new FileMatcher.GetFileSystemEntries(GetFileSystemEntries));
 
             Assert.Equal(@"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
@@ -877,7 +877,7 @@ namespace Microsoft.Build.UnitTests
         {
             string longPath = FileMatcher.GetLongPathName(
                 @"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt",
-                new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
+                new FileMatcher.GetFileSystemEntries(GetFileSystemEntries));
 
             Assert.Equal(@"\\server\share\LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
@@ -893,7 +893,7 @@ namespace Microsoft.Build.UnitTests
         {
             string longPath = FileMatcher.GetLongPathName(
                 @"LONGDI~1\LONGSU~1\LONGFI~1.TXT",
-                new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
+                new FileMatcher.GetFileSystemEntries(GetFileSystemEntries));
 
             Assert.Equal(@"LongDirectoryName\LongSubDirectory\LongFileName.txt", longPath);
         }
@@ -909,7 +909,7 @@ namespace Microsoft.Build.UnitTests
         {
             string longPath = FileMatcher.GetLongPathName(
                 @"LONGDI~1\LONGSU~1\",
-                new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
+                new FileMatcher.GetFileSystemEntries(GetFileSystemEntries));
 
             Assert.Equal(@"LongDirectoryName\LongSubDirectory\", longPath);
         }
@@ -925,7 +925,7 @@ namespace Microsoft.Build.UnitTests
         {
             string longPath = FileMatcher.GetLongPathName(
                 @"LONGDI~1\\LONGSU~1\\",
-                new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
+                new FileMatcher.GetFileSystemEntries(GetFileSystemEntries));
 
             Assert.Equal(@"LongDirectoryName\\LongSubDirectory\\", longPath);
         }
@@ -941,7 +941,7 @@ namespace Microsoft.Build.UnitTests
         {
             string longPath = FileMatcher.GetLongPathName(
                 @"c:\apple\banana\tomato\pomegr~1\orange\",
-                new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
+                new FileMatcher.GetFileSystemEntries(GetFileSystemEntries));
 
             Assert.Equal(@"c:\apple\banana\tomato\pomegranate\orange\", longPath);
         }
@@ -958,7 +958,7 @@ namespace Microsoft.Build.UnitTests
         {
             string longPath = FileMatcher.GetLongPathName(
                 @"c:\apple\banana\tomato\pomegr~1\orange\chocol~1\vanila~1",
-                new FileMatcher.GetFileSystemEntries(FileMatcherTest.GetFileSystemEntries));
+                new FileMatcher.GetFileSystemEntries(GetFileSystemEntries));
 
             Assert.Equal(@"c:\apple\banana\tomato\pomegranate\orange\chocol~1\vanila~1", longPath);
         }

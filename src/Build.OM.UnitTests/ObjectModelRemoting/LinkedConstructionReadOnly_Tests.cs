@@ -26,30 +26,30 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             public ROTestCollectionGroup()
                 : base(1, 0)
             {
-                this.BigFile = this.ImmutableDisk.WriteProjectFile($"Big.proj", TestCollectionGroup.BigProjectFile);
-                var projReal = this.Remote[0].LoadProjectIgnoreMissingImports(this.BigFile);
-                this.Local.Importing = true;
+                BigFile = ImmutableDisk.WriteProjectFile($"Big.proj", BigProjectFile);
+                var projReal = Remote[0].LoadProjectIgnoreMissingImports(BigFile);
+                Local.Importing = true;
                 Assert.NotNull(projReal);
-                this.RealXml = projReal.Xml;
-                Assert.NotNull(this.RealXml);
-                var projView = this.Local.GetLoadedProjects(this.BigFile).FirstOrDefault();
+                RealXml = projReal.Xml;
+                Assert.NotNull(RealXml);
+                var projView = Local.GetLoadedProjects(BigFile).FirstOrDefault();
                 Assert.NotNull(projView);
-                this.ViewXml = projView.Xml;
+                ViewXml = projView.Xml;
 
-                ViewValidation.VerifyNotLinkedNotNull(this.RealXml);
-                ViewValidation.VerifyLinkedNotNull(this.ViewXml);
+                ViewValidation.VerifyNotLinkedNotNull(RealXml);
+                ViewValidation.VerifyLinkedNotNull(ViewXml);
             }
 
             public void ResetBeforeTests()
             {
-                this.Group.ClearAllRemotes();
+                Group.ClearAllRemotes();
 
-                var projView = this.Local.GetLoadedProjects(this.BigFile).FirstOrDefault();
+                var projView = Local.GetLoadedProjects(BigFile).FirstOrDefault();
                 Assert.NotNull(projView);
-                Assert.NotSame(projView, this.ViewXml);
-                this.ViewXml = projView.Xml;
+                Assert.NotSame(projView, ViewXml);
+                ViewXml = projView.Xml;
 
-                ViewValidation.VerifyLinkedNotNull(this.ViewXml);
+                ViewValidation.VerifyLinkedNotNull(ViewXml);
             }
         }
 
@@ -57,8 +57,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public LinkedConstructionReadOnly_Tests(ROTestCollectionGroup group)
         {
-            this.StdGroup = group; // new ROTestCollectionGroup();
-            this.StdGroup.ResetBeforeTests();
+            StdGroup = group; // new ROTestCollectionGroup();
+            StdGroup.ResetBeforeTests();
             // group.Clear();
         }
 
@@ -66,8 +66,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectRootElemetReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             ViewValidation.Verify(preView, preReal);
         }
@@ -75,8 +75,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectChooseElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             Assert.NotEmpty(preReal.ChooseElements);
 
@@ -86,8 +86,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectExtensionsElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realExtensionsList = preReal.ChildrenReversed.OfType<ProjectExtensionsElement>().ToList();
             var viewExtensionsList = preView.ChildrenReversed.OfType<ProjectExtensionsElement>().ToList();
@@ -108,8 +108,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectImportElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realImports = preReal.Imports.ToList();
             var viewImports = preView.Imports.ToList();
@@ -121,8 +121,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectImportGroupElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realImportGroups = preReal.ImportGroups.ToList();
             var viewImportGroups = preView.ImportGroups.ToList();
@@ -134,8 +134,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectItemDefinitionElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realItemDefinitions = preReal.ItemDefinitions.ToList();
             var viewlItemDefinitions = preView.ItemDefinitions.ToList();
@@ -147,8 +147,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectItemDefinitionGroupElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realItemDefinitionGroups = preReal.ItemDefinitionGroups.ToList();
             var viewlItemDefinitionGroups = preView.ItemDefinitionGroups.ToList();
@@ -160,8 +160,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectItemElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realItems = preReal.Items.ToList();
             var viewlItems = preView.Items.ToList();
@@ -173,8 +173,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectItemGroupElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realItemGroups = preReal.ItemGroups.ToList();
             var viewItemGroups = preView.ItemGroups.ToList();
@@ -186,8 +186,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectPropertyElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realProperties = preReal.Properties.ToList();
             var viewProperties = preView.Properties.ToList();
@@ -199,8 +199,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectPropertyGroupElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realPropertieGroups = preReal.PropertyGroups.ToList();
             var viewPropertieGroups = preView.PropertyGroups.ToList();
@@ -212,8 +212,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectOtherwiseElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realCollection = preReal.AllChildren.OfType<ProjectOtherwiseElement>().ToList();
             var viewCollection = preView.AllChildren.OfType<ProjectOtherwiseElement>().ToList();
@@ -225,8 +225,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectProjectWhenElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realCollection = preReal.AllChildren.OfType<ProjectWhenElement>().ToList();
             var viewCollection = preView.AllChildren.OfType<ProjectWhenElement>().ToList();
@@ -238,8 +238,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectProjectSdkElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realCollection = preReal.AllChildren.OfType<ProjectSdkElement>().ToList();
             var viewCollection = preView.AllChildren.OfType<ProjectSdkElement>().ToList();
@@ -251,8 +251,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectTargetElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realCollection = preReal.Targets.ToList();
             var viewCollection = preView.Targets.ToList();
@@ -264,8 +264,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectTaskElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realCollection = preReal.AllChildren.OfType<ProjectTaskElement>().ToList();
             var viewCollection = preView.AllChildren.OfType<ProjectTaskElement>().ToList();
@@ -278,8 +278,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectUsingTaskElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realCollection = preReal.AllChildren.OfType<ProjectUsingTaskElement>().ToList();
             var viewCollection = preView.AllChildren.OfType<ProjectUsingTaskElement>().ToList();
@@ -291,8 +291,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectUsingTaskBodyElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realCollection = preReal.AllChildren.OfType<ProjectUsingTaskBodyElement>().ToList();
             var viewCollection = preView.AllChildren.OfType<ProjectUsingTaskBodyElement>().ToList();
@@ -304,8 +304,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void UsingTaskParameterGroupElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realCollection = preReal.AllChildren.OfType<UsingTaskParameterGroupElement>().ToList();
             var viewCollection = preView.AllChildren.OfType<UsingTaskParameterGroupElement>().ToList();
@@ -317,8 +317,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectUsingTaskParameterElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realCollection = preReal.AllChildren.OfType<ProjectUsingTaskParameterElement>().ToList();
             var viewCollection = preView.AllChildren.OfType<ProjectUsingTaskParameterElement>().ToList();
@@ -330,8 +330,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectOnErrorElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realCollection = preReal.AllChildren.OfType<ProjectOnErrorElement>().ToList();
             var viewCollection = preView.AllChildren.OfType<ProjectOnErrorElement>().ToList();
@@ -343,8 +343,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         [Fact]
         public void ProjectOutputElementReadOnly()
         {
-            var preReal = this.StdGroup.RealXml;
-            var preView = this.StdGroup.ViewXml;
+            var preReal = StdGroup.RealXml;
+            var preView = StdGroup.ViewXml;
 
             var realCollection = preReal.AllChildren.OfType<ProjectOutputElement>().ToList();
             var viewCollection = preView.AllChildren.OfType<ProjectOutputElement>().ToList();

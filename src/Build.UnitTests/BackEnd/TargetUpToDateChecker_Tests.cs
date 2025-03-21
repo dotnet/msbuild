@@ -542,8 +542,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             public FileWriteInfo(string path, DateTime lastWriteTime)
             {
-                this.Path = path;
-                this.LastWriteTime = lastWriteTime;
+                Path = path;
+                LastWriteTime = lastWriteTime;
             }
         }
 

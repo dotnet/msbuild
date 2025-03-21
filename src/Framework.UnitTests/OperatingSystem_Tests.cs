@@ -17,7 +17,7 @@ namespace Microsoft.Build.Framework.UnitTests
         [InlineData("macOS", false)]
         public void IsOSPlatform(string platform, bool expected)
         {
-            Microsoft.Build.Framework.OperatingSystem.IsOSPlatform(platform).ShouldBe(expected);
+            OperatingSystem.IsOSPlatform(platform).ShouldBe(expected);
         }
 
         [WindowsFullFrameworkOnlyTheory]
@@ -27,30 +27,30 @@ namespace Microsoft.Build.Framework.UnitTests
         [InlineData("macOS", 0, false)]
         public void IsOSPlatformVersionAtLeast(string platform, int major, bool expected)
         {
-            Microsoft.Build.Framework.OperatingSystem.IsOSPlatformVersionAtLeast(platform, major).ShouldBe(expected);
+            OperatingSystem.IsOSPlatformVersionAtLeast(platform, major).ShouldBe(expected);
         }
 
         [WindowsFullFrameworkOnlyFact]
         public void IsWindows()
         {
-            Microsoft.Build.Framework.OperatingSystem.IsWindows().ShouldBeTrue();
+            OperatingSystem.IsWindows().ShouldBeTrue();
         }
 
         [WindowsFullFrameworkOnlyFact]
         public void IsWindowsVersionAtLeast()
         {
-            Microsoft.Build.Framework.OperatingSystem.IsWindowsVersionAtLeast(4).ShouldBeTrue();
-            Microsoft.Build.Framework.OperatingSystem.IsWindowsVersionAtLeast(999).ShouldBeFalse();
+            OperatingSystem.IsWindowsVersionAtLeast(4).ShouldBeTrue();
+            OperatingSystem.IsWindowsVersionAtLeast(999).ShouldBeFalse();
         }
 
         [WindowsFullFrameworkOnlyFact]
         public void IsOtherThanWindows()
         {
-            Microsoft.Build.Framework.OperatingSystem.IsFreeBSD().ShouldBeFalse();
-            Microsoft.Build.Framework.OperatingSystem.IsFreeBSDVersionAtLeast(0).ShouldBeFalse();
-            Microsoft.Build.Framework.OperatingSystem.IsLinux().ShouldBeFalse();
-            Microsoft.Build.Framework.OperatingSystem.IsMacOS().ShouldBeFalse();
-            Microsoft.Build.Framework.OperatingSystem.IsMacOSVersionAtLeast(0).ShouldBeFalse();
+            OperatingSystem.IsFreeBSD().ShouldBeFalse();
+            OperatingSystem.IsFreeBSDVersionAtLeast(0).ShouldBeFalse();
+            OperatingSystem.IsLinux().ShouldBeFalse();
+            OperatingSystem.IsMacOS().ShouldBeFalse();
+            OperatingSystem.IsMacOSVersionAtLeast(0).ShouldBeFalse();
         }
 #endif
     }

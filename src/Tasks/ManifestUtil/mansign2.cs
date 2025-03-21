@@ -290,7 +290,7 @@ namespace System.Deployment.Internal.CodeSigning
                 return base.GetIdElement(document, idValue);
             }
 
-            KeyInfo keyInfo = this.KeyInfo;
+            KeyInfo keyInfo = KeyInfo;
             if (keyInfo.Id != idValue)
             {
                 return null;
@@ -462,7 +462,7 @@ namespace System.Deployment.Internal.CodeSigning
         /// <param name="oldCsp"></param>
         /// <param name="useSha256">Whether to use sha256</param>
         /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Cryptographic.Standard", "CA5358:RSAProviderNeeds2048bitKey", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
+        [SuppressMessage("Microsoft.Cryptographic.Standard", "CA5358:RSAProviderNeeds2048bitKey", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
         internal static RSACryptoServiceProvider GetFixedRSACryptoServiceProvider(RSACryptoServiceProvider oldCsp, bool useSha256)
         {
             if (!useSha256)
@@ -556,7 +556,7 @@ namespace System.Deployment.Internal.CodeSigning
             return ComputeHashFromManifest(manifestDom, false, useSha256);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
+        [SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
         private static byte[] ComputeHashFromManifest(XmlDocument manifestDom, bool oldFormat, bool useSha256)
         {
             if (oldFormat)

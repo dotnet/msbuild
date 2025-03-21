@@ -223,10 +223,10 @@ namespace Microsoft.Build.Shared
         {
             if (!NativeMethods.IsWindows)
             {
-                return EncodingUtilities.Utf8WithoutBom;
+                return Utf8WithoutBom;
             }
 
-            var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;
+            var defaultEncoding = CurrentSystemOemEncoding;
 
             // When Windows is configured to use UTF-8 by default, the above returns
             // a UTF-8-with-BOM encoding, which cmd.exe can't interpret. Force the no-BOM
@@ -234,23 +234,23 @@ namespace Microsoft.Build.Shared
             // See https://github.com/dotnet/msbuild/issues/4268
             if (defaultEncoding is UTF8Encoding e && e.GetPreamble().Length > 0)
             {
-                defaultEncoding = EncodingUtilities.Utf8WithoutBom;
+                defaultEncoding = Utf8WithoutBom;
             }
 
-            string useUtf8 = string.IsNullOrEmpty(encodingSpecification) ? EncodingUtilities.UseUtf8Detect : encodingSpecification;
+            string useUtf8 = string.IsNullOrEmpty(encodingSpecification) ? UseUtf8Detect : encodingSpecification;
 
             switch (useUtf8.ToUpperInvariant())
             {
-                case EncodingUtilities.UseUtf8Always:
-                case EncodingUtilities.UseUtf8True:
-                    return EncodingUtilities.Utf8WithoutBom;
-                case EncodingUtilities.UseUtf8Never:
-                case EncodingUtilities.UseUtf8System:
+                case UseUtf8Always:
+                case UseUtf8True:
+                    return Utf8WithoutBom;
+                case UseUtf8Never:
+                case UseUtf8System:
                     return defaultEncoding;
                 default:
-                    return EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, contents)
+                    return CanEncodeString(defaultEncoding.CodePage, contents)
                         ? defaultEncoding
-                        : EncodingUtilities.Utf8WithoutBom;
+                        : Utf8WithoutBom;
             }
         }
 #nullable enable

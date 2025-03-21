@@ -75,6 +75,6 @@ internal class TerminalNodeStatus
 
     public override int GetHashCode()
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 }

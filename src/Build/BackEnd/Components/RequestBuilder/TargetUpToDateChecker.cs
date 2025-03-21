@@ -547,8 +547,8 @@ namespace Microsoft.Build.BackEnd
             //    typically be built out of more than one set of inputs
             if (discreteTargetInputItemSpecs.Count > 0)
             {
-                List<string> inputs = CollectionHelpers.RemoveNulls<string>(discreteTargetInputItemSpecs);
-                List<string> outputs = CollectionHelpers.RemoveNulls<string>(targetOutputItemSpecs);
+                List<string> inputs = CollectionHelpers.RemoveNulls(discreteTargetInputItemSpecs);
+                List<string> outputs = CollectionHelpers.RemoveNulls(targetOutputItemSpecs);
 
                 if (inputs.Count == 0)
                 {
@@ -745,8 +745,8 @@ namespace Microsoft.Build.BackEnd
             targetInputItemSpecs.AddRange(GetItemSpecsFromItemVectors(itemVectorTransformsInTargetInputs));
             targetInputItemSpecs.AddRange(discreteItemsInTargetInputs.Values);
 
-            List<string> inputs = CollectionHelpers.RemoveNulls<string>(targetInputItemSpecs);
-            List<string> outputs = CollectionHelpers.RemoveNulls<string>(targetOutputItemSpecs);
+            List<string> inputs = CollectionHelpers.RemoveNulls(targetInputItemSpecs);
+            List<string> outputs = CollectionHelpers.RemoveNulls(targetOutputItemSpecs);
 
             if (inputs.Count == 0)
             {

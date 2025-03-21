@@ -153,7 +153,7 @@ namespace Microsoft.Build.BackEnd
                 var targetExists = _projectInstance.Targets.TryGetValue(targetName.name, out ProjectTargetInstance targetInstance);
                 if (!targetExists && entry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.SkipNonexistentTargets))
                 {
-                    _projectLoggingContext.LogComment(Framework.MessageImportance.Low,
+                    _projectLoggingContext.LogComment(MessageImportance.Low,
                         "TargetSkippedWhenSkipNonexistentTargets", targetName.name);
                 }
                 else
@@ -307,7 +307,7 @@ namespace Microsoft.Build.BackEnd
                 // Any targets we have pushed on at this point we need to get rid of since we aren't going to process them.
                 // If there were normal task errors, standard error handling semantics would have taken care of them.
                 // If there was an exception, such as a circular dependency error, items may still be on the stack so we must clear them.
-                while (!Object.ReferenceEquals(_targetsToBuild.Peek(), currentTargetEntry))
+                while (!ReferenceEquals(_targetsToBuild.Peek(), currentTargetEntry))
                 {
                     _targetsToBuild.Pop();
                 }
@@ -326,7 +326,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Forwarding implementation of BuildProjects
         /// </summary>
-        async Task<BuildResult[]> IRequestBuilderCallback.BuildProjects(string[] projectFiles, Microsoft.Build.Collections.PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets)
+        async Task<BuildResult[]> IRequestBuilderCallback.BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets)
         {
             return await _requestBuilderCallback.BuildProjects(projectFiles, properties, toolsVersions, targets, waitForResults, skipNonexistentTargets);
         }

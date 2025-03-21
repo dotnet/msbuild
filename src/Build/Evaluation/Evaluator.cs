@@ -736,7 +736,7 @@ namespace Microsoft.Build.Evaluation
                 using (_evaluationProfiler.TrackPass(EvaluationPass.UsingTasks))
                 {
                     // Evaluate the usingtask and add the result into the data passed in
-                    TaskRegistry.InitializeTaskRegistryFromUsingTaskElements<P, I>(
+                    TaskRegistry.InitializeTaskRegistryFromUsingTaskElements(
                         _evaluationLoggingContext,
                         _usingTaskElements.Select(p => (p.Value, p.Key)),
                         _data.TaskRegistry,

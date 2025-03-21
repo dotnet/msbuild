@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(projectXml1.FullPath);
 
-            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.True(ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(@"xyz\abc");
 
-            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.True(ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
@@ -209,7 +209,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc"));
 
-            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.True(ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc"));
 
-            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.True(ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(@"xyz\abc");
 
-            Assert.True(object.ReferenceEquals(projectXml1, projectXml2));
+            Assert.True(ReferenceEquals(projectXml1, projectXml2));
         }
 
         /// <summary>
@@ -257,7 +257,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void SetFullPathProjectXmlAlreadyLoaded()
         {
             ProjectRootElement projectXml1 = ProjectRootElement.Create();
-            projectXml1.FullPath = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+            projectXml1.FullPath = FileUtilities.GetTemporaryFile();
 
             ProjectRootElement projectXml2 = ProjectRootElement.Create();
             projectXml2.FullPath = projectXml1.FullPath;
@@ -429,7 +429,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 {
                     try
                     {
-                        path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
+                        path = FileUtilities.GetTemporaryFileName();
                         File.WriteAllText(path, content);
 
                         ProjectRootElement.Open(path);
@@ -913,11 +913,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 try
                 {
-                    tempFileSentinel = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    tempFileSentinel = FileUtilities.GetTemporaryFile();
                     solutionFile = Path.ChangeExtension(tempFileSentinel, ".sln");
                     File.Copy(tempFileSentinel, solutionFile);
 
-                    security = new FileSecurity(solutionFile, System.Security.AccessControl.AccessControlSections.All);
+                    security = new FileSecurity(solutionFile, AccessControlSections.All);
 
                     security.AddAccessRule(rule);
 
@@ -958,9 +958,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 try
                 {
                     // Does not have .sln or .vcproj extension so loads as project
-                    projectFile = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    projectFile = FileUtilities.GetTemporaryFile();
 
-                    security = new FileSecurity(projectFile, System.Security.AccessControl.AccessControlSections.All);
+                    security = new FileSecurity(projectFile, AccessControlSections.All);
                     security.AddAccessRule(rule);
 
                     File.SetAccessControl(projectFile, security);
@@ -994,7 +994,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 try
                 {
-                    solutionFile = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
+                    solutionFile = FileUtilities.GetTemporaryFileName();
 
                     // Arbitrary corrupt content
                     string content = @"Microsoft Visual Studio Solution File, Format Version 10.00

@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests
         public bool MyBoolParam
         {
             get { return _myBoolParam; }
-            set { _myBoolParam = value; this.myBoolParamWasSet = true; }
+            set { _myBoolParam = value; myBoolParamWasSet = true; }
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests
         public bool[] MyBoolArrayParam
         {
             get { return _myBoolArrayParam; }
-            set { _myBoolArrayParam = value; this.myBoolArrayParamWasSet = true; }
+            set { _myBoolArrayParam = value; myBoolArrayParamWasSet = true; }
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Microsoft.Build.UnitTests
         public int MyIntParam
         {
             get { return _myIntParam; }
-            set { _myIntParam = value; this.myIntParamWasSet = true; }
+            set { _myIntParam = value; myIntParamWasSet = true; }
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests
         public int[] MyIntArrayParam
         {
             get { return _myIntArrayParam; }
-            set { _myIntArrayParam = value; this.myIntArrayParamWasSet = true; }
+            set { _myIntArrayParam = value; myIntArrayParamWasSet = true; }
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests
         public string MyStringParam
         {
             get { return _myStringParam; }
-            set { _myStringParam = value; this.myStringParamWasSet = true; }
+            set { _myStringParam = value; myStringParamWasSet = true; }
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests
         public string[] MyStringArrayParam
         {
             get { return _myStringArrayParam; }
-            set { _myStringArrayParam = value; this.myStringArrayParamWasSet = true; }
+            set { _myStringArrayParam = value; myStringArrayParamWasSet = true; }
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests
         public ITaskItem MyITaskItemParam
         {
             get { return _myITaskItemParam; }
-            set { _myITaskItemParam = value; this.myITaskItemParamWasSet = true; }
+            set { _myITaskItemParam = value; myITaskItemParamWasSet = true; }
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests
         public ITaskItem[] MyITaskItemArrayParam
         {
             get { return _myITaskItemArrayParam; }
-            set { _myITaskItemArrayParam = value; this.myITaskItemArrayParamWasSet = true; }
+            set { _myITaskItemArrayParam = value; myITaskItemArrayParamWasSet = true; }
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests
         public bool MyRequiredBoolParam
         {
             get { return _myRequiredBoolParam; }
-            set { _myRequiredBoolParam = value; this.myRequiredBoolParamWasSet = true; }
+            set { _myRequiredBoolParam = value; myRequiredBoolParamWasSet = true; }
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests
         public bool[] MyRequiredBoolArrayParam
         {
             get { return _myRequiredBoolArrayParam; }
-            set { _myRequiredBoolArrayParam = value; this.myRequiredBoolArrayParamWasSet = true; }
+            set { _myRequiredBoolArrayParam = value; myRequiredBoolArrayParamWasSet = true; }
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Microsoft.Build.UnitTests
         public int MyRequiredIntParam
         {
             get { return _myRequiredIntParam; }
-            set { _myRequiredIntParam = value; this.myRequiredIntParamWasSet = true; }
+            set { _myRequiredIntParam = value; myRequiredIntParamWasSet = true; }
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests
         public int[] MyRequiredIntArrayParam
         {
             get { return _myRequiredIntArrayParam; }
-            set { _myRequiredIntArrayParam = value; this.myRequiredIntArrayParamWasSet = true; }
+            set { _myRequiredIntArrayParam = value; myRequiredIntArrayParamWasSet = true; }
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests
         public string MyRequiredStringParam
         {
             get { return _myRequiredStringParam; }
-            set { _myRequiredStringParam = value; this.myRequiredStringParamWasSet = true; }
+            set { _myRequiredStringParam = value; myRequiredStringParamWasSet = true; }
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace Microsoft.Build.UnitTests
         public string[] MyRequiredStringArrayParam
         {
             get { return _myRequiredStringArrayParam; }
-            set { _myRequiredStringArrayParam = value; this.myRequiredStringArrayParamWasSet = true; }
+            set { _myRequiredStringArrayParam = value; myRequiredStringArrayParamWasSet = true; }
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
         public ITaskItem MyRequiredITaskItemParam
         {
             get { return _myRequiredITaskItemParam; }
-            set { _myRequiredITaskItemParam = value; this.myRequiredITaskItemParamWasSet = true; }
+            set { _myRequiredITaskItemParam = value; myRequiredITaskItemParamWasSet = true; }
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace Microsoft.Build.UnitTests
         public ITaskItem[] MyRequiredITaskItemArrayParam
         {
             get { return _myRequiredITaskItemArrayParam; }
-            set { _myRequiredITaskItemArrayParam = value; this.myRequiredITaskItemArrayParamWasSet = true; }
+            set { _myRequiredITaskItemArrayParam = value; myRequiredITaskItemArrayParamWasSet = true; }
         }
 
         /// <summary>

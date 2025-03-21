@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests
             _faultInjector.FailurePointThrow(MockTypeLibrariesFailurePoints.ITypeLib_GetLibAttr);
 
             ppTLibAttr = _memoryHelper.AllocateHandle(Marshal.SizeOf<TYPELIBATTR>());
-            Marshal.StructureToPtr(this.Attributes, ppTLibAttr, false);
+            Marshal.StructureToPtr(Attributes, ppTLibAttr, false);
         }
 
         public void ReleaseTLibAttr(IntPtr pTLibAttr)

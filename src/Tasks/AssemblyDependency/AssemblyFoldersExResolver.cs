@@ -121,7 +121,7 @@ namespace Microsoft.Build.Tasks
             _isInitialized = true;
 
             // Crack the search path just one time.
-            Match match = s_crackAssemblyFoldersExSentinel.Value.Match(this.searchPathElement);
+            Match match = s_crackAssemblyFoldersExSentinel.Value.Match(searchPathElement);
             _wasMatch = false;
 
             if (match.Success)
@@ -162,7 +162,7 @@ namespace Microsoft.Build.Tasks
                     _wasMatch = true;
 
                     bool useCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
-                    string key = "ca22615d-aa83-444b-80b9-b32f3d5db097" + this.searchPathElement;
+                    string key = "ca22615d-aa83-444b-80b9-b32f3d5db097" + searchPathElement;
                     if (useCache && _buildEngine != null)
                     {
                         _assemblyFoldersCache = _buildEngine.GetRegisteredTaskObject(key, RegisteredTaskObjectLifetime.Build) as AssemblyFoldersExCache;
@@ -170,7 +170,7 @@ namespace Microsoft.Build.Tasks
 
                     if (_assemblyFoldersCache == null)
                     {
-                        AssemblyFoldersEx assemblyFolders = new AssemblyFoldersEx(_registryKeyRoot, _targetRuntimeVersion, _registryKeySuffix, _osVersion, _platform, _getRegistrySubKeyNames, _getRegistrySubKeyDefaultValue, this.targetProcessorArchitecture, _openBaseKey);
+                        AssemblyFoldersEx assemblyFolders = new AssemblyFoldersEx(_registryKeyRoot, _targetRuntimeVersion, _registryKeySuffix, _osVersion, _platform, _getRegistrySubKeyNames, _getRegistrySubKeyDefaultValue, targetProcessorArchitecture, _openBaseKey);
                         _assemblyFoldersCache = new AssemblyFoldersExCache(assemblyFolders, fileExists);
                         if (useCache)
                         {

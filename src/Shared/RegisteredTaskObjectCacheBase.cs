@@ -127,7 +127,7 @@ namespace Microsoft.Build.Shared
                     break;
 
                 case RegisteredTaskObjectLifetime.AppDomain:
-                    dict = RegisteredTaskObjectCacheBase.s_appDomainLifetimeObjects;
+                    dict = s_appDomainLifetimeObjects;
                     break;
             }
 
