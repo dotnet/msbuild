@@ -102,10 +102,6 @@
     <DocumentationFile/>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(MSBuildRuntimeType)' == 'Full'">
-    <DefineConstants>$(DefineConstants);BOOTSTRAP_FULL_IS_AVAILABLE_FOR_RUNTIME</DefineConstants>
-  </PropertyGroup>
-
   <PropertyGroup>
     <!--
       For some reason at the moment our $(DocumentationFile) property does not contain the TFM.  I can't figure out why...
