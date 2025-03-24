@@ -104,6 +104,7 @@ extends:
           displayName: 'Generate SBOM For Insertion'
           inputs:
               BuildDropPath: 'artifacts\$(BuildConfiguration)\bin'
+              ManifestDirPath: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
 
         - task: CmdLine@1
           displayName: Print bin contents
