@@ -25,6 +25,8 @@ extends:
             signing:
               enabled: true
               signType: $(SignType)
+            sbom:
+              enabled: true
           outputs:
           - output: pipelineArtifact
             displayName: 'Publish Artifact: logs'
