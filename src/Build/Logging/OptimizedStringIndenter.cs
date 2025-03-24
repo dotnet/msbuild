@@ -4,7 +4,7 @@
 using System;
 using System.Buffers;
 
-#if NET7_0_OR_GREATER
+#if NET
 using System.Runtime.CompilerServices;
 #else
 using System.Text;
@@ -49,7 +49,7 @@ namespace Microsoft.Build.BackEnd.Logging;
 internal static class OptimizedStringIndenter
 {
 #nullable enable
-#if NET7_0_OR_GREATER
+#if NET
     [SkipLocalsInit]
 #endif
     internal static unsafe string IndentString(string? s, int indent, IStringBuilderProvider stringBuilderProvider)
@@ -67,7 +67,7 @@ internal static class OptimizedStringIndenter
             indentedStringLength += segment.Length;
         }
 
-#if NET7_0_OR_GREATER
+#if NET
 #pragma warning disable CS8500
         string result = string.Create(indentedStringLength, (s, (IntPtr)(&segments), indent), static (output, state) =>
         {

@@ -274,12 +274,13 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Dictionary of methods used to read BuildEventArgs.
         /// </summary>
-        private static Dictionary<LoggingEventType, MethodInfo> s_readMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
+        private static readonly Dictionary<LoggingEventType, MethodInfo> s_readMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
+
 #endif
         /// <summary>
         /// Dictionary of methods used to write BuildEventArgs.
         /// </summary>
-        private static Dictionary<LoggingEventType, MethodInfo> s_writeMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
+        private static readonly Dictionary<LoggingEventType, MethodInfo> s_writeMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
 
         /// <summary>
         /// Delegate for translating targetfinished events.

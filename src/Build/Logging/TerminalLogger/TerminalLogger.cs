@@ -12,8 +12,10 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 
-#if NET7_0_OR_GREATER
+#if NET
 using System.Diagnostics.CodeAnalysis;
+using System.Buffers;
+
 #endif
 
 #if NETFRAMEWORK
@@ -34,15 +36,10 @@ public sealed partial class TerminalLogger : INodeLogger
 {
     private const string FilePathPattern = " -> ";
 
-#if NET7_0_OR_GREATER
-    [StringSyntax(StringSyntaxAttribute.Regex)]
-    private const string ImmediateMessagePattern = @"\[CredentialProvider\]|--interactive";
-    private const RegexOptions Options = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture;
-
-    [GeneratedRegex(ImmediateMessagePattern, Options)]
-    private static partial Regex ImmediateMessageRegex();
+#if NET
+    private static readonly SearchValues<string> _immediateMessageKeywords = SearchValues.Create(["[CredentialProvider]", "--interactive"], StringComparison.OrdinalIgnoreCase);
 #else
-    private static readonly string[] _immediateMessageKeywords = { "[CredentialProvider]", "--interactive" };
+    private static readonly string[] _immediateMessageKeywords = ["[CredentialProvider]", "--interactive"];
 #endif
 
     private static readonly string[] newLineStrings = { "\r\n", "\n" };
@@ -164,11 +161,6 @@ public sealed partial class TerminalLogger : INodeLogger
     /// True if we've logged the ".NET SDK is preview" message.
     /// </summary>
     private bool _loggedPreviewMessage;
-
-    /// <summary>
-    /// The two directory separator characters to be passed to methods like <see cref="String.IndexOfAny(char[])"/>.
-    /// </summary>
-    private static readonly char[] PathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
 
     /// <summary>
     /// One summary per finished project test run.
@@ -816,15 +808,17 @@ public sealed partial class TerminalLogger : INodeLogger
         // For cache plugin projects which result in a cache hit, ensure the output path is set
         // to the item spec corresponding to the GetTargetPath target upon completion.
         var buildEventContext = e.BuildEventContext;
+        var targetOutputs = e.TargetOutputs;
         if (_restoreContext is null
             && buildEventContext is not null
+            && targetOutputs is not null
             && _hasUsedCache
             && e.TargetName == "GetTargetPath"
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
         {
-            if (project.IsCachePluginProject)
+            if (project is not null && project.IsCachePluginProject)
             {
-                foreach (ITaskItem output in e.TargetOutputs)
+                foreach (ITaskItem output in targetOutputs)
                 {
                     project.OutputPath = output.ItemSpec.AsMemory();
                     break;
@@ -1018,8 +1012,8 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <param name="message">Raised event.</param>
     /// <returns>true if marker is detected.</returns>
     private bool IsImmediateMessage(string message) =>
-#if NET7_0_OR_GREATER
-        ImmediateMessageRegex().IsMatch(message);
+#if NET
+        message.AsSpan().ContainsAny(_immediateMessageKeywords);
 #else
         _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
 #endif
@@ -1195,7 +1189,7 @@ public sealed partial class TerminalLogger : INodeLogger
             return null;
         }
 
-        int index = path.LastIndexOfAny(PathSeparators);
+        int index = path.AsSpan().LastIndexOfAny(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         return index >= 0
             ? $"{path.Substring(0, index + 1)}{AnsiCodes.MakeBold(path.Substring(index + 1))}"
             : path;
@@ -1293,7 +1287,7 @@ public sealed partial class TerminalLogger : INodeLogger
         builder.Append($"{category} {code}: ");
 
         // render multi-line message in a special way
-        if (message.IndexOf('\n') >= 0)
+        if (message.Contains('\n'))
         {
             // Place the multiline message under the project in case of minimal and higher verbosity.
             string[] lines = message.Split(newLineStrings, StringSplitOptions.None);

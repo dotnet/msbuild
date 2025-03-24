@@ -60,7 +60,7 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)Microsoft.Bcl.HashCode.dll
   file source=$(X86BinPath)Microsoft.NET.StringTools.dll vs.file.ngenArchitecture=all
-  file source=$(TaskHostBinPath)Microsoft.NET.StringTools.net35.dll vs.file.ngenArchitecture=all
+  file source=$(TaskHostBinPath)Microsoft.NET.StringTools.net35.dll
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
@@ -229,7 +229,7 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Bcl.HashCode.dll
   file source=$(X86BinPath)Microsoft.NET.StringTools.dll vs.file.ngenArchitecture=all
-  file source=$(TaskHostBinPath)Microsoft.NET.StringTools.net35.dll vs.file.ngenArchitecture=all
+  file source=$(TaskHostBinPath)Microsoft.NET.StringTools.net35.dll
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks
