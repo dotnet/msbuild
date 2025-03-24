@@ -7,7 +7,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -21,7 +20,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             "TestResources",
             "CustomCulture");
 
-        [WindowsFullFrameworkOnlyTheory]
+        [WindowsOnlyTheory]
         [InlineData(true, "", true, true)]
         [InlineData(false)]
         [InlineData(true, "yue", false, true)]
@@ -29,57 +28,87 @@ namespace Microsoft.Build.Tasks.UnitTests
         [InlineData(true, "euy", true)]
         [InlineData(true, "yue;euy")]
         [InlineData(true, "euy;yue")]
-        public void E2EScenarioTests(bool enableCustomCulture, string customCultureExclusions = "", bool isYueCultureExpected = false, bool isEuyCultureExpected = false)
+        public void E2EScenarioTests(
+            bool enableCustomCulture,
+            string customCultureExclusions = "",
+            bool isYueCultureExpected = false,
+            bool isEuyCultureExpected = false)
         {
-            using (TestEnvironment env = TestEnvironment.Create())
+            // Skip test if running in .NET Core SDK (relevant for VS .NetFramework only)
+            var extensionsPath = Environment.GetEnvironmentVariable("MSBuildExtensionsPath");
+            if (!string.IsNullOrEmpty(extensionsPath) && extensionsPath.Contains(Path.Combine("core", "sdk")))
             {
-                env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", enableCustomCulture ? "1" : "");
-
-                // Set up project paths
-                var testAssetsPath = TestAssetsRootPath;
-                var solutionFolder = env.CreateFolder();
-                var solutionPath = solutionFolder.Path;
-
-                // Create and configure ProjectB
-                var projectBName = "ProjectB.csproj";
-                var projBOutputPath = env.CreateFolder().Path;
-                var projectBFolder = Path.Combine(solutionPath, projectBName);
-                Directory.CreateDirectory(projectBFolder);
-                var projBContent = File.ReadAllText(Path.Combine(testAssetsPath, projectBName))
-                    .Replace("OutputPathPlaceholder", projBOutputPath)
-                    .Replace("NonCultureResourceDirectoriesPlaceholder", customCultureExclusions);
-                env.CreateFile(Path.Combine(projectBFolder, projectBName), projBContent);
-
-                // Copy ProjectA files to test solution folder
-                CopyTestAsset(testAssetsPath, "ProjectA.csproj", solutionPath);
-                CopyTestAsset(testAssetsPath, "Test.resx", solutionPath);
-                CopyTestAsset(testAssetsPath, "Test.yue.resx", solutionPath);
-                CopyTestAsset(testAssetsPath, "Test.euy.resx", solutionPath);
-
-                env.SetCurrentDirectory(projectBFolder);
-                var output = RunnerUtilities.ExecBootstrapedMSBuild("-restore", out bool buildSucceeded);
-
-                buildSucceeded.ShouldBeTrue($"MSBuild should complete successfully. Build output: {output}");
-
-                var yueCultureResourceDll = Path.Combine(projBOutputPath, "yue", "ProjectA.resources.dll");
-                AssertCustomCulture(isYueCultureExpected, "yue", yueCultureResourceDll);
-
-                var euyCultureResourceDll = Path.Combine(projBOutputPath, "euy", "ProjectA.resources.dll");
-                AssertCustomCulture(isEuyCultureExpected, "euy", euyCultureResourceDll);
-
-                env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", "");
+                return;
             }
 
-            void AssertCustomCulture(bool isCultureExpectedToExist, string customCultureName, string cultureResourcePath)
+            using (TestEnvironment env = TestEnvironment.Create())
             {
-                if (enableCustomCulture && isCultureExpectedToExist)
+                try
                 {
-                    File.Exists(cultureResourcePath).ShouldBeTrue($"Expected '{customCultureName}' resource DLL not found at: {cultureResourcePath}");
+                    // Configure environment
+                    env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", enableCustomCulture ? "1" : "");
+
+                    // Set up project structure
+                    var testAssetsPath = TestAssetsRootPath;
+                    var solutionFolder = env.CreateFolder();
+                    var solutionPath = solutionFolder.Path;
+                    var outputFolder = env.CreateFolder();
+                    var projBOutputPath = outputFolder.Path;
+
+                    SetupProjectB(env, testAssetsPath, solutionPath, projBOutputPath, customCultureExclusions);
+
+                    env.SetCurrentDirectory(Path.Combine(solutionPath, "ProjectB.csproj"));
+                    string output = RunnerUtilities.ExecBootstrapedMSBuild("-restore", out bool buildSucceeded);
+                    buildSucceeded.ShouldBeTrue($"MSBuild should complete successfully. Build output: {output}");
+
+                    VerifyCustomCulture(enableCustomCulture, isYueCultureExpected, "yue", projBOutputPath);
+                    VerifyCustomCulture(enableCustomCulture, isEuyCultureExpected, "euy", projBOutputPath);
                 }
-                else
+                finally
                 {
-                    File.Exists(cultureResourcePath).ShouldBeFalse($"Unexpected '{customCultureName}' culture DLL was found at: {cultureResourcePath}");
+                    env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", "");
                 }
+            }
+        }
+
+        private void SetupProjectB(TestEnvironment env, string testAssetsPath, string solutionPath,
+            string projBOutputPath, string customCultureExclusions)
+        {
+            var projectBName = "ProjectB.csproj";
+            var projectBFolder = Path.Combine(solutionPath, projectBName);
+            Directory.CreateDirectory(projectBFolder);
+
+            var projBContent = File.ReadAllText(Path.Combine(testAssetsPath, projectBName))
+                .Replace("OutputPathPlaceholder", projBOutputPath)
+                .Replace("NonCultureResourceDirectoriesPlaceholder", customCultureExclusions);
+
+            env.CreateFile(Path.Combine(projectBFolder, projectBName), projBContent);
+
+            CopyProjectAssets(testAssetsPath, solutionPath);
+        }
+
+        private void CopyProjectAssets(string testAssetsPath, string solutionPath)
+        {
+            CopyTestAsset(testAssetsPath, "ProjectA.csproj", solutionPath);
+            CopyTestAsset(testAssetsPath, "Test.resx", solutionPath);
+            CopyTestAsset(testAssetsPath, "Test.yue.resx", solutionPath);
+            CopyTestAsset(testAssetsPath, "Test.euy.resx", solutionPath);
+        }
+
+        private void VerifyCustomCulture(bool enableCustomCulture, bool isCultureExpectedToExist,
+            string customCultureName, string outputPath)
+        {
+            var cultureResourcePath = Path.Combine(outputPath, customCultureName, "ProjectA.resources.dll");
+
+            if (enableCustomCulture && isCultureExpectedToExist)
+            {
+                File.Exists(cultureResourcePath).ShouldBeTrue(
+                    $"Expected '{customCultureName}' resource DLL not found at: {cultureResourcePath}");
+            }
+            else
+            {
+                File.Exists(cultureResourcePath).ShouldBeFalse(
+                    $"Unexpected '{customCultureName}' culture DLL was found at: {cultureResourcePath}");
             }
         }
 
