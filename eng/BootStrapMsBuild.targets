@@ -63,14 +63,34 @@
     </ItemGroup>
   </Target>
 
+  <!-- The task allows to find VS bits on machine. These files will be used as a source for patching on the top of them. -->
+  <UsingTask TaskName="LocateVisualStudioTask"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"
+             TaskFactory="RoslynCodeTaskFactory">
+    <Task>
+      <Code Source="$(MSBuildThisFileDirectory)..\src\MSBuild.Bootstrap.Utils\Tasks\LocateVisualStudioTask.cs" Language="cs" />
+    </Task>
+  </UsingTask>
   <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder;SetBinPaths;GatherNuGetDependencies">
+
+      <!-- MSBuildSdkResolver bits from stage1 if available. The folder is absent if the current runtime if .NET. -->
+      <PropertyGroup>
+        <DefaultSdkResolverPath>$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver</DefaultSdkResolverPath>
+      </PropertyGroup>
+      <LocateVisualStudioTask Condition="!Exists('$(DefaultSdkResolverPath)')">
+        <Output TaskParameter="VsInstallPath" PropertyName="AvailableVsInstallPath" />
+      </LocateVisualStudioTask>
     <ItemGroup>
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.props" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\Tracker*.dll" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\Tracker*.exe" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\FileTracker*.dll" />
-      <SdkResolverFiles Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\**\*.*" />
+
+      <!-- If the bits from stage1 are available we take them otherwise copy from the local VS instance. -->
+      <SdkResolverFiles Include="$(DefaultSdkResolverPath)\**\*.*" Condition="'$(AvailableVsInstallPath)' == ''" />
+      <SdkResolverFiles Include="$(AvailableVsInstallPath)\MSBuild\Current\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\**\*.*" Condition="'$(AvailableVsInstallPath)' != ''" />
+
       <NuGetSdkResolverManifest Include="$(RepoRoot)src\MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml" />
       <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
 
