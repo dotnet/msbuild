@@ -81,11 +81,6 @@ extends:
             platform: 'AnyCPU'
             configuration: 'Release'
 
-        - task: MicroBuildSwixPlugin@4
-          displayName: Install Swix Plugin
-          inputs:
-            dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
-
         - task: CmdLine@1
           displayName: restore build number
           inputs:
