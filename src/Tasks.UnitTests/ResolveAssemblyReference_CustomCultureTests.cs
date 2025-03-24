@@ -43,36 +43,25 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                try
-                {
-                    // Configure environment
-                    env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", enableCustomCulture ? "1" : "");
+                env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", enableCustomCulture ? "1" : "");
+                var testAssetsPath = TestAssetsRootPath;
+                var solutionFolder = env.CreateFolder();
+                var solutionPath = solutionFolder.Path;
+                var outputFolder = env.CreateFolder();
+                var projBOutputPath = outputFolder.Path;
+                SetupProjectB(env, testAssetsPath, solutionPath, projBOutputPath, customCultureExclusions);
+                SetupProjectA(testAssetsPath, solutionPath);
 
-                    // Set up project structure
-                    var testAssetsPath = TestAssetsRootPath;
-                    var solutionFolder = env.CreateFolder();
-                    var solutionPath = solutionFolder.Path;
-                    var outputFolder = env.CreateFolder();
-                    var projBOutputPath = outputFolder.Path;
+                env.SetCurrentDirectory(Path.Combine(solutionPath, "ProjectB.csproj"));
+                string output = RunnerUtilities.ExecBootstrapedMSBuild("-restore", out bool buildSucceeded);
+                buildSucceeded.ShouldBeTrue($"MSBuild should complete successfully. Build output: {output}");
 
-                    SetupProjectB(env, testAssetsPath, solutionPath, projBOutputPath, customCultureExclusions);
-
-                    env.SetCurrentDirectory(Path.Combine(solutionPath, "ProjectB.csproj"));
-                    string output = RunnerUtilities.ExecBootstrapedMSBuild("-restore", out bool buildSucceeded);
-                    buildSucceeded.ShouldBeTrue($"MSBuild should complete successfully. Build output: {output}");
-
-                    VerifyCustomCulture(enableCustomCulture, isYueCultureExpected, "yue", projBOutputPath);
-                    VerifyCustomCulture(enableCustomCulture, isEuyCultureExpected, "euy", projBOutputPath);
-                }
-                finally
-                {
-                    env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", "");
-                }
+                VerifyCustomCulture(enableCustomCulture, isYueCultureExpected, "yue", projBOutputPath);
+                VerifyCustomCulture(enableCustomCulture, isEuyCultureExpected, "euy", projBOutputPath);
             }
         }
 
-        private void SetupProjectB(TestEnvironment env, string testAssetsPath, string solutionPath,
-            string projBOutputPath, string customCultureExclusions)
+        private void SetupProjectB(TestEnvironment env, string testAssetsPath, string solutionPath, string projBOutputPath, string customCultureExclusions)
         {
             var projectBName = "ProjectB.csproj";
             var projectBFolder = Path.Combine(solutionPath, projectBName);
@@ -83,11 +72,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 .Replace("NonCultureResourceDirectoriesPlaceholder", customCultureExclusions);
 
             env.CreateFile(Path.Combine(projectBFolder, projectBName), projBContent);
-
-            CopyProjectAssets(testAssetsPath, solutionPath);
         }
 
-        private void CopyProjectAssets(string testAssetsPath, string solutionPath)
+        private void SetupProjectA(string testAssetsPath, string solutionPath)
         {
             CopyTestAsset(testAssetsPath, "ProjectA.csproj", solutionPath);
             CopyTestAsset(testAssetsPath, "Test.resx", solutionPath);
