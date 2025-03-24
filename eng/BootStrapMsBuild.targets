@@ -8,7 +8,7 @@
 
   <PropertyGroup>
     <BootstrapDependsOn Condition="$(TargetFramework.StartsWith('net4'))">BootstrapFull</BootstrapDependsOn>
-    <BootstrapDependsOn Condition="!$(TargetFramework.StartsWith('net4'))">BootstrapNetCore;BootstrapFull</BootstrapDependsOn>
+    <BootstrapDependsOn Condition="!$(TargetFramework.StartsWith('net4'))">BootstrapNetCore</BootstrapDependsOn>
 
     <!-- Needed to ensure that RuntimeTargetsCopyLocalItems is populated for full framework -->
     <DisableRuntimeTargets>false</DisableRuntimeTargets>

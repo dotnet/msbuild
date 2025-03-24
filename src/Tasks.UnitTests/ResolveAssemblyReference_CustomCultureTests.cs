@@ -34,13 +34,8 @@ namespace Microsoft.Build.Tasks.UnitTests
             bool isYueCultureExpected = false,
             bool isEuyCultureExpected = false)
         {
-            // Skip test if running in .NET Core SDK (relevant for VS .NetFramework only)
-            var extensionsPath = Environment.GetEnvironmentVariable("MSBuildExtensionsPath");
-            if (!string.IsNullOrEmpty(extensionsPath) && extensionsPath.Contains(Path.Combine("core", "sdk")))
-            {
-                return;
-            }
-
+ // Skip test if running in .NET Core SDK (relevant for VS .NetFramework only)
+#if BOOTSTRAP_FULL_IS_AVAILABLE_FOR_RUNTIME
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", enableCustomCulture ? "1" : "");
@@ -59,6 +54,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 VerifyCustomCulture(enableCustomCulture, isYueCultureExpected, "yue", projBOutputPath);
                 VerifyCustomCulture(enableCustomCulture, isEuyCultureExpected, "euy", projBOutputPath);
             }
+#endif
         }
 
         private void SetupProjectB(TestEnvironment env, string testAssetsPath, string solutionPath, string projBOutputPath, string customCultureExclusions)
