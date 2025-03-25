@@ -7,7 +7,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -21,7 +20,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             "TestResources",
             "CustomCulture");
 
-        [WindowsFullFrameworkOnlyTheory]
+        [WindowsOnlyTheory]
         [InlineData(true, "", true, true)]
         [InlineData(false)]
         [InlineData(true, "yue", false, true)]
