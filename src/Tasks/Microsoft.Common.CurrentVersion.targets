@@ -2417,6 +2417,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <NonCultureResourceDirectory Include="$(NonCultureResourceDirectories)" />
     </ItemGroup>
 
+    <PropertyGroup Condition="'$(EnableCustomCulture)' == ''">
+      <EnableCustomCulture>false</EnableCustomCulture>
+    </PropertyGroup>
+
     <!--
       Normally, as an optimization, finding dependencies of references marked with ExternallyResolved=true metadata is skipped.
       However, skipping that step breaks binding redirect generation when there are conflicting versions within the externally
@@ -2471,6 +2475,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         ContinueOnError="$(ContinueOnError)"
         OutputUnresolvedAssemblyConflicts="$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)"
         NonCultureResourceDirectories="@(NonCultureResourceDirectory)"
+        EnableCustomCulture="$(EnableCustomCulture)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >
 

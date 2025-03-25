@@ -150,6 +150,11 @@ namespace Microsoft.Build.Tasks
         private readonly string[] _nonCultureResourceDirectories = [];
 
         /// <summary>
+        /// Is true, custom culture processing is enabled.
+        /// </summary>
+        private readonly bool _enableCustomCulture = false;
+
+        /// <summary>
         /// Should a warning or error be emitted on architecture mismatch.
         /// </summary>
         private readonly WarnOrErrorOnTargetArchitectureMismatchBehavior _warnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatchBehavior.Warning;
@@ -179,6 +184,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="findSatellites">If true, then search for satellite files.</param>
         /// <param name="findSerializationAssemblies">If true, then search for serialization assembly files.</param>
         /// <param name="findRelatedFiles">If true, then search for related files.</param>
+        /// <param name="enableCustomCulture">If true, custom culture processing is enabled.</param>
         /// <param name="searchPaths">Paths to search for dependent assemblies on.</param>
         /// <param name="relatedFileExtensions"></param>
         /// <param name="candidateAssemblyFiles">List of literal assembly file names to be considered when SearchPaths has {CandidateAssemblyFiles}.</param>
@@ -221,6 +227,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="findSatellites">If true, then search for satellite files.</param>
         /// <param name="findSerializationAssemblies">If true, then search for serialization assembly files.</param>
         /// <param name="findRelatedFiles">If true, then search for related files.</param>
+        /// <param name="enableCustomCulture">If true, custom culture processing is enabled.</param>
         /// <param name="searchPaths">Paths to search for dependent assemblies on.</param>
         /// <param name="relatedFileExtensions"></param>
         /// <param name="candidateAssemblyFiles">List of literal assembly file names to be considered when SearchPaths has {CandidateAssemblyFiles}.</param>
@@ -258,6 +265,7 @@ namespace Microsoft.Build.Tasks
             bool findSatellites,
             bool findSerializationAssemblies,
             bool findRelatedFiles,
+            bool enableCustomCulture,
             string[] searchPaths,
             string[] allowedAssemblyExtensions,
             string[] relatedFileExtensions,
@@ -326,6 +334,7 @@ namespace Microsoft.Build.Tasks
             _ignoreFrameworkAttributeVersionMismatch = ignoreFrameworkAttributeVersionMismatch;
             _assemblyMetadataCache = assemblyMetadataCache;
             _nonCultureResourceDirectories = nonCultureResourceDirectories;
+            _enableCustomCulture = enableCustomCulture;
 
             // Set condition for when to check assembly version against the target framework version
             _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
@@ -981,7 +990,7 @@ namespace Microsoft.Build.Tasks
                     string cultureName = Path.GetFileName(subDirectory);
 
                     // Custom or unknown cultures can be met only if the feature is enabled and the directory was not added to the exclusion list.
-                    if ((Traits.Instance.EnableCustomCultures && !_nonCultureResourceDirectories.Contains(cultureName))
+                    if ((_enableCustomCulture && !_nonCultureResourceDirectories.Contains(cultureName))
                         || CultureInfoCache.IsValidCultureString(cultureName))
                     {
                         string satelliteAssembly = Path.Combine(subDirectory, satelliteFilename);

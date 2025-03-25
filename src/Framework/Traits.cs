@@ -134,11 +134,6 @@ namespace Microsoft.Build.Framework
         public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
 
         /// <summary>
-        /// Escape hatch to enable custom cultures recognition.
-        /// </summary>
-        public readonly bool EnableCustomCultures = Environment.GetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES") == "1";
-
-        /// <summary>
         /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.
         /// mirroring
         /// https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry
