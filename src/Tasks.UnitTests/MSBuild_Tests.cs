@@ -336,7 +336,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
 
         [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/259")]
-        [Trait("Category", "mono-osx-failing")]
+        // [Trait("Category", "mono-osx-failing")]
         public void PropertyOverridesContainSemicolon()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
