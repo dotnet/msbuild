@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `MSBUILDENABLECUSTOMCULTURES` feature flag provides an opt-in mechanism for handling custom culture-specific resources in MSBuild projects. This feature allows for greater control over which directories are treated as culture-specific resources during the build process.
+The `MSBUILDENABLECUSTOMCULTURES` feature flag provides an opt-in mechanism for handling custom culture-specific resources in MSBuild projects. This feature allows for greater control over which directories are treated as culture-specific resources during the build process. 
 
 ## Purpose
 
@@ -27,7 +27,7 @@ When the feature is enabled, you can specify directories that should not be trea
 </PropertyGroup>
 ```
 
-In this example, directories named "long", "hash", or "temp" will not be processed as culture-specific resources, even if their names match culture naming patterns.
+In this example, directories named "long", "hash", or "temp" will not be processed as culture-specific resources and the assemblied inside of them will be skipped, even if their names match culture naming patterns. Globbing is not supported.
 
 ## Additional Notes
 

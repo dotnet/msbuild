@@ -136,7 +136,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Escape hatch to enable custom cultures recognition.
         /// </summary>
-        public static readonly bool EnableCustomCultures = Environment.GetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES") == "1";
+        public readonly bool EnableCustomCultures = Environment.GetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES") == "1";
 
         /// <summary>
         /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.
