@@ -912,8 +912,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
     {
         private readonly ITestOutputHelper _testOutput;
 
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
-
         public FullProjectsUsingMicrosoftCommonTargets(ITestOutputHelper output)
         {
             _testOutput = output;
