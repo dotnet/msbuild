@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `MSBUILDENABLECUSTOMCULTURES` feature flag provides an opt-in mechanism for handling custom culture-specific resources in MSBuild projects. This feature allows for greater control over which directories are treated as culture-specific resources during the build process.
+The `EnableCustomCulture` property provides an opt-in mechanism for handling custom culture-specific resources in MSBuild projects. This feature allows for greater control over which directories are treated as culture-specific resources during the build process.
 
 ## Purpose
 
@@ -15,7 +15,13 @@ In some projects, directory names that match culture name patterns might not act
 
 ### Enabling the Feature
 
-To enable the custom cultures feature, set the `MSBUILDENABLECUSTOMCULTURES` environment variable to `1`.
+To enable the custom cultures feature, set the `EnableCustomCulture` property `true`.
+
+```xml
+<PropertyGroup>
+  <EnableCustomCulture>true</EnableCustomCulture>
+</PropertyGroup>
+```
 
 ### Excluding Specific Directories
 

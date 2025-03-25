@@ -32,8 +32,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", enableCustomCulture ? "1" : "");
-
                 // Set up project paths
                 var testAssetsPath = TestAssetsRootPath;
                 var solutionFolder = env.CreateFolder();
@@ -46,7 +44,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Directory.CreateDirectory(projectBFolder);
                 var projBContent = File.ReadAllText(Path.Combine(testAssetsPath, projectBName))
                     .Replace("OutputPathPlaceholder", projBOutputPath)
-                    .Replace("NonCultureResourceDirectoriesPlaceholder", customCultureExclusions);
+                    .Replace("NonCultureResourceDirectoriesPlaceholder", customCultureExclusions)
+                    .Replace("EnableCustomCulturePlaceholder", enableCustomCulture.ToString());
                 env.CreateFile(Path.Combine(projectBFolder, projectBName), projBContent);
 
                 // Copy ProjectA files to test solution folder

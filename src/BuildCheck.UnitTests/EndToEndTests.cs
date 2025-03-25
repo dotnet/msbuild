@@ -118,7 +118,6 @@ public class EndToEndTests : IDisposable
         string expectedDiagnostic,
         bool resourceExpectedToBeRecognizedAsSatelite)
     {
-        _env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", "1");
         EmbedResourceTestOutput output = RunEmbeddedResourceTest(resourceElement, resourceExtension, respectAssignedCulturePropSet);
 
         int expectedWarningsCount = 0;

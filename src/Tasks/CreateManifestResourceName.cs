@@ -28,6 +28,8 @@ namespace Microsoft.Build.Tasks
 
         private ITaskItem[] _resourceFiles;
 
+        private bool _enableCustomCulture;
+
         [SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Taskitem", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         protected Dictionary<string, ITaskItem> itemSpecToTaskitem = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
@@ -54,6 +56,15 @@ namespace Microsoft.Build.Tasks
                 return _resourceFiles;
             }
             set => _resourceFiles = value;
+        }
+
+        /// <summary>
+        /// Contains the information if custom culture is enabled.
+        /// </summary>
+        public bool EnableCustomCulture
+        {
+            get { return _enableCustomCulture; }
+            set { _enableCustomCulture = value; }
         }
 
         /// <summary>
