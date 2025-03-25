@@ -65,8 +65,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 var euyCultureResourceDll = Path.Combine(projBOutputPath, "euy", "ProjectA.resources.dll");
                 AssertCustomCulture(isEuyCultureExpected, "euy", euyCultureResourceDll);
-
-                env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", "");
             }
 
             void AssertCustomCulture(bool isCultureExpectedToExist, string customCultureName, string cultureResourcePath)

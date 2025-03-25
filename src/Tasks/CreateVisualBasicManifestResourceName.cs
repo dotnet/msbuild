@@ -102,7 +102,7 @@ namespace Microsoft.Build.Tasks
             dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
             Culture.ItemCultureInfo info;
 
-            if (!string.IsNullOrEmpty(culture) && Traits.EnableCustomCultures)
+            if (!string.IsNullOrEmpty(culture) && Traits.Instance.EnableCustomCultures)
             {
                 info = new Culture.ItemCultureInfo()
                 {

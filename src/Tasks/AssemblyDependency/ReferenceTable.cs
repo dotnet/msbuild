@@ -981,7 +981,7 @@ namespace Microsoft.Build.Tasks
                     string cultureName = Path.GetFileName(subDirectory);
 
                     // Custom or unknown cultures can be met only if the feature is enabled and the directory was not added to the exclusion list.
-                    if ((Traits.EnableCustomCultures && !_nonCultureResourceDirectories.Contains(cultureName))
+                    if ((Traits.Instance.EnableCustomCultures && !_nonCultureResourceDirectories.Contains(cultureName))
                         || CultureInfoCache.IsValidCultureString(cultureName))
                     {
                         string satelliteAssembly = Path.Combine(subDirectory, satelliteFilename);

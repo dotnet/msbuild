@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Build.Framework;
@@ -15,35 +17,18 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         [Output]
         public string VsInstallPath { get; set; }
 
-        protected override string ToolName => "powershell.exe";
+        protected override string ToolName => "vswhere.exe";
 
-        protected override string GenerateFullPathToTool() => ToolName;
-
-        // vswhere.exe is a tool that allows to detect the installed VS on the machine.
-        // Local VS bits is a source for MSBuild-dependencies for full framework bootstrap.
-        protected override string GenerateCommandLineCommands()
+        protected override string GenerateFullPathToTool()
         {
-            string script = @"
-                $vsWherePath = ""${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe""
-                if (Test-Path $vsWherePath) {
-                    try {
-                        $vsPath = & $vsWherePath -latest -property installationPath
-                        if ($vsPath -and (Test-Path $vsPath)) {
-                            Write-Output $vsPath
-                            exit 0
-                        }
-                    } catch {
-                        Write-Warning ""VSWhere failed: $_""
-                    }
-                }
-                # No installation found
-                exit 1
-            ";
+            string programFilesX86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+            string vsWherePath = Path.Combine(programFilesX86, "Microsoft Visual Studio", "Installer", ToolName);
 
-            script = script.Replace("\"", "\\\"");
 
-            return $"-NoProfile -ExecutionPolicy Bypass -Command \"{script}\"";
+            return vsWherePath;
         }
+
+        protected override string GenerateCommandLineCommands() => "-latest -prerelease -property installationPath";
 
         public override bool Execute()
         {
@@ -53,7 +38,7 @@ namespace MSBuild.Bootstrap.Utils.Tasks
                 return true;
             }
 
-            _ = ExecuteTool(ToolName, string.Empty, GenerateCommandLineCommands());
+            _ = ExecuteTool(GenerateFullPathToTool(), string.Empty, GenerateCommandLineCommands());
 
             if (!Log.HasLoggedErrors)
             {

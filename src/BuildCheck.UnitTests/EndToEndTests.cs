@@ -12,7 +12,6 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -149,8 +148,6 @@ public class EndToEndTests : IDisposable
                     $"Unexpected resource for culture {culture} was found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");
             }
         }
-
-        _env.SetEnvironmentVariable("MSBUILDENABLECUSTOMCULTURES", "");
     }
 
     private readonly record struct EmbedResourceTestOutput(String LogOutput, JsonObject DepsJsonResources);
