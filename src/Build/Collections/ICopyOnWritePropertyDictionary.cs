@@ -51,6 +51,14 @@ namespace Microsoft.Build.Collections
         void ImportProperties(IEnumerable<T> other);
 
         /// <summary>
+        /// Adds the specified properties to this dictionary.
+        /// </summary>
+        /// <param name="other">An enumerator over the items to process.</param>
+        /// <param name="selector">A function to select the properties.</param>
+        /// <typeparam name="TSource">The type of item in the enumerable.</typeparam>
+        void ImportPropertiesWithSelector<TSource>(IEnumerable<TSource> other, Func<TSource, T> selector);
+
+        /// <summary>
         /// Clone. As we're copy on write, this should be cheap.
         /// </summary>
         ICopyOnWritePropertyDictionary<T> DeepClone();

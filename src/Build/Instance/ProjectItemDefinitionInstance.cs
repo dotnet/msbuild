@@ -59,8 +59,7 @@ namespace Microsoft.Build.Execution
             if (itemDefinition.MetadataCount > 0)
             {
                 var copyOnWriteMetadataDictionary = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-                IEnumerable<ProjectMetadataInstance> projectMetadataInstances = itemDefinition.Metadata.Select(originalMetadata => new ProjectMetadataInstance(originalMetadata));
-                copyOnWriteMetadataDictionary.ImportProperties(projectMetadataInstances);
+                copyOnWriteMetadataDictionary.ImportPropertiesWithSelector(itemDefinition.Metadata, originalMetadata => new ProjectMetadataInstance(originalMetadata));
 
                 _metadata = copyOnWriteMetadataDictionary;
             }

@@ -358,6 +358,20 @@ namespace Microsoft.Build.Collections
             }
         }
 
+        public void ImportPropertiesWithSelector<TSource>(IEnumerable<TSource> other, Func<TSource, T> selector)
+        {
+            _backing = _backing.SetItems(Items());
+
+            IEnumerable<KeyValuePair<string, T>> Items()
+            {
+                foreach (TSource sourceItem in other)
+                {
+                    T property = selector(sourceItem);
+                    yield return new(property.Key, property);
+                }
+            }
+        }
+
         /// <summary>
         /// Clone. As we're copy on write, this
         /// should be cheap.

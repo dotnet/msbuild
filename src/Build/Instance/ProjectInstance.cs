@@ -3342,8 +3342,7 @@ namespace Microsoft.Build.Execution
             {
                 directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
 
-                IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
-                directMetadata.ImportProperties(projectMetadataInstances);
+                directMetadata.ImportPropertiesWithSelector(item.DirectMetadata, directMetadatum => new ProjectMetadataInstance(directMetadatum));
             }
 
             GetEvaluatedIncludesFromProjectItem(
@@ -3400,8 +3399,7 @@ namespace Microsoft.Build.Execution
                 {
                     directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
 
-                    IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
-                    directMetadata.ImportProperties(projectMetadataInstances);
+                    directMetadata.ImportPropertiesWithSelector(item.DirectMetadata, directMetadatum => new ProjectMetadataInstance(directMetadatum));
                 }
             }
 

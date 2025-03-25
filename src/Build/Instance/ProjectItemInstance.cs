@@ -126,8 +126,7 @@ namespace Microsoft.Build.Execution
             if (directMetadata?.GetEnumerator().MoveNext() == true)
             {
                 metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-                IEnumerable<ProjectMetadataInstance> directMetadataInstances = directMetadata.Select(metadatum => new ProjectMetadataInstance(metadatum.Key, metadatum.Value));
-                metadata.ImportProperties(directMetadataInstances);
+                metadata.ImportPropertiesWithSelector(directMetadata, metadatum => new ProjectMetadataInstance(metadatum.Key, metadatum.Value));
             }
 
             CommonConstructor(project, itemType, includeEscaped, includeEscaped, metadata, null /* need to add item definition metadata */, definingFileEscaped, useItemDefinitionsWithoutModification: false);
@@ -605,8 +604,7 @@ namespace Microsoft.Build.Execution
             // Set up a single dictionary that can be applied to all the items
             CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = new();
 
-            IEnumerable<ProjectMetadataInstance> projectMetadataInstances = metadataList.Select(metadatum => new ProjectMetadataInstance(metadatum.Key, metadatum.Value));
-            metadata.ImportProperties(projectMetadataInstances);
+            metadata.ImportPropertiesWithSelector(metadataList, metadatum => new ProjectMetadataInstance(metadatum.Key, metadatum.Value));
 
             foreach (ProjectItemInstance item in items)
             {
@@ -1082,7 +1080,7 @@ namespace Microsoft.Build.Execution
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
                 _directMetadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-                _directMetadata.ImportProperties(metadata.Select(kvp => new ProjectMetadataInstance(kvp.Key, kvp.Value, allowItemSpecModifiers: true)));
+                _directMetadata.ImportPropertiesWithSelector(metadata, kvp => new ProjectMetadataInstance(kvp.Key, kvp.Value, allowItemSpecModifiers: true));
             }
 
             /// <summary>
@@ -2060,8 +2058,7 @@ namespace Microsoft.Build.Execution
                 {
                     // Set up a single dictionary that can be applied to all the items
                     CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-                    IEnumerable<ProjectMetadataInstance> projectMetadataInstances = metadataList.Select(metadatum => new ProjectMetadataInstance(metadatum.Key.Name, metadatum.Value));
-                    metadata.ImportProperties(projectMetadataInstances);
+                    metadata.ImportPropertiesWithSelector(metadataList, metadatum => new ProjectMetadataInstance(metadatum.Key.Name, metadatum.Value));
 
                     foreach (ProjectItemInstance item in destinationItems)
                     {

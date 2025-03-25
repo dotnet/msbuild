@@ -32,6 +32,8 @@ namespace Microsoft.Build.Instance
 
         public void ImportProperties(IEnumerable<T> other) => throw new NotSupportedException();
 
+        public void ImportPropertiesWithSelector<TSource>(IEnumerable<TSource> other, Func<TSource, T> selector) => throw new NotImplementedException();
+
         public void Set(T projectProperty) => throw new NotSupportedException();
 
         public bool Equals(ICopyOnWritePropertyDictionary<T>? other)
