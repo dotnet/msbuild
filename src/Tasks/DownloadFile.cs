@@ -156,7 +156,7 @@ namespace Microsoft.Build.Tasks
                     {
                         response.EnsureSuccessStatusCode();
                     }
-#if NET6_0_OR_GREATER
+#if NET
                     catch (HttpRequestException)
                     {
                         throw;
@@ -203,7 +203,7 @@ namespace Microsoft.Build.Tasks
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             using (Stream responseStream = await response.Content.ReadAsStreamAsync(
-#if NET6_0_OR_GREATER
+#if NET
                             cancellationToken
 #endif
                             ).ConfigureAwait(false))
@@ -260,7 +260,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-#if NET6_0_OR_GREATER
+#if NET
                 // net5.0 included StatusCode in the HttpRequestException.
                 switch (httpRequestException.StatusCode)
                 {
@@ -329,7 +329,7 @@ namespace Microsoft.Build.Tasks
             return !String.IsNullOrWhiteSpace(filename);
         }
 
-#if !NET6_0_OR_GREATER
+#if !NET
         /// <summary>
         /// Represents a wrapper around the <see cref="HttpRequestException"/> that also contains the <see cref="HttpStatusCode"/>.
         /// DEPRECATED as of net5.0, which included the StatusCode in the HttpRequestException class.

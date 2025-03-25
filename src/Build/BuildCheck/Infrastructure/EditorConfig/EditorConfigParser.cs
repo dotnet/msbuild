@@ -2,14 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Drawing.Design;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.Shared;
 using static Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig.EditorConfigGlobsMatcher;
 
@@ -46,12 +41,7 @@ internal sealed class EditorConfigParser
         {
             var editorConfig = _editorConfigFileCache.GetOrAdd(editorConfigFilePath, (key) =>
             {
-                using (FileStream stream = new FileStream(editorConfigFilePath, FileMode.Open, System.IO.FileAccess.Read, FileShare.Read))
-                {
-                    using StreamReader sr = new StreamReader(editorConfigFilePath);
-                    var editorConfigfileContent = sr.ReadToEnd();
-                    return EditorConfigFile.Parse(editorConfigfileContent);
-                }
+                return EditorConfigFile.Parse(File.ReadAllText(editorConfigFilePath));
             });
 
             editorConfigDataFromFilesList.Add(editorConfig);
@@ -96,7 +86,7 @@ internal sealed class EditorConfigParser
                 }
             }
         }
-        
+
         return resultingDictionary;
     }
 

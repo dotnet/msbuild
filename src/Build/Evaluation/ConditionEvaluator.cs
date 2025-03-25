@@ -166,7 +166,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         // Cached expression trees for all the combinations of condition strings and parser options
-        private static volatile ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize> s_cachedExpressionTrees = new ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize>();
+        private static readonly ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize> s_cachedExpressionTrees = new ConcurrentDictionary<int, ExpressionTreeForCurrentOptionsWithSize>();
 
         /// <summary>
         /// For debugging leaks, a way to disable caching expression trees, to reduce noise
@@ -226,9 +226,9 @@ namespace Microsoft.Build.Evaluation
             where P : class, IProperty
             where I : class, IItem
         {
-            ErrorUtilities.VerifyThrowArgumentNull(condition, nameof(condition));
-            ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
-            ErrorUtilities.VerifyThrowArgumentLength(evaluationDirectory, nameof(evaluationDirectory));
+            ErrorUtilities.VerifyThrowArgumentNull(condition);
+            ErrorUtilities.VerifyThrowArgumentNull(expander);
+            ErrorUtilities.VerifyThrowArgumentLength(evaluationDirectory);
 
             // An empty condition is equivalent to a "true" condition.
             if (condition.Length == 0)
@@ -237,7 +237,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             // If the condition wasn't empty, there must be a location for it
-            ErrorUtilities.VerifyThrowArgumentNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowArgumentNull(elementLocation);
 
             // Get the expression tree cache for the current parsing options.
             var cachedExpressionTreesForCurrentOptions = s_cachedExpressionTrees.GetOrAdd(
@@ -427,10 +427,10 @@ namespace Microsoft.Build.Evaluation
                 IFileSystem fileSystem,
                 ProjectRootElementCacheBase? projectRootElementCache = null)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(condition, nameof(condition));
-                ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
-                ErrorUtilities.VerifyThrowArgumentNull(evaluationDirectory, nameof(evaluationDirectory));
-                ErrorUtilities.VerifyThrowArgumentNull(elementLocation, nameof(elementLocation));
+                ErrorUtilities.VerifyThrowArgumentNull(condition);
+                ErrorUtilities.VerifyThrowArgumentNull(expander);
+                ErrorUtilities.VerifyThrowArgumentNull(evaluationDirectory);
+                ErrorUtilities.VerifyThrowArgumentNull(elementLocation);
 
                 Condition = condition;
                 _expander = expander;

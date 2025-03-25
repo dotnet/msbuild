@@ -10,6 +10,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Framework;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.Build.Execution
 {
@@ -523,8 +524,8 @@ namespace Microsoft.Build.Execution
         /// <param name="result">The results for the target.</param>
         public void AddResultsForTarget(string target, TargetResult result)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(target, nameof(target));
-            ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
+            ErrorUtilities.VerifyThrowArgumentNull(target);
+            ErrorUtilities.VerifyThrowArgumentNull(result);
 
             lock (this)
             {
@@ -564,7 +565,7 @@ namespace Microsoft.Build.Execution
         /// <param name="results">The results to merge in.</param>
         public void MergeResults(BuildResult results)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(results, nameof(results));
+            ErrorUtilities.VerifyThrowArgumentNull(results);
             ErrorUtilities.VerifyThrow(results.ConfigurationId == ConfigurationId, "Result configurations don't match");
 
             // If we are merging with ourself or with a shallow clone, do nothing.
@@ -601,6 +602,16 @@ namespace Microsoft.Build.Execution
             return _resultsByTarget?.ContainsKey(target) ?? false;
         }
 
+        public bool TryGetResultsForTarget(string target, [NotNullWhen(true)] out TargetResult? value)
+        {
+            if (_resultsByTarget is null)
+            {
+                value = default;
+                return false;
+            }
+
+            return _resultsByTarget.TryGetValue(target, out value);
+        }
         #region INodePacket Members
 
         /// <summary>

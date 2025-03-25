@@ -88,7 +88,6 @@
     <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\Shared\Modifiers.cs" />
     <Compile Include="..\Shared\XMakeElements.cs" />
-    <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\IKeyed.cs" />
     <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
@@ -103,6 +102,9 @@
     <Compile Include="..\Shared\XMakeAttributes.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
+    <Compile Include="..\Shared\NodePipeBase.cs" />
+    <Compile Include="..\Shared\NodePipeClient.cs" />
+    <Compile Include="..\Shared\NodePipeServer.cs" />
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
@@ -136,7 +138,6 @@
     <Compile Include="CommandLineSwitchException.cs" />
     <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
     <Compile Include="DistributedLoggerRecord.cs" />
-    <Compile Include="TerminalLogger\*.cs" />
     <Compile Include="InitializationException.cs" />
     <Compile Include="MSBuildClientApp.cs" />
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
@@ -174,8 +175,13 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
+    <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
+         or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
+    <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
+
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" /><!-- for consistency with Framework via transitives -->
   </ItemGroup>
   <!-- Manually download this library for RoslynCodeTaskFactory.
            See target AddRefAssemblies below. -->
@@ -191,10 +197,7 @@
     <Reference Include="System.Xml" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' AND '$(DotNetBuildSourceOnly)' != 'true'">
-    <!-- Bump these to the latest version despite transitive references to older -->
-    <PackageReference Include="System.Private.Uri" PrivateAssets="all" />
-  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" PrivateAssets="All" />
@@ -204,6 +207,12 @@
   <!-- Xsds are not TF or arch-specific so copy once them in the outer build -->
   <Target Name="CopyXsds" BeforeTargets="Build" Condition="'$(IsInnerBuild)' != 'true'">
     <Copy SourceFiles="@(XsdsForVS)" DestinationFiles="@(XsdsForVS-&gt;'$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'xsd'))%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="AvoidValueTupleConflict" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Remove="@(Reference->WithMetadataValue(`NuGetPackageId`, `System.ValueTuple`))" />
+    </ItemGroup>
   </Target>
 
   <!-- Include MSBuild.deps.json and MSBuild.runtimeconfig.json in ContentWithTargetPath so they will be copied to the output folder of projects

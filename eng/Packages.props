@@ -19,19 +19,32 @@
     <PackageVersion Include="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
     <PackageVersion Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="$(SystemConfigurationConfigurationManagerVersion)" />
+    <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="$(SystemDiagnosticsDiagnosticSourceVersion)" />
+    <PackageVersion Include="System.Diagnostics.EventLog" Version="$(SystemDiagnosticsEventLogVersion)" />
     <PackageVersion Include="System.Formats.Asn1" Version="$(SystemFormatsAsn1Version)" />
+    <PackageVersion Include="System.Formats.Nrbf" Version="$(SystemFormatsNrbfVersion)" />
     <PackageVersion Include="System.Memory" Version="$(SystemMemoryVersion)" />
-    <PackageVersion Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
     <PackageVersion Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
     <PackageVersion Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsVersion)" />
     <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafeVersion)" />
+    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataVersion)" />
     <PackageVersion Include="System.Security.Principal.Windows" Version="$(SystemSecurityPrincipalWindowsVersion)" />
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="$(SystemTextEncodingCodePagesVersion)" />
     <PackageVersion Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
-    <PackageVersion Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressionsVersion)" />
     <PackageVersion Include="System.Threading.Channels" Version="$(SystemThreadingChannelsVersion)" />
     <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="$(SystemThreadingTasksDataflowVersion)" />
     <PackageVersion Include="xunit.console" Version="$(XUnitVersion)" />
+    <PackageVersion Include="Microsoft.VisualStudio.OpenTelemetry.Collector" Version="$(MicrosoftVisualStudioOpenTelemetryVersion)" />
+    <PackageVersion Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" Version="$(MicrosoftVisualStudioOpenTelemetryVersion)" />
+
+    <!-- maintained in eng/dependabot/Packages.props -->
+    <!--
+      System.CodeDom
+      System.Security.Cryptography.Pkcs
+      System.Security.Cryptography.Xml
+      Microsoft.Bcl.Cryptography
+      Microsoft.VisualStudio.SolutionPersistence
+    -->
   </ItemGroup>
 </Project>

@@ -21,6 +21,7 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.TelemetryInfra;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 
@@ -196,8 +197,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="entry">The entry to build.</param>
         public void BuildRequest(NodeLoggingContext loggingContext, BuildRequestEntry entry)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
-            ErrorUtilities.VerifyThrowArgumentNull(entry, nameof(entry));
+            ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
+            ErrorUtilities.VerifyThrowArgumentNull(entry);
             ErrorUtilities.VerifyThrow(_componentHost != null, "Host not set.");
             ErrorUtilities.VerifyThrow(_targetBuilder == null, "targetBuilder not null");
             ErrorUtilities.VerifyThrow(_nodeLoggingContext == null, "nodeLoggingContext not null");
@@ -241,7 +242,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(HasActiveBuildRequest, "Request not building");
             ErrorUtilities.VerifyThrow(!_terminateEvent.WaitOne(0), "Request already terminated");
-            ErrorUtilities.VerifyThrow(_pendingResourceRequests.Any(), "No pending resource requests");
+            ErrorUtilities.VerifyThrow(!_pendingResourceRequests.IsEmpty, "No pending resource requests");
             VerifyEntryInActiveOrWaitingState();
 
             _pendingResourceRequests.Dequeue()(response);
@@ -332,10 +333,10 @@ namespace Microsoft.Build.BackEnd
         public async Task<BuildResult[]> BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets = false)
         {
             VerifyIsNotZombie();
-            ErrorUtilities.VerifyThrowArgumentNull(projectFiles, nameof(projectFiles));
-            ErrorUtilities.VerifyThrowArgumentNull(properties, nameof(properties));
-            ErrorUtilities.VerifyThrowArgumentNull(targets, nameof(targets));
-            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions, nameof(toolsVersions));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFiles);
+            ErrorUtilities.VerifyThrowArgumentNull(properties);
+            ErrorUtilities.VerifyThrowArgumentNull(targets);
+            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions);
             ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
             ErrorUtilities.VerifyThrow(projectFiles.Length == properties.Length, "Properties and project counts not the same");
             ErrorUtilities.VerifyThrow(projectFiles.Length == toolsVersions.Length, "Tools versions and project counts not the same");
@@ -550,7 +551,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
             ErrorUtilities.VerifyThrow(_componentHost == null, "RequestBuilder already initialized.");
             _componentHost = host;
         }
@@ -1031,22 +1032,9 @@ namespace Microsoft.Build.BackEnd
 
             // The build results will have node request IDs in the same order as the requests were issued,
             // which is in the array order above.
-            List<BuildResult> resultsList = new List<BuildResult>(results.Values);
-            resultsList.Sort(delegate (BuildResult left, BuildResult right)
-            {
-                if (left.NodeRequestId < right.NodeRequestId)
-                {
-                    return -1;
-                }
-                else if (left.NodeRequestId == right.NodeRequestId)
-                {
-                    return 0;
-                }
-
-                return 1;
-            });
-
-            return resultsList.ToArray();
+            BuildResult[] resultsArray = results.Values.ToArray();
+            Array.Sort(resultsArray, (left, right) => left.NodeRequestId.CompareTo(right.NodeRequestId));
+            return resultsArray;
         }
 
         /// <summary>
@@ -1105,7 +1093,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
 
-            // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
+            // We consider this the entrypoint for the project build for purposes of BuildCheck processing
             bool isRestoring = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring] is not null;
 
             var buildCheckManager = isRestoring
@@ -1155,7 +1143,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.Request.BuildEventContext);
             }
 
-            
+
             try
             {
                 HandleProjectStarted(buildCheckManager);
@@ -1208,6 +1196,8 @@ namespace Microsoft.Build.BackEnd
                 BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
                     allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
+                UpdateStatisticsPostBuild();
+
                 result = _requestEntry.Request.ProxyTargets == null
                     ? result
                     : CopyTargetResultsFromProxyTargetsToRealTargets(result);
@@ -1257,6 +1247,86 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        private void UpdateStatisticsPostBuild()
+        {
+            ITelemetryForwarder telemetryForwarder =
+                ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
+                .Instance;
+
+            if (!telemetryForwarder.IsTelemetryCollected)
+            {
+                return;
+            }
+
+            IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
+            // The TargetBuilder filters out results for targets not explicitly requested before returning the result.
+            // Hence we need to fetch the original result from the cache - to get the data for all executed targets.
+            BuildResult unfilteredResult = resultsCache.GetResultsForConfiguration(_requestEntry.Request.ConfigurationId);
+
+            foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
+            {
+                bool wasExecuted =
+                    unfilteredResult.ResultsByTarget.TryGetValue(projectTargetInstance.Key, out TargetResult targetResult) &&
+                    // We need to match on location of target as well - as multiple targets with same name can be defined.
+                    // E.g. _SourceLinkHasSingleProvider can be brought explicitly via nuget (Microsoft.SourceLink.GitHub) as well as sdk
+                    projectTargetInstance.Value.Location.Equals(targetResult.TargetLocation);
+
+                bool isFromNuget, isMetaprojTarget, isCustom;
+
+                if (IsMetaprojTargetPath(projectTargetInstance.Value.FullPath))
+                {
+                    isMetaprojTarget = true;
+                    isFromNuget = false;
+                    isCustom = false;
+                }
+                else
+                {
+                    isMetaprojTarget = false;
+                    isFromNuget = FileClassifier.Shared.IsInNugetCache(projectTargetInstance.Value.FullPath);
+                    isCustom = !FileClassifier.Shared.IsBuiltInLogic(projectTargetInstance.Value.FullPath) ||
+                               // add the isFromNuget to condition - to prevent double checking of nonnuget package
+                               (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
+                }
+
+                telemetryForwarder.AddTarget(
+                    projectTargetInstance.Key,
+                    // would we want to distinguish targets that were executed only during this execution - we'd need
+                    //  to remember target names from ResultsByTarget from before execution
+                    wasExecuted,
+                    isCustom,
+                    isMetaprojTarget,
+                    isFromNuget);
+            }
+
+            TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
+            CollectTasksStats(taskReg);
+
+            void CollectTasksStats(TaskRegistry taskRegistry)
+            {
+                if (taskRegistry == null)
+                {
+                    return;
+                }
+
+                foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
+                {
+                    telemetryForwarder.AddTask(registeredTaskRecord.TaskIdentity.Name,
+                        registeredTaskRecord.Statistics.ExecutedTime,
+                        registeredTaskRecord.Statistics.ExecutedCount,
+                        registeredTaskRecord.Statistics.TotalMemoryConsumption,
+                        registeredTaskRecord.ComputeIfCustom(),
+                        registeredTaskRecord.IsFromNugetCache);
+
+                    registeredTaskRecord.Statistics.Reset();
+                }
+
+                taskRegistry.Toolset?.InspectInternalTaskRegistry(CollectTasksStats);
+            }
+        }
+
+        private static bool IsMetaprojTargetPath(string targetPath)
+            => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
+
         /// <summary>
         /// Saves the current operating environment.
         /// </summary>
@@ -1279,7 +1349,7 @@ namespace Microsoft.Build.BackEnd
             BuildEventContext projectBuildEventContext = _projectLoggingContext?.BuildEventContext;
 
             // We can set the warning as errors and messages only after the project logging context has been created (as it creates the new ProjectContextId)
-            if (buildCheckManager != null && loggingService != null && projectBuildEventContext != null)
+            if (loggingService != null && projectBuildEventContext != null)
             {
                 args.WarningsAsErrors = loggingService.GetWarningsAsErrors(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
                 args.WarningsAsMessages = loggingService.GetWarningsAsMessages(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -1437,7 +1507,9 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
+            return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings)
+            .SelectMany(w => w.Split([','], StringSplitOptions.RemoveEmptyEntries))
+            .Select(w => w.Trim()), StringComparer.OrdinalIgnoreCase);
         }
 
         private sealed class DedicatedThreadsTaskScheduler : TaskScheduler

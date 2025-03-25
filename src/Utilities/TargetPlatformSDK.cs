@@ -42,8 +42,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public TargetPlatformSDK(string targetPlatformIdentifier, Version targetPlatformVersion, string path)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformIdentifier, nameof(targetPlatformIdentifier));
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion, nameof(targetPlatformVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformIdentifier);
+            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion);
             TargetPlatformIdentifier = targetPlatformIdentifier;
             TargetPlatformVersion = targetPlatformVersion;
             Path = path;
@@ -189,6 +189,6 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Given an identifier and version, construct a string to use as a key for that combination.
         /// </summary>
-        internal static string GetSdkKey(string sdkIdentifier, string sdkVersion) => string.Format(CultureInfo.InvariantCulture, "{0}, Version={1}", sdkIdentifier, sdkVersion);
+        internal static string GetSdkKey(string sdkIdentifier, string sdkVersion) => $"{sdkIdentifier}, Version={sdkVersion}";
     }
 }

@@ -69,7 +69,7 @@ namespace Microsoft.Build.Evaluation
         internal ToolsetConfigurationReader(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, Func<Configuration> readApplicationConfiguration)
             : base(environmentProperties, globalProperties)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(readApplicationConfiguration, nameof(readApplicationConfiguration));
+            ErrorUtilities.VerifyThrowArgumentNull(readApplicationConfiguration);
             _readApplicationConfiguration = readApplicationConfiguration;
             _projectImportSearchPathsCache = new Dictionary<string, Dictionary<string, ProjectImportPathMatch>>(StringComparer.OrdinalIgnoreCase);
         }
@@ -207,7 +207,7 @@ namespace Microsoft.Build.Evaluation
         protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os)
         {
             Dictionary<string, ProjectImportPathMatch> kindToPathsCache;
-            var key = toolsVersion + ":" + os;
+            var key = $"{toolsVersion}:{os}";
             if (_projectImportSearchPathsCache.TryGetValue(key, out kindToPathsCache))
             {
                 return kindToPathsCache;

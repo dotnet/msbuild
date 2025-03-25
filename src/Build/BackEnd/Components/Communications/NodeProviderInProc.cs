@@ -157,7 +157,7 @@ namespace Microsoft.Build.BackEnd
         public void SendData(int nodeId, INodePacket packet)
         {
             ErrorUtilities.VerifyThrowArgumentOutOfRange(nodeId == _inProcNodeId, "node");
-            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
+            ErrorUtilities.VerifyThrowArgumentNull(packet);
 
             if (_inProcNode == null)
             {
@@ -285,10 +285,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Deserializes and routes a packet.  Not used in the in-proc node.
         /// </summary>
-        public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
         {
             // Not used
             ErrorUtilities.ThrowInternalErrorUnreachable();
+            return null;
         }
 
         /// <summary>
@@ -382,7 +383,7 @@ namespace Microsoft.Build.BackEnd
                 InProcNodeThreadProc();
             });
 #endif
-            _inProcNodeThread.Name = String.Format(CultureInfo.CurrentCulture, "In-proc Node ({0})", _componentHost.Name);
+            _inProcNodeThread.Name = $"In-proc Node ({_componentHost.Name})";
             _inProcNodeThread.IsBackground = true;
 #if FEATURE_THREAD_CULTURE
             _inProcNodeThread.CurrentCulture = _componentHost.BuildParameters.Culture;

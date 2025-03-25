@@ -143,7 +143,7 @@ namespace Microsoft.Build.Tasks
             using (var stream = File.OpenRead(filePath))
             using (var algorithm = algorithmFactory())
             {
-#if NET5_0_OR_GREATER
+#if NET
                 return algorithm.ComputeHashAsync(stream, ct).Result;
 #else
                 return algorithm.ComputeHash(stream);

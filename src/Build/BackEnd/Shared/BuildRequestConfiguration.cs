@@ -167,7 +167,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="defaultToolsVersion">The default ToolsVersion to use as a fallback</param>
         internal BuildRequestConfiguration(int configId, BuildRequestData data, string defaultToolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(data, nameof(data));
+            ErrorUtilities.VerifyThrowArgumentNull(data);
             ErrorUtilities.VerifyThrowInternalLength(data.ProjectFullPath, "data.ProjectFullPath");
 
             _configId = configId;
@@ -209,7 +209,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="instance">The project instance.</param>
         internal BuildRequestConfiguration(int configId, ProjectInstance instance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(instance, nameof(instance));
+            ErrorUtilities.VerifyThrowArgumentNull(instance);
 
             _configId = configId;
             _projectFullPath = instance.FullPath;
@@ -230,7 +230,7 @@ namespace Microsoft.Build.BackEnd
         private BuildRequestConfiguration(int configId, BuildRequestConfiguration other)
         {
             ErrorUtilities.VerifyThrow(configId != InvalidConfigurationId, "Configuration ID must not be invalid when using this constructor.");
-            ErrorUtilities.VerifyThrowArgumentNull(other, nameof(other));
+            ErrorUtilities.VerifyThrowArgumentNull(other);
             ErrorUtilities.VerifyThrow(other._transferredState == null, "Unexpected transferred state still set on other configuration.");
 
             _project = other._project;
@@ -299,7 +299,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (!_isTraversalProject.HasValue)
                 {
-                    if (String.Equals(Path.GetFileName(ProjectFullPath), "dirs.proj", StringComparison.OrdinalIgnoreCase))
+#if NET471_OR_GREATER
+                    if (MemoryExtensions.Equals(Microsoft.IO.Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj".AsSpan(), StringComparison.OrdinalIgnoreCase))
+#else
+                    if (MemoryExtensions.Equals(Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj", StringComparison.OrdinalIgnoreCase))
+#endif
                     {
                         // dirs.proj are assumed to be traversals
                         _isTraversalProject = true;
@@ -808,7 +812,7 @@ namespace Microsoft.Build.BackEnd
 
         public bool ShouldSkipIsolationConstraintsForReference(string referenceFullPath)
         {
-            ErrorUtilities.VerifyThrowInternalNull(Project, nameof(Project));
+            ErrorUtilities.VerifyThrowInternalNull(Project);
             ErrorUtilities.VerifyThrowInternalLength(referenceFullPath, nameof(referenceFullPath));
             ErrorUtilities.VerifyThrow(Path.IsPathRooted(referenceFullPath), "Method does not treat path normalization cases");
 
@@ -865,7 +869,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>String representation of the object</returns>
         public override string ToString()
         {
-            return String.Format(CultureInfo.CurrentCulture, "{0} {1} {2} {3}", _configId, _projectFullPath, _toolsVersion, _globalProperties);
+            return $"{_configId} {_projectFullPath} {_toolsVersion} {_globalProperties}";
         }
 
         /// <summary>

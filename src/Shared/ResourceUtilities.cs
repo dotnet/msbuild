@@ -39,7 +39,7 @@ namespace Microsoft.Build.Shared
         internal static string ExtractMessageCode(bool msbuildCodeOnly, string message, out string code)
         {
 #if !BUILDINGAPPXTASKS
-            ErrorUtilities.VerifyThrowInternalNull(message, nameof(message));
+            ErrorUtilities.VerifyThrowInternalNull(message);
 #endif
 
             code = null;
@@ -122,7 +122,7 @@ namespace Microsoft.Build.Shared
 
             if (i < message.Length)
             {
-                message = message.Substring(i, message.Length - i);
+                message = message.Substring(i);
             }
 
             return message;

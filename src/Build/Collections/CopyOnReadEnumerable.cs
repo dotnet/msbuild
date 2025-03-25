@@ -44,8 +44,8 @@ namespace Microsoft.Build.Collections
         /// <param name="selector">function to translate items in the backing collection to the resulting type.</param>
         public CopyOnReadEnumerable(IEnumerable<TSource> backingEnumerable, object syncRoot, Func<TSource, TResult> selector)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(backingEnumerable, nameof(backingEnumerable));
-            ErrorUtilities.VerifyThrowArgumentNull(syncRoot, nameof(syncRoot));
+            ErrorUtilities.VerifyThrowArgumentNull(backingEnumerable);
+            ErrorUtilities.VerifyThrowArgumentNull(syncRoot);
 
             _backingEnumerable = backingEnumerable;
             _syncRoot = syncRoot;
@@ -62,7 +62,7 @@ namespace Microsoft.Build.Collections
         {
             List<TResult> list;
 
-#if NETCOREAPP
+#if NET
             if (_backingEnumerable.TryGetNonEnumeratedCount(out int count))
             {
 #else

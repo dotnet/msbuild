@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using Microsoft.Build.Shared;
 
 using Shouldly;
@@ -130,7 +131,7 @@ namespace Microsoft.Build.UnitTests
         public void TestArchitectureValuesMatch()
         {
             string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
-            string notCurrentArchitecture = EnvironmentUtilities.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x86 : XMakeAttributes.MSBuildArchitectureValues.x64;
+            string notCurrentArchitecture = Environment.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x86 : XMakeAttributes.MSBuildArchitectureValues.x64;
 
             Assert.True(XMakeAttributes.ArchitectureValuesMatch(XMakeAttributes.MSBuildArchitectureValues.any, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture));
             Assert.True(XMakeAttributes.ArchitectureValuesMatch(XMakeAttributes.MSBuildArchitectureValues.any, XMakeAttributes.MSBuildArchitectureValues.x64));
@@ -145,7 +146,7 @@ namespace Microsoft.Build.UnitTests
         public void TestMergeArchitectureValues()
         {
             string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
-            string notCurrentArchitecture = EnvironmentUtilities.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x86 : XMakeAttributes.MSBuildArchitectureValues.x64;
+            string notCurrentArchitecture = Environment.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x86 : XMakeAttributes.MSBuildArchitectureValues.x64;
 
             string mergedArchitecture;
             Assert.True(XMakeAttributes.TryMergeArchitectureValues(XMakeAttributes.MSBuildArchitectureValues.any, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture, out mergedArchitecture));

@@ -291,7 +291,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Array of paths to redist lists under given framework directory.</returns>
         public static string[] GetRedistListPathsFromDisk(string frameworkDirectory)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory, nameof(frameworkDirectory));
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory);
 
             lock (s_locker)
             {
@@ -372,7 +372,7 @@ namespace Microsoft.Build.Tasks
                 throw new ArgumentNullException(nameof(assemblyName));
             }
 
-            int i = assemblyName.IndexOf(",", StringComparison.Ordinal);
+            int i = assemblyName.IndexOf(',');
             return i > 0 ? assemblyName.Substring(0, i) : assemblyName;
         }
 
@@ -429,7 +429,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool FrameworkAssemblyEntryInRedist(AssemblyNameExtension assemblyName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyName, nameof(assemblyName));
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyName);
 
             if (!_assemblyNameInRedist.TryGetValue(assemblyName, out bool isAssemblyNameInRedist))
             {
@@ -794,7 +794,7 @@ namespace Microsoft.Build.Tasks
                         {
                             // When comparing the assembly entries we want to compare the FullName which is a formatted as name, version, publicKeyToken and culture and whether the entry is a redistroot flag
                             // We do not need to add the redistName and the framework directory because this will be the same for all entries in the current redist list being read.
-                            string hashIndex = String.Format(CultureInfo.InvariantCulture, "{0},{1}", newEntry.FullName, newEntry.IsRedistRoot == null ? "null" : newEntry.IsRedistRoot.ToString());
+                            string hashIndex = $"{newEntry.FullName},{(newEntry.IsRedistRoot == null ? "null" : newEntry.IsRedistRoot.ToString())}";
 
                             assemblyEntries.TryGetValue(hashIndex, out AssemblyEntry dictionaryEntry);
                             // If the entry is not in the dictionary or the entry is in the dictionary but the new entry has the ingac flag true, make sure the dictionary contains the entry with the ingac true.
@@ -991,7 +991,7 @@ namespace Microsoft.Build.Tasks
         /// found in the target framework directories. This can happen if the subsets are instead passed in as InstalledDefaultSubsetTables</param>
         internal SubsetListFinder(string[] subsetToSearchFor)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor, nameof(subsetToSearchFor));
+            ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor);
             _subsetToSearchFor = subsetToSearchFor;
         }
 
@@ -1015,7 +1015,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Array of paths locations to subset lists under the given framework directory.</returns>
         public string[] GetSubsetListPathsFromDisk(string frameworkDirectory)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory, nameof(frameworkDirectory));
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory);
 
             // Make sure we have some subset names to search for it is possible that no subsets are asked for
             // so we should return as quickly as possible in that case.

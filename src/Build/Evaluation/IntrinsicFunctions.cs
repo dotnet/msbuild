@@ -22,6 +22,8 @@ using System.Linq;
 
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
+using System.Security.Cryptography;
+using System.Buffers.Text;
 
 #nullable disable
 
@@ -31,13 +33,22 @@ namespace Microsoft.Build.Evaluation
     /// The Intrinsic class provides static methods that can be accessed from MSBuild's
     /// property functions using $([MSBuild]::Function(x,y)).
     /// </summary>
-    internal static class IntrinsicFunctions
+    internal static partial class IntrinsicFunctions
     {
+        // lang=regex
+        private const string RegistrySdkSpecification = @"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$";
+
 #pragma warning disable CA1416 // Platform compatibility: we'll only use this on Windows
         private static readonly object[] DefaultRegistryViews = [RegistryView.Default];
 #pragma warning restore CA1416
 
-        private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
+#if NET
+        [GeneratedRegex(RegistrySdkSpecification, RegexOptions.IgnoreCase)]
+        private static partial Regex RegistrySdkRegex { get; }
+#else
+        private static Regex s_registrySdkRegex;
+        private static Regex RegistrySdkRegex => s_registrySdkRegex ??= new Regex(RegistrySdkSpecification, RegexOptions.IgnoreCase);
+#endif
 
         private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => NuGetFrameworkWrapper.CreateInstance());
 
@@ -264,8 +275,8 @@ namespace Microsoft.Build.Evaluation
             {
                 if (viewObject is string viewAsString)
                 {
-                    string typeLeafName = typeof(RegistryView).Name + ".";
-                    string typeFullName = typeof(RegistryView).FullName + ".";
+                    string typeLeafName = $"{typeof(RegistryView).Name}.";
+                    string typeFullName = $"{typeof(RegistryView).FullName}.";
 
                     // We'll allow the user to specify the leaf or full type name on the RegistryView enum
                     viewAsString = viewAsString.Replace(typeFullName, "").Replace(typeLeafName, "");
@@ -279,7 +290,7 @@ namespace Microsoft.Build.Evaluation
                         // Fake common requests to HKLM that we can resolve
 
                         // See if this asks for a specific SDK
-                        var m = RegistrySdkRegex.Value.Match(keyName);
+                        var m = RegistrySdkRegex.Match(keyName);
 
                         if (m.Success && m.Groups.Count >= 1 && valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
                         {
@@ -446,7 +457,12 @@ namespace Microsoft.Build.Evaluation
 
         private static string CalculateSha256(string toHash)
         {
-            using var sha = System.Security.Cryptography.SHA256.Create();
+#if NET
+            Span<byte> hash = stackalloc byte[SHA256.HashSizeInBytes];
+            SHA256.HashData(Encoding.UTF8.GetBytes(toHash), hash);
+            return Convert.ToHexStringLower(hash);
+#else
+            using var sha = SHA256.Create();
             var hashResult = new StringBuilder();
             foreach (byte theByte in sha.ComputeHash(Encoding.UTF8.GetBytes(toHash)))
             {
@@ -454,6 +470,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             return hashResult.ToString();
+#endif
         }
 
         /// <summary>
@@ -631,14 +648,15 @@ namespace Microsoft.Build.Evaluation
             {
                 return string.Empty;
             }
+
             if (start + length > input.Length)
             {
                 length = input.Length - start;
             }
+
             StringBuilder sb = new StringBuilder();
-            for (int i = start; i < start + length; i++)
+            foreach (char c in input.AsSpan(start, length))
             {
-                char c = input[i];
                 if (c >= 32 && c <= 126 && !FileUtilities.InvalidFileNameChars.Contains(c))
                 {
                     sb.Append(c);
@@ -648,6 +666,7 @@ namespace Microsoft.Build.Evaluation
                     sb.Append('_');
                 }
             }
+
             return sb.ToString();
         }
 
@@ -784,7 +803,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                subKeyName = keyName.Substring(i + 1, keyName.Length - i - 1);
+                subKeyName = keyName.Substring(i + 1);
             }
 
             return basekey;

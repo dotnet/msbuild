@@ -821,7 +821,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </ItemGroup>
 </Project>");
 
-           using ProjectRootElementFromString projectRootElementFromString = new(content);
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
             ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
 
@@ -933,6 +933,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/11498")]
         public void SdkResolverItemsAndPropertiesAreInPreprocessedOutput()
         {
             using (TestEnvironment env = TestEnvironment.Create())

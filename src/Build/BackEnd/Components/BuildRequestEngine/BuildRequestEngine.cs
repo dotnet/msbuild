@@ -15,6 +15,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.TelemetryInfra;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
 #nullable disable
@@ -286,6 +287,9 @@ namespace Microsoft.Build.BackEnd
                     IBuildCheckManagerProvider buildCheckProvider = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider);
                     var buildCheckManager = buildCheckProvider!.Instance;
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
+                    // Flush and send the final telemetry data if they are being collected
+                    ITelemetryForwarder telemetryForwarder = (_componentHost.GetComponent(BuildComponentType.TelemetryForwarder) as TelemetryForwarderProvider)!.Instance;
+                    telemetryForwarder.FinalizeProcessing(_nodeLoggingContext);
                     // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
                     buildCheckProvider.ShutdownComponent();
                 },
@@ -590,7 +594,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
             ErrorUtilities.VerifyThrow(_componentHost == null, "BuildRequestEngine already initialized!");
             _componentHost = host;
             _configCache = (IConfigCache)host.GetComponent(BuildComponentType.ConfigCache);
@@ -1330,7 +1334,7 @@ namespace Microsoft.Build.BackEnd
         private void IssueConfigurationRequest(BuildRequestConfiguration config)
         {
             ErrorUtilities.VerifyThrow(config.WasGeneratedByNode, "InvalidConfigurationId");
-            ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
+            ErrorUtilities.VerifyThrowArgumentNull(config);
             ErrorUtilities.VerifyThrow(_unresolvedConfigurations.HasConfiguration(config.ConfigurationId), "NoUnresolvedConfiguration");
             TraceEngine("Issuing configuration request for node config {0}", config.ConfigurationId);
             RaiseNewConfigurationRequest(config);
@@ -1342,7 +1346,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="blocker">The information about why the request is blocked.</param>
         private void IssueBuildRequest(BuildRequestBlocker blocker)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
+            ErrorUtilities.VerifyThrowArgumentNull(blocker);
 
             if (blocker.BuildRequests == null)
             {
@@ -1426,10 +1430,10 @@ namespace Microsoft.Build.BackEnd
                 {
                     FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
-                    using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
+                    using (StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true))
                     {
                         string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
-                        file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, DateTime.UtcNow.Ticks, message);
+                        file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, DateTime.UtcNow.Ticks, message);
                         file.Flush();
                     }
                 }

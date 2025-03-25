@@ -202,14 +202,13 @@ namespace Microsoft.Build.Experimental
         }
 
         /// <summary>
-        /// Deserializes and routes a packer to the appropriate handler.
+        /// Deserializes a packet.
         /// </summary>
-        /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packetType">The packet type.</param>
         /// <param name="translator">The translator to use as a source for packet data.</param>
-        void INodePacketFactory.DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
+        INodePacket INodePacketFactory.DeserializePacket(NodePacketType packetType, ITranslator translator)
         {
-            _packetFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
+            return _packetFactory.DeserializePacket(packetType, translator);
         }
 
         /// <summary>
@@ -381,7 +380,7 @@ namespace Microsoft.Build.Experimental
                 BuildTelemetry buildTelemetry = KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry();
 
                 buildTelemetry.StartAt = command.PartialBuildTelemetry.StartedAt;
-                buildTelemetry.InitialServerState = command.PartialBuildTelemetry.InitialServerState;
+                buildTelemetry.InitialMSBuildServerState = command.PartialBuildTelemetry.InitialServerState;
                 buildTelemetry.ServerFallbackReason = command.PartialBuildTelemetry.ServerFallbackReason;
             }
 

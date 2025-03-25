@@ -61,7 +61,7 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         internal ProjectMetadataInstance(string name, string escapedValue, bool allowItemSpecModifiers)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             if (allowItemSpecModifiers)
             {
@@ -164,7 +164,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public override string ToString()
         {
-            return _name + "=" + _escapedValue;
+            return $"{_name}={_escapedValue}";
         }
 
         #region INodePacketTranslatable Members

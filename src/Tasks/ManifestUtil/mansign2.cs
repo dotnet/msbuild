@@ -817,12 +817,17 @@ namespace System.Deployment.Internal.CodeSigning
 
                 try
                 {
+#if NET
+                    Span<byte> nonce = stackalloc byte[32];
+                    RandomNumberGenerator.Fill(nonce);
+#else
                     byte[] nonce = new byte[32];
 
                     using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
                     {
                         rng.GetBytes(nonce);
                     }
+#endif
 
                     // Eventually, CryptEncodeObjectEx(...) is called on a CRYPT_TIMESTAMP_REQUEST with this nonce,
                     // and CryptEncodeObjectEx(...) interprets the nonce as a little endian, DER-encoded integer value
@@ -835,7 +840,7 @@ namespace System.Deployment.Internal.CodeSigning
                     // To ensure this does not happen, ensure that the most significant byte in the little
                     // endian byte sequence is in the 0x01-0x7F range; clear that byte's most significant bit
                     // and set that byte's least significant bit.
- 
+
                     nonce[nonce.Length - 1] &= 0x7f;
                     nonce[nonce.Length - 1] |= 0x01;
 
@@ -1044,13 +1049,19 @@ namespace System.Deployment.Internal.CodeSigning
             // Insert the signature now.
             signatureParent.AppendChild(xmlDigitalSignature);
         }
+
+#if !NET
         private static readonly char[] s_hexValues = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+#endif
 
         private static string BytesToHexString(byte[] array, int start, int end)
         {
             string result = null;
             if (array != null)
             {
+#if NET
+                return Convert.ToHexStringLower(array.AsSpan(start, end - start));
+#else
                 char[] hexOrder = new char[(end - start) * 2];
                 int i = end;
                 int digit, j = 0;
@@ -1062,6 +1073,7 @@ namespace System.Deployment.Internal.CodeSigning
                     hexOrder[j++] = s_hexValues[digit];
                 }
                 result = new String(hexOrder);
+#endif
             }
             return result;
         }

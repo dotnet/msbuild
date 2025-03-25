@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (_taskType == null)
                 {
-                    _taskType = _taskAssembly.GetType(String.Concat(XamlTaskNamespace, ".", TaskName), true);
+                    _taskType = _taskAssembly.GetType($"{XamlTaskNamespace}.{TaskName}", true);
                 }
 
                 return _taskType;
@@ -84,8 +84,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskName, nameof(taskName));
-            ErrorUtilities.VerifyThrowArgumentNull(taskParameters, nameof(taskParameters));
+            ErrorUtilities.VerifyThrowArgumentNull(taskName);
+            ErrorUtilities.VerifyThrowArgumentNull(taskParameters);
 
             var log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
             {
@@ -195,7 +195,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="taskFactoryLoggingHost">The task factory logging host will log messages in the context of the task.</param>
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
         {
-            string fullTaskName = String.Concat(TaskNamespace, ".", TaskName);
+            string fullTaskName = $"{TaskNamespace}.{TaskName}";
             return (ITask)_taskAssembly.CreateInstance(fullTaskName);
         }
 
@@ -210,7 +210,7 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
+            ErrorUtilities.VerifyThrowArgumentNull(task);
         }
 
         /// <summary>

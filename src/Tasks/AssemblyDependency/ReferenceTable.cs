@@ -789,9 +789,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            string newFusionName = String.Format(CultureInfo.InvariantCulture,
-                "{0}, Version={1}, Culture={2}, PublicKeyToken={3}",
-                name, version, culture, publicKeyToken);
+            string newFusionName = $"{name}, Version={version}, Culture={culture}, PublicKeyToken={publicKeyToken}";
 
             // Now try to convert to an AssemblyName.
             try
@@ -812,19 +810,20 @@ namespace Microsoft.Build.Tasks
         private static void TryGetAssemblyNameComponent(string fusionName, string component, ref string value)
         {
             int position = fusionName.IndexOf(component + "=", StringComparison.Ordinal);
-            if (position == -1)
+            if (position < 0)
             {
                 return;
             }
+
             position += component.Length + 1;
-            int nextDelimiter = fusionName.IndexOfAny([',', ' '], position);
-            if (nextDelimiter == -1)
+            int nextDelimiter = fusionName.AsSpan(position).IndexOfAny(',', ' ');
+            if (nextDelimiter < 0)
             {
                 value = fusionName.Substring(position);
             }
             else
             {
-                value = fusionName.Substring(position, nextDelimiter - position);
+                value = fusionName.Substring(position, nextDelimiter);
             }
         }
 
@@ -971,7 +970,8 @@ namespace Microsoft.Build.Tasks
                     // Is there a candidate satellite in that folder?
                     string cultureName = Path.GetFileName(subDirectory);
 
-                    if (CultureInfoCache.IsValidCultureString(cultureName))
+                    // Custom or unknown cultures can be met as well
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14) || CultureInfoCache.IsValidCultureString(cultureName))
                     {
                         string satelliteAssembly = Path.Combine(subDirectory, satelliteFilename);
                         if (_fileExists(satelliteAssembly))
@@ -1240,7 +1240,7 @@ namespace Microsoft.Build.Tasks
             if (!parentReferencesAdded.Contains(parentReferenceFolder) && !parentReferenceResolvedFromGAC && !parentReferenceResolvedFromAssemblyFolders)
             {
                 parentReferencesAdded.Add(parentReferenceFolder);
-                parentReferenceFolders.Add(new (Directory: parentReferenceFolder, ParentAssembly: parentReference.FullPath));
+                parentReferenceFolders.Add(new(Directory: parentReferenceFolder, ParentAssembly: parentReference.FullPath));
             }
         }
 
@@ -2300,18 +2300,9 @@ namespace Microsoft.Build.Tasks
 
             byte[] rpkt = @ref.GetPublicKeyToken();
             byte[] dpkt = def.GetPublicKeyToken();
-
-            if (rpkt.Length != dpkt.Length)
+            if (!rpkt.AsSpan().SequenceEqual(dpkt.AsSpan()))
             {
                 return false;
-            }
-
-            for (int i = 0; i < rpkt.Length; i++)
-            {
-                if (rpkt[i] != dpkt[i])
-                {
-                    return false;
-                }
             }
 
             if (@ref.Version != def.Version)
@@ -2541,8 +2532,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool CompareAssembliesIgnoringVersion(AssemblyName a, AssemblyName b)
         {
-            ErrorUtilities.VerifyThrowInternalNull(a, nameof(a));
-            ErrorUtilities.VerifyThrowInternalNull(b, nameof(b));
+            ErrorUtilities.VerifyThrowInternalNull(a);
+            ErrorUtilities.VerifyThrowInternalNull(b);
 
             if (a == b)
             {

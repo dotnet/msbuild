@@ -56,7 +56,7 @@ namespace Microsoft.Build.Tasks
         private static string GetLocationImpl(AssemblyNameExtension assemblyName, string targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntime, FileExists fileExists, GetPathFromFusionName getPathFromFusionName, GetGacEnumerator getGacEnumerator, bool specificVersion)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyName, nameof(assemblyName));
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyName);
             ErrorUtilities.VerifyThrow(assemblyName.FullName != null, "Got a null assembly name fullname.");
 
             string strongName = assemblyName.FullName;
@@ -117,7 +117,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static SortedDictionary<Version, SortedDictionary<AssemblyNameExtension, string>> GenerateListOfAssembliesByRuntime(string strongName, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntime, FileExists fileExists, GetPathFromFusionName getPathFromFusionName, GetGacEnumerator getGacEnumerator, bool specificVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetedRuntime, nameof(targetedRuntime));
+            ErrorUtilities.VerifyThrowArgumentNull(targetedRuntime);
 
             IEnumerable<AssemblyNameExtension> gacEnum = getGacEnumerator(strongName);
 
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Tasks
         internal static string RetrievePathFromFusionName(string strongName)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(strongName, nameof(strongName));
+            ErrorUtilities.VerifyThrowArgumentNull(strongName);
 
             string value;
 
@@ -283,7 +283,7 @@ namespace Microsoft.Build.Tasks
             bool useGacRarCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEGACRARCACHE") == null;
             if (buildEngine != null && useGacRarCache)
             {
-                string key = "44d78b60-3bbe-48fe-9493-04119ebf515f" + "|" + targetProcessorArchitecture.ToString() + "|" + targetedRuntimeVersion.ToString() + "|" + fullFusionName.ToString() + "|" + specificVersion.ToString();
+                string key = $"44d78b60-3bbe-48fe-9493-04119ebf515f|{targetProcessorArchitecture}|{targetedRuntimeVersion}|{fullFusionName}|{specificVersion}";
                 fusionNameToResolvedPath = buildEngine.GetRegisteredTaskObject(key, RegisteredTaskObjectLifetime.Build) as ConcurrentDictionary<AssemblyNameExtension, string>;
                 if (fusionNameToResolvedPath == null)
                 {

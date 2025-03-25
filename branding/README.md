@@ -1,16 +1,29 @@
 # Branding
 
-This folder contains images used for branding MSBuild in various places.  If you add a new image, please indicate where it is used.
+This folder contains MSBuild brand images.
 
-## MSBuild-Icon.png ![MSBuild-NuGet-Icon.png](MSBuild-Icon.png?raw=true)
-This image is the original graphic used for creating the MSBuild icon.  It was placed here from its original location but is not currently used by anything.
+## MSBuild-Logo.svg
 
-## MSBuild-Logo.png ![MSBuild-NuGet-Icon.png](MSBuild-Logo.png?raw=true)
-This image is an original graphic created by Immo Landwerth.  It can be used for images where the size is required to be larger than the MSBuild-Icon.png.
+A vector-based version of the logo that scales to any resolution.
 
-## MSBuild-NuGet-Icon.png ![MSBuild-NuGet-Icon.png](MSBuild-NuGet-Icon.png?raw=true)
-This image is used by the NuGet packages as the ``<iconUrl />``.  Its raw location in this repo is used by the forwarding link [https://aka.ms/msbuildicon](https://aka.ms/msbuildicon).  If it is moved, please update the link.
+![MSBuild-Logo.svg](MSBuild-Logo.svg?raw=true)
 
-If the below image loads, then the forwarding link is working.
+## MSBuild-Icon.png
+
+A 40x40px version of the MSBuild logo.
+
+![MSBuild-NuGet-Icon.png](MSBuild-Icon.png?raw=true)
+
+## MSBuild-Logo.png
+
+A 256x256px version of the MSBuild logo.
+
+![MSBuild-Logo.png](MSBuild-Logo.png?raw=true)
+
+## MSBuild-NuGet-Icon.png
+
+A 128x128px version of the MSBuild logo, intended for use in NuGet packages.
 
 ![MSBuild-NuGet-Icon from the forwarding link](https://aka.ms/msbuildicon)
+
+The URL [https://aka.ms/msbuildicon](https://aka.ms/msbuildicon) redirects to this file on github.com. If the above image loads, then the forwarding link works. If not, please update the link.

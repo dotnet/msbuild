@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- The .NET Core version of MSBuild doesn't support targeting .NET Framework 3.5.  So in that case, we import
        a .props file that prevents building the project from doing much of anything. -->
@@ -64,12 +64,12 @@
     <Compile Include="..\Framework\AssemblyUtilities.cs" />
     <Compile Include="..\Framework\Polyfills\*.cs" />
     <Compile Include="..\Framework\ResponseFileUsedEventArgs.cs" />
-    <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
       <Link>CopyOnWriteDictionary.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Constants.cs" />
+    <Compile Include="..\Shared\EnvironmentUtilities.cs" Link="EnvironmentUtilities.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Framework\ErrorUtilities.cs">
       <Link>ErrorUtilities.cs</Link>
@@ -138,6 +138,15 @@
     </Compile>
     <Compile Include="..\Shared\NodeBuildComplete.cs">
       <Link>NodeBuildComplete.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\NodePipeBase.cs">
+      <Link>NodeComponentBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\NodePipeClient.cs">
+      <Link>NodeComponentBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\NodePipeServer.cs">
+      <Link>NodeComponentBase.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs">
       <Link>NodeEndpointOutOfProcBase.cs</Link>

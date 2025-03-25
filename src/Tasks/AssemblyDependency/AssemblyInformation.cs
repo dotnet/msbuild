@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
 #endif
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-        private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
+        private const string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
 #endif
 #if !FEATURE_ASSEMBLYLOADCONTEXT
         // Borrowed from genman.
@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks
         internal AssemblyInformation(string sourceFile)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(sourceFile, nameof(sourceFile));
+            ErrorUtilities.VerifyThrowArgumentNull(sourceFile);
             _sourceFile = sourceFile;
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT

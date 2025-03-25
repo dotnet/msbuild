@@ -63,4 +63,4 @@ namespace Microsoft.Build.Framework.UnitTests
             argDeserialized.SubmissionId.ShouldBe(submissionId);
         }
     }
-} 
+}

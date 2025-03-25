@@ -175,11 +175,11 @@ namespace Microsoft.Build.BackEnd
             LoggingContext loggingContext,
             bool stopProcessingOnCompletion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, nameof(requestEntry));
-            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, nameof(targetBuilderCallback));
+            ErrorUtilities.VerifyThrowArgumentNull(requestEntry);
+            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback);
             ErrorUtilities.VerifyThrowArgumentNull(targetSpecification, "targetName");
             ErrorUtilities.VerifyThrowArgumentNull(baseLookup, "lookup");
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
 
             _requestEntry = requestEntry;
             _targetBuilderCallback = targetBuilderCallback;
@@ -810,7 +810,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>
         /// The result of the tasks, based on the last task which ran.
         /// </returns>
-        private async Task<WorkUnitResult> ProcessBucket(ITaskBuilder taskBuilder, TargetLoggingContext targetLoggingContext, TaskExecutionMode mode, Lookup lookupForInference, Lookup lookupForExecution)
+        private async ValueTask<WorkUnitResult> ProcessBucket(ITaskBuilder taskBuilder, TargetLoggingContext targetLoggingContext, TaskExecutionMode mode, Lookup lookupForInference, Lookup lookupForExecution)
         {
             WorkUnitResultCode aggregatedTaskResult = WorkUnitResultCode.Success;
             WorkUnitActionCode finalActionCode = WorkUnitActionCode.Continue;

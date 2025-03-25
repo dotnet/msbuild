@@ -43,5 +43,10 @@
       <_Parameter1>$(TestBootstrapBinaryDestination)</_Parameter1>
       <_Parameter2>$(BootstrapSdkVersion)</_Parameter2>
     </AssemblyAttribute>
+
+    <AssemblyAttribute Include="Microsoft.Build.UnitTests.Shared.ArtifactsLocationAttribute">
+      <_Parameter1>$(ArtifactsShippingPackagesDir)</_Parameter1>
+    </AssemblyAttribute>
+
   </ItemGroup>
 </Project>
