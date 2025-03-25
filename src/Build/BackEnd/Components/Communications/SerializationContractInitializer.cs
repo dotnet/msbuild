@@ -4,10 +4,11 @@
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using Microsoft.Build.ProjectCache;
+using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Internal;
+using Microsoft.Build.ProjectCache;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -30,7 +31,8 @@ namespace Microsoft.Build.BackEnd
                 new(typeof(InternalLoggerException), (msg, inner) => new InternalLoggerException(msg, inner)),
                 new(typeof(InvalidProjectFileException), (msg, inner) => new InvalidProjectFileException(msg, inner)),
                 new(typeof(InvalidToolsetDefinitionException), (msg, inner) => new InvalidToolsetDefinitionException(msg, inner)),
-                new(typeof(ProjectCacheException), (msg, inner) => new ProjectCacheException(msg, inner)),
+                new(typeof(Experimental.ProjectCache.ProjectCacheException), (msg, inner) => new Experimental.ProjectCache.ProjectCacheException(msg, inner)),
+                new(typeof(ProjectCache.ProjectCacheException), (msg, inner) => new ProjectCache.ProjectCacheException(msg, inner)),
                 new(typeof(InternalErrorException), InternalErrorException.CreateFromRemote),
                 new(typeof(LoggerException), (msg, inner) => new LoggerException(msg, inner)),
                 new(typeof(NodeFailedToLaunchException), (msg, inner) => new NodeFailedToLaunchException(msg, inner)),
