@@ -35,6 +35,13 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="xunit.core" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <PackageReference Include="xunit.core" Version="2.3.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
@@ -59,7 +66,7 @@
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
 
     <EmbeddedResource Include="SampleResx" />
-    
+
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>

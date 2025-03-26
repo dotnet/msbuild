@@ -45,8 +45,8 @@
     <!-- MSBuild isn't xunit analyzer clean, so remove the reference to the xunit package added by the repo toolset and
          replace it with references to xunit.core and xunit.assert. -->
     <PackageReference Remove="xunit" />
-    <PackageReference Include="xunit.core" Version="$(XUnitVersion)" />
-    <PackageReference Include="xunit.assert" Version="$(XUnitVersion)" />
+    <PackageReference Include="xunit.core" Version="2.1.0" />
+    <PackageReference Include="xunit.assert" Version="2.1.0" />
 
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
@@ -82,7 +82,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
-    <PackageReference Include="xunit.console" Version="$(XUnitVersion)" />
+    <PackageReference Include="xunit.console" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(OutputType)' == 'Exe'">

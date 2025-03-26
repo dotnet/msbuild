@@ -19,7 +19,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Microsoft.Build.Utilities;
-using Microsoft.CodeAnalysis.BuildTasks;
 using Shouldly;
 using Xunit;
 
