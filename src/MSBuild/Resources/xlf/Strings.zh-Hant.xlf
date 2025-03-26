@@ -214,7 +214,7 @@
                     終端機記錄器的參數。(簡短形式: -tlp)
                     可用的參數。
                        default -- 指定終端機記錄器的預設值。
-                       其需要下列其中一值:
+                       其需要下列其中一值: 
 。
                           - 'on'、'true' 會強制使用 TerminalLogger，即使
                            其之後可能會停用。
@@ -227,7 +227,7 @@
                        -verbosity
                        showCommandLine -- 顯示 TaskCommandLineEvent 訊息
 
-                     範例:
+                     範例: 
                        -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
@@ -246,7 +246,7 @@
         <target state="translated">  -getResultOutputFile:file
                     將輸出從 get* 重新導向至檔案。
 
-                    範例:
+                    範例: 
                     -getProperty:Bar -getResultOutputFile:Biz.txt
                     這會將屬性列的值寫入 Biz.txt。
    </target>
@@ -263,7 +263,7 @@
 	</source>
         <target state="translated">  -check
                      在建置期間啟用 BuildChecks。
-                     BuildCheck 會啟用評估規則以確保組建的
+                     BuildCheck 會啟用評估規則以確保組建的 
                      屬性。如需詳細資訊，請參閱 aka.ms/buildcheck
 	</target>
         <note>
@@ -446,8 +446,8 @@
         <target state="translated">  -isolateProjects[:True|MessageUponIsolationViolation|False]
                      導致 MSBuild 在隔離中建置每個專案。
 
-                     設定為 "MessageUponIsolationViolation"
-                     (或其簡短形式 "Message") 時，如果提供
+                     設定為 "MessageUponIsolationViolation" 
+                     (或其簡短形式 "Message") 時，如果提供 
                      -outputResultsCache 切換，則只會序列化來自
                      頂層目標的結果。這是為了降低相依性專案上，
                      由於其相依性位於快取目標上 (其副作用
@@ -1081,8 +1081,8 @@
    </source>
         <target state="translated">  -toolsversion:&lt;版本&gt;
                      建置期間所使用的 MSBuild 工具組 (工作、目標等)
-                      版本。此版本將會覆寫
-                     個別專案所指定的版本。(簡短形式:
+                      版本。此版本將會覆寫 
+                     個別專案所指定的版本。(簡短形式: 
                      -tv)
                      範例:
                        -toolsVersion:3.5
