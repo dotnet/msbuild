@@ -30,10 +30,6 @@
      <SwrFile Include="*.swr" /> 
   </ItemGroup>
 
-  <ItemGroup>
-     <PackageReference Include="Microsoft.VisualStudio.Internal.MicroBuild.VisualStudio" Version="2.0.117" PrivateAssets="all" />
-  </ItemGroup>
-
   <!-- GetBinPaths depends on GetBuildVersion which does not get imported if ProducesNoOutput.Settings.props is imported-->
   <Import Project="..\GetBinPaths.targets" Condition="!$(ShouldSkipProject)"/>
 
