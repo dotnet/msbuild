@@ -1913,7 +1913,10 @@ namespace Microsoft.Build.Evaluation
 #endif
 
             // Generate a unique filename for the generated project for each unique set of properties and items.
-            string projectPath = _projectRootElement.FullPath + ".SdkResolver." + propertiesAndItemsHash + ".proj";
+            string projectNameEnding = $".SdkResolver.{propertiesAndItemsHash}.proj";
+            string projectPath = _projectRootElement.FullPath != null ?
+             _projectRootElement.FullPath + projectNameEnding :
+             FileUtilities.NormalizePath(Guid.NewGuid() + projectNameEnding);
 
             ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)
             {
