@@ -1600,7 +1600,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogDoesntContain("[errormessage]");
         }
 
-#if !NO_MSBUILDTASKHOST
         // Run this test only if we expect MSBuildTaskHost to have been produced, which requires that MSBuildTaskHost.csproj
         // be built with full-framework MSBuild (so that it can target .NET 3.5).
 
@@ -1645,7 +1644,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Task host should have been successfully found and run
             _logger.AssertLogDoesntContain("MSB4216");
         }
-#endif
 
         /// <summary>
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.. task, we should
