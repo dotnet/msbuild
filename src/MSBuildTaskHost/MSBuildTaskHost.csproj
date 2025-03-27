@@ -221,6 +221,9 @@
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\AssemblyNameExtension.cs" />
 
+    <Compile Include="..\Framework\InterningReadTranslator.cs" />
+    <Compile Include="..\Framework\InterningWriteTranslator.cs" />
+
     <Compile Include="..\Shared\FileSystem\IFileSystem.cs" />
     <Compile Include="..\Shared\FileSystem\FileSystems.cs" />
     <Compile Include="FileSystem\MSBuildTaskHostFileSystem.cs" />
