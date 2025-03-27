@@ -666,6 +666,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Resources.Extensions" />
+    <PackageReference Include="System.Threading.Channels" />
   </ItemGroup>
 
   <!-- Mimics AddRefAssemblies from MSBuild.csproj -->
