@@ -50,7 +50,22 @@ namespace Microsoft.Build.Tasks
                     keyFileContents = new byte[fileLength];
 
                     // TODO: Read the count of read bytes and check if it matches the expected length, if not raise an exception
-                    fs.Read(keyFileContents, 0, fileLength);
+#if NET
+                    fs.ReadExactly(keyFileContents, 0, fileLength);
+#else
+                    int count = fileLength;
+                    int offset = 0;
+                    while (count > 0)
+                    {
+                        int read = fs.Read(buffer, offset, count);
+                        if (read <= 0)
+                        {
+                            throw new EndOfStreamException();
+                        }
+                        offset += read;
+                        count -= read;
+                    }
+#endif
                 }
             }
             catch (ArgumentException e)
