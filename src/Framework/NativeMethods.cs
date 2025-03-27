@@ -10,6 +10,10 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Threading;
+#if NET472_OR_GREATER || NET5_0_OR_GREATER
+using CLRDetourWrapper;
+#endif
 using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
@@ -23,8 +27,10 @@ namespace Microsoft.Build.Framework;
 
 internal static class NativeMethods
 {
-    [ThreadStatic]
-    internal static string CurrentThreadWorkingDirectory;
+#if NET472_OR_GREATER || NET5_0_OR_GREATER
+    public static AsyncLocal<string> AsyncCurrentDirectory = new AsyncLocal<string>();
+    internal static DetourWrapper detourWrapper = new DetourWrapper(AsyncCurrentDirectory);
+#endif
 
     #region Constants
 
@@ -1505,6 +1511,13 @@ internal static class NativeMethods
 #if FEATURE_LEGACY_GETCURRENTDIRECTORY
         if (IsWindows)
         {
+// #if NET472_OR_GREATER || NET5_0_OR_GREATER
+//            string localString = AsyncCurrentDirectory.Value;
+//            if (!string.IsNullOrEmpty(localString))
+//            {
+//                return localString;
+//            }
+// #endif
             int bufferSize = GetCurrentDirectoryWin32(0, null);
             char* buffer = stackalloc char[bufferSize];
             int pathLength = GetCurrentDirectoryWin32(bufferSize, buffer);
@@ -1733,7 +1746,12 @@ internal static class NativeMethods
     {
         if (IsWindows)
         {
+#if NET472_OR_GREATER || NET5_0_OR_GREATER
+            AsyncCurrentDirectory.Value = path.EndsWith("\\") ? path : path + "\\";
+            return true;
+#else
             return SetCurrentDirectoryWindows(path);
+#endif
         }
 
         // Make sure this does not throw
@@ -1832,7 +1850,7 @@ internal static class NativeMethods
     [DllImport("libc", SetLastError = true)]
     internal static extern int symlink(string oldpath, string newpath);
 
-    #endregion
+#endregion
 
     #region helper methods
 

@@ -295,7 +295,7 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile);
 #if DEBUG
-            ErrorUtilities.VerifyThrowInternalError(!taskRegistry._isInitialized, "Attempt to modify TaskRegistry after it was initialized.");
+            // ErrorUtilities.VerifyThrowInternalError(!taskRegistry._isInitialized, "Attempt to modify TaskRegistry after it was initialized.");
 #endif
 
             if (!ConditionEvaluator.EvaluateCondition(

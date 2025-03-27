@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
 using System.Resources;
 
@@ -158,7 +159,7 @@ namespace Microsoft.Build.Utilities
 
         protected string MakePath(string path)
         {
-            return MakePath(NativeMethodsShared.CurrentThreadWorkingDirectory, path);
+            return MakePath(Environment.CurrentDirectory, path);
         }
 
         protected string MakePath(string baseDirectory, string path)
@@ -168,7 +169,7 @@ namespace Microsoft.Build.Utilities
 
         protected string GetBasePath()
         {
-            return NativeMethodsShared.CurrentThreadWorkingDirectory;
+            return Environment.CurrentDirectory;
         }
 
         #endregion
