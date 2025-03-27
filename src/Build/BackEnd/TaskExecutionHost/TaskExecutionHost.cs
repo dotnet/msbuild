@@ -24,6 +24,7 @@ using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -1392,41 +1393,45 @@ namespace Microsoft.Build.BackEnd
 
                             ProjectItemInstance newItem;
 
-                            TaskItem outputAsProjectItem = output as TaskItem;
                             string parameterLocationEscaped = EscapingUtilities.EscapeWithCaching(parameterLocation.File);
 
-                            if (outputAsProjectItem != null)
+                            if (output is TaskItem outputAsProjectItem)
                             {
                                 // The common case -- all items involved are Microsoft.Build.Execution.ProjectItemInstance.TaskItems.
                                 // Furthermore, because that is true, we know by definition that they also implement ITaskItem2.
                                 newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsProjectItem.IncludeEscaped, parameterLocationEscaped);
 
-                                newItem.SetMetadata(outputAsProjectItem.MetadataCollection); // copy-on-write!
+                                outputAsProjectItem.CopyMetadataTo(newItem, addOriginalItemSpec: false);
                             }
-                            else
+                            else if (output is ITaskItem2 outputAsITaskItem2)
                             {
-                                if (output is ITaskItem2 outputAsITaskItem2)
-                                {
-                                    // Probably a Microsoft.Build.Utilities.TaskItem.  Not quite as good, but we can still preserve escaping.
-                                    newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsITaskItem2.EvaluatedIncludeEscaped, parameterLocationEscaped);
+                                // Probably a Microsoft.Build.Utilities.TaskItem.  Not quite as good, but we can still preserve escaping.
+                                newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsITaskItem2.EvaluatedIncludeEscaped, parameterLocationEscaped);
 
-                                    // It would be nice to be copy-on-write here, but Utilities.TaskItem doesn't know about CopyOnWritePropertyDictionary.
-                                    newItem.SetMetadataOnTaskOutput(outputAsITaskItem2.CloneCustomMetadataEscaped().Cast<KeyValuePair<string, string>>());
+                                IDictionary customMetadataEscaped = outputAsITaskItem2.CloneCustomMetadataEscaped();
+
+                                if (customMetadataEscaped is CopyOnWriteDictionary<string> copyOnWriteDictionary)
+                                {
+                                    newItem.SetMetadata(new CopyOnWritePropertyDictionary(copyOnWriteDictionary));
                                 }
                                 else
                                 {
-                                    // Not a ProjectItemInstance.TaskItem or even a ITaskItem2, so we have to fake it.
-                                    // Setting an item spec expects the escaped value, as does setting metadata.
-                                    newItem = new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output.ItemSpec), parameterLocationEscaped);
+                                    newItem.SetMetadataOnTaskOutput(outputAsITaskItem2.CloneCustomMetadataEscaped().Cast<KeyValuePair<string, string>>());
+                                }
+                            }
+                            else
+                            {
+                                // Not a ProjectItemInstance.TaskItem or even a ITaskItem2, so we have to fake it.
+                                // Setting an item spec expects the escaped value, as does setting metadata.
+                                newItem = new ProjectItemInstance(_projectInstance, outputTargetName, EscapingUtilities.Escape(output.ItemSpec), parameterLocationEscaped);
 
-                                    newItem.SetMetadataOnTaskOutput(EnumerateMetadata(output.CloneCustomMetadata()));
+                                newItem.SetMetadataOnTaskOutput(EnumerateMetadata(output.CloneCustomMetadata()));
 
-                                    static IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(IDictionary customMetadata)
+                                static IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(IDictionary customMetadata)
+                                {
+                                    foreach (DictionaryEntry de in customMetadata)
                                     {
-                                        foreach (DictionaryEntry de in customMetadata)
-                                        {
-                                            yield return new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value));
-                                        }
+                                        yield return new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value));
                                     }
                                 }
                             }

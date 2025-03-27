@@ -134,6 +134,8 @@ namespace Microsoft.Build.Execution
             { return Name; }
         }
 
+        internal string Key => ((IKeyed)this).Key;
+
         /// <summary>
         /// Implementation of IValued
         /// </summary>
@@ -144,6 +146,8 @@ namespace Microsoft.Build.Execution
             get
             { return EvaluatedValueEscaped; }
         }
+
+        internal string EscapedValue => ((IValued)this).EscapedValue;
 
         /// <summary>
         /// Evaluated and escaped value of the metadata.

@@ -60,9 +60,6 @@
     <Compile Include="..\Shared\FileDelegates.cs">
       <Link>Shared\FileDelegates.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
-      <Link>Shared\CopyOnWriteDictionary.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Shared\ErrorUtilities.cs</Link>
     </Compile>
@@ -87,14 +84,8 @@
     <Compile Include="..\Shared\FrameworkLocationHelper.cs">
       <Link>Shared\FrameworkLocationHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
-      <Link>Shared\IConstrainedEqualityComparer.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\IKeyed.cs">
       <Link>Shared\IKeyed.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs">
-      <Link>Shared\MSBuildNameIgnoreCaseComparer.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Modifiers.cs">
       <Link>Shared\Modifiers.cs</Link>

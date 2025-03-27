@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Build.Collections;
-
+using Microsoft.Build.Execution;
 using Shouldly;
 
 using Xunit;
@@ -22,15 +23,15 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             dic.Count.ShouldBe(0);
 
-            dic.Set(new("a"));
+            dic.Set(new MockValue("a"));
 
             dic.Count.ShouldBe(1);
 
-            dic.Set(new("b"));
+            dic.Set(new MockValue("b"));
 
             dic.Count.ShouldBe(2);
 
-            dic.Set(new("c"));
+            dic.Set(new MockValue("c"));
 
             dic.Count.ShouldBe(3);
 
@@ -112,7 +113,8 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dic.Set(a);
             dic.Set(b);
 
-            dic.ShouldBeSetEquivalentTo(new[] { a, b });
+            IEnumerable<ProjectMetadataInstance> set = [a, b];
+            dic.ShouldBeSetEquivalentTo(set);
         }
 
         [Fact]
@@ -131,7 +133,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Test(dic1, dic4, false);
             Test(dic1, dic5, false);
 
-            static void Test(CopyOnWritePropertyDictionary<MockValue> a, CopyOnWritePropertyDictionary<MockValue> b, bool expected)
+            static void Test(CopyOnWritePropertyDictionary a, CopyOnWritePropertyDictionary b, bool expected)
             {
                 if (expected)
                 {
@@ -173,51 +175,37 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             dic.ImportProperties(new[] { a, b });
 
-            dic.ShouldBeSetEquivalentTo(new[] { a, b });
+            IEnumerable<ProjectMetadataInstance> set = [a, b];
+            dic.ShouldBeSetEquivalentTo(set);
         }
 
         [Fact]
         public void DeepClone()
         {
-            CopyOnWritePropertyDictionary<MockValue> source = CreateInstance("a", "b", "c");
-            CopyOnWritePropertyDictionary<MockValue> clone = (CopyOnWritePropertyDictionary<MockValue>)source.DeepClone();
+            CopyOnWritePropertyDictionary source = CreateInstance("a", "b", "c");
+            CopyOnWritePropertyDictionary clone = (CopyOnWritePropertyDictionary)source.DeepClone();
 
             source.ShouldBe(clone);
             source.ShouldNotBeSameAs(clone);
         }
 
-        private static CopyOnWritePropertyDictionary<MockValue> CreateInstance(params string[] values)
+        private static CopyOnWritePropertyDictionary CreateInstance(params string[] values)
         {
-            CopyOnWritePropertyDictionary<MockValue> dic = new CopyOnWritePropertyDictionary<MockValue>();
+            CopyOnWritePropertyDictionary dic = new();
 
             foreach (string value in values)
             {
-                dic.Set(new(value));
+                dic.Set(new MockValue(value));
             }
 
             return dic;
         }
 
-        private sealed class MockValue : IKeyed, IValued, IEquatable<MockValue>, IEquatable<object>, IImmutable
+        private sealed class MockValue : ProjectMetadataInstance
         {
-            public MockValue(string s) => Key = s;
-
-            public string Key { get; }
-
-            public string EscapedValue => Key;
-
-            public bool Equals(MockValue? other)
+            public MockValue(string s)
+                : base(s, "foo")
             {
-                return other != null && Key == other.Key;
-            }
-
-            public new bool Equals(object? other)
-            {
-                if (other is MockValue mv)
-                {
-                    return Equals(mv);
-                }
-                return false;
             }
         }
     }

@@ -66,7 +66,7 @@
     <Compile Include="..\Framework\ResponseFileUsedEventArgs.cs" />
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CollectionHelpers.cs" />
-    <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
+    <Compile Include="..\Framework\CopyOnWriteDictionary.cs">
       <Link>CopyOnWriteDictionary.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Constants.cs" />
@@ -220,6 +220,8 @@
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\AssemblyNameExtension.cs" />
+    <Compile Include="..\Framework\IConstrainedEqualityComparer.cs" />
+    <Compile Include="..\Framework\MSBuildNameIgnoreCaseComparer.cs" />
 
     <Compile Include="..\Shared\FileSystem\IFileSystem.cs" />
     <Compile Include="..\Shared\FileSystem\FileSystems.cs" />

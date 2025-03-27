@@ -108,6 +108,11 @@ namespace Microsoft.Build.Collections
             _backing = dictionary.ToImmutableDictionary();
         }
 
+        public CopyOnWriteDictionary(ImmutableDictionary<string, V> dictionary)
+        {
+            _backing = dictionary;
+        }
+
         /// <summary>
         /// Returns the collection of keys in the dictionary.
         /// </summary>
@@ -389,5 +394,7 @@ namespace Microsoft.Build.Collections
             info.AddValue(nameof(_backing), array);
             info.AddValue(nameof(Comparer), Comparer);
         }
+
+        internal ImmutableDictionary<string, V> ToImmutableDictionary() => _backing;
     }
 }

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -2585,6 +2587,9 @@ namespace Microsoft.Build.Tasks
             var scatterItems = new List<ITaskItem>();
             var copyLocalItems = new List<ITaskItem>();
 
+            // Cache shared source items to avoid enumerating slow ProjectItemInstance.TaskItem.
+            Dictionary<ITaskItem, TaskItem> referenceMetadataCache = new(ITaskItemComparer.Default);
+
             foreach (KeyValuePair<AssemblyNameExtension, Reference> kvp in References)
             {
                 AssemblyNameExtension assemblyName = kvp.Key;
@@ -2618,7 +2623,7 @@ namespace Microsoft.Build.Tasks
 
                 if (reference.IsResolved)
                 {
-                    ITaskItem referenceItem = SetItemMetadata(relatedItems, satelliteItems, serializationAssemblyItems, scatterItems, assemblyName.FullName, reference, assemblyName);
+                    ITaskItem referenceItem = SetItemMetadata(relatedItems, satelliteItems, serializationAssemblyItems, scatterItems, assemblyName.FullName, reference, assemblyName, referenceMetadataCache);
 
                     if (reference.IsPrimary)
                     {
@@ -2659,7 +2664,15 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set metadata on the items which will be output from RAR.
         /// </summary>
-        private ITaskItem SetItemMetadata(List<ITaskItem> relatedItems, List<ITaskItem> satelliteItems, List<ITaskItem> serializationAssemblyItems, List<ITaskItem> scatterItems, string fusionName, Reference reference, AssemblyNameExtension assemblyName)
+        private ITaskItem SetItemMetadata(
+            List<ITaskItem> relatedItems,
+            List<ITaskItem> satelliteItems,
+            List<ITaskItem> serializationAssemblyItems,
+            List<ITaskItem> scatterItems,
+            string fusionName,
+            Reference reference,
+            AssemblyNameExtension assemblyName,
+            Dictionary<ITaskItem, TaskItem> referenceMetadataCache)
         {
             // Set up the main item.
             TaskItem referenceItem = new TaskItem();
@@ -2690,7 +2703,15 @@ namespace Microsoft.Build.Tasks
                 ICollection<ITaskItem> sourceItems = reference.GetSourceItems();
                 foreach (ITaskItem sourceItem in sourceItems)
                 {
-                    sourceItem.CopyMetadataTo(referenceItem);
+                    // Source items are shared between references. ProjectItemInstance.TaskItem is expensive to enumerate as it always
+                    // creates a new backing collection. Cache the result in a Utilities.TaskItem.instead.
+                    if (!referenceMetadataCache.TryGetValue(sourceItem, out TaskItem clonedItem))
+                    {
+                        clonedItem = new TaskItem(sourceItem);
+                        referenceMetadataCache[sourceItem] = clonedItem;
+                    }
+
+                    clonedItem.CopyMetadataTo(referenceItem);
                 }
 
                 // If the item originally did not have the implementation file metadata then we do not want to get it from the set of primary source items
@@ -3221,6 +3242,15 @@ namespace Microsoft.Build.Tasks
             return _externallyResolvedImmutableFiles.TryGetValue(path, out AssemblyNameExtension assemblyNameExtension)
                 ? assemblyNameExtension
                 : null;
+        }
+
+        private class ITaskItemComparer : IEqualityComparer<ITaskItem>
+        {
+            internal static ITaskItemComparer Default = new();
+
+            public bool Equals(ITaskItem first, ITaskItem second) => ReferenceEquals(first, second);
+
+            public int GetHashCode(ITaskItem value) => value.GetHashCode();
         }
     }
 }

@@ -58,7 +58,7 @@ namespace Microsoft.Build.Execution
         {
             if (itemDefinition.MetadataCount > 0)
             {
-                var copyOnWriteMetadataDictionary = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                var copyOnWriteMetadataDictionary = new CopyOnWritePropertyDictionary();
                 IEnumerable<ProjectMetadataInstance> projectMetadataInstances = itemDefinition.Metadata.Select(originalMetadata => new ProjectMetadataInstance(originalMetadata));
                 copyOnWriteMetadataDictionary.ImportProperties(projectMetadataInstances);
 
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Execution
         ProjectMetadataInstance IItemDefinition<ProjectMetadataInstance>.SetMetadata(ProjectMetadataElement xml, string evaluatedValue, ProjectMetadataInstance predecessor)
         {
             // No mutability check as this is used during creation (evaluation)
-            _metadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+            _metadata ??= new CopyOnWritePropertyDictionary();
 
             ProjectMetadataInstance metadatum = new ProjectMetadataInstance(xml.Name, evaluatedValue);
             _metadata[xml.Name] = metadatum;
@@ -238,7 +238,7 @@ namespace Microsoft.Build.Execution
 
         private static IDictionary<string, ProjectMetadataInstance> CreateMetadataCollection(int capacity)
         {
-            return new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+            return new CopyOnWritePropertyDictionary();
         }
     }
 }

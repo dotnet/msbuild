@@ -21,6 +21,8 @@ namespace Microsoft.Build.Framework
         public string ItemSpec { get; set; }
         public IDictionary<string, string> Metadata { get; }
 
+        int IMetadataContainer.CustomMetadataCount => Metadata.Count;
+
         public TaskItemData(string itemSpec, IDictionary<string, string> metadata)
         {
             ItemSpec = itemSpec;
@@ -89,5 +91,7 @@ namespace Microsoft.Build.Framework
         {
             return $"{ItemSpec} Metadata: {MetadataCount}";
         }
+
+        public bool HasSameBackingCollection(ICollection<KeyValuePair<string, string>> backingCollection) => false;
     }
 }
