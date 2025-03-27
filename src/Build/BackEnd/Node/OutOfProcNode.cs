@@ -552,7 +552,7 @@ namespace Microsoft.Build.Execution
             }
 
             // Since we aren't going to be doing any more work, lets clean up all our memory usage.
-            GC.Collect();
+            // GC.Collect();
         }
 
         /// <summary>

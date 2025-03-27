@@ -844,7 +844,7 @@ namespace Microsoft.Build.BackEnd
         [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.GC.Collect", Justification = "We're trying to get rid of memory because we're running low, so we need to collect NOW in order to free it up ASAP")]
         private void CheckMemoryUsage()
         {
-            if (!NativeMethodsShared.IsWindows || BuildEnvironmentHelper.Instance.RunningInVisualStudio)
+            if (!NativeMethodsShared.IsWindows || BuildEnvironmentHelper.Instance.RunningInVisualStudio || Environment.Is64BitOperatingSystem)
             {
                 // Since this causes synchronous I/O and a stop-the-world GC, it can be very expensive. If
                 // something other than build results is taking up the bulk of the memory space, it may not
