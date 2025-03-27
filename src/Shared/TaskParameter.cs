@@ -583,7 +583,7 @@ namespace Microsoft.Build.BackEnd
                         _customEscapedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
                         foreach (DictionaryEntry entry in nonGenericEscapedMetadata)
                         {
-                            _customEscapedMetadata[(string)entry.Key] = (string)nonGenericEscapedMetadata[entry.Value] ?? string.Empty;
+                            _customEscapedMetadata[(string)entry.Key] = (string)entry.Value ?? string.Empty;
                         }
                     }
                 }
