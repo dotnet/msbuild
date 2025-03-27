@@ -140,7 +140,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             {
                 OutOfProcRarNodeEndpoint endpoint = new(endpointId: i + 1, _handshake, _maxNumberOfConcurrentTasks);
                 endpoints[i] = endpoint;
-                endpointTasks[i] = Task.Run(() => endpoint.Run(cancellationToken), cancellationToken);
+                endpointTasks[i] = Task.Run(() => endpoint.RunAsync(cancellationToken), cancellationToken);
             }
 
             CommunicationsUtilities.Trace("{0} RAR endpoints started.", _maxNumberOfConcurrentTasks);
