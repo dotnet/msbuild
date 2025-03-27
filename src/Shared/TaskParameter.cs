@@ -746,6 +746,25 @@ namespace Microsoft.Build.BackEnd
                 // between items, and need to know the source item where the metadata came from
                 string originalItemSpec = destinationItem.GetMetadata("OriginalItemSpec");
 
+#if !TASKHOST
+                if (_customEscapedMetadata != null && destinationItem is IMetadataContainer destinationItemAsMetadataContainer)
+                {
+                    // The destination implements IMetadataContainer so we can use the ImportMetadata bulk-set operation.
+                    IEnumerable<KeyValuePair<string, string>> metadataToImport = _customEscapedMetadata
+                        .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Key)));
+
+#if FEATURE_APPDOMAIN
+                    if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
+                    {
+                        // Linq is not serializable so materialize the collection before making the call.
+                        metadataToImport = metadataToImport.ToList();
+                    }
+#endif
+
+                    destinationItemAsMetadataContainer.ImportMetadata(metadataToImport);
+                }
+                else
+#endif
                 if (_customEscapedMetadata != null)
                 {
                     foreach (KeyValuePair<string, string> entry in _customEscapedMetadata)
