@@ -85,7 +85,6 @@
     <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\Shared\Modifiers.cs" />
     <Compile Include="..\Shared\XMakeElements.cs" />
-    <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\IKeyed.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs" />
@@ -98,6 +97,9 @@
     <Compile Include="..\Shared\XMakeAttributes.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
+    <Compile Include="..\Shared\NodePipeBase.cs" />
+    <Compile Include="..\Shared\NodePipeClient.cs" />
+    <Compile Include="..\Shared\NodePipeServer.cs" />
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
