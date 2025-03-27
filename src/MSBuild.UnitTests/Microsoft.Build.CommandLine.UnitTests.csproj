@@ -10,20 +10,11 @@
     <PackageReference Include="Shouldly" Version="$(ShouldlyVersion)" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="xunit.core" Version="2.1.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
-    <PackageReference Include="xunit.core" Version="2.3.0" />
-  </ItemGroup>
-
-
   <ItemGroup>
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
-
+    
     <!-- Tasks are needed for some tests -->
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
   </ItemGroup>
@@ -65,7 +56,7 @@
       <SubType>
       </SubType>
     </EmbeddedResource>
-
+    
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
