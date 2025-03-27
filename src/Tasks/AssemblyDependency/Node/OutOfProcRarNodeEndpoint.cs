@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -30,13 +31,13 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
         public void Dispose() => _pipeServer.Dispose();
 
-        internal void Run(CancellationToken cancellationToken = default)
+        internal async Task RunAsync(CancellationToken cancellationToken = default)
         {
             CommunicationsUtilities.Trace("({0}) Starting RAR endpoint.", _endpointId);
 
             try
             {
-                RunInternal(cancellationToken);
+                await RunInternalAsync(cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -46,7 +47,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             }
         }
 
-        private void RunInternal(CancellationToken cancellationToken)
+        private async Task RunInternalAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -59,7 +60,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
                 try
                 {
-                    INodePacket packet = _pipeServer.ReadPacket();
+                    INodePacket packet = await _pipeServer.ReadPacketAsync(cancellationToken);
 
                     if (packet.Type == NodePacketType.NodeShutdown)
                     {
@@ -78,7 +79,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
                     // TODO: bool success = rarTask.ExecuteInProcess();
                     // TODO: Use RAR task outputs to create response packet.
-                    _pipeServer.WritePacket(new RarNodeExecuteResponse());
+                    await _pipeServer.WritePacketAsync(new RarNodeExecuteResponse(), cancellationToken);
 
                     CommunicationsUtilities.Trace("({0}) Completed RAR request.", _endpointId);
                 }
