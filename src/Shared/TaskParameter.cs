@@ -575,9 +575,10 @@ namespace Microsoft.Build.BackEnd
                 {
                     _escapedItemSpec = copyFromAsITaskItem2.EvaluatedIncludeEscaped;
                     _escapedDefiningProject = copyFromAsITaskItem2.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
-                    IDictionary nonGenericEscapedMetadata = copyFromAsITaskItem2.CloneCustomMetadataEscaped();
 
+                    IDictionary nonGenericEscapedMetadata = copyFromAsITaskItem2.CloneCustomMetadataEscaped();
                     _customEscapedMetadata = nonGenericEscapedMetadata as Dictionary<string, string>;
+
                     if (_customEscapedMetadata is null)
                     {
                         _customEscapedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
@@ -594,7 +595,6 @@ namespace Microsoft.Build.BackEnd
                     // TaskParameterTaskItem's constructor expects escaped values, so escaping them all
                     // is the closest approximation to correct we can get.
                     _escapedItemSpec = EscapingUtilities.Escape(copyFrom.ItemSpec);
-
                     _escapedDefiningProject = EscapingUtilities.EscapeWithCaching(copyFrom.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath));
 
                     IDictionary customMetadata = copyFrom.CloneCustomMetadata();
@@ -604,7 +604,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         foreach (DictionaryEntry entry in customMetadata)
                         {
-                            _customEscapedMetadata.Add((string)entry.Key, EscapingUtilities.Escape((string)entry.Value ?? string.Empty));
+                            _customEscapedMetadata[(string)entry.Key] = EscapingUtilities.Escape((string)entry.Value) ?? string.Empty;
                         }
                     }
                 }
