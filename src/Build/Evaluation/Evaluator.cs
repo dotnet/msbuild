@@ -1928,7 +1928,7 @@ namespace Microsoft.Build.Evaluation
 
             // Generate a unique filename for the generated project for each unique set of properties and items that ends like ".SdkResolver.{propertiesAndItemsHash}.proj".
             // _projectRootElement.FullPath can be null. This can be in the case when Project is created from XmlReader. For that case we generate filename like "{Guid}.SdkResolver.{propertiesAndItemsHash}.proj in the current directory.
-            // Oterwise the project is in the same directory as _projectRootElement and has a name of the saem project and ends like ".SdkResolver.{propertiesAndItemsHash}.proj".
+            // Otherwise the project is in the same directory as _projectRootElement and has a name of the saem project and ends like ".SdkResolver.{propertiesAndItemsHash}.proj".
             string projectNameEnding = $".SdkResolver.{propertiesAndItemsHash}.proj";
             string projectPath = _projectRootElement.FullPath != null ?
              _projectRootElement.FullPath + projectNameEnding :
