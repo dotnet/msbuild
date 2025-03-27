@@ -1,22 +1,23 @@
-<Project DefaultTargets="GetBuildVersion">
-
-  <Import Project="..\Versions.props" />
+<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="GetBuildVersion">
+  <Import Project="..\Versions.props"/>
 
   <PropertyGroup>
+    <TargetFramework>net46</TargetFramework>
     <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
     <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
+
   </PropertyGroup>
 
-   <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
+  </ItemGroup>
 
-   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
-    <RestoreSources>$(RestoreSources);https://api.nuget.org/v3/index.json</RestoreSources>
-  </PropertyGroup>
-
-   <ItemGroup>
-      <PackageReference Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
-   </ItemGroup>
-
-   <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
+  <!-- Add a target that will output the version information -->
+  <Target Name="OutputVersionInfo" DependsOnTargets="GetBuildVersion">
+    <Message Importance="High" Text="##vso[task.setvariable variable=SWIX_VERSION]$(Version)" />
+    <Message Importance="High" Text="##vso[task.setvariable variable=SWIX_ASSEMBLY_VERSION]$(AssemblyVersion)" />
+    <Message Importance="High" Text="##vso[task.setvariable variable=SWIX_FILE_VERSION]$(FileVersion)" />
+    <Message Importance="High" Text="##vso[task.setvariable variable=SWIX_PACKAGE_VERSION]$(PackageVersion)" />
+    <Message Importance="High" Text="Version: $(Version)" />
+  </Target>
 </Project>

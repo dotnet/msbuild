@@ -28,7 +28,7 @@
   <ItemGroup>
     <SigningTarget Include="$(OutDir)$(OutputName)"/>
     <FilesToSign Include="@(SigningTarget)">
-      <Authenticode>Vsix</Authenticode>
+      <Authenticode>Microsoft400</Authenticode>
     </FilesToSign>
   </ItemGroup>  
 
