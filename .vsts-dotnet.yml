@@ -25,6 +25,8 @@ extends:
             signing:
               enabled: true
               signType: $(SignType)
+            sbom:
+              enabled: true
           outputs:
           - output: pipelineArtifact
             displayName: 'Publish Artifact: logs'
@@ -48,6 +50,7 @@ extends:
             condition: succeededOrFailed()
           - output: microBuildVstsDrop
             displayName: 'Upload VSTS Drop'
+            dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
             dropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
             dropRetentionDays: 90
             accessToken: '$(System.AccessToken)'
@@ -56,9 +59,6 @@ extends:
         steps:        
         - task: MicroBuildIBCMergePlugin@1
           displayName: Install IBCMerge Plugin
-
-        - task: MicroBuildSbomPlugin@1
-          displayName: Install MicroBuild Sbom Plugin
 
         - task: CmdLine@1
           displayName: save build number
