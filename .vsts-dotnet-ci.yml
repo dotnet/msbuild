@@ -5,8 +5,8 @@ pr:
 - vs15.9
 
 jobs:
-- job: innerloop_OSX1013_CoreCLR
-  displayName: OSX10.13 Build for CoreCLR
+- job: innerloop_OSX_CoreCLR
+  displayName: OSX Build for CoreCLR
   pool:
     vmImage: macOS-latest
   steps:
@@ -31,8 +31,8 @@ jobs:
       pathtoPublish: '$(Build.ArtifactStagingDirectory)'
       artifactName: innerloop_OSX1013_CoreCLR
 
-- job: innerloop_Ubuntu1604_CoreCLR
-  displayName: Ubuntu16.04 Build for CoreCLR
+- job: innerloop_Ubuntu_CoreCLR
+  displayName: Ubuntu Build for CoreCLR
   pool:
     vmImage: ubuntu-latest
   steps:
@@ -64,7 +64,7 @@ jobs:
   steps:
   - checkout: self
     clean: true
-  - script: set VSCMD_START_DIR="%CD%" && call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" && build\cibuild.cmd -hostType Core
+  - script: set VSCMD_START_DIR="%CD%" && call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" && build\cibuild.cmd -hostType Core
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: xUnit
@@ -90,7 +90,7 @@ jobs:
   steps:
   - checkout: self
     clean: true
-  - script: set VSCMD_START_DIR="%CD%" && call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\Tools\VsDevCmd.bat" && build\cibuild.cmd
+  - script: set VSCMD_START_DIR="%CD%" && call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" && build\cibuild.cmd
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: xUnit
