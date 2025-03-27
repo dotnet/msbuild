@@ -8,7 +8,7 @@ jobs:
 - job: innerloop_OSX1013_CoreCLR
   displayName: OSX10.13 Build for CoreCLR
   pool:
-    vmImage: macOS-10.13
+    vmImage: macOS-latest
   steps:
   - checkout: self
     clean: true
@@ -34,7 +34,7 @@ jobs:
 - job: innerloop_Ubuntu1604_CoreCLR
   displayName: Ubuntu16.04 Build for CoreCLR
   pool:
-    vmImage: ubuntu-16.04
+    vmImage: ubuntu-latest
   steps:
   - checkout: self
     clean: true
@@ -60,7 +60,7 @@ jobs:
 - job: innerloop_Windows_NT_CoreCLR
   displayName: Windows_NT Build for CoreCLR
   pool:
-    vmImage: vs2017-win2016
+    vmImage: windows-2019
   steps:
   - checkout: self
     clean: true
@@ -86,7 +86,7 @@ jobs:
 - job: innerloop_Windows_NT_Full
   displayName: Windows_NT Build for Full
   pool:
-    vmImage: vs2017-win2016
+    vmImage: windows-2019
   steps:
   - checkout: self
     clean: true
