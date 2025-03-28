@@ -104,7 +104,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return manifest;
         }
 
-        private static void ReadExist(FileStream stream, byte[] buffer, int offset, int count)
+        private static void ReadExist(Stream stream, byte[] buffer, int offset, int count)
         {
             while (count > 0)
             {

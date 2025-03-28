@@ -57,7 +57,7 @@ namespace Microsoft.Build.Tasks
                     int offset = 0;
                     while (count > 0)
                     {
-                        int read = fs.Read(buffer, offset, count);
+                        int read = fs.Read(keyFileContents, offset, count);
                         if (read <= 0)
                         {
                             throw new EndOfStreamException();
