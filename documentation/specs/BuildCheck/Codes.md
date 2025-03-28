@@ -21,7 +21,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 Notes: 
  * What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
  * How can you alter the default configuration? [Please check the Configuration section of the BuildCheck documentation](./BuildCheck.md#sample-configuration)
- * To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview
+ * To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
    _Cmd:_
    ```cmd
    dotnet build -bl -check
