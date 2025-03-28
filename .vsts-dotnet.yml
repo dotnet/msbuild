@@ -19,7 +19,7 @@ extends:
     stages:
     - stage: stage
       jobs:
-      - job: job
+      - job: buildjob 
         templateContext:
           mb:
             signing:
@@ -39,23 +39,23 @@ extends:
             artifactName: packages
             condition: succeededOrFailed()
           - output: pipelineArtifact
-            displayName: 'Publish Artifact: vsix'
+            displayName: 'Publish Artifact: vsix_pre_sbom'
             targetPath: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
-            artifactName: vsix
+            artifactName: vsix_pre_sbom
             condition: succeededOrFailed()
           - output: pipelineArtifact
             displayName: 'Publish Artifact: symbols'
             targetPath: '$(Build.ArtifactStagingDirectory)/symbols'
             artifactName: symbols
             condition: succeededOrFailed()
-          - output: microBuildVstsDrop
-            displayName: 'Upload VSTS Drop'
-            dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
-            dropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
-            dropRetentionDays: 90
-            accessToken: '$(System.AccessToken)'
-            dropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
-            vsDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
+          # - output: microBuildVstsDrop
+          #   displayName: 'Upload VSTS Drop'
+          #   dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
+          #   dropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
+          #   dropRetentionDays: 90
+          #   accessToken: '$(System.AccessToken)'
+          #   dropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
+          #   vsDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
         steps:        
         - task: MicroBuildIBCMergePlugin@1
           displayName: Install IBCMerge Plugin
@@ -136,3 +136,261 @@ extends:
 
         - task: MicroBuildCleanup@1
           displayName: Execute cleanup tasks
+
+      - job: embedSBOM
+        displayName: Embed SBOM
+        dependsOn: buildjob
+        pool:
+          name: VSEngSS-MicroBuild2017-1ES
+        steps:
+        - task: DownloadPipelineArtifact@2
+          inputs:
+            artifactName: 'vsix_pre_sbom'
+            targetPath: '$(System.ArtifactsDirectory)/vsix'
+        - task: PowerShell@2
+          displayName: 'link sbom to Microsoft.Build.vsman in vsix folder'
+          inputs:
+            targetType: 'inline'
+            script: |
+              # copy the sbom to the vsix folder
+              Copy-Item "$(SYSTEM_ARTIFACTSDIRECTORY)\vsix\_manifest\spdx_2.2\manifest.spdx.json" "$(SYSTEM_ARTIFACTSDIRECTORY)\vsix\Microsoft.Build.neutral_sbom.json" -Force
+              # calculate sha256 hash of the sbom file
+              $sbomFile = "$(SYSTEM_ARTIFACTSDIRECTORY)\vsix\Microsoft.Build.neutral_sbom.json"
+              $sha256 = Get-FileHash -Path $sbomFile -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+              # calculate size of the sbom file
+              $size = (Get-Item $sbomFile).length
+              # get the crc32 of the sbom file as decimal
+
+              # CRC32 File Hashing for Azure Pipelines
+              # Install and load System.IO.Hashing
+              Write-Host "Installing System.IO.Hashing package..."
+              Install-Package -Name System.IO.Hashing -Scope CurrentUser -Force
+
+              # Find and load the DLL
+              $nugetPackagesPath = "$env:USERPROFILE\.nuget\packages"
+              $dllPath = Get-ChildItem -Path "$nugetPackagesPath\system.io.hashing" -Recurse -Filter "System.IO.Hashing.dll" | 
+                  Where-Object { $_.FullName -match "net\d" } | 
+                  Select-Object -First 1 -ExpandProperty FullName
+
+              if (-not $dllPath) {
+                  Write-Host "Searching for DLL in all paths..."
+                  $dllPath = Get-ChildItem -Path "$nugetPackagesPath\system.io.hashing" -Recurse -Filter "System.IO.Hashing.dll" | 
+                      Select-Object -First 1 -ExpandProperty FullName
+              }
+
+              if (-not $dllPath) {
+                  throw "Could not find System.IO.Hashing.dll. Make sure the package is installed."
+              }
+
+              Write-Host "Loading assembly from: $dllPath"
+              Add-Type -Path $dllPath
+
+              # Function to calculate CRC32 hash for a file, returns decimal value
+              function Get-FileCrc32 {
+                  param (
+                      [Parameter(Mandatory=$true)]
+                      [string]$FilePath
+                  )
+                  
+                  # Convert relative path to absolute path
+                  $absolutePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($FilePath)
+                  
+                  if (Test-Path $absolutePath) {
+                      Write-Host "Processing file: $absolutePath"
+                      
+                      try {
+                          # Read all bytes from the file
+                          $fileBytes = [System.IO.File]::ReadAllBytes($absolutePath)
+                          
+                          # Use the static Hash method
+                          $hashBytes = [System.IO.Hashing.Crc32]::Hash($fileBytes)
+                          
+                          # Convert to UInt32 and return decimal value
+                          return [System.BitConverter]::ToUInt32($hashBytes, 0)
+                      }
+                      catch {
+                          Write-Error "Error processing file: $_"
+                          return $null
+                      }
+                  }
+                  else {
+                      Write-Error "File not found: $absolutePath"
+                      return $null
+                  }
+              }
+
+              # Calculate CRC32 for your file
+              $crc32 = Get-FileCrc32 -FilePath $sbomFile
+
+              # read the vsman file
+              $relativeUrl = "/Microsoft.Build.neutral_sbom.json"
+              $vsmanFile = "$(SYSTEM_ARTIFACTSDIRECTORY)\vsix\Microsoft.Build.vsman"
+              $vsman = Get-Content -Path $vsmanFile -Raw | ConvertFrom-Json
+              
+              # add the sbom file to the vsman file - FIXED VARIABLE SYNTAX
+              $vsman.packages[0].payloads += @{
+                fileName = "Microsoft.Build.neutral_sbom.json"
+                sha256 = "$sha256"
+                size = $size
+                url = "https://vsdrop.corp.microsoft.com/file/v1/Products/$env:SYSTEM_TEAMPROJECT/$env:BUILD_REPOSITORY_NAME/$env:BUILD_SOURCEBRANCHNAME/$env:BUILD_BUILDNUMBER/$env:BUILD_BUILDID$relativeUrl"
+                _buildInfo = @{
+                  crc = $crc32
+                  relativeUrl = "$relativeUrl"
+                }
+              }
+              # write the vsman file back to disk
+              $vsman | ConvertTo-Json -Depth 100 | Set-Content -Path $vsmanFile -Force
+        
+  #           script: |
+  #             # copy the sbom to the vsix folder
+  #             Copy-Item "$(SYSTEM_ARTIFACTSDIRECTORY)\vsix\_manifest\spdx_2.2\manifest.spdx.json" "$(SYSTEM_ARTIFACTSDIRECTORY)\vsix\Microsoft.Build.neutral_sbom.json" -Force
+  #             # calculate sha256 hash of the sbom file
+  #             $sbomFile = "$(SYSTEM_ARTIFACTSDIRECTORY)\vsix\Microsoft.Build.neutral_sbom.json"
+  #             $sha256 = Get-FileHash -Path $sbomFile -Algorithm SHA256 | Select-Object -ExpandProperty Hash
+  #             # calculate size of the sbom file
+  #             $size = (Get-Item $sbomFile).length
+  #             # get the crc32 of the sbom file as decimal
+
+  #             # CRC32 File Hashing for Azure Pipelines
+  #             # Install and load System.IO.Hashing
+  #             Write-Host "Installing System.IO.Hashing package..."
+  #             Install-Package -Name System.IO.Hashing -Scope CurrentUser -Force
+
+  #             # Find and load the DLL
+  #             $nugetPackagesPath = "$env:USERPROFILE\.nuget\packages"
+  #             $dllPath = Get-ChildItem -Path "$nugetPackagesPath\system.io.hashing" -Recurse -Filter "System.IO.Hashing.dll" | 
+  #                 Where-Object { $_.FullName -match "net\d" } | 
+  #                 Select-Object -First 1 -ExpandProperty FullName
+
+  #             if (-not $dllPath) {
+  #                 Write-Host "Searching for DLL in all paths..."
+  #                 $dllPath = Get-ChildItem -Path "$nugetPackagesPath\system.io.hashing" -Recurse -Filter "System.IO.Hashing.dll" | 
+  #                     Select-Object -First 1 -ExpandProperty FullName
+  #             }
+
+  #             if (-not $dllPath) {
+  #                 throw "Could not find System.IO.Hashing.dll. Make sure the package is installed."
+  #             }
+
+  #             Write-Host "Loading assembly from: $dllPath"
+  #             Add-Type -Path $dllPath
+
+  #             # Function to calculate CRC32 hash for a file, returns decimal value
+  #             function Get-FileCrc32 {
+  #                 param (
+  #                     [Parameter(Mandatory=$true)]
+  #                     [string]$FilePath
+  #                 )
+                  
+  #                 # Convert relative path to absolute path
+  #                 $absolutePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($FilePath)
+                  
+  #                 if (Test-Path $absolutePath) {
+  #                     Write-Host "Processing file: $absolutePath"
+                      
+  #                     try {
+  #                         # Read all bytes from the file
+  #                         $fileBytes = [System.IO.File]::ReadAllBytes($absolutePath)
+                          
+  #                         # Use the static Hash method
+  #                         $hashBytes = [System.IO.Hashing.Crc32]::Hash($fileBytes)
+                          
+  #                         # Convert to UInt32 and return decimal value
+  #                         return [System.BitConverter]::ToUInt32($hashBytes, 0)
+  #                     }
+  #                     catch {
+  #                         Write-Error "Error processing file: $_"
+  #                         return $null
+  #                     }
+  #                 }
+  #                 else {
+  #                     Write-Error "File not found: $absolutePath"
+  #                     return $null
+  #                 }
+  #             }
+
+  #             # Calculate CRC32 for your file (replace with actual file path)
+              
+  #             $crc32 = Get-FileCrc32 -FilePath $sbomFile
+
+  #             # now we want a vsman file in this format:
+  # #{
+  # # "manifestV  ersion": "1.1",
+  # # "info": {
+  # # ...
+  # # },
+  # # "signers":   [
+  # #   {
+  # # ...
+  # #   }
+  # # ],
+  # # "packages"  : [
+  # #   {
+  # #     "id":   "Microsoft.Build",
+  # #     "versi  on": "17.15.0.2517702",
+  # #     "type"  : "Vsix",
+  # #     "chip"  : "neutral",
+  # #     "langu  age": "neutral",
+  # #     "paylo  ads": [
+  # #       {
+  # #         "f  ileName": "Microsoft.Build.vsix",
+  # #         "s  ha256": "c19b99310d7d1408cd6beb5bc4d2090478318b1a460cb828f344e43e3ab6b02d",
+  # #         "s  ize": 13916790,
+  # #         "u  rl": "https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/Update_Ngen_Priorities_for_VS/20250327.2;/Microsoft.Build.vsix",
+  # #         "_  buildInfo": {
+  # #             "crc": "2240540897",
+  # #             "relativeUrl": "/Microsoft.Build.vsix"
+  # #         },
+  # #         "s  igner": {
+  # #             "$ref": "1"
+  # #         }
+  # #       },
+  # #       {
+  # #         "f  ileName": "Microsoft.Build.neutral_sbom.json",
+  # #         "s  ha256": "2302c17ba81281880c10b19a48b14b80a3e62c162a8f7df29568a212dd151957",
+  # #         "s  ize": 190043,
+  # #         "u  rl": "https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/Update_Ngen_Priorities_for_VS/20250327.2;/Microsoft.Build.neutral_sbom.json",
+  # #         "_  buildInfo": {
+  # #             "crc": "1907048634",
+  # #             "relativeUrl": "/Microsoft.Build.neutral_sbom.json"
+  # #         }
+  # #       }
+  # #     ],
+
+  #             # but! our vsman file is missing the Microsoft.Build.neutral_sbom.json file
+  #             # so we need to add it to the vsman file
+
+  #             # read the vsman file
+  #             $relativeUrl = "/Microsoft.Build.neutral_sbom.json"
+  #             $vsmanFile = "$(SYSTEM_ARTIFACTSDIRECTORY)\vsix\Microsoft.Build.vsman"
+  #             $vsman = Get-Content -Path $vsmanFile -Raw | ConvertFrom-Json
+  #             # add the sbom file to the vsman file
+
+  #             $vsman.packages[0].payloads += @{
+  #               fileName = "Microsoft.Build.neutral_sbom.json"
+  #               sha256 = "$sha256"
+  #               size = $size
+  #               url = "https://vsdrop.corp.microsoft.com/file/v1/Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)/$relativeUrl"
+  #               _buildInfo = @{
+  #                 crc = $crc32
+  #                 relativeUrl = "$relativeUrl"
+  #               }
+  #             }
+  #             # write the vsman file back to disk
+  #             $vsman | ConvertTo-Json -Depth 100 | Set-Content -Path $vsmanFile -Force
+      
+          - task: 1ES.MicroBuildVstsDrop@1
+            displayName: 'Upload VSTS Drop'
+            inputs:
+              dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
+              dropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
+              dropRetentionDays: 1000
+              accessToken: '$(System.AccessToken)'
+              dropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
+              vsDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
+          
+          # republish the edited vsix pipeline artifact with the sbom
+          - task: 1ES.PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: artifacts\$(BuildConfiguration)\VSSetup\Insertion
+              ArtifactName: vsix
