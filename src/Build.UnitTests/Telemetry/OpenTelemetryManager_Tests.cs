@@ -12,9 +12,7 @@ using Microsoft.Build.Framework.Telemetry;
 
 namespace Microsoft.Build.Engine.UnitTests.Telemetry
 {
-    /// <summary>
-    /// Ensures tests run serially so environment variables and the singleton do not interfere with parallel test runs.
-    /// </summary>
+    // Putting the tests to a collection ensures tests run serially by default, that's needed to isolate the manager singleton state and env vars in some telemetry tests.
     [Collection("OpenTelemetryManagerTests")]
     public class OpenTelemetryManagerTests : IDisposable
     {
