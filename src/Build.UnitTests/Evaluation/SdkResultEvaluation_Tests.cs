@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
@@ -135,6 +136,40 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             _logger.ErrorCount.ShouldBe(0);
             _logger.WarningCount.ShouldBe(0);
+        }
+
+        [Fact]
+        public void SuccessfullyEvaluatesSdkResultWithPropertiesForNullProjectRootElement()
+        {
+            Dictionary<string, string> propertiesToAdd = null;
+            Dictionary<string, SdkResultItem> itemsToAdd = null;
+
+            CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
+
+            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
+                new Build.BackEnd.SdkResolution.SdkResult(
+                        new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
+                        Enumerable.Empty<string>(),
+                        version: null,
+                        propertiesToAdd,
+                        itemsToAdd,
+                        warnings: null)));
+
+            string projectContent = @"
+                    <Project>
+                        <Import Project=""Sdk.props"" Sdk=""TestPropsAndItemsFromResolverSdk""/>
+                    </Project>";
+
+            string projectPath = Path.Combine(_testFolder, "project.proj");
+            File.WriteAllText(projectPath, projectContent);
+
+            using XmlReader xmlReader = XmlReader.Create(projectPath);
+
+            projectOptions.ProjectCollection = _projectCollection;
+
+            // Creating project from XmlReader results in null ProjectRootElement on Evaluation phase.
+            // In that case project created for SdkResult properties and items is given a unique file name {Guid}.SdkResolver.{propertiesAndItemsHash}.proj in the current directory
+            Project.FromXmlReader(xmlReader, projectOptions);
         }
 
         [Theory]
