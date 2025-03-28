@@ -152,79 +152,77 @@ extends:
           inputs:
             targetType: 'inline'
             script: |
+              $sbomFile = "$env:SYSTEM_ARTIFACTSDIRECTORY\vsix\Microsoft.Build.neutral_sbom.json"
               # copy the sbom to the vsix folder
-              Copy-Item "$(SYSTEM_ARTIFACTSDIRECTORY)\vsix\_manifest\spdx_2.2\manifest.spdx.json" "$(SYSTEM_ARTIFACTSDIRECTORY)\vsix\Microsoft.Build.neutral_sbom.json" -Force
+              Copy-Item "$env:SYSTEM_ARTIFACTSDIRECTORY\vsix\_manifest\spdx_2.2\manifest.spdx.json" $sbomFile -Force
               # calculate sha256 hash of the sbom file
-              $sbomFile = "$(SYSTEM_ARTIFACTSDIRECTORY)\vsix\Microsoft.Build.neutral_sbom.json"
               $sha256 = Get-FileHash -Path $sbomFile -Algorithm SHA256 | Select-Object -ExpandProperty Hash
               # calculate size of the sbom file
               $size = (Get-Item $sbomFile).length
               # get the crc32 of the sbom file as decimal
 
-              # CRC32 File Hashing for Azure Pipelines
-              # Install and load System.IO.Hashing
-              Write-Host "Installing System.IO.Hashing package..."
-              Install-Package -Name System.IO.Hashing -Scope CurrentUser -Force
-
-              # Find and load the DLL
-              $nugetPackagesPath = "$env:USERPROFILE\.nuget\packages"
-              $dllPath = Get-ChildItem -Path "$nugetPackagesPath\system.io.hashing" -Recurse -Filter "System.IO.Hashing.dll" | 
-                  Where-Object { $_.FullName -match "net\d" } | 
-                  Select-Object -First 1 -ExpandProperty FullName
-
-              if (-not $dllPath) {
-                  Write-Host "Searching for DLL in all paths..."
-                  $dllPath = Get-ChildItem -Path "$nugetPackagesPath\system.io.hashing" -Recurse -Filter "System.IO.Hashing.dll" | 
-                      Select-Object -First 1 -ExpandProperty FullName
-              }
-
-              if (-not $dllPath) {
-                  throw "Could not find System.IO.Hashing.dll. Make sure the package is installed."
-              }
-
-              Write-Host "Loading assembly from: $dllPath"
-              Add-Type -Path $dllPath
-
-              # Function to calculate CRC32 hash for a file, returns decimal value
-              function Get-FileCrc32 {
+              function Get-Crc32 {
+                  [CmdletBinding()]
                   param (
                       [Parameter(Mandatory=$true)]
                       [string]$FilePath
                   )
+              
+                  # Ensure path is resolved properly
+                  $resolvedPath = Resolve-Path -Path $FilePath -ErrorAction Stop
                   
-                  # Convert relative path to absolute path
-                  $absolutePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($FilePath)
+                  # Initialize CRC32 table
+                  $crc32Table = New-Object 'System.UInt32[]' 256
                   
-                  if (Test-Path $absolutePath) {
-                      Write-Host "Processing file: $absolutePath"
-                      
-                      try {
-                          # Read all bytes from the file
-                          $fileBytes = [System.IO.File]::ReadAllBytes($absolutePath)
-                          
-                          # Use the static Hash method
-                          $hashBytes = [System.IO.Hashing.Crc32]::Hash($fileBytes)
-                          
-                          # Convert to UInt32 and return decimal value
-                          return [System.BitConverter]::ToUInt32($hashBytes, 0)
+                  # Generate CRC32 table
+                  for ($i = 0; $i -lt 256; $i++) {
+                      $c = [uint32]$i
+                      for ($j = 0; $j -lt 8; $j++) {
+                          if (($c -band 1) -eq 1) {
+                              $c = [uint32](0xEDB88320 -bxor ($c -shr 1))
+                          } else {
+                              $c = [uint32]($c -shr 1)
+                          }
                       }
-                      catch {
-                          Write-Error "Error processing file: $_"
-                          return $null
-                      }
+                      $crc32Table[$i] = $c
                   }
-                  else {
-                      Write-Error "File not found: $absolutePath"
+              
+                  # Initialize CRC32 value - using Convert instead of direct assignment
+                  [uint32]$crc32 = [Convert]::ToUInt32("FFFFFFFF", 16)
+                  
+                  try {
+                      # Process file in chunks to avoid memory issues with large files
+                      $buffer = New-Object byte[] 8192  # 8KB buffer
+                      $stream = [System.IO.File]::OpenRead($resolvedPath)
+                      
+                      do {
+                          $bytesRead = $stream.Read($buffer, 0, $buffer.Length)
+                          
+                          for ($i = 0; $i -lt $bytesRead; $i++) {
+                              $crc32 = [uint32]($crc32Table[($crc32 -bxor $buffer[$i]) -band 0xFF] -bxor ($crc32 -shr 8))
+                          }
+                      } while ($bytesRead -eq $buffer.Length)
+                      
+                      $stream.Close()
+                  }
+                  catch {
+                      Write-Error "Error processing file: $_"
+                      if ($null -ne $stream) { $stream.Close() }
                       return $null
                   }
+              
+                  # Final XOR with 0xFFFFFFFF
+                  $crc32 = $crc32 -bxor ([Convert]::ToUInt32("FFFFFFFF", 16))
+                  
+                  return $crc32
               }
 
               # Calculate CRC32 for your file
-              $crc32 = Get-FileCrc32 -FilePath $sbomFile
+              $crc32 = Get-Crc32 -FilePath $sbomFile
 
               # read the vsman file
               $relativeUrl = "/Microsoft.Build.neutral_sbom.json"
-              $vsmanFile = "$(SYSTEM_ARTIFACTSDIRECTORY)\vsix\Microsoft.Build.vsman"
+              $vsmanFile = "$env:SYSTEM_ARTIFACTSDIRECTORY\vsix\Microsoft.Build.vsman"
               $vsman = Get-Content -Path $vsmanFile -Raw | ConvertFrom-Json
               
               # add the sbom file to the vsman file - FIXED VARIABLE SYNTAX
@@ -384,7 +382,7 @@ extends:
           inputs:
             dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
             dropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
-            dropRetentionDays: 1000
+            dropRetentionDays: 180
             accessToken: '$(System.AccessToken)'
             dropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
             vsDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
