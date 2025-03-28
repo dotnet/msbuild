@@ -7,7 +7,7 @@ using Microsoft.Build.FileSystem;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.ProjectCache
+namespace Microsoft.Build.Experimental.ProjectCache
 {
     /// <summary>
     ///     Holds various information about the current msbuild execution that the cache might use.
