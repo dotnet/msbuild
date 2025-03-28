@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Shouldly;
 using Xunit;
+using Microsoft.Build.Framework.Telemetry;
 
 namespace Microsoft.Build.Framework.UnitTests
 {
