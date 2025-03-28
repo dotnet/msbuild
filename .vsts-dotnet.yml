@@ -379,18 +379,18 @@ extends:
   #             # write the vsman file back to disk
   #             $vsman | ConvertTo-Json -Depth 100 | Set-Content -Path $vsmanFile -Force
       
-          - task: 1ES.MicroBuildVstsDrop@1
-            displayName: 'Upload VSTS Drop'
-            inputs:
-              dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
-              dropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
-              dropRetentionDays: 1000
-              accessToken: '$(System.AccessToken)'
-              dropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
-              vsDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
+        - task: 1ES.MicroBuildVstsDrop@1
+          displayName: 'Upload VSTS Drop'
+          inputs:
+            dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
+            dropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
+            dropRetentionDays: 1000
+            accessToken: '$(System.AccessToken)'
+            dropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
+            vsDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
           
           # republish the edited vsix pipeline artifact with the sbom
-          - task: 1ES.PublishBuildArtifacts@1
-            inputs:
-              PathtoPublish: artifacts\$(BuildConfiguration)\VSSetup\Insertion
-              ArtifactName: vsix
+        - task: 1ES.PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: artifacts\$(BuildConfiguration)\VSSetup\Insertion
+            ArtifactName: vsix
