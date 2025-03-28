@@ -64,6 +64,9 @@
     <None Include="..\Shared\UnitTests\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="TestResources\CustomCulture\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="TestResources\Projects\Custom_COM\Custom_COM\Class1.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -135,6 +138,7 @@
     <Compile Remove="VisualBasicParserUtilitites_Tests.cs" />
     <Compile Remove="VisualBasicTokenizer_Tests.cs" />
     <Compile Remove="WinMDExp_Tests.cs" />
+    <Compile Remove="ResolveAssemblyReference_CustomCultureTests.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -155,6 +159,9 @@
     <None Update="TestResources\Manifests\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <EmbeddedResource Update="TestResources\CustomCulture\*.resx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <None Update="TestResources\mycert.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
