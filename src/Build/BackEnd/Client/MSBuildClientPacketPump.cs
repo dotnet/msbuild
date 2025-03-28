@@ -2,11 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+#if !FEATURE_APM
 using System.Threading.Tasks;
+#endif
 
 namespace Microsoft.Build.BackEnd.Client
 {
@@ -43,14 +47,24 @@ namespace Microsoft.Build.BackEnd.Client
         private readonly NodePacketFactory _packetFactory;
 
         /// <summary>
+        /// The memory stream for a read buffer.
+        /// </summary>
+        private readonly MemoryStream _readBufferMemoryStream;
+
+        /// <summary>
         /// The thread which runs the asynchronous packet pump
         /// </summary>
         private Thread? _packetPumpThread;
 
         /// <summary>
-        /// The pipe client from where to read packets.
+        /// The stream from where to read packets.
         /// </summary>
-        private readonly NodePipeClient _pipeClient;
+        private readonly Stream _stream;
+
+        /// <summary>
+        /// The binary translator for reading packets.
+        /// </summary>
+        private readonly ITranslator _binaryReadTranslator;
 
         /// <summary>
         /// True if this side is gracefully disconnecting.
@@ -59,12 +73,11 @@ namespace Microsoft.Build.BackEnd.Client
         /// </summary>
         private bool _isServerDisconnecting;
 
-        public MSBuildClientPacketPump(NodePipeClient pipeClient)
+        public MSBuildClientPacketPump(Stream stream)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(pipeClient);
+            ErrorUtilities.VerifyThrowArgumentNull(stream);
 
-            _pipeClient = pipeClient;
-            _pipeClient.RegisterPacketFactory(this);
+            _stream = stream;
             _isServerDisconnecting = false;
             _packetFactory = new NodePacketFactory();
 
@@ -72,6 +85,9 @@ namespace Microsoft.Build.BackEnd.Client
             PacketReceivedEvent = new AutoResetEvent(false);
             PacketPumpCompleted = new ManualResetEvent(false);
             _packetPumpShutdownEvent = new ManualResetEvent(false);
+
+            _readBufferMemoryStream = new MemoryStream();
+            _binaryReadTranslator = BinaryTranslator.GetReadTranslator(_readBufferMemoryStream, InterningBinaryReader.CreateSharedBuffer());
         }
 
         #region INodePacketFactory Members
@@ -97,13 +113,14 @@ namespace Microsoft.Build.BackEnd.Client
         }
 
         /// <summary>
-        /// Deserializes a packet.
+        /// Deserializes and routes a packer to the appropriate handler.
         /// </summary>
+        /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packetType">The packet type.</param>
         /// <param name="translator">The translator to use as a source for packet data.</param>
-        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
-            return _packetFactory.DeserializePacket(packetType, translator);
+            _packetFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
         }
 
         /// <summary>
@@ -165,16 +182,21 @@ namespace Microsoft.Build.BackEnd.Client
         /// </remarks>
         private void PacketPumpProc()
         {
-            RunReadLoop(_pipeClient, _packetPumpShutdownEvent);
+            RunReadLoop(_stream, _packetPumpShutdownEvent);
         }
 
-        private void RunReadLoop(NodePipeClient pipeClient, ManualResetEvent localPacketPumpShutdownEvent)
+        private void RunReadLoop(Stream localStream, ManualResetEvent localPacketPumpShutdownEvent)
         {
             CommunicationsUtilities.Trace("Entering read loop.");
 
             try
             {
-                Task<INodePacket> readTask = pipeClient.ReadPacketAsync();
+                byte[] headerByte = new byte[5];
+#if FEATURE_APM
+                IAsyncResult result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
+#else
+                Task<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
+#endif
 
                 bool continueReading = true;
                 do
@@ -186,7 +208,11 @@ namespace Microsoft.Build.BackEnd.Client
                     WaitHandle[] handles =
                     [
                         localPacketPumpShutdownEvent,
+#if FEATURE_APM
+                        result.AsyncWaitHandle
+#else
                         ((IAsyncResult)readTask).AsyncWaitHandle
+#endif
                     ];
                     int waitId = WaitHandle.WaitAny(handles);
                     switch (waitId)
@@ -198,27 +224,80 @@ namespace Microsoft.Build.BackEnd.Client
                             break;
 
                         case 1:
-                            INodePacket packet = readTask.GetAwaiter().GetResult();
-
-                            if (packet.Type == NodePacketType.NodeShutdown)
                             {
-                                if (!_isServerDisconnecting)
+                                // Client recieved a packet header. Read the rest of it.
+                                int headerBytesRead = 0;
+#if FEATURE_APM
+                                headerBytesRead = localStream.EndRead(result);
+#else
+                                headerBytesRead = readTask.Result;
+#endif
+
+                                if ((headerBytesRead != headerByte.Length) && !localPacketPumpShutdownEvent.WaitOne(0))
                                 {
-                                    ErrorUtilities.ThrowInternalError("Server disconnected abruptly.");
+                                    // Incomplete read. Abort.
+                                    if (headerBytesRead == 0)
+                                    {
+                                        if (_isServerDisconnecting)
+                                        {
+                                            continueReading = false;
+                                            break;
+                                        }
+
+                                        ErrorUtilities.ThrowInternalError("Server disconnected abruptly");
+                                    }
+                                    else
+                                    {
+                                        ErrorUtilities.ThrowInternalError("Incomplete header read.  {0} of {1} bytes read", headerBytesRead, headerByte.Length);
+                                    }
                                 }
 
-                                continueReading = false;
-                                break;
+                                NodePacketType packetType = (NodePacketType)Enum.ToObject(typeof(NodePacketType), headerByte[0]);
+
+                                int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(headerByte, 1, 4));
+                                int packetBytesRead = 0;
+
+                                _readBufferMemoryStream.Position = 0;
+                                _readBufferMemoryStream.SetLength(packetLength);
+                                byte[] packetData = _readBufferMemoryStream.GetBuffer();
+
+                                while (packetBytesRead < packetLength)
+                                {
+                                    int bytesRead = localStream.Read(packetData, packetBytesRead, packetLength - packetBytesRead);
+                                    if (bytesRead == 0)
+                                    {
+                                        // Incomplete read.  Abort.
+                                        ErrorUtilities.ThrowInternalError("Incomplete packet read. {0} of {1} bytes read", packetBytesRead, packetLength);
+                                    }
+
+                                    packetBytesRead += bytesRead;
+                                }
+
+                                try
+                                {
+                                    _packetFactory.DeserializeAndRoutePacket(0, packetType, _binaryReadTranslator);
+                                }
+                                catch
+                                {
+                                    // Error while deserializing or handling packet. Logging additional info.
+                                    CommunicationsUtilities.Trace("Packet factory failed to receive package. Exception while deserializing packet {0}.", packetType);
+                                    throw;
+                                }
+
+                                if (packetType == NodePacketType.ServerNodeBuildResult)
+                                {
+                                    continueReading = false;
+                                }
+                                else
+                                {
+                                    // Start reading the next package header.
+#if FEATURE_APM
+                                    result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
+#else
+                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
+#endif
+                                }
                             }
-
-                            _packetFactory.RoutePacket(0, packet);
-
-                            continueReading = packet.Type != NodePacketType.ServerNodeBuildResult;
-                            if (continueReading)
-                            {
-                                readTask = pipeClient.ReadPacketAsync();
-                            }
-
                             break;
 
                         default:
