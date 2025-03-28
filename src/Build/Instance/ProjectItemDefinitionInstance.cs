@@ -236,6 +236,18 @@ namespace Microsoft.Build.Execution
 
         string IItemTypeDefinition.ItemType => _itemType;
 
+        internal bool TryFastCopyOnWritePropertyDictionary(out ICopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata)
+        {
+            if (_metadata is CopyOnWritePropertyDictionary copyOnWritePropertyDictionary)
+            {
+                metadata = copyOnWritePropertyDictionary.DeepClone();
+                return true;
+            }
+
+            metadata = null;
+            return false;
+        }
+
         private static IDictionary<string, ProjectMetadataInstance> CreateMetadataCollection(int capacity)
         {
             return new CopyOnWritePropertyDictionary();

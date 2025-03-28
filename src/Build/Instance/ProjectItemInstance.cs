@@ -1175,17 +1175,38 @@ namespace Microsoft.Build.Execution
                         return (_directMetadata == null) ? new CopyOnWritePropertyDictionary() : _directMetadata.DeepClone(); // copy on write!
                     }
 
+                    int lastIndex = _itemDefinitions.Count - 1;
+
+                    if (_itemDefinitions[lastIndex].TryFastCopyOnWritePropertyDictionary(out ICopyOnWritePropertyDictionary<ProjectMetadataInstance> fastMetadata))
+                    {
+                        // In most cases, we only have a single item definition and can either directly return it, or at least start with an allocated dictionary.
+                        if (lastIndex == 0)
+                        {
+                            if (_directMetadata != null)
+                            {
+                                fastMetadata.ImportProperties(_directMetadata);
+                            }
+                        }
+                        else
+                        {
+                            fastMetadata.ImportProperties(metaData(lastIndex - 1));
+                        }
+
+                        return fastMetadata;
+                    }
+
+                    // Slow path - enumerate all our metadata.
                     CopyOnWritePropertyDictionary allMetadata = new();
 
-                    allMetadata.ImportProperties(metaData());
+                    allMetadata.ImportProperties(metaData(lastIndex));
 
                     return allMetadata;
 
-                    IEnumerable<ProjectMetadataInstance> metaData()
+                    IEnumerable<ProjectMetadataInstance> metaData(int frontIndex)
                     {
                         // Next, any inherited item definitions. Front of the list is highest priority,
                         // so walk backwards.
-                        for (int i = _itemDefinitions.Count - 1; i >= 0; i--)
+                        for (int i = frontIndex; i >= 0; i--)
                         {
                             foreach (ProjectMetadataInstance metadatum in _itemDefinitions[i].Metadata)
                             {
