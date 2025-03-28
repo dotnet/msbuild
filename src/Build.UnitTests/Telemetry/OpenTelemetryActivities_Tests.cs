@@ -8,8 +8,9 @@ using System.Linq;
 using System.Text;
 using Xunit;
 using Shouldly;
+using Microsoft.Build.Framework.Telemetry;
 
-namespace Microsoft.Build.Framework.Telemetry.Tests
+namespace Microsoft.Build.Engine.UnitTests.Telemetry
 {
     public class ActivityExtensionsTests
     {
