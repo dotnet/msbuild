@@ -53,13 +53,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             dic["a"] = a;
 
-            dic["a"].ShouldBeSameAs(a);
+            dic["a"].ShouldBe(a);
             dic["b"].ShouldBeNull();
 
             dic["b"] = b;
 
-            dic["a"].ShouldBeSameAs(a);
-            dic["b"].ShouldBeSameAs(b);
+            dic["a"].ShouldBe(a);
+            dic["b"].ShouldBe(b);
 
             // Cannot set a null value
             Assert.ThrowsAny<Exception>(() => dic["a"] = null!);
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dic.Set(b);
 
             IEnumerable<ProjectMetadataInstance> set = [a, b];
-            dic.ShouldBeSetEquivalentTo(set);
+            dic.ShouldBe(set, ignoreOrder: true);
         }
 
         [Fact]
@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dic.ImportProperties(new[] { a, b });
 
             IEnumerable<ProjectMetadataInstance> set = [a, b];
-            dic.ShouldBeSetEquivalentTo(set);
+            dic.ShouldBe(set, ignoreOrder: true);
         }
 
         [Fact]

@@ -189,6 +189,10 @@ namespace Microsoft.Build.Execution
 
         #endregion
 
+        public override bool Equals(object other) => other is ProjectMetadataInstance projectMetadataInstance && Equals(projectMetadataInstance);
+
+        public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(_name) ^ _escapedValue.GetHashCode();
+
         #region IEquatable<ProjectMetadataInstance> Members
 
         /// <summary>
