@@ -34,7 +34,7 @@ variables:
     - name: SourceBranch
       value: ''
   - name: EnableReleaseOneLocBuild
-    value: true # Enable loc for vs17.13
+    value: false # Disable loc for vs17.13
   - name: Codeql.Enabled
     value: true
   - group: AzureDevOps-Artifact-Feeds-Pats
