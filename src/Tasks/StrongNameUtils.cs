@@ -49,10 +49,23 @@ namespace Microsoft.Build.Tasks
                     int fileLength = (int)fs.Length;
                     keyFileContents = new byte[fileLength];
 
-#pragma warning disable CA2022 // Avoid inexact read with 'Stream.Read'
                     // TODO: Read the count of read bytes and check if it matches the expected length, if not raise an exception
-                    fs.Read(keyFileContents, 0, fileLength);
-#pragma warning restore CA2022 // Avoid inexact read with 'Stream.Read'
+#if NET
+                    fs.ReadExactly(keyFileContents, 0, fileLength);
+#else
+                    int count = fileLength;
+                    int offset = 0;
+                    while (count > 0)
+                    {
+                        int read = fs.Read(keyFileContents, offset, count);
+                        if (read <= 0)
+                        {
+                            throw new EndOfStreamException();
+                        }
+                        offset += read;
+                        count -= read;
+                    }
+#endif
                 }
             }
             catch (ArgumentException e)
