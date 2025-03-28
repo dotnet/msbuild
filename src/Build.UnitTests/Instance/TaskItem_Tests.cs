@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     }
                 }
 
-                CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = new();
+                CopyOnWritePropertyDictionary directMetadata = new();
                 if (metadata is not null)
                 {
                     foreach ((string name, string value) in metadata)

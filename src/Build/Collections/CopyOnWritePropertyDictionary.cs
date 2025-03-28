@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-
+using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -34,48 +34,61 @@ namespace Microsoft.Build.Collections
     ///
     /// This collection is safe for concurrent readers and a single writer.
     /// </remarks>
-    /// <typeparam name="T">Property or Metadata class type to store</typeparam>
     [DebuggerDisplay("#Entries={Count}")]
-    internal sealed class CopyOnWritePropertyDictionary<T> : ICopyOnWritePropertyDictionary<T>, IEquatable<CopyOnWritePropertyDictionary<T>>
-        where T : class, IKeyed, IValued, IEquatable<T>, IImmutable
+    internal sealed class CopyOnWritePropertyDictionary : ICopyOnWritePropertyDictionary<ProjectMetadataInstance>, IEquatable<CopyOnWritePropertyDictionary>, IEnumerable<ProjectMetadataInstance>
     {
-        private static readonly ImmutableDictionary<string, T> NameComparerDictionaryPrototype = ImmutableDictionary.Create<string, T>(MSBuildNameIgnoreCaseComparer.Default);
+        private static readonly ImmutableDictionary<string, string> NameComparerDictionaryPrototype = ImmutableDictionary.Create<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
         /// <summary>
         /// Backing dictionary.
         /// </summary>
-        private ImmutableDictionary<string, T> _backing;
+        private ImmutableDictionary<string, string> _backing;
 
         /// <summary>
         /// Creates empty dictionary.
         /// </summary>
-        public CopyOnWritePropertyDictionary()
-        {
-            _backing = NameComparerDictionaryPrototype;
-        }
+        public CopyOnWritePropertyDictionary() => _backing = NameComparerDictionaryPrototype;
 
         /// <summary>
         /// Cloning constructor, with deferred cloning semantics.
         /// </summary>
-        private CopyOnWritePropertyDictionary(CopyOnWritePropertyDictionary<T> that)
-        {
-            _backing = that._backing;
-        }
+        internal CopyOnWritePropertyDictionary(CopyOnWriteDictionary<string> that) => _backing = that.ToImmutableDictionary();
+
+        /// <summary>
+        /// Cloning constructor, with deferred cloning semantics.
+        /// </summary>
+        private CopyOnWritePropertyDictionary(CopyOnWritePropertyDictionary that) => _backing = that._backing;
 
         /// <summary>
         /// Accessor for the list of property names.
         /// </summary>
-        ICollection<string> IDictionary<string, T>.Keys => ((IDictionary<string, T>)_backing).Keys;
+        ICollection<string> IDictionary<string, ProjectMetadataInstance>.Keys => ((IDictionary<string, string>)_backing).Keys;
 
         /// <summary>
         /// Accessor for the list of properties.
         /// </summary>
-        ICollection<T> IDictionary<string, T>.Values => ((IDictionary<string, T>)_backing).Values;
+        ICollection<ProjectMetadataInstance> IDictionary<string, ProjectMetadataInstance>.Values
+        {
+            get
+            {
+                ImmutableDictionary<string, string> backing = _backing;
+                int index = 0;
+                ProjectMetadataInstance[] values = new ProjectMetadataInstance[backing.Count];
+
+                foreach (KeyValuePair<string, string> entry in backing)
+                {
+                    values[index] = new ProjectMetadataInstance(entry.Key, entry.Value, allowItemSpecModifiers: true);
+                    index++;
+                }
+
+                return values;
+            }
+        }
 
         /// <summary>
         /// Whether the collection is read-only.
         /// </summary>
-        bool ICollection<KeyValuePair<string, T>>.IsReadOnly => false;
+        bool ICollection<KeyValuePair<string, ProjectMetadataInstance>>.IsReadOnly => false;
 
         /// <summary>
         /// Returns the number of properties in the collection.
@@ -91,20 +104,24 @@ namespace Microsoft.Build.Collections
         /// This better matches the semantics of property, which are considered to have a blank value if they
         /// are not defined.
         /// </remarks>
-        public T this[string name]
+        public ProjectMetadataInstance this[string name]
         {
+            // We don't want to check for a zero length name here, since that is a valid name
+            // and should return a null instance which will be interpreted as blank
             get
             {
-                // We don't want to check for a zero length name here, since that is a valid name
-                // and should return a null instance which will be interpreted as blank
-                _backing.TryGetValue(name, out T projectProperty);
-                return projectProperty;
+                if (_backing.TryGetValue(name, out string escapedValue) && escapedValue != null)
+                {
+                    return new ProjectMetadataInstance(name, escapedValue, allowItemSpecModifiers: true);
+                }
+
+                return null;
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowInternalNull(value, "Properties can't have null value");
-                ErrorUtilities.VerifyThrow(String.Equals(name, value.Key, StringComparison.OrdinalIgnoreCase), "Key must match value's key");
+                ErrorUtilities.VerifyThrow(string.Equals(name, value.Key, StringComparison.OrdinalIgnoreCase), "Key must match value's key");
                 Set(value);
             }
         }
@@ -115,36 +132,31 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Contains(string name) => _backing.ContainsKey(name);
 
-        public string GetEscapedValue(string name)
-        {
-            if (_backing.TryGetValue(name, out T value))
-            {
-                return value?.EscapedValue;
-            }
-
-            return null;
-        }
+        public string GetEscapedValue(string name) => _backing.TryGetValue(name, out string escapedValue) ? escapedValue : null;
 
         /// <summary>
         /// Empties the collection
         /// </summary>
-        public void Clear()
-        {
-            _backing = _backing.Clear();
-        }
+        public void Clear() => _backing = _backing.Clear();
 
         /// <summary>
         /// Gets an enumerator over all the properties in the collection
         /// Enumeration is in undefined order
         /// </summary>
-        public IEnumerator<T> GetEnumerator() => _backing.Values.GetEnumerator();
+        public IEnumerator<ProjectMetadataInstance> GetEnumerator()
+        {
+            foreach (KeyValuePair<string, string> item in _backing)
+            {
+                yield return new ProjectMetadataInstance(item.Key, item.Value, allowItemSpecModifiers: true);
+            }
+        }
 
         /// <summary>
         /// Get an enumerator over entries
         /// </summary>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        #region IEquatable<CopyOnWritePropertyDictionary<T>> Members
+        #region IEquatable<CopyOnWritePropertyDictionary> Members
 
         /// <summary>
         /// Compares two property dictionaries for equivalence.  They are equal if each contains the same properties with the
@@ -152,7 +164,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         /// <param name="other">The dictionary to which this should be compared</param>
         /// <returns>True if they are equivalent, false otherwise.</returns>
-        public bool Equals(CopyOnWritePropertyDictionary<T> other)
+        public bool Equals(CopyOnWritePropertyDictionary other)
         {
             if (other == null)
             {
@@ -160,8 +172,8 @@ namespace Microsoft.Build.Collections
             }
 
             // Copy both backing collections to locals
-            ImmutableDictionary<string, T> thisBacking = _backing;
-            ImmutableDictionary<string, T> thatBacking = other._backing;
+            ImmutableDictionary<string, string> thisBacking = _backing;
+            ImmutableDictionary<string, string> thatBacking = other._backing;
 
             // If the backing collections are the same, we are equal.
             // Note that with this check, we intentionally avoid the common reference
@@ -176,10 +188,9 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            foreach (T thisProp in thisBacking.Values)
+            foreach (KeyValuePair<string, string> thisEntry in thisBacking)
             {
-                if (!thatBacking.TryGetValue(thisProp.Key, out T thatProp) ||
-                    !EqualityComparer<T>.Default.Equals(thisProp, thatProp))
+                if (!thatBacking.TryGetValue(thisEntry.Key, out string thatValue) || thisEntry.Value != thatValue)
                 {
                     return false;
                 }
@@ -190,7 +201,7 @@ namespace Microsoft.Build.Collections
 
         #endregion
 
-        #region IEquatable<CopyOnWritePropertyDictionary<T>> Members
+        #region IEquatable<CopyOnWritePropertyDictionary<ProjectMetadataInstance>> Members
 
         /// <summary>
         /// Compares two property dictionaries for equivalence.  They are equal if each contains the same properties with the
@@ -198,38 +209,29 @@ namespace Microsoft.Build.Collections
         /// </summary>
         /// <param name="other">The dictionary to which this should be compared</param>
         /// <returns>True if they are equivalent, false otherwise.</returns>
-        public bool Equals(ICopyOnWritePropertyDictionary<T> other)
+        public bool Equals(ICopyOnWritePropertyDictionary<ProjectMetadataInstance> other)
         {
             if (other == null)
             {
                 return false;
             }
 
-            ImmutableDictionary<string, T> thisBacking = _backing;
-            IDictionary<string, T> otherDict = other;
+            ImmutableDictionary<string, string> thisBacking = _backing;
 
-            if (other is CopyOnWritePropertyDictionary<T> otherCopyOnWritePropertyDictionary)
+            if (other is CopyOnWritePropertyDictionary otherCopyOnWritePropertyDictionary)
             {
-                // If the backing collections are the same, we are equal.
-                // Note that with this check, we intentionally avoid the common reference
-                // comparison between 'this' and 'other'.
-                if (ReferenceEquals(thisBacking, otherCopyOnWritePropertyDictionary._backing))
-                {
-                    return true;
-                }
-
-                otherDict = otherCopyOnWritePropertyDictionary._backing;
+                return Equals(otherCopyOnWritePropertyDictionary);
             }
 
-            if (thisBacking.Count != otherDict.Count)
+            if (thisBacking.Count != other.Count)
             {
                 return false;
             }
 
-            foreach (T thisProp in thisBacking.Values)
+            foreach (KeyValuePair<string, string> thisEntry in thisBacking)
             {
-                if (!otherDict.TryGetValue(thisProp.Key, out T thatProp) ||
-                    !EqualityComparer<T>.Default.Equals(thisProp, thatProp))
+                if (!other.TryGetValue(thisEntry.Key, out ProjectMetadataInstance thatProp) ||
+                    !EqualityComparer<ProjectMetadataInstance>.Default.Equals(new ProjectMetadataInstance(thisEntry.Key, thisEntry.Value, allowItemSpecModifiers: true), thatProp))
                 {
                     return false;
                 }
@@ -240,12 +242,12 @@ namespace Microsoft.Build.Collections
 
         #endregion
 
-        #region IDictionary<string,T> Members
+        #region IDictionary<string, ProjectMetadataInstance> Members
 
         /// <summary>
         /// Adds a property
         /// </summary>
-        void IDictionary<string, T>.Add(string key, T value)
+        void IDictionary<string, ProjectMetadataInstance>.Add(string key, ProjectMetadataInstance value)
         {
             ErrorUtilities.VerifyThrowInternalNull(value, "Properties can't have null value");
             ErrorUtilities.VerifyThrow(key == value.Key, "Key must match value's key");
@@ -255,33 +257,48 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns true if the dictionary contains the key
         /// </summary>
-        bool IDictionary<string, T>.ContainsKey(string key) => _backing.ContainsKey(key);
+        bool IDictionary<string, ProjectMetadataInstance>.ContainsKey(string key) => _backing.ContainsKey(key);
 
         /// <summary>
         /// Attempts to retrieve the a property.
         /// </summary>
-        bool IDictionary<string, T>.TryGetValue(string key, out T value) => _backing.TryGetValue(key, out value);
+        bool IDictionary<string, ProjectMetadataInstance>.TryGetValue(string key, out ProjectMetadataInstance value)
+        {
+            value = null;
+
+            if (_backing.TryGetValue(key, out string escapedValue))
+            {
+                if (escapedValue != null)
+                {
+                    value = new ProjectMetadataInstance(key, escapedValue, allowItemSpecModifiers: true);
+                }
+
+                return true;
+            }
+
+            return false;
+        }
 
         #endregion
 
-        #region ICollection<KeyValuePair<string,T>> Members
+        #region ICollection<KeyValuePair<string,ProjectMetadataInstance>> Members
 
         /// <summary>
         /// Adds a property
         /// </summary>
-        void ICollection<KeyValuePair<string, T>>.Add(KeyValuePair<string, T> item)
+        void ICollection<KeyValuePair<string, ProjectMetadataInstance>>.Add(KeyValuePair<string, ProjectMetadataInstance> item)
         {
-            ((IDictionary<string, T>)this).Add(item.Key, item.Value);
+            ((IDictionary<string, ProjectMetadataInstance>)this).Add(item.Key, item.Value);
         }
 
         /// <summary>
         /// Checks for a property in the collection
         /// </summary>
-        bool ICollection<KeyValuePair<string, T>>.Contains(KeyValuePair<string, T> item)
+        bool ICollection<KeyValuePair<string, ProjectMetadataInstance>>.Contains(KeyValuePair<string, ProjectMetadataInstance> item)
         {
-            if (_backing.TryGetValue(item.Key, out T value))
+            if (_backing.TryGetValue(item.Key, out string escapedValue))
             {
-                return EqualityComparer<T>.Default.Equals(value, item.Value);
+                return EqualityComparer<ProjectMetadataInstance>.Default.Equals(new ProjectMetadataInstance(item.Key, escapedValue, allowItemSpecModifiers: true), item.Value);
             }
 
             return false;
@@ -290,7 +307,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Not implemented
         /// </summary>
-        void ICollection<KeyValuePair<string, T>>.CopyTo(KeyValuePair<string, T>[] array, int arrayIndex)
+        void ICollection<KeyValuePair<string, ProjectMetadataInstance>>.CopyTo(KeyValuePair<string, ProjectMetadataInstance>[] array, int arrayIndex)
         {
             ErrorUtilities.ThrowInternalError("CopyTo is not supported on PropertyDictionary.");
         }
@@ -298,7 +315,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Removes a property from the collection
         /// </summary>
-        bool ICollection<KeyValuePair<string, T>>.Remove(KeyValuePair<string, T> item)
+        bool ICollection<KeyValuePair<string, ProjectMetadataInstance>>.Remove(KeyValuePair<string, ProjectMetadataInstance> item)
         {
             ErrorUtilities.VerifyThrow(item.Key == item.Value.Key, "Key must match value's key");
             return Remove(item.Key);
@@ -306,14 +323,18 @@ namespace Microsoft.Build.Collections
 
         #endregion
 
-        #region IEnumerable<KeyValuePair<string,T>> Members
+        #region IEnumerable<KeyValuePair<string,ProjectMetadataInstance>> Members
 
         /// <summary>
         /// Get an enumerator over the entries.
         /// </summary>
-        IEnumerator<KeyValuePair<string, T>> IEnumerable<KeyValuePair<string, T>>.GetEnumerator()
+        IEnumerator<KeyValuePair<string, ProjectMetadataInstance>> IEnumerable<KeyValuePair<string, ProjectMetadataInstance>>.GetEnumerator()
         {
-            return _backing.GetEnumerator();
+            foreach (KeyValuePair<string, string> item in _backing)
+            {
+                ProjectMetadataInstance projectProperty = new(item.Key, item.Value, allowItemSpecModifiers: true);
+                yield return new(item.Key, projectProperty);
+            }
         }
 
         #endregion
@@ -334,26 +355,26 @@ namespace Microsoft.Build.Collections
         /// Overwrites any property with the same name already in the collection.
         /// To remove a property, use Remove(...) instead.
         /// </summary>
-        public void Set(T projectProperty)
+        public void Set(ProjectMetadataInstance projectProperty)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectProperty);
 
-            _backing = _backing.SetItem(projectProperty.Key, projectProperty);
+            _backing = _backing.SetItem(projectProperty.Key, projectProperty.EscapedValue);
         }
 
         /// <summary>
         /// Adds the specified properties to this dictionary.
         /// </summary>
         /// <param name="other">An enumerator over the properties to add.</param>
-        public void ImportProperties(IEnumerable<T> other)
+        public void ImportProperties(IEnumerable<ProjectMetadataInstance> other)
         {
-            _backing = _backing.SetItems(Items());
+            _backing = _backing.SetItems(Items(other));
 
-            IEnumerable<KeyValuePair<string, T>> Items()
+            static IEnumerable<KeyValuePair<string, string>> Items(IEnumerable<ProjectMetadataInstance> other)
             {
-                foreach (T property in other)
+                foreach (ProjectMetadataInstance property in other)
                 {
-                    yield return new(property.Key, property);
+                    yield return new(property.Key, property.EscapedValue);
                 }
             }
         }
@@ -362,9 +383,18 @@ namespace Microsoft.Build.Collections
         /// Clone. As we're copy on write, this
         /// should be cheap.
         /// </summary>
-        public ICopyOnWritePropertyDictionary<T> DeepClone()
+        public ICopyOnWritePropertyDictionary<ProjectMetadataInstance> DeepClone() => new CopyOnWritePropertyDictionary(this);
+
+        /// <summary>
+        /// Returns true if these dictionaries have the same backing.
+        /// </summary>
+        public bool HasSameBacking(ICopyOnWritePropertyDictionary<ProjectMetadataInstance> other)
         {
-            return new CopyOnWritePropertyDictionary<T>(this);
+            return other is CopyOnWritePropertyDictionary otherCopyOnWritePropertyDictionary
+                ? ReferenceEquals(otherCopyOnWritePropertyDictionary._backing, _backing)
+                : false;
         }
+
+        internal CopyOnWriteDictionary<string> ToCopyOnWriteDictionary() => new(_backing);
     }
 }

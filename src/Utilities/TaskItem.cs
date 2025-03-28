@@ -232,6 +232,8 @@ namespace Microsoft.Build.Utilities
         /// <value>Count of metadata.</value>
         public int MetadataCount => (_metadata?.Count ?? 0) + FileUtilities.ItemSpecModifiers.All.Length;
 
+        int IMetadataContainer.CustomMetadataCount => _metadata?.Count ?? 0;
+
         /// <summary>
         /// Gets the metadata dictionary
         /// Property is required so that we can access the metadata dictionary in an item from
@@ -322,51 +324,21 @@ namespace Microsoft.Build.Utilities
 
             if (_metadata != null)
             {
-                if (destinationItem is TaskItem destinationAsTaskItem)
+                if (destinationItem is TaskItem destinationAsUtilitiesTaskItem)
                 {
-                    CopyOnWriteDictionary<string> copiedMetadata;
-                    // Avoid a copy if we can, and if not, minimize the number of items we have to set.
-                    if (destinationAsTaskItem.Metadata == null)
-                    {
-                        copiedMetadata = _metadata.Clone(); // Copy on write!
-                    }
-                    else if (destinationAsTaskItem.Metadata.Count < _metadata.Count)
-                    {
-                        copiedMetadata = _metadata.Clone(); // Copy on write!
-                        copiedMetadata.SetItems(destinationAsTaskItem.Metadata.Where(entry => !String.IsNullOrEmpty(entry.Value)));
-                    }
-                    else
-                    {
-                        copiedMetadata = destinationAsTaskItem.Metadata.Clone();
-                        copiedMetadata.SetItems(_metadata.Where(entry => !destinationAsTaskItem.Metadata.TryGetValue(entry.Key, out string val) || String.IsNullOrEmpty(val)));
-                    }
-                    destinationAsTaskItem.Metadata = copiedMetadata;
+                    CopyToUtilitiesTaskItem(destinationAsUtilitiesTaskItem);
+                }
+                else if (destinationItem is IMetadataContainer destinationAsMetadataContainer)
+                {
+                    CopyToMetadataContainer(destinationItem, destinationAsMetadataContainer);
+                }
+                else if (destinationAsITaskItem2 != null)
+                {
+                    CopyToTaskItem2(destinationAsITaskItem2);
                 }
                 else
                 {
-                    foreach (KeyValuePair<string, string> entry in _metadata)
-                    {
-                        string value;
-
-                        if (destinationAsITaskItem2 != null)
-                        {
-                            value = destinationAsITaskItem2.GetMetadataValueEscaped(entry.Key);
-
-                            if (string.IsNullOrEmpty(value))
-                            {
-                                destinationAsITaskItem2.SetMetadata(entry.Key, entry.Value);
-                            }
-                        }
-                        else
-                        {
-                            value = destinationItem.GetMetadata(entry.Key);
-
-                            if (string.IsNullOrEmpty(value))
-                            {
-                                destinationItem.SetMetadata(entry.Key, EscapingUtilities.Escape(entry.Value));
-                            }
-                        }
-                    }
+                    CopyToTaskItem(destinationItem);
                 }
             }
 
@@ -379,6 +351,79 @@ namespace Microsoft.Build.Utilities
                 else
                 {
                     destinationItem.SetMetadata("OriginalItemSpec", EscapingUtilities.Escape(ItemSpec));
+                }
+            }
+
+            void CopyToUtilitiesTaskItem(TaskItem destinationItem)
+            {
+                CopyOnWriteDictionary<string> copiedMetadata;
+
+                // Avoid a copy if we can, and if not, minimize the number of items we have to set.
+                if (destinationItem.Metadata == null)
+                {
+                    copiedMetadata = _metadata.Clone(); // Copy on write!
+                }
+                else if (destinationItem.Metadata.Count < _metadata.Count)
+                {
+                    copiedMetadata = _metadata.Clone(); // Copy on write!
+                    copiedMetadata.SetItems(destinationItem.Metadata.Where(entry =>
+                        !string.IsNullOrEmpty(entry.Value)));
+                }
+                else
+                {
+                    copiedMetadata = destinationItem.Metadata.Clone();
+                    copiedMetadata.SetItems(_metadata.Where(entry =>
+                        !destinationItem.Metadata.TryGetValue(entry.Key, out string val) || string.IsNullOrEmpty(val)));
+                }
+
+                destinationItem.Metadata = copiedMetadata;
+            }
+
+            void CopyToMetadataContainer(ITaskItem destinationItem, IMetadataContainer destinationMetadata)
+            {
+                if (destinationMetadata.CustomMetadataCount == 0)
+                {
+                    destinationMetadata.ImportMetadata(_metadata);
+                    return;
+                }
+                else if (destinationMetadata.HasSameBackingCollection(_metadata))
+                {
+                    return;
+                }
+
+                IEnumerable<KeyValuePair<string, string>> metadataToImport = destinationItem is ITaskItem2 destinationAsITaskItem2
+                    ? _metadata.Where(entry => string.IsNullOrEmpty(destinationAsITaskItem2.GetMetadataValueEscaped(entry.Key)))
+                    : _metadata.Where(entry => string.IsNullOrEmpty(destinationItem.GetMetadata(entry.Key)));
+
+#if FEATURE_APPDOMAIN
+                if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
+                {
+                    // Linq is not serializable so materialize the collection before making the call.
+                    metadataToImport = [.. metadataToImport];
+                }
+#endif
+                destinationMetadata.ImportMetadata(metadataToImport);
+            }
+
+            void CopyToTaskItem2(ITaskItem2 destinationItem)
+            {
+                foreach (KeyValuePair<string, string> entry in _metadata)
+                {
+                    if (string.IsNullOrEmpty(destinationAsITaskItem2.GetMetadataValueEscaped(entry.Key)))
+                    {
+                        destinationAsITaskItem2.SetMetadata(entry.Key, entry.Value);
+                    }
+                }
+            }
+
+            void CopyToTaskItem(ITaskItem destinationItem)
+            {
+                foreach (KeyValuePair<string, string> entry in _metadata)
+                {
+                    if (string.IsNullOrEmpty(destinationItem.GetMetadata(entry.Key)))
+                    {
+                        destinationItem.SetMetadata(entry.Key, EscapingUtilities.Escape(entry.Value));
+                    }
                 }
             }
         }
@@ -504,6 +549,12 @@ namespace Microsoft.Build.Utilities
 
         void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
         {
+            if (_metadata == null && metadata is CopyOnWriteDictionary<string> copyOnWriteDictionary)
+            {
+                _metadata = copyOnWriteDictionary.Clone();
+                return;
+            }
+
             _metadata ??= new CopyOnWriteDictionary<string>(MSBuildNameIgnoreCaseComparer.Default);
             _metadata.SetItems(metadata.Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value ?? string.Empty)));
         }
@@ -539,6 +590,20 @@ namespace Microsoft.Build.Utilities
                 var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
                 yield return unescaped;
             }
+        }
+
+        bool IMetadataContainer.HasSameBackingCollection(ICollection<KeyValuePair<string, string>> backingCollection)
+        {
+            if (_metadata == null)
+            {
+                return backingCollection == null;
+            }
+            else if (backingCollection is CopyOnWriteDictionary<string> copyOnWriteDictionary)
+            {
+                return _metadata.HasSameBacking(copyOnWriteDictionary);
+            }
+
+            return false;
         }
     }
 }

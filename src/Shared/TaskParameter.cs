@@ -811,6 +811,8 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            public int CustomMetadataCount => _customEscapedMetadata?.Count ?? 0;
+
             /// <summary>
             /// Returns the escaped version of this item's ItemSpec
             /// </summary>
@@ -1038,6 +1040,8 @@ namespace Microsoft.Build.BackEnd
                     SetMetadata(kvp.Key, kvp.Value);
                 }
             }
+
+            public bool HasSameBackingCollection(ICollection<KeyValuePair<string, string>> backingCollection) => false;
         }
     }
 }
