@@ -23,7 +23,6 @@ using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFra
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 

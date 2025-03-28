@@ -12,12 +12,9 @@ using System.Runtime.InteropServices;
 #endif
 using System.Reflection;
 using System.Runtime.Versioning;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using static Microsoft.Build.Shared.FileSystem.WindowsNative;
 #if FEATURE_ASSEMBLYLOADCONTEXT
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;

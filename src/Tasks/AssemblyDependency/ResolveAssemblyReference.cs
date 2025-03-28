@@ -5,7 +5,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if !NET
 using System.Globalization;
+#endif
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -2045,7 +2047,7 @@ namespace Microsoft.Build.Tasks
                     break;
             }
         }
-#endregion
+        #endregion
 
         #region StateFile
         /// <summary>

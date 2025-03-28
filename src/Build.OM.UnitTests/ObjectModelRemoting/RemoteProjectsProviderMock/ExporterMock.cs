@@ -7,9 +7,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Threading;
-    using System.Xml;
     using Microsoft.Build.Construction;
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.ObjectModelRemoting;

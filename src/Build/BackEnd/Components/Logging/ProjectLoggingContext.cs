@@ -3,7 +3,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;

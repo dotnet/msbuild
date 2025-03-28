@@ -2,16 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Buffers;
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Security;
-using System.Text;
 using System.Xml;
-#if !NETFRAMEWORK
+#if NETFRAMEWORK
+using System.Text;
+#else
+using System.Buffers;
 using Microsoft.Build.Shared;
 #endif
 
@@ -19,6 +21,8 @@ using XMakeAttributes = Microsoft.Build.Shared.XMakeAttributes;
 using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
 using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
+
+
 
 #nullable disable
 
@@ -581,7 +585,7 @@ namespace Microsoft.Build.Construction
             return false;
         }
 
-#endregion
+        #endregion
 
         #region Constants
 

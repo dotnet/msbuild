@@ -9,7 +9,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
-using Xunit;
 
 #nullable disable
 

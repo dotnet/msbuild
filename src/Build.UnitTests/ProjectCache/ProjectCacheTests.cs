@@ -10,7 +10,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.CommandLine;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
@@ -24,7 +23,6 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.Engine.UnitTests.ProjectCache

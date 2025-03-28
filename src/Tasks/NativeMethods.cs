@@ -12,7 +12,9 @@ using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System.Collections;
 using System.Globalization;
+#if !NET
 using System.Linq;
+#endif
 #if FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS
 using System.Runtime.ExceptionServices;
 #endif

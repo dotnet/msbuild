@@ -3,12 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+#if FEATURE_APPDOMAIN
 using System.Globalization;
+#endif
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 

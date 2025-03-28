@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Threading;
-
-using Microsoft.Build.Evaluation;
 
 using Shouldly;
 

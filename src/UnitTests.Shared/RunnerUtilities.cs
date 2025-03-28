@@ -3,12 +3,11 @@
 
 using System;
 using System.Diagnostics;
-using Microsoft.Build.Shared;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Xunit.Abstractions;
-using System.Linq;
 
 #nullable disable
 

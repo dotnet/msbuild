@@ -13,9 +13,7 @@ using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 
 #if NET
-using System.Diagnostics.CodeAnalysis;
 using System.Buffers;
-
 #endif
 
 #if NETFRAMEWORK

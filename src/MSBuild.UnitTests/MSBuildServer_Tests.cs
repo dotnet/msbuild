@@ -11,7 +11,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 #if NETFRAMEWORK
