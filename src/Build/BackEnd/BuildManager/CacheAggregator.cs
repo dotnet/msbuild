@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -55,8 +56,8 @@ namespace Microsoft.Build.Execution
 
         private void InsertCaches(IConfigCache configCache, IResultsCache resultsCache)
         {
-            var configs = configCache.GetEnumerator().ToArray();
-            var results = resultsCache.GetEnumerator().ToArray();
+            var configs = configCache.ToArray();
+            var results = resultsCache.ToArray();
 
             ErrorUtilities.VerifyThrow(configs.Length == results.Length, "Assuming 1-to-1 mapping between configs and results. Otherwise it means the caches are either not minimal or incomplete");
 

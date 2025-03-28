@@ -241,7 +241,7 @@ namespace Microsoft.Build.Utilities
 
             public override string ToString()
             {
-                return ProcessId + "@" + StartTime.ToString("s");
+                return $"{ProcessId}@{StartTime:s}";
             }
         }
 

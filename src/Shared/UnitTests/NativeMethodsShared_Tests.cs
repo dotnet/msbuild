@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    nonexistentDirectory = Path.Combine(currentDirectory, "foo", "bar", "baz") + Guid.NewGuid();
+                    nonexistentDirectory = $"{Path.Combine(currentDirectory, "foo", "bar", "baz")}{Guid.NewGuid()}";
 
                     if (!Directory.Exists(nonexistentDirectory))
                     {
