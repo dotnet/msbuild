@@ -1401,7 +1401,7 @@ namespace Microsoft.Build.BackEnd
                                 // Furthermore, because that is true, we know by definition that they also implement ITaskItem2.
                                 newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsProjectItem.IncludeEscaped, parameterLocationEscaped);
 
-                                outputAsProjectItem.CopyMetadataTo(newItem, addOriginalItemSpec: false);
+                                newItem.SetMetadata(outputAsProjectItem.MetadataCollection);
                             }
                             else if (output is ITaskItem2 outputAsITaskItem2)
                             {
