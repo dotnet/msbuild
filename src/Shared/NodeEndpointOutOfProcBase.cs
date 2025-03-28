@@ -9,7 +9,6 @@ using Microsoft.Build.Shared.Concurrent;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 #endif
-using System.IO;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;

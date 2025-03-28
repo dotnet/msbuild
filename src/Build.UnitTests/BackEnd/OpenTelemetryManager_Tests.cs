@@ -3,11 +3,8 @@
 
 using System;
 using System.Reflection;
-using Xunit;
 using Shouldly;
-using Xunit.Abstractions;
-using Microsoft.Build.UnitTests.Shared;
-using Microsoft.Build.UnitTests;
+using Xunit;
 
 namespace Microsoft.Build.Framework.Telemetry.Tests
 {

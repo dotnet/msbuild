@@ -4,8 +4,10 @@
 using System;
 using System.IO;
 using System.IO.Pipes;
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
 using System.Security.AccessControl;
 using System.Security.Principal;
+#endif
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 

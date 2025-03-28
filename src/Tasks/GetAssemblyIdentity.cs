@@ -3,12 +3,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Reflection;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+#if !NET
+using System.Globalization;
+using System.Text;
+#endif
 
 #nullable disable
 

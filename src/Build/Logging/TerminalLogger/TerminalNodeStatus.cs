@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
 using Microsoft.Build.Framework.Logging;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging;
 

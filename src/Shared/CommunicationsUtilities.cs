@@ -7,7 +7,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+#if NETFRAMEWORK
 using System.Runtime.InteropServices;
+#endif
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
 using System.Security.Principal;
 #endif
