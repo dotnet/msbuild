@@ -885,7 +885,6 @@ public sealed partial class TerminalLogger : INodeLogger
 
             if (Verbosity > LoggerVerbosity.Quiet)
             {
-                // Show immediate messages to the user.
                 if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
                 {
                     // The SDK will log the high-pri "not-a-warning" message NETSDK1057
