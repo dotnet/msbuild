@@ -200,13 +200,14 @@ namespace Microsoft.Build.Experimental
         }
 
         /// <summary>
-        /// Deserializes a packet.
+        /// Deserializes and routes a packer to the appropriate handler.
         /// </summary>
+        /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packetType">The packet type.</param>
         /// <param name="translator">The translator to use as a source for packet data.</param>
-        INodePacket INodePacketFactory.DeserializePacket(NodePacketType packetType, ITranslator translator)
+        void INodePacketFactory.DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
-            return _packetFactory.DeserializePacket(packetType, translator);
+            _packetFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
         }
 
         /// <summary>
