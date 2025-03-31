@@ -6,7 +6,11 @@ using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
+
+#if NET
 using System.Threading.Tasks;
+#endif
+
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
