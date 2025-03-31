@@ -55,6 +55,12 @@ extends:
       # We generate SBOM ourselves, so don't need steps injected by 1ES.
       sbom:
         enabled: false
+      codeSignValidation:
+        enabled: true
+        break: true
+        additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
+      credscan:
+        suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
 
     stages:
     - stage: build
@@ -100,7 +106,7 @@ extends:
             command: restore
             feedsToUse: config
             restoreSolution: 'eng\common\internal\Tools.csproj'
-            nugetConfigPath: 'NuGet.config'
+            nugetConfigPath: '.\NuGet.config'
             restoreDirectory: '$(Build.SourcesDirectory)\.packages'
 
         - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
@@ -109,14 +115,13 @@ extends:
             zipSources: false
           condition: and(succeeded(), in(variables['SignType'], 'test', 'real'))
 
-        # OptProf is not needed because this packaged will not be serviced in VS.
-        # - task: MicroBuildOptProfPlugin@6
-        #   inputs:
-        #     ProfilingInputsDropName: '$(VisualStudio.DropName)'
-        #     ShouldSkipOptimize: true
-        #     AccessToken: '$(System.AccessToken)'
-        #     feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
-        #   displayName: 'Install OptProf Plugin'
+        - task: MicroBuildOptProfPlugin@6
+          inputs:
+            ProfilingInputsDropName: '$(VisualStudio.DropName)'
+            ShouldSkipOptimize: true
+            AccessToken: '$(System.AccessToken)'
+            feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
+          displayName: 'Install OptProf Plugin'
 
         # Required by MicroBuildBuildVSBootstrapper
         - task: MicroBuildSwixPlugin@4
@@ -148,50 +153,48 @@ extends:
         # Required by Microsoft policy
         - template: eng\common\templates-official\steps\generate-sbom.yml@self
 
-        # OptProf is not needed because this packaged will not be serviced in VS.
         # Publish OptProf configuration files
-        # - task: 1ES.PublishArtifactsDrop@1
-        #   inputs:
-        #     dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
-        #     buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
-        #     sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
-        #     toLowerCase: false
-        #     usePat: true
-        #   displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
-        #   condition: succeeded()
+        - task: 1ES.PublishArtifactsDrop@1
+          inputs:
+            dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
+            buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+            sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
+            toLowerCase: false
+            usePat: true
+          displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
+          condition: succeeded()
 
         # Build VS bootstrapper
         # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-        # - task: MicroBuildBuildVSBootstrapper@3
-        #   inputs:
-        #     vsMajorVersion: $(VisualStudio.MajorVersion)
-        #     channelName: $(VisualStudio.ChannelName)
-        #     manifests: $(VisualStudio.SetupManifestList)
-        #     outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
-        #     bootstrapperCoreVersion:
-        #   displayName: 'OptProf - Build VS bootstrapper'
-        #   condition: succeeded()
+        - task: MicroBuildBuildVSBootstrapper@3
+          inputs:
+            vsMajorVersion: $(VisualStudio.MajorVersion)
+            channelName: $(VisualStudio.ChannelName)
+            manifests: $(VisualStudio.SetupManifestList)
+            outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+          displayName: 'OptProf - Build VS bootstrapper'
+          condition: succeeded()
 
         # Publish run settings
-        # - task: PowerShell@2
-        #   inputs:
-        #     filePath: eng\common\sdk-task.ps1
-        #     arguments: -configuration $(BuildConfiguration)
-        #               -task VisualStudio.BuildIbcTrainingSettings
-        #               /p:VisualStudioDropName=$(VisualStudio.DropName)
-        #               /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
-        #               /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
-        #   displayName: 'OptProf - Build IBC training settings'
-        #   condition: succeeded()
+        - task: PowerShell@2
+          inputs:
+            filePath: eng\common\sdk-task.ps1
+            arguments: -configuration $(BuildConfiguration)
+                      -task VisualStudio.BuildIbcTrainingSettings
+                      /p:VisualStudioDropName=$(VisualStudio.DropName)
+                      /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+                      /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
+          displayName: 'OptProf - Build IBC training settings'
+          condition: succeeded()
 
         # Publish bootstrapper info
-        # - task: 1ES.PublishBuildArtifacts@1
-        #   inputs:
-        #     PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
-        #     ArtifactName: MicroBuildOutputs
-        #     ArtifactType: Container
-        #   displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
-        #   condition: succeeded()
+        - task: 1ES.PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
+            ArtifactName: MicroBuildOutputs
+            ArtifactType: Container
+          displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
+          condition: succeeded()
 
         - task: 1ES.PublishBuildArtifacts@1
           displayName: 'Publish Artifact: logs'
@@ -272,7 +275,7 @@ extends:
             - name: Managed
               pool:
                 name: AzurePipelines-EO
-                image: AzurePipelinesUbuntu22.04compliantGPT
+                image: 1ESPT-Ubuntu22.04
                 os: linux
 
       - template: /eng/common/templates-official/job/publish-build-assets.yml@self
@@ -283,8 +286,8 @@ extends:
             - Windows_NT
             - Source_Build_Managed
           pool:
-            name: AzurePipelines-EO
-            image: 1ESPT-Windows2022
+            name: $(DncEngInternalBuildPool)
+            image: $(WindowsImage)
             os: windows
 
     - template: eng\common\templates-official\post-build\post-build.yml@self
@@ -293,18 +296,3 @@ extends:
         enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
-        SDLValidationParameters:
-          enable: true
-          continueOnError: false
-          params: ' -SourceToolsList @("policheck","credscan")
-          -TsaInstanceURL "$(_TsaInstanceURL)"
-          -TsaProjectName "$(_TsaProjectName)"
-          -TsaNotificationEmail "$(_TsaNotificationEmail)"
-          -TsaCodebaseAdmin "$(_TsaCodebaseAdmin)"
-          -TsaBugAreaPath "$(_TsaBugAreaPath)"
-          -TsaIterationPath "$(_TsaIterationPath)"
-          -TsaRepositoryName "dotnet-msbuild"
-          -TsaCodebaseName "dotnet-msbuild"
-          -TsaPublish $True
-          -CrScanAdditionalRunConfigParams @("SuppressionsPath < $(Build.SourcesDirectory)\eng\CredScanSuppressions.json")
-          -PoliCheckAdditionalRunConfigParams @("UserExclusionPath < $(Build.SourcesDirectory)\eng\policheck_exclusions.xml")'
