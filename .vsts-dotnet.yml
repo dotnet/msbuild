@@ -155,7 +155,7 @@ extends:
             script: |
               Write-Host "Files in $(System.ArtifactsDirectory)/vsix:"
               Get-ChildItem -Path "$(System.ArtifactsDirectory)/vsix" -Recurse | Select-Object FullName
-              
+
         - task: PowerShell@2
           displayName: 'link sbom to Microsoft.Build.vsman in vsix folder'
           inputs:
@@ -390,14 +390,14 @@ extends:
           displayName: 'Upload VSTS Drop'
           inputs:
             dropName: 'Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)/$(Build.BuildId)'
-            dropFolder: 'artifacts\$(BuildConfiguration)\VSSetup\Insertion'
+            dropFolder: '$(System.ArtifactsDirectory)/vsix'
             dropRetentionDays: 180
             accessToken: '$(System.AccessToken)'
             dropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
             vsDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
-          
-          # republish the edited vsix pipeline artifact with the sbom
+
         - task: 1ES.PublishBuildArtifacts@1
+          displayName: 'Republish vsix artifact with embedded SBOM' 
           inputs:
-            PathtoPublish: artifacts\$(BuildConfiguration)\VSSetup\Insertion
+            PathtoPublish: '$(System.ArtifactsDirectory)/vsix'
             ArtifactName: vsix
