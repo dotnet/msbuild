@@ -236,7 +236,7 @@ namespace Microsoft.Build.Execution
 
         string IItemTypeDefinition.ItemType => _itemType;
 
-        internal bool TryFastCopyOnWritePropertyDictionary(out ICopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata)
+        internal bool TryCloneAsPropertyDictionary(out ICopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata)
         {
             if (_metadata is CopyOnWritePropertyDictionary copyOnWritePropertyDictionary)
             {
@@ -246,6 +246,18 @@ namespace Microsoft.Build.Execution
 
             metadata = null;
             return false;
+        }
+
+        internal bool HasSameBackingCollection(ProjectItemDefinitionInstance other)
+        {
+            if (ReferenceEquals(_metadata, other._metadata))
+            {
+                return true;
+            }
+
+            return _metadata is CopyOnWritePropertyDictionary propertyDictionary
+                && other._metadata is CopyOnWritePropertyDictionary otherPropertyDictionary
+                && propertyDictionary.HasSameBackingCollection(otherPropertyDictionary);
         }
 
         private static IDictionary<string, ProjectMetadataInstance> CreateMetadataCollection(int capacity)

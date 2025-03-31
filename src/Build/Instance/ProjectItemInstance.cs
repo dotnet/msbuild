@@ -655,6 +655,13 @@ namespace Microsoft.Build.Execution
             _taskItem.SetMetadataOnTaskOutput(items);
         }
 
+        internal void SetMetadataOnTaskOutput(TaskItem taskItem)
+        {
+            _project.VerifyThrowNotImmutable();
+
+            _taskItem.SetMetadataOnTaskOutput(taskItem);
+        }
+
         /// <summary>
         /// Deep clone the item.
         /// Any metadata inherited from item definitions are also copied.
@@ -946,11 +953,9 @@ namespace Microsoft.Build.Execution
             {
                 get
                 {
-                    ICopyOnWritePropertyDictionary<ProjectMetadataInstance> metadataCollection = MetadataCollection;
+                    List<string> names = new(capacity: _directMetadata.Count + FileUtilities.ItemSpecModifiers.All.Length);
 
-                    List<string> names = new List<string>(capacity: metadataCollection.Count + FileUtilities.ItemSpecModifiers.All.Length);
-
-                    foreach (ProjectMetadataInstance metadatum in (IEnumerable<ProjectMetadataInstance>)metadataCollection)
+                    foreach (ProjectMetadataInstance metadatum in EnumerateProjectMetadata())
                     {
                         names.Add(metadatum.Name);
                     }
@@ -967,7 +972,16 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public int MetadataCount
             {
-                get { return MetadataNames.Count; }
+                get
+                {
+                    int count = 0;
+                    foreach (ProjectMetadataInstance _ in EnumerateProjectMetadata())
+                    {
+                        count++;
+                    }
+
+                    return count;
+                }
             }
 
             /// <summary>
@@ -1055,25 +1069,19 @@ namespace Microsoft.Build.Execution
             {
                 // If we have item definitions, call the expensive property that does the right thing.
                 // Otherwise use _directMetadata to avoid allocations caused by DeepClone().
-                var list = _itemDefinitions != null ? MetadataCollection : _directMetadata;
-                if (list != null)
-                {
+                IEnumerable<ProjectMetadataInstance> list = EnumerateProjectMetadata();
+
 #if FEATURE_APPDOMAIN
-                    // Can't send a yield-return iterator across AppDomain boundaries
-                    if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
-                    {
-                        return EnumerateMetadataEager(list);
-                    }
-#endif
-                    // Mainline scenario, returns an iterator to avoid allocating an array
-                    // to store the results. With the iterator, results can stream to the
-                    // consumer (e.g. binlog writer) without allocations.
-                    return EnumerateMetadata(list);
-                }
-                else
+                // Can't send a yield-return iterator across AppDomain boundaries
+                if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
                 {
-                    return [];
+                    return EnumerateMetadataEager(list);
                 }
+#endif
+                // Mainline scenario, returns an iterator to avoid allocating an array
+                // to store the results. With the iterator, results can stream to the
+                // consumer (e.g. binlog writer) without allocations.
+                return EnumerateMetadata(list);
             }
 
             /// <summary>
@@ -1108,11 +1116,11 @@ namespace Microsoft.Build.Execution
                 }
                 else if (backingCollection is ICopyOnWritePropertyDictionary<ProjectMetadataInstance> copyOnWritePropertyDictionary)
                 {
-                    return _directMetadata.HasSameBacking(copyOnWritePropertyDictionary);
+                    return _directMetadata.HasSameBackingCollection(copyOnWritePropertyDictionary);
                 }
                 else if (backingCollection is CopyOnWriteDictionary<string> copyOnWriteDictionary)
                 {
-                    return _directMetadata.HasSameBacking(new CopyOnWritePropertyDictionary(copyOnWriteDictionary));
+                    return _directMetadata.HasSameBackingCollection(new CopyOnWritePropertyDictionary(copyOnWriteDictionary));
                 }
 
                 return false;
@@ -1124,11 +1132,11 @@ namespace Microsoft.Build.Execution
             /// </summary>
             /// <param name="list">The source list to return metadata from.</param>
             /// <returns>An array of string key-value pairs representing metadata.</returns>
-            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager(ICopyOnWritePropertyDictionary<ProjectMetadataInstance> list)
+            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager(IEnumerable<ProjectMetadataInstance> list)
             {
-                var result = new List<KeyValuePair<string, string>>(list.Count);
+                var result = new List<KeyValuePair<string, string>>(_directMetadata.Count);
 
-                foreach (var projectMetadataInstance in list.Values)
+                foreach (var projectMetadataInstance in list)
                 {
                     if (projectMetadataInstance != null)
                     {
@@ -1137,16 +1145,70 @@ namespace Microsoft.Build.Execution
                 }
 
                 // Probably better to send the raw array across the wire even if it's another allocation.
-                return result.ToArray();
+                return [.. result];
             }
 
-            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(ICopyOnWritePropertyDictionary<ProjectMetadataInstance> list)
+            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(IEnumerable<ProjectMetadataInstance> list)
             {
-                foreach (var projectMetadataInstance in list.Values)
+                foreach (var projectMetadataInstance in list)
                 {
                     if (projectMetadataInstance != null)
                     {
                         yield return new KeyValuePair<string, string>(projectMetadataInstance.Name, projectMetadataInstance.EvaluatedValue);
+                    }
+                }
+            }
+
+            private IEnumerable<ProjectMetadataInstance> EnumerateProjectMetadata()
+            {
+                // In-order enumeration to avoid building dictionaries, following the same rules as MetadataCollection..
+                if (_directMetadata == null && _itemDefinitions == null)
+                {
+                    return [];
+                }
+                else if (_directMetadata?.Count > 0 && _itemDefinitions == null)
+                {
+                    return _directMetadata;
+                }
+                else if (_directMetadata == null
+                    && _itemDefinitions?.Count == 1
+                    && _itemDefinitions[0].TryCloneAsPropertyDictionary(out ICopyOnWritePropertyDictionary<ProjectMetadataInstance> propertyDictionary))
+                {
+                    return propertyDictionary;
+                }
+
+                return EnumerateProjectMetadataInternal();
+            }
+
+            private IEnumerable<ProjectMetadataInstance> EnumerateProjectMetadataInternal()
+            {
+                HashSet<string> returnedKeys = new((_directMetadata?.Count ?? 0) + (_itemDefinitions?[0]?.MetadataCount ?? 0), MSBuildNameIgnoreCaseComparer.Default);
+
+                if (_directMetadata != null)
+                {
+                    IEnumerable<ProjectMetadataInstance> metadataEnumerable = _directMetadata;
+                    foreach (ProjectMetadataInstance metadatum in metadataEnumerable)
+                    {
+                        if (returnedKeys.Add(metadatum.Name))
+                        {
+                            yield return metadatum;
+                        }
+                    }
+                }
+
+                if (_itemDefinitions == null)
+                {
+                    yield break;
+                }
+
+                for (int i = 0; i < _itemDefinitions.Count; i++)
+                {
+                    foreach (ProjectMetadataInstance metadatum in _itemDefinitions[i].Metadata)
+                    {
+                        if (returnedKeys.Add(metadatum.Name))
+                        {
+                            yield return metadatum;
+                        }
                     }
                 }
             }
@@ -1177,22 +1239,22 @@ namespace Microsoft.Build.Execution
 
                     int lastIndex = _itemDefinitions.Count - 1;
 
-                    if (_itemDefinitions[lastIndex].TryFastCopyOnWritePropertyDictionary(out ICopyOnWritePropertyDictionary<ProjectMetadataInstance> fastMetadata))
+                    if (_itemDefinitions[lastIndex].TryCloneAsPropertyDictionary(out ICopyOnWritePropertyDictionary<ProjectMetadataInstance> propertyDictionary))
                     {
                         // In most cases, we only have a single item definition and can either directly return it, or at least start with an allocated dictionary.
                         if (lastIndex == 0)
                         {
                             if (_directMetadata != null)
                             {
-                                fastMetadata.ImportProperties(_directMetadata);
+                                propertyDictionary.ImportProperties(_directMetadata);
                             }
                         }
                         else
                         {
-                            fastMetadata.ImportProperties(metaData(lastIndex - 1));
+                            propertyDictionary.ImportProperties(metaData(lastIndex - 1));
                         }
 
-                        return fastMetadata;
+                        return propertyDictionary;
                     }
 
                     // Slow path - enumerate all our metadata.
@@ -1480,19 +1542,19 @@ namespace Microsoft.Build.Execution
 
                 if (destinationItem is TaskItem destinationAsTaskItem)
                 {
-                    CopyToProjectTaskItem(destinationAsTaskItem);
+                    CopyMetadataToEngineTaskItem(destinationAsTaskItem);
                 }
                 else if (destinationItem is ProjectItemInstance destinationAsProjectItemInstance)
                 {
-                    CopyToProjectTaskItem(destinationAsProjectItemInstance._taskItem);
+                    CopyMetadataToEngineTaskItem(destinationAsProjectItemInstance._taskItem);
                 }
                 else if (destinationItem is IMetadataContainer destinationAsMetadataContainer)
                 {
-                    CopyToMetadataContainer(destinationItem, destinationAsMetadataContainer);
+                    CopyMetadataToMetadataContainer(destinationItem, destinationAsMetadataContainer);
                 }
                 else
                 {
-                    CopyToTaskItem(destinationItem);
+                    CopyMetadataToTaskItem(destinationItem);
                 }
 
                 if (addOriginalItemSpec)
@@ -1503,93 +1565,184 @@ namespace Microsoft.Build.Execution
                         destinationItem.SetMetadata("OriginalItemSpec", _includeEscaped);
                     }
                 }
+            }
 
-                void CopyToProjectTaskItem(TaskItem destinationItem)
+            private void CopyMetadataToEngineTaskItem(TaskItem destinationItem)
+            {
+                if ((_directMetadata == null && _itemDefinitions == null) || HasSameBackingMetadata(destinationItem))
                 {
-                    ProjectInstance.VerifyThrowNotImmutable(destinationItem._isImmutable);
+                    return;
+                }
 
-                    if (destinationItem._directMetadata == null)
+                ProjectInstance.VerifyThrowNotImmutable(destinationItem._isImmutable);
+
+                if (destinationItem._directMetadata == null)
+                {
+                    // This optimized path is hit most often
+                    destinationItem._directMetadata = _directMetadata?.DeepClone(); // copy on write!
+
+                    // If the destination item already has item definitions then we want to maintain them
+                    // But ours will be of less precedence than those already on the item
+                    if (destinationItem._itemDefinitions == null)
                     {
-                        // This optimized path is hit most often
-                        destinationItem._directMetadata = _directMetadata?.DeepClone(); // copy on write!
-
-                        // If the destination item already has item definitions then we want to maintain them
-                        // But ours will be of less precedence than those already on the item
-                        if (destinationItem._itemDefinitions == null)
+                        destinationItem._itemDefinitions = (_itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(_itemDefinitions);
+                    }
+                    else if (_itemDefinitions != null)
+                    {
+                        for (int i = 0; i < _itemDefinitions.Count; i++)
                         {
-                            destinationItem._itemDefinitions = (_itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(_itemDefinitions);
+                            destinationItem._itemDefinitions.Add(_itemDefinitions[i]);
                         }
-                        else if (_itemDefinitions != null)
+                    }
+                }
+                else if (_itemDefinitions == null)
+                {
+                    // If no item definitions exist, we can take advantage of the fact that there are no expandable values.
+                    // Assume that the destination is smaller and begin with our allocated clone.
+                    ICopyOnWritePropertyDictionary<ProjectMetadataInstance> clonedMetadata = _directMetadata.DeepClone();
+
+                    if (destinationItem._itemDefinitions != null)
+                    {
+                        foreach (ProjectItemDefinitionInstance item in destinationItem._itemDefinitions)
                         {
-                            for (int i = 0; i < _itemDefinitions.Count; i++)
+                            foreach (ProjectMetadataInstance metadatum in item.Metadata)
                             {
-                                destinationItem._itemDefinitions.Add(_itemDefinitions[i]);
+                                if (!string.IsNullOrEmpty(metadatum.EvaluatedValueEscaped))
+                                {
+                                    _ = clonedMetadata.Remove(metadatum.Key);
+                                }
                             }
                         }
                     }
-                    else if (_directMetadata != null && !_directMetadata.HasSameBacking(destinationItem._directMetadata))
+
+                    IEnumerable<ProjectMetadataInstance> metadataEnumerable = destinationItem._directMetadata;
+                    clonedMetadata.ImportProperties(metadataEnumerable.Where(metadatum =>
+                        string.IsNullOrEmpty(_directMetadata.GetEscapedValue(metadatum.Name))));
+                    destinationItem._directMetadata = clonedMetadata;
+                }
+                else
+                {
+                    // Slowest path but rarely gets hit.
+                    IEnumerable<ProjectMetadataInstance> metadataEnumerable = MetadataCollection;
+                    IEnumerable<KeyValuePair<string, string>> metadataToImport = metadataEnumerable
+                        .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Name)))
+                        .Select(metadatum => new KeyValuePair<string, string>(metadatum.Name, GetMetadataEscaped(metadatum.Name)));
+                    destinationItem.ImportMetadata(metadataToImport);
+                }
+            }
+
+            private bool HasSameBackingMetadata(TaskItem other)
+            {
+                // First, filter out the easy cases.
+                // If the sizes of metdata and item definitions dont match, then there is no point in comparing our collections.
+                if ((_directMetadata?.Count ?? 0) != (other._directMetadata?.Count ?? 0))
+                {
+                    return false;
+                }
+                else if ((_itemDefinitions?.Count ?? 0) != (other._itemDefinitions?.Count ?? 0))
+                {
+                    return false;
+                }
+
+                // Then, try compare the direct metadata - this is most commonly where we bail out.
+                if (_directMetadata != null && !_directMetadata.HasSameBackingCollection(other._directMetadata))
+                {
+                    return false;
+                }
+
+                // Finally, compare each item definition.
+                if (_itemDefinitions != null)
+                {
+                    for (int i = 0; i < _itemDefinitions.Count; i++)
                     {
-                        IEnumerable<ProjectMetadataInstance> metadataToImport = ((IEnumerable<ProjectMetadataInstance>)_directMetadata)
-                            .Where(metadatum => string.IsNullOrEmpty(destinationItem._directMetadata.GetEscapedValue(metadatum.Name)));
-                        destinationItem._directMetadata.ImportProperties(metadataToImport);
+                        if (!_itemDefinitions[i].HasSameBackingCollection(other._itemDefinitions[i]))
+                        {
+                            return false;
+                        }
                     }
                 }
 
-                void CopyToMetadataContainer(ITaskItem destinationItem, IMetadataContainer destinationMetadata)
+                return true;
+            }
+
+            private void CopyMetadataToMetadataContainer(ITaskItem destinationItem, IMetadataContainer destinationMetadata)
+            {
+                if (_itemDefinitions == null && _directMetadata == null)
                 {
-                    if (_itemDefinitions == null && _directMetadata == null)
+                    return;
+                }
+
+                IEnumerable<ProjectMetadataInstance> metadataEnumerable = null;
+                bool hasExpandableItemDefinitions = HasExpandableItemDefinitions();
+
+                if (!hasExpandableItemDefinitions && destinationMetadata.CustomMetadataCount == 0)
+                {
+                    metadataEnumerable = MetadataCollection;
+
+                    if (metadataEnumerable is CopyOnWritePropertyDictionary propertyDictionary)
                     {
+                        destinationMetadata.ImportMetadata(propertyDictionary.ToCopyOnWriteDictionary());
                         return;
                     }
-                    else if (_itemDefinitions == null && _directMetadata is CopyOnWritePropertyDictionary copyOnWritePropertyDictionary)
-                    {
-                        if (destinationMetadata.CustomMetadataCount == 0)
-                        {
-                            destinationMetadata.ImportMetadata(copyOnWritePropertyDictionary.ToCopyOnWriteDictionary());
-                            return;
-                        }
-                        else if (destinationMetadata.HasSameBackingCollection(copyOnWritePropertyDictionary.ToCopyOnWriteDictionary()))
-                        {
-                            return;
-                        }
-                    }
+                }
 
-                    // The destination implements IMetadataContainer so we can use the ImportMetadata bulk-set operation.
-                    IEnumerable<ProjectMetadataInstance> metadataEnumerable = MetadataCollection;
+                metadataEnumerable ??= EnumerateProjectMetadata();
 
-                    // Avoid unescaping the value just to immediately escape after, since TaskItem implementations store their values escaped.
-                    IEnumerable<KeyValuePair<string, string>> metadataToImport = destinationItem is ITaskItem2 destinationAsITaskItem2
-                        ? metadataEnumerable
-                            .Where(metadatum => string.IsNullOrEmpty(destinationAsITaskItem2.GetMetadataValueEscaped(metadatum.Name)))
-                            .Select(metadatum => new KeyValuePair<string, string>(metadatum.Name, GetMetadataEscaped(metadatum.Name)))
-                        : metadataEnumerable
-                            .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Name)))
-                            .Select(metadatum => new KeyValuePair<string, string>(metadatum.Name, GetMetadataEscaped(metadatum.Name)));
+                IEnumerable<KeyValuePair<string, string>> metadataToImport = destinationItem is ITaskItem2 destinationAsITaskItem2
+                    ? EnumerateMetadata()
+                        .Where(metadatum => string.IsNullOrEmpty(destinationAsITaskItem2.GetMetadataValueEscaped(metadatum.Key)))
+                    : EnumerateMetadata()
+                        .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Key)));
+
+                if (hasExpandableItemDefinitions)
+                {
+                    metadataToImport = metadataToImport.Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, GetMetadataEscaped(metadatum.Key)));
+                }
 
 #if FEATURE_APPDOMAIN
-                    if (RemotingServices.IsTransparentProxy(destinationMetadata))
-                    {
-                        // Linq is not serializable so materialize the collection before making the call.
-                        metadataToImport = [.. metadataToImport];
-                    }
+                if (RemotingServices.IsTransparentProxy(destinationMetadata))
+                {
+                    // Linq is not serializable so materialize the collection before making the call.
+                    metadataToImport = [.. metadataToImport];
+                }
 #endif
-                    destinationMetadata.ImportMetadata(metadataToImport);
+                destinationMetadata.ImportMetadata(metadataToImport);
+            }
+
+            private void CopyMetadataToTaskItem(ITaskItem destinationItem)
+            {
+                // OK, most likely the destination item was a Microsoft.Build.Utilities.TaskItem.
+                foreach (ProjectMetadataInstance metadatum in (IEnumerable<ProjectMetadataInstance>)MetadataCollection)
+                {
+                    // When copying metadata, we do NOT overwrite metadata already on the destination item.
+                    string destinationValue = destinationItem.GetMetadata(metadatum.Name);
+                    if (string.IsNullOrEmpty(destinationValue))
+                    {
+                        // Utilities.TaskItem's don't know about item definition metadata. So merge that into the values.
+                        destinationItem.SetMetadata(metadatum.Name, GetMetadataEscaped(metadatum.Name));
+                    }
+                }
+            }
+
+            private bool HasExpandableItemDefinitions()
+            {
+                if (_itemDefinitions == null)
+                {
+                    return false;
                 }
 
-                void CopyToTaskItem(ITaskItem destinationItem)
+                foreach (ProjectItemDefinitionInstance item in _itemDefinitions)
                 {
-                    // OK, most likely the destination item was a Microsoft.Build.Utilities.TaskItem.
-                    foreach (ProjectMetadataInstance metadatum in (IEnumerable<ProjectMetadataInstance>)MetadataCollection)
+                    foreach (ProjectMetadataInstance metadatum in item.Metadata)
                     {
-                        // When copying metadata, we do NOT overwrite metadata already on the destination item.
-                        string destinationValue = destinationItem.GetMetadata(metadatum.Name);
-                        if (string.IsNullOrEmpty(destinationValue))
+                        if (Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
                         {
-                            // Utilities.TaskItem's don't know about item definition metadata. So merge that into the values.
-                            destinationItem.SetMetadata(metadatum.Name, GetMetadataEscaped(metadatum.Name));
+                            return true;
                         }
                     }
                 }
+
+                return false;
             }
 
             /// <summary>
@@ -1602,7 +1755,7 @@ namespace Microsoft.Build.Execution
                 var metadata = MetadataCollection;
                 Dictionary<string, string> clonedMetadata = new Dictionary<string, string>(metadata.Count, MSBuildNameIgnoreCaseComparer.Default);
 
-                foreach (ProjectMetadataInstance metadatum in (IEnumerable<ProjectMetadataInstance>)metadata)
+                foreach (ProjectMetadataInstance metadatum in EnumerateProjectMetadata())
                 {
                     clonedMetadata[metadatum.Name] = metadatum.EvaluatedValue;
                 }
@@ -1619,7 +1772,7 @@ namespace Microsoft.Build.Execution
             {
                 Dictionary<string, string> clonedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
-                foreach (ProjectMetadataInstance metadatum in (IEnumerable<ProjectMetadataInstance>)MetadataCollection)
+                foreach (ProjectMetadataInstance metadatum in EnumerateProjectMetadata())
                 {
                     clonedMetadata[metadatum.Name] = metadatum.EvaluatedValueEscaped;
                 }
@@ -1997,6 +2150,32 @@ namespace Microsoft.Build.Execution
                     .Select(item => new ProjectMetadataInstance(item.Key, item.Value, true /* may be built-in metadata name */));
 
                 _directMetadata.ImportProperties(metadata);
+            }
+
+            internal void SetMetadataOnTaskOutput(TaskItem taskItem)
+            {
+                ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
+
+                // This optimized path is hit most often
+                _directMetadata ??= taskItem._directMetadata?.DeepClone(); // copy on write!
+
+                // If the destination item already has item definitions then we want to maintain them
+                // But ours will be of less precedence than those already on the item
+                if (_itemDefinitions == null)
+                {
+                    _itemDefinitions = (taskItem._itemDefinitions == null) ? null : [.. taskItem._itemDefinitions];
+                }
+                else if (_itemDefinitions != null)
+                {
+                    List<ProjectItemDefinitionInstance> shiftedItemDefinitions = [.. taskItem._itemDefinitions];
+
+                    for (int i = 0; i < _itemDefinitions.Count; i++)
+                    {
+                        shiftedItemDefinitions.Add(_itemDefinitions[i]);
+                    }
+
+                    _itemDefinitions = shiftedItemDefinitions;
+                }
             }
 
             /// <summary>

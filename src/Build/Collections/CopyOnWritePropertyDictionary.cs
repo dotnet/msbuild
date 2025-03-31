@@ -347,7 +347,11 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrowArgumentLength(name);
 
-            return ImmutableInterlocked.TryRemove(ref _backing, name, out _);
+            ImmutableDictionary<string, string> initial = _backing;
+
+            _backing = _backing.Remove(name);
+
+            return initial != _backing; // whether the removal occured
         }
 
         /// <summary>
@@ -368,6 +372,7 @@ namespace Microsoft.Build.Collections
         /// <param name="other">An enumerator over the properties to add.</param>
         public void ImportProperties(IEnumerable<ProjectMetadataInstance> other)
         {
+            // TODO: check if we get dictionaries here too
             _backing = _backing.SetItems(Items(other));
 
             static IEnumerable<KeyValuePair<string, string>> Items(IEnumerable<ProjectMetadataInstance> other)
@@ -388,7 +393,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns true if these dictionaries have the same backing.
         /// </summary>
-        public bool HasSameBacking(ICopyOnWritePropertyDictionary<ProjectMetadataInstance> other)
+        public bool HasSameBackingCollection(ICopyOnWritePropertyDictionary<ProjectMetadataInstance> other)
         {
             return other is CopyOnWritePropertyDictionary otherCopyOnWritePropertyDictionary
                 ? ReferenceEquals(otherCopyOnWritePropertyDictionary._backing, _backing)

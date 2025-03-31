@@ -363,6 +363,10 @@ namespace Microsoft.Build.Utilities
                 {
                     copiedMetadata = _metadata.Clone(); // Copy on write!
                 }
+                else if (destinationItem.Metadata.HasSameBacking(_metadata))
+                {
+                    return;
+                }
                 else if (destinationItem.Metadata.Count < _metadata.Count)
                 {
                     copiedMetadata = _metadata.Clone(); // Copy on write!

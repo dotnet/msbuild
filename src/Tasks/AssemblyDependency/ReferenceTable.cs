@@ -2679,7 +2679,6 @@ namespace Microsoft.Build.Tasks
             referenceItem.ItemSpec = reference.FullPath;
 
             IMetadataContainer referenceItemAsMetadataContainer = referenceItem;
-            referenceItemAsMetadataContainer.ImportMetadata(EnumerateCommonMetadata());
 
             // If there was a primary source item, then forward metadata from it.
             // It's important that the metadata from the primary source item
@@ -2692,12 +2691,13 @@ namespace Microsoft.Build.Tasks
             if (reference.PrimarySourceItem != null)
             {
                 reference.PrimarySourceItem.CopyMetadataTo(referenceItem);
+                referenceItemAsMetadataContainer.ImportMetadata(EnumerateCommonMetadata());
             }
             else
             {
-                bool hasImplementationFile = referenceItem.GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length > 0;
-                bool hasImageRuntime = referenceItem.GetMetadata(ItemMetadataNames.imageRuntime).Length > 0;
-                bool hasWinMDFile = referenceItem.GetMetadata(ItemMetadataNames.winMDFile).Length > 0;
+                bool hasImplementationFile = false; // This is apparently never true?
+                bool hasImageRuntime = !string.IsNullOrEmpty(reference.ImageRuntime);
+                bool hasWinMDFile = false; // this is also never true?
 
                 // If there were non-primary source items, then forward metadata from them.
                 ICollection<ITaskItem> sourceItems = reference.GetSourceItems();
@@ -2713,6 +2713,8 @@ namespace Microsoft.Build.Tasks
 
                     clonedItem.CopyMetadataTo(referenceItem);
                 }
+
+                referenceItemAsMetadataContainer.ImportMetadata(EnumerateCommonMetadata());
 
                 // If the item originally did not have the implementation file metadata then we do not want to get it from the set of primary source items
                 // since the implementation file is something specific to the source item and not supposed to be propagated.

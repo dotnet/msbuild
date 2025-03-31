@@ -62,6 +62,6 @@ namespace Microsoft.Build.Collections
         /// </summary>
         string GetEscapedValue(string name);
 
-        bool HasSameBacking(ICopyOnWritePropertyDictionary<T> other);
+        bool HasSameBackingCollection(ICopyOnWritePropertyDictionary<T> other);
     }
 }
