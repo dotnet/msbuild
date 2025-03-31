@@ -11,11 +11,15 @@ using System.Collections.Concurrent;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using System.IO.Pipes;
+using System.IO;
+
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
+
 #endif
 #if NET451_OR_GREATER || NETCOREAPP
 using System.Threading.Tasks;
