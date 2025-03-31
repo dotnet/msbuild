@@ -9,21 +9,16 @@
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
 
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
-
-    <!-- We are using two frameworks here, one for Arcade and one for our build. Harcoding this value so when building it copies and
-    references files of the right -->
-    <FallbackDotNetCliVersion>5.0.408</FallbackDotNetCliVersion>
-    <!-- Check if primary file exists, otherwise use fallback -->
   </PropertyGroup>
   <Choose>
     <When Condition="Exists('$(RepoRoot).dotnet\sdk\$(DotNetCliVersion)\Microsoft.NETCoreSdk.BundledVersions.props')">
       <PropertyGroup>
-        <UsedDotNetCliVersion>$(DotNetCliVersion)</UsedDotNetCliVersion>
+        <BundledVersionsPath>$(RepoRoot).dotnet\sdk\$(DotNetCliVersion)\Microsoft.NETCoreSdk.BundledVersions.props'</BundledVersionsPath>
       </PropertyGroup>
     </When>
     <Otherwise>
       <PropertyGroup>
-        <UsedDotNetCliVersion>$(FallbackDotNetCliVersion)</UsedDotNetCliVersion>
+        <BundledVersionsPath>$(RepoRoot).dotnet\sdk\6.0.135\Microsoft.NETCoreSdk.BundledVersions.props</BundledVersionsPath>
       </PropertyGroup>
     </Otherwise>
   </Choose>
@@ -39,7 +34,7 @@
   <ItemGroup>
     <!-- This file is needed so the dotnet CLI knows how to map preview SDK versions to tfms (because tfms do not have preview information on them) -->
     <!-- This is because according to semver, 2.1.0-preview is not >= 2.1.0 -->
-    <Content Include="$(RepoRoot).dotnet\sdk\$(UsedDotNetCliVersion)\Microsoft.NETCoreSdk.BundledVersions.props" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(BundledVersionsPath)" CopyToOutputDirectory="PreserveNewest" />
 
     <!-- Include NuGet build tasks -->
     <PackageReference Include="NuGet.Build.Tasks" />
