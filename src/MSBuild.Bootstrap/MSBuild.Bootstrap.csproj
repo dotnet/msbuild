@@ -8,9 +8,11 @@
     <!-- Don't warn on incompatability MSIL vs x86 since this isn't an actual working DLL -->
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
 
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
+
     <!-- We are using two frameworks here, one for Arcade and one for our build. Harcoding this value so when building it copies and
     references files of the right -->
-    <FallbackDotNetCliVersion>6.0.135</FallbackDotNetCliVersion>
+    <FallbackDotNetCliVersion>5.0.408</FallbackDotNetCliVersion>
     <!-- Check if primary file exists, otherwise use fallback -->
   </PropertyGroup>
   <Choose>
