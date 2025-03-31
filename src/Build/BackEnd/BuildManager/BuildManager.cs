@@ -2989,8 +2989,8 @@ namespace Microsoft.Build.Execution
                 // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportance.Low is used)
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
-                    loggerClassName: typeof(InternalTelemeteryForwardingLogger).FullName,
-                    loggerAssemblyName: typeof(InternalTelemeteryForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                    loggerClassName: typeof(InternalTelemetryForwardingLogger).FullName,
+                    loggerAssemblyName: typeof(InternalTelemetryForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
                     loggerAssemblyFile: null,
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);

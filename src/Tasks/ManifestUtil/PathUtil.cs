@@ -3,8 +3,11 @@
 
 using System;
 using System.IO;
+#if !NET
 using System.Linq;
+#else
 using System.Text;
+#endif
 using Microsoft.Build.Shared;
 
 #nullable disable

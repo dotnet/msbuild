@@ -8,7 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;

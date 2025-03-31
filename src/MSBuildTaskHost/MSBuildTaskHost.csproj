@@ -64,6 +64,7 @@
     <Compile Include="..\Framework\AssemblyUtilities.cs" />
     <Compile Include="..\Framework\Polyfills\*.cs" />
     <Compile Include="..\Framework\ResponseFileUsedEventArgs.cs" />
+    <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="..\Framework\CopyOnWriteDictionary.cs">
       <Link>CopyOnWriteDictionary.cs</Link>
@@ -138,15 +139,6 @@
     </Compile>
     <Compile Include="..\Shared\NodeBuildComplete.cs">
       <Link>NodeBuildComplete.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\NodePipeBase.cs">
-      <Link>NodeComponentBase.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\NodePipeClient.cs">
-      <Link>NodeComponentBase.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\NodePipeServer.cs">
-      <Link>NodeComponentBase.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs">
       <Link>NodeEndpointOutOfProcBase.cs</Link>
