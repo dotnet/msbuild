@@ -6,11 +6,9 @@ using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-#if !FEATURE_APM
-using System.Threading.Tasks;
-#endif
 
 namespace Microsoft.Build.BackEnd.Client
 {

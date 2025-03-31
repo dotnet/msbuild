@@ -2,11 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
+#if NETFRAMEWORK
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+#endif
 
 namespace Microsoft.Build.Evaluation.Expander
 {

@@ -8,8 +8,6 @@ using Microsoft.Build.Shared.Concurrent;
 #else
 using System.Collections.Concurrent;
 #endif
-using System.IO;
-using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;

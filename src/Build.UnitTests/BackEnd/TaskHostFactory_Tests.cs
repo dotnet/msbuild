@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
 

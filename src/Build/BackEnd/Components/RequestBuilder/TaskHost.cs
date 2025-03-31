@@ -11,19 +11,20 @@ using System.Runtime.Remoting.Lifetime;
 #endif
 using System.Diagnostics;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
-using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+#if FEATURE_REPORTFILEACCESSES
+using Microsoft.Build.Experimental.FileAccess;
+using Microsoft.Build.FileAccesses;
+#endif
 
 #nullable disable
 

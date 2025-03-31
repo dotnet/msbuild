@@ -4,26 +4,16 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.IO.Pipes;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-#if FEATURE_PIPE_SECURITY
-using System.Security.Principal;
-#endif
-
-#if FEATURE_APM
-using Microsoft.Build.Eventing;
-#endif
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Task = System.Threading.Tasks.Task;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
 
 #nullable disable
 
