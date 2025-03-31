@@ -55,12 +55,6 @@ extends:
       # We generate SBOM ourselves, so don't need steps injected by 1ES.
       sbom:
         enabled: false
-      codeSignValidation:
-        enabled: true
-        break: true
-        additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
-      credscan:
-        suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
 
     stages:
     - stage: build
