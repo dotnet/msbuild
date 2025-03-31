@@ -246,7 +246,7 @@ extends:
                 }
               }
               # for some reason the vsman does not have the correct url, just fix that...
-              $vsman.packages[0].payloads[0].url = "https://vsdrop.corp.microsoft.com/file/v1/Products/$env:SYSTEM_TEAMPROJECT/$env:BUILD_REPOSITORY_NAME/$env:BUILD_SOURCEBRANCHNAME/$env:BUILD_BUILDNUMBER/$env:BUILD_BUILDID/Microsoft.Build.vsix"
+              Add-Member -InputObject $vsman.packages[0].payloads[0] -MemberType NoteProperty -Name "url" -Value "https://vsdrop.corp.microsoft.com/file/v1/Products/$env:SYSTEM_TEAMPROJECT/$env:BUILD_REPOSITORY_NAME/$env:BUILD_SOURCEBRANCHNAME/$env:BUILD_BUILDNUMBER/$env:BUILD_BUILDID/Microsoft.Build.vsix" -Force
               # write the vsman file back to disk
               $vsman | ConvertTo-Json -Depth 100 | Set-Content -Path $vsmanFile -Force
         
