@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if NETFRAMEWORK
 using Microsoft.Build.Shared;
+#endif
 
 namespace Microsoft.Build.Framework.Telemetry;
 

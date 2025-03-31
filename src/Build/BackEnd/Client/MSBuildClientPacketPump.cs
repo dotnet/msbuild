@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Threading.Tasks;
 
 namespace Microsoft.Build.BackEnd.Client
 {
