@@ -13,7 +13,7 @@
   <Choose>
     <When Condition="Exists('$(RepoRoot).dotnet\sdk\$(DotNetCliVersion)\Microsoft.NETCoreSdk.BundledVersions.props')">
       <PropertyGroup>
-        <BundledVersionsPath>$(RepoRoot).dotnet\sdk\$(DotNetCliVersion)\Microsoft.NETCoreSdk.BundledVersions.props'</BundledVersionsPath>
+        <BundledVersionsPath>$(RepoRoot).dotnet\sdk\$(DotNetCliVersion)\Microsoft.NETCoreSdk.BundledVersions.props</BundledVersionsPath>
       </PropertyGroup>
     </When>
     <Otherwise>
