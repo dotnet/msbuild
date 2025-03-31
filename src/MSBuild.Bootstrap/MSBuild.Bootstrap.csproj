@@ -18,7 +18,7 @@
     </When>
     <Otherwise>
       <PropertyGroup>
-        <BundledVersionsPath>$(RepoRoot).dotnet\sdk\6.0.135\Microsoft.NETCoreSdk.BundledVersions.props</BundledVersionsPath>
+        <BundledVersionsPath>$(MSBuildExtensionsPath)Microsoft.NETCoreSdk.BundledVersions.props</BundledVersionsPath>
       </PropertyGroup>
     </Otherwise>
   </Choose>
