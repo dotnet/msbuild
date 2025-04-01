@@ -48,4 +48,6 @@
       <FileVersion>$(VersionPrefix).$(FileVersion.Split('.')[3])</FileVersion>
     </PropertyGroup>
   </Target>
+
+  <Import Project=".\DotNetBuild.props" />
 </Project>
