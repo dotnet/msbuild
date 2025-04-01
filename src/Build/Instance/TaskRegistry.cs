@@ -153,7 +153,7 @@ namespace Microsoft.Build.Execution
         /// This field may be null.
         /// This is expected to be modified only during initialization via a single call, and all reads will occur only after the initialization is done - so no need for a concurrent dictionary.
         /// </summary>
-        private Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> _taskRegistrations;
+        private ConcurrentDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> _taskRegistrations;
 
         /// <summary>
         /// Create another set containing architecture-specific task entries.
@@ -748,11 +748,11 @@ namespace Microsoft.Build.Execution
             registeredTaskEntries.Add(newRecord);
         }
 
-        private static Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> CreateRegisteredTaskDictionary(int? capacity = null)
+        private static ConcurrentDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> CreateRegisteredTaskDictionary(int? capacity = null)
         {
             return capacity != null
-                ? new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(capacity.Value, RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact)
-                : new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                ? new ConcurrentDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(Environment.ProcessorCount, capacity.Value, RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact)
+                : new ConcurrentDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
         }
 
         /// <summary>
@@ -1843,7 +1843,7 @@ namespace Microsoft.Build.Execution
 
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
-                _taskRegistrations = (Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>)copy;
+                _taskRegistrations = (ConcurrentDictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>)copy;
 #if DEBUG
                 _isInitialized = _taskRegistrations != null;
 #endif

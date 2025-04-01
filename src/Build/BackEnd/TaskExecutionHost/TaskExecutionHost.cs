@@ -58,6 +58,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class TaskExecutionHost : IDisposable
     {
+        public readonly object lockObject = new object();
         /// <summary>
         /// Time interval in miliseconds to wait between receiving a cancelation signal and emitting the first warning that a non-cancelable task has not finished
         /// </summary>
@@ -338,24 +339,27 @@ namespace Microsoft.Build.BackEnd
 #endif
 
             // We instantiate a new task object for each batch
-            TaskInstance = InstantiateTask(taskIdentityParameters);
-
-            if (TaskInstance == null)
+            lock (lockObject)
             {
-                return false;
+                TaskInstance = InstantiateTask(taskIdentityParameters);
+
+                if (TaskInstance == null)
+                {
+                    return false;
+                }
+
+                string realTaskAssemblyLoaction = TaskInstance.GetType().Assembly.Location;
+                if (!string.IsNullOrWhiteSpace(realTaskAssemblyLoaction) &&
+                    realTaskAssemblyLoaction != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
+                {
+                    _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLoaction, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
+                }
+
+                TaskInstance.BuildEngine = _buildEngine;
+                TaskInstance.HostObject = _taskHost;
+
+                return true;
             }
-
-            string realTaskAssemblyLoaction = TaskInstance.GetType().Assembly.Location;
-            if (!string.IsNullOrWhiteSpace(realTaskAssemblyLoaction) &&
-                realTaskAssemblyLoaction != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
-            {
-                _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLoaction, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
-            }
-
-            TaskInstance.BuildEngine = _buildEngine;
-            TaskInstance.HostObject = _taskHost;
-
-            return true;
         }
 
         /// <summary>
@@ -408,9 +412,12 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            if (this.TaskInstance is IIncrementalTask incrementalTask)
+            lock (lockObject)
             {
-                incrementalTask.FailIfNotIncremental = _buildComponentHost.BuildParameters.Question;
+                if (this.TaskInstance is IIncrementalTask incrementalTask)
+                {
+                    incrementalTask.FailIfNotIncremental = _buildComponentHost.BuildParameters.Question;
+                }
             }
 
             if (taskInitialized)
@@ -813,7 +820,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private ITaskItem[] GetItemOutputs(TaskPropertyInfo parameter)
         {
-            object outputs = _taskFactoryWrapper.GetPropertyValue(TaskInstance, parameter);
+            object outputs;
+
+            lock (lockObject)
+            {
+                outputs = _taskFactoryWrapper.GetPropertyValue(TaskInstance, parameter);
+            }
 
             if (!(outputs is ITaskItem[] taskItemOutputs))
             {
@@ -828,7 +840,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string[] GetValueOutputs(TaskPropertyInfo parameter)
         {
-            object outputs = _taskFactoryWrapper.GetPropertyValue(TaskInstance, parameter);
+            object outputs;
+            lock (lockObject)
+            {
+                outputs = _taskFactoryWrapper.GetPropertyValue(TaskInstance, parameter);
+            }
 
             Array convertibleOutputs = parameter.PropertyType.IsArray ? (Array)outputs : new[] { outputs };
 
@@ -1349,7 +1365,11 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                _taskFactoryWrapper.SetPropertyValue(TaskInstance, parameter, parameterValue);
+                lock (lockObject)
+                {
+                    _taskFactoryWrapper.SetPropertyValue(TaskInstance, parameter, parameterValue);
+                }
+                
                 success = true;
             }
             catch (TargetInvocationException e)

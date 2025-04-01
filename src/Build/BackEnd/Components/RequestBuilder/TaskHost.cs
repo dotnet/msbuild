@@ -517,6 +517,38 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogMessageEvent(Microsoft.Build.Framework.BuildMessageEventArgs e)
         {
+            lock (_callbackMonitor)
+            {
+                ErrorUtilities.VerifyThrowArgumentNull(e);
+
+                if (!_activeProxy)
+                {
+                    // The task has been logging on another thread, typically
+                    // because of logging a spawned process's output, and has
+                    // not terminated this logging before it returned. This is common
+                    // enough that we don't want to crash and break the entire build. But
+                    // we don't have any good way to log it any more, as not only has this task
+                    // finished, the whole build might have finished! The task author will
+                    // just have to figure out that their task has a bug by themselves.
+                    if (s_breakOnLogAfterTaskReturns)
+                    {
+                        Trace.Fail(String.Format(CultureInfo.CurrentUICulture, "Task at {0}, after already returning, attempted to log '{1}'", _taskLocation.ToString(), e.Message));
+                    }
+
+                    return;
+                }
+
+                // If we are in building across process we need the events to be serializable. This method will
+                // check to see if we are building with multiple process and if the event is serializable. It will
+                // also log a warning if the event is not serializable and drop the logging message.
+                if (IsRunningMultipleNodes && !IsEventSerializable(e))
+                {
+                    return;
+                }
+
+                e.BuildEventContext = _taskLoggingContext.BuildEventContext;
+                _taskLoggingContext.LoggingService.LogBuildEvent(e);
+            }
         }
 
         /// <summary>
