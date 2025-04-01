@@ -12,6 +12,7 @@
 //using Microsoft.Build.Framework;
 //using Microsoft.Build.Shared;
 //using Microsoft.Build.Utilities;
+//using Microsoft.CodeAnalysis.BuildTasks;
 //using Xunit;
 //using BackEndNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 

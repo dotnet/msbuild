@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <Configurations>Debug;Release;Debug-MONO;Release-MONO</Configurations>
-    <RestoreSources>https://devdiv.pkgs.visualstudio.com/_packaging/container-tools-shared/nuget/v3/index.json</RestoreSources>
+    <RestoreSources>https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json</RestoreSources>
   </PropertyGroup>
 
   <PropertyGroup>
