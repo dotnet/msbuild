@@ -145,6 +145,7 @@ namespace Microsoft.Build.Framework
 
         // for VS17.14
         public readonly bool TelemetryOptIn = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTIN");
+        public readonly bool SlnParsingWithSolutionPersistenceOptIn = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE"));
 
         public static void UpdateFromEnvironment()
         {
