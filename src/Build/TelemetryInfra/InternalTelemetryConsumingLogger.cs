@@ -3,10 +3,8 @@
 
 using System;
 using System.Linq;
-using System.Text.Json;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
-using System.IO;
 
 namespace Microsoft.Build.TelemetryInfra;
 

@@ -3,22 +3,14 @@
 
 using System;
 using System.Reflection;
-using Xunit;
-using Shouldly;
-using Xunit.Abstractions;
-using Microsoft.Build.UnitTests.Shared;
-using Microsoft.Build.UnitTests;
 using Microsoft.Build.Framework.Telemetry;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Build.UnitTests;
+using Shouldly;
+using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.Telemetry
 {
-    /// <summary>
-    /// Ensures tests run serially so environment variables and the singleton do not interfere with parallel test runs.
-    /// </summary>
+    // Putting the tests to a collection ensures tests run serially by default, that's needed to isolate the manager singleton state and env vars in some telemetry tests.
     [Collection("OpenTelemetryManagerTests")]
     public class OpenTelemetryManagerTests : IDisposable
     {

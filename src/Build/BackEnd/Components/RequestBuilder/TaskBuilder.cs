@@ -291,7 +291,7 @@ namespace Microsoft.Build.BackEnd
         /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it.
         /// </summary>
         /// <returns>true, if successful</returns>
-        private async Task<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
+        private async ValueTask<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
         {
             ErrorUtilities.VerifyThrowArgumentNull(lookup);
 
@@ -366,7 +366,7 @@ namespace Microsoft.Build.BackEnd
         /// Execute a single bucket
         /// </summary>
         /// <returns>true if execution succeeded</returns>
-        private async Task<WorkUnitResult> ExecuteBucket(TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask, Dictionary<string, string> lookupHash)
+        private async ValueTask<WorkUnitResult> ExecuteBucket(TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask, Dictionary<string, string> lookupHash)
         {
             // On Intrinsic tasks, we do not allow batchable params, therefore metadata is excluded.
             ParserOptions parserOptions = (_taskNode == null) ? ParserOptions.AllowPropertiesAndItemLists : ParserOptions.AllowAll;
@@ -738,7 +738,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="bucket">The batching bucket</param>
         /// <param name="howToExecuteTask">The task execution mode</param>
         /// <returns>The result of running the task.</returns>
-        private async Task<WorkUnitResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
+        private async ValueTask<WorkUnitResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
         {
             UpdateContinueOnError(bucket, taskHost);
 
@@ -859,7 +859,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else if (type == typeof(ThreadAbortException))
                     {
-#if !NET6_0_OR_GREATER && !NET6_0 // This is redundant but works around https://github.com/dotnet/sdk/issues/20700
+#if !NET
                         Thread.ResetAbort();
 #endif
                         _continueOnError = ContinueOnError.ErrorAndStop;

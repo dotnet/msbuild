@@ -22,7 +22,7 @@ internal class InternalTelemetryForwardingLogger : IForwardingLogger
     {
         if (BuildEventRedirector != null && eventSource is IEventSource5 eventSource5)
         {
-            eventSource5.WorkerNodeTelemetryLogged += (o,e) => BuildEventRedirector.ForwardEvent(e);
+            eventSource5.WorkerNodeTelemetryLogged += (o, e) => BuildEventRedirector.ForwardEvent(e);
         }
     }
 

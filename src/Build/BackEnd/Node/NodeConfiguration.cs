@@ -7,7 +7,6 @@ using System;
 using System.Diagnostics;
 
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 #nullable disable
 

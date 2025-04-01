@@ -65,18 +65,20 @@ internal struct TaskOrTargetTelemetryKey : IEquatable<TaskOrTargetTelemetryKey>
     public string Name { get; }
 
     /// <summary>
-    /// Gets a value indicating whether this task/target is custom.
+    /// Indicates whether the task/target is custom.
     /// </summary>
     public bool IsCustom { get; }
 
     /// <summary>
-    /// Indicate targets/tasks sourced from NuGet cache - those can be custom or MSFT provided ones.
+    /// Indicates whether the task/target is from NuGet cache.
     /// </summary>
+    /// <remarks>Those can be custom or MSFT provided ones.</remarks>
     public bool IsNuget { get; }
 
     /// <summary>
-    /// Indicate targets/tasks generated during build - those must be hashed (as they contain paths).
+    /// Indicates whether the task/target is generated during build from a metaproject.
     /// </summary>
+    /// <remarks>Those must be hashed (as they contain paths).</remarks>
     public bool IsMetaProj { get; }
 
     public override bool Equals(object? obj)

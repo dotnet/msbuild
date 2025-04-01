@@ -9,10 +9,8 @@ using OpenTelemetry;
 using OpenTelemetry.Trace;
 #endif
 using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Microsoft.Build.Framework.Telemetry
 {

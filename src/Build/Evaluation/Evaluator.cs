@@ -809,7 +809,7 @@ namespace Microsoft.Build.Evaluation
                             {
                                 if (!String.Equals(entry.Name, "currentsolutionconfigurationcontents", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    propertyDump += entry.Name + "=" + entry.EvaluatedValue + "\n";
+                                    propertyDump += $"{entry.Name}={entry.EvaluatedValue}\n";
                                 }
                             }
 
@@ -1886,19 +1886,17 @@ namespace Microsoft.Build.Evaluation
         // Creates a project to set the properties and include the items from an SdkResult
         private ProjectRootElement CreateProjectForSdkResult(SdkResult sdkResult)
         {
-            int propertiesAndItemsHash;
-
-#if NETCOREAPP
-            HashCode hash = new HashCode();
+#if NET
+            HashCode hash = default;
 #else
-            propertiesAndItemsHash = -849885975;
+            int propertiesAndItemsHash = -849885975;
 #endif
 
             if (sdkResult.PropertiesToAdd != null)
             {
                 foreach (var property in sdkResult.PropertiesToAdd)
                 {
-#if NETCOREAPP
+#if NET
                     hash.Add(property.Key);
                     hash.Add(property.Value);
 #else
@@ -1911,7 +1909,7 @@ namespace Microsoft.Build.Evaluation
             {
                 foreach (var item in sdkResult.ItemsToAdd)
                 {
-#if NETCOREAPP
+#if NET
                     hash.Add(item.Key);
                     hash.Add(item.Value);
 #else
@@ -1922,12 +1920,17 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-#if NETCOREAPP
-            propertiesAndItemsHash = hash.ToHashCode();
+#if NET
+            int propertiesAndItemsHash = hash.ToHashCode();
 #endif
 
-            // Generate a unique filename for the generated project for each unique set of properties and items.
-            string projectPath = _projectRootElement.FullPath + ".SdkResolver." + propertiesAndItemsHash + ".proj";
+            // Generate a unique filename for the generated project for each unique set of properties and items that ends like ".SdkResolver.{propertiesAndItemsHash}.proj".
+            // _projectRootElement.FullPath can be null. This can be in the case when Project is created from XmlReader. For that case we generate filename like "{Guid}.SdkResolver.{propertiesAndItemsHash}.proj in the current directory.
+            // Otherwise the project is in the same directory as _projectRootElement and has a name of the same project and ends like ".SdkResolver.{propertiesAndItemsHash}.proj".
+            string projectNameEnding = $".SdkResolver.{propertiesAndItemsHash}.proj";
+            string projectPath = _projectRootElement.FullPath != null ?
+             _projectRootElement.FullPath + projectNameEnding :
+             FileUtilities.NormalizePath(Guid.NewGuid() + projectNameEnding);
 
             ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)
             {
@@ -2136,7 +2139,7 @@ namespace Microsoft.Build.Evaluation
                         // If neither file involved is the project itself, append its path in square brackets
                         if (previouslyImportedAt.ContainingProject != _projectRootElement && importElement.ContainingProject != _projectRootElement)
                         {
-                            parenthesizedProjectLocation = "[" + _projectRootElement.FullPath + "]";
+                            parenthesizedProjectLocation = $"[{_projectRootElement.FullPath}]";
                         }
                         // TODO: Detect if the duplicate import came from an SDK attribute
                         _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
@@ -2577,7 +2580,7 @@ namespace Microsoft.Build.Evaluation
             if (_lastModifiedProject != null)
             {
                 P oldValue = _data.GetProperty(Constants.MSBuildAllProjectsPropertyName);
-                string streamImports = string.Join(";", _streamImports.ToArray());
+                string streamImports = string.Join(";", _streamImports);
                 _data.SetProperty(
                     Constants.MSBuildAllProjectsPropertyName,
                     oldValue == null

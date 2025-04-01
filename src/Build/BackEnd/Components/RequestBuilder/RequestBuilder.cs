@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -242,7 +241,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(HasActiveBuildRequest, "Request not building");
             ErrorUtilities.VerifyThrow(!_terminateEvent.WaitOne(0), "Request already terminated");
-            ErrorUtilities.VerifyThrow(_pendingResourceRequests.Any(), "No pending resource requests");
+            ErrorUtilities.VerifyThrow(!_pendingResourceRequests.IsEmpty, "No pending resource requests");
             VerifyEntryInActiveOrWaitingState();
 
             _pendingResourceRequests.Dequeue()(response);
@@ -1032,22 +1031,9 @@ namespace Microsoft.Build.BackEnd
 
             // The build results will have node request IDs in the same order as the requests were issued,
             // which is in the array order above.
-            List<BuildResult> resultsList = new List<BuildResult>(results.Values);
-            resultsList.Sort(delegate (BuildResult left, BuildResult right)
-            {
-                if (left.NodeRequestId < right.NodeRequestId)
-                {
-                    return -1;
-                }
-                else if (left.NodeRequestId == right.NodeRequestId)
-                {
-                    return 0;
-                }
-
-                return 1;
-            });
-
-            return resultsList.ToArray();
+            BuildResult[] resultsArray = results.Values.ToArray();
+            Array.Sort(resultsArray, (left, right) => left.NodeRequestId.CompareTo(right.NodeRequestId));
+            return resultsArray;
         }
 
         /// <summary>
@@ -1520,7 +1506,9 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
+            return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings)
+            .SelectMany(w => w.Split([','], StringSplitOptions.RemoveEmptyEntries))
+            .Select(w => w.Trim()), StringComparer.OrdinalIgnoreCase);
         }
 
         private sealed class DedicatedThreadsTaskScheduler : TaskScheduler

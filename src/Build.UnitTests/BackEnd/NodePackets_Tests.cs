@@ -332,12 +332,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     LogMessagePacket deserializedPacket = tempPacket as LogMessagePacket;
 
                     packet.Should().BeEquivalentTo(deserializedPacket, options => options
-                        .RespectingRuntimeTypes());
+                        .PreferringRuntimeMemberTypes());
 
                     BuildEventArgs args = packet.NodeBuildEvent?.Value;
                     BuildEventArgs desArgs = deserializedPacket?.NodeBuildEvent?.Value;
                     desArgs.Should().BeEquivalentTo(args, options => options
-                        .RespectingRuntimeTypes()
+                        .PreferringRuntimeMemberTypes()
                         // Since we use struct DictionaryEntry of class TaskItemData, generated DictionaryEntry.Equals compare TaskItemData by references.
                         // Bellow will instruct equivalency test to not use DictionaryEntry.Equals but its public members for equivalency tests.
                         .ComparingByMembers<DictionaryEntry>()
