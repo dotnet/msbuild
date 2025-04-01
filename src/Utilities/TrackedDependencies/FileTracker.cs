@@ -247,12 +247,25 @@ namespace Microsoft.Build.Utilities
             // 5. Files under the common ("All Users") Application Data location -- C:\Documents and Settings\All Users\Application Data
             //    on XP and either C:\Users\All Users\Application Data or C:\ProgramData on Vista+
 
-            return FileIsUnderPath(fileName, s_applicationDataPath) ||
+            if (FileIsUnderPath(fileName, s_applicationDataPath) ||
                    FileIsUnderPath(fileName, s_localApplicationDataPath) ||
                    FileIsUnderPath(fileName, s_localLowApplicationDataPath) ||
                    FileIsUnderPath(fileName, s_tempShortPath) ||
-                   FileIsUnderPath(fileName, s_tempLongPath) ||
-                   s_commonApplicationDataPaths.Any(p => FileIsUnderPath(fileName, p));
+                   FileIsUnderPath(fileName, s_tempLongPath))
+            {
+                return true;
+            }
+
+            // PERF: Avoid LINQ in this path.
+            foreach (string p in s_commonApplicationDataPaths)
+            {
+                if (FileIsUnderPath(fileName, p))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -271,9 +284,20 @@ namespace Microsoft.Build.Utilities
             // as written by CL etc. does not contain short paths
             // fileDirectory = NativeMethods.GetFullLongFilePath(fileDirectory);
 
+            // See if the path ends with a slash and adjust the index that we'll used to inspect the given file name.
+            int expectedPathLengthAfterTrailingSlash = FileUtilities.IsSlash(path[path.Length - 1]) ? path.Length : path.Length + 1;
+            
+            // quick checks to return early. If our given filename is less than the length of the path, it can't be under it.
+            // Similarly, if the separator characters don't line up at the end of the path we want to be under, it can't be under that path.
+            if (fileName.Length < expectedPathLengthAfterTrailingSlash || fileName[expectedPathLengthAfterTrailingSlash - 1] != Path.DirectorySeparatorChar)
+            {
+                return false;
+            }
+
             // Ensure that the path has a trailing slash that we are checking under
             // By default the paths that we check for most often will have, so this will
             // return fast and not allocate memory in the process
+            // NOTE: this will also normalize the slashes in the path
             path = FileUtilities.EnsureTrailingSlash(path);
 
             // Is the fileName under the filePath?
