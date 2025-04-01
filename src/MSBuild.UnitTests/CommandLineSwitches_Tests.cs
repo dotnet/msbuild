@@ -13,11 +13,9 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
-using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 

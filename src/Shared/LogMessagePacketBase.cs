@@ -18,11 +18,6 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework.Profiler;
 using System.Collections;
-using System.Linq;
-#endif
-
-#if FEATURE_APPDOMAIN
-using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 #endif
 
 #nullable disable
@@ -433,14 +428,14 @@ namespace Microsoft.Build.Shared
             bool eventCanSerializeItself = methodInfo != null;
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
-                if (_buildEvent is ProjectEvaluationStartedEventArgs
-                    or ProjectEvaluationFinishedEventArgs
-                    or ResponseFileUsedEventArgs)
-                {
-                    // switch to serialization methods that we provide in this file
-                    // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
-                    eventCanSerializeItself = false;
-                }
+            if (_buildEvent is ProjectEvaluationStartedEventArgs
+                or ProjectEvaluationFinishedEventArgs
+                or ResponseFileUsedEventArgs)
+            {
+                // switch to serialization methods that we provide in this file
+                // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
+                eventCanSerializeItself = false;
+            }
 #endif
 
             translator.Translate(ref eventCanSerializeItself);

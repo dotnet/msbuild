@@ -16,7 +16,9 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
+#if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.FileAccesses;
+#endif
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
