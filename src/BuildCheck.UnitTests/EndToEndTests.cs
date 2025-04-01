@@ -362,6 +362,8 @@ public class EndToEndTests : IDisposable
     [InlineData("""<TargetFramework>net9.0</TargetFramework>""", "", false)]
     [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
     [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", " /p:TargetFramework=net9.0", false)]
+    [InlineData("""<TargetFramework></TargetFramework><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
+    [InlineData("""<TargetFramework /><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
     [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", true)]
     public void TFMConfusionCheckTest(string tfmString, string cliSuffix, bool shouldTriggerCheck)
     {
