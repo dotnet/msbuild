@@ -2,7 +2,7 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>17.14.0</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
+    <VersionPrefix>17.14.1</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <PackageValidationBaselineVersion>17.13.9</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
@@ -20,18 +20,28 @@
     <UsingToolVSSDK>true</UsingToolVSSDK>
   </PropertyGroup>
   <!-- Production Dependencies -->
-  <PropertyGroup>
-    <!-- manually maintained versions -->
+  <!-- Condition consumption of maintenance-packages dependencies based on source build.
+       This is to prevent "package downgrade" errors coming from other packages that are
+       already consuming the newest version of these same dependencies. -->
+  <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' == 'true'">
+    <!-- Use newest package versions. -->
+    <SystemMemoryVersion>4.6.0</SystemMemoryVersion>
+    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.0</SystemRuntimeCompilerServicesUnsafeVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
+    <!-- Keep using older versions. Upgrade carefully. -->
     <!--
         Modifying the version of System.Memory is very high impact and causes downstream breaks in third-party tooling that uses the MSBuild API.
         When updating the version of System.Memory file a breaking change here: https://github.com/dotnet/docs/issues/new?assignees=gewarren&labels=breaking-change%2CPri1%2Cdoc-idea&template=breaking-change.yml&title=%5BBreaking+change%5D%3A+
         and follow the guidelines written here (internal-link): https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/1796/How-to-add-a-Known-Issue
     -->
-    <SystemMemoryVersion>4.6.0</SystemMemoryVersion>
-    <SystemThreadingTasksExtensionsVersion>4.6.0</SystemThreadingTasksExtensionsVersion>
-    <MicrosoftIORedistVersion>6.1.0</MicrosoftIORedistVersion>
+    <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
+    <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- manually maintained versions -->
+    <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
     <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
-    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.0</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
   </PropertyGroup>
   <PropertyGroup>
