@@ -2,7 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.UnitTests;
 using Shouldly;

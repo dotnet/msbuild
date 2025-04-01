@@ -7,7 +7,6 @@ using System.IO;
 using Microsoft.Build.Framework.Telemetry;
 using Shouldly;
 using Xunit;
-using Microsoft.Build.Framework.Telemetry;
 
 namespace Microsoft.Build.Framework.UnitTests
 {
