@@ -7,8 +7,6 @@
     <TargetFrameworks>net5.0</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(FullFrameworkTFM);net5.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
-    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" />

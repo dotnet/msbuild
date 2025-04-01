@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
-    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     
     <AssemblyName>Microsoft.Build.Utilities.UnitTests</AssemblyName>

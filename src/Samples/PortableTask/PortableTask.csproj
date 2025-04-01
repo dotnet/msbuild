@@ -4,8 +4,6 @@
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <TargetFrameworks>netstandard1.3</TargetFrameworks>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
-    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="portableTaskTest.proj">

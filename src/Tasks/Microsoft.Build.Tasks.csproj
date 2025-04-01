@@ -5,8 +5,6 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
-    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>

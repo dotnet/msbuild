@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework Condition="$(MonoBuild) != 'true'">net5.0</TargetFramework>
     <TargetFramework Condition="$(MonoBuild) == 'true'">net472</TargetFramework>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <NuspecFile>Microsoft.Build.Localization.nuspec</NuspecFile>
     <IsShipping>false</IsShipping>
     <NoPackageAnalysis>true</NoPackageAnalysis>

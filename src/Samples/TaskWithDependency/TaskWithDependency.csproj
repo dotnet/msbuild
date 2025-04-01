@@ -4,8 +4,6 @@
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
-    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <None Include="TaskWithDependencyTest.proj">
