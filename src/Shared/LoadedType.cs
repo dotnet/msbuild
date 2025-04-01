@@ -8,7 +8,6 @@ using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
-#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -164,10 +163,8 @@ namespace Microsoft.Build.Shared
         /// <value>The loaded type.</value>
         internal Type Type { get; private set; }
 
-        [DisallowNull]
         internal AssemblyName LoadedAssemblyName { get; private set; }
 
-        [DisallowNull]
         internal string Path { get; private set; }
 
         /// <summary>
