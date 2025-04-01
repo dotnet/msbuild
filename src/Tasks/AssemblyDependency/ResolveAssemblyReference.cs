@@ -5,7 +5,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if !NET
 using System.Globalization;
+#endif
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -1311,6 +1313,9 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
+#if NET
+            return Convert.ToHexStringLower(a);
+#else
             var buffer = new StringBuilder(a.Length * 2);
             for (int i = 0; i < a.Length; ++i)
             {
@@ -1318,6 +1323,7 @@ namespace Microsoft.Build.Tasks
             }
 
             return buffer.ToString();
+#endif
         }
 
         /// <summary>
@@ -1536,22 +1542,22 @@ namespace Microsoft.Build.Tasks
             }
 
             Log.LogMessage(importance, property, "AppConfigFile");
-            Log.LogMessage(importance, indent + AppConfigFile);
+            Log.LogMessage(importance, $"{indent}{AppConfigFile}");
 
             Log.LogMessage(importance, property, "AutoUnify");
-            Log.LogMessage(importance, indent + AutoUnify.ToString());
+            Log.LogMessage(importance, $"{indent}{AutoUnify}");
 
             Log.LogMessage(importance, property, "CopyLocalDependenciesWhenParentReferenceInGac");
-            Log.LogMessage(importance, indent + _copyLocalDependenciesWhenParentReferenceInGac);
+            Log.LogMessage(importance, $"{indent}{_copyLocalDependenciesWhenParentReferenceInGac}");
 
             Log.LogMessage(importance, property, "FindDependencies");
-            Log.LogMessage(importance, indent + _findDependencies);
+            Log.LogMessage(importance, $"{indent}{_findDependencies}");
 
             Log.LogMessage(importance, property, "TargetProcessorArchitecture");
-            Log.LogMessage(importance, indent + TargetProcessorArchitecture);
+            Log.LogMessage(importance, $"{indent}{TargetProcessorArchitecture}");
 
             Log.LogMessage(importance, property, "StateFile");
-            Log.LogMessage(importance, indent + StateFile);
+            Log.LogMessage(importance, $"{indent}{StateFile}");
 
             Log.LogMessage(importance, property, "InstalledAssemblySubsetTables");
             foreach (ITaskItem installedAssemblySubsetTable in InstalledAssemblySubsetTables)
@@ -1561,33 +1567,33 @@ namespace Microsoft.Build.Tasks
             }
 
             Log.LogMessage(importance, property, "IgnoreInstalledAssemblySubsetTable");
-            Log.LogMessage(importance, indent + _ignoreDefaultInstalledAssemblySubsetTables);
+            Log.LogMessage(importance, $"{indent}{_ignoreDefaultInstalledAssemblySubsetTables}");
 
             Log.LogMessage(importance, property, "TargetFrameworkSubsets");
             foreach (string subset in _targetFrameworkSubsets)
             {
-                Log.LogMessage(importance, indent + subset);
+                Log.LogMessage(importance, $"{indent}{subset}");
             }
 
             Log.LogMessage(importance, property, "FullTargetFrameworkSubsetNames");
             foreach (string subset in FullTargetFrameworkSubsetNames)
             {
-                Log.LogMessage(importance, indent + subset);
+                Log.LogMessage(importance, $"{indent}{subset}");
             }
 
             Log.LogMessage(importance, property, "ProfileName");
-            Log.LogMessage(importance, indent + ProfileName);
+            Log.LogMessage(importance, $"{indent}{ProfileName}");
 
             Log.LogMessage(importance, property, "FullFrameworkFolders");
             foreach (string fullFolder in FullFrameworkFolders)
             {
-                Log.LogMessage(importance, indent + fullFolder);
+                Log.LogMessage(importance, $"{indent}{fullFolder}");
             }
 
             Log.LogMessage(importance, property, "LatestTargetFrameworkDirectories");
             foreach (string latestFolder in _latestTargetFrameworkDirectories)
             {
-                Log.LogMessage(importance, indent + latestFolder);
+                Log.LogMessage(importance, $"{indent}{latestFolder}");
             }
 
             Log.LogMessage(importance, property, "ProfileTablesLocation");
@@ -2843,7 +2849,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return String.Join(", ", subsetNames.ToArray());
+            return String.Join(", ", subsetNames);
         }
 
         /// <summary>
