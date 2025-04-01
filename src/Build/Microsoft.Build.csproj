@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -7,7 +7,6 @@
     <TargetFrameworks>net5.0</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(FullFrameworkTFM);net5.0</TargetFrameworks>
     <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
-
     <RootNamespace>Microsoft.Build</RootNamespace>
     <AssemblyName>Microsoft.Build</AssemblyName>
 
