@@ -953,7 +953,8 @@ namespace Microsoft.Build.Execution
             {
                 get
                 {
-                    List<string> names = new(capacity: _directMetadata.Count + FileUtilities.ItemSpecModifiers.All.Length);
+                    int capacity = (_directMetadata?.Count ?? 0) + FileUtilities.ItemSpecModifiers.All.Length;
+                    List<string> names = new(capacity: capacity + FileUtilities.ItemSpecModifiers.All.Length);
 
                     foreach (ProjectMetadataInstance metadatum in EnumerateProjectMetadata())
                     {
@@ -974,7 +975,8 @@ namespace Microsoft.Build.Execution
             {
                 get
                 {
-                    int count = 0;
+                    int count = FileUtilities.ItemSpecModifiers.All.Length;
+
                     foreach (ProjectMetadataInstance _ in EnumerateProjectMetadata())
                     {
                         count++;
@@ -1067,6 +1069,11 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata()
             {
+                if (_directMetadata == null && _itemDefinitions == null)
+                {
+                    return [];
+                }
+
                 // If we have item definitions, call the expensive property that does the right thing.
                 // Otherwise use _directMetadata to avoid allocations caused by DeepClone().
                 IEnumerable<ProjectMetadataInstance> list = EnumerateProjectMetadata();
@@ -1082,6 +1089,30 @@ namespace Microsoft.Build.Execution
                 // to store the results. With the iterator, results can stream to the
                 // consumer (e.g. binlog writer) without allocations.
                 return EnumerateMetadata(list);
+            }
+
+            public IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEscaped()
+            {
+                if (_directMetadata == null && _itemDefinitions == null)
+                {
+                    return [];
+                }
+
+                // If we have item definitions, call the expensive property that does the right thing.
+                // Otherwise use _directMetadata to avoid allocations caused by DeepClone().
+                IEnumerable<ProjectMetadataInstance> list = EnumerateProjectMetadata();
+
+#if FEATURE_APPDOMAIN
+                // Can't send a yield-return iterator across AppDomain boundaries
+                if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
+                {
+                    return [.. EnumerateMetadataEscaped(list)];
+                }
+#endif
+                // Mainline scenario, returns an iterator to avoid allocating an array
+                // to store the results. With the iterator, results can stream to the
+                // consumer (e.g. binlog writer) without allocations.
+                return EnumerateMetadataEscaped(list);
             }
 
             /// <summary>
@@ -1134,7 +1165,7 @@ namespace Microsoft.Build.Execution
             /// <returns>An array of string key-value pairs representing metadata.</returns>
             private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager(IEnumerable<ProjectMetadataInstance> list)
             {
-                var result = new List<KeyValuePair<string, string>>(_directMetadata.Count);
+                var result = new List<KeyValuePair<string, string>>(DirectMetadataCount);
 
                 foreach (var projectMetadataInstance in list)
                 {
@@ -1155,6 +1186,17 @@ namespace Microsoft.Build.Execution
                     if (projectMetadataInstance != null)
                     {
                         yield return new KeyValuePair<string, string>(projectMetadataInstance.Name, projectMetadataInstance.EvaluatedValue);
+                    }
+                }
+            }
+
+            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEscaped(IEnumerable<ProjectMetadataInstance> list)
+            {
+                foreach (var projectMetadataInstance in list)
+                {
+                    if (projectMetadataInstance != null)
+                    {
+                        yield return new KeyValuePair<string, string>(projectMetadataInstance.Name, projectMetadataInstance.EvaluatedValueEscaped);
                     }
                 }
             }
@@ -1182,7 +1224,7 @@ namespace Microsoft.Build.Execution
 
             private IEnumerable<ProjectMetadataInstance> EnumerateProjectMetadataInternal()
             {
-                HashSet<string> returnedKeys = new((_directMetadata?.Count ?? 0) + (_itemDefinitions?[0]?.MetadataCount ?? 0), MSBuildNameIgnoreCaseComparer.Default);
+                HashSet<string> returnedKeys = new(DirectMetadataCount, MSBuildNameIgnoreCaseComparer.Default);
 
                 if (_directMetadata != null)
                 {
@@ -1689,9 +1731,9 @@ namespace Microsoft.Build.Execution
                 metadataEnumerable ??= EnumerateProjectMetadata();
 
                 IEnumerable<KeyValuePair<string, string>> metadataToImport = destinationItem is ITaskItem2 destinationAsITaskItem2
-                    ? EnumerateMetadata()
+                    ? EnumerateMetadataEscaped()
                         .Where(metadatum => string.IsNullOrEmpty(destinationAsITaskItem2.GetMetadataValueEscaped(metadatum.Key)))
-                    : EnumerateMetadata()
+                    : EnumerateMetadataEscaped()
                         .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Key)));
 
                 if (hasExpandableItemDefinitions)
