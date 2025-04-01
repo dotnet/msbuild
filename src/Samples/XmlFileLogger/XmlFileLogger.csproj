@@ -5,7 +5,7 @@
     <UseProductOutputPath>true</UseProductOutputPath>
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <!-- <Reference Include="System" />
