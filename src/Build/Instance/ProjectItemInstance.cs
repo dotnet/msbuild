@@ -655,13 +655,6 @@ namespace Microsoft.Build.Execution
             _taskItem.SetMetadataOnTaskOutput(items);
         }
 
-        internal void SetMetadataOnTaskOutput(TaskItem taskItem)
-        {
-            _project.VerifyThrowNotImmutable();
-
-            _taskItem.SetMetadataOnTaskOutput(taskItem);
-        }
-
         /// <summary>
         /// Deep clone the item.
         /// Any metadata inherited from item definitions are also copied.
@@ -1091,30 +1084,6 @@ namespace Microsoft.Build.Execution
                 return EnumerateMetadata(list);
             }
 
-            public IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEscaped()
-            {
-                if (_directMetadata == null && _itemDefinitions == null)
-                {
-                    return [];
-                }
-
-                // If we have item definitions, call the expensive property that does the right thing.
-                // Otherwise use _directMetadata to avoid allocations caused by DeepClone().
-                IEnumerable<ProjectMetadataInstance> list = EnumerateProjectMetadata();
-
-#if FEATURE_APPDOMAIN
-                // Can't send a yield-return iterator across AppDomain boundaries
-                if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
-                {
-                    return [.. EnumerateMetadataEscaped(list)];
-                }
-#endif
-                // Mainline scenario, returns an iterator to avoid allocating an array
-                // to store the results. With the iterator, results can stream to the
-                // consumer (e.g. binlog writer) without allocations.
-                return EnumerateMetadataEscaped(list);
-            }
-
             /// <summary>
             /// Sets the given metadata.
             /// Equivalent to calling <see cref="SetMetadata(string,string)"/> for each item in <paramref name="metadata"/>.
@@ -1186,17 +1155,6 @@ namespace Microsoft.Build.Execution
                     if (projectMetadataInstance != null)
                     {
                         yield return new KeyValuePair<string, string>(projectMetadataInstance.Name, projectMetadataInstance.EvaluatedValue);
-                    }
-                }
-            }
-
-            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEscaped(IEnumerable<ProjectMetadataInstance> list)
-            {
-                foreach (var projectMetadataInstance in list)
-                {
-                    if (projectMetadataInstance != null)
-                    {
-                        yield return new KeyValuePair<string, string>(projectMetadataInstance.Name, projectMetadataInstance.EvaluatedValueEscaped);
                     }
                 }
             }
@@ -1729,17 +1687,12 @@ namespace Microsoft.Build.Execution
                 }
 
                 metadataEnumerable ??= EnumerateProjectMetadata();
-
-                IEnumerable<KeyValuePair<string, string>> metadataToImport = destinationItem is ITaskItem2 destinationAsITaskItem2
-                    ? EnumerateMetadataEscaped()
-                        .Where(metadatum => string.IsNullOrEmpty(destinationAsITaskItem2.GetMetadataValueEscaped(metadatum.Key)))
-                    : EnumerateMetadataEscaped()
-                        .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Key)));
-
-                if (hasExpandableItemDefinitions)
-                {
-                    metadataToImport = metadataToImport.Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, GetMetadataEscaped(metadatum.Key)));
-                }
+                metadataEnumerable = destinationItem is ITaskItem2 destinationAsITaskItem2
+                    ? metadataEnumerable.Where(metadatum => string.IsNullOrEmpty(destinationAsITaskItem2.GetMetadataValueEscaped(metadatum.Key)))
+                    : metadataEnumerable.Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Key)));
+                IEnumerable<KeyValuePair<string, string>> metadataToImport = hasExpandableItemDefinitions
+                    ? metadataEnumerable.Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, GetMetadataEscaped(metadatum.Key)))
+                    : metadataEnumerable.Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, metadatum.EvaluatedValueEscaped));
 
 #if FEATURE_APPDOMAIN
                 if (RemotingServices.IsTransparentProxy(destinationMetadata))
@@ -2192,32 +2145,6 @@ namespace Microsoft.Build.Execution
                     .Select(item => new ProjectMetadataInstance(item.Key, item.Value, true /* may be built-in metadata name */));
 
                 _directMetadata.ImportProperties(metadata);
-            }
-
-            internal void SetMetadataOnTaskOutput(TaskItem taskItem)
-            {
-                ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
-
-                // This optimized path is hit most often
-                _directMetadata ??= taskItem._directMetadata?.DeepClone(); // copy on write!
-
-                // If the destination item already has item definitions then we want to maintain them
-                // But ours will be of less precedence than those already on the item
-                if (_itemDefinitions == null)
-                {
-                    _itemDefinitions = (taskItem._itemDefinitions == null) ? null : [.. taskItem._itemDefinitions];
-                }
-                else if (_itemDefinitions != null)
-                {
-                    List<ProjectItemDefinitionInstance> shiftedItemDefinitions = [.. taskItem._itemDefinitions];
-
-                    for (int i = 0; i < _itemDefinitions.Count; i++)
-                    {
-                        shiftedItemDefinitions.Add(_itemDefinitions[i]);
-                    }
-
-                    _itemDefinitions = shiftedItemDefinitions;
-                }
             }
 
             /// <summary>
