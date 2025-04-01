@@ -10,6 +10,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -80,6 +81,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildSubmissionStartedEventArgs buildSubmissionStarted = new(new Dictionary<string, string> { { "Value1", "Value2" } }, ["Path1"], ["TargetName"], BuildRequestDataFlags.ReplaceExistingProjectInstance, 123);
             BuildCheckTracingEventArgs buildCheckTracing = new();
             BuildCanceledEventArgs buildCanceled = new("message", DateTime.UtcNow);
+            WorkerNodeTelemetryEventArgs workerNodeTelemetry = new();
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
@@ -116,6 +118,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(buildSubmissionStarted, LoggingEventType.BuildSubmissionStartedEvent);
             VerifyLoggingPacket(buildCheckTracing, LoggingEventType.BuildCheckTracingEvent);
             VerifyLoggingPacket(buildCanceled, LoggingEventType.BuildCanceledEvent);
+            VerifyLoggingPacket(workerNodeTelemetry, LoggingEventType.WorkerNodeTelemetryEvent);
         }
 
         private static BuildEventContext CreateBuildEventContext()
@@ -329,12 +332,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     LogMessagePacket deserializedPacket = tempPacket as LogMessagePacket;
 
                     packet.Should().BeEquivalentTo(deserializedPacket, options => options
-                        .RespectingRuntimeTypes());
+                        .PreferringRuntimeMemberTypes());
 
                     BuildEventArgs args = packet.NodeBuildEvent?.Value;
                     BuildEventArgs desArgs = deserializedPacket?.NodeBuildEvent?.Value;
                     desArgs.Should().BeEquivalentTo(args, options => options
-                        .RespectingRuntimeTypes()
+                        .PreferringRuntimeMemberTypes()
                         // Since we use struct DictionaryEntry of class TaskItemData, generated DictionaryEntry.Equals compare TaskItemData by references.
                         // Bellow will instruct equivalency test to not use DictionaryEntry.Equals but its public members for equivalency tests.
                         .ComparingByMembers<DictionaryEntry>()

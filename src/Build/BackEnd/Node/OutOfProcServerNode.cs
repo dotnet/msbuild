@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -381,7 +379,7 @@ namespace Microsoft.Build.Experimental
                 BuildTelemetry buildTelemetry = KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry();
 
                 buildTelemetry.StartAt = command.PartialBuildTelemetry.StartedAt;
-                buildTelemetry.InitialServerState = command.PartialBuildTelemetry.InitialServerState;
+                buildTelemetry.InitialMSBuildServerState = command.PartialBuildTelemetry.InitialServerState;
                 buildTelemetry.ServerFallbackReason = command.PartialBuildTelemetry.ServerFallbackReason;
             }
 

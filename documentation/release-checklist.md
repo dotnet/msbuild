@@ -36,7 +36,8 @@ _(This is for the case where we create the branch too early and want it to be ba
   - In the file `eng/Versions.props` Update the `VersionPrefix` to `{{NEXT_VERSION}}` and `PackageValidationBaselineVersion` set to a latest internally available {{THIS_RELEASE_VERSION}} preview version in the [internal dnceng dotnet-tools feed](https://dev.azure.com/dnceng/internal/_artifacts/feed/dotnet-tools-internal). It might be needed to update `CompatibilitySuppressions.xml` files. See [this documentation](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/overview) for more details. You can update `CompatibilitySuppressions.xml` files by running
 `dotnet pack MSBuild.Dev.slnf /p:ApiCompatGenerateSuppressionFile=true`.
   - [ ]  When VS main snaps to {{THIS_RELEASE_VERSION}} and updates its version to {{NEXT_VERSION}}, modify the [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) YAML so that it flows from MSBuild main to VS main.
-    - [ ]  Update AutoTargetBranch selection in the [YAML](../azure-pipelines/vs-insertion.yml) (add to parameters and make new AutoTargetBranch rule by copying it from existing ones) of the [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) to insert MSBuild `vs{{THIS_RELEASE_VERSION}}` to the corresponding VS branch `rel/d{{THIS_RELEASE_VERSION}}`.
+    - [ ] Update AutoTargetBranch selection in the [YAML](../azure-pipelines/vs-insertion.yml) (add to parameters and make new AutoTargetBranch rule by copying it from existing ones) of the [MSBuild VS Insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) to insert MSBuild `vs{{THIS_RELEASE_VERSION}}` to the corresponding VS branch `rel/d{{THIS_RELEASE_VERSION}}`.
+      - [ ] Add a selection rule for `vs{{NEXT_VERSION}}` -> `rel/d{{NEXT_VERSION}}` (preparation if we need to branch early and backport to previews)
     - [ ] Add `rel/d{{THIS_RELEASE_VERSION}}` case to TargetBranch parameter in [Experimental insertion](../azure-pipelines/vs-insertion-experimental.yml)
     - [ ] Set scheduled insertion for main and remove exclusion of `vs{{THIS_RELEASE_VERSION}}` triggering on each commit if added earlier.
 - [ ] Merge {{NEXT_VERSION}} branding PR
@@ -129,3 +130,9 @@ Timing based on the [(Microsoft-internal) release schedule](https://dev.azure.co
   git push upstream v{{THIS_RELEASE_VERSION}}.3
   ```
   - [ ]  Create Release in Github with `Create Release from Tag` GH option (https://github.com/dotnet/msbuild/releases/new?tag=v17.9.3) - the release notes can be prepopulated (`Generate Release Notes`)
+
+## After release
+
+If v{{NEXT_VERSION}} is a new major version
+
+- [ ] do Major version extra update steps from [release.md](./release.md)

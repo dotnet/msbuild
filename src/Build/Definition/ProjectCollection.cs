@@ -498,6 +498,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Properties passed from the command line (e.g. by using /p:).
+        /// </summary>
+        public ICollection<string> PropertiesFromCommandLine { get; set; }
+
+        /// <summary>
         /// The default tools version of this project collection. Projects use this tools version if they
         /// aren't otherwise told what tools version to use.
         /// This value is gotten from the .exe.config file, or else in the registry,

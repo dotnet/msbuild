@@ -7,6 +7,9 @@ using System.Collections.Concurrent;
 #else
 using Microsoft.Build.Shared.Concurrent;
 #endif
+#if NET
+using System.Buffers;
+#endif
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -71,7 +74,7 @@ namespace Microsoft.Build.Shared
         {
             try
             {
-                string pathWithUpperCase = Path.Combine(Path.GetTempPath(), "CASESENSITIVETEST" + Guid.NewGuid().ToString("N"));
+                string pathWithUpperCase = Path.Combine(Path.GetTempPath(), $"CASESENSITIVETEST{Guid.NewGuid():N}");
                 using (new FileStream(pathWithUpperCase, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
                 {
                     string lowerCased = pathWithUpperCase.ToLowerInvariant();
@@ -91,20 +94,24 @@ namespace Microsoft.Build.Shared
         /// Copied from https://github.com/dotnet/corefx/blob/056715ff70e14712419d82d51c8c50c54b9ea795/src/Common/src/System/IO/PathInternal.Windows.cs#L61
         /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/dotnet/msbuild/issues/781#issuecomment-243942514
         /// </summary>
-        internal static readonly char[] InvalidPathChars =
+#if NET
+        internal static readonly SearchValues<char> InvalidPathChars = SearchValues.Create(
+#else
+        internal static readonly char[] InvalidPathChars = (
+#endif
         [
             '|', '\0',
             (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10,
             (char)11, (char)12, (char)13, (char)14, (char)15, (char)16, (char)17, (char)18, (char)19, (char)20,
             (char)21, (char)22, (char)23, (char)24, (char)25, (char)26, (char)27, (char)28, (char)29, (char)30,
             (char)31
-        ];
+        ]);
 
         /// <summary>
         /// Copied from https://github.com/dotnet/corefx/blob/387cf98c410bdca8fd195b28cbe53af578698f94/src/System.Runtime.Extensions/src/System/IO/Path.Windows.cs#L18
         /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/dotnet/msbuild/issues/781#issuecomment-243942514
         /// </summary>
-        internal static readonly char[] InvalidFileNameChars =
+        internal static readonly char[] InvalidFileNameCharsArray =
         [
             '\"', '<', '>', '|', '\0',
             (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10,
@@ -112,6 +119,12 @@ namespace Microsoft.Build.Shared
             (char)21, (char)22, (char)23, (char)24, (char)25, (char)26, (char)27, (char)28, (char)29, (char)30,
             (char)31, ':', '*', '?', '\\', '/'
         ];
+
+#if NET
+        internal static readonly SearchValues<char> InvalidFileNameChars = SearchValues.Create(InvalidFileNameCharsArray);
+#else
+        internal static char[] InvalidFileNameChars => InvalidFileNameCharsArray;
+#endif
 
         internal static readonly char[] Slashes = { '/', '\\' };
 
@@ -128,7 +141,7 @@ namespace Microsoft.Build.Shared
         {
             if (cacheDirectory == null)
             {
-                cacheDirectory = Path.Combine(TempFileDirectory, String.Format(CultureInfo.CurrentUICulture, "MSBuild{0}-{1}", Process.GetCurrentProcess().Id, AppDomain.CurrentDomain.Id));
+                cacheDirectory = Path.Combine(TempFileDirectory, string.Format(CultureInfo.CurrentUICulture, "MSBuild{0}-{1}", EnvironmentUtilities.CurrentProcessId, AppDomain.CurrentDomain.Id));
             }
 
             return cacheDirectory;
@@ -179,10 +192,10 @@ namespace Microsoft.Build.Shared
         {
             try
             {
-                string testFilePath = Path.Combine(directory, $"MSBuild_{Guid.NewGuid().ToString("N")}_testFile.txt");
+                string testFilePath = Path.Combine(directory, $"MSBuild_{Guid.NewGuid():N}_testFile.txt");
                 FileInfo file = new(testFilePath);
                 file.Directory.Create(); // If the directory already exists, this method does nothing.
-                File.WriteAllText(testFilePath, $"MSBuild process {Process.GetCurrentProcess().Id} successfully wrote to file.");
+                File.WriteAllText(testFilePath, $"MSBuild process {EnvironmentUtilities.CurrentProcessId} successfully wrote to file.");
                 File.Delete(testFilePath);
                 return true;
             }
@@ -258,7 +271,11 @@ namespace Microsoft.Build.Shared
 
             return FixFilePath(start < stop && IsSlash(path[stop - 1]) ?
                 path.Substring(start) :
+#if NET
+                string.Concat(path.AsSpan(start), new(in Path.DirectorySeparatorChar)));
+#else
                 path.Substring(start) + Path.DirectorySeparatorChar);
+#endif
         }
 
         /// <summary>
@@ -315,7 +332,11 @@ namespace Microsoft.Build.Shared
                 // Special case: convert the quotes.
                 if (path.Length > 1 && path[0] == convertQuote && path[path.Length - 1] == convertQuote)
                 {
+#if NET
+                    path = $"{targetQuote}{path.AsSpan(1, path.Length - 2)}{targetQuote}";
+#else
                     path = $"{targetQuote}{path.Substring(1, path.Length - 2)}{targetQuote}";
+#endif
                 }
                 // Enclose the path in a set of the 'target' quote unless the string is already quoted with the 'target' quotes.
                 else if (path.Length == 1 || path[0] != targetQuote || path[path.Length - 1] != targetQuote)
@@ -752,14 +773,20 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="fileSpec">The file spec to get the full path of.</param>
         /// <param name="currentDirectory"></param>
-        /// <returns>full path</returns>
-        internal static string GetFullPath(string fileSpec, string currentDirectory)
+        /// <param name="escape">Whether to escape the path after getting the full path.</param>
+        /// <returns>Full path to the file, escaped if not specified otherwise.</returns>
+        internal static string GetFullPath(string fileSpec, string currentDirectory, bool escape = true)
         {
             // Sending data out of the engine into the filesystem, so time to unescape.
             fileSpec = FixFilePath(EscapingUtilities.UnescapeAll(fileSpec));
 
-            // Data coming back from the filesystem into the engine, so time to escape it back.
-            string fullPath = EscapingUtilities.Escape(NormalizePath(Path.Combine(currentDirectory, fileSpec)));
+            string fullPath = NormalizePath(Path.Combine(currentDirectory, fileSpec));
+            // In some cases we might want to NOT escape in order to preserve symbols like @, %, $ etc.
+            if (escape)
+            {
+                // Data coming back from the filesystem into the engine, so time to escape it back.
+                fullPath = EscapingUtilities.Escape(fullPath);
+            }
 
             if (NativeMethodsShared.IsWindows && !EndsWithSlash(fullPath))
             {
@@ -838,17 +865,23 @@ namespace Microsoft.Build.Shared
 
         internal static bool PathIsInvalid(string path)
         {
-            if (path.IndexOfAny(InvalidPathChars) >= 0)
-            {
-                return true;
-            }
-
             // Path.GetFileName does not react well to malformed filenames.
             // For example, Path.GetFileName("a/b/foo:bar") returns bar instead of foo:bar
             // It also throws exceptions on illegal path characters
-            var lastDirectorySeparator = path.LastIndexOfAny(Slashes);
-
-            return path.IndexOfAny(InvalidFileNameChars, lastDirectorySeparator >= 0 ? lastDirectorySeparator + 1 : 0) >= 0;
+#if NET
+            if (!path.AsSpan().ContainsAny(InvalidPathChars))
+            {
+                int lastDirectorySeparator = path.LastIndexOfAny(Slashes);
+                return path.AsSpan(lastDirectorySeparator >= 0 ? lastDirectorySeparator + 1 : 0).ContainsAny(InvalidFileNameChars);
+            }
+#else
+            if (path.IndexOfAny(InvalidPathChars) < 0)
+            {
+                int lastDirectorySeparator = path.LastIndexOfAny(Slashes);
+                return path.IndexOfAny(InvalidFileNameChars, lastDirectorySeparator >= 0 ? lastDirectorySeparator + 1 : 0) >= 0;
+            }
+#endif
+            return true;
         }
 
         /// <summary>
@@ -1532,12 +1565,20 @@ namespace Microsoft.Build.Shared
 
         internal static void ReadFromStream(this Stream stream, byte[] content, int startIndex, int length)
         {
-#if NET7_0_OR_GREATER
+#if NET
             stream.ReadExactly(content, startIndex, length);
 #else
-#pragma warning disable CA2022 // Avoid inexact read with 'Stream.Read'
-            stream.Read(content, 0, length);
-#pragma warning restore CA2022 // Avoid inexact read with 'Stream.Read'
+            int bytesRead = 0;
+            while (bytesRead < length)
+            {
+                int read = stream.Read(content, startIndex + bytesRead, length - bytesRead);
+                if (read == 0)
+                {
+                    throw new EndOfStreamException();
+                }
+
+                bytesRead += read;
+            }
 #endif
         }
     }

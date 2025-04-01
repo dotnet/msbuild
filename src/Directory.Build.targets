@@ -47,10 +47,6 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true'">
-    <!-- Force updated reference to this package because xunit and shouldly
-         are netstandard1.6 and transitively bring in an old reference -->
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" />
-
     <!-- As of 17.3, one TF of Microsoft.NET.Test.Sdk depends on Newtonsoft.Json
          9.0.1, causing it to be downloaded and flagged by component governance -->
     <PackageReference Include="Newtonsoft.Json" />

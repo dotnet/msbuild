@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
@@ -18,7 +18,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IEventSource4, IBuildEventSink
+        IEventSource5, IBuildEventSink
     {
         #region Events
 
@@ -103,6 +103,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// This event is raised to log BuildCheck events.
         /// </summary>
         internal event BuildCheckEventHandler? BuildCheckEventRaised;
+
+        /// <summary>
+        /// this event is raised to log internal telemetry data from worker nodes.
+        /// </summary>
+        public event WorkerNodeTelemetryEventHandler? WorkerNodeTelemetryLogged;
         #endregion
 
         #region Properties
@@ -263,7 +268,6 @@ namespace Microsoft.Build.BackEnd.Logging
                     RaiseEvent(buildFinishedEvent, args => BuildFinished?.Invoke(null, args), BuildFinishedFollowUp);
                     break;
                 case BuildCanceledEventArgs buildCanceledEvent:
-
                     RaiseEvent(buildCanceledEvent, args => StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
                     break;
                 case CustomBuildEventArgs customBuildEvent:
@@ -283,6 +287,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     break;
                 case BuildCheckEventArgs buildCheckEvent:
                     RaiseEvent(buildCheckEvent, args => BuildCheckEventRaised?.Invoke(null, args), RaiseAnyEvent);
+                    break;
+                case WorkerNodeTelemetryEventArgs workerNodeTelemetryEvent:
+                    RaiseEvent(workerNodeTelemetryEvent, args => WorkerNodeTelemetryLogged?.Invoke(null, args), null);
                     break;
 
                 default:

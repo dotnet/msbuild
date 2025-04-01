@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if NET
+using System.Buffers;
+#endif
 using System.IO;
 
 #nullable disable
@@ -112,25 +115,31 @@ namespace Microsoft.Build.Shared
         internal const string ProjectReferenceTargetsOrDefaultTargetsMarker = ".projectReferenceTargetsOrDefaultTargets";
 
         // One-time allocations to avoid implicit allocations for Split(), Trim().
-        internal static readonly char[] SemicolonChar = { ';' };
-        internal static readonly char[] SpaceChar = { ' ' };
-        internal static readonly char[] SingleQuoteChar = { '\'' };
-        internal static readonly char[] EqualsChar = { '=' };
-        internal static readonly char[] ColonChar = { ':' };
-        internal static readonly char[] BackslashChar = { '\\' };
-        internal static readonly char[] NewlineChar = { '\n' };
-        internal static readonly char[] CrLf = { '\r', '\n' };
-        internal static readonly char[] ForwardSlash = { '/' };
-        internal static readonly char[] ForwardSlashBackslash = { '/', '\\' };
-        internal static readonly char[] WildcardChars = { '*', '?' };
-        internal static readonly string[] CharactersForExpansion = { "*", "?", "$(", "@(", "%" };
-        internal static readonly char[] CommaChar = { ',' };
-        internal static readonly char[] HyphenChar = { '-' };
-        internal static readonly char[] DirectorySeparatorChar = { Path.DirectorySeparatorChar };
-        internal static readonly char[] DotChar = { '.' };
-        internal static readonly string[] EnvironmentNewLine = { Environment.NewLine };
-        internal static readonly char[] PipeChar = { '|' };
-        internal static readonly char[] PathSeparatorChar = { Path.PathSeparator };
+        internal static readonly char[] SemicolonChar = [';'];
+        internal static readonly char[] SpaceChar = [' '];
+        internal static readonly char[] SingleQuoteChar = ['\''];
+        internal static readonly char[] EqualsChar = ['='];
+        internal static readonly char[] ColonChar = [':'];
+        internal static readonly char[] BackslashChar = ['\\'];
+        internal static readonly char[] NewlineChar = ['\n'];
+        internal static readonly char[] CrLf = ['\r', '\n'];
+        internal static readonly char[] ForwardSlash = ['/'];
+        internal static readonly char[] ForwardSlashBackslash = ['/', '\\'];
+        internal static readonly char[] WildcardChars = ['*', '?'];
+        internal static readonly string[] CharactersForExpansion = ["*", "?", "$(", "@(", "%"];
+        internal static readonly char[] CommaChar = [','];
+        internal static readonly char[] HyphenChar = ['-'];
+        internal static readonly char[] DirectorySeparatorChar = [Path.DirectorySeparatorChar];
+        internal static readonly char[] DotChar = ['.'];
+        internal static readonly string[] EnvironmentNewLine = [Environment.NewLine];
+        internal static readonly char[] PipeChar = ['|'];
+        internal static readonly char[] PathSeparatorChar = [Path.PathSeparator];
+
+#if NET
+        internal static readonly SearchValues<char> InvalidPathChars = SearchValues.Create(Path.GetInvalidPathChars());
+#else
+        internal static readonly char[] InvalidPathChars = Path.GetInvalidPathChars();
+#endif
     }
 
     internal static class PropertyNames
@@ -144,6 +153,7 @@ namespace Microsoft.Build.Shared
         internal const string InnerBuildPropertyValues = nameof(InnerBuildPropertyValues);
         internal const string TargetFrameworks = nameof(TargetFrameworks);
         internal const string TargetFramework = nameof(TargetFramework);
+        internal const string UsingMicrosoftNETSdk = nameof(UsingMicrosoftNETSdk);
     }
 
     // TODO: Remove these when VS gets updated to setup project cache plugins.
@@ -209,6 +219,7 @@ namespace Microsoft.Build.Shared
         internal const string withCulture = "WithCulture";
         internal const string copyToOutputDirectory = "CopyToOutputDirectory";
         internal const string copyAlways = "Always";
+        internal const string managed = "Managed";
 
         /// <summary>
         /// The output path for a given item.
@@ -249,5 +260,6 @@ namespace Microsoft.Build.Shared
         internal const string EmbeddedResource = "EmbeddedResource";
         internal const string None = "None";
         internal const string Reference = "Reference";
+        internal const string ProjectCapability = "ProjectCapability";
     }
 }

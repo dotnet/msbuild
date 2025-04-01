@@ -1180,8 +1180,8 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/binaryformatter-migration-guide</source>
-        <target state="new">MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://aka.ms/binaryformatter-migration-guide</target>
+        <target state="translated">MSB3825: la risorsa "{0}" verrà deserializzata tramite BinaryFormatter al runtime. BinaryFormatter è deprecato a causa di rischi noti per la sicurezza ed è stato rimosso da .NET 9+. Se si desidera continuare a usarlo, impostare la proprietà "GenerateResourceWarnOnBinaryFormatterUse" su false.
+           Altre informazioni: https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
@@ -2839,7 +2839,7 @@
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotInferParameterType">
         <source>Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</source>
-        <target state="translated">Non è stato possibile inferire il tipo di parametro "{0}" perché il tipo di attributo è sconosciuto. Il valore sarà trattto come una stringa.</target>
+        <target state="translated">Non è stato possibile inferire il tipo di parametro "{0}" perché il tipo di attributo è sconosciuto. Il valore sarà tratto come una stringa.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.MultipleConstructorsFound">

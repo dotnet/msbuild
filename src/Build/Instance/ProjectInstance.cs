@@ -1791,7 +1791,7 @@ namespace Microsoft.Build.Execution
         /// immutable if we are immutable.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable)
+        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable, bool isCommandLineProperty)
         {
             // Mutability not verified as this is being populated during evaluation
             ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValueEscaped, mayBeReserved, _isImmutable, isEnvironmentVariable, loggingContext);
@@ -2640,7 +2640,12 @@ namespace Microsoft.Build.Execution
                 }
                 else /* Dev 12 and above */
                 {
-                    toolsVersion = visualStudioVersion.ToString(CultureInfo.InvariantCulture) + ".0";
+                    toolsVersion =
+#if NET
+                        string.Create(CultureInfo.InvariantCulture, $"{visualStudioVersion}.0");
+#else
+                        $"{visualStudioVersion.ToString(CultureInfo.InvariantCulture)}.0";
+#endif
                 }
 
                 string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
@@ -3161,7 +3166,7 @@ namespace Microsoft.Build.Execution
 
             if (Traits.Instance.EscapeHatches.DebugEvaluation)
             {
-                Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Creating a ProjectInstance from an unevaluated state [{0}]", FullPath));
+                Trace.WriteLine($"MSBUILD: Creating a ProjectInstance from an unevaluated state [{FullPath}]");
             }
 
             ErrorUtilities.VerifyThrow(EvaluationId == BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
@@ -3175,6 +3180,7 @@ namespace Microsoft.Build.Execution
                 projectLoadSettings ?? buildParameters.ProjectLoadSettings, /* Use override ProjectLoadSettings if specified */
                 buildParameters.MaxNodeCount,
                 buildParameters.EnvironmentPropertiesInternal,
+                buildParameters.PropertiesFromCommandLine,
                 loggingService,
                 new ProjectItemInstanceFactory(this),
                 buildParameters.ToolsetProvider,

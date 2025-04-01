@@ -70,7 +70,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Additional level of caching kept at the process level.
         /// </summary>
-        private static ConcurrentDictionary<string, FileState> s_processWideFileStateCache = new ConcurrentDictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, FileState> s_processWideFileStateCache = new ConcurrentDictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// XML tables of installed assemblies.
@@ -456,9 +456,7 @@ namespace Microsoft.Build.Tasks
             // then we can short-circuit the File IO involved with GetAssemblyName()
             if (redistList != null)
             {
-                string extension = Path.GetExtension(path);
-
-                if (string.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(path) && path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
                 {
                     IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName(
                             Path.GetFileNameWithoutExtension(path));

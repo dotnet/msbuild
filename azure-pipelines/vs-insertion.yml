@@ -2,9 +2,9 @@
 # To achieve insertion automation, this pipeline definition yml has to be on servicing branches and main.
 
 
-# Runs in 3 modes: 
+# Runs in 3 modes:
 # 1. daily main insertion from latest main CI.
-#   - can be disabled in the UI by adding a custom schedule for any branch. 
+#   - can be disabled in the UI by adding a custom schedule for any branch.
 # 2. trigger insert as a followup to a servicing CI run.
 #   - can be disabled in the UI by adding a custom CI trigger.
 # 3. manual insertion - select manually the TargetBranch and inserted CI run.
@@ -12,13 +12,13 @@ trigger: none
 pr: none
 name: $(Date:yyyyMMdd).$(Rev:r)
 
-schedules:
-  - cron: '0 3 * * 1-5' # Runs every weekday at 3AM UTC
-    displayName: Daily VS insertion main
-    branches:
-      include:
-        - main
-    always: false # Don't run if there are no code changes
+# schedules:
+#   - cron: '0 3 * * 1-5' # Runs every weekday at 3AM UTC
+#     displayName: Daily VS insertion main
+#     branches:
+#       include:
+#         - main
+#     always: false # Don't run if there are no code changes
 
 resources:
   pipelines:
@@ -44,6 +44,7 @@ parameters:
     values:
       - auto
       - main
+      - rel/d17.14
       - rel/d17.13
       - rel/d17.12
       - rel/d17.11
@@ -56,11 +57,17 @@ parameters:
     default: 183
     type: number
     displayName: 'Drop Retention Days (do not set to < 90)'
+  - name: SkipUploadingPackages
+    default: false
+    type: boolean
+    displayName: 'Skip uploading packages (set to true if inserting the same version multiple times)'
 
 variables:
   # `auto` should work every time and selecting a branch in parameters is likely to fail due to incompatible versions in MSBuild and VS
   - name: AutoInsertTargetBranch
-    ${{ if eq(variables['Build.SourceBranchName'], 'vs17.13') }}:
+    ${{ if eq(variables['Build.SourceBranchName'], 'vs17.14') }}:
+      value: 'main'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.13') }}:
       value: 'rel/d17.13'
     ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.12') }}:
       value: 'rel/d17.12'
@@ -95,8 +102,8 @@ variables:
     value: $(resources.pipeline.MSBuild.sourceCommit)
   - name: ArtifactPackagesPath
     value: $(Build.ArtifactStagingDirectory)/PackageArtifacts
-  
-  - name: MSBuildPackagePattern 
+
+  - name: MSBuildPackagePattern
     value: '$(ArtifactPackagesPath)/Microsoft.Build.*.nupkg'
   - name: StringToolsPackagePattern
     value: '$(ArtifactPackagesPath)/Microsoft.NET.StringTools*.nupkg'
@@ -200,7 +207,6 @@ extends:
               $MicrosoftNETStringToolsPackageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
               Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$MicrosoftNETStringToolsPackageVersion'"
               Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($MicrosoftNETStringToolsPackageVersion)"
-              
               $props = @(
                       "VS.ExternalAPIs.MSBuild=$MSBuild_ExtApisPackageVersion",
                       "Microsoft.Build=$MicrosoftNETStringToolsPackageVersion",
@@ -221,26 +227,38 @@ extends:
               $propsValue = $props -join ";"
               Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
               Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
+              
+              # autocomplete main
+              $autocomplete = "false"
+              if ("$(InsertTargetBranch)" -eq "main")
+              {
+                  $autocomplete = "true"
+              }
+              Write-Host "Setting AutoCompleteEnabled to '$autocomplete'"
+              Write-Host "##vso[task.setvariable variable=AutoCompleteEnabled]$($autocomplete)"
+
         - task: 1ES.PublishNuGet@1
           displayName: 'Push MSBuild CoreXT packages'
+          condition: ${{ eq(parameters.SkipUploadingPackages, false) }}
           inputs:
             packageParentPath: '$(Build.ArtifactStagingDirectory)'
             packagesToPush: $(MSBuildPackagePattern);$(StringToolsPackagePattern);$(ExternalAPIsPackagePattern)
             nuGetFeedType: internal
             publishVstsFeed: VS
-            allowPackageConflicts: true
+            allowPackageConflicts: false
         - template: /azure-pipelines/WIFtoPATauth.yml@self
           parameters:
             wifServiceConnectionName: azure-public/vside package push
             deadPATServiceConnectionId: 42175e93-c771-4a4f-a132-3cca78f44b3b
         - task: 1ES.PublishNuGet@1
+          condition: ${{ eq(parameters.SkipUploadingPackages, false) }}
           displayName: 'Push MSBuild packages to VSSDK'
           inputs:
             packageParentPath: '$(Build.ArtifactStagingDirectory)'
             packagesToPush: $(MSBuildPackagePattern);$(StringToolsPackagePattern)
             nuGetFeedType: external
             publishFeedCredentials: azure-public/vssdk
-            allowPackageConflicts: true
+            allowPackageConflicts: false
         - task: PowerShell@2
           name: PrintTargetBranch
           inputs:
@@ -262,6 +280,6 @@ extends:
             DefaultConfigValues: $(InsertConfigValues)
             InsertionReviewers: MSBuild,VS ProTools
             CustomScriptExecutionCommand: $(InsertCustomScriptExecutionCommand)
-            AutoCompletePR: true
+            AutoCompletePR: $(AutoCompleteEnabled)
             AutoCompleteMergeStrategy: Squash
             InsertionBuildPolicy: Request Perf DDRITs

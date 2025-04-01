@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
+#if NET
+using System.Buffers;
+#endif
 using System.Collections.Generic;
 
 #nullable disable
@@ -35,7 +37,12 @@ namespace Microsoft.Build.Shared
         internal const string usingTaskBody = "Task";
         internal const string sdk = "Sdk";
 
-        internal static readonly char[] InvalidTargetNameCharacters = [ '$', '@', '(', ')', '%', '*', '?', '.' ];
+#if NET
+        internal static readonly SearchValues<char> InvalidTargetNameCharacters = SearchValues.Create(
+#else
+        internal static readonly char[] InvalidTargetNameCharacters = (
+#endif
+            ['$', '@', '(', ')', '%', '*', '?', '.']);
 
         // Names that cannot be used as property or item names because they are reserved
         internal static readonly HashSet<string> ReservedItemNames =

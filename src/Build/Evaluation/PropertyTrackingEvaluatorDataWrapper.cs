@@ -87,16 +87,23 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which does not come from the Xml.
         /// </summary>
-        public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false)
+        public P SetProperty(
+            string name,
+            string evaluatedValueEscaped,
+            bool isGlobalProperty,
+            bool mayBeReserved,
+            LoggingContext loggingContext,
+            bool isEnvironmentVariable = false,
+            bool isCommandLineProperty = false)
         {
             P? originalProperty = _wrapped.GetProperty(name);
-            P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, _evaluationLoggingContext, isEnvironmentVariable);
+            P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, _evaluationLoggingContext, isEnvironmentVariable, isCommandLineProperty);
 
             this.TrackPropertyWrite(
                 originalProperty,
                 newProperty,
                 null,
-                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable),
+                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable, isCommandLineProperty),
                 loggingContext);
 
             return newProperty;
@@ -168,13 +175,10 @@ namespace Microsoft.Build.Evaluation
         #region Private Methods...
 
         private bool IsPropertyReadTrackingRequested
-            => IsEnvironmentVariableReadTrackingRequested ||
-               (_settings & PropertyTrackingSetting.UninitializedPropertyRead) ==
-               PropertyTrackingSetting.UninitializedPropertyRead;
+            => IsEnvironmentVariableReadTrackingRequested
+            || PropertyTrackingUtils.IsPropertyTrackingEnabled(_settings, PropertyTrackingSetting.UninitializedPropertyRead);
 
-        private bool IsEnvironmentVariableReadTrackingRequested
-            => (_settings & PropertyTrackingSetting.EnvironmentVariableRead) ==
-               PropertyTrackingSetting.EnvironmentVariableRead;
+        private bool IsEnvironmentVariableReadTrackingRequested => PropertyTrackingUtils.IsPropertyTrackingEnabled(_settings, PropertyTrackingSetting.EnvironmentVariableRead);
 
         /// <summary>
         /// Logic containing what to do when a property is read.
@@ -209,7 +213,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="name">The name of the environment variable read.</param>
         private void TrackEnvironmentVariableRead(string name)
         {
-            if ((_settings & PropertyTrackingSetting.EnvironmentVariableRead) != PropertyTrackingSetting.EnvironmentVariableRead)
+            if (!IsEnvironmentVariableReadTrackingRequested)
             {
                 return;
             }
@@ -231,15 +235,15 @@ namespace Microsoft.Build.Evaluation
         /// <param name="name">The name of the uninitialized property read.</param>
         private void TrackUninitializedPropertyRead(string name)
         {
-            if ((_settings & PropertyTrackingSetting.UninitializedPropertyRead) != PropertyTrackingSetting.UninitializedPropertyRead)
+            if (!PropertyTrackingUtils.IsPropertyTrackingEnabled(_settings, PropertyTrackingSetting.UninitializedPropertyRead))
             {
                 return;
             }
 
-            var args = new UninitializedPropertyReadEventArgs(
-                name,
-                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("UninitializedPropertyRead", name));
-            args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
+            var args = new UninitializedPropertyReadEventArgs(name, message: null)
+            {
+                BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+            };
 
             _evaluationLoggingContext.LogBuildEvent(args);
         }
@@ -258,12 +262,12 @@ namespace Microsoft.Build.Evaluation
             if (predecessor == null)
             {
                 // If this property had no previous value, then track an initial value.
-                TrackPropertyInitialValueSet(property, source);
+                TrackPropertyInitialValueSet(property, source, location);
             }
             else
             {
                 // There was a previous value, and it might have been changed. Track that.
-                TrackPropertyReassignment(predecessor, property, location?.LocationString);
+                TrackPropertyReassignment(predecessor, property, location);
             }
 
             // If this property was an environment variable but no longer is, track it.
@@ -278,19 +282,25 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="property">The property being set.</param>
         /// <param name="source">The source of the property.</param>
-        private void TrackPropertyInitialValueSet(P property, PropertySource source)
+        /// <param name="location">The exact location of the property. Can be null if comes not form xml.</param>
+        private void TrackPropertyInitialValueSet(P property, PropertySource source, IElementLocation? location)
         {
-            if ((_settings & PropertyTrackingSetting.PropertyInitialValueSet) != PropertyTrackingSetting.PropertyInitialValueSet)
+            if (!PropertyTrackingUtils.IsPropertyTrackingEnabled(_settings, PropertyTrackingSetting.PropertyInitialValueSet))
             {
                 return;
             }
 
             var args = new PropertyInitialValueSetEventArgs(
-                    property.Name,
-                    property.EvaluatedValue,
-                    source.ToString(),
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", property.Name, property.EvaluatedValue, source));
-            args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
+                property.Name,
+                property.EvaluatedValue,
+
+                // If the property is from XML, we don't need property source since a full location is available.
+                location == null ? GetPropertySourceName(source) : string.Empty,
+                location?.File,
+                location?.Line ?? 0,
+                location?.Column ?? 0,
+                message: null)
+            { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
 
             _evaluationLoggingContext.LogBuildEvent(args);
         }
@@ -301,7 +311,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="predecessor">The property's preceding state. Null if none.</param>
         /// <param name="property">The property's current state.</param>
         /// <param name="location">The location of this property's reassignment.</param>
-        private void TrackPropertyReassignment(P? predecessor, P property, string? location)
+        private void TrackPropertyReassignment(P? predecessor, P property, IElementLocation? location)
         {
             if (MSBuildNameIgnoreCaseComparer.Default.Equals(property.Name, "MSBuildAllProjects"))
             {
@@ -317,17 +327,17 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            // Either we want to specifically track property reassignments
-            // or we do not want to track nothing - in which case the prop reassignment is enabled by default.
-            if ((_settings & PropertyTrackingSetting.PropertyReassignment) == PropertyTrackingSetting.PropertyReassignment ||
-                (_settings == 0 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)))
+            if (PropertyTrackingUtils.IsPropertyReassignmentEnabled(_settings))
             {
                 var args = new PropertyReassignmentEventArgs(
-                        property.Name,
-                        oldValue,
-                        newValue,
-                        location,
-                        message: null)
+                    property.Name,
+                    oldValue,
+                    newValue,
+                    location: null,
+                    location?.File,
+                    location?.Line ?? 0,
+                    location?.Column ?? 0,
+                    message: null)
                 { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
 
                 _evaluationLoggingContext.LogBuildEvent(args);
@@ -347,7 +357,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Determines the source of a property given the variables SetProperty arguments provided. This logic follows what's in <see cref="Evaluator{P,I,M,D}"/>.
         /// </summary>
-        private PropertySource DeterminePropertySource(bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable)
+        private PropertySource DeterminePropertySource(bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable, bool isCommandLineProperty)
         {
             if (isEnvironmentVariable)
             {
@@ -356,7 +366,7 @@ namespace Microsoft.Build.Evaluation
 
             if (isGlobalProperty)
             {
-                return PropertySource.Global;
+                return isCommandLineProperty ? PropertySource.CommandLine : PropertySource.Global;
             }
 
             return mayBeReserved ? PropertySource.BuiltIn : PropertySource.Toolset;
@@ -373,20 +383,107 @@ namespace Microsoft.Build.Evaluation
             BuiltIn,
             Global,
             Toolset,
-            EnvironmentVariable
+            EnvironmentVariable,
+            CommandLine,
         }
 
-        [Flags]
-        private enum PropertyTrackingSetting
+        private static string GetPropertySourceName(PropertySource source) => source switch
         {
-            None = 0,
+            PropertySource.Xml => "Xml",
+            PropertySource.BuiltIn => "BuiltIn",
+            PropertySource.Global => "Global",
+            PropertySource.Toolset => "Toolset",
+            PropertySource.EnvironmentVariable => "EnvironmentVariable",
+            PropertySource.CommandLine => "CommandLine",
+            _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
+        };
+    }
 
-            PropertyReassignment = 1,
-            PropertyInitialValueSet = 1 << 1,
-            EnvironmentVariableRead = 1 << 2,
-            UninitializedPropertyRead = 1 << 3,
+    [Flags]
+    internal enum PropertyTrackingSetting
+    {
+        None = 0,
 
-            All = PropertyReassignment | PropertyInitialValueSet | EnvironmentVariableRead | UninitializedPropertyRead
+        PropertyReassignment = 1,
+        PropertyInitialValueSet = 1 << 1,
+        EnvironmentVariableRead = 1 << 2,
+        UninitializedPropertyRead = 1 << 3,
+
+        All = PropertyReassignment | PropertyInitialValueSet | EnvironmentVariableRead | UninitializedPropertyRead
+    }
+
+    internal class PropertyTrackingUtils
+    {
+        /// <summary>
+        /// Determines if a specific property tracking setting is enabled within the provided settings configuration.
+        /// </summary>
+        /// <param name="settings">The combined property tracking settings value to check against.</param>
+        /// <param name="currentTrackingSetting">The specific tracking setting to verify.</param>
+        /// <returns>true if the specified tracking setting is enabled in the settings configuration.</returns>
+        internal static bool IsPropertyTrackingEnabled(PropertyTrackingSetting settings, PropertyTrackingSetting currentTrackingSetting) => (settings & currentTrackingSetting) == currentTrackingSetting;
+
+        // Either we want to specifically track property reassignments
+        // or we do not want to track nothing - in which case the prop reassignment is enabled by default.
+        internal static bool IsPropertyReassignmentEnabled(PropertyTrackingSetting currentTrackingSetting) => IsPropertyTrackingEnabled(currentTrackingSetting, PropertyTrackingSetting.PropertyReassignment)
+                || (currentTrackingSetting == PropertyTrackingSetting.None && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10));
+
+        /// <summary>
+        /// Logs property assignment information during execution, providing detailed tracking of property value changes.
+        /// This internal method handles two scenarios:
+        /// 1. Initial property value assignment (when previousPropertyValue is null)
+        /// 2. Property value reassignment (when previousPropertyValue has a value)
+        /// If property tracking is disabled (PropertyTrackingSetting.None), no logging occurs.
+        /// </summary>
+        /// <param name="settings">Controls what types of property assignments should be tracked.</param>
+        /// <param name="propertyName">Name of the property being modified.</param>
+        /// <param name="propertyValue">New value being assigned to the property.</param>
+        /// <param name="location">Source location information (file, line, column).</param>
+        /// <param name="previousPropertyValue">Previous value of the property, null if this is initial assignment.</param>
+        /// <param name="loggingContext">Context for logging build events.</param>
+        internal static void LogPropertyAssignment(
+            PropertyTrackingSetting settings,
+            string propertyName,
+            string propertyValue,
+            IElementLocation location,
+            string? previousPropertyValue,
+            LoggingContext loggingContext)
+        {
+            if (previousPropertyValue == null)
+            {
+                if (IsPropertyTrackingEnabled(settings, PropertyTrackingSetting.PropertyInitialValueSet))
+                {
+                    var args = new PropertyInitialValueSetEventArgs(
+                        propertyName,
+                        propertyValue,
+                        propertySource: string.Empty,
+                        location.File,
+                        location.Line,
+                        location.Column,
+                        message: null) { BuildEventContext = loggingContext.BuildEventContext };
+
+                    loggingContext.LogBuildEvent(args);
+                }
+            }
+            else
+            {
+                if (IsPropertyReassignmentEnabled(settings))
+                {
+                    if (propertyValue != previousPropertyValue)
+                    {
+                        var args = new PropertyReassignmentEventArgs(
+                            propertyName,
+                            previousPropertyValue,
+                            propertyValue,
+                            location: null,
+                            location.File,
+                            location.Line,
+                            location.Column,
+                            message: null) { BuildEventContext = loggingContext.BuildEventContext, };
+
+                        loggingContext.LogBuildEvent(args);
+                    }
+                }
+            }
         }
     }
 }

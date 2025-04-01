@@ -64,7 +64,7 @@ namespace Microsoft.Build.Graph
                 ErrorUtilities.VerifyThrow(
                     !skipIfNonexistent || (!target.Equals(MSBuildConstants.DefaultTargetsMarker)
                     && !target.Equals(MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker)),
-                    target + " cannot be marked as SkipNonexistentTargets");
+                    $"{target} cannot be marked as SkipNonexistentTargets");
                 Target = target;
                 SkipIfNonexistent = skipIfNonexistent;
             }
@@ -556,7 +556,7 @@ namespace Microsoft.Build.Graph
             // special case for Quickbuild which updates msbuild binaries independent of props/targets. Remove this when all QB repos will have
             // migrated to new enough Visual Studio versions whose Microsoft.Managed.After.Targets enable transitive references.
             if (string.IsNullOrWhiteSpace(projectInstance.GetEngineRequiredPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName)) &&
-                MSBuildStringIsTrue(projectInstance.GetEngineRequiredPropertyValue("UsingMicrosoftNETSdk")) &&
+                MSBuildStringIsTrue(projectInstance.GetEngineRequiredPropertyValue(PropertyNames.UsingMicrosoftNETSdk)) &&
                 MSBuildStringIsFalse(projectInstance.GetEngineRequiredPropertyValue("DisableTransitiveProjectReferences")))
             {
                 return true;
