@@ -122,7 +122,7 @@ namespace Microsoft.Build.Shared
 
             if (i < message.Length)
             {
-                message = message.Substring(i, message.Length - i);
+                message = message.Substring(i);
             }
 
             return message;

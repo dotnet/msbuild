@@ -428,7 +428,7 @@ namespace Microsoft.Build.Evaluation
 
                         itemName = firstPart;
                         metadataName = expression.Substring(startOfText, i - startOfText);
-                        qualifiedMetadataName = itemName + "." + metadataName;
+                        qualifiedMetadataName = $"{itemName}.{metadataName}";
                     }
                     else
                     {
