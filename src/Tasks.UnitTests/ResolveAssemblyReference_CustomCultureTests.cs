@@ -83,11 +83,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             var sourcePath = Path.Combine(sourceFolder, fileName);
 
-            if (!File.Exists(sourcePath))
-            {
-                throw new FileNotFoundException($"Test asset not found: {sourcePath}");
-            }
-
             File.Copy(sourcePath, Path.Combine(destinationFolder, fileName));
         }
     }
