@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -1373,7 +1372,7 @@ namespace Microsoft.Build.BackEnd
                 _modifies = null;
                 _properties = properties;
                 _propertySets = null;
-                _threadIdThatEnteredScope = Thread.CurrentThread.ManagedThreadId;
+                _threadIdThatEnteredScope = Environment.CurrentManagedThreadId;
                 _truncateLookupsAtThisScope = false;
             }
 

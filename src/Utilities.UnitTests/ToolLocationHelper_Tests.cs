@@ -23,7 +23,6 @@ using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFra
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -2142,7 +2141,7 @@ namespace Microsoft.Build.UnitTests
             string frameworkDirectory2064bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness64);
             string frameworkDirectory20Current = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Current);
 
-            if (!EnvironmentUtilities.Is64BitOperatingSystem)
+            if (!Environment.Is64BitOperatingSystem)
             {
                 // "Not 64 bit OS "
                 return;
@@ -2163,7 +2162,7 @@ namespace Microsoft.Build.UnitTests
             pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "itanium");
             pathToFramework.ShouldBe(frameworkDirectory2064bit, StringCompareShould.IgnoreCase);
 
-            if (!EnvironmentUtilities.Is64BitProcess)
+            if (!Environment.Is64BitProcess)
             {
                 pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "RandomPlatform");
                 pathToFramework.ShouldBe(frameworkDirectory2032bit, StringCompareShould.IgnoreCase);
@@ -2188,7 +2187,7 @@ namespace Microsoft.Build.UnitTests
         {
             IList<string> referencePaths = ToolLocationHelper.GetPathToReferenceAssemblies(new FrameworkNameVersioning(".NETFramework", new Version("4.0")));
 
-            if (!EnvironmentUtilities.Is64BitOperatingSystem)
+            if (!Environment.Is64BitOperatingSystem)
             {
                 // "Not 64 bit OS "
                 return;
@@ -2233,7 +2232,7 @@ namespace Microsoft.Build.UnitTests
             string frameworkDirectory2032bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness32);
             string frameworkDirectory20Current = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Current);
 
-            if (EnvironmentUtilities.Is64BitOperatingSystem)
+            if (Environment.Is64BitOperatingSystem)
             {
                 // "Is a 64 bit OS "
                 return;
@@ -2271,7 +2270,7 @@ namespace Microsoft.Build.UnitTests
         {
             IList<string> referencePaths = ToolLocationHelper.GetPathToReferenceAssemblies(new FrameworkNameVersioning(".NETFramework", new Version("4.0")));
 
-            if (EnvironmentUtilities.Is64BitOperatingSystem)
+            if (Environment.Is64BitOperatingSystem)
             {
                 // "Is 64 bit OS "
                 return;

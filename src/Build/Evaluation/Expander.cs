@@ -24,8 +24,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
+using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
 
@@ -280,16 +280,10 @@ namespace Microsoft.Build.Evaluation
         private static readonly char[] s_doubleQuoteChar = { '"' };
 
         /// <summary>
-        /// Those characters which indicate that an expression may contain expandable
-        /// expressions.
-        /// </summary>
-        private static char[] s_expandableChars = { '$', '%', '@' };
-
-        /// <summary>
         /// The CultureInfo from the invariant culture. Used to avoid allocations for
         /// performing IndexOf etc.
         /// </summary>
-        private static CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
+        private static readonly CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
 
         /// <summary>
         /// Properties to draw on for expansion.
@@ -454,7 +448,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static bool ExpressionMayContainExpandableExpressions(string expression)
         {
-            return expression.IndexOfAny(s_expandableChars) > -1;
+            return expression.AsSpan().IndexOfAny('$', '%', '@') >= 0;
         }
 
         /// <summary>
@@ -1110,7 +1104,12 @@ namespace Microsoft.Build.Evaluation
 
                         if (IsTruncationEnabled(_options) && metadataValue.Length > CharacterLimitPerExpansion)
                         {
-                            metadataValue = metadataValue.Substring(0, CharacterLimitPerExpansion - 3) + "...";
+                            metadataValue =
+#if NET
+                                $"{metadataValue.AsSpan(0, CharacterLimitPerExpansion - 3)}...";
+#else
+                                $"{metadataValue.Substring(0, CharacterLimitPerExpansion - 3)}...";
+#endif
                         }
                     }
 
@@ -1313,7 +1312,12 @@ namespace Microsoft.Build.Evaluation
                                 var value = propertyValue.ToString();
                                 if (value.Length > CharacterLimitPerExpansion)
                                 {
-                                    propertyValue = value.Substring(0, CharacterLimitPerExpansion - 3) + "...";
+                                    propertyValue =
+#if NET
+                                        $"{value.AsSpan(0, CharacterLimitPerExpansion - 3)}...";
+#else
+                                        $"{value.Substring(0, CharacterLimitPerExpansion - 3)}...";
+#endif
                                 }
                             }
 
@@ -1730,7 +1734,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
                     {
-                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidRegistryPropertyExpression", "$(" + registryExpression + ")", ex.Message);
+                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidRegistryPropertyExpression", $"$({registryExpression})", ex.Message);
                     }
                 }
 
@@ -1858,7 +1862,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 List<ExpressionShredder.ItemExpressionCapture> matches;
-                if (expression.IndexOf('@') == -1)
+                if (!expression.Contains('@'))
                 {
                     return null;
                 }
@@ -2239,7 +2243,7 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// A cache of previously created item function delegates.
                 /// </summary>
-                private static ConcurrentDictionary<string, ItemTransformFunction> s_transformFunctionDelegateCache = new ConcurrentDictionary<string, ItemTransformFunction>(StringComparer.OrdinalIgnoreCase);
+                private static readonly ConcurrentDictionary<string, ItemTransformFunction> s_transformFunctionDelegateCache = new ConcurrentDictionary<string, ItemTransformFunction>(StringComparer.OrdinalIgnoreCase);
 
                 /// <summary>
                 /// Delegate that represents the signature of all item transformation functions
@@ -2254,7 +2258,7 @@ namespace Microsoft.Build.Evaluation
                 internal static ItemTransformFunction GetItemTransformFunction(IElementLocation elementLocation, string functionName, Type itemType)
                 {
                     ItemTransformFunction transformFunction = null;
-                    string qualifiedFunctionName = itemType.FullName + "::" + functionName;
+                    string qualifiedFunctionName = $"{itemType.FullName}::{functionName}";
 
                     // We may have seen this delegate before, if so grab the one we already created
                     if (!s_transformFunctionDelegateCache.TryGetValue(qualifiedFunctionName, out transformFunction))
@@ -2631,7 +2635,7 @@ namespace Microsoft.Build.Evaluation
                             {
                                 // It may be that the itemspec has unescaped ';'s in it so we need to split here to handle
                                 // that case.
-                                if (metadataValue.IndexOf(';') >= 0)
+                                if (metadataValue.Contains(';'))
                                 {
                                     var splits = ExpressionShredder.SplitSemiColonSeparatedList(metadataValue);
 
@@ -3095,36 +3099,23 @@ namespace Microsoft.Build.Evaluation
             * description of an item vector changes, the expressions must be updated in both places.
             *************************************************************************************************************************/
 
-
-
-#if NET7_0_OR_GREATER
+#if NET
             [GeneratedRegex(ItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
-            internal static partial Regex ItemMetadataPattern();
+            internal static partial Regex ItemMetadataRegex { get; }
 #else
             /// <summary>
             /// Regular expression used to match item metadata references embedded in strings.
             /// For example, %(Compile.DependsOn) or %(DependsOn).
             /// </summary>
-            internal static readonly Lazy<Regex> ItemMetadataPattern = new Lazy<Regex>(
-                () => new Regex(ItemMetadataSpecification,
-                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+            internal static Regex ItemMetadataRegex => s_itemMetadataRegex ??=
+                new Regex(ItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled);
+
+            internal static Regex s_itemMetadataRegex;
 #endif
 
-            internal static Regex ItemMetadataRegex
-            {
-                get
-                {
-#if NET7_0_OR_GREATER
-                    return ItemMetadataPattern();
-#else
-                    return ItemMetadataPattern.Value;
-#endif
-                }
-            }
-
-                /// <summary>
-                /// Name of the group matching the "name" of a metadatum.
-                /// </summary>
+            /// <summary>
+            /// Name of the group matching the "name" of a metadatum.
+            /// </summary>
             internal const string NameGroup = "NAME";
 
             /// <summary>
@@ -3143,29 +3134,19 @@ namespace Microsoft.Build.Evaluation
                                                                 ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
                                                                 ItemVectorWithTransformRHS + @"))";
 
-#if NET7_0_OR_GREATER
+#if NET
             [GeneratedRegex(NonTransformItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
-            internal static partial Regex NonTransformItemMetadataPattern();
+            internal static partial Regex NonTransformItemMetadataRegex { get; }
 #else
             /// <summary>
             /// regular expression used to match item metadata references outside of item vector transforms.
             /// </summary>
             /// <remarks>PERF WARNING: this Regex is complex and tends to run slowly.</remarks>
-            internal static readonly Lazy<Regex> NonTransformItemMetadataPattern = new Lazy<Regex>(
-                () => new Regex(NonTransformItemMetadataSpecification,
-                                RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+            private static Regex s_nonTransformItemMetadataPattern;
+
+            internal static Regex NonTransformItemMetadataRegex => s_nonTransformItemMetadataPattern ??=
+                new Regex(NonTransformItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled);
 #endif
-            internal static Regex NonTransformItemMetadataRegex
-            {
-                get
-                {
-#if NET7_0_OR_GREATER
-                    return NonTransformItemMetadataPattern();
-#else
-                    return NonTransformItemMetadataPattern.Value;
-#endif
-                }
-            }
 
             /// <summary>
             /// Complete description of an item metadata reference, including the optional qualifying item type.
@@ -4114,8 +4095,8 @@ namespace Microsoft.Build.Evaluation
                         else if (parameters[n].ParameterType.GetTypeInfo().IsEnum && args[n] is string v && v.Contains("."))
                         {
                             Type enumType = parameters[n].ParameterType;
-                            string typeLeafName = enumType.Name + ".";
-                            string typeFullName = enumType.FullName + ".";
+                            string typeLeafName = $"{enumType.Name}.";
+                            string typeFullName = $"{enumType.FullName}.";
 
                             // Enum.parse expects commas between enum components
                             // We'll support the C# type | syntax too
@@ -4200,11 +4181,11 @@ namespace Microsoft.Build.Evaluation
                     }
                     if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
                     {
-                        return "[" + typeName + "]::" + name + "(" + parameters + ")";
+                        return $"[{typeName}]::{name}({parameters})";
                     }
                     else
                     {
-                        return "[" + typeName + "]::" + name;
+                        return $"[{typeName}]::{name}";
                     }
                 }
                 else
@@ -4213,11 +4194,11 @@ namespace Microsoft.Build.Evaluation
 
                     if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
                     {
-                        return propertyValue + "." + name + "(" + parameters + ")";
+                        return $"{propertyValue}.{name}({parameters})";
                     }
                     else
                     {
-                        return propertyValue + "." + name;
+                        return $"{propertyValue}.{name}";
                     }
                 }
             }

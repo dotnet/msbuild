@@ -4,8 +4,9 @@ A remote host object must be registered in the [Running Object Table (ROT)](http
 
 [The registration of interfaces](https://docs.microsoft.com/en-us/dotnet/framework/interop/how-to-register-primary-interop-assemblies) is the only thing interop with COM that need extra care. There are 3 interfaces involved in out-of-proc tasks work: `IVsMSBuildTaskFileManager`, `IPersistFileCheckSum` and `ITaskHost`. `IVsMSBuildTaskFileManager` and `IPersistFileCheckSum` are registered globally in Windows registry by VS existing setup. `ITaskHost` is also configured in VS using registration-free. So the only work is to configure it using registration-free in **MSBuild**. That results the change in msbuild.exe.manifest file and the change to generate tlb file for ITaskHost.
 
-## Annotated additions to the msbuild.exe.manifest file.
-```
+## Annotated additions to the msbuild.exe.manifest file
+
+```xml
 <file name="Microsoft.Build.Framework.tlb"> -- Location of the tlb, it should be in the same directory as msbuild.exe
     <typelib
         tlbid="{D8A9BA71-4724-481D-9CA7-0DA23A1D615C}" -- matches what is embedded in the tlb with ITaskHost
@@ -24,7 +25,7 @@ A remote host object must be registered in the [Running Object Table (ROT)](http
 
 If is part of the work for [allowing out-of-proc tasks to access unsaved changes](https://github.com/dotnet/project-system/issues/4406)
 
-## More reference:
+## More reference
 
 [RegFree COM Walkthrough](https://msdn.microsoft.com/library/ms973913.aspx)
 
