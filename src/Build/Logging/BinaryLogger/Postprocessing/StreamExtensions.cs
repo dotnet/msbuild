@@ -3,9 +3,7 @@
 
 using System;
 using System.Buffers;
-using System.Diagnostics;
 using System.IO;
-using System.Text;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging

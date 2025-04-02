@@ -2,16 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -236,7 +231,7 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = text.IndexOfAny(arg0.ToCharArray());
+                    returnVal = text.AsSpan().IndexOfAny(arg0.AsSpan());
                     return true;
                 }
             }
@@ -262,7 +257,7 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                 {
-                    returnVal = text.LastIndexOfAny(arg0.ToCharArray());
+                    returnVal = text.AsSpan().LastIndexOfAny(arg0.AsSpan());
                     return true;
                 }
             }

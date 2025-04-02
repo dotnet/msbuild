@@ -518,7 +518,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 foreach (KeyValuePair<string, string> entry in environment)
                 {
                     setColor(ConsoleColor.Gray);
-                    WritePretty(String.Format(CultureInfo.CurrentCulture, "{0,-30} = ", entry.Key));
+                    WritePretty($"{entry.Key,-30} = ");
                     setColor(ConsoleColor.DarkGray);
                     WriteLinePretty(entry.Value);
                 }
@@ -536,7 +536,7 @@ namespace Microsoft.Build.BackEnd.Logging
             foreach (DictionaryEntry prop in list)
             {
                 setColor(ConsoleColor.Gray);
-                WritePretty(String.Format(CultureInfo.CurrentCulture, "{0,-30} = ", prop.Key));
+                WritePretty($"{prop.Key,-30} = ");
                 setColor(ConsoleColor.DarkGray);
                 WriteLinePretty(EscapingUtilities.UnescapeAll((string)prop.Value));
             }
@@ -656,12 +656,12 @@ namespace Microsoft.Build.BackEnd.Logging
 
         protected virtual void WriteItemSpec(string itemSpec)
         {
-            WriteLinePretty("    " + itemSpec);
+            WriteLinePretty($"    {itemSpec}");
         }
 
         protected virtual void WriteMetadata(string name, string value)
         {
-            WriteLinePretty("        " + name + " = " + value);
+            WriteLinePretty($"        {name} = {value}");
         }
 
         /// <summary>
@@ -821,8 +821,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     2,
                     "PerformanceLine",
                     time,
-                    String.Format(CultureInfo.CurrentCulture, "{0,-40}" /* pad to 40 align left */, scopeName),
-                    String.Format(CultureInfo.CurrentCulture, "{0,3}", calls));
+                    $"{scopeName,-40}", // pad to 40 align left
+                    $"{calls,3}");
             }
 
             /// <summary>

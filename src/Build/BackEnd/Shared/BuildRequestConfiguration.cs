@@ -869,7 +869,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>String representation of the object</returns>
         public override string ToString()
         {
-            return String.Format(CultureInfo.CurrentCulture, "{0} {1} {2} {3}", _configId, _projectFullPath, _toolsVersion, _globalProperties);
+            return $"{_configId} {_projectFullPath} {_toolsVersion} {_globalProperties}";
         }
 
         /// <summary>

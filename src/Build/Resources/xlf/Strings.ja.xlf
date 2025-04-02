@@ -221,6 +221,16 @@
         <target state="translated">'TargetFramework' プロパティと 'TargetFrameworks' プロパティは優先されないため、.NET SDK を使用しないプロジェクトでは指定しないでください。</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0109_MessageFmt">
+        <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
+        <target state="new">Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0109_Title">
+        <source>The 'Exec' task should not be used to build a project.</source>
+        <target state="new">The 'Exec' task should not be used to build a project.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">プロパティ: '{0}' にアクセスしましたが、初期化されませんでした。</target>
