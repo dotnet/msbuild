@@ -3,6 +3,8 @@
 VS OTel provide packages compatible with ingesting data to their backend if we instrument it via OpenTelemetry traces (System.Diagnostics.Activity).
 VS OTel packages are not open source so we need to conditionally include them in our build only for VS and MSBuild.exe
 
+> this formatting is a comment describing how the implementation turned out in 17.14 when our original goals were different
+
 [Onepager](https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/telemetry-onepager.md)
 
 ## Concepts
@@ -12,10 +14,10 @@ It's a bit confusing how things are named in OpenTelemetry and .NET and VS Telem
 | OTel concept | .NET/VS | Description |
 | --- | --- | --- |
 | Span/Trace | System.Diagnostics.Activity |  Trace is a tree of Spans. Activities can be nested.|
-| Tracer | System.Diagnostics.ActivitySource | Creates and listens to activites.  |
+| Tracer | System.Diagnostics.ActivitySource | Creates activites.  |
 | Processor/Exporter | VS OTel provided default config | filters and saves telemetry as files in a desired format |
-| TracerProvider | OTel SDK TracerProvider | Singleton that is aware of processors, exporters and Tracers (in .NET a bit looser relationship because it does not create Tracers just hooks to them) |
-| Collector | VS OTel Collector | Sends to VS backend, expensive to initialize and finalize |
+| TracerProvider | OTel SDK TracerProvider | Singleton that is aware of processors, exporters and Tracers and listens (in .NET a bit looser relationship because it does not create Tracers just hooks to them) |
+| Collector | VS OTel Collector | Sends to VS backend |
 
 ## Requirements
 
@@ -25,6 +27,8 @@ It's a bit confusing how things are named in OpenTelemetry and .NET and VS Telem
 - Avoid allocations when not sampled.
 - Has to have no impact on Core without opting into tracing, small impact on Framework
 - No regression in VS perf ddrit scenarios.
+
+> there is an allocation regression when sampled, one of the reasons why it's not enabled by default
 
 ### Privacy
 
@@ -36,6 +40,8 @@ It's a bit confusing how things are named in OpenTelemetry and .NET and VS Telem
 - Providing or/and documenting a method for creating a hook in Framework MSBuild
 - If custom hooking solution will be used - document the security implications of hooking custom telemetry Exporters/Collectors in Framework
 - other security requirements (transportation, rate limiting, sanitization, data access) are implemented by VS Telemetry library or the backend
+
+> hooking in Framework not implemented
 
 ### Data handling
 
@@ -61,29 +67,36 @@ The data sent via VS OpenTelemetry is neither a subset neither a superset of wha
 ##### Features
 
 - BuildCheck enabled
-- Custom tasks and targets counts and durations
+- Tasks runtimes and memory usage
+- Tasks summary - whether they come from Nuget or are custom
+- Targets summary - how many loaded and executed, how many come from nuget, how many come from metaproject
 
-The design allows for easy instrumentation of additional data points.
+The design should allow for easy instrumentation of additional data points.
+> current implementation has only one datapoint and that is the whole build `vs/msbuild/build`, the instrumentaiton of additional datapoints is gated by first checking that telemetry is running and using `Activity` classes only in helper methods gated by `[MethodImpl(MethodImplOptions.NoInlining)]` to avoid System.Diagnostics.DiagnosticSource dll load.
 
 ## Core `dotnet build` scenario
 
 - Telemetry should not be collected via VS OpenTelemetry mechanism because it's already collected in sdk.
 - opt in to initialize the ActivitySource to avoid degrading performance.
-- [baronfel/otel-startup-hook: A .NET CLR Startup Hook that exports OpenTelemetry metrics via the OTLP Exporter to an OpenTelemetry Collector](https://github.com/baronfel/otel-startup-hook/) and similar enable collecting telemetry data locally by listening to the ActivitySource name defined in MSBuild.
+- [baronfel/otel-startup-hook: A .NET CLR Startup Hook that exports OpenTelemetry metrics via the OTLP Exporter to an OpenTelemetry Collector](https://github.com/baronfel/otel-startup-hook/) and similar enable collecting telemetry data locally by listening to the ActivitySource prefix defined in MSBuild.
+
+> this hook can be used when the customer specifies that they want to listen to the prefix `Microsoft.VisualStudio.OpenTelemetry.MSBuild`, opt in by setting environment variables `MSBUILD_TELEMETRY_OPTIN=1`,`MSBUILD_TELEMETRY_SAMPLE_RATE=1.0`
 
 ## Standalone MSBuild.exe scenario
 
 - Initialize and finalize in Xmake.cs
-	- ActivitySource, TracerProvider, VS Collector
-		- overhead of starting VS collector is nonzero
-			- head sampling should avoid initializing if not sampled
+ ActivitySource, TracerProvider, VS Collector
+- overhead of starting VS collector is nonzero
+- head sampling should avoid initializing if not sampled
 
 ## VS in proc (devenv) scenario
 
 - VS can call `BuildManager` in a thread unsafe way the telemetry implementation has to be mindful of [BuildManager instances acquire its own BuildTelemetry instance by rokonec · Pull Request #8444 · dotnet/msbuild](https://github.com/dotnet/msbuild/pull/8444)
-	- ensure no race conditions in initialization
-	- only 1 TracerProvider with VS defined processing should exist
+  - ensure no race conditions in initialization
+  - only 1 TracerProvider with VS defined processing should exist
 - Visual Studio should be responsible for having a running collector, we don't want this overhead in MSBuild and eventually many will use it
+
+> this was not achieved in 17.14 so we start collector every time
 
 ## Implementation and MSBuild developer experience
 
@@ -103,15 +116,17 @@ For proportion estimation (of fairly common occurence in the builds), with not v
 - Enables opt-in and opt-out for guaranteed sample or not sampled.
 - nullable ActivitySource, using `?` when working with them, we can be initialized but not sampled -> it will not reinitialize but not collect telemetry.
 
-- for Dev17 we can't use the new OTel assemblies and their dependencies, so everything has to be opt in.
-- for Dev18 OpenTelemetry will be available and usable by default
+- for 17.14 we can't use the new OTel assemblies and their dependencies, so everything has to be opt in.
+- eventually OpenTelemetry will be available and usable by default
 - We can use experiments in VS to pass the environment variable to initialize
+
+> Targeted notification can be set that samples 100% of customers to which it is sent
 
 ### Initialization at entrypoints
 
 - There are 2 entrypoints:
-    - for VS in BuildManager.BeginBuild
-    - for standalone in Xmake.cs Main
+  - for VS in BuildManager.BeginBuild
+  - for standalone in Xmake.cs Main
 
 ### Exiting
 
@@ -147,6 +162,8 @@ IActivityTelemetryDataHolder data = new SomeData();
 myActivity?.WithTags(data);
 ```
 
+> currently this should be gated in a separate method to avoid System.DiagnosticDiagnosticsource dll load.
+
 #### Default Build activity in EndBuild
 
 - this activity would always be created at the same point when sdk telemetry is sent in Core
@@ -165,13 +182,17 @@ We potentially want apart from the Default ActivitySource:
 - Create a way of using a "HighPrioActivitySource" which would override sampling and initialize Collector in MSBuild.exe scenario/tracerprovider in VS.
 - this would enable us to catch rare events
 
+> not implemented
 
-## Uncertainties
+### Implementation details
 
-- Configuring tail sampling in VS telemetry server side infrastructure.
-- Sampling rare events details.
-- In standalone we could start the collector async without waiting which would potentially miss some earlier traces (unlikely to miss the important end of build trace though) but would degrade performance less than waiting for it's startup. The performance and utility tradeoff is not clear.
-- Can collector startup/shutdown be faster?
-- Exceptions in Collector code paths
-- Do we want to send antivirus state? Figuring it out is expensive: https://github.com/dotnet/msbuild/compare/main...proto/get-av ~100ms
-- ability to configure the overall and per-namespace sampling from server side (e.g. storing it in the .msbuild folder in user profile if different then default values set from server side - this would obviously have a delay of the default sample rate # of executions)
+- `OpenTelemetryManager` - singleton that manages lifetime of OpenTelemetry objects listening to `Activity`ies, start by initializing in `Xmake` or `BuildManager`.
+- Task and Target data is forwarded from worker nodes via `TelemetryForwarder` and `InternalTelemetryForwardingLogger` and then aggregated to stats and serialized in `TelemetryDataUtils` and attached to the default `vs/msbuild/build` event.
+
+## Future work when/if we decide to invest in telemetry again
+
+- avoid initializing/finalizing collector in VS when there is one running
+- multiple levels of sampling for different types of events
+- running by default with head sampling (simplifies instrumentation with `Activity`ies)
+- implement anonymization consistently in an OTel processor and not ad hoc in each usage
+- add datapoints helping perf optimization decisions/ reliability investigations
