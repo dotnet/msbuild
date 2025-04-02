@@ -14,15 +14,18 @@ namespace Microsoft.Build.Tasks
     /// <remarks>
     /// Represents a single input to a compilation-style task.
     /// Keeps track of timestamp for later comparison.
+    ///
+    /// Must be serializable because instances may be marshaled cross-AppDomain, see <see cref="ProcessResourceFiles.PortableLibraryCacheInfo"/>.
     /// </remarks>
-    /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
+#if FEATURE_APPDOMAIN
     [Serializable]
+#endif
     internal class DependencyFile
     {
         // Filename
         internal string filename;
 
-        // Date and time the file was last modified           
+        // Date and time the file was last modified
         internal DateTime lastModified;
 
         // Whether the file exists or not.

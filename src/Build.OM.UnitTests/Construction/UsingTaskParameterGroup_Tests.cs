@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             UsingTaskParameterGroupElement parameterGroup = GetParameterGroupXml(s_contentEmptyParameterGroup);
             Assert.NotNull(parameterGroup);
             Assert.Equal(0, parameterGroup.Count);
-            Assert.Null(parameterGroup.Parameters.GetEnumerator().Current);
+            Assert.Empty(parameterGroup.Parameters);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 GetParameterGroupXml(s_contentDuplicateParameters);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -135,7 +135,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         private static UsingTaskParameterGroupElement GetParameterGroupXml(string contents)
         {
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(contents)));
+            using ProjectRootElementFromString projectRootElementFromString = new(contents);
+            ProjectRootElement project = projectRootElementFromString.Project;
+
             ProjectUsingTaskElement usingTask = (ProjectUsingTaskElement)Helpers.GetFirst(project.Children);
             return usingTask.ParameterGroup;
         }

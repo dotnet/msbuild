@@ -34,14 +34,14 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public void VerifyNotSame(LinkPair<T> other)
         {
-            Assert.NotSame((object)this.View, (object)other.View);
-            Assert.NotSame((object)this.Real, (object)other.Real);
+            Assert.NotEqual((object)this.View, (object)other.View);
+            Assert.NotEqual((object)this.Real, (object)other.Real);
         }
 
         public void VerifySame(LinkPair<T> other)
         {
-            Assert.Same((object)this.View, (object)other.View);
-            Assert.Same((object)this.Real, (object)other.Real);
+            Assert.Equal((object)this.View, (object)other.View);
+            Assert.Equal((object)this.Real, (object)other.Real);
         }
 
         public void VerifySetter(bool finalValue, Func<T, bool> getter, Action<T, bool> setter)

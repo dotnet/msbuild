@@ -8,9 +8,9 @@
 //     * The assembly must be built with <GenerateAssemblyRefs>true</GenerateAssemblyRefs>
 //     * The ECDSA methods are not available
 
-// There are cases where we have multiple assemblies that are going to import this file and 
+// There are cases where we have multiple assemblies that are going to import this file and
 // if they are going to also have InternalsVisibleTo between them, there will be a compiler warning
-// that the type is found both in the source and in a referenced assembly. The compiler will prefer 
+// that the type is found both in the source and in a referenced assembly. The compiler will prefer
 // the version of the type defined in the source
 //
 // In order to disable the warning for this type we are disabling this warning for this entire file.
@@ -26,7 +26,6 @@ namespace System.Security.Cryptography
 {
     internal static partial class CngLightup
     {
-        private const string DsaOid = "1.2.840.10040.4.1";
         private const string RsaOid = "1.2.840.113549.1.1.1";
 
         private const string HashAlgorithmNameTypeName = "System.Security.Cryptography.HashAlgorithmName";
@@ -56,9 +55,6 @@ namespace System.Security.Cryptography
             s_rsaEncryptionPaddingType?.GetProperty("OaepSHA1", BindingFlags.Static | BindingFlags.Public).GetValue(null);
 
         private static readonly Lazy<bool> s_preferRsaCng = new Lazy<bool>(DetectRsaCngSupport);
-
-        private static volatile Func<X509Certificate2, DSA> s_getDsaPublicKey;
-        private static volatile Func<X509Certificate2, DSA> s_getDsaPrivateKey;
 
         private static volatile Func<X509Certificate2, RSA> s_getRsaPublicKey;
         private static volatile Func<X509Certificate2, RSA> s_getRsaPrivateKey;
@@ -110,30 +106,6 @@ namespace System.Security.Cryptography
             }
 
             return s_getRsaPrivateKey(cert);
-        }
-
-        internal static DSA GetDSAPublicKey(X509Certificate2 cert)
-        {
-            if (s_getDsaPublicKey == null)
-            {
-                s_getDsaPublicKey =
-                    BindCoreDelegate<DSA>("DSA", isPublic: true) ??
-                    BindGetCapiPublicKey<DSA, DSACryptoServiceProvider>(DsaOid);
-            }
-
-            return s_getDsaPublicKey(cert);
-        }
-
-        internal static DSA GetDSAPrivateKey(X509Certificate2 cert)
-        {
-            if (s_getDsaPrivateKey == null)
-            {
-                s_getDsaPrivateKey =
-                    BindCoreDelegate<DSA>("DSA", isPublic: false) ??
-                    BindGetCapiPrivateKey<DSA>(DsaOid, csp => new DSACryptoServiceProvider(csp));
-            }
-
-            return s_getDsaPrivateKey(cert);
         }
 
 #if !CNG_LIGHTUP_NO_SYSTEM_CORE
@@ -523,10 +495,9 @@ namespace System.Security.Cryptography
         {
             Debug.Assert(typeof(T).Name == algorithmName);
 
-            // Load System.Core.dll and load the appropriate extension class 
+            // Load System.Core.dll and load the appropriate extension class
             // (one of
             //    System.Security.Cryptography.X509Certificates.RSACertificateExtensions
-            //    System.Security.Cryptography.X509Certificates.DSACertificateExtensions
             //    System.Security.Cryptography.X509Certificates.ECDsaCertificateExtensions
             // )
             string typeName = "System.Security.Cryptography.X509Certificates." + algorithmName + "CertificateExtensions";
@@ -543,12 +514,10 @@ namespace System.Security.Cryptography
             }
 
             // Now, find the api we want to call:
-            //   
+            //
             // (one of
             //     GetRSAPublicKey(this X509Certificate2 c)
             //     GetRSAPrivateKey(this X509Certificate2 c)
-            //     GetDSAPublicKey(this X509Certificate2 c)
-            //     GetDSAPrivateKey(this X509Certificate2 c)
             //     GetECDsaPublicKey(this X509Certificate2 c)
             //     GetECDsaPrivateKey(this X509Certificate2 c)
             // )
@@ -558,7 +527,7 @@ namespace System.Security.Cryptography
                 methodName,
                 BindingFlags.Public | BindingFlags.Static,
                 null,
-                new[] { typeof(X509Certificate2) },
+                [typeof(X509Certificate2)],
                 null);
 
             Debug.Assert(api != null, "Method '" + methodName + "(X509Certificate2 c)' not found on type '" + type + "'");

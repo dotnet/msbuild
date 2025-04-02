@@ -2,6 +2,16 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ja" original="../Strings.resx">
     <body>
+      <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
+        <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
+        <target state="translated">マニフェスト ファイルが存在しないか、読み取れません。これが存在し、関連するコンテンツがあることを確認してください。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
+        <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
+        <target state="translated">マニフェスト ファイルを開けませんでした。例外: '{0}'。これが存在し、関連するコンテンツがあることを確認してください。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
         <source>BindingRedirect is missing required field 'oldVersion'.</source>
         <target state="translated">BindingRedirect には必須フィールド 'oldVersion' がありません。</target>
@@ -26,6 +36,14 @@
         <source>There was a problem parsing the newVersion attribute. {0}</source>
         <target state="translated">newVersion 属性の解析中に問題が発生しました。{0}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="AssignCulture.CultureOverwritten">
+        <source>MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</source>
+        <target state="translated">MSB3002: 'RespectAlreadyAssignedItemCulture' プロパティが設定されていなかったため、アイテム "{0}" の明示的に設定されたカルチャ "{1}" は、推定カルチャ "{2}" で上書きされました。</target>
+        <note>
+	{StrBegin="MSB3002: "}
+	'RespectAlreadyAssignedItemCulture' should not be translated
+	</note>
       </trans-unit>
       <trans-unit id="AssignProjectConfiguration.IllegalMappingString">
         <source>The platform mapping "{0}" in the platform mapping list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "foo=bar;foo2=bar2".</source>
@@ -121,6 +139,106 @@
         <target state="translated">MSB3654: 遅延署名には、最低でも 1 つの公開キーを指定する必要があります。KeyFile または KeyContainer プロパティを使用して公開キーを提供するか、遅延署名を無効にしてください。</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
+      <trans-unit id="CodeTaskFactory.AttributeEmptyWithTaskElement">
+        <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</source>
+        <target state="translated">MSB3752: タスク "{2}" の &lt;{1}&gt; 要素の "{0}" 属性が設定されていますが、空です。属性に適切な値があることを確認します。</target>
+        <note>{StrBegin="MSB3752: "}</note>
+      </trans-unit>
+      <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
+        <source>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</source>
+        <target state="translated">MSB3991: '{0}' が設定されていないか、空です。{1} が false の場合は、'{0}' に空でない値を設定してください。</target>
+        <note>{StrBegin="MSB3991: "}</note>
+      </trans-unit>
+      <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullRootElementName">
+        <source>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</source>
+        <target state="translated">MSB3992: '{0}' が設定されていません。{1} が true の場合は、必ず '{0}' の値を設定してください。</target>
+        <note>{StrBegin="MSB3992: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.BaseIntermediateOutputPathMismatchWarning">
+        <source>MSB3539: The value of the property "BaseIntermediateOutputPath" was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the "MSBuildProjectExtensionsPath" instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</source>
+        <target state="translated">MSB3539: プロパティ "BaseIntermediateOutputPath" の値は MSBuild で使用された後に変更されたため、予期しないビルド結果が発生する可能性があります。NuGet などのツールは、代わりに "MSBuildProjectExtensionsPath" で指定されたパスに出力を書き込みます。このプロパティを設定するには、たとえば Directory.Build.props を使用して Microsoft.Common.props をインポートする前に設定する必要があります。 詳細については、https://go.microsoft.com/fwlink/?linkid=869650 をご覧ください。</target>
+        <note>{StrBegin="MSB3539: "} </note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.CrossTargetingGetTargetFrameworks">
+        <source>Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build</source>
+        <target state="translated">内部 MSBuild エラー: CrossTargeting 以外の GetTargetFrameworks ターゲットをクロス ターゲット (外部) ビルドで使用することはできません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.DeploymentUnpublishable">
+        <source>Skipping unpublishable project.</source>
+        <target state="translated">発行できないプロジェクトをスキップしています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.GenerateManifestsOnlyForExe">
+        <source>Publish is only valid for 'Windows Application' or 'Console Application' project types.</source>
+        <target state="translated">発行は、'Windows アプリケーション' または 'コンソール アプリケーション' プロジェクトの種類に対してのみ有効です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.InvalidConfigurationTextWhenBuildingInsideVisualStudio">
+        <source>The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. This error may also appear if some other project is trying to follow a project-to-project reference to this project, this project has been unloaded or is not included in the solution, and the referencing project does not build using the same or an equivalent Configuration or Platform.</source>
+        <target state="translated">プロジェクト '{0}' に BaseOutputPath/OutputPath プロパティが設定されていません。 このプロジェクトの構成とプラットフォームの有効な組み合わせが指定されていることを確認チェック。 Configuration='{1}' Platform='{2}'。このエラーは、他のプロジェクトがこのプロジェクトへのプロジェクト間参照に従おうとしている場合、このプロジェクトがアンロードされたか、ソリューションに含まれていない場合、および参照元のプロジェクトが同じまたは同等の構成またはプラットフォームを使用してビルドされていない場合にも表示されます。</target>
+        <note>LOCALIZATION:  Do not localize the words "BaseOutputPath/OutputPath", "Configuration" and "Platform"</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.InvalidConfigurationTextWhenBuildingOutsideVisualStudio">
+        <source>The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. You may be seeing this message because you are trying to build a project without a solution file, and have specified a non-default Configuration or Platform that doesn't exist for this project.</source>
+        <target state="translated">プロジェクト '{0}' に BaseOutputPath/OutputPath プロパティが設定されていません。 このプロジェクトの構成とプラットフォームの有効な組み合わせが指定されていることを確認チェック。 Configuration='{1}' Platform='{2}'。ソリューション ファイルを使用せずにプロジェクトをビルドしようとして、このプロジェクトに存在しない既定以外の構成またはプラットフォームを指定したため、このメッセージが表示される可能性があります。</target>
+        <note>LOCALIZATION:  Do not localize the words "BaseOutputPath/OutputPath", "Configuration" and "Platform"</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.MSBuildProjectExtensionsPathModifiedAfterUse">
+        <source>MSB3540: The value of the property "MSBuildProjectExtensionsPath" was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</source>
+        <target state="translated">MSB3540: プロパティ "MSBuildProjectExtensionsPath" の値は、MSBuild によって使用された後に変更されたため、予期しないビルド結果が発生する可能性があります。 このプロパティを設定するには、たとえば Directory.Build.props を使用して Microsoft.Common.props をインポートする前に設定する必要があります。 詳細については、https://go.microsoft.com/fwlink/?linkid=869650 にアクセスしてください</target>
+        <note>{StrBegin="MSB3540: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.ManifestResourceWithNoCultureWarning">
+        <source>{0}: {1} item type is deprecated. Emit EmbeddedResource items instead, with metadata WithCulture='{2}', Type='{3}', and optional LogicalName.</source>
+        <target state="translated">{0}: {1} 項目の種類は非推奨です。代わりに、メタデータ WithCulture='{2}'、Type='{3}'、およびオプションの LogicalName を使用して EmbeddedResource 項目を生成します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.NoWin32ManifestAndPreferNativeArm64Enabled">
+        <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
+        <target state="translated">MSB9903: PreferNativeArm64 は、Win32 アプリケーション マニフェストを必要とし、NoWin32Manifest と相互に排他的です。</target>
+        <note>{StrBegin="MSB9903: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.NonExistentProjectReference">
+        <source>MSB9008: The referenced project {0} does not exist.</source>
+        <target state="translated">MSB9008: 参照されているプロジェクト {0} が存在しません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
+        <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
+        <target state="translated">MSB9904: PreferNativeArm64 が有効である場合、プラットフォームが AnyCPU に設定されていることを確認してください。現在のプラットフォーム: {0}。</target>
+        <note>{StrBegin="MSB9904: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.Prefer32BitAndPreferNativeArm64Enabled">
+        <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
+        <target state="translated">MSB9902: Prefer32Bit オプションと PreferNativeArm64 オプションは相互に排他的です。1 つだけ有効にしてください。</target>
+        <note>{StrBegin="MSB9902: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.PropertyWithTrailingSlash">
+        <source>The {0} must end with a trailing slash.</source>
+        <target state="translated">{0} の末尾はスラッシュにする必要があります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.RunTargetDependsOnMessage">
+        <source>Cannot run '{0}' because project output type is not '.exe'</source>
+        <target state="translated">プロジェクト出力の種類が '.exe' されていないため、'{0}' を実行できません</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.SigningKeyRequired">
+        <source>A signing key is required in order to publish this project. Please specify a ManifestKeyFile or ManifestCertificateThumbprint value. Publishing from Visual Studio will automatically configure a signing key for this project.</source>
+        <target state="translated">このプロジェクトを公開するには、署名キーが必要です。ManifestKeyFile または ManifestCertificateThumbprint の値を指定してください。Visual Studioから発行すると、このプロジェクトの署名キーが自動的に構成されます。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.SpecifiedSeverityDoesNotExist">
+        <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
+        <target state="translated">MSB9901: 指定された重要度に関連性がありません: メッセージの '{0}': '{1}'。</target>
+        <note>{StrBegin="MSB9901: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage">
+        <source>{0}: {1} item type is deprecated. Use EmbeddedResource items instead.</source>
+        <target state="translated">{0}: {1} 項目の種類は非推奨です。代わりに EmbeddedResource 項目を使用してください。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
         <target state="translated">MSB3881: 致命的なエラー: コマンド ライン引数が {0} を超えています。</target>
@@ -181,6 +299,16 @@
         <target state="translated">ハード リンクを作成して "{0}" を "{1}" にコピーしています。</target>
         <note>LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
+      <trans-unit id="Copy.IOException">
+        <source>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</source>
+        <target state="translated">MSB3894: "{1}" を "{2}" にコピー中に {0}が発生しました。HR は {3} です</target>
+        <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
+      </trans-unit>
+      <trans-unit id="Copy.IncompatibleParameters">
+        <source>MSB3896: Both "{0}" and "{1}" were specified as parameters in the project file but cannot be used together. Please choose one or the other.</source>
+        <target state="translated">MSB3896: "{0}" と "{1}" の両方がプロジェクト ファイルのパラメーターとして指定されましたが、一緒に使用することはできません。どちらか一方を選択してください。</target>
+        <note>{StrBegin="MSB3896: "}</note>
+      </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
         <target state="translated">MSB3893: リンクを使用して "{0}" を "{1}" にコピーできませんでした。</target>
@@ -188,7 +316,7 @@
       </trans-unit>
       <trans-unit id="Copy.NonWindowsLinkErrorMessage">
         <source>The {0} library call failed with the following error code: {1}.</source>
-        <target state="new">The {0} library call failed with the following error code: {1}.</target>
+        <target state="translated">{0} ライブラリの呼び出しは次のエラー コードで失敗しました: {1}。</target>
         <note />
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
@@ -208,8 +336,13 @@
       </trans-unit>
       <trans-unit id="Copy.RetryingAsSymbolicLink">
         <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</source>
-        <target state="new">Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</target>
+        <target state="translated">ハード リンクを使用して "{0}" を "{1}" にコピーできませんでした。代わりにシンボリック リンクを使用してファイルをコピーしています。 {2}</target>
         <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
+      </trans-unit>
+      <trans-unit id="Copy.RetryingOnAccessDenied">
+        <source>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</source>
+        <target state="translated">MSB3895: 環境変数 MSBUILDALWAYSRETRY = 1 のため、ERROR_ACCESS_DENIED で再試行しています</target>
+        <note>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</note>
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
         <source>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</source>
@@ -219,12 +352,12 @@
       <trans-unit id="Copy.Retrying">
         <source>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4} {5}</source>
         <target state="translated">MSB3026: "{0}" を "{1}" にコピーできませんでした。{3} ミリ秒以内に {2} 回目の再試行を開始します。{4} {5}</target>
-        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
+        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.ExceededRetries">
         <source>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed. {3}</source>
         <target state="translated">MSB3027: "{0}" を "{1}" にコピーできませんでした。{2} 回の再試行回数を超えたため、失敗しました。{3}</target>
-        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
+        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.InvalidRetryCount">
         <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
@@ -302,24 +435,24 @@
         <note />
       </trans-unit>
       <trans-unit id="Delete.Error">
-        <source>MSB3061: Unable to delete file "{0}". {1}</source>
-        <target state="translated">MSB3061: ファイル "{0}" を削除できません。{1}</target>
+        <source>MSB3061: Unable to delete file "{0}". {1} {2}</source>
+        <target state="translated">MSB3061: ファイル "{0}" を削除できません。{1} {2}</target>
         <note>{StrBegin="MSB3061: "}</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
         <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
-        <target state="new">MSB3028: {0} is an invalid retry count. Value must not be negative.</target>
+        <target state="translated">MSB3028: {0} は無効な再試行回数です。値を負にすることはできません。</target>
         <note>{StrBegin="MSB3028: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryDelay">
         <source>MSB3029: {0} is an invalid retry delay. Value must not be negative.</source>
-        <target state="new">MSB3029: {0} is an invalid retry delay. Value must not be negative.</target>
+        <target state="translated">MSB3029: {0} は無効な再試行遅延です。値を負にすることはできません。</target>
         <note>{StrBegin="MSB3029: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="Delete.Retrying">
-        <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</source>
-        <target state="new">MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</target>
-        <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</note>
+        <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</source>
+        <target state="translated">MSB3062: ファイル "{0}" を削除できませんでした。{2} ミリ秒で再試行 {1} を開始しています。{3} {4}</target>
+        <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message, {4} is message from LockCheck.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
         <source>File "{0}" doesn't exist. Skipping.</source>
@@ -623,6 +756,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" は {0} 項目を参照し、"{3}" は {1} 項目を参照します。これらは同じ項目数を持たなければなりません。</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+        <source>Creating binding redirection file "{0}".</source>
+        <target state="translated">バインド リダイレクト ファイル "{0}" を作成しています。</target>
+        <note />
       </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
         <source>MSB3831: The application configuration file must have root configuration element.</source>
@@ -1030,14 +1168,21 @@
         <note>{StrBegin="MSB3183: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.WriteOutputManifestFailed">
-        <source>MSB3173: Unable to write manifest '{0}'. {1}</source>
-        <target state="translated">MSB3173: マニフェスト '{0}' を書き込めません。{1}</target>
+        <source>MSB3173: Unable to write manifest '{0}'. {1} {2}</source>
+        <target state="translated">MSB3173: マニフェスト '{0}' を書き込めません。{1}{2}</target>
         <note>{StrBegin="MSB3173: "}</note>
       </trans-unit>
       <trans-unit id="GenerateManifest.InvalidRequestedExecutionLevel">
         <source>MSB3190: ClickOnce does not support the request execution level '{0}'.</source>
         <target state="translated">MSB3190: ClickOnce では、要求の実行レベル '{0}' はサポートされていません。</target>
         <note>{StrBegin="MSB3190: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.BinaryFormatterUse">
+        <source>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide</source>
+        <target state="translated">MSB3825: リソース "{0}" は実行時に BinaryFormatter を介して逆シリアル化されます。BinaryFormatter は、既知のセキュリティ リスクにより非推奨となり、.NET 9 以降では削除されています。引き続き使用する場合は、プロパティ "GenerateResourceWarnOnBinaryFormatterUse" を false に設定します。
+           詳細情報: https://aka.ms/binaryformatter-migration-guide</target>
+        <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
         <source>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</source>
@@ -1068,6 +1213,11 @@
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: ファイル {0} を処理できませんでした。インターネットまたは制限付きゾーン内にあるか、ファイルに Web のマークがあるためです。これらのファイルを処理するには、Web のマークを削除してください。</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
+        <source>MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</source>
+        <target state="translated">MSB3826: \"{1}\" のリソース \"{0}\" は MIME の種類 \"{2}\" を使用します。これは、.NET で実行されている場合、MSBuild ではサポートされていません。</target>
+        <note>{StrBegin="MSB3826: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>
@@ -1388,12 +1538,12 @@
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.NoPlatformsListed">
         <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</source>
-        <target state="new">MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</target>
+        <target state="translated">MSB3982: EnableDynamicPlatformResolution は true ですが、参照対象プロジェクト '{0}' に 'Platforms' または 'Platform' メタデータが設定されていません。これは、指定されたプラットフォームなしでビルドされます。</target>
         <note>{StrBegin="MSB3982: "}</note>
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
         <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
-        <target state="new">Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</target>
+        <target state="translated">参照されたプロジェクト '{0}' の Platform プロパティは現在のプロジェクトのプラットフォーム '{1}' と一致します。参照されたプロジェクトは、グローバル Platform プロパティなしでビルドされます。</target>
         <note />
       </trans-unit>
       <trans-unit id="GetCompatiblePlatform.SamePlatform">
@@ -1447,8 +1597,8 @@
         <note>{StrBegin="MSB3676: "}</note>
       </trans-unit>
       <trans-unit id="Move.Error">
-        <source>MSB3677: Unable to move file "{0}" to "{1}". {2}</source>
-        <target state="translated">MSB3677: ファイル "{0}" を "{1}" に移動できません。{2}</target>
+        <source>MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</source>
+        <target state="translated">MSB3677: ファイル "{0}" を "{1}" に移動できません。{2} {3}</target>
         <note>{StrBegin="MSB3677: "}</note>
       </trans-unit>
       <trans-unit id="Move.ExactlyOneTypeOfDestination">
@@ -1522,6 +1672,21 @@
         <target state="translated">StopOnFirstFailure は、次のすべての条件に該当する場合に無効となります。1) システムがマルチプロセッサ モードで実行されている。2) BuildInParallel プロパティが true に設定されている。3) RunEachTargetSeparately プロパティが false に設定されている。</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
       </trans-unit>
+      <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
+        <source>The assembly element is missing from the application manifest.</source>
+        <target state="translated">アセンブリ要素がアプリケーション マニフェストにありません。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
+        <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</source>
+        <target state="translated">MSB4300: supportedArchitectures 要素に指定された値 '{0}' が無効です。マニフェストから削除するか、'amd64 arm64' に設定してください。</target>
+        <note>{StrBegin="MSB4300: "}</note>
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
+        <source>The application manifest file cannot be found. Please make sure it exists.</source>
+        <target state="translated">アプリケーション マニフェスト ファイルが見つかりません。これが存在することを確認してください。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
         <target state="translated">MSB3501: ファイル "{0}" からの行を読み取れませんでした。{1}</target>
@@ -1579,7 +1744,7 @@
       </trans-unit>
       <trans-unit id="RemoveDir.EmptyPath">
         <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
-        <target state="new">MSB3232: An empty directory was passed to RemoveDir and was ignored.</target>
+        <target state="translated">MSB3232: 空のディレクトリが RemoveDir に渡され、無視されました。</target>
         <note>{StrBegin="MSB3232: "}</note>
       </trans-unit>
       <trans-unit id="RemoveDir.Error">
@@ -1639,10 +1804,15 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.NoBecauseBadImage">
         <source>This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</source>
-        <target state="new">This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</target>
+        <target state="translated">この参照は無効なイメージであるため、"CopyLocal" ではありません。ネイティブ バイナリであるか、アセンブリではない可能性があります。</target>
         <note>
       LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
     </note>
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.SearchPathAddedByParentAssembly">
+        <source>For SearchPath "{0}" (added by referencing assembly "{1}").</source>
+        <target state="translated">SearchPath "{0}" の場合 (アセンブリ "{1}" を参照して追加)。</target>
+        <note> {1} is the name of the parent assembly for which SearchPath was used.</note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
@@ -1903,6 +2073,11 @@
         <target state="translated">無効な PE ヘッダーが見つかりました。実装ファイルは使用されません。</target>
         <note>This message can be used as the {1} in MSB3272</note>
       </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.UnifiedReferenceDependsOn">
+        <source>References which depend on or have been unified to "{0}" [{1}].</source>
+        <target state="translated">"{0}" [{1}] に依存しているか、統合されている参照。</target>
+        <note> This will look like references which depend on or have been unified to "A, Version=2.0.0.0 PublicKey=4a4fded9gisujf" [a.dll].</note>
+      </trans-unit>
       <trans-unit id="ResolveAssemblyReference.UnknownProcessorArchitecture">
         <source>MSB3273: Unknown processor architecture. The implementation file "{0}" for "{1}" had an ImageFileMachine value of "0x{2}". If you wish to use this implementation file make sure the "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" property in your project is set to "Warning" or "None".</source>
         <target state="translated">MSB3273: 不明なプロセッサ アーキテクチャです。"{1}" の実装ファイル "{0}" の ImageFileMachine 値は "0x{2}" でした。この実装ファイルを使用する場合は、プロジェクトの "ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch" プロパティに "警告" または "なし" を設定してください。</target>
@@ -2108,7 +2283,7 @@
         <target state="translated">TargetFramework プロファイルのリスト情報:</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+      <trans-unit id="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
         <source>TargetFramework Profile List Paths:</source>
         <target state="translated">TargetFramework プロファイルのリストのパス:</target>
         <note />
@@ -2353,6 +2528,11 @@
         <target state="translated">MSB3326: 次のキー ファイルをインポートできません: {0}。キー ファイルはパスワードで保護されている可能性があります。この状況を解決するには、証明書をもう一度インポートするか、現在のユーザーの個人証明書ストアに証明書を手動でインポートしてください。</target>
         <note>{StrBegin="MSB3326: "}</note>
       </trans-unit>
+      <trans-unit id="ResolveKeySource.PfxUnsupported">
+        <source>PFX signing not supported on .NET Core.</source>
+        <target state="translated">PFX 署名は .NET Core ではサポートされていません。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ResolveKeySource.ResolvedThumbprintEmpty">
         <source>MSB3327: Unable to find code signing certificate in the current user’s Windows certificate store. To correct this, either disable signing of the ClickOnce manifest or install the certificate into the certificate store.</source>
         <target state="translated">MSB3327: 現在のユーザーの Windows 証明書ストアにコード署名証明書が見つかりません。これを修正するには、ClickOnce マニフェストの署名を無効にするか、証明書ストアに証明書をインストールしてください。</target>
@@ -2483,8 +2663,8 @@
         <note>{StrBegin="MSB3371: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotMakeFileWritable">
-        <source>MSB3372: The file "{0}" cannot be made writable. {1}</source>
-        <target state="translated">MSB3372: ファイル "{0}" を書き込み可能にすることはできません。{1}</target>
+        <source>MSB3372: The file "{0}" cannot be made writable. {1} {2}</source>
+        <target state="translated">MSB3372: ファイル "{0}" を書き込み可能にすることはできません。{1} {2}</target>
         <note>{StrBegin="MSB3372: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotRestoreAttributes">
@@ -2493,8 +2673,8 @@
         <note>{StrBegin="MSB3373: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotTouch">
-        <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1}</source>
-        <target state="translated">MSB3374: ファイル "{0}" に最後にアクセスした、または書き込んだ時間を設定できません。{1}</target>
+        <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</source>
+        <target state="translated">MSB3374: ファイル "{0}" に最後にアクセスした、または書き込んだ時間を設定できません。{1} {2}</target>
         <note>{StrBegin="MSB3374: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CreatingFile">
@@ -2588,8 +2768,8 @@
         <note>{StrBegin="MSB3936: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
-        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
-        <target state="translated">MSB3935: 解凍先のファイル "{1}" が読み取り専用で、書き込み可能にすることができないため、ファイル "{0}" を解凍できませんでした。{2}</target>
+        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
+        <target state="translated">MSB3935: 解凍先のファイル "{0}" が読み取り専用で、書き込み可能にすることができないため、ファイル "{1}" を解凍できませんでした。{2} {3}</target>
         <note>{StrBegin="MSB3935: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotOpenFile">
@@ -2624,7 +2804,7 @@
       </trans-unit>
       <trans-unit id="Unzip.ZipSlipExploit">
         <source>Entry is outside the target directory: "{0}"</source>
-        <target state="new">Entry is outside the target directory: "{0}"</target>
+        <target state="translated">エントリがターゲット ディレクトリの外部にあります: "{0}"</target>
         <note />
       </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
@@ -2673,8 +2853,8 @@
         <note>{StrBegin="MSB3715: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
-        <source>MSB3491: Could not write lines to file "{0}". {1}</source>
-        <target state="translated">MSB3491: 行をファイル "{0}" に書き込めませんでした。{1}</target>
+        <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
+        <target state="translated">MSB3491: 行をファイル "{0}" に書き込めませんでした。{1} {2}</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
@@ -2704,7 +2884,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
         <source>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</source>
-        <target state="new">'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</target>
+        <target state="translated">"{0}" の 'WriteOnlyWhenDifferent' 属性は、'Overwrite="true"' の場合にのみ有効になります。</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
@@ -2781,6 +2961,11 @@
         <source>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</source>
         <target state="translated">MSB3705: XslCompiledDllPath は、.NET Core を使用してビルドしている場合サポートされません。</target>
         <note>{StrBegin="MSB3705: "}</note>
+      </trans-unit>
+      <trans-unit id="XslTransform.SecuritySettingsViaUseTrustedSettings">
+        <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
+        <target state="translated">UseTrustedSettings パラメーターを使用して、緩和された XSLT セキュリティ設定を有効にしています。この設定のセキュリティへの影響の詳細については、https://aka.ms/msbuild/xsltransformation-task を参照してください</target>
+        <note />
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
         <source>MSB3702: Unable to process the XsltParameters argument for the XslTransformation task. {0}</source>
@@ -2938,8 +3123,8 @@
         <note>{StrBegin="MSB3712: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotWriteOutput">
-        <source>MSB3713: The file "{0}" could not be created. {1}</source>
-        <target state="translated">MSB3713: ファイル "{0}" を作成できませんでした。{1}</target>
+        <source>MSB3713: The file "{0}" could not be created. {1} {2}</source>
+        <target state="translated">MSB3713: ファイル "{0}" を作成できませんでした。{1} {2}</target>
         <note>{StrBegin="MSB3713: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.SkippedNumberedParameter">
@@ -3342,11 +3527,6 @@
         <target state="translated">MSB4801: タスク ファクトリ "{0}" は MSBuild の .NET Core バージョン上でサポートされていません。</target>
         <note>{StrBegin="MSB4801: "}</note>
       </trans-unit>
-      <trans-unit id="Copy.FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="translated">このファイルは "{0}" によってロックされています。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CodeTaskFactory.InvalidCodeType">
         <source>MSB3759: The specified code type "{0}" is invalid.  The supported code types are "{1}".</source>
         <target state="translated">MSB3759: 指定されたコードの種類 "{0}" が無効です。サポートされているコードの種類は "{1}" です。</target>
@@ -3393,8 +3573,8 @@
         <note>{StrBegin="MSB3941: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFailed">
-        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
-        <target state="translated">MSB3943: ディレクトリ "{0}" をファイル "{1}" に zip 圧縮できませんでした。{2}</target>
+        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</source>
+        <target state="translated">MSB3943: ディレクトリ "{0}" をファイル "{1}" に zip 圧縮できませんでした。{2} {3}</target>
         <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFileExists">

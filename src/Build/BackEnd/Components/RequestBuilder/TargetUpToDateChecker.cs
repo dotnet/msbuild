@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,12 +23,12 @@ namespace Microsoft.Build.BackEnd
     using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
     using ItemVectorPartition = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>;
     // ItemVectorPartitionCollection is designed to contains a set of project items which have possibly undergone transforms.
-    // The outer dictionary it usually keyed by item type, so if items originally came from 
+    // The outer dictionary it usually keyed by item type, so if items originally came from
     // an expression like @(Foo), the outer dictionary would have a key of "Foo" in it.
     // Under that is a dictionary of expressions to items resulting from the expression.
     // For instance, if items were generated from an expression @(Foo->'%(Filename).obj'), then
-    // the inner dictionary would have a key of "@(Foo->'%(Filename).obj')", in which would be 
-    // contained a list of the items which were created/transformed using that pattern.    
+    // the inner dictionary would have a key of "@(Foo->'%(Filename).obj')", in which would be
+    // contained a list of the items which were created/transformed using that pattern.
     using ItemVectorPartitionCollection = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>>;
 
     /// <summary>
@@ -118,6 +119,7 @@ namespace Microsoft.Build.BackEnd
         /// incremental build is needed.
         /// </remarks>
         /// <param name="bucket"></param>
+        /// <param name="question"></param>
         /// <param name="changedTargetInputs"></param>
         /// <param name="upToDateTargetInputs"></param>
         /// <returns>
@@ -129,6 +131,7 @@ namespace Microsoft.Build.BackEnd
         /// </returns>
         internal DependencyAnalysisResult PerformDependencyAnalysis(
             ItemBucket bucket,
+            bool question,
             out ItemDictionary<ProjectItemInstance> changedTargetInputs,
             out ItemDictionary<ProjectItemInstance> upToDateTargetInputs)
         {
@@ -190,14 +193,14 @@ namespace Microsoft.Build.BackEnd
                          * At this point, we know the following:
                          * 1) the target has outputs
                          * 2) the target has NO discrete outputs
-                         * 
+                         *
                          * This implies:
                          * 1) the target only references vectors (incl. transforms) in its outputs
                          * 2) all vectors referenced in the outputs are also referenced in the inputs
                          * 3) the referenced vectors are not empty
-                         * 
+                         *
                          * We can thus conclude: the target MUST have (non-discrete) inputs
-                         * 
+                         *
                          */
                         ErrorUtilities.VerifyThrow(itemVectorsReferencedInBothTargetInputsAndOutputs.Count > 0, "The target must have inputs.");
                         ErrorUtilities.VerifyThrow(!IsItemVectorEmpty(itemVectorsInTargetInputs), "The target must have inputs.");
@@ -252,7 +255,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            LogReasonForBuildingTarget(result);
+            LogReasonForBuildingTarget(result, question);
 
             return result;
         }
@@ -261,15 +264,23 @@ namespace Microsoft.Build.BackEnd
         /// Does appropriate logging to indicate why this target is being built fully or partially.
         /// </summary>
         /// <param name="result"></param>
-        private void LogReasonForBuildingTarget(DependencyAnalysisResult result)
+        /// <param name="question"></param>
+        private void LogReasonForBuildingTarget(DependencyAnalysisResult result, bool question)
         {
             // Only if we are not logging just critical events should we be logging the details
             if (!_loggingService.OnlyLogCriticalEvents)
             {
                 if (result == DependencyAnalysisResult.FullBuild && _dependencyAnalysisDetail.Count > 0)
                 {
-                    // For the full build decision the are three possible outcomes
-                    _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "BuildTargetCompletely", _targetToAnalyze.Name);
+                    if (question)
+                    {
+                        _loggingService.LogError(_buildEventContext, new BuildEventFileInfo(String.Empty), "BuildTargetCompletely", _targetToAnalyze.Name);
+                    }
+                    else
+                    {
+                        // For the full build decision, there are three possible outcomes
+                        _loggingService.LogComment(_buildEventContext, MessageImportance.Low, "BuildTargetCompletely", _targetToAnalyze.Name);
+                    }
 
                     foreach (DependencyAnalysisLogDetail logDetail in _dependencyAnalysisDetail)
                     {
@@ -279,8 +290,15 @@ namespace Microsoft.Build.BackEnd
                 }
                 else if (result == DependencyAnalysisResult.IncrementalBuild)
                 {
-                    // For the partial build decision the are three possible outcomes
-                    _loggingService.LogComment(_buildEventContext, MessageImportance.Normal, "BuildTargetPartially", _targetToAnalyze.Name);
+                    if (question)
+                    {
+                        _loggingService.LogError(_buildEventContext, new BuildEventFileInfo(String.Empty), "BuildTargetPartially", _targetToAnalyze.Name);
+                    }
+                    else
+                    {
+                        // For the partial build decision the are three possible outcomes
+                        _loggingService.LogComment(_buildEventContext, MessageImportance.Normal, "BuildTargetPartially", _targetToAnalyze.Name);
+                    }
                     foreach (DependencyAnalysisLogDetail logDetail in _dependencyAnalysisDetail)
                     {
                         string reason = GetIncrementalBuildReason(logDetail);
@@ -351,6 +369,8 @@ namespace Microsoft.Build.BackEnd
             var args = ItemGroupLoggingHelper.CreateTaskParameterEventArgs(
                 _buildEventContext,
                 TaskParameterMessageKind.SkippedTargetInputs,
+                parameterName: null,
+                propertyName: null,
                 itemType: null,
                 _uniqueTargetInputs.Keys.ToArray(),
                 logItemMetadata: false,
@@ -360,6 +380,8 @@ namespace Microsoft.Build.BackEnd
             args = ItemGroupLoggingHelper.CreateTaskParameterEventArgs(
                 _buildEventContext,
                 TaskParameterMessageKind.SkippedTargetOutputs,
+                parameterName: null,
+                propertyName: null,
                 itemType: null,
                 _uniqueTargetOutputs.Keys.ToArray(),
                 logItemMetadata: false,
@@ -817,15 +839,14 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         // Do we already have a partition for this?
-                        if (!itemVectorCollection.ContainsKey(itemVectorType))
+                        if (!itemVectorCollection.TryGetValue(itemVectorType, out ItemVectorPartition itemVectorPartition))
                         {
                             // Nope, create one.
-                            itemVectorCollection[itemVectorType] = new ItemVectorPartition(MSBuildNameIgnoreCaseComparer.Default);
+                            itemVectorPartition = new ItemVectorPartition(MSBuildNameIgnoreCaseComparer.Default);
+                            itemVectorCollection[itemVectorType] = itemVectorPartition;
                         }
 
-                        ItemVectorPartition itemVectorPartition = itemVectorCollection[itemVectorType];
-
-                        ErrorUtilities.VerifyThrow(!itemVectorCollection[itemVectorType].ContainsKey(item), "ItemVectorPartition already contains a vector for items with the expression '{0}'", item);
+                        ErrorUtilities.VerifyThrow(!itemVectorPartition.ContainsKey(item), "ItemVectorPartition already contains a vector for items with the expression '{0}'", item);
                         itemVectorPartition[item] = itemVectorContents;
 
                         ErrorUtilities.VerifyThrow((itemVectorTransforms == null) || (itemVectorCollection.Equals(itemVectorTransforms)) || (itemVectorPartition.Count == 1),
@@ -953,7 +974,7 @@ namespace Microsoft.Build.BackEnd
             // Algorithm: walk through all the outputs to find the oldest output
             //            walk through the inputs as far as we need to until we find one that's newer (if any)
 
-            // PERF -- we could change this to ensure that we walk the shortest list first (because we walk that one entirely): 
+            // PERF -- we could change this to ensure that we walk the shortest list first (because we walk that one entirely):
             //         possibly the outputs list isn't actually the shortest list. However it always is the shortest
             //         in the cases I've seen, and adding this optimization would make the code hard to read.
 
@@ -1108,6 +1129,8 @@ namespace Microsoft.Build.BackEnd
         {
             input = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(input));
             output = EscapingUtilities.UnescapeAll(FileUtilities.FixFilePath(output));
+            ProjectErrorUtilities.VerifyThrowInvalidProject(input.AsSpan().IndexOfAny(MSBuildConstants.InvalidPathChars) < 0, _project.ProjectFileLocation, "IllegalCharactersInFileOrDirectory", input, inputItemName);
+            ProjectErrorUtilities.VerifyThrowInvalidProject(output.AsSpan().IndexOfAny(MSBuildConstants.InvalidPathChars) < 0, _project.ProjectFileLocation, "IllegalCharactersInFileOrDirectory", output, outputItemName);
             bool outOfDate = (CompareLastWriteTimes(input, output, out bool inputDoesNotExist, out bool outputDoesNotExist) == 1) || inputDoesNotExist;
 
             // Only if we are not logging just critical events should we be gathering full details

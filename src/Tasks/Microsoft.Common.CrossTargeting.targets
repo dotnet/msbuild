@@ -19,6 +19,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportBefore\*.targets"
           Condition="'$(ImportByWildcardBeforeMicrosoftCommonCrossTargetingTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportBefore')"/>
 
+  <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')"/>
+
   <Import Project="$(CustomBeforeMicrosoftCommonCrossTargetingTargets)" Condition="'$(CustomBeforeMicrosoftCommonCrossTargetingTargets)' != '' and Exists('$(CustomBeforeMicrosoftCommonCrossTargetingTargets)')"/>
 
   <Target Name="GetTargetFrameworks"
@@ -46,7 +48,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <!-- Extract necessary information for SetPlatform negotiation -->
         <!-- This target does not run for cpp projects. -->
         <IsVcxOrNativeProj>false</IsVcxOrNativeProj>
-        <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
+        <Platform>$(Platform)</Platform>
         <Platforms>$(Platforms)</Platforms>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
@@ -75,6 +77,34 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
 
   </Target>
+
+  <!--
+    Target that allows targets consuming source control confirmation to establish a dependency on targets producing this information.
+
+    Any target that reads SourceRevisionId, PrivateRepositoryUrl, SourceRoot, and other source control properties and items
+    should depend on this target and be conditioned on '$(SourceControlInformationFeatureSupported)' == 'true'.
+
+    SourceRevisionId property uniquely identifies the source control revision of the repository the project belongs to.
+    For Git repositories this id is a commit hash, for TFVC repositories it's the changeset number, etc.
+
+    PrivateRepositoryUrl property stores the URL of the repository supplied by the CI server or retrieved from source control manager.
+    Targets consuming this property shall not publish its value implicitly as it might inadvertently reveal an internal URL.
+    Instead, they shall only do so if the project sets PublishRepositoryUrl property to true. For example, the NuGet Pack target
+    may include the repository URL in the nuspec file generated for NuGet package produced by the project if PublishRepositoryUrl is true.
+
+    SourceRoot item group lists all source roots that the project source files reside under and their mapping to source control server URLs,
+    if available. This includes both source files under source control as well as source files in source packages. SourceRoot items are
+    used by compilers to determine path map in deterministic build and by SourceLink provider, which maps local paths to URLs of source files
+    stored on the source control server.
+
+    Source control information provider that sets these properties and items shall execute before this target (by including
+    InitializeSourceControlInformation in its BeforeTargets) and set source control properties and items that haven't been initialized yet.
+  -->
+  <Target Name="InitializeSourceControlInformation" />
+
+  <PropertyGroup>
+    <SourceControlInformationFeatureSupported>true</SourceControlInformationFeatureSupported>
+  </PropertyGroup>
 
   <!--
   ============================================================
@@ -197,6 +227,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     build.
   -->
   <PropertyGroup>
+    <!--
+        Don't import project extensions during restore because NuGet restore generates them.  Importing them during restore will embed
+        the pre-restore files in the binary log and then NuGet won't be able to embed the generated one after restore.  If some other
+        project extension mechanism wants to import project extensions during restore, they need to explicitly set ImportProjectExtensionTargets
+    -->
+    <ImportProjectExtensionTargets Condition="$([MSBuild]::AreFeaturesEnabled('17.10')) And '$(ImportProjectExtensionTargets)' == '' And '$(MSBuildIsRestoring)' == 'true'">false</ImportProjectExtensionTargets>
+    
     <ImportProjectExtensionTargets Condition="'$(ImportProjectExtensionTargets)' == ''">true</ImportProjectExtensionTargets>
   </PropertyGroup>
 
@@ -217,5 +254,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <Import Project="$(DirectoryBuildTargetsPath)" Condition="'$(ImportDirectoryBuildTargets)' == 'true' and exists('$(DirectoryBuildTargetsPath)')"/>
+
+  <PropertyGroup>
+    <UseMSBuildTestInfrastructure Condition="'$(UseMSBuildTestInfrastructure)' == ''">false</UseMSBuildTestInfrastructure>
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.Test.targets" Condition="'$(UseMSBuildTestInfrastructure)' == 'true'"/>
 
 </Project>

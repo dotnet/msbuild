@@ -12,6 +12,7 @@ using System.Xml;
 
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -20,7 +21,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -50,6 +50,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
             GC.Collect();
         }
 
+        [Fact]
+        public void EnsureProjectEvaluationFinishedIsLogged()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile projectFile = env.CreateFile("project.proj", $@"
+<Project Sdk=""Microsoft.NETT.Sdk"">
+  <Target Name=""DefaultTarget"">
+  </Target>
+</Project>
+");
+
+            MockLogger logger = new();
+            using ProjectCollection collection = new(new Dictionary<string, string>(), [logger], ToolsetDefinitionLocations.Default);
+            Assert.Throws<InvalidProjectFileException>(() => collection.LoadProject(projectFile.Path));
+            logger.EvaluationFinishedEvents.ShouldNotBeEmpty();
+        }
+
         [Theory]
         [MemberData(nameof(ImportLoadingScenarioTestData))]
         public void VerifyLoadingImportScenarios(string importParameter, bool shouldSucceed)
@@ -76,6 +93,41 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 }
                 catch (InvalidProjectFileException) { }
                 result.ShouldBe(shouldSucceed);
+            }
+        }
+
+        [Theory]
+        [InlineData("(test")]
+        [InlineData("@@@test")]
+        [InlineData(@")(!!test")]
+        public void VerifyItemsUpdateIsHandledForAnyProjectPath(string projectPathCandidate)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder projDirectory = env.CreateFolder(Path.Combine(env.CreateNewTempPath().TempPath, projectPathCandidate), createFolder: true);
+                TransientTestFile projectFile = env.CreateFile(projDirectory, "project.proj", @"
+<Project>
+
+  <ItemGroup>
+    <ItemCheck Include=""Test"" />
+  </ItemGroup>
+
+  <ItemGroup>
+     <ItemCheck Update=""Test""
+             NewTestLabels=""Dummy"" />
+  </ItemGroup>
+
+ <Target Name=""MyTarget"">
+    <Message Text=""ItemCheck updated metadata value: @(ItemCheck->Metadata('NewTestLabels'))"" />
+  </Target>
+</Project>
+");
+                Project project = new(projectFile.Path);
+                MockLogger logger = new();
+                var result = project.Build(logger);
+
+                result.ShouldBeTrue();
+                project.AllEvaluatedItems.Where(ei => ei.ItemType == "ItemCheck" && ei.Metadata.Any(m => m.EvaluatedValue == "Dummy")).ShouldNotBeEmpty();
             }
         }
 
@@ -143,14 +195,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Project>");
 
             // no imports should be loaded
-            Project project = new Project(XmlReader.Create(new StringReader(projXml)));
+            using ProjectFromString projectFromString = new(projXml);
+            Project project = projectFromString.Project;
             project.ReevaluateIfNecessary();
 
             Assert.Null(project.GetProperty("foo"));
             Assert.Null(project.GetProperty("bar"));
 
             // add in-memory project c:\temp\foo.import
-            Project fooImport = new Project(XmlReader.Create(new StringReader(fooXml)));
+            using ProjectFromString projectFromStringFoo = new(fooXml);
+            Project fooImport = projectFromStringFoo.Project;
             fooImport.FullPath = fooPath;
 
             // force reevaluation
@@ -162,7 +216,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Null(project.GetProperty("bar"));
 
             // add in-memory project c:\temp\bar.import
-            Project barImport = new Project(XmlReader.Create(new StringReader(barXml)));
+            using ProjectFromString projectFromStringBar = new(barXml);
+            Project barImport = projectFromStringBar.Project;
             barImport.FullPath = barPath;
 
             // force reevaluation
@@ -491,7 +546,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.WriteAllText(projectPath, projectContents);
 
                 MockLogger logger = new MockLogger();
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 pc.RegisterLogger(logger);
                 Project project = pc.LoadProject(projectPath);
 
@@ -534,7 +589,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.WriteAllText(testTargetPath, testtargets);
 
                 MockLogger logger = new MockLogger();
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 pc.RegisterLogger(logger);
                 Project project = pc.LoadProject(testTargetPath);
 
@@ -579,7 +634,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.WriteAllText(testTargetPath, testtargets);
 
                 MockLogger logger = new MockLogger();
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 pc.RegisterLogger(logger);
                 Project project = pc.LoadProject(testTargetPath);
 
@@ -622,7 +677,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.WriteAllText(testTargetPath, testtargets);
 
                 MockLogger logger = new MockLogger();
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 pc.RegisterLogger(logger);
                 Project project = pc.LoadProject(testTargetPath);
 
@@ -668,7 +723,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.WriteAllText(testTargetPath, testtargets);
 
                 MockLogger logger = new MockLogger();
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 pc.RegisterLogger(logger);
                 Project project = pc.LoadProject(testTargetPath);
 
@@ -712,7 +767,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.WriteAllText(testTargetPath, testtargets);
 
                 MockLogger logger = new MockLogger();
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 pc.RegisterLogger(logger);
                 Project project = pc.LoadProject(testTargetPath);
 
@@ -758,7 +813,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.WriteAllText(testTargetPath, testtargets);
 
                 MockLogger logger = new MockLogger();
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 pc.RegisterLogger(logger);
                 Project project = pc.LoadProject(testTargetPath);
 
@@ -821,7 +876,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     </Project>
                 ");
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
@@ -896,8 +952,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     </Project>
                 ");
 
-                ProjectCollection pc = new ProjectCollection();
-                Project project = new Project(XmlReader.Create(new StringReader(content)), null, null, pc, ProjectLoadSettings.RecordDuplicateButNotCircularImports);
+                using ProjectCollection pc = new ProjectCollection();
+                using ProjectFromString projectFromString = new(content, null, null, pc, ProjectLoadSettings.RecordDuplicateButNotCircularImports);
+                Project project = projectFromString.Project;
                 IList<ResolvedImport> imports = project.Imports;
                 IList<ResolvedImport> importsIncludingDuplicates = project.ImportsIncludingDuplicates;
                 Assert.Equal(3, imports.Count);
@@ -911,6 +968,31 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 File.Delete(importPath);
                 File.Delete(importPath2);
                 File.Delete(importPath3);
+            }
+        }
+
+        [DotNetOnlyFact("Tests .NET SDK-only error")]
+        public void ImportWithVSPathThrowsCorrectError()
+        {
+            string importPath = null;
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // Does not matter that the file or folder does not exist, we are checking for the VS pathing here
+                importPath = "path\\that\\does\\not\\exist\\Microsoft\\VisualStudio\\FileName.txt";
+
+                var content = env.CreateTestProjectWithFiles(@"
+                    <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace' >
+                        <Import Project='" + importPath + @"'/>
+                    </Project>
+                ");
+
+                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
+                {
+                    Project project = new Project(content.ProjectFile, null, null);
+                });
+
+                Assert.Contains("MSB4278", ex.ErrorCode);
             }
         }
 
@@ -955,8 +1037,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     </Project>
                 ");
 
-                ProjectCollection pc = new ProjectCollection();
-                Project project = new Project(XmlReader.Create(new StringReader(manifest)), null, null, pc, ProjectLoadSettings.RecordDuplicateButNotCircularImports);
+                using ProjectCollection pc = new ProjectCollection();
+                using ProjectFromString projectFromString = new(manifest, null, null, pc, ProjectLoadSettings.RecordDuplicateButNotCircularImports);
+                Project project = projectFromString.Project;
+
 
                 // In the list returned by ImportsIncludingDuplicates, check if there are any imports that are imported by importPath2.
                 bool circularImportsAreRecorded = project.ImportsIncludingDuplicates.Any(resolvedImport => string.Equals(resolvedImport.ImportingElement.ContainingProject.FullPath, importPath2, StringComparison.OrdinalIgnoreCase));
@@ -1156,7 +1240,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     </Project>
                 ");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -1219,7 +1304,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 </Project>
             ");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -1255,7 +1341,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     </Project>
                 ");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -1370,7 +1457,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </Target>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
             ProjectInstance instance = project.CreateProjectInstance();
 
             Assert.Equal("3", (Helpers.GetFirst(instance.Targets["t"].Tasks)).GetParameter("Text"));
@@ -1392,7 +1480,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectProperty property = project.GetProperty("p");
 
@@ -1418,7 +1507,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             // Verify the predecessor is the one in the import document
             ProjectRootElement importXml = ProjectRootElement.Open(project.Items.ElementAt(0).Xml.ContainingProject.FullPath);
@@ -1440,7 +1530,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         <Import Project='$(MSBuildToolsPath)\Microsoft.Common.targets'/>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectProperty property = project.SetProperty("outdir", "x"); // Outdir is set in microsoft.common.targets
 
@@ -1465,7 +1556,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </ItemDefinitionGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = project.ItemDefinitions["i"].GetMetadata("m");
 
@@ -1492,7 +1584,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </ItemDefinitionGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.AddItem("i", "i1")[0];
             ProjectMetadata metadatum = item.SetMetadataValue("m", "m2");
@@ -1522,7 +1615,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </ItemGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = project.GetItems("i").ElementAt(0).GetMetadata("m");
 
@@ -1560,7 +1654,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </ItemGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = project.GetItems("i").ElementAt(1).GetMetadata("m");
 
@@ -1591,7 +1686,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </ItemGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = project.GetItems("i").ElementAt(0).GetMetadata("m");
 
@@ -1619,7 +1715,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </ItemGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadataElement metadataElementFromProjectRootElement =
                 project.Xml.Items.First().Metadata.First();
@@ -1657,7 +1754,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </ItemGroup>
                     </Project>");
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
 
                 ProjectMetadataElement metadataElementFromProjectRootElement =
                     project.Xml.Items.First().Metadata.First();
@@ -1685,7 +1783,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </ItemGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = project.GetItems("i").ElementAt(0).GetMetadata("m");
 
@@ -1709,7 +1808,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     </Project>");
 
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Collection(project.GetItems("i"), item =>
             {
@@ -1738,8 +1838,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </ItemGroup>
                     </Project>");
 
-
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
 
                 // Should be empty because of the case mismatch
                 Assert.Empty(project.GetItems("i"));
@@ -1777,7 +1877,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                             </ItemGroup>
                         </Project>");
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
 
                 ProjectMetadata predecessor = project.GetItems("i").ElementAt(0).GetMetadata("m").Predecessor;
 
@@ -1813,7 +1914,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </ItemGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Null(project.GetProperty("p").Predecessor);
             Assert.Null(project.ItemDefinitions["i"].GetMetadata("m").Predecessor);
@@ -1844,7 +1946,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             IDictionary<string, ProjectProperty> allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates = new Dictionary<string, ProjectProperty>(StringComparer.OrdinalIgnoreCase);
 
@@ -1869,11 +1972,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 if (!allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.TryGetValue(property.Name, out propertyFromAllEvaluated))
                 {
-                    Assert.True(false, String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
+                    Assert.Fail(String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
                 }
                 else if (!property.Equals(propertyFromAllEvaluated))
                 {
-                    Assert.True(false, String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
+                    Assert.Fail(String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
                 }
             }
 
@@ -1948,7 +2051,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         <Import Project='" + file + @"'/>
                     </Project>");
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
 
                 Assert.Equal(6, project.AllEvaluatedItems.Count);
                 Assert.Equal("i1", project.AllEvaluatedItems.ElementAt(0).EvaluatedInclude);
@@ -2004,7 +2108,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>");
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
 
                 IDictionary<string, ProjectProperty> allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates = new Dictionary<string, ProjectProperty>(StringComparer.OrdinalIgnoreCase);
 
@@ -2031,11 +2136,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     if (!allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.TryGetValue(property.Name, out propertyFromAllEvaluated))
                     {
-                        Assert.True(false, String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
+                        Assert.Fail(String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
                     }
                     else if (!property.Equals(propertyFromAllEvaluated))
                     {
-                        Assert.True(false, String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
+                        Assert.Fail(String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
                     }
                 }
 
@@ -2064,7 +2169,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         <Import Project='$(MSBuildToolsPath)\Microsoft.Common.targets'/>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             int initial = project.AllEvaluatedProperties.Count;
 
@@ -2100,7 +2206,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </ItemDefinitionGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Equal(4, project.AllEvaluatedItemDefinitionMetadata.Count);
 
@@ -2126,7 +2233,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         </ItemGroup>
                     </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Empty(project.AllEvaluatedItemDefinitionMetadata);
         }
@@ -2236,7 +2344,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             List<ILogger> loggerList = new List<ILogger>();
             loggerList.Add(mockLogger);
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
             ProjectInstance instance = project.CreateProjectInstance();
             instance.Build(loggerList);
 
@@ -2260,7 +2369,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             List<ILogger> loggerList = new List<ILogger>();
             loggerList.Add(mockLogger);
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
             ProjectInstance instance = project.CreateProjectInstance();
             Assert.Equal(2, instance.DefaultTargets.Count);
             Assert.Equal("t", instance.DefaultTargets[0]);
@@ -2283,7 +2393,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             List<ILogger> loggerList = new List<ILogger>();
             loggerList.Add(mockLogger);
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
             ProjectInstance instance = project.CreateProjectInstance();
             Assert.Equal(2, instance.InitialTargets.Count);
             Assert.Equal("t", instance.InitialTargets[0]);
@@ -2315,7 +2426,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH", "1");
 
                 // Need to create a new project collection object in order to pick up the new environment variables.
-                Project project = new Project(new ProjectCollection());
+                using var collection = new ProjectCollection();
+                Project project = new Project(collection);
 
                 string msbuildPath = NativeMethodsShared.IsWindows ?
                     Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + Path.DirectorySeparatorChar + "MSBuild" :
@@ -2361,7 +2473,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH", null);
 
                 // Need to create a new project collection object in order to pick up the new environment variables.
-                Project project = new Project(new ProjectCollection());
+                using var collection = new ProjectCollection();
+                Project project = new Project(collection);
 
                 Assert.Equal(project.GetPropertyValue(specialPropertyName32), project.GetPropertyValue(specialPropertyName));
             }
@@ -2394,7 +2507,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Environment.SetEnvironmentVariable("MSBuildExtensionsPath", @"c:\foo\bar");
 
                 // Need to create a new project collection object in order to pick up the new environment variables.
-                Project project = new Project(new ProjectCollection());
+                using var collection = new ProjectCollection();
+                Project project = new Project(collection);
 
                 Assert.Equal(@"c:\foo\bar", project.GetPropertyValue("MSBuildExtensionsPath"));
             }
@@ -2411,7 +2525,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void MSBuildExtensionsPathWithGlobalOverride()
         {
-            Project project = new Project(new ProjectCollection());
+            using var collection = new ProjectCollection();
+            Project project = new Project(collection);
 
             // Set a global property called MSBuildExtensionsPath to some value, for the purpose
             // of seeing whether our value wins.
@@ -2443,7 +2558,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             try
             {
                 Environment.SetEnvironmentVariable("MSBuildExtensionsPath32", null);
-                Project project = new Project(new ProjectCollection());
+                using var collection = new ProjectCollection();
+                Project project = new Project(collection);
 
                 string msbuildPath = NativeMethodsShared.IsWindows ? Path.Combine(expected, "MSBuild") : "MSBuild";
                 Assert.Equal(msbuildPath, project.GetPropertyValue("MSBuildExtensionsPath32"));
@@ -2467,7 +2583,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             try
             {
                 Environment.SetEnvironmentVariable("MSBuildExtensionsPath32", @"c:\devdiv\vscore\msbuild");
-                Project project = new Project(new ProjectCollection());
+                using var collection = new ProjectCollection();
+                Project project = new Project(collection);
                 string msbuildExtensionsPath32Value = project.GetPropertyValue("MSBuildExtensionsPath32");
                 Assert.Equal(@"c:\devdiv\vscore\msbuild", msbuildExtensionsPath32Value);
             }
@@ -2485,7 +2602,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void MSBuildExtensionsPath32WithGlobalOverride()
         {
-            Project project = new Project(new ProjectCollection());
+            using var collection = new ProjectCollection();
+            Project project = new Project(collection);
 
             project.SetGlobalProperty("MSBuildExtensionsPath32", @"c:\devdiv\vscore\msbuild");
             string msbuildExtensionsPath32Value = project.GetPropertyValue("MSBuildExtensionsPath32");
@@ -2540,7 +2658,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             try
             {
                 Environment.SetEnvironmentVariable("MSBuildExtensionsPath64", @"c:\devdiv\vscore\msbuild");
-                Project project = new Project(new ProjectCollection());
+                using var collection = new ProjectCollection();
+                Project project = new Project(collection);
                 string msbuildExtensionsPath64Value = project.GetPropertyValue("MSBuildExtensionsPath64");
                 Assert.Equal(@"c:\devdiv\vscore\msbuild", msbuildExtensionsPath64Value);
             }
@@ -2558,7 +2677,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void MSBuildExtensionsPath64WithGlobalOverride()
         {
-            Project project = new Project(new ProjectCollection());
+            using var collection = new ProjectCollection();
+            Project project = new Project(collection);
 
             project.SetGlobalProperty("MSBuildExtensionsPath64", @"c:\devdiv\vscore\msbuild");
             string msbuildExtensionsPath64Value = project.GetPropertyValue("MSBuildExtensionsPath64");
@@ -2595,7 +2715,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             try
             {
                 Environment.SetEnvironmentVariable("LocalAppData", @"c:\AppData\Local");
-                Project project = new Project(new ProjectCollection());
+                using var collection = new ProjectCollection();
+                Project project = new Project(collection);
                 string localAppDataValue = project.GetPropertyValue("LocalAppData");
                 Assert.Equal(@"c:\AppData\Local", localAppDataValue);
             }
@@ -2613,7 +2734,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void LocalAppDataWithGlobalOverride()
         {
-            Project project = new Project(new ProjectCollection());
+            using var collection = new ProjectCollection();
+            Project project = new Project(collection);
 
             project.SetGlobalProperty("LocalAppData", @"c:\AppData\Local");
             string localAppDataValue = project.GetPropertyValue("LocalAppData");
@@ -2651,18 +2773,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Version.TryParse(msbuildVersionProperty, out Version msbuildVersionAsVersion).ShouldBeTrue();
 
             msbuildVersionAsVersion.Minor.ShouldBeInRange(0, 20,
-                () => $"minor version {msbuildVersionProperty} looks fishy. If we're really in x.20.0, go ahead and change the constant. This is to guard against being nonsensical like 16.200.19");
+                customMessage: $"minor version {msbuildVersionProperty} looks fishy. If we're really in x.20.0, go ahead and change the constant. This is to guard against being nonsensical like 16.200.19");
 
             // Version parses missing elements into -1, and this property should be Major.Minor.Patch only
             msbuildVersionAsVersion.Revision.ShouldBe(-1);
 
             msbuildFileVersionProperty.ShouldBe(ProjectCollection.Version.ToString());
             ProjectCollection.Version.ToString().ShouldStartWith(msbuildVersionProperty,
-                "ProjectCollection.Version should match the property MSBuildVersion, but can contain another version part");
+                customMessage: "ProjectCollection.Version should match the property MSBuildVersion, but can contain another version part");
 
             msbuildSemanticVersionProperty.ShouldBe(ProjectCollection.DisplayVersion);
             ProjectCollection.DisplayVersion.ShouldStartWith(msbuildVersionProperty,
-                "DisplayVersion is semver2 while MSBuildVersion is Major.Minor.Build but should be a prefix match");
+                customMessage: "DisplayVersion is semver2 while MSBuildVersion is Major.Minor.Build but should be a prefix match");
         }
 
 
@@ -2761,7 +2883,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                               </Project>");
 
             // Setup a project collection which asks for 4 nodes
-            ProjectCollection collection =
+            using ProjectCollection collection =
                 new ProjectCollection(
                                    ProjectCollection.GlobalProjectCollection.GlobalProperties,
                                    ProjectCollection.GlobalProjectCollection.Loggers,
@@ -2770,7 +2892,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                    4,
                     false);
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, collection);
+            using ProjectFromString projectFromString = new(content, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, collection);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -2796,7 +2919,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Target>
                               </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -2820,7 +2944,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                     <Message Text='[$(abcdef)]' />
                                 </Target>
                               </Project>");
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -2844,7 +2969,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                     <Message Text='[$(Foo)]' />
                                 </Target>
                               </Project>");
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -2873,7 +2999,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             IDictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globalProperties.Add("Foo", "Baz");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
+            using ProjectFromString projectFromString = new(content, globalProperties, null);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -2902,7 +3029,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             IDictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globalProperties.Add("Foo", "Baz");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
+            using ProjectFromString projectFromString = new(content, globalProperties, null);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -2931,7 +3059,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             IDictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globalProperties.Add("Foo", "Baz");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
+            using ProjectFromString projectFromString = new(content, globalProperties, null);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -2960,7 +3089,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             IDictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globalProperties.Add("Foo", "Baz");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
+            using ProjectFromString projectFromString = new(content, globalProperties, null);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -3002,7 +3132,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 globalProperties.Add("Baz", "Baz1");
                 globalProperties.Add("GlobalProperty", "Foo");
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null, new ProjectCollection());
+                using var collection = new ProjectCollection();
+                using ProjectFromString projectFromString = new(content, globalProperties, null, collection);
+                Project project = projectFromString.Project;
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
@@ -3045,7 +3177,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 project.Build(logger);
 
                 // Should not reach this point.
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -3073,7 +3205,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             globalProperties.Add("Foo", "Baz");
             globalProperties.Add("Goo", "Foo");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
+            using ProjectFromString projectFromString = new(content, globalProperties, null);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -3106,7 +3239,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             globalProperties.Add("Foo", "Baz");
             globalProperties.Add("Goo", "Foo");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
+            using ProjectFromString projectFromString = new(content, globalProperties, null);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -3137,7 +3271,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             IDictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globalProperties.Add("Foo", "Baz");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
+            using ProjectFromString projectFromString = new(content, globalProperties, null);
+            Project project = projectFromString.Project;
 
             Assert.Equal("BazBar", project.GetPropertyValue("Foo"));
             Assert.Equal("Baz", project.GlobalProperties["Foo"]);
@@ -3166,7 +3301,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             globalProperties.Add("Foo", "Baz");
             globalProperties.Add("Goo", "Foo");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
+            using ProjectFromString projectFromString = new(content, globalProperties, null);
+            Project project = projectFromString.Project;
 
             Assert.Equal("Foo;Goo", project.Xml.TreatAsLocalProperty);
 
@@ -3202,7 +3338,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Target>
                               </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Equal("Bar", project.GetPropertyValue("Foo"));
             Assert.False(project.GlobalProperties.ContainsKey("Foo"));
@@ -3247,7 +3384,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             globalProperties.Add("Bar", "Bar1");
             globalProperties.Add("Baz", "Baz1");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, null);
+            using ProjectFromString projectFromString = new(content, globalProperties, null);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -3745,8 +3883,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Target>
                               </Project>");
 
-                ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no global properties */);
-                Project project = new Project(XmlReader.Create(new StringReader(content)), null, "Fake", fakeProjectCollection);
+                using ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no global properties */);
+                using ProjectFromString projectFromString = new(content, null, "Fake", fakeProjectCollection);
+                Project project = projectFromString.Project;
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
@@ -3810,8 +3949,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Target>
                               </Project>");
 
-                ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no global properties */);
-                Project project = new Project(XmlReader.Create(new StringReader(content)), null, "Fake", fakeProjectCollection);
+                using ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no global properties */);
+                using ProjectFromString projectFromString = new(content, null, "Fake", fakeProjectCollection);
+                Project project = projectFromString.Project;
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
@@ -3861,8 +4001,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Target>
                               </Project>");
 
-                ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no global properties */);
-                Project project = new Project(XmlReader.Create(new StringReader(content)), null, "Fake", fakeProjectCollection);
+                using ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no global properties */);
+                using ProjectFromString projectFromString = new(content, null, "Fake", fakeProjectCollection);
+                Project project = projectFromString.Project;
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
@@ -3912,8 +4053,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Target>
                               </Project>");
 
-                ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no global properties */);
-                Project project = new Project(XmlReader.Create(new StringReader(content)), null, "Fake", fakeProjectCollection);
+                using ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no global properties */);
+                using ProjectFromString projectFromString = new(content, null, "Fake", fakeProjectCollection);
+                Project project = projectFromString.Project;
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
@@ -3970,8 +4112,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Target>
                               </Project>");
 
-                ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no global properties */);
-                Project project = new Project(XmlReader.Create(new StringReader(content)), null, "Fake", fakeProjectCollection);
+                using ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no global properties */);
+                using ProjectFromString projectFromString = new(content, null, "Fake", fakeProjectCollection);
+                Project project = projectFromString.Project;
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
@@ -4027,13 +4170,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Target>
                               </Project>");
 
-                ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no project collection global properties */);
+                using ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no project collection global properties */);
 
                 IDictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties.Add("c", "c5");
                 globalProperties.Add("d", "d5");
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, "Fake", fakeProjectCollection);
+                using ProjectFromString projectFromString = new(content, globalProperties, "Fake", fakeProjectCollection);
+                Project project = projectFromString.Project;
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
@@ -4086,12 +4230,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Target>
                               </Project>");
 
-                ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no project collection global properties */);
+                using ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no project collection global properties */);
 
                 IDictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties.Add("VisualStudioVersion", "11.0");
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, "Fake", fakeProjectCollection);
+                using ProjectFromString projectFromString = new(content, globalProperties, "Fake", fakeProjectCollection);
+                Project project = projectFromString.Project;
 
                 MockLogger logger = new MockLogger();
                 bool result = project.Build(logger);
@@ -4137,12 +4282,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Target>
                               </Project>");
 
-            ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no project collection global properties */);
+            using ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no project collection global properties */);
 
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
             globalProperties.Add("VisualStudioVersion", "11.0");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, "Fake", "FakeSubToolset", fakeProjectCollection, ProjectLoadSettings.Default);
+            using ProjectFromString projectFromString = new(content, globalProperties, "Fake", "FakeSubToolset", fakeProjectCollection, ProjectLoadSettings.Default);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -4183,9 +4329,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                 </Target>
                               </Project>");
 
-            ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no project collection global properties */);
+            using ProjectCollection fakeProjectCollection = GetProjectCollectionWithFakeToolset(null /* no project collection global properties */);
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), null, "Fake", "FakeSubToolset", fakeProjectCollection, ProjectLoadSettings.Default);
+            using ProjectFromString projectFromString = new(content, null, "Fake", "FakeSubToolset", fakeProjectCollection, ProjectLoadSettings.Default);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             bool result = project.Build(logger);
@@ -4218,7 +4365,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 // No global properties are passed to the ProjectCollection so VisualStudioVersion should not be set
                 //
-                Project project = new Project(null, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
+                using var collection = new ProjectCollection();
+                Project project = new Project(null, ObjectModelHelpers.MSBuildDefaultToolsVersion, collection);
 
                 string actual = project.GetPropertyValue(Constants.VisualStudioVersionPropertyName);
 
@@ -4272,7 +4420,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             catch (XmlException)
             {
                 // XmlException thrown when invalid DTD statement is parsed: it means DTD processing was enabled
-                Assert.True(false);
+                Assert.Fail();
             }
         }
 
@@ -4287,7 +4435,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7623")]
-        public async void VerifyDTDProcessingIsDisabled2()
+        public async Task VerifyDTDProcessingIsDisabled2()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
                                 <!DOCTYPE Project [
@@ -4360,10 +4508,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     ExpanderOptions.ExpandProperties,
                     Directory.GetCurrentDirectory(),
                     MockElementLocation.Instance,
-                    null,
-                    new BuildEventContext(1, 2, 3, 4),
-                    FileSystems.Default);
-                Assert.True(false, "Expect exception due to the value of property \"TargetOSFamily\" is not a number.");
+                    FileSystems.Default,
+                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+                Assert.Fail("Expect exception due to the value of property \"TargetOSFamily\" is not a number.");
             }
             catch (InvalidProjectFileException e)
             {
@@ -4379,9 +4526,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ExpanderOptions.ExpandProperties,
                 Directory.GetCurrentDirectory(),
                 MockElementLocation.Instance,
-                null,
-                new BuildEventContext(1, 2, 3, 4),
-                FileSystems.Default));
+                FileSystems.Default,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4))));
         }
 
         /// <summary>
@@ -4463,13 +4609,46 @@ namespace Microsoft.Build.UnitTests.Evaluation
             using (var env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
 
                 MockLogger logger = new MockLogger();
 
                 bool result = project.Build(logger);
 
                 Assert.True(result);
+            }
+        }
+
+        [Theory]
+        [InlineData("$(Hello)", 0, 8, "Hello")]
+        [InlineData("$(Hello)|$(World)", 9, 8, "World")]
+        [InlineData("$(He()o)", 0, 8, null)]
+        [InlineData("$)Hello(", 0, 8, null)]
+        [InlineData("$(Helloo", 0, 8, null)]
+        [InlineData("$Heello)", 0, 8, null)]
+        [InlineData("$(He$$o)", 0, 8, null)]
+        [InlineData(" $(Helo)", 0, 8, null)]
+        [InlineData("$(Helo) ", 0, 8, null)]
+        [InlineData("$()", 0, 3, "")]
+        [InlineData("$( Hello )", 0, 10, " Hello ")]
+        [InlineData("$(He-ll-o)", 0, 10, "He-ll-o")]
+        [InlineData("$(He ll o)", 0, 10, "He ll o")]
+        [InlineData("aaa$(Hello)", 3, 8, "Hello")]
+        [InlineData("aaa$(Hello)bbb", 3, 8, "Hello")]
+        public void TryGetSingleProperty(string input, int start, int length, string expected)
+        {
+            bool result = ConditionEvaluator.TryGetSingleProperty(input.AsSpan(), start, length, out ReadOnlySpan<char> actual);
+
+            if (expected is null)
+            {
+                Assert.False(result);
+                Assert.True(actual.IsEmpty);
+            }
+            else
+            {
+                Assert.True(result);
+                Assert.Equal(expected, actual.ToString());
             }
         }
 
@@ -4548,13 +4727,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             MockLogger logger = new MockLogger();
 
-            Project project =
-                new Project(
-                    XmlReader.Create(new StringReader(content)),
-                    globalProperties,
-                    null,
-                    new ProjectCollection(
-                        globalProperties, new List<ILogger> { logger }, ToolsetDefinitionLocations.Default));
+            using var collection = new ProjectCollection(
+                        globalProperties, new List<ILogger> { logger }, ToolsetDefinitionLocations.Default);
+            using ProjectFromString projectFromString = new(content, globalProperties, null, collection);
+            Project project = projectFromString.Project;
 
             project.Build(logger);
             logger.AssertLogContains(
@@ -4565,9 +4741,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void VerifyPropertyTrackingLoggingDefault()
         {
             // Having just environment variables defined should default to nothing being logged except one environment variable read.
-            this.VerifyPropertyTrackingLoggingScenario(
+            VerifyPropertyTrackingLoggingScenario(
                 null,
-                logger =>
+                 (logger, _) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4584,7 +4760,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     logger
                         .AllBuildEvents
                         .OfType<PropertyReassignmentEventArgs>()
-                        .ShouldBeEmpty();
+                        .Count()
+                        .ShouldBe(2);
 
                     logger
                         .AllBuildEvents
@@ -4596,9 +4773,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void VerifyPropertyTrackingLoggingPropertyReassignment()
         {
-            this.VerifyPropertyTrackingLoggingScenario(
+            VerifyPropertyTrackingLoggingScenario(
                 "1",
-                logger =>
+                (logger, _) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4629,7 +4806,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             this.VerifyPropertyTrackingLoggingScenario(
                 "0",
-                logger =>
+                 (logger, _) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4645,13 +4822,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     logger
                         .AllBuildEvents
-                        .OfType<PropertyReassignmentEventArgs>()
+                        .OfType<PropertyInitialValueSetEventArgs>()
                         .ShouldBeEmpty();
 
                     logger
-                        .AllBuildEvents
-                        .OfType<PropertyInitialValueSetEventArgs>()
-                        .ShouldBeEmpty();
+                       .AllBuildEvents
+                       .OfType<PropertyReassignmentEventArgs>()
+                       .Count()
+                       .ShouldBe(2);
                 });
         }
 
@@ -4660,7 +4838,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             this.VerifyPropertyTrackingLoggingScenario(
                 "2",
-                logger =>
+                (logger, projectPath) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4686,11 +4864,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     // Verify logging of property initial values.
                     propertyInitialValueMap.ShouldContainKey("Prop");
-                    propertyInitialValueMap["Prop"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["Prop"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["Prop"].PropertyValue.ShouldBe(string.Empty);
 
                     propertyInitialValueMap.ShouldContainKey("EnvVar");
-                    propertyInitialValueMap["EnvVar"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["EnvVar"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["EnvVar"].PropertyValue.ShouldBe("It's also Defined!");
 
                     propertyInitialValueMap.ShouldContainKey("DEFINED_ENVIRONMENT_VARIABLE");
@@ -4698,11 +4876,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertyValue.ShouldBe("It's Defined!");
 
                     propertyInitialValueMap.ShouldContainKey("NotEnvVarRead");
-                    propertyInitialValueMap["NotEnvVarRead"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["NotEnvVarRead"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["NotEnvVarRead"].PropertyValue.ShouldBe("Overwritten!");
 
                     propertyInitialValueMap.ShouldContainKey("Prop2");
-                    propertyInitialValueMap["Prop2"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["Prop2"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["Prop2"].PropertyValue.ShouldBe("Value1");
                 });
         }
@@ -4712,7 +4890,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             this.VerifyPropertyTrackingLoggingScenario(
                 "4",
-                logger =>
+                (logger, _) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4746,7 +4924,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             this.VerifyPropertyTrackingLoggingScenario(
                 "8",
-                logger =>
+                (logger, _) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4777,7 +4955,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             this.VerifyPropertyTrackingLoggingScenario(
                 "15",
-                logger =>
+                (logger, projectPath) =>
                 {
                     logger
                         .AllBuildEvents
@@ -4806,11 +4984,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     // Verify logging of property initial values.
                     propertyInitialValueMap.ShouldContainKey("Prop");
-                    propertyInitialValueMap["Prop"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["Prop"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["Prop"].PropertyValue.ShouldBe(string.Empty);
 
                     propertyInitialValueMap.ShouldContainKey("EnvVar");
-                    propertyInitialValueMap["EnvVar"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["EnvVar"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["EnvVar"].PropertyValue.ShouldBe("It's also Defined!");
 
                     propertyInitialValueMap.ShouldContainKey("DEFINED_ENVIRONMENT_VARIABLE");
@@ -4818,11 +4996,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     propertyInitialValueMap["DEFINED_ENVIRONMENT_VARIABLE"].PropertyValue.ShouldBe("It's Defined!");
 
                     propertyInitialValueMap.ShouldContainKey("NotEnvVarRead");
-                    propertyInitialValueMap["NotEnvVarRead"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["NotEnvVarRead"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["NotEnvVarRead"].PropertyValue.ShouldBe("Overwritten!");
 
                     propertyInitialValueMap.ShouldContainKey("Prop2");
-                    propertyInitialValueMap["Prop2"].PropertySource.ShouldBe("Xml");
+                    propertyInitialValueMap["Prop2"].File.ShouldBe(projectPath);
                     propertyInitialValueMap["Prop2"].PropertyValue.ShouldBe("Value1");
                 });
         }
@@ -4837,14 +5015,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                </PropertyGroup>
                              </Project>");
 
-            ProjectCollection fakeProjectCollection =
+            using ProjectCollection fakeProjectCollection =
                 GetProjectCollectionWithFakeToolset(null /* no global properties */);
 
             Should.Throw<InvalidProjectFileException>(() =>
                 new Project(XmlReader.Create(new StringReader(projectContents)), null, "Fake", fakeProjectCollection));
         }
 
-        private void VerifyPropertyTrackingLoggingScenario(string envVarValue, Action<MockLogger> loggerEvaluatorAction)
+        private void VerifyPropertyTrackingLoggingScenario(string envVarValue, Action<MockLogger, string> loggerEvaluatorAction)
         {
             // The default is that only reassignments are logged.
 
@@ -4877,13 +5055,60 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 MockLogger logger = new MockLogger();
                 logger.Verbosity = LoggerVerbosity.Diagnostic;
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 pc.RegisterLogger(logger);
                 Project project = pc.LoadProject(tempPath.Path);
 
                 project.Build().ShouldBeTrue();
 
-                loggerEvaluatorAction?.Invoke(logger);
+                loggerEvaluatorAction?.Invoke(logger, tempPath.Path);
+            }
+        }
+
+        /// <summary>
+        /// Log when a property is being assigned a new value.
+        /// </summary>
+        [Fact]
+        public void VerifyLogPropertyReassignment()
+        {
+            string propertyName = "Prop";
+            string propertyOldValue = "OldValue";
+            string propertyNewValue = "NewValue";
+            string testtargets = ObjectModelHelpers.CleanupFileContents(@$"
+                                <Project xmlns='msbuildnamespace'>
+                                     <PropertyGroup>
+                                         <{propertyName}>{propertyOldValue}</{propertyName}>
+                                         <{propertyName}>{propertyNewValue}</{propertyName}>
+                                     </PropertyGroup>
+                                  <Target Name=""Test""/>
+                                </Project>");
+
+            string tempPath = Path.GetTempPath();
+            string targetDirectory = Path.Combine(tempPath, "LogPropertyAssignments");
+            string testTargetPath = Path.Combine(targetDirectory, "test.proj");
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.CreateFolder(targetDirectory);
+                env.CreateFile(testTargetPath, testtargets);
+
+                MockLogger logger = new()
+                {
+                    Verbosity = LoggerVerbosity.Diagnostic,
+                };
+                using ProjectCollection pc = new();
+                pc.RegisterLogger(logger);
+                Project project = pc.LoadProject(testTargetPath);
+
+                bool result = project.Build();
+                result.ShouldBeTrue();
+                logger.BuildMessageEvents
+                      .OfType<PropertyReassignmentEventArgs>()
+                      .ShouldContain(r => r.PropertyName == propertyName
+                      && r.PreviousValue == propertyOldValue
+                      && r.NewValue == propertyNewValue
+                      && r.Message.StartsWith($"{ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                              "PropertyReassignment", propertyName, propertyNewValue, propertyOldValue, string.Empty)}"));
             }
         }
 
@@ -4898,7 +5123,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             try
             {
-                HttpListener listener = new HttpListener();
+                using HttpListener listener = new HttpListener();
                 listener.Prefixes.Add("http://localhost:51111/");
                 listener.Start();
 

@@ -3,8 +3,6 @@
 
 using System.Diagnostics.Tracing;
 
-#nullable disable
-
 namespace Microsoft.Build.Eventing
 {
     /// <summary>
@@ -242,7 +240,7 @@ namespace Microsoft.Build.Eventing
             WriteEvent(27);
         }
 
-        [Event(28, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        [Event(28, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
         public void RarOverallStop(int assembliesCount, int assemblyFilesCount, int resolvedFilesCount, int resolvedDependencyFilesCount, int copyLocalFilesCount, bool findDependencies)
         {
             WriteEvent(28, assembliesCount, assemblyFilesCount, resolvedFilesCount, resolvedDependencyFilesCount, copyLocalFilesCount, findDependencies);
@@ -316,7 +314,7 @@ namespace Microsoft.Build.Eventing
         }
 
         /// <summary>
-        /// Call this method to notify listeners of profiling for the method that removes blacklisted references from the reference table. It puts primary and dependency references in invalid file lists.
+        /// Call this method to notify listeners of profiling for the method that removes denylisted references from the reference table. It puts primary and dependency references in invalid file lists.
         /// </summary>
         [Event(35, Keywords = Keywords.All)]
         public void RarRemoveReferencesMarkedForExclusionStart()
@@ -364,10 +362,11 @@ namespace Microsoft.Build.Eventing
         }
 
         /// <param name="targetName">The name of the target being executed.</param>
-        [Event(44, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void TargetStop(string targetName)
+        /// <param name="result">Target stop result.</param>
+        [Event(44, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
+        public void TargetStop(string targetName, string result)
         {
-            WriteEvent(44, targetName);
+            WriteEvent(44, targetName, result);
         }
 
         /// <summary>
@@ -478,13 +477,13 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(62, Keywords = Keywords.All)]
-        public void SdkResolverServiceInitializeStart()
+        public void SdkResolverLoadAllResolversStart()
         {
             WriteEvent(62);
         }
 
         [Event(63, Keywords = Keywords.All)]
-        public void SdkResolverServiceInitializeStop(int resolverCount)
+        public void SdkResolverLoadAllResolversStop(int resolverCount)
         {
             WriteEvent(63, resolverCount);
         }
@@ -603,25 +602,25 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(81, Keywords = Keywords.All)]
-        public void SdkResolverServiceFindResolversManifestsStart()
+        public void SdkResolverFindResolversManifestsStart()
         {
             WriteEvent(81);
         }
 
         [Event(82, Keywords = Keywords.All)]
-        public void SdkResolverServiceFindResolversManifestsStop(int resolverManifestCount)
+        public void SdkResolverFindResolversManifestsStop(int resolverManifestCount)
         {
             WriteEvent(82, resolverManifestCount);
         }
 
         [Event(83, Keywords = Keywords.All)]
-        public void SdkResolverServiceLoadResolversStart()
+        public void SdkResolverLoadResolversStart()
         {
             WriteEvent(83);
         }
 
         [Event(84, Keywords = Keywords.All)]
-        public void SdkResolverServiceLoadResolversStop(string manifestName, int resolverCount)
+        public void SdkResolverLoadResolversStop(string manifestName, int resolverCount)
         {
             WriteEvent(84, manifestName, resolverCount);
         }
@@ -660,6 +659,18 @@ namespace Microsoft.Build.Eventing
         public void MSBuildServerBuildStop(string commandLine, int countOfConsoleMessages, long sumSizeOfConsoleMessages, string clientExitType, string serverExitType)
         {
             WriteEvent(90, commandLine, countOfConsoleMessages, sumSizeOfConsoleMessages, clientExitType, serverExitType);
+        }
+
+        [Event(91, Keywords = Keywords.All)]
+        public void ProjectCacheHandleBuildResultStart(string pluginTypeName, string projectPath, string targets)
+        {
+            WriteEvent(91, pluginTypeName, projectPath, targets);
+        }
+
+        [Event(92, Keywords = Keywords.All)]
+        public void ProjectCacheHandleBuildResultStop(string pluginTypeName, string projectPath, string targets)
+        {
+            WriteEvent(92, pluginTypeName, projectPath, targets);
         }
         #endregion
     }

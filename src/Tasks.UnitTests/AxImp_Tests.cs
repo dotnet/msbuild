@@ -1,11 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -70,7 +68,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /nologo switch
         /// </summary>
-        [WindowsOnlyFact("The /nologo switch is not available on Mono.")]
+        [Fact]
         public void NoLogo()
         {
             var t = new ResolveComReference.AxImp();

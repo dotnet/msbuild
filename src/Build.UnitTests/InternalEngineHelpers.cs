@@ -175,7 +175,7 @@ namespace Microsoft.Build.Unittest
 
             internal static void AssertTargetResultsEqual(TargetResult a, TargetResult b)
             {
-                TranslationHelpers.CompareExceptions(a.Exception, b.Exception).ShouldBeTrue();
+                TranslationHelpers.CompareExceptions(a.Exception, b.Exception, out string diffReason).ShouldBeTrue(diffReason);
                 TranslationHelpers.CompareCollections(a.Items, b.Items, TaskItemComparer.Instance).ShouldBeTrue();
 
                 a.ResultCode.ShouldBe(b.ResultCode);

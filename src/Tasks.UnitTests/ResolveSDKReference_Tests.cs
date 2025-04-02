@@ -12,7 +12,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using SDKReference = Microsoft.Build.Tasks.ResolveSDKReference.SDKReference;
 
 #nullable disable
@@ -3733,7 +3732,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 APPX ='AppxLocation'
                 SDKType ='External'
                 DisplayName = 'AnotherSDkWithManifest 2.0'
-                CopyRedistToSubDirectory='SomeOtherRedistDirectory'> 
+                CopyRedistToSubDirectory='SomeOtherRedistDirectory'>
                 <File WinMD = 'AnotherSDkWithManifest.Sprint, Version=8.0' />
                 <File AssemblyName = 'Assembly1, Version=8.0' />
                 <DependsOn Identity='Windows SDK, Version 8.0'/>
@@ -3755,7 +3754,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                  <PropertyGroup>
                      <Configuration>CAT</Configuration>" +
                     @"<OutputPath>" + testDirectoryRoot + "</OutputPath>" +
-                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>
@@ -3808,7 +3807,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 MockLogger logger = new MockLogger();
 
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 ProjectInstance project = pc.LoadProject(testProjectFile).CreateProjectInstance();
                 project.SetProperty("SDKReferenceDirectoryRoot", testDirectoryRoot);
                 project.SetProperty("SDKReferenceRegistryRoot", "");
@@ -3896,7 +3895,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                  <PropertyGroup>
                      <Configuration>CAT</Configuration>" +
                     @"<OutputPath>" + testDirectoryRoot + "</OutputPath>" +
-                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>
@@ -3951,7 +3950,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 MockLogger logger = new MockLogger();
 
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 ProjectInstance project = pc.LoadProject(testProjectFile).CreateProjectInstance();
                 project.SetProperty("SDKReferenceDirectoryRoot", testDirectoryRoot);
                 project.SetProperty("SDKReferenceRegistryRoot", "");
@@ -4018,7 +4017,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                  <PropertyGroup>
                       <Configuration>CAT</Configuration>" +
                     @"<OutputPath>" + testDirectoryRoot + "</OutputPath>" +
-                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>
@@ -4060,7 +4059,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 MockLogger logger = new MockLogger();
 
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 ProjectInstance project = pc.LoadProject(testProjectFile).CreateProjectInstance();
                 project.SetProperty("SDKReferenceDirectoryRoot", testDirectoryRoot);
                 project.SetProperty("SDKReferenceRegistryRoot", "");
@@ -4123,7 +4122,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                  <PropertyGroup>
                     <Configuration>CAT</Configuration>" +
                     @"<OutputPath>" + testDirectoryRoot + "</OutputPath>" +
-                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>
@@ -4157,7 +4156,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 MockLogger logger = new MockLogger();
 
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 ProjectInstance project = pc.LoadProject(testProjectFile).CreateProjectInstance();
                 project.SetProperty("SDKReferenceDirectoryRoot", testDirectoryRoot);
                 project.SetProperty("SDKReferenceRegistryRoot", "");
@@ -4262,7 +4261,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                  <PropertyGroup>
                     <Configuration>CAT</Configuration>" +
                     @"<OutputPath>" + testDirectoryRoot + "</OutputPath>" +
-                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>
@@ -4326,7 +4325,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
         private ITaskItem[] RunBuildAndReturnResolvedSDKReferences(ILogger logger, string testProjectFile, string testDirectoryRoot)
         {
-            ProjectCollection pc = new ProjectCollection();
+            using ProjectCollection pc = new ProjectCollection();
             ProjectInstance project = pc.LoadProject(testProjectFile).CreateProjectInstance();
             project.SetProperty("SDKReferenceDirectoryRoot", testDirectoryRoot);
             project.SetProperty("SDKReferenceRegistryRoot", "");

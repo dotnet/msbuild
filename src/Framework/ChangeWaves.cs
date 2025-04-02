@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if DEBUG
+using System.Diagnostics;
+#endif
 using System.Linq;
 
 #nullable disable
@@ -22,17 +25,24 @@ namespace Microsoft.Build.Framework
     /// </summary>
     /// See docs here: https://github.com/dotnet/msbuild/blob/main/documentation/wiki/ChangeWaves.md
     /// For dev docs: https://github.com/dotnet/msbuild/blob/main/documentation/wiki/ChangeWaves-Dev.md
-    internal class ChangeWaves
+    internal static class ChangeWaves
     {
-        internal static readonly Version Wave17_2 = new Version(17, 2);
-        internal static readonly Version Wave17_4 = new Version(17, 4);
-        internal static readonly Version Wave17_6 = new Version(17, 6);
-        internal static readonly Version[] AllWaves = { Wave17_2, Wave17_4, Wave17_6 };
+        internal static readonly Version Wave17_10 = new Version(17, 10);
+        internal static readonly Version Wave17_12 = new Version(17, 12);
+        internal static readonly Version Wave17_14 = new Version(17, 14);
+        internal static readonly Version[] AllWaves = { Wave17_10, Wave17_12, Wave17_14 };
 
         /// <summary>
         /// Special value indicating that all features behind all Change Waves should be enabled.
         /// </summary>
         internal static readonly Version EnableAllFeatures = new Version(999, 999);
+
+#if DEBUG
+        /// <summary>
+        /// True if <see cref="ResetStateForTests"/> has been called.
+        /// </summary>
+        private static bool _runningTests = false;
+#endif
 
         /// <summary>
         /// The lowest wave in the current rotation of Change Waves.
@@ -125,7 +135,7 @@ namespace Microsoft.Build.Framework
                 ConversionState = ChangeWaveConversionState.Valid;
                 _cachedWave = ChangeWaves.EnableAllFeatures;
             }
-            else if (!Version.TryParse(msbuildDisableFeaturesFromVersion, out _cachedWave))
+            else if (!TryParseVersion(msbuildDisableFeaturesFromVersion, out _cachedWave))
             {
                 ConversionState = ChangeWaveConversionState.InvalidFormat;
                 _cachedWave = ChangeWaves.EnableAllFeatures;
@@ -161,6 +171,10 @@ namespace Microsoft.Build.Framework
         {
             ApplyChangeWave();
 
+#if DEBUG
+            Debug.Assert(_runningTests || AllWaves.Contains(wave), $"Change wave version {wave} is invalid");
+#endif
+
             return wave < _cachedWave;
         }
 
@@ -170,8 +184,29 @@ namespace Microsoft.Build.Framework
         /// </summary>
         internal static void ResetStateForTests()
         {
+#if DEBUG
+            _runningTests = true;
+#endif
             _cachedWave = null;
             _state = ChangeWaveConversionState.NotConvertedYet;
+        }
+
+        private static bool TryParseVersion(string stringVersion, out Version version)
+        {
+#if FEATURE_NET35_TASKHOST
+            try
+            {
+                version = new Version(stringVersion);
+                return true;
+            }
+            catch (Exception)
+            {
+                version = null;
+                return false;
+            }
+#else
+            return Version.TryParse(stringVersion, out version);
+#endif
         }
     }
 }

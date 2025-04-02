@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,13 +12,13 @@ using System.Resources;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
-using Microsoft.Build.UnitTests.Shared;
+using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
+using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
 #nullable disable
@@ -71,7 +72,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             "</FileList >";
 
         /// <summary>
-        /// The contents of a subsetFile which only contain the Microsoft.Build.Engine assembly in the white list
+        /// The contents of a subsetFile which only contain the Microsoft.Build.Engine assembly in the allow list
         /// </summary>
         private string _engineOnlySubset =
             "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
@@ -79,7 +80,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             "</FileList >";
 
         /// <summary>
-        /// The contents of a subsetFile which only contain the System.Xml assembly in the white list
+        /// The contents of a subsetFile which only contain the System.Xml assembly in the allow list
         /// </summary>
         private string _xmlOnlySubset =
             "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
@@ -87,7 +88,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             "</FileList >";
 
         /// <summary>
-        /// The contents of a subsetFile which contain both the Microsoft.Build.Engine and System.Xml assemblies in the white list
+        /// The contents of a subsetFile which contain both the Microsoft.Build.Engine and System.Xml assemblies in the allow list
         /// </summary>
         private string _engineAndXmlSubset =
             "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
@@ -551,17 +552,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 {
                     // The version of System.Xml.dll in C:\MyProject is an older version.
                     // This version is not a match. When want the current version which should have been in a different directory.
-                    Assert.True(false, "Wrong version of System.Xml.dll matched--version was wrong");
+                    Assert.Fail("Wrong version of System.Xml.dll matched--version was wrong");
                 }
                 else if (String.Equals(item.ItemSpec, Path.Combine(s_myProjectPath, "System.Data.dll"), StringComparison.OrdinalIgnoreCase))
                 {
                     // The version of System.Data.dll in C:\MyProject has an incorrect PKT
                     // This version is not a match.
-                    Assert.True(false, "Wrong version of System.Data.dll matched--public key token was wrong");
+                    Assert.Fail("Wrong version of System.Data.dll matched--public key token was wrong");
                 }
                 else
                 {
-                    Assert.True(false, String.Format("A new resolved file called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
+                    Assert.Fail(String.Format("A new resolved file called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
                 }
             }
 
@@ -591,14 +592,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
                 else
                 {
-                    Assert.True(false, String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
+                    Assert.Fail(String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
                 }
             }
 
             // Process the related files.
             foreach (ITaskItem item in t.RelatedFiles)
             {
-                Assert.True(false, String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
+                Assert.Fail(String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
             }
 
             // Process the satellites.
@@ -620,7 +621,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
                 else
                 {
-                    Assert.True(false, String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
+                    Assert.Fail(String.Format("A new dependency called '{0}' was found. If this is intentional, then add unittests above.", item.ItemSpec));
                 }
             }
 
@@ -784,7 +785,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                     if (j == assembliesCount)
                     {
-                        Assert.True(false, String.Format("{0}: A new resolved file called '{1}' was found. If this is intentional, then add unittests above.", fxVersion, item.ItemSpec));
+                        Assert.Fail(String.Format("{0}: A new resolved file called '{1}' was found. If this is intentional, then add unittests above.", fxVersion, item.ItemSpec));
                     }
                 }
 
@@ -3235,7 +3236,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ParentAssemblyResolvedFromAForGac()
         {
-            var parentReferenceFolders = new List<string>();
+            var parentReferenceFolders = new List<DirectoryWithParentAssembly>();
             var referenceList = new List<Reference>();
 
             var taskItem = new TaskItem("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
@@ -3264,7 +3265,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
 
             Assert.Single(parentReferenceFolders);
-            Assert.Equal(reference2.ResolvedSearchPath, parentReferenceFolders[0]);
+            Assert.Equal(reference2.ResolvedSearchPath, parentReferenceFolders[0].Directory);
         }
 
         /// <summary>
@@ -3561,7 +3562,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResourceManager resources = new ResourceManager("Microsoft.Build.Tasks.Strings", Assembly.GetExecutingAssembly());
 
             // Unresolved primary reference with itemspec "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null".
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_ADllPath);
+            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnifiedReferenceDependsOn", "A, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_ADllPath);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_CDllPath);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_BDllPath);
@@ -3607,7 +3608,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
 
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null", String.Empty);
-            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.ReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
+            engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnifiedReferenceDependsOn", "A, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null", s_regress444809_V2_ADllPath);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.UnResolvedPrimaryItemSpec", "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null");
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_DDllPath);
             engine.AssertLogContainsMessageFromResource(resourceDelegate, "ResolveAssemblyReference.PrimarySourceItemsForReference", s_regress444809_BDllPath);
@@ -4886,37 +4887,28 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress314573_VeryLongPaths()
         {
-            string veryLongPath = @"C:\" + new String('a', 260);
-            string veryLongFile = veryLongPath + "\\A.dll";
+            string veryLongPath = @"C:\" + new string('a', 260);
+            string veryLongFile = veryLongPath + @"\A.dll";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
-            MockEngine e = new MockEngine(_output);
+            MockEngine e = new (_output);
             t.BuildEngine = e;
 
-            t.Assemblies = new ITaskItem[]
-            {
-                new TaskItem("A")                    // Resolved by HintPath
-            };
+            t.Assemblies = [new TaskItem("A")]; // Resolved by HintPath
             t.Assemblies[0].SetMetadata(
                 "HintPath",
                 veryLongFile);
 
-            t.SearchPaths = new string[]
-            {
-                "{HintPathFromItem}"
-            };
+            t.SearchPaths = ["{HintPathFromItem}"];
 
-            t.AssemblyFiles = new ITaskItem[]
-            {
-                new TaskItem(veryLongFile)            // Resolved as File Reference
-            };
+            t.AssemblyFiles = [new TaskItem(veryLongFile)]; // Resolved as File Reference
 
-            Execute(t);
-
-            Assert.Equal(1, e.Warnings); // "One warning expected in this scenario." // Couldn't find dependencies for {HintPathFromItem}-resolved item.
-            Assert.Equal(0, e.Errors); // "No errors expected in this scenario."
-            Assert.Empty(t.ResolvedFiles);  // This test used to have 1 here. But that was because the mock GetAssemblyName was not accurately throwing an exception for non-existent files.
+            e.ShouldSatisfyAllConditions(
+                () => Execute(t).ShouldBeTrue(),
+                () => e.Warnings.ShouldBe(1, "One warning expected in this scenario."), // Couldn't find dependencies for {HintPathFromItem}-resolved item.
+                () => e.Errors.ShouldBe(0, "No errors expected in this scenario."),
+                () => t.ResolvedFiles.ShouldBeEmpty());
         }
 
         /// <summary>
@@ -5564,39 +5556,39 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where the redist list is empty and we pass in an empty set of white lists
-        /// We should return null as there is no point generating a white list if there is nothing to subtract from.
-        /// ResolveAssemblyReference will see this as null and log a warning indicating no redist assemblies were found therefore no black list could be
+        /// Test the case where the redist list is empty and we pass in an empty set of allow lists
+        /// We should return null as there is no point generating an allow list if there is nothing to subtract from.
+        /// ResolveAssemblyReference will see this as null and log a warning indicating no redist assemblies were found therefore no deny list could be
         /// generated
         /// </summary>
         [Fact]
-        public void RedistListGenerateBlackListEmptyAssemblyInfoNoRedistAssemblies()
+        public void RedistListGenerateDenyListEmptyAssemblyInfoNoRedistAssemblies()
         {
             RedistList redistList = RedistList.GetRedistList(Array.Empty<AssemblyTableInfo>());
-            List<Exception> whiteListErrors = new List<Exception>();
-            List<string> whiteListErrorFileNames = new List<string>();
-            Dictionary<string, string> blackList = redistList.GenerateBlackList(Array.Empty<AssemblyTableInfo>(), whiteListErrors, whiteListErrorFileNames);
-            Assert.Null(blackList); // "Should return null if the AssemblyTableInfo is empty and the redist list is empty"
+            List<Exception> allowListErrors = new List<Exception>();
+            List<string> allowListErrorFileNames = new List<string>();
+            Dictionary<string, string> denyList = redistList.GenerateDenyList(Array.Empty<AssemblyTableInfo>(), allowListErrors, allowListErrorFileNames);
+            Assert.Null(denyList); // "Should return null if the AssemblyTableInfo is empty and the redist list is empty"
         }
 
         /// <summary>
-        /// Verify that when we go to generate a black list but there were no subset list files passed in that we get NO black list generated as there is nothing to subtract.
+        /// Verify that when we go to generate a deny list but there were no subset list files passed in that we get NO deny list generated as there is nothing to subtract.
         /// Nothing meaning, we don't have any matching subset list files to say there are no good files.
         /// </summary>
         [Fact]
-        public void RedistListGenerateBlackListEmptyAssemblyInfoWithRedistAssemblies()
+        public void RedistListGenerateDenyListEmptyAssemblyInfoWithRedistAssemblies()
         {
             string redistFile = CreateGenericRedistList();
             try
             {
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(Array.Empty<AssemblyTableInfo>(), whiteListErrors, whiteListErrorFileNames);
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFileNames = new List<string>();
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(Array.Empty<AssemblyTableInfo>(), allowListErrors, allowListErrorFileNames);
 
-                // Since there were no white list expect the black list to return null
-                Assert.Empty(blackList); // "Expected to have no assemblies in the black list"
+                // Since there were no allow list expect the deny list to return null
+                Assert.Empty(denyList); // "Expected to have no assemblies in the deny list"
             }
             finally
             {
@@ -5605,32 +5597,32 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where the subset lists cannot be read. The expectation is that the black list will be empty as we have no proper white lists to compare it to.
+        /// Test the case where the subset lists cannot be read. The expectation is that the deny list will be empty as we have no proper allow lists to compare it to.
         /// </summary>
         [Fact]
-        public void RedistListGenerateBlackListNotFoundSubsetFiles()
+        public void RedistListGenerateDenyListNotFoundSubsetFiles()
         {
             string redistFile = CreateGenericRedistList();
             try
             {
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFileNames = new List<string>();
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFileNames = new List<string>();
 
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(
                                                                    new AssemblyTableInfo[]
                                                                                          {
                                                                                            new AssemblyTableInfo("c:\\RandomDirectory.xml", "TargetFrameworkDirectory"),
                                                                                            new AssemblyTableInfo("c:\\AnotherRandomDirectory.xml", "TargetFrameworkDirectory")
                                                                                           },
-                                                                                          whiteListErrors,
-                                                                                          whiteListErrorFileNames);
+                                                                                          allowListErrors,
+                                                                                          allowListErrorFileNames);
 
-                // Since there were no white list expect the black list to return null
-                Assert.Empty(blackList); // "Expected to have no assemblies in the black list"
-                Assert.Equal(2, whiteListErrors.Count); // "Expected there to be two errors in the whiteListErrors, one for each missing file"
-                Assert.Equal(2, whiteListErrorFileNames.Count); // "Expected there to be two errors in the whiteListErrorFileNames, one for each missing file"
+                // Since there were no allow list expect the deny list to return null
+                Assert.Empty(denyList); // "Expected to have no assemblies in the deny list"
+                Assert.Equal(2, allowListErrors.Count); // "Expected there to be two errors in the allowListErrors, one for each missing file"
+                Assert.Equal(2, allowListErrorFileNames.Count); // "Expected there to be two errors in the allowListErrorFileNames, one for each missing file"
             }
             finally
             {
@@ -5640,10 +5632,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Test the case where there is random goo in the subsetList file. Expect the file to not be read in and a warning indicating the file was skipped due to a read error.
-        /// This should also cause the white list to be empty as the badly formatted file was the only whitelist subset file.
+        /// This should also cause the allow list to be empty as the badly formatted file was the only allowlist subset file.
         /// </summary>
         [Fact]
-        public void RedistListGenerateBlackListGarbageSubsetListFiles()
+        public void RedistListGenerateDenyListGarbageSubsetListFiles()
         {
             string redistFile = CreateGenericRedistList();
             string garbageSubsetFile = FileUtilities.GetTemporaryFileName();
@@ -5656,14 +5648,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(garbageSubsetFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFileNames = new List<string>();
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo }, allowListErrors, allowListErrorFileNames);
 
-                Assert.Empty(blackList); // "Expected to have no assemblies in the black list"
-                Assert.Single(whiteListErrors); // "Expected there to be an error in the whiteListErrors"
-                Assert.Single(whiteListErrorFileNames); // "Expected there to be an error in the whiteListErrorFileNames"
-                Assert.DoesNotContain("MSB3257", ((Exception)whiteListErrors[0]).Message); // "Expect to not have the null redist warning"
+                Assert.Empty(denyList); // "Expected to have no assemblies in the deny list"
+                Assert.Single(allowListErrors); // "Expected there to be an error in the allowListErrors"
+                Assert.Single(allowListErrorFileNames); // "Expected there to be an error in the allowListErrorFileNames"
+                Assert.DoesNotContain("MSB3257", ((Exception)allowListErrors[0]).Message); // "Expect to not have the null redist warning"
             }
             finally
             {
@@ -5679,7 +5671,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// Expected:
         ///     Expect a warning that a redist list or subset list has no redist name.
-        ///     There should be no black list generated as no sub set lists were read in.
+        ///     There should be no deny list generated as no sub set lists were read in.
         ///
         /// Rational:
         ///     If we have no redist name to compare to the redist list redist name we cannot subtract the lists correctly.
@@ -5701,16 +5693,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(subsetFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFileNames = new List<string>();
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo }, allowListErrors, allowListErrorFileNames);
 
-                // If the names do not match then i expect there to be no black list items
-                Assert.Empty(blackList); // "Expected to have no assembly in the black list"
-                Assert.Single(whiteListErrors); // "Expected there to be one error in the whiteListErrors"
-                Assert.Single(whiteListErrorFileNames); // "Expected there to be one error in the whiteListErrorFileNames"
+                // If the names do not match then i expect there to be no deny list items
+                Assert.Empty(denyList); // "Expected to have no assembly in the deny list"
+                Assert.Single(allowListErrors); // "Expected there to be one error in the allowListErrors"
+                Assert.Single(allowListErrorFileNames); // "Expected there to be one error in the allowListErrorFileNames"
                 string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ResolveAssemblyReference.NoSubSetRedistListName", subsetFile);
-                Assert.Contains(message, ((Exception)whiteListErrors[0]).Message); // "Expected assertion to contain correct error code"
+                Assert.Contains(message, ((Exception)allowListErrors[0]).Message); // "Expected assertion to contain correct error code"
             }
             finally
             {
@@ -5725,7 +5717,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///     Subset list which has a redist name and entries
         ///
         /// Expected:
-        ///     Expect no black list to be generated and no warnings to be emitted
+        ///     Expect no deny list to be generated and no warnings to be emitted
         ///
         /// Rational:
         ///     Since the redist list name is null or empty we have no way of matching any subset list up to it.
@@ -5754,14 +5746,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(subsetFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFileNames = new List<string>();
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo }, allowListErrors, allowListErrorFileNames);
 
-                // If the names do not match then i expect there to be no black list items
-                Assert.Empty(blackList); // "Expected to have no assembly in the black list"
-                Assert.Empty(whiteListErrors); // "Expected there to be no errors in the whiteListErrors"
-                Assert.Empty(whiteListErrorFileNames); // "Expected there to be no errors in the whiteListErrorFileNames"
+                // If the names do not match then i expect there to be no deny list items
+                Assert.Empty(denyList); // "Expected to have no assembly in the deny list"
+                Assert.Empty(allowListErrors); // "Expected there to be no errors in the allowListErrors"
+                Assert.Empty(allowListErrorFileNames); // "Expected there to be no errors in the allowListErrorFileNames"
             }
             finally
             {
@@ -5776,11 +5768,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///     Subset list which has entries but has a different redist name than the redist list
         ///
         /// Expected:
-        ///     There should be no black list generated as no sub set lists with matching names were found.
+        ///     There should be no deny list generated as no sub set lists with matching names were found.
         ///
         /// Rational:
         ///     If the redist name does not match then that subset list should not be subtracted from the redist list.
-        ///     We only add assemblies to the black list if there is a corosponding white list even if it is empty to inform us what assemblies are good and which are not.
+        ///     We only add assemblies to the deny list if there is a corosponding allow list even if it is empty to inform us what assemblies are good and which are not.
         /// </summary>
         [Fact]
         public void RedistListDifferentNameToSubSet()
@@ -5799,14 +5791,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(subsetFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFileNames = new List<string>();
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo }, allowListErrors, allowListErrorFileNames);
 
-                // If the names do not match then i expect there to be no black list items
-                Assert.Empty(blackList); // "Expected to have no assembly in the black list"
-                Assert.Empty(whiteListErrors); // "Expected there to be no error in the whiteListErrors"
-                Assert.Empty(whiteListErrorFileNames); // "Expected there to be no error in the whiteListErrorFileNames"
+                // If the names do not match then i expect there to be no deny list items
+                Assert.Empty(denyList); // "Expected to have no assembly in the deny list"
+                Assert.Empty(allowListErrors); // "Expected there to be no error in the allowListErrors"
+                Assert.Empty(allowListErrorFileNames); // "Expected there to be no error in the allowListErrorFileNames"
             }
             finally
             {
@@ -5817,7 +5809,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Test the case where the subset list has the same name as the redist list but it has no entries In this case
-        /// the black list should contain ALL redist list entries because there are no white list files to remove from the black list.
+        /// the deny list should contain ALL redist list entries because there are no allow list files to remove from the deny list.
         /// </summary>
         [Fact]
         public void RedistListEmptySubsetMatchingName()
@@ -5834,19 +5826,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(subsetFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFileNames = new List<string>();
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo }, allowListErrors, allowListErrorFileNames);
 
-                // If the names do not match then i expect there to be no black list items
-                Assert.Equal(2, blackList.Count); // "Expected to have two assembly in the black list"
-                Assert.Empty(whiteListErrors); // "Expected there to be no error in the whiteListErrors"
-                Assert.Empty(whiteListErrorFileNames); // "Expected there to be no error in the whiteListErrorFileNames"
+                // If the names do not match then i expect there to be no deny list items
+                Assert.Equal(2, denyList.Count); // "Expected to have two assembly in the deny list"
+                Assert.Empty(allowListErrors); // "Expected there to be no error in the allowListErrors"
+                Assert.Empty(allowListErrorFileNames); // "Expected there to be no error in the allowListErrorFileNames"
 
-                ArrayList whiteListErrors2 = new ArrayList();
-                ArrayList whiteListErrorFileNames2 = new ArrayList();
-                Dictionary<string, string> blackList2 = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
-                Assert.Same(blackList, blackList2);
+                ArrayList allowListErrors2 = new ArrayList();
+                ArrayList allowListErrorFileNames2 = new ArrayList();
+                Dictionary<string, string> denyList2 = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo }, allowListErrors, allowListErrorFileNames);
+                Assert.Same(denyList, denyList2);
             }
             finally
             {
@@ -5857,8 +5849,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Test the case where, no redist assemblies are read in.
-        /// In this case no blacklist can be generated.
-        /// We should get a warning informing us that we could not create a black list.
+        /// In this case no denylist can be generated.
+        /// We should get a warning informing us that we could not create a deny list.
         /// </summary>
         [Fact]
         public void RedistListNoAssembliesinRedistList()
@@ -5906,10 +5898,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Test the case where the subset list is a subset of the redist list. Make sure that
-        /// even though there are two files in the redist list that only one shows up in the black list.
+        /// even though there are two files in the redist list that only one shows up in the deny list.
         /// </summary>
         [Fact]
-        public void RedistListGenerateBlackListGoodListsSubsetIsSubsetOfRedist()
+        public void RedistListGenerateDenyListGoodListsSubsetIsSubsetOfRedist()
         {
             string redistFile = CreateGenericRedistList();
             string goodSubsetFile = FileUtilities.GetTemporaryFileName();
@@ -5920,14 +5912,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(goodSubsetFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFileNames = new List<string>();
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo }, allowListErrors, allowListErrorFileNames);
 
-                Assert.Single(blackList); // "Expected to have one assembly in the black list"
-                Assert.True(blackList.ContainsKey("System.Xml, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b03f5f7f11d50a3a")); // "Expected System.xml to be in the black list"
-                Assert.Empty(whiteListErrors); // "Expected there to be no error in the whiteListErrors"
-                Assert.Empty(whiteListErrorFileNames); // "Expected there to be no error in the whiteListErrorFileNames"
+                Assert.Single(denyList); // "Expected to have one assembly in the deny list"
+                Assert.True(denyList.ContainsKey("System.Xml, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b03f5f7f11d50a3a")); // "Expected System.xml to be in the deny list"
+                Assert.Empty(allowListErrors); // "Expected there to be no error in the allowListErrors"
+                Assert.Empty(allowListErrorFileNames); // "Expected there to be no error in the allowListErrorFileNames"
             }
             finally
             {
@@ -5937,12 +5929,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where we generate a black list based on a set of subset file paths, and then ask for
-        /// another black list using the same file paths. We expect to get the exact same Dictionary out
+        /// Test the case where we generate a deny list based on a set of subset file paths, and then ask for
+        /// another deny list using the same file paths. We expect to get the exact same Dictionary out
         /// as it should be pulled from the cache.
         /// </summary>
         [Fact]
-        public void RedistListGenerateBlackListVerifyBlackListCache()
+        public void RedistListGenerateDenyListVerifyDenyListCache()
         {
             string redistFile = CreateGenericRedistList();
             string goodSubsetFile = FileUtilities.GetTemporaryFileName();
@@ -5953,20 +5945,20 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(goodSubsetFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFileNames = new List<string>();
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo }, allowListErrors, allowListErrorFileNames);
 
-                // Since there were no white list expect the black list to return null
-                Assert.Single(blackList); // "Expected to have one assembly in the black list"
-                Assert.True(blackList.ContainsKey("System.Xml, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b03f5f7f11d50a3a")); // "Expected System.xml to be in the black list"
-                Assert.Empty(whiteListErrors); // "Expected there to be no error in the whiteListErrors"
-                Assert.Empty(whiteListErrorFileNames); // "Expected there to be no error in the whiteListErrorFileNames"
+                // Since there were no allow list expect the deny list to return null
+                Assert.Single(denyList); // "Expected to have one assembly in the deny list"
+                Assert.True(denyList.ContainsKey("System.Xml, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=b03f5f7f11d50a3a")); // "Expected System.xml to be in the deny list"
+                Assert.Empty(allowListErrors); // "Expected there to be no error in the allowListErrors"
+                Assert.Empty(allowListErrorFileNames); // "Expected there to be no error in the allowListErrorFileNames"
 
-                List<Exception> whiteListErrors2 = new List<Exception>();
-                List<string> whiteListErrorFileNames2 = new List<string>();
-                Dictionary<string, string> blackList2 = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors2, whiteListErrorFileNames2);
-                Assert.Same(blackList, blackList2);
+                List<Exception> allowListErrors2 = new List<Exception>();
+                List<string> allowListErrorFileNames2 = new List<string>();
+                Dictionary<string, string> denyList2 = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo }, allowListErrors2, allowListErrorFileNames2);
+                Assert.Same(denyList, denyList2);
             }
             finally
             {
@@ -5976,14 +5968,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where the white list and the redist list are identical
-        /// In this case the black list should be empty.
+        /// Test the case where the allow list and the redist list are identical
+        /// In this case the deny list should be empty.
         ///
         /// We are also in a way testing the combining of subset files as we read in one assembly from two
         /// different subset lists while the redist list already contains both assemblies.
         /// </summary>
         [Fact]
-        public void RedistListGenerateBlackListGoodListsSubsetIsSameAsRedistList()
+        public void RedistListGenerateDenyListGoodListsSubsetIsSameAsRedistList()
         {
             string redistFile = CreateGenericRedistList();
             string goodSubsetFile = FileUtilities.GetTemporaryFileName();
@@ -5998,13 +5990,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo subsetListInfo2 = new AssemblyTableInfo(goodSubsetFile2, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
 
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo, subsetListInfo2 }, whiteListErrors, whiteListErrorFileNames);
-                // Since there were no white list expect the black list to return null
-                Assert.Empty(blackList); // "Expected to have no assemblies in the black list"
-                Assert.Empty(whiteListErrors); // "Expected there to be no error in the whiteListErrors"
-                Assert.Empty(whiteListErrorFileNames); // "Expected there to be no error in the whiteListErrorFileNames"
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFileNames = new List<string>();
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo, subsetListInfo2 }, allowListErrors, allowListErrorFileNames);
+                // Since there were no allow list expect the deny list to return null
+                Assert.Empty(denyList); // "Expected to have no assemblies in the deny list"
+                Assert.Empty(allowListErrors); // "Expected there to be no error in the allowListErrors"
+                Assert.Empty(allowListErrorFileNames); // "Expected there to be no error in the allowListErrorFileNames"
             }
             finally
             {
@@ -6014,13 +6006,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where the white list is a superset of the redist list.
-        /// This means there are more assemblies in the white list than in the black list.
+        /// Test the case where the allow list is a superset of the redist list.
+        /// This means there are more assemblies in the allow list than in the deny list.
         ///
-        /// The black list should be empty.
+        /// The deny list should be empty.
         /// </summary>
         [Fact]
-        public void RedistListGenerateBlackListGoodListsSubsetIsSuperSet()
+        public void RedistListGenerateDenyListGoodListsSubsetIsSuperSet()
         {
             string redistFile = CreateGenericRedistList();
             string goodSubsetFile = FileUtilities.GetTemporaryFileName();
@@ -6037,14 +6029,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(goodSubsetFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFileNames = new List<string>();
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo }, allowListErrors, allowListErrorFileNames);
 
-                // Since there were no white list expect the black list to return null
-                Assert.Empty(blackList); // "Expected to have no assemblies in the black list"
-                Assert.Empty(whiteListErrors); // "Expected there to be no error in the whiteListErrors"
-                Assert.Empty(whiteListErrorFileNames); // "Expected there to be no error in the whiteListErrorFileNames"
+                // Since there were no allow list expect the deny list to return null
+                Assert.Empty(denyList); // "Expected to have no assemblies in the deny list"
+                Assert.Empty(allowListErrors); // "Expected there to be no error in the allowListErrors"
+                Assert.Empty(allowListErrorFileNames); // "Expected there to be no error in the allowListErrorFileNames"
             }
             finally
             {
@@ -6058,7 +6050,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// list are case sensitive or not, they should not be case sensitive.
         /// </summary>
         [Fact]
-        public void RedistListGenerateBlackListGoodListsCheckCaseInsensitive()
+        public void RedistListGenerateDenyListGoodListsCheckCaseInsensitive()
         {
             string redistFile = CreateGenericRedistList();
             string goodSubsetFile = FileUtilities.GetTemporaryFileName();
@@ -6069,14 +6061,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(goodSubsetFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFileNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFileNames);
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFileNames = new List<string>();
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo }, allowListErrors, allowListErrorFileNames);
 
-                // Since there were no white list expect the black list to return null
-                Assert.Empty(blackList); // "Expected to have no assemblies in the black list"
-                Assert.Empty(whiteListErrors); // "Expected there to be no error in the whiteListErrors"
-                Assert.Empty(whiteListErrorFileNames); // "Expected there to be no error in the whiteListErrorFileNames"
+                // Since there were no allow list expect the deny list to return null
+                Assert.Empty(denyList); // "Expected to have no assemblies in the deny list"
+                Assert.Empty(allowListErrors); // "Expected there to be no error in the allowListErrors"
+                Assert.Empty(allowListErrorFileNames); // "Expected there to be no error in the allowListErrorFileNames"
             }
             finally
             {
@@ -6086,11 +6078,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify that when we go to generate a black list but there were no subset list files passed in that we get NO black list generated as there is nothing to subtract.
+        /// Verify that when we go to generate a deny list but there were no subset list files passed in that we get NO deny list generated as there is nothing to subtract.
         /// Nothing meaning, we don't have any matching subset list files to say there are no good files.
         /// </summary>
         [Fact]
-        public void RedistListGenerateBlackListGoodListsMultipleIdenticalAssembliesInRedistList()
+        public void RedistListGenerateDenyListGoodListsMultipleIdenticalAssembliesInRedistList()
         {
             string redistFile = FileUtilities.GetTemporaryFileName();
             string goodSubsetFile = FileUtilities.GetTemporaryFileName();
@@ -6110,14 +6102,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 AssemblyTableInfo redistListInfo = new AssemblyTableInfo(redistFile, "TargetFrameworkDirectory");
                 AssemblyTableInfo subsetListInfo = new AssemblyTableInfo(goodSubsetFile, "TargetFrameworkDirectory");
                 RedistList redistList = RedistList.GetRedistList(new AssemblyTableInfo[] { redistListInfo });
-                List<Exception> whiteListErrors = new List<Exception>();
-                List<string> whiteListErrorFilesNames = new List<string>();
-                Dictionary<string, string> blackList = redistList.GenerateBlackList(new AssemblyTableInfo[] { subsetListInfo }, whiteListErrors, whiteListErrorFilesNames);
+                List<Exception> allowListErrors = new List<Exception>();
+                List<string> allowListErrorFilesNames = new List<string>();
+                Dictionary<string, string> denyList = redistList.GenerateDenyList(new AssemblyTableInfo[] { subsetListInfo }, allowListErrors, allowListErrorFilesNames);
 
-                // Since there were no white list expect the black list to return null
-                Assert.Empty(blackList); // "Expected to have no assemblies in the black list"
-                Assert.Empty(whiteListErrors); // "Expected there to be no error in the whiteListErrors"
-                Assert.Empty(whiteListErrorFilesNames); // "Expected there to be no error in the whiteListErrorFileNames"
+                // Since there were no allow list expect the deny list to return null
+                Assert.Empty(denyList); // "Expected to have no assemblies in the deny list"
+                Assert.Empty(allowListErrors); // "Expected there to be no error in the allowListErrors"
+                Assert.Empty(allowListErrorFilesNames); // "Expected there to be no error in the allowListErrorFileNames"
             }
             finally
             {
@@ -6312,10 +6304,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// A null black list should be the same as an empty one.
+        /// A null deny list should be the same as an empty one.
         /// </summary>
         [Fact]
-        public void ReferenceTableNullBlackList()
+        public void ReferenceTableNullDenyList()
         {
             TaskLoggingHelper log = new TaskLoggingHelper(new ResolveAssemblyReference());
             ReferenceTable referenceTable = MakeEmptyReferenceTable(log);
@@ -6337,10 +6329,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Test the case where the blacklist is empty.
+        /// Test the case where the denylist is empty.
         /// </summary>
         [Fact]
-        public void ReferenceTableEmptyBlackList()
+        public void ReferenceTableEmptyDenyList()
         {
             TaskLoggingHelper log = new TaskLoggingHelper(new ResolveAssemblyReference());
             ReferenceTable referenceTable = MakeEmptyReferenceTable(log);
@@ -6362,10 +6354,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify the case where there are primary references in the reference table which are also in the black list
+        /// Verify the case where there are primary references in the reference table which are also in the deny list
         /// </summary>
         [Fact]
-        public void ReferenceTablePrimaryItemInBlackList()
+        public void ReferenceTablePrimaryItemInDenyList()
         {
             MockEngine mockEngine = new MockEngine(_output);
             ResolveAssemblyReference rar = new ResolveAssemblyReference();
@@ -6383,12 +6375,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             table.Add(engineAssemblyName, reference);
             table.Add(xmlAssemblyName, new Reference(isWinMDFile, fileExists, getRuntimeVersion));
 
-            var blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            blackList[engineAssemblyName.FullName] = null;
+            var denyList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            denyList[engineAssemblyName.FullName] = null;
             string[] targetFrameworks = new string[] { "Client", "Web" };
             string subSetName = ResolveAssemblyReference.GenerateSubSetName(targetFrameworks, null);
 
-            referenceTable.MarkReferencesForExclusion(blackList);
+            referenceTable.MarkReferencesForExclusion(denyList);
             referenceTable.RemoveReferencesMarkedForExclusion(false, subSetName);
 
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
@@ -6401,10 +6393,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify the case where there are primary references in the reference table which are also in the black list
+        /// Verify the case where there are primary references in the reference table which are also in the deny list
         /// </summary>
         [Fact]
-        public void ReferenceTablePrimaryItemInBlackListSpecificVersionTrue()
+        public void ReferenceTablePrimaryItemInDenyListSpecificVersionTrue()
         {
             MockEngine mockEngine = new MockEngine(_output);
             ResolveAssemblyReference rar = new ResolveAssemblyReference();
@@ -6423,11 +6415,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             table.Add(engineAssemblyName, reference);
             table.Add(xmlAssemblyName, new Reference(isWinMDFile, fileExists, getRuntimeVersion));
 
-            var blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            blackList[engineAssemblyName.FullName] = null;
+            var denyList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            denyList[engineAssemblyName.FullName] = null;
             string[] targetFrameworks = new string[] { "Client", "Web" };
             string subSetName = ResolveAssemblyReference.GenerateSubSetName(targetFrameworks, null);
-            referenceTable.MarkReferencesForExclusion(blackList);
+            referenceTable.MarkReferencesForExclusion(denyList);
             referenceTable.RemoveReferencesMarkedForExclusion(false, subSetName);
 
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
@@ -6481,7 +6473,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Verify the case where we just want to remove the references before conflict resolution and not print out the warning.
         /// </summary>
         [Fact]
-        public void ReferenceTablePrimaryItemInBlackListRemoveOnlyNoWarn()
+        public void ReferenceTablePrimaryItemInDenyListRemoveOnlyNoWarn()
         {
             MockEngine mockEngine = new MockEngine(_output);
             ResolveAssemblyReference rar = new ResolveAssemblyReference();
@@ -6499,9 +6491,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             table.Add(engineAssemblyName, reference);
             table.Add(xmlAssemblyName, new Reference(isWinMDFile, fileExists, getRuntimeVersion));
 
-            var blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            blackList[engineAssemblyName.FullName] = null;
-            referenceTable.MarkReferencesForExclusion(blackList);
+            var denyList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            denyList[engineAssemblyName.FullName] = null;
+            referenceTable.MarkReferencesForExclusion(denyList);
             referenceTable.RemoveReferencesMarkedForExclusion(true, String.Empty);
 
             Dictionary<AssemblyNameExtension, Reference> table2 = referenceTable.References;
@@ -6515,16 +6507,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference : sqlDependencyReference is in black list
+        /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference : sqlDependencyReference is in deny list
         /// expect to see one dependency warning message
         /// </summary>
         [Fact]
-        public void ReferenceTableDependentItemsInBlackList()
+        public void ReferenceTableDependentItemsInDenyList()
         {
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Dictionary<string, string> blackList;
+            Dictionary<string, string> denyList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension sqlclientAssemblyName = new AssemblyNameExtension("System.SqlClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -6548,7 +6540,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             InitializeMockEngine(out referenceTable, out mockEngine, out rar);
             AddReferencesToReferenceTable(referenceTable, engineAssemblyName, dataAssemblyName, sqlclientAssemblyName, xmlAssemblyName, enginePrimaryReference, dataDependencyReference, sqlDependencyReference, xmlPrimaryReference);
-            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName }, out blackList);
+            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName }, out denyList);
 
             string subsetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { "Client" }, null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem.ItemSpec, sqlclientAssemblyName.FullName, subsetName);
@@ -6557,17 +6549,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference
-        /// and enginePrimary->sqlDependencyReference: sqlDependencyReference is in black list
+        /// and enginePrimary->sqlDependencyReference: sqlDependencyReference is in deny list
         /// and systemxml->enginePrimary
         /// expect to see one dependency warning message
         /// </summary>
         [Fact]
-        public void ReferenceTableDependentItemsInBlackList2()
+        public void ReferenceTableDependentItemsInDenyList2()
         {
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Dictionary<string, string> blackList;
+            Dictionary<string, string> denyList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension sqlclientAssemblyName = new AssemblyNameExtension("System.SqlClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -6592,7 +6584,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             InitializeMockEngine(out referenceTable, out mockEngine, out rar);
             AddReferencesToReferenceTable(referenceTable, engineAssemblyName, dataAssemblyName, sqlclientAssemblyName, xmlAssemblyName, enginePrimaryReference, dataDependencyReference, sqlDependencyReference, xmlPrimaryReference);
-            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName }, out blackList);
+            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName }, out denyList);
 
             string subsetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { "Client" }, null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem.ItemSpec, sqlclientAssemblyName.FullName, subsetName);
@@ -6603,12 +6595,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Testing case  enginePrimary->XmlPrimary with XMLPrimary in the BL
         /// </summary>
         [Fact]
-        public void ReferenceTablePrimaryToPrimaryDependencyWithOneInBlackList()
+        public void ReferenceTablePrimaryToPrimaryDependencyWithOneInDenyList()
         {
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Dictionary<string, string> blackList;
+            Dictionary<string, string> denyList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension xmlAssemblyName = new AssemblyNameExtension("System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             Reference enginePrimaryReference = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
@@ -6628,7 +6620,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             InitializeMockEngine(out referenceTable, out mockEngine, out rar);
             AddReferencesToReferenceTable(referenceTable, engineAssemblyName, null, null, xmlAssemblyName, enginePrimaryReference, null, null, xmlPrimaryReference);
 
-            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { xmlAssemblyName }, out blackList);
+            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { xmlAssemblyName }, out denyList);
             string subsetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { "Client" }, null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem.ItemSpec, xmlAssemblyName.FullName, subsetName);
             string warningMessage2 = rar.Log.FormatResourceString("ResolveAssemblyReference.FailedToResolveReferenceBecausePrimaryAssemblyInExclusionList", taskItem2.ItemSpec, subsetName);
@@ -6644,12 +6636,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Testing case  enginePrimary->XmlPrimary->dataDependency with dataDependency in the BL
         /// </summary>
         [Fact]
-        public void ReferenceTablePrimaryToPrimaryToDependencyWithOneInBlackList()
+        public void ReferenceTablePrimaryToPrimaryToDependencyWithOneInDenyList()
         {
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Dictionary<string, string> blackList;
+            Dictionary<string, string> denyList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension xmlAssemblyName = new AssemblyNameExtension("System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -6674,7 +6666,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             InitializeMockEngine(out referenceTable, out mockEngine, out rar);
             AddReferencesToReferenceTable(referenceTable, engineAssemblyName, dataAssemblyName, null, xmlAssemblyName, enginePrimaryReference, dataDependencyReference, null, xmlPrimaryReference);
 
-            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { dataAssemblyName }, out blackList);
+            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { dataAssemblyName }, out denyList);
 
             string subsetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { "Client" }, null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem.ItemSpec, dataAssemblyName.FullName, subsetName);
@@ -6690,16 +6682,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference
-        /// and xmlPrimary->sqlDependencyReference: sqlDependencyReference is in black list
+        /// and xmlPrimary->sqlDependencyReference: sqlDependencyReference is in deny list
         /// expect to see one dependency warning message
         /// </summary>
         [Fact]
-        public void ReferenceTableDependentItemsInBlackList3()
+        public void ReferenceTableDependentItemsInDenyList3()
         {
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Dictionary<string, string> blackList;
+            Dictionary<string, string> denyList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension sqlclientAssemblyName = new AssemblyNameExtension("System.SqlClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -6726,7 +6718,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             InitializeMockEngine(out referenceTable, out mockEngine, out rar);
             AddReferencesToReferenceTable(referenceTable, engineAssemblyName, dataAssemblyName, sqlclientAssemblyName, xmlAssemblyName, enginePrimaryReference, dataDependencyReference, sqlDependencyReference, xmlPrimaryReference);
 
-            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName }, out blackList);
+            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName }, out denyList);
 
             string subsetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { "Client" }, null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem.ItemSpec, sqlclientAssemblyName.FullName, subsetName);
@@ -6736,11 +6728,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference
-        /// and xmlPrimary->dataDependencyReference: sqlDependencyReference is in black list
+        /// and xmlPrimary->dataDependencyReference: sqlDependencyReference is in deny list
         /// expect to see one dependency warning message
         /// </summary>
         [Fact]
-        public void ReferenceTableDependentItemsInBlackList4()
+        public void ReferenceTableDependentItemsInDenyList4()
         {
             ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null,
 #if FEATURE_WIN32_REGISTRY
@@ -6749,7 +6741,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Dictionary<string, string> blackList;
+            Dictionary<string, string> denyList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension sqlclientAssemblyName = new AssemblyNameExtension("System.SqlClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -6776,7 +6768,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             InitializeMockEngine(out referenceTable, out mockEngine, out rar);
             AddReferencesToReferenceTable(referenceTable, engineAssemblyName, dataAssemblyName, sqlclientAssemblyName, xmlAssemblyName, enginePrimaryReference, dataDependencyReference, sqlDependencyReference, xmlPrimaryReference);
 
-            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName }, out blackList);
+            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName }, out denyList);
 
             string subsetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { "Client" }, null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem.ItemSpec, sqlclientAssemblyName.FullName, subsetName);
@@ -6788,16 +6780,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Testing case  enginePrimary -> dataDependencyReference->sqlDependencyReference
         /// enginePrimary -> dataDependencyReference
         /// xmlPrimaryReference ->DataDependency
-        /// dataDependencyReference and sqlDependencyReference are in black list
+        /// dataDependencyReference and sqlDependencyReference are in deny list
         /// expect to see two dependency warning messages in the enginePrimaryCase and one in the xmlPrimarycase
         /// </summary>
         [Fact]
-        public void ReferenceTableDependentItemsInBlackList5()
+        public void ReferenceTableDependentItemsInDenyList5()
         {
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Dictionary<string, string> blackList;
+            Dictionary<string, string> denyList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension sqlclientAssemblyName = new AssemblyNameExtension("System.SqlClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -6824,7 +6816,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             InitializeMockEngine(out referenceTable, out mockEngine, out rar);
             AddReferencesToReferenceTable(referenceTable, engineAssemblyName, dataAssemblyName, sqlclientAssemblyName, xmlAssemblyName, enginePrimaryReference, dataDependencyReference, sqlDependencyReference, xmlPrimaryReference);
 
-            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName, dataAssemblyName }, out blackList);
+            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName, dataAssemblyName }, out denyList);
 
             string subsetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { "Client" }, null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem.ItemSpec, sqlclientAssemblyName.FullName, subsetName);
@@ -6851,17 +6843,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Testing case
         /// enginePrimary -> dataDependencyReference   also enginePrimary->sqlDependencyReference   specific version = true on the primary
         /// xmlPrimaryReference ->dataDependencyReference specific version = false on the primary
-        /// dataDependencyReference and sqlDependencyReference is in the black list.
+        /// dataDependencyReference and sqlDependencyReference is in the deny list.
         /// Expect to see one dependency warning messages xmlPrimarycase and no message for enginePrimary
         /// Also expect to resolve all files except for xmlPrimaryReference
         /// </summary>
         [Fact]
-        public void ReferenceTableDependentItemsInBlackListPrimaryWithSpecificVersion()
+        public void ReferenceTableDependentItemsInDenyListPrimaryWithSpecificVersion()
         {
             ReferenceTable referenceTable;
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
-            Dictionary<string, string> blackList;
+            Dictionary<string, string> denyList;
             AssemblyNameExtension engineAssemblyName = new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension dataAssemblyName = new AssemblyNameExtension("System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             AssemblyNameExtension sqlclientAssemblyName = new AssemblyNameExtension("System.SqlClient, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
@@ -6892,7 +6884,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             InitializeMockEngine(out referenceTable, out mockEngine, out rar);
             AddReferencesToReferenceTable(referenceTable, engineAssemblyName, dataAssemblyName, sqlclientAssemblyName, xmlAssemblyName, enginePrimaryReference, dataDependencyReference, sqlDependencyReference, xmlPrimaryReference);
 
-            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName, dataAssemblyName }, out blackList);
+            InitializeExclusionList(referenceTable, new AssemblyNameExtension[] { sqlclientAssemblyName, dataAssemblyName }, out denyList);
 
             string subsetName = ResolveAssemblyReference.GenerateSubSetName(new string[] { "Client" }, null);
             string warningMessage = rar.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", taskItem2.ItemSpec, dataAssemblyName.FullName, subsetName);
@@ -6929,7 +6921,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify the correct references are still in the references table and that references which are in the black list are not in the references table
+        /// Verify the correct references are still in the references table and that references which are in the deny list are not in the references table
         /// Also verify any expected warning messages are seen in the log.
         /// </summary>
         private static void VerifyReferenceTable(ReferenceTable referenceTable, MockEngine mockEngine, AssemblyNameExtension engineAssemblyName, AssemblyNameExtension dataAssemblyName, AssemblyNameExtension sqlclientAssemblyName, AssemblyNameExtension xmlAssemblyName, string[] warningMessages)
@@ -7086,7 +7078,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Initialize the mock engine so we can look at the warning messages, also put the assembly name which is to be in the black list into the black list.
+        /// Initialize the mock engine so we can look at the warning messages, also put the assembly name which is to be in the deny list into the deny list.
         /// Call remove references so that we can then validate the results.
         /// </summary>
         private void InitializeMockEngine(out ReferenceTable referenceTable, out MockEngine mockEngine, out ResolveAssemblyReference rar)
@@ -7099,17 +7091,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Initialize the black list and use it to remove references from the reference table
+        /// Initialize the deny list and use it to remove references from the reference table
         /// </summary>
-        private void InitializeExclusionList(ReferenceTable referenceTable, AssemblyNameExtension[] assembliesForBlackList, out Dictionary<string, string> blackList)
+        private void InitializeExclusionList(ReferenceTable referenceTable, AssemblyNameExtension[] assembliesForDenyList, out Dictionary<string, string> denyList)
         {
-            blackList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (AssemblyNameExtension assemblyName in assembliesForBlackList)
+            denyList = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (AssemblyNameExtension assemblyName in assembliesForDenyList)
             {
-                blackList[assemblyName.FullName] = null;
+                denyList[assemblyName.FullName] = null;
             }
 
-            referenceTable.MarkReferencesForExclusion(blackList);
+            referenceTable.MarkReferencesForExclusion(denyList);
             referenceTable.RemoveReferencesMarkedForExclusion(false, "Client");
         }
 
@@ -7342,7 +7334,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// This test will verify when the full client name is passed in and it appears in the TargetFrameworkSubsetList, that the
-        /// black list is not used.
+        /// deny list is not used.
         /// </summary>
         [Fact]
         public void ResolveAssemblyReferenceVerifyFullClientName()
@@ -7375,7 +7367,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// This test will verify when the full client name is passed in and it appears in the TargetFrameworkSubsetList, that the
-        /// black list is not used.
+        /// deny list is not used.
         /// </summary>
         [Fact]
         public void ResolveAssemblyReferenceVerifyFullClientNameWithSubsetTables()
@@ -7410,7 +7402,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         /// <summary>
         /// This test will verify when the full client name is passed in and it appears in the TargetFrameworkSubsetList, that the
-        /// black list is not used.
+        /// deny list is not used.
         /// </summary>
         [Fact]
         public void ResolveAssemblyReferenceVerifyFullClientNameNoTablesPassedIn()
@@ -7443,7 +7435,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify the correct references are still in the references table and that references which are in the black list are not in the references table
+        /// Verify the correct references are still in the references table and that references which are in the deny list are not in the references table
         /// Also verify any expected warning messages are seen in the log.
         /// </summary>
         private static void VerifyReferenceTable(ReferenceTable referenceTable, MockEngine mockEngine, AssemblyNameExtension engineAssemblyName, AssemblyNameExtension dataAssemblyName, AssemblyNameExtension sqlclientAssemblyName, AssemblyNameExtension xmlAssemblyName, string warningMessage, string warningMessage2)
@@ -8238,7 +8230,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify when a p2p (assemblies in the AssemblyFiles property) are passed to rar that we properly un-resolve them if they depend on references which are in the black list for the profile.
+        /// Verify when a p2p (assemblies in the AssemblyFiles property) are passed to rar that we properly un-resolve them if they depend on references which are in the deny list for the profile.
         /// </summary>
         [Fact]
         public void Verifyp2pAndProfile()
@@ -8286,7 +8278,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Verify when a p2p (assemblies in the AssemblyFiles property) are passed to rar that we properly resolve them if they depend on references which are in the black list for the profile but have specific version set to true.
+        /// Verify when a p2p (assemblies in the AssemblyFiles property) are passed to rar that we properly resolve them if they depend on references which are in the deny list for the profile but have specific version set to true.
         /// </summary>
         [Fact]
         public void Verifyp2pAndProfile2()
@@ -8483,7 +8475,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Make sure when reading in the full framework redist list or when reading in the white list xml files.
+        /// Make sure when reading in the full framework redist list or when reading in the allow list xml files.
         /// Errors in reading the file should be logged as warnings and no assemblies should be excluded.
         ///
         /// </summary>
@@ -8563,6 +8555,111 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Directory.CreateDirectory(redistDirectory);
 
             File.WriteAllText(profileRedistList, profileListContents);
+        }
+
+        [Fact]
+        public void SDKReferencesAreResolvedWithoutIO()
+        {
+            InitializeRARwithMockEngine(_output, out MockEngine mockEngine, out ResolveAssemblyReference rar);
+
+            string refPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+
+            TaskItem item = new TaskItem(refPath);
+            item.SetMetadata("ExternallyResolved", "true");
+
+            item.SetMetadata("FrameworkReferenceName", "Microsoft.NETCore.App");
+            item.SetMetadata("FrameworkReferenceVersion", "8.0.0");
+
+            item.SetMetadata("AssemblyName", "System.Candy");
+            item.SetMetadata("AssemblyVersion", "8.1.2.3");
+            item.SetMetadata("PublicKeyToken", "b03f5f7f11d50a3a");
+
+            rar.Assemblies = new ITaskItem[] { item };
+            rar.SearchPaths = new string[]
+            {
+                "{CandidateAssemblyFiles}",
+                "{HintPathFromItem}",
+                "{TargetFrameworkDirectory}",
+                "{RawFileName}",
+            };
+            rar.WarnOrErrorOnTargetArchitectureMismatch = "Warning";
+
+            // Execute RAR and assert that we receive no I/O callbacks because the task gets what it needs from item metadata.
+            rar.Execute(
+                _ => throw new ShouldAssertException("Unexpected FileExists callback"),
+                directoryExists,
+                getDirectories,
+                _ => throw new ShouldAssertException("Unexpected GetAssemblyName callback"),
+                (string path, ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache, out AssemblyNameExtension[] dependencies, out string[] scatterFiles, out FrameworkNameVersioning frameworkName)
+                  => throw new ShouldAssertException("Unexpected GetAssemblyMetadata callback"),
+#if FEATURE_WIN32_REGISTRY
+                getRegistrySubKeyNames,
+                getRegistrySubKeyDefaultValue,
+#endif
+                _ => throw new ShouldAssertException("Unexpected GetLastWriteTime callback"),
+                _ => throw new ShouldAssertException("Unexpected GetAssemblyRuntimeVersion callback"),
+#if FEATURE_WIN32_REGISTRY
+                openBaseKey,
+#endif
+                checkIfAssemblyIsInGac,
+                isWinMDFile,
+                readMachineTypeFromPEHeader).ShouldBeTrue();
+
+            rar.ResolvedFiles.Length.ShouldBe(1);
+            rar.ResolvedFiles[0].ItemSpec.ShouldBe(refPath);
+            rar.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("System.Candy, Version=8.1.2.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
+
+            // The reference is not worth persisting in the per-instance cache.
+            rar._cache.IsDirty.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void LogsParentAssemblyForEveryConsideredAndRejectedSearchPath()
+        {
+            InitializeRARwithMockEngine(_output, out MockEngine mockEngine, out ResolveAssemblyReference rar);
+
+            rar.Assemblies = new ITaskItem[]
+            {
+                new TaskItem(@"C:\DirectoryTest\A.dll"),
+                new TaskItem("B"),
+            };
+
+            rar.SearchPaths = new string[]
+            {
+                "{RawFileName}",
+            };
+
+            Execute(rar).ShouldBeTrue();
+
+            mockEngine.AssertLogContains(rar.Log.FormatResourceString("ResolveAssemblyReference.SearchPathAddedByParentAssembly",
+                @"C:\DirectoryTest",
+                @"C:\DirectoryTest\A.dll"));
+        }
+
+        [Fact]
+        public void ManagedRuntimeVersionReaderSupportsWindowsRuntime()
+        {
+            // This is a prefix of a .winmd file built using the Universal Windows runtime component project in Visual Studio.
+            string windowsRuntimeAssemblyHeaderBase64Encoded =
+                "TVqQAAMAAAAEAAAA//8AALgAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAA4fug4AtAnNIbgBTM0hVGhpcyBwcm9ncmFtIGNhbm5vdCBiZSBydW4gaW4gRE9TIG1v" +
+                "ZGUuDQ0KJAAAAAAAAABQRQAATAEDAFD4XWQAAAAAAAAAAOAAIiALATAAAAwAAAAGAAAAAAAAXioAAAAgAAAAQAAAAAAAEAAgAAAAAgAABAAAAAAAAAAGAAIAAAAAAACAAAAAAgAAAAAAAAMAYIUAABAA" +
+                "ABAAAAAAEAAAEAAAAAAAABAAAAAAAAAAAAAAAAkqAABPAAAAAEAAANADAAAAAAAAAAAAAAAAAAAAAAAAAGAAAAwAAABwKQAAHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
+                "AAAAIAAACAAAAAAAAAAAAAAACCAAAEgAAAAAAAAAAAAAAC50ZXh0AAAAZAoAAAAgAAAADAAAAAIAAAAAAAAAAAAAAAAAACAAAGAucnNyYwAAANADAAAAQAAAAAQAAAAOAAAAAAAAAAAAAAAAAABAAABA" +
+                "LnJlbG9jAAAMAAAAAGAAAAACAAAAEgAAAAAAAAAAAAAAAAAAQAAAQgAAAAAAAAAAAAAAAAAAAAA9KgAAAAAAAEgAAAACAAUAWCAAABgJAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAB4CKAEAAAoqQlNKQgEAAQAAAAAAJAAAAFdpbmRvd3NSdW50aW1lIDEuNDtDTFIgdjQuMC4zMDMxOQAAAAAABQCEAAAA+AIAACN+AAB8AwAAoAMAACNTdHJpbmdz" +
+                "AAAAABwHAAAIAAAAI1VTACQHAAAQAAAAI0dVSUQAAAA0BwAA5AEAACNCbG9iAAAAAAAAAAIAAAFHFwACCQAAAAD6ATMAFgAAAQAAABwAAAAEAAAAAwAAAAEAAAADAAAAFwAAABwAAAABAAAAAQAAAAMA" +
+                "AAAAAE0AAQAAAAAABgCWA9ACCgCWA9ACDgBlANcCBgDdATQDBgBbAjQDBgC4AAIDGwBUAwAABgD1AOoCBgCPAeoCBgBwAeoCBgBCAuoCBgD9AeoCBgAWAuoCBgAfAeoCBgBTAeoCBgDhABUDBgA6AX8C" +
+                "DgDBASgADgCAACgADgAMASgADgDBAigADgBfASgADgDMACgADgAxAigABgCPADQDDgCqACgADgCsASgACgCKANACAAAAAB8AAAAAAAEAAQAABRAAAQANAAUAAQABAAFBEAAGAA0ACQABAAIAoEAAAGMD" +
+                "DQAAAAEABABQIAAAAACGGPwCAQABAAAAAAADAIYY/AIBAAEAAAAAAAMA4QGZAgUAAQAAAAAAeQICABAAAwAQAAMADQAJAPwCAQAZALgCBQAhAPwCCQApAPwCAQAxAPwCDgBBAPwCFABJAPwCFABRAPwC" +
+                "FABZAPwCFABhAPwCFABpAPwCFABxAPwCFAB5APwCFACBAPwCGQCJAPwCFACRAPwCHgChAPwCJACxAPwCKgC5APwCKgDBAPwCAQDJAPwCAQDRAPwCLwDZAPwCPgAlAKMAqgEuABsA2AAuACMA4QAuACsA" +
+                "AAEuADMACQEuADsAIAEuAEMAIAEuAEsAIAEuAFMACQEuAFsAJgEuAGMAIAEuAGsAPgEuAHMAIAEuAHsASwFDAIMAAAFDAIsAmAFDAJMAoQFDAJsAoQFFAKMAqgFjAIMAAAFjAIsAmAFjAJMAoQFjAKsA" +
+                "qgFjAJsAoQGDAKsAqgGDALMArwGDAJMAoQGDALsAxAEDAAYABQAEgAAAAQAAAAAAAAAAAgAAAAANAAAABAACAAEAAAAAAAAARABxAAAAAAD/AP8A/wD/AAAAAABNAEQAAABWAAQAAAAAAAAAAAIAAAAA";
+
+            using MemoryStream memoryStream = new MemoryStream(Convert.FromBase64String(windowsRuntimeAssemblyHeaderBase64Encoded));
+            using BinaryReader reader = new BinaryReader(memoryStream);
+            string runtimeVersion = ManagedRuntimeVersionReader.GetRuntimeVersion(reader);
+
+            runtimeVersion.ShouldBe("WindowsRuntime 1.4;CLR v4.0.30319");
         }
     }
 }

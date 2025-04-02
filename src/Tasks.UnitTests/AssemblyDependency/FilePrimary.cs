@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// Primary references are never unified. This is because:
         /// (a) The user expects that a primary reference will be respected.
-        /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+        /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
         ///     dependencies anyway to make things work consistently. This would be a significant
         ///     perf hit when loading large solutions.
         /// </summary>
@@ -187,15 +187,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - An app.config was passed in that promotes UnifyMe version from 1.0.0.0 to 2.0.0.0
         /// - Version 1.0.0.0 of UnifyMe exists.
         /// - Version 2.0.0.0 of UnifyMe exists.
-        /// -Version 2.0.0.0 of UnifyMe is in the Black List
+        /// -Version 2.0.0.0 of UnifyMe is in the Deny List
         /// Expected:
         /// - There should be a warning indicating that DependsOnUnified has a dependency UnifyMe 2.0.0.0 which is not in a TargetFrameworkSubset.
         /// - There will be no unified message.
         /// Rationale:
-        /// Strongly named dependencies should unify according to the bindingRedirects in the app.config, if the unified version is in the black list it should be removed and warned.
+        /// Strongly named dependencies should unify according to the bindingRedirects in the app.config, if the unified version is in the deny list it should be removed and warned.
         /// </summary>
         [Fact]
-        public void ExistsPromotedDependencyInTheBlackList()
+        public void ExistsPromotedDependencyInTheDenyList()
         {
             string implicitRedistListContents =
                 "<FileList Redist='Microsoft-Windows-CLRCoreComp' >" +
@@ -261,7 +261,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// <summary>
         /// In this case,
         /// - A single primary file reference to assembly version 1.0.0.0 was passed in.
-        /// - An app.config was passed in that promotes a *different* assembly version name from 
+        /// - An app.config was passed in that promotes a *different* assembly version name from
         ///   1.0.0.0 to 2.0.0.0
         /// - Version 1.0.0.0 of the file exists.
         /// - Version 2.0.0.0 of the file exists.
@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// Primary references are never unified. This is because:
         /// (a) The user expects that a primary reference will be respected.
-        /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+        /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
         ///     dependencies anyway to make things work consistently. This would be a significant
         ///     perf hit when loading large solutions.
         /// </summary>
@@ -369,7 +369,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// Primary references are never unified. This is because:
         /// (a) The user expects that a primary reference will be respected.
-        /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all 
+        /// (b) When FindDependencies is false and AutoUnify is true, we'd have to find all
         ///     dependencies anyway to make things work consistently. This would be a significant
         ///     perf hit when loading large solutions.
         /// </summary>
@@ -419,7 +419,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// -- The resulting assembly returned should be 2.0.0.0.
         /// Rationale:
         /// There's no way for the resolve algorithm to determine that the file reference corresponds
-        /// to a particular AssemblyName. Because of this, there's no way to determine that we want to 
+        /// to a particular AssemblyName. Because of this, there's no way to determine that we want to
         /// promote from 0.5.0.0 to 2.0.0.0. In this case, just use the assembly name that was passed in.
         /// </summary>
         [Fact]

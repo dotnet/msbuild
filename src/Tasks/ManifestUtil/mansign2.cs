@@ -270,10 +270,14 @@ namespace System.Deployment.Internal.CodeSigning
                                Sha256SignatureMethodUri);
 
 #if RUNTIME_TYPE_NETCORE
-            CryptoConfig.AddAlgorithm(typeof(SHA256),
+#pragma warning disable SYSLIB0021 // Type or member is obsolete
+            // SHA256 can not be used since it is an abstract class.
+            // CalculateHashValue internally calls CryptoConfig.CreateFromName and it causes instantiation problems.
+            CryptoConfig.AddAlgorithm(typeof(SHA256Managed),
                                Sha256DigestMethod);
+#pragma warning restore SYSLIB0021 // Type or member is obsolete
 #else
-            CryptoConfig.AddAlgorithm(typeof(System.Security.Cryptography.SHA256Cng),
+            CryptoConfig.AddAlgorithm(typeof(SHA256Cng),
                                Sha256DigestMethod);
 #endif
         }
@@ -507,7 +511,8 @@ namespace System.Deployment.Internal.CodeSigning
 
             if (snKey is RSACryptoServiceProvider rsacsp)
             {
-                cspPublicKeyBlob = (GetFixedRSACryptoServiceProvider(rsacsp, useSha256)).ExportCspBlob(false);
+                using var cryptoProvider = GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
+                cspPublicKeyBlob = cryptoProvider.ExportCspBlob(false);
                 if (cspPublicKeyBlob == null || cspPublicKeyBlob.Length == 0)
                 {
                     throw new CryptographicException(Win32.NTE_BAD_KEY);
@@ -581,6 +586,7 @@ namespace System.Deployment.Internal.CodeSigning
                 else
                 {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                    // codeql[cs/weak-crypto] SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/139025
                     using (SHA1 sha1 = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA1CryptoServiceProvider"
@@ -612,8 +618,10 @@ namespace System.Deployment.Internal.CodeSigning
                 {
                     XmlReaderSettings settings = new XmlReaderSettings();
                     settings.DtdProcessing = DtdProcessing.Parse;
-                    XmlReader reader = XmlReader.Create(stringReader, settings, manifestDom.BaseURI);
-                    normalizedDom.Load(reader);
+                    using (XmlReader reader = XmlReader.Create(stringReader, settings, manifestDom.BaseURI))
+                    {
+                        normalizedDom.Load(reader);
+                    }
                 }
 
                 XmlDsigExcC14NTransform exc = new XmlDsigExcC14NTransform();
@@ -641,6 +649,7 @@ namespace System.Deployment.Internal.CodeSigning
                 else
                 {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                    // codeql[cs/weak-crypto] SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/139025
                     using (SHA1 sha1 = SHA1.Create(
 #if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
                         "System.Security.Cryptography.SHA1CryptoServiceProvider"
@@ -756,7 +765,7 @@ namespace System.Deployment.Internal.CodeSigning
             // Add an enveloped and an Exc-C14N transform.
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
 #if (false) // BUGBUG: LTA transform complaining about issuer node not found.
-            reference.AddTransform(new XmlLicenseTransform()); 
+            reference.AddTransform(new XmlLicenseTransform());
 #endif
             reference.AddTransform(new XmlDsigExcC14NTransform());
 
@@ -808,12 +817,32 @@ namespace System.Deployment.Internal.CodeSigning
 
                 try
                 {
-                    byte[] nonce = new byte[24];
+#if NET
+                    Span<byte> nonce = stackalloc byte[32];
+                    RandomNumberGenerator.Fill(nonce);
+#else
+                    byte[] nonce = new byte[32];
 
                     using (RandomNumberGenerator rng = RandomNumberGenerator.Create())
                     {
                         rng.GetBytes(nonce);
                     }
+#endif
+
+                    // Eventually, CryptEncodeObjectEx(...) is called on a CRYPT_TIMESTAMP_REQUEST with this nonce,
+                    // and CryptEncodeObjectEx(...) interprets the nonce as a little endian, DER-encoded integer value
+                    // (without tag and length), and may even strip leading bytes from the big endian representation
+                    // of the byte sequence to achieve proper integer DER encoding.
+                    //
+                    // If the nonce is changed after the client generates it, the timestamp server would receive
+                    // and return a nonce that does not agree with the client's original nonce.
+                    //
+                    // To ensure this does not happen, ensure that the most significant byte in the little
+                    // endian byte sequence is in the 0x01-0x7F range; clear that byte's most significant bit
+                    // and set that byte's least significant bit.
+
+                    nonce[nonce.Length - 1] &= 0x7f;
+                    nonce[nonce.Length - 1] |= 0x01;
 
                     Win32.CRYPT_TIMESTAMP_PARA para = new Win32.CRYPT_TIMESTAMP_PARA()
                     {
@@ -883,7 +912,7 @@ namespace System.Deployment.Internal.CodeSigning
                 // Try RFC3161 first
                 XmlElement signatureValueNode = licenseDom.SelectSingleNode("r:license/r:issuer/ds:Signature/ds:SignatureValue", nsm) as XmlElement;
                 string signatureValue = signatureValueNode.InnerText;
-                timestamp = ObtainRFC3161Timestamp(timeStampUrl, signatureValue, useSha256);
+                timestamp = ObtainRFC3161Timestamp(timeStampUrl, signatureValue, true);
             }
             // Catch CryptographicException to ensure fallback to old code (non-RFC3161)
             catch (CryptographicException)
@@ -1020,13 +1049,19 @@ namespace System.Deployment.Internal.CodeSigning
             // Insert the signature now.
             signatureParent.AppendChild(xmlDigitalSignature);
         }
+
+#if !NET
         private static readonly char[] s_hexValues = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+#endif
 
         private static string BytesToHexString(byte[] array, int start, int end)
         {
             string result = null;
             if (array != null)
             {
+#if NET
+                return Convert.ToHexStringLower(array.AsSpan(start, end - start));
+#else
                 char[] hexOrder = new char[(end - start) * 2];
                 int i = end;
                 int digit, j = 0;
@@ -1038,6 +1073,7 @@ namespace System.Deployment.Internal.CodeSigning
                     hexOrder[j++] = s_hexValues[digit];
                 }
                 result = new String(hexOrder);
+#endif
             }
             return result;
         }

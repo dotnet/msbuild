@@ -12,6 +12,8 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
+    internal readonly record struct DirectoryWithParentAssembly(string Directory, string ParentAssembly);
+
     /// <summary>
     /// Utility class encapsulates steps to resolve assembly references.
     /// For example, this class has the code that will take:
@@ -22,7 +24,7 @@ namespace Microsoft.Build.Tasks
     ///
     ///     [path-to-frameworks]\System.Xml.dll
     ///
-    /// 
+    ///
     /// </summary>
     internal static class AssemblyResolution
     {
@@ -34,6 +36,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="sdkName"></param>
         /// <param name="rawFileNameCandidate">The file name to match if {RawFileName} is seen. (May be null).</param>
         /// <param name="isPrimaryProjectReference">True if this is a primary reference directly from the project file.</param>
+        /// <param name="isImmutableFrameworkReference">True if <paramref name="rawFileNameCandidate"/> is immutable and guaranteed to exist.</param>
         /// <param name="wantSpecificVersion"></param>
         /// <param name="executableExtensions">The filename extension of the assembly. Must be this or its no match.</param>
         /// <param name="hintPath">This reference's hintpath</param>
@@ -48,6 +51,7 @@ namespace Microsoft.Build.Tasks
             string sdkName,
             string rawFileNameCandidate,
             bool isPrimaryProjectReference,
+            bool isImmutableFrameworkReference,
             bool wantSpecificVersion,
             string[] executableExtensions,
             string hintPath,
@@ -79,6 +83,7 @@ namespace Microsoft.Build.Tasks
                             sdkName,
                             rawFileNameCandidate,
                             isPrimaryProjectReference,
+                            isImmutableFrameworkReference,
                             wantSpecificVersion,
                             executableExtensions,
                             hintPath,
@@ -200,7 +205,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    resolvers[p] = new DirectoryResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
+                    resolvers[p] = new DirectoryResolver(searchPaths[p], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, null);
                 }
             }
             return resolvers;
@@ -210,16 +215,16 @@ namespace Microsoft.Build.Tasks
         /// Build a resolver array from a set of directories to resolve directly from.
         /// </summary>
         internal static Resolver[] CompileDirectories(
-            List<string> directories,
+            List<DirectoryWithParentAssembly> parentReferenceDirectories,
             FileExists fileExists,
             GetAssemblyName getAssemblyName,
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVersion)
         {
-            var resolvers = new Resolver[directories.Count];
-            for (int i = 0; i < directories.Count; i++)
+            var resolvers = new Resolver[parentReferenceDirectories.Count];
+            for (int i = 0; i < parentReferenceDirectories.Count; i++)
             {
-                resolvers[i] = new DirectoryResolver(directories[i], getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion);
+                resolvers[i] = new DirectoryResolver(parentReferenceDirectories[i].Directory, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVersion, parentReferenceDirectories[i].ParentAssembly);
             }
 
             return resolvers;

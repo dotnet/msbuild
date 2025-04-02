@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 File.Delete(file);
 
-                // Write ANSI .. that won't work! 
+                // Write ANSI .. that won't work!
                 a = new WriteLinesToFile
                 {
                     BuildEngine = new MockEngine(_output),
@@ -151,6 +151,141 @@ namespace Microsoft.Build.Tasks.UnitTests
             finally
             {
                 File.Delete(file);
+            }
+        }
+
+        [Fact]
+        public void RedundantParametersAreLogged()
+        {
+            using TestEnvironment testEnv = TestEnvironment.Create(_output);
+
+            MockEngine engine = new(_output);
+
+            string file = testEnv.ExpectFile().Path;
+
+            WriteLinesToFile task = new()
+            {
+                BuildEngine = engine,
+                File = new TaskItem(file),
+                Lines = new ITaskItem[] { new TaskItem($"{nameof(RedundantParametersAreLogged)} Test") },
+                WriteOnlyWhenDifferent = true,
+                Overwrite = false,
+            };
+
+            task.Execute().ShouldBeTrue();
+            engine.AssertLogContainsMessageFromResource(AssemblyResources.GetString, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", file);
+        }
+
+        /// <summary>
+        /// Question WriteLines to return false when a write will be required.
+        /// </summary>
+        [Fact]
+        public void QuestionWriteLinesWriteOnlyWhenDifferentTest()
+        {
+            var file = FileUtilities.GetTemporaryFile();
+            try
+            {
+                // Write an initial file.
+                var a = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") }
+                };
+
+                a.Execute().ShouldBeTrue();
+
+                // Verify contents
+                var r = new ReadLinesFromFile { File = new TaskItem(file) };
+                r.Execute().ShouldBeTrue();
+                r.Lines[0].ItemSpec.ShouldBe("File contents1");
+
+                var writeTime = DateTime.Now.AddHours(-1);
+
+                File.SetLastWriteTime(file, writeTime);
+
+                // Write the same contents to the file, timestamps should match.
+                var a2 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Lines = new ITaskItem[] { new TaskItem("File contents1") },
+                    FailIfNotIncremental = true,
+                };
+                a2.Execute().ShouldBeTrue();
+                File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
+
+                // Write different contents to the file, last write time should differ.
+                var a3 = new WriteLinesToFile
+                {
+                    Overwrite = true,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(file),
+                    WriteOnlyWhenDifferent = true,
+                    Lines = new ITaskItem[] { new TaskItem("File contents2") },
+                    FailIfNotIncremental = true,
+                };
+                a3.Execute().ShouldBeFalse();
+                File.GetLastWriteTime(file).ShouldBe(writeTime, tolerance: TimeSpan.FromSeconds(1));
+            }
+            finally
+            {
+                File.Delete(file);
+            }
+        }
+
+        /// <summary>
+        /// Question WriteLines to return true when Lines are empty.
+        /// </summary>
+        [Fact]
+        public void QuestionWriteLinesWhenLinesAreEmpty()
+        {
+            // Test the combination of:
+            // 1) File exists
+            // 2) Overwrite
+            // 3) WriteOnlyWhenDifferent
+
+            var fileExists = FileUtilities.GetTemporaryFile();
+            var fileNotExists = FileUtilities.GetTemporaryFileName();
+            try
+            {
+                TestWriteLines(fileExists, fileNotExists, Overwrite: true, WriteOnlyWhenDifferent: true);
+                TestWriteLines(fileExists, fileNotExists, Overwrite: false, WriteOnlyWhenDifferent: true);
+                TestWriteLines(fileExists, fileNotExists, Overwrite: true, WriteOnlyWhenDifferent: false);
+                TestWriteLines(fileExists, fileNotExists, Overwrite: false, WriteOnlyWhenDifferent: false);
+            }
+            finally
+            {
+                File.Delete(fileExists);
+            }
+
+            void TestWriteLines(string fileExists, string fileNotExists, bool Overwrite, bool WriteOnlyWhenDifferent)
+            {
+                var test1 = new WriteLinesToFile
+                {
+                    Overwrite = Overwrite,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(fileExists),
+                    WriteOnlyWhenDifferent = WriteOnlyWhenDifferent,
+                    FailIfNotIncremental = true,
+                    // Tests Lines = null.
+                };
+                test1.Execute().ShouldBeTrue();
+
+                var test2 = new WriteLinesToFile
+                {
+                    Overwrite = Overwrite,
+                    BuildEngine = new MockEngine(_output),
+                    File = new TaskItem(fileNotExists),
+                    WriteOnlyWhenDifferent = WriteOnlyWhenDifferent,
+                    FailIfNotIncremental = true,
+                    Lines = Array.Empty<ITaskItem>(),  // Test empty.
+                };
+                test2.Execute().ShouldBeTrue();
             }
         }
 

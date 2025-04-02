@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -415,7 +414,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void CreateProjectInstanceWithItemsContainingProjects()
         {
             const string CapturedMetadataName = "DefiningProjectFullPath";
-            var pc = new ProjectCollection();
+            using var pc = new ProjectCollection();
             var projA = ProjectRootElement.Create(pc);
             var projB = ProjectRootElement.Create(pc);
             projA.FullPath = Path.Combine(Path.GetTempPath(), "a.proj");
@@ -451,7 +450,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void CreateProjectInstanceFromProject()
         {
             const string CapturedMetadataName = "DefiningProjectFullPath";
-            var pc = new ProjectCollection();
+            using var pc = new ProjectCollection();
             var projA = ProjectRootElement.Create(pc);
             var projB = ProjectRootElement.Create(pc);
             projA.FullPath = Path.Combine(Path.GetTempPath(), "a.proj");
@@ -493,7 +492,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void DefiningProjectItemBuiltInMetadataFromWildcards()
         {
             const string CapturedMetadataName = "DefiningProjectFullPath";
-            var pc = new ProjectCollection();
+            using var pc = new ProjectCollection();
             var projA = ProjectRootElement.Create(pc);
             var projB = ProjectRootElement.Create(pc);
 
@@ -1027,7 +1026,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globalProperties["g"] = "gv";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            using ProjectFromString projectFromString = new(content, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, ProjectCollection.GlobalProjectCollection);
+            Project project = projectFromString.Project;
             ProjectInstance instance = immutable ? project.CreateProjectInstance(ProjectInstanceSettings.Immutable) : project.CreateProjectInstance();
 
             return instance;

@@ -11,7 +11,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Performs SetPlatform negotiation for all project references when opted
     /// in via the EnableDynamicPlatformResolution property.
-    /// 
+    ///
     /// See ProjectReference-Protocol.md for details.
     /// </summary>
     public class GetCompatiblePlatform : TaskExtension
@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] AnnotatedProjects { get; set; }
 
         /// <summary>
-        /// The platform the current project is building as. 
+        /// The platform the current project is building as.
         /// </summary>
         [Required]
         public string CurrentProjectPlatform { get; set; }
@@ -59,8 +59,9 @@ namespace Microsoft.Build.Tasks
                 string referencedProjectPlatform = AssignedProjectsWithPlatform[i].GetMetadata("Platform");
                 string projectReferencePlatformsMetadata = AssignedProjectsWithPlatform[i].GetMetadata("Platforms");
                 string projectReferenceLookupTableMetadata = AssignedProjectsWithPlatform[i].GetMetadata("PlatformLookupTable");
+                string projectReferenceOverridePlatformNegotiationMetadata = AssignedProjectsWithPlatform[i].GetMetadata("OverridePlatformNegotiationValue");
 
-                string? buildProjectReferenceAs = PlatformNegotiation.GetNearestPlatform(referencedProjectPlatform, projectReferencePlatformsMetadata, projectReferenceLookupTableMetadata, PlatformLookupTable, AssignedProjectsWithPlatform[i].ItemSpec, CurrentProjectPlatform, Log);
+                string? buildProjectReferenceAs = PlatformNegotiation.GetNearestPlatform(projectReferenceOverridePlatformNegotiationMetadata, referencedProjectPlatform, projectReferencePlatformsMetadata, projectReferenceLookupTableMetadata, PlatformLookupTable, AssignedProjectsWithPlatform[i].ItemSpec, CurrentProjectPlatform, Log);
 
                 AssignedProjectsWithPlatform[i].SetMetadata("NearestPlatform", buildProjectReferenceAs);
                 Log.LogMessageFromResources(MessageImportance.Low, "GetCompatiblePlatform.DisplayChosenPlatform", AssignedProjectsWithPlatform[i].ItemSpec, buildProjectReferenceAs);

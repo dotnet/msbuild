@@ -24,15 +24,25 @@ resources:
   - pipeline: DartLab.OptProf
     source: DartLab.OptProf
     branch: main
+    tags:
+    - production
   repositories:
   - repository: DartLabTemplates
     type: git
     name: DartLab.Templates
-    ref: refs/heads/main
   - repository: DartLabOptProfTemplates
     type: git
     name: DartLab.OptProf
-    ref: refs/heads/main
+    ref: refs/tags/Production
+
+parameters:
+  # Whether or not to delete the test machines after the run completes
+  - name: testMachineCleanUpStrategy
+    type: string
+    default: delete
+    values:
+    - delete
+    - stop
 
 stages:
 - template: \templates\stages\visual-studio\single-runsettings.yml@DartLabOptProfTemplates
@@ -44,8 +54,9 @@ stages:
     name: OptProfProfilingWorkflow
     displayName: OptProf Profiling Workflow
     optOptimizationInputsDropName: $(OptimizationInputsDropName)
+    cloudBuildResourceName: ComponentBuildUnderTest
     testLabPoolName: VS-Platform # The test lab pool to run your tests in
-    testMachineImageName: Windows-10-Enterprise-20H2
+    testMachineCleanUpStrategy: ${{parameters.testMachineCleanUpStrategy}}
     visualStudioSigning: Test
     variables:
     - name: branchName # The branch in the VS repo the bootstrapper was based on
@@ -68,7 +79,7 @@ stages:
           $vsBranch = $bootstrapperInfoJson[0].VSBranch
           Write-Host "VSBootstrapperBranch: $vsBranch"
           Set-AzurePipelinesVariable 'VSBootstrapperBranch' $vsBranch
-        }        
+        }
         catch {
           Write-Host $_
           Write-Error "Failed to set VSBootstrapperBranch pipeline variable"

@@ -10,6 +10,7 @@ using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -1379,7 +1380,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1422,7 +1423,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1468,7 +1469,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1486,7 +1487,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1557,7 +1558,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1604,7 +1605,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1651,7 +1652,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1808,7 +1809,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string evaluate = "RandomStuff";
                 List<ProjectUsingTaskElement> elementList = CreateTaskBodyElementWithAttributes(evaluate, "");
                 CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -2182,18 +2183,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ? new TaskRegistry(toolset, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache)
                 : new TaskRegistry(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
-            foreach (ProjectUsingTaskElement projectUsingTaskElement in usingTaskElements)
-            {
-                TaskRegistry.RegisterTasksFromUsingTaskElement(
-                        _loggingService,
-                        _loggerContext,
-                        Directory.GetCurrentDirectory(),
-                        projectUsingTaskElement,
-                        registry,
-                        RegistryExpander,
-                        ExpanderOptions.ExpandPropertiesAndItems,
-                        FileSystems.Default);
-            }
+            string currentDir = Directory.GetCurrentDirectory();
+            TaskRegistry.InitializeTaskRegistryFromUsingTaskElements(
+                _targetLoggingContext,
+                usingTaskElements.Select(el => (el, currentDir)),
+                registry,
+                RegistryExpander,
+                ExpanderOptions.ExpandPropertiesAndItems,
+                FileSystems.Default);
 
             return registry;
         }
@@ -2252,7 +2249,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             secondaryItemsByName.ImportItems(thirdItemGroup);
             secondaryItemsByName.ImportItems(trueItemGroup);
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, secondaryItemsByName, FileSystems.Default);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                pg,
+                secondaryItemsByName,
+                FileSystems.Default,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
             return expander;
         }
 

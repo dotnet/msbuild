@@ -18,7 +18,6 @@ namespace Microsoft.Build.Tasks
         /// The root element name to use for the generated XML string
         /// </summary>
         public string RootElementName { get; set; }
-
         /// <summary>
         /// Items to include in the XML.  The ItemSpec should be the property name, and it should have Value metadata for its value.
         /// </summary>
@@ -39,16 +38,24 @@ namespace Microsoft.Build.Tasks
         {
             if (PropertiesAndValues != null)
             {
-                XElement root = UseAttributeForTargetFrameworkInfoPropertyNames ?
-                    new("TargetFramework", new XAttribute("Name", EscapingUtilities.Escape(RootElementName))) :
-                    new(RootElementName);
-
-                foreach (ITaskItem item in PropertiesAndValues)
+                if ((!UseAttributeForTargetFrameworkInfoPropertyNames && string.IsNullOrEmpty(RootElementName)) || (UseAttributeForTargetFrameworkInfoPropertyNames && RootElementName == null))
                 {
-                    root.Add(new XElement(item.ItemSpec, item.GetMetadata("Value")));
+                    string resource = UseAttributeForTargetFrameworkInfoPropertyNames ? "CombineTargetFrameworkInfoProperties.NotNullRootElementName" : "CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName";
+                    Log.LogErrorWithCodeFromResources(resource, nameof(RootElementName), nameof(UseAttributeForTargetFrameworkInfoPropertyNames));
                 }
+                else
+                {
+                    XElement root = UseAttributeForTargetFrameworkInfoPropertyNames ?
+                        new("TargetFramework", new XAttribute("Name", EscapingUtilities.Escape(RootElementName))) :
+                        new(RootElementName);
 
-                Result = root.ToString();
+                    foreach (ITaskItem item in PropertiesAndValues)
+                    {
+                        root.Add(new XElement(item.ItemSpec, item.GetMetadata("Value")));
+                    }
+
+                    Result = root.ToString();
+                }
             }
             return !Log.HasLoggedErrors;
         }

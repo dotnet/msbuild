@@ -127,7 +127,7 @@ namespace Microsoft.Build.Tasks
                             fs = File.OpenRead(KeyFile);
                             int fileLength = (int)fs.Length;
                             var keyBytes = new byte[fileLength];
-                            fs.Read(keyBytes, 0, fileLength);
+                            fs.ReadFromStream(keyBytes, 0, fileLength);
 
                             UInt64 hash = HashFromBlob(keyBytes);
                             hash ^= HashFromBlob(userNameBytes); // modify it with the username hash, so each user would get different hash for the same key
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Tasks
                             fs?.Close();
                         }
 #else
-                        Log.LogError("PFX signing not supported on .NET Core");
+                        Log.LogErrorWithCodeFromResources("ResolveKeySource.PfxUnsupported");
                         pfxSuccess = false;
 #endif
                     }
@@ -216,7 +216,7 @@ namespace Microsoft.Build.Tasks
                     {
                         bool imported = false;
                         // first try it with no password
-                        var cert = new X509Certificate2();
+                        using var cert = new X509Certificate2();
                         var personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                         try
                         {
@@ -266,7 +266,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 #else
-                Log.LogError("Certificate signing not supported on .NET Core");
+                Log.LogErrorWithCodeFromResources("ResolveKeySource.PfxUnsupported");
 #endif
             }
             else if (!certInStore && !string.IsNullOrEmpty(CertificateFile) && !string.IsNullOrEmpty(CertificateThumbprint))

@@ -16,12 +16,26 @@ using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 
 namespace Microsoft.Build.BackEnd
 {
-    internal class NodeLauncher
+    internal sealed class NodeLauncher : INodeLauncher, IBuildComponent
     {
+        public static IBuildComponent CreateComponent(BuildComponentType type)
+        {
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.NodeLauncher, nameof(type));
+            return new NodeLauncher();
+        }
+
+        public void InitializeComponent(IBuildComponentHost host)
+        {
+        }
+
+        public void ShutdownComponent()
+        {
+        }
+
         /// <summary>
         /// Creates a new MSBuild process
         /// </summary>
-        public Process Start(string msbuildLocation, string commandLineArgs)
+        public Process Start(string msbuildLocation, string commandLineArgs, int nodeId)
         {
             // Disable MSBuild server for a child process.
             // In case of starting msbuild server it prevents an infinite recurson. In case of starting msbuild node we also do not want this variable to be set.
@@ -79,13 +93,9 @@ namespace Microsoft.Build.BackEnd
 
             string exeName = msbuildLocation;
 
-#if RUNTIME_TYPE_NETCORE || MONO
-            // Mono automagically uses the current mono, to execute a managed assembly
-            if (!NativeMethodsShared.IsMono)
-            {
-                // Run the child process with the same host as the currently-running process.
-                exeName = CurrentHost.GetCurrentHost();
-            }
+#if RUNTIME_TYPE_NETCORE
+            // Run the child process with the same host as the currently-running process.
+            exeName = CurrentHost.GetCurrentHost();
 #endif
 
             if (!NativeMethodsShared.IsWindows)
@@ -181,7 +191,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private Process DisableMSBuildServer(Func<Process> func)
+        private static Process DisableMSBuildServer(Func<Process> func)
         {
             string useMSBuildServerEnvVarValue = Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName);
             try

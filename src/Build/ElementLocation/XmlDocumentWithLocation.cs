@@ -3,9 +3,11 @@
 
 using System;
 using System.IO;
+using System.Threading;
 using System.Xml;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.NET.StringTools;
 
 #nullable disable
 
@@ -18,19 +20,14 @@ namespace Microsoft.Build.Construction
     /// <remarks>
     /// XmlDocument has many members, and this can't substitute for all of them. Location finding probably won't work if
     /// certain XmlDocument members are used. So for extra robustness, this could wrap an XmlDocument instead,
-    /// and expose the small number of members that the MSBuild code actually uses. 
+    /// and expose the small number of members that the MSBuild code actually uses.
     /// </remarks>
     internal class XmlDocumentWithLocation : XmlDocument
     {
         /// <summary>
-        /// Used to cache strings used in attribute values and comments.
-        /// </summary>
-        private static ProjectStringCache s_globalStringCache = new ProjectStringCache();
-
-        /// <summary>
         /// Used to cache tag names in loaded files.
         /// </summary>
-        private static NameTable s_nameTable = new XmlNameTableThreadSafe();
+        private static readonly NameTable s_nameTable = new XmlNameTableThreadSafe();
 
         /// <summary>
         /// Whether we can selectively load as read-only (eg just when in program files directory)
@@ -49,15 +46,17 @@ namespace Microsoft.Build.Construction
         private string _fullPath;
 
         /// <summary>
-        /// Local cache of strings for attribute values and comments. Used for testing.
-        /// </summary>
-        private ProjectStringCache _stringCache;
-
-        /// <summary>
         /// Whether we can expect to never save this file.
         /// In such a case, we can discard as much as possible on load, like comments and whitespace.
         /// </summary>
         private bool? _loadAsReadOnly;
+
+        /// <summary>
+        /// Location of the element to be created via 'CreateElement' call. So that we can
+        ///  receive and use location from the caller up the stack even if we are being called via
+        /// <see cref="XmlDocument"/> internal methods.
+        /// </summary>
+        private readonly AsyncLocal<ElementLocation> _elementLocation = new AsyncLocal<ElementLocation>();
 
         /// <summary>
         /// Constructor
@@ -117,19 +116,6 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Sets or gets the string cache used by this XmlDocument.
-        /// </summary>
-        /// <remarks>
-        /// When a particular instance has not been set will use the global string cache. The ability
-        /// to use a particular instance is useful for tests.
-        /// </remarks>
-        internal ProjectStringCache StringCache
-        {
-            get { return _stringCache ?? s_globalStringCache; }
-            set { _stringCache = value; }
-        }
-
-        /// <summary>
         /// Loads from an XmlReader, intercepting the reader.
         /// </summary>
         /// <remarks>
@@ -181,6 +167,31 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Called during parse, to add an element.
+        /// </summary>
+        /// <remarks>
+        /// We create our own kind of element, that we can give location information to.
+        /// In order to pass the location through the callchain, that contains XmlDocument function
+        ///  that then calls back to our XmlDocumentWithLocation (so we cannot use call stack via passing via parameters),
+        ///  we use async local field, that simulates variable on call stack.
+        /// </remarks>
+        internal XmlElement CreateElement(string localName, string namespaceURI, ElementLocation location)
+        {
+            if (location != null)
+            {
+                this._elementLocation.Value = location;
+            }
+            try
+            {
+                return CreateElement(localName, namespaceURI);
+            }
+            finally
+            {
+                this._elementLocation.Value = null;
+            }
+        }
+
+        /// <summary>
         /// Called during load, to add an element.
         /// </summary>
         /// <remarks>
@@ -191,6 +202,10 @@ namespace Microsoft.Build.Construction
             if (_reader != null)
             {
                 return new XmlElementWithLocation(prefix, localName, namespaceURI, this, _reader.LineNumber, _reader.LinePosition);
+            }
+            else if (_elementLocation?.Value != null)
+            {
+                return new XmlElementWithLocation(prefix, localName, namespaceURI, this, _elementLocation.Value.Line, _elementLocation.Value.Column);
             }
 
             // Must be a subsequent edit; we can't provide location information
@@ -225,7 +240,7 @@ namespace Microsoft.Build.Construction
                 text = String.Empty;
             }
 
-            string interned = StringCache.Add(text, this);
+            string interned = Strings.WeakIntern(text);
             return base.CreateWhitespace(interned);
         }
 
@@ -241,7 +256,7 @@ namespace Microsoft.Build.Construction
                 text = String.Empty;
             }
 
-            string interned = StringCache.Add(text, this);
+            string interned = Strings.WeakIntern(text);
             return base.CreateSignificantWhitespace(interned);
         }
 
@@ -251,7 +266,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public override XmlText CreateTextNode(string text)
         {
-            string textNode = StringCache.Add(text, this);
+            string textNode = Strings.WeakIntern(text);
             return base.CreateTextNode(textNode);
         }
 
@@ -266,7 +281,7 @@ namespace Microsoft.Build.Construction
                 data = String.Empty;
             }
 
-            string interned = StringCache.Add(data, this);
+            string interned = Strings.WeakIntern(data);
             return base.CreateComment(interned);
         }
 
@@ -317,16 +332,6 @@ namespace Microsoft.Build.Construction
         internal static void ClearReadOnlyFlags_UnitTestsOnly()
         {
             s_readOnlyFlags = ReadOnlyLoadFlags.Undefined;
-        }
-
-        /// <summary>
-        /// Called when the XmlDocument is unloaded to remove this XML's
-        /// contribution to the string interning cache.
-        /// Does NOT zombie the ProjectRootElement or anything else.
-        /// </summary>
-        internal void ClearAnyCachedStrings()
-        {
-            StringCache.Clear(this);
         }
 
         /// <summary>

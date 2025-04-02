@@ -47,8 +47,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
     public class CacheResult
     {
         public CacheResultType ResultType { get; }
+
         public BuildResult? BuildResult { get; }
+
         public ProxyTargets? ProxyTargets { get; }
+
         internal Exception? Exception { get; }
 
         private CacheResult(
@@ -86,14 +89,14 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public static CacheResult IndicateCacheHit(IReadOnlyCollection<PluginTargetResult> targetResults)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(targetResults, nameof(targetResults));
+            ErrorUtilities.VerifyThrowArgumentLength(targetResults);
 
             return new CacheResult(CacheResultType.CacheHit, ConstructBuildResult(targetResults));
         }
 
         public static CacheResult IndicateNonCacheHit(CacheResultType resultType)
         {
-            ErrorUtilities.VerifyThrowInvalidOperation(resultType != CacheResultType.CacheHit, "CantBeCacheHit");
+            ErrorUtilities.VerifyThrow(resultType != CacheResultType.CacheHit, "CantBeCacheHit");
             return new CacheResult(resultType);
         }
 

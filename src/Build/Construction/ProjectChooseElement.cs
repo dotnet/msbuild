@@ -3,9 +3,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Xml;
-using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
@@ -34,7 +32,7 @@ namespace Microsoft.Build.Construction
         internal ProjectChooseElement(XmlElement xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -46,7 +44,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Condition should never be set, but the getter returns null instead of throwing 
+        /// Condition should never be set, but the getter returns null instead of throwing
         /// because a nonexistent condition is implicitly true
         /// </summary>
         public override string Condition
@@ -60,7 +58,7 @@ namespace Microsoft.Build.Construction
         /// Get the When children.
         /// Will contain at least one entry.
         /// </summary>
-        public ICollection<ProjectWhenElement> WhenElements => new ReadOnlyCollection<ProjectWhenElement>(Children.OfType<ProjectWhenElement>());
+        public ICollection<ProjectWhenElement> WhenElements => GetChildrenOfType<ProjectWhenElement>();
 
         /// <summary>
         /// Get any Otherwise child.
@@ -94,7 +92,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ProjectChooseElement CreateDisconnected(ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrow(containingProject.Link == null, "External project");
+            ErrorUtilities.VerifyThrow(containingProject.Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.choose);
             return new ProjectChooseElement(element, containingProject);

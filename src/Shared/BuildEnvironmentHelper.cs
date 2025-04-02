@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -120,6 +119,7 @@ namespace Microsoft.Build.Shared
                 BuildEnvironmentMode.None,
                 msbuildExePath,
                 runningTests: s_runningTests(),
+                runningInMSBuildExe: false,
                 runningInVisualStudio: false,
                 visualStudioPath: null);
         }
@@ -153,6 +153,7 @@ namespace Microsoft.Build.Shared
                 BuildEnvironmentMode.VisualStudio,
                 msBuildExe,
                 runningTests: false,
+                runningInMSBuildExe: false,
                 runningInVisualStudio: true,
                 visualStudioPath: vsRoot);
         }
@@ -173,6 +174,7 @@ namespace Microsoft.Build.Shared
                     BuildEnvironmentMode.VisualStudio,
                     msBuildExe,
                     runningTests: false,
+                    runningInMSBuildExe: true,
                     runningInVisualStudio: false,
                     visualStudioPath: GetVsRootFromMSBuildAssembly(msBuildExe));
             }
@@ -182,6 +184,7 @@ namespace Microsoft.Build.Shared
                 BuildEnvironmentMode.Standalone,
                 msBuildExe,
                 runningTests: false,
+                runningInMSBuildExe: true,
                 runningInVisualStudio: false,
                 visualStudioPath: null);
         }
@@ -223,6 +226,7 @@ namespace Microsoft.Build.Shared
                     BuildEnvironmentMode.Standalone,
                     msBuildPath,
                     runningTests: s_runningTests(),
+                    runningInMSBuildExe: false,
                     runningInVisualStudio: false,
                     visualStudioPath: null);
             }
@@ -244,6 +248,7 @@ namespace Microsoft.Build.Shared
                         BuildEnvironmentMode.VisualStudio,
                         GetMSBuildExeFromVsRoot(visualStudioRoot),
                         runningTests: s_runningTests(),
+                        runningInMSBuildExe: false,
                         runningInVisualStudio: false,
                         visualStudioPath: visualStudioRoot);
             }
@@ -274,6 +279,7 @@ namespace Microsoft.Build.Shared
                 BuildEnvironmentMode.VisualStudio,
                 GetMSBuildExeFromVsRoot(vsInstallDir),
                 runningTests: false,
+                runningInMSBuildExe: false,
                 runningInVisualStudio: false,
                 visualStudioPath: vsInstallDir);
         }
@@ -306,6 +312,7 @@ namespace Microsoft.Build.Shared
                 BuildEnvironmentMode.VisualStudio,
                 GetMSBuildExeFromVsRoot(instances[0].Path),
                 runningTests: false,
+                runningInMSBuildExe: false,
                 runningInVisualStudio: false,
                 visualStudioPath: instances[0].Path);
         }
@@ -338,6 +345,7 @@ namespace Microsoft.Build.Shared
                     BuildEnvironmentMode.Standalone,
                     msBuildExePath,
                     runningTests: s_runningTests(),
+                    runningInMSBuildExe: false,
                     runningInVisualStudio: false,
                     visualStudioPath: null);
             }
@@ -422,12 +430,13 @@ namespace Microsoft.Build.Shared
             // an unmanaged application (for example, using custom CLR hosting).
             if (AssemblyUtilities.EntryAssembly == null)
             {
-                return Process.GetCurrentProcess().MainModule.FileName;
+                return EnvironmentUtilities.ProcessPath;
             }
 
             return AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
 #else
-            return Process.GetCurrentProcess().MainModule.FileName;
+
+            return EnvironmentUtilities.ProcessPath;
 #endif
         }
 
@@ -527,13 +536,15 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal sealed class BuildEnvironment
     {
-        public BuildEnvironment(BuildEnvironmentMode mode, string currentMSBuildExePath, bool runningTests, bool runningInVisualStudio, string visualStudioPath)
+        public BuildEnvironment(BuildEnvironmentMode mode, string currentMSBuildExePath, bool runningTests, bool runningInMSBuildExe, bool runningInVisualStudio,
+                string visualStudioPath)
         {
             FileInfo currentMSBuildExeFile = null;
             DirectoryInfo currentToolsDirectory = null;
 
             Mode = mode;
             RunningTests = runningTests;
+            RunningInMSBuildExe = runningInMSBuildExe;
             RunningInVisualStudio = runningInVisualStudio;
             CurrentMSBuildExePath = currentMSBuildExePath;
             VisualStudioInstallRootDirectory = visualStudioPath;
@@ -619,6 +630,11 @@ namespace Microsoft.Build.Shared
         /// Gets the flag that indicates if we are running in a test harness.
         /// </summary>
         internal bool RunningTests { get; }
+
+        /// <summary>
+        /// Returns true when the entry point application is MSBuild.exe.
+        /// </summary>
+        internal bool RunningInMSBuildExe { get; }
 
         /// <summary>
         /// Returns true when the entry point application is Visual Studio.

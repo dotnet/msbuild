@@ -18,6 +18,7 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -557,6 +558,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         currentBuildEnvironment.Mode,
                         currentBuildEnvironment.CurrentMSBuildExePath,
                         currentBuildEnvironment.RunningTests,
+                        currentBuildEnvironment.RunningInMSBuildExe,
                         runningInVisualStudio: true,
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
@@ -674,6 +676,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         currentBuildEnvironment.Mode,
                         currentBuildEnvironment.CurrentMSBuildExePath,
                         currentBuildEnvironment.RunningTests,
+                        currentBuildEnvironment.RunningInMSBuildExe,
                         runningInVisualStudio: true,
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
@@ -841,7 +844,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             // If it's not a cache result by proxy targets then the cache constructed the target results by hand and only the real target result
             // exists in the BuildResult.
 
-            var targetResult = buildResult.ResultsByTarget["Build"];
+            var targetResult = buildResult.ResultsByTarget!["Build"];
 
             targetResult.Items.ShouldHaveSingleItem();
             var itemResult = targetResult.Items.First();
@@ -1189,6 +1192,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 {
                     throw new NotImplementedException();
                 }
+                buildSession?.Dispose();
             }
 
             logger.BuildFinishedEvents.First().Succeeded.ShouldBeFalse();
@@ -1239,7 +1243,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 </Target>
 ");
 
-            var buildSession = new Helpers.BuildManagerSession(
+            using var buildSession = new Helpers.BuildManagerSession(
                 _env,
                 new BuildParameters
                 {
@@ -1340,7 +1344,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 UseSynchronousLogging = true
             };
 
-            var buildSession = new Helpers.BuildManagerSession(_env, buildParameters);
+            using var buildSession = new Helpers.BuildManagerSession(_env, buildParameters);
             GraphBuildResult graphResult = buildSession.BuildGraph(new ProjectGraph(project.Path));
 
             Should.Throw<ProjectCacheException>(() => buildSession.Dispose()).InnerException!.Message.ShouldContain("Cache plugin exception from EndBuildAsync");
@@ -1440,6 +1444,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         currentBuildEnvironment.Mode,
                         currentBuildEnvironment.CurrentMSBuildExePath,
                         currentBuildEnvironment.RunningTests,
+                        currentBuildEnvironment.RunningInMSBuildExe,
                         runningInVisualStudio: true,
                         visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
@@ -1547,7 +1552,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         // This test ensures that scheduling proxy builds on the inproc node works nicely within the Scheduler
         // if the BuildRequestConfigurations for those proxy builds have built before (or are still building) on
         // the out of proc node.
-        // More details: https://github.com/dotnet/msbuild/pull/6635 
+        // More details: https://github.com/dotnet/msbuild/pull/6635
         public void ProxyCacheHitsOnPreviousCacheMissesShouldWork()
         {
             var cacheNotApplicableTarget = "NATarget";
@@ -1651,6 +1656,74 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     _output.WriteLine($"Set exception location: {exceptionLocation}");
                 }
             }
+        }
+
+        [DotNetOnlyFact("The netfx bootstrap layout created with 'dotnet build' is incomplete")]
+        /// <summary>
+        /// https://github.com/dotnet/msbuild/issues/5334
+        /// </summary>
+        public void EmbeddedResourcesFileCompileCache()
+        {
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents(
+            """
+            <Project Sdk="Microsoft.NET.Sdk">
+                <PropertyGroup>
+                    <TargetFramework>net8.0</TargetFramework>
+                    <OutputType>Exe</OutputType>
+                    <OutputPath>bin/</OutputPath>
+                </PropertyGroup>
+                <ItemGroup>
+                    <EmbeddedResource Include="*.txt"/>
+                </ItemGroup>
+            </Project>
+            """);
+            var projectPath = directory.CreateFile("app.csproj", content).Path;
+            directory.CreateFile("Program.cs",
+            """
+            using System;
+            using System.IO;
+            using System.Reflection;
+
+            class Program
+            {
+                static void Main()
+                {
+                    var assembly = Assembly.GetExecutingAssembly();
+                    var resourceNames = assembly.GetManifestResourceNames();
+
+                    foreach (var resourceName in resourceNames)
+                    {
+                        using (var stream = assembly.GetManifestResourceStream(resourceName))
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var content = reader.ReadToEnd();
+                            Console.WriteLine($"Content of {resourceName}:");
+                            Console.WriteLine(content);
+                        }
+                    }
+                }
+            }
+            """);
+
+            // Create EmbeddedResources file
+            var file1 = directory.CreateFile("File1.txt", "A=1");
+            var file2 = directory.CreateFile("File2.txt", "B=1");
+
+            // Build and run the project
+            string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath} -restore", out bool success);
+            success.ShouldBeTrue(output);
+            output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/net8.0/app"), "", out success, false, _output);
+            output.ShouldContain("A=1");
+            output.ShouldContain("B=1");
+
+            // Delete a file and build
+            FileUtilities.DeleteNoThrow(file1.Path);
+            output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath}", out success);
+            success.ShouldBeTrue(output);
+            output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/net8.0/app"), "", out success, false, _output);
+            output.ShouldNotContain("A=1");
+            output.ShouldContain("B=1");
         }
     }
 }

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
@@ -40,7 +39,7 @@ namespace Microsoft.Build.Construction
         internal ProjectItemGroupElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -55,7 +54,7 @@ namespace Microsoft.Build.Construction
         /// Get any child items.
         /// This is a live collection.
         /// </summary>
-        public ICollection<ProjectItemElement> Items => new ReadOnlyCollection<ProjectItemElement>(Children.OfType<ProjectItemElement>());
+        public ICollection<ProjectItemElement> Items => GetChildrenOfType<ProjectItemElement>();
 
         /// <summary>
         /// True if it is known that no child items have wildcards in their
@@ -100,16 +99,16 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemElement AddItem(string itemType, string include, IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
-            ErrorUtilities.VerifyThrowArgumentLength(include, nameof(include));
+            ErrorUtilities.VerifyThrowArgumentLength(itemType);
+            ErrorUtilities.VerifyThrowArgumentLength(include);
 
-            // If there are no items, or it turns out that there are only items with 
+            // If there are no items, or it turns out that there are only items with
             // item types that sort earlier, then we should go after the last child
             ProjectElement reference = LastChild;
 
             foreach (ProjectItemElement item in Items)
             {
-                // If it's the same item type, and 
+                // If it's the same item type, and
                 if (MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, item.ItemType))
                 {
                     // the include sorts after us,

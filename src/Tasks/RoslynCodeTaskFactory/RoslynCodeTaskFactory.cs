@@ -80,12 +80,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private const string ReferenceAssemblyDirectoryName = "ref";
 
-
-        /// <summary>
-        /// Array of mono lib directories used to resolve references
-        /// </summary>
-        private static readonly string[] MonoLibDirs = GetMonoLibDirs();
-
         /// <summary>
         /// A cache of <see cref="RoslynCodeTaskFactoryTaskInfo"/> objects and their corresponding compiled assembly.  This cache ensures that two of the exact same code task
         /// declarations are not compiled multiple times.
@@ -180,6 +174,12 @@ namespace Microsoft.Build.Tasks
                 // Find an exact match by class name or a partial match by full name
                 TaskType = exportedTypes.FirstOrDefault(type => type.Name.Equals(taskName, StringComparison.OrdinalIgnoreCase))
                            ?? exportedTypes.Where(i => i.FullName != null).FirstOrDefault(type => type.FullName.Equals(taskName, StringComparison.OrdinalIgnoreCase) || type.FullName.EndsWith(taskName, StringComparison.OrdinalIgnoreCase));
+
+                if (TaskType == null)
+                {
+                    _log.LogErrorWithCodeFromResources("CodeTaskFactory.CouldNotFindTaskInAssembly", taskName);
+                    return false;
+                }
 
                 if (taskInfo.CodeType == RoslynCodeTaskFactoryCodeType.Class && parameterGroup.Count == 0)
                 {
@@ -350,7 +350,7 @@ namespace Microsoft.Build.Tasks
                             if (String.IsNullOrWhiteSpace(includeAttribute?.Value))
                             {
                                 // A <Reference Include="" /> is not allowed.
-                                log.LogErrorWithCodeFromResources("CodeTaskFactory.AttributeEmptyWithElement", "Include", "Reference");
+                                log.LogErrorWithCodeFromResources("CodeTaskFactory.AttributeEmptyWithTaskElement", "Include", "Reference", taskName);
                                 return false;
                             }
 
@@ -536,10 +536,10 @@ namespace Microsoft.Build.Tasks
             // Start with the user specified references and include all of the default references that are language agnostic
             IEnumerable<string> references = taskInfo.References.Union(DefaultReferences[String.Empty]);
 
-            if (DefaultReferences.ContainsKey(taskInfo.CodeLanguage))
+            if (DefaultReferences.TryGetValue(taskInfo.CodeLanguage, out IEnumerable<string> value))
             {
                 // Append default references for the specific language
-                references = references.Union(DefaultReferences[taskInfo.CodeLanguage]);
+                references = references.Union(value);
             }
 
             List<string> directoriesToAddToAppDomain = new();
@@ -567,7 +567,6 @@ namespace Microsoft.Build.Tasks
                     Path.Combine(ThisAssemblyDirectoryLazy.Value, ReferenceAssemblyDirectoryName),
                     ThisAssemblyDirectoryLazy.Value,
                 }
-                .Concat(MonoLibDirs)
                 .FirstOrDefault(p => File.Exists(Path.Combine(p, assemblyFileName)));
 
                 if (resolvedDir != null)
@@ -686,6 +685,10 @@ namespace Microsoft.Build.Tasks
 
             try
             {
+                // Embed generated file in the binlog
+                string fileNameInBinlog = $"{Guid.NewGuid()}-{_taskName}-compilation-file.tmp";
+                _log.LogIncludeGeneratedFile(fileNameInBinlog, taskInfo.SourceCode);
+
                 // Create the code
                 File.WriteAllText(sourceCodePath, taskInfo.SourceCode);
 
@@ -734,7 +737,7 @@ namespace Microsoft.Build.Tasks
                     managedCompiler.Optimize = false;
                     managedCompiler.OutputAssembly = new TaskItem(assemblyPath);
                     managedCompiler.References = references;
-                    managedCompiler.Sources = new ITaskItem[] { new TaskItem(sourceCodePath) };
+                    managedCompiler.Sources = [new TaskItem(sourceCodePath)];
                     managedCompiler.TargetType = "Library";
                     managedCompiler.UseSharedCompilation = false;
 
@@ -780,21 +783,6 @@ namespace Microsoft.Build.Tasks
                 {
                     File.Delete(sourceCodePath);
                 }
-            }
-        }
-
-        private static string[] GetMonoLibDirs()
-        {
-            if (NativeMethodsShared.IsMono)
-            {
-                string monoLibDir = Path.GetDirectoryName(typeof(object).Assembly.Location);
-                string monoLibFacadesDir = Path.Combine(monoLibDir, "Facades");
-
-                return new[] { monoLibDir, monoLibFacadesDir };
-            }
-            else
-            {
-                return Array.Empty<string>();
             }
         }
     }

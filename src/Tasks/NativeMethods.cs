@@ -12,7 +12,9 @@ using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System.Collections;
 using System.Globalization;
+#if !NET
 using System.Linq;
+#endif
 #if FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS
 using System.Runtime.ExceptionServices;
 #endif
@@ -108,7 +110,7 @@ namespace Microsoft.Build.Tasks
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IMetaDataImport
     {
-        // PreserveSig because this method is an exception that 
+        // PreserveSig because this method is an exception that
         // actually returns void, not HRESULT.
         [PreserveSig]
         void CloseEnum();
@@ -279,7 +281,7 @@ namespace Microsoft.Build.Tasks
         void GetAssemblyFromScope(out UInt32 mdAsm);
         void FindExportedTypeByName();
         void FindManifestResourceByName();
-        // PreserveSig because this method is an exception that 
+        // PreserveSig because this method is an exception that
         // actually returns void, not HRESULT.
         [PreserveSig]
         void CloseEnum([In] IntPtr phEnum);
@@ -520,7 +522,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Interop methods.
     /// </summary>
-    internal static class NativeMethods
+    internal static partial class NativeMethods
     {
         #region Constants
 
@@ -537,6 +539,7 @@ namespace Microsoft.Build.Tasks
 
         internal const int HRESULT_E_CLASSNOTREGISTERED = -2147221164;
 
+        internal const int ERROR_INVALID_FILENAME = -2147024773; // Illegal characters in name
         internal const int ERROR_ACCESS_DENIED = -2147024891; // ACL'd or r/o
         internal const int ERROR_SHARING_VIOLATION = -2147024864; // File locked by another use
 
@@ -1027,7 +1030,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="cacheFlags">Value that indicates the source of the cached assembly.</param>
         /// <param name="cachePath">The returned pointer to the path.</param>
         /// <param name="pcchPath">The requested maximum length of CachePath, and upon return, the actual length of CachePath.</param>
-        /// 
+        ///
         [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
         [SupportedOSPlatform("windows")]
         internal static extern unsafe int GetCachePath(AssemblyCacheFlags cacheFlags, [Out] char* cachePath, ref int pcchPath);
@@ -1140,13 +1143,13 @@ namespace Microsoft.Build.Tasks
                     IntPtr attrDataPostProlog = attrData + preReadOffset;
 
                     int strLen;
-                    // Get the offset at which the uncompressed data starts, and the 
+                    // Get the offset at which the uncompressed data starts, and the
                     // length of the uncompressed data.
                     attrDataOffset = CorSigUncompressData(attrDataPostProlog, out strLen);
 
                     if (strLen != -1)
                     {
-                        // the full size of the blob we were passed in should be sufficient to 
+                        // the full size of the blob we were passed in should be sufficient to
                         // cover the prolog, compressed string length, and actual string.
                         if (attrDataSize >= preReadOffset + attrDataOffset + strLen)
                         {
@@ -1158,8 +1161,8 @@ namespace Microsoft.Build.Tasks
                                 bytes[i] = Marshal.ReadByte(attrDataPostProlog, attrDataOffset + i);
                             }
 
-                            // And convert it to the output string. 
-                            strValue = new String(Encoding.UTF8.GetChars(bytes));
+                            // And convert it to the output string.
+                            strValue = Encoding.UTF8.GetString(bytes);
                         }
                         else
                         {
@@ -1174,11 +1177,11 @@ namespace Microsoft.Build.Tasks
             }
             catch (AccessViolationException)
             {
-                // The Marshal.ReadXXXX functions throw AVs when they're fed an invalid pointer, and very occasionally, 
-                // for some reason, on what seem to be otherwise perfectly valid assemblies (it must be 
+                // The Marshal.ReadXXXX functions throw AVs when they're fed an invalid pointer, and very occasionally,
+                // for some reason, on what seem to be otherwise perfectly valid assemblies (it must be
                 // intermittent given that otherwise the user would be completely unable to use the reference
-                // manager), the pointer that we generate to look up the AssemblyTitle is apparently invalid, 
-                // or for some reason Marshal.ReadByte thinks it is.  
+                // manager), the pointer that we generate to look up the AssemblyTitle is apparently invalid,
+                // or for some reason Marshal.ReadByte thinks it is.
                 //
                 return false;
             }
@@ -1208,19 +1211,19 @@ namespace Microsoft.Build.Tasks
             byte* bytes = (byte*)(data);
             uncompressedDataLength = 0;
 
-            // Smallest.    
-            if ((*bytes & 0x80) == 0x00)       // 0??? ????    
+            // Smallest.
+            if ((*bytes & 0x80) == 0x00)       // 0??? ????
             {
                 uncompressedDataLength = *bytes;
                 count = 1;
             }
-            // Medium.  
-            else if ((*bytes & 0xC0) == 0x80)  // 10?? ????    
+            // Medium.
+            else if ((*bytes & 0xC0) == 0x80)  // 10?? ????
             {
                 uncompressedDataLength = (int)((*bytes & 0x3f) << 8 | *(bytes + 1));
                 count = 2;
             }
-            else if ((*bytes & 0xE0) == 0xC0)      // 110? ????    
+            else if ((*bytes & 0xE0) == 0xC0)      // 110? ????
             {
                 uncompressedDataLength = (int)((*bytes & 0x1f) << 24 | *(bytes + 1) << 16 | *(bytes + 2) << 8 | *(bytes + 3));
                 count = 4;
@@ -1234,19 +1237,24 @@ namespace Microsoft.Build.Tasks
         /// This class is a wrapper over the native GAC enumeration API.
         /// </summary>
         [ComVisible(false)]
-        internal class AssemblyCacheEnum : IEnumerable<AssemblyNameExtension>
+        internal partial class AssemblyCacheEnum : IEnumerable<AssemblyNameExtension>
         {
             /// <summary>
             /// Path to the gac
             /// </summary>
             private static readonly string s_gacPath = Path.Combine(NativeMethodsShared.FrameworkBasePath, "gac");
 
+            private const string AssemblyVersionPattern = @"^([.\d]+)_([^_]*)_([a-fA-F\d]{16})$";
+
             /// <summary>
             /// Regex for directory version parsing
             /// </summary>
-            private static readonly Regex s_assemblyVersionRegex = new Regex(
-                @"^([.\d]+)_([^_]*)_([a-fA-F\d]{16})$",
-                RegexOptions.CultureInvariant | RegexOptions.Compiled);
+#if NET
+            [GeneratedRegex(AssemblyVersionPattern, RegexOptions.CultureInvariant)]
+            private static partial Regex AssemblyVersionRegex { get; }
+#else
+            private static Regex AssemblyVersionRegex { get; } = new Regex(AssemblyVersionPattern, RegexOptions.CultureInvariant | RegexOptions.Compiled);
+#endif
 
             /// <summary>
             /// The IAssemblyEnum interface which allows us to ask for the next assembly from the GAC enumeration.
@@ -1333,7 +1341,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        _gacDirectories = Array.Empty<string>();
+                        _gacDirectories = [];
                     }
                 }
             }
@@ -1386,7 +1394,7 @@ namespace Microsoft.Build.Tasks
                                 var versionString = Path.GetFileName(version);
                                 if (!string.IsNullOrWhiteSpace(versionString))
                                 {
-                                    var match = s_assemblyVersionRegex.Match(versionString);
+                                    var match = AssemblyVersionRegex.Match(versionString);
                                     if (match.Success)
                                     {
                                         var name = new AssemblyName
@@ -1406,10 +1414,16 @@ namespace Microsoft.Build.Tasks
                                         if (!string.IsNullOrWhiteSpace(match.Groups[3].Value))
                                         {
                                             var value = match.Groups[3].Value;
-                                            name.SetPublicKeyToken(
+                                            byte[] key =
+#if NET
+                                                Convert.FromHexString(value.AsSpan(0, 16));
+#else
                                                 Enumerable.Range(0, 16)
-                                                    .Where(x => x % 2 == 0)
-                                                    .Select(x => Convert.ToByte(value.Substring(x, 2), 16)).ToArray());
+                                                .Where(x => x % 2 == 0)
+                                                .Select(x => Convert.ToByte(value.Substring(x, 2), 16))
+                                                .ToArray();
+#endif
+                                            name.SetPublicKeyToken(key);
                                         }
 
                                         yield return new AssemblyNameExtension(name);
@@ -1454,8 +1468,12 @@ namespace Microsoft.Build.Tasks
                             "{0}_{1}_{2}",
                             assemblyNameVersion.Version.ToString(4),
                             assemblyNameVersion.CultureName != "neutral" ? assemblyNameVersion.CultureName : string.Empty,
+#if NET
+                            Convert.ToHexStringLower(assemblyNameVersion.GetPublicKeyToken())),
+#else
                             assemblyNameVersion.GetPublicKeyToken()
                                 .Aggregate(new StringBuilder(), (builder, v) => builder.Append(v.ToString("x2")))),
+#endif
                         assemblyNameVersion.Name + ".dll");
 
                     if (FileSystems.Default.FileExists(path))

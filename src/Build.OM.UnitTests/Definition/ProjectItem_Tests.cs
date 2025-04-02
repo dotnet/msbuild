@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Engine.UnitTests.Globbing;
@@ -16,7 +15,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -57,7 +55,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ";
 
         protected readonly TestEnvironment _env;
-        private DummyMappedDrive _mappedDrive = null;
+        private Lazy<DummyMappedDrive> _mappedDrive = DummyMappedDriveUtils.GetLazyDummyMappedDrive();
 
         public ProjectItem_Tests()
         {
@@ -67,7 +65,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void Dispose()
         {
             _env.Dispose();
-            _mappedDrive?.Dispose();
+            _mappedDrive.Value?.Dispose();
         }
 
         /// <summary>
@@ -158,7 +156,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = Helpers.GetFirst(project.GetItems("i"));
             ProjectMetadata m0 = item.GetMetadata("m0");
@@ -804,8 +803,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [InlineData(@"%DRIVE%:\**\*.cs")]
         public void ProjectGetterResultsInWindowsDriveEnumerationWarning(string unevaluatedInclude)
         {
-            var mappedDrive = GetDummyMappedDrive();
-            unevaluatedInclude = UpdatePathToMappedDrive(unevaluatedInclude, mappedDrive.MappedDriveLetter);
+            unevaluatedInclude = DummyMappedDriveUtils.UpdatePathToMappedDrive(unevaluatedInclude, _mappedDrive.Value.MappedDriveLetter);
             ProjectGetterResultsInDriveEnumerationWarning(unevaluatedInclude);
         }
 
@@ -830,7 +828,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
 
                     // Setup
-                    ProjectCollection projectCollection = new ProjectCollection();
+                    using ProjectCollection projectCollection = new ProjectCollection();
                     MockLogger collectionLogger = new MockLogger();
                     projectCollection.RegisterLogger(collectionLogger);
                     Project project = new Project(projectCollection);
@@ -898,33 +896,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             @"%DRIVE%:\$(Microsoft_WindowsAzure_EngSys)**")]
         public void LogWindowsWarningUponProjectInstanceCreationFromDriveEnumeratingContent(string content, string placeHolder, string excludePlaceHolder = null)
         {
-            var mappedDrive = GetDummyMappedDrive();
-            placeHolder = UpdatePathToMappedDrive(placeHolder, mappedDrive.MappedDriveLetter);
-            excludePlaceHolder = UpdatePathToMappedDrive(excludePlaceHolder, mappedDrive.MappedDriveLetter);
+            placeHolder = DummyMappedDriveUtils.UpdatePathToMappedDrive(placeHolder, _mappedDrive.Value.MappedDriveLetter);
+            excludePlaceHolder = DummyMappedDriveUtils.UpdatePathToMappedDrive(excludePlaceHolder, _mappedDrive.Value.MappedDriveLetter);
             content = string.Format(content, placeHolder, excludePlaceHolder);
             CleanContentsAndCreateProjectInstanceFromFileWithDriveEnumeratingWildcard(content, false);
-        }
-
-        private DummyMappedDrive GetDummyMappedDrive()
-        {
-            if (NativeMethods.IsWindows)
-            {
-                // let's create the mapped drive only once it's needed by any test, then let's reuse;
-                _mappedDrive ??= new DummyMappedDrive();
-            }
-
-            return _mappedDrive;
-        }
-
-        private static string UpdatePathToMappedDrive(string path, char driveLetter)
-        {
-            const string drivePlaceholder = "%DRIVE%";
-            // if this seems to be rooted path - replace with the dummy mount
-            if (!string.IsNullOrEmpty(path) && path.StartsWith(drivePlaceholder))
-            {
-                path = driveLetter + path.Substring(drivePlaceholder.Length);
-            }
-            return path;
         }
 
         [UnixOnlyTheory]
@@ -968,7 +943,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             try
             {
-                // Reset state 
+                // Reset state
                 Helpers.ResetStateForDriveEnumeratingWildcardTests(env, throwException ? "1" : "0");
 
                 if (throwException)
@@ -1216,7 +1191,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetItems("i").First().SetMetadataValue("m", "m2");
 
@@ -1258,7 +1234,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item1 = project.GetItems("i").First();
             ProjectItem item1b = project.GetItems("i").ElementAt(1);
@@ -1308,7 +1285,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item1 = project.GetItems("i").First();
             ProjectItem item1b = project.GetItems("i").ElementAt(1);
@@ -1377,7 +1355,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Equal("l0", project.GetItems("i").First().GetMetadataValue("l"));
             Assert.Equal("m1", project.GetItems("i").First().GetMetadataValue("m"));
@@ -1474,7 +1453,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ";
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Equal("l0", project.GetItems("i").First().GetMetadataValue("l"));
             Assert.Equal("m1", project.GetItems("i").First().GetMetadataValue("m"));

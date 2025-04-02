@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     DestinationFolder = new TaskItem(folder.Path),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent(new String('!', 10000000)),
+                        Content = new StreamContent(new FakeStream()),
                         RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://largedownload/foo.txt")
                     }),
                     SourceUrl = "http://largedownload/foo.txt"
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 downloadFile.Cancel();
 
-                task.Wait(TimeSpan.FromSeconds(1)).ShouldBeTrue();
+                task.Wait(TimeSpan.FromMilliseconds(1500)).ShouldBeTrue();
 
                 task.Result.ShouldBeFalse();
             }
@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 FileInfo file = new FileInfo(Path.Combine(folder.Path, "foo.txt"));
 
-                file.Exists.ShouldBeTrue(() => file.FullName);
+                file.Exists.ShouldBeTrue(file.FullName);
 
                 File.ReadAllText(file.FullName).ShouldBe("Success!");
 
@@ -89,7 +89,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             const string filename = "C6DDD10A99E149F78FA11F133127BF38.txt";
 
-            HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK)
+            using HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent("Success!")
                 {
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 FileInfo file = new FileInfo(Path.Combine(folder.Path, filename));
 
-                file.Exists.ShouldBeTrue(() => file.FullName);
+                file.Exists.ShouldBeTrue(file.FullName);
 
                 File.ReadAllText(file.FullName).ShouldBe("Success!");
 
@@ -155,7 +155,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 FileInfo file = new FileInfo(Path.Combine(folder.Path, filename));
 
-                file.Exists.ShouldBeTrue(() => file.FullName);
+                file.Exists.ShouldBeTrue(file.FullName);
 
                 File.ReadAllText(file.FullName).ShouldBe("Success!");
 
@@ -172,7 +172,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 SourceUrl = "&&&&&"
             };
 
-            downloadFile.Execute().ShouldBeFalse(() => _mockEngine.Log);
+            downloadFile.Execute().ShouldBeFalse(_mockEngine.Log);
 
             _mockEngine.Log.ShouldContain("MSB3921");
         }
@@ -187,7 +187,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 SourceUrl = "http://notfound/foo.txt"
             };
 
-            downloadFile.Execute().ShouldBeFalse(() => _mockEngine.Log);
+            downloadFile.Execute().ShouldBeFalse(_mockEngine.Log);
 
             _mockEngine.Log.ShouldContain("Response status code does not indicate success: 404 (Not Found).");
         }
@@ -226,9 +226,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceUrl = "http://success/foo.txt"
                 };
 
-                downloadFile.Execute().ShouldBeTrue(() => _mockEngine.Log);
+                downloadFile.Execute().ShouldBeTrue(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("MSB3924", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("MSB3924", customMessage: _mockEngine.Log);
             }
         }
 
@@ -244,15 +244,15 @@ namespace Microsoft.Build.Tasks.UnitTests
                 SourceUrl = "http://notfound/foo.txt"
             };
 
-            downloadFile.Execute().ShouldBeFalse(() => _mockEngine.Log);
+            downloadFile.Execute().ShouldBeFalse(_mockEngine.Log);
 
-            _mockEngine.Log.ShouldContain("MSB3924", () => _mockEngine.Log);
+            _mockEngine.Log.ShouldContain("MSB3924", customMessage: _mockEngine.Log);
         }
 
         [Fact]
         public void AbortOnTimeout()
         {
-            CancellationTokenSource timeout = new CancellationTokenSource();
+            using CancellationTokenSource timeout = new CancellationTokenSource();
             timeout.Cancel();
             DownloadFile downloadFile = new DownloadFile()
             {
@@ -267,9 +267,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 SourceUrl = "http://notfound/foo.txt"
             };
 
-            downloadFile.Execute().ShouldBeFalse(() => _mockEngine.Log);
+            downloadFile.Execute().ShouldBeFalse(_mockEngine.Log);
 
-            _mockEngine.Log.ShouldContain("MSB3923", () => _mockEngine.Log);
+            _mockEngine.Log.ShouldContain("MSB3923", customMessage: _mockEngine.Log);
         }
 
         [Fact]
@@ -306,7 +306,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             runaway.IsCompleted.ShouldBeTrue("Task did not cancel");
 
             var result = await runaway;
-            result.ShouldBeFalse(() => _mockEngine.Log);
+            result.ShouldBeFalse(_mockEngine.Log);
         }
 
         [Fact]
@@ -339,7 +339,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 downloadFile.Execute().ShouldBeTrue();
 
-                _mockEngine.Log.ShouldContain("Did not download file from \"http://success/foo.txt\"", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("Did not download file from \"http://success/foo.txt\"", customMessage: _mockEngine.Log);
             }
         }
 
@@ -357,9 +357,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 SourceUrl = "http://unknown/"
             };
 
-            downloadFile.Execute().ShouldBeFalse(() => _mockEngine.Log);
+            downloadFile.Execute().ShouldBeFalse(_mockEngine.Log);
 
-            _mockEngine.Log.ShouldContain("MSB3922", () => _mockEngine.Log);
+            _mockEngine.Log.ShouldContain("MSB3922", customMessage: _mockEngine.Log);
         }
 
         private sealed class MockHttpContent : HttpContent
@@ -400,5 +400,41 @@ namespace Microsoft.Build.Tasks.UnitTests
                 return Task.FromResult(_func(request, cancellationToken));
             }
         }
+    }
+
+    // Fake stream that simulates providing a single character A~Z per a couple of milliseconds without high memory cost.
+    public class FakeStream : Stream
+    {
+        private readonly int delayMilliseconds;
+
+        public FakeStream(int delayInMilliseconds = 20)
+        {
+            delayMilliseconds = delayInMilliseconds;
+            Position = 0;
+        }
+
+        public override bool CanRead => true;
+        public override bool CanSeek => true;
+        public override bool CanWrite => false;
+        public override long Length => long.MaxValue;
+        public override long Position { get; set; }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            // Simulate infinite stream by keeping providing a single character to the beginning of the requested destination.
+            // Writes next char A ~ Z in alphabet into the begining of requested destination. The count could be ignored.
+            buffer[offset] = (byte)('A' + Position % 26);
+            Position++;
+            Task.Delay(delayMilliseconds).Wait();
+            return 1;
+        }
+
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotImplementedException();
+
+        public override void SetLength(long value) => throw new NotImplementedException();
+
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotImplementedException();
+
+        public override void Flush() => throw new NotImplementedException();
     }
 }

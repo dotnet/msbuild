@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -194,7 +192,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             item.MetadataCount.ShouldBe(s_builtInMetadataNames.Length + 2);
             item.DirectMetadataCount.ShouldBe(1);
 
-            CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = item.MetadataCollection;
+            ICopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = item.MetadataCollection;
             metadata.Count.ShouldBe(2);
             metadata["a"].EvaluatedValue.ShouldBe("override");
             metadata["b"].EvaluatedValue.ShouldBe("base");
@@ -235,7 +233,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Flushing an item through a task should not mess up special characters on the metadata. 
+        /// Flushing an item through a task should not mess up special characters on the metadata.
         /// </summary>
         [Fact]
         public void Escaping1()
@@ -274,7 +272,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
@@ -287,13 +286,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Flushing an item through a task run in the task host also should not mess up special characters on the metadata. 
+        /// Flushing an item through a task run in the task host also should not mess up special characters on the metadata.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE || MONO
-        [Fact(Skip = "FEATURE: TASKHOST")]
-#else
         [Fact]
-#endif
         public void Escaping2()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -331,7 +326,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
@@ -344,13 +340,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Flushing an item through a task run in the task host also should not mess up the escaping of the itemspec either. 
+        /// Flushing an item through a task run in the task host also should not mess up the escaping of the itemspec either.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE || MONO
-        [Fact(Skip = "FEATURE: TASKHOST")]
-#else
         [Fact]
-#endif
         public void Escaping3()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -369,7 +361,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();

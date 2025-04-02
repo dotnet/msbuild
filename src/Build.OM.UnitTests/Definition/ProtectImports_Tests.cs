@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 
 using Microsoft.Build.Evaluation;
 using Xunit;
@@ -603,7 +602,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>";
 
             projectContents = Expand(projectContents);
-            Project project = new Project(XmlReader.Create(new StringReader(projectContents)));
+            using ProjectFromString projectFromString = new(projectContents);
+            Project project = projectFromString.Project;
+
             return project;
         }
 

@@ -215,7 +215,12 @@ namespace Microsoft.Build.Tasks
         {
             if (version.StartsWith("v", StringComparison.OrdinalIgnoreCase))
             {
-                return new Version(version.Substring(1));
+                return Version.Parse(
+#if NET
+                    version.AsSpan(1));
+#else
+                    version.Substring(1));
+#endif
             }
             return new Version(version);
         }
@@ -285,14 +290,17 @@ namespace Microsoft.Build.Tasks
             {
                 targetPath = Path.GetFileName(item.ItemSpec);
                 //
-                // .NETCore Launcher.exe based deployment: If the file is apphost.exe, we need to set 'TargetPath' metadata
-                // to {assemblyname}.exe so that the file gets published as {assemblyname}.exe and not apphost.exe.
+                // .NET >= 5 ClickOnce: If TargetPath metadata is not present in apphost.exe's metadata, we'll fallback to using AssemblyName
                 //
                 if (LauncherBasedDeployment &&
                     targetPath.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) &&
                     !String.IsNullOrEmpty(AssemblyName))
                 {
-                    targetPath = AssemblyName;
+                    targetPath = item.GetMetadata(ItemMetadataNames.targetPath);
+                    if (String.IsNullOrEmpty(targetPath))
+                    {
+                        targetPath = AssemblyName;
+                    }
                 }
                 else
                 {
@@ -343,7 +351,7 @@ namespace Microsoft.Build.Tasks
                 // Infer culture from path (i.e. "obj\debug\fr\WindowsApplication1.resources.dll" -> "fr")
                 string[] pathSegments = PathUtil.GetPathSegments(item.ItemSpec);
                 itemCulture = pathSegments.Length > 1 ? pathSegments[pathSegments.Length - 2] : null;
-                Debug.Assert(!String.IsNullOrEmpty(itemCulture), String.Format(CultureInfo.CurrentCulture, "Satellite item '{0}' is missing expected attribute '{1}'", item.ItemSpec, "Culture"));
+                Debug.Assert(!String.IsNullOrEmpty(itemCulture), $"Satellite item '{item.ItemSpec}' is missing expected attribute 'Culture'");
                 item.SetMetadata("Culture", itemCulture);
             }
             return new CultureInfo(itemCulture);
@@ -859,7 +867,7 @@ namespace Microsoft.Build.Tasks
 
                 // Add to map with full name, for SpecificVersion=true case
                 string key = fusionName.ToLowerInvariant();
-                Debug.Assert(!_dictionary.ContainsKey(key), String.Format(CultureInfo.CurrentCulture, "Two or more items with same key '{0}' detected", key));
+                Debug.Assert(!_dictionary.ContainsKey(key), $"Two or more items with same key '{key}' detected");
                 if (!_dictionary.ContainsKey(key))
                 {
                     _dictionary.Add(key, entry);
@@ -918,7 +926,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // Use satellite assembly strong name signature as key
                     string key = identity.ToString();
-                    Debug.Assert(!_dictionary.ContainsKey(key), String.Format(CultureInfo.CurrentCulture, "Two or more items with same key '{0}' detected", key));
+                    Debug.Assert(!_dictionary.ContainsKey(key), $"Two or more items with same key '{key}' detected");
                     if (!_dictionary.ContainsKey(key))
                     {
                         _dictionary.Add(key, entry);
@@ -959,7 +967,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 string key = targetPath.ToLowerInvariant();
-                Debug.Assert(!_dictionary.ContainsKey(key), String.Format(CultureInfo.CurrentCulture, "Two or more items with same '{0}' attribute detected", ItemMetadataNames.targetPath));
+                Debug.Assert(!_dictionary.ContainsKey(key), $"Two or more items with same '{(object)ItemMetadataNames.targetPath}' attribute detected");
                 var entry = new MapEntry(item, includedByDefault);
                 if (!_dictionary.ContainsKey(key))
                 {
@@ -994,11 +1002,11 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (FormatException)
                 {
-                    Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Invalid value '{0}' for {1}", value, "PublishState"));
+                    Debug.Fail($"Invalid value '{value}' for PublishState");
                 }
                 catch (ArgumentException)
                 {
-                    Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Invalid value '{0}' for {1}", value, "PublishState"));
+                    Debug.Fail($"Invalid value '{value}' for PublishState");
                 }
             }
             return PublishState.Auto;
@@ -1033,14 +1041,14 @@ namespace Microsoft.Build.Tasks
                         isPublished = false;
                         break;
                     case PublishState.DataFile:
-                        Debug.Fail(String.Format(CultureInfo.CurrentCulture, "PublishState.DataFile is invalid for an assembly"));
+                        Debug.Fail("PublishState.DataFile is invalid for an assembly");
                         break;
                     case PublishState.Prerequisite:
                         isPrerequisite = true;
                         isPublished = false;
                         break;
                     default:
-                        Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Unhandled value PublishFlags.{0}", state.ToString()));
+                        Debug.Fail($"Unhandled value PublishFlags.{state}");
                         break;
                 }
                 return new PublishFlags(isDataFile, isPrerequisite, isPublished);
@@ -1070,10 +1078,10 @@ namespace Microsoft.Build.Tasks
                         isPublished = true;
                         break;
                     case PublishState.Prerequisite:
-                        Debug.Fail(String.Format(CultureInfo.CurrentCulture, "PublishState.Prerequisite is invalid for a file"));
+                        Debug.Fail("PublishState.Prerequisite is invalid for a file");
                         break;
                     default:
-                        Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Unhandled value PublishFlags.{0}", state.ToString()));
+                        Debug.Fail($"Unhandled value PublishFlags.{state}");
                         break;
                 }
                 return new PublishFlags(isDataFile, isPrerequisite, isPublished);
@@ -1100,14 +1108,14 @@ namespace Microsoft.Build.Tasks
                         isPublished = false;
                         break;
                     case PublishState.DataFile:
-                        Debug.Fail(String.Format(CultureInfo.CurrentCulture, "PublishState.DataFile is invalid for an assembly"));
+                        Debug.Fail("PublishState.DataFile is invalid for an assembly");
                         break;
                     case PublishState.Prerequisite:
                         isPrerequisite = true;
                         isPublished = false;
                         break;
                     default:
-                        Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Unhandled value PublishFlags.{0}", state.ToString()));
+                        Debug.Fail($"Unhandled value PublishFlags.{state}");
                         break;
                 }
                 return new PublishFlags(isDataFile, isPrerequisite, isPublished);

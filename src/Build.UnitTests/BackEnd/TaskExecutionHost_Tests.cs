@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -18,6 +17,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
+using Shouldly;
 using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -44,7 +45,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// The task execution host
         /// </summary>
-        private ITaskExecutionHost _host;
+        private TaskExecutionHost _host;
 
         /// <summary>
         /// The mock logging service
@@ -1029,6 +1030,99 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("MSB4036");
         }
 
+        /// <summary>
+        /// https://github.com/dotnet/msbuild/issues/8864
+        /// </summary>
+        [Fact]
+        public void TestTaskDictionaryOutputItems()
+        {
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+            MockLogger ml = ObjectModelHelpers.BuildProjectExpectSuccess($"""
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                        <UsingTask TaskName=`TaskThatReturnsDictionaryTaskItem` AssemblyFile=`{customTaskPath}`/>
+                        <Target Name=`Build`>
+                           <TaskThatReturnsDictionaryTaskItem Key="a" Value="b">
+                                <Output TaskParameter="DictionaryTaskItemOutput" ItemName="Outputs"/>
+                            </TaskThatReturnsDictionaryTaskItem>
+                        </Target>
+                    </Project>
+                """);
+            ml.AssertLogContains("a=b");
+        }
+
+        [Theory]
+        [InlineData(typeof(OutOfMemoryException), true)]
+        [InlineData(typeof(ArgumentException), false)]
+        public void TaskExceptionHandlingTest(Type exceptionType, bool isCritical)
+        {
+            string testExceptionMessage = "Test Message";
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+            MockLogger ml = new MockLogger() { AllowTaskCrashes = true };
+
+            using TestEnvironment env = TestEnvironment.Create();
+            var debugFolder = env.CreateFolder();
+            // inject the location for failure logs - not to interact with other tests
+            env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugFolder.Path);
+            // Force initing the DebugPath from the env var - as we need it to be unique for those tests.
+            // The ProjectCacheTests DataMemberAttribute usages (specifically SuccessfulGraphsWithBuildParameters) lead
+            //  to the DebugPath being set before this test runs - and hence the env var is ignored.
+            DebugUtils.SetDebugPath();
+
+            ObjectModelHelpers.BuildProjectExpectFailure($"""
+                     <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                         <UsingTask TaskName=`TaskThatThrows` AssemblyFile=`{customTaskPath}`/>
+                         <Target Name=`Build`>
+                            <TaskThatThrows ExceptionType="{exceptionType.ToString()}" ExceptionMessage="{testExceptionMessage}">
+                             </TaskThatThrows>
+                         </Target>
+                     </Project>
+                  """,
+                ml);
+            // 'This is an unhandled exception from a task'
+            ml.AssertLogContains("MSB4018");
+            // 'An internal failure occurred while running MSBuild'
+            ml.AssertLogDoesntContain("MSB1025");
+            // 'This is an unhandled error in MSBuild'
+            ml.AssertLogDoesntContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("UnhandledMSBuildError", string.Empty));
+            ml.AssertLogContains(testExceptionMessage);
+
+            File.Exists(ExceptionHandling.DumpFilePath).ShouldBe(isCritical,
+                $"{ExceptionHandling.DumpFilePath} expected to exist: {isCritical}");
+            if (isCritical)
+            {
+                FileUtilities.DeleteNoThrow(ExceptionHandling.DumpFilePath);
+            }
+        }
+
+        [Fact]
+        public void TestTaskParameterLogging()
+        {
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+            MockLogger ml = ObjectModelHelpers.BuildProjectExpectSuccess($"""
+                    <Project>
+                        <UsingTask TaskName=`TaskThatReturnsDictionaryTaskItem` AssemblyFile=`{customTaskPath}`/>
+                        <ItemGroup>
+                            <MyItem Include="item1"/>
+                            <MyItem Include="item2"/>
+                        </ItemGroup>
+                        <Target Name=`Build`>
+                           <TaskThatReturnsDictionaryTaskItem Key="a" Value="b" AdditionalParameters="@(MyItem)" />
+                        </Target>
+                    </Project>
+                """);
+
+            // Each parameter should be logged as TaskParameterEvent.
+            ml.TaskParameterEvents.Count.ShouldBe(3);
+            IList<string> messages = ml.TaskParameterEvents.Select(e => e.Message).ToList();
+            messages.ShouldContain($"{ItemGroupLoggingHelper.TaskParameterPrefix}Key=a");
+            messages.ShouldContain($"{ItemGroupLoggingHelper.TaskParameterPrefix}Value=b");
+            messages.ShouldContain($"{ItemGroupLoggingHelper.TaskParameterPrefix}\n    AdditionalParameters=\n        item1\n        item2");
+
+            // Parameters should not be logged as messages.
+            messages = ml.BuildMessageEvents.Select(e => e.Message).ToList();
+            messages.ShouldNotContain(m => m.StartsWith(ItemGroupLoggingHelper.TaskParameterPrefix));
+        }
+
         #endregion
 
         #region ITestTaskHost Members
@@ -1150,7 +1244,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #else
             AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).GetTypeInfo().FullName, null);
 #endif
-            LoadedType loadedType = new LoadedType(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory), loadInfo, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).GetTypeInfo().Assembly, typeof(ITaskItem));
+            LoadedType loadedType = new LoadedType(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory), loadInfo, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).Assembly, typeof(ITaskItem));
 
             TaskBuilderTestTask.TaskBuilderTestTaskFactory taskFactory = new TaskBuilderTestTask.TaskBuilderTestTaskFactory();
             taskFactory.ThrowOnExecute = throwOnExecute;
@@ -1171,7 +1265,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 CancellationToken.None);
 
             ProjectTaskInstance taskInstance = project.Targets["foo"].Tasks.First();
-            TaskLoggingContext talc = tlc.LogTaskBatchStarted(".", taskInstance);
+            TaskLoggingContext talc = tlc.LogTaskBatchStarted(".", taskInstance, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).Assembly.GetName().FullName);
 
             ItemDictionary<ProjectItemInstance> itemsByName = new ItemDictionary<ProjectItemInstance>();
 
@@ -1189,6 +1283,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _twoItems = new ITaskItem[] { new TaskItem(item), new TaskItem(item2) };
 
             _bucket = new ItemBucket(Array.Empty<string>(), new Dictionary<string, string>(), new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
+            _bucket.Initialize(null);
             _host.FindTask(null);
             _host.InitializeForBatch(talc, _bucket, null);
             _parametersSetOnTask = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
@@ -1423,11 +1518,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Target Name='Skip' Inputs='testProject.proj' Outputs='testProject.proj' />
 
                     <Target Name='Error' >
-                        <ErrorTask1 ContinueOnError='True'/>                    
-                        <ErrorTask2 ContinueOnError='False'/>  
-                        <ErrorTask3 /> 
-                        <OnError ExecuteTargets='Foo'/>                  
-                        <OnError ExecuteTargets='Bar'/>                  
+                        <ErrorTask1 ContinueOnError='True'/>
+                        <ErrorTask2 ContinueOnError='False'/>
+                        <ErrorTask3 />
+                        <OnError ExecuteTargets='Foo'/>
+                        <OnError ExecuteTargets='Bar'/>
                     </Target>
 
                     <Target Name='Foo' Inputs='foo.cpp' Outputs='foo.o'>
@@ -1464,7 +1559,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </Project>
                 ");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             return project.CreateProjectInstance();
         }
     }

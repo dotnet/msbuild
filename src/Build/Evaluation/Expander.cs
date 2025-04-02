@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Evaluation.Expander;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -23,6 +24,7 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
+using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
@@ -78,7 +80,7 @@ namespace Microsoft.Build.Evaluation
         /// When an error occurs expanding a property, just leave it unexpanded.
         /// </summary>
         /// <remarks>
-        /// This should only be used in cases where property evaluation isn't critcal, such as when attempting to log a
+        /// This should only be used in cases where property evaluation isn't critical, such as when attempting to log a
         /// message with a best effort expansion of a string, or when discovering partial information during lazy evaluation.
         /// </remarks>
         LeavePropertiesUnexpandedOnError = 0x20,
@@ -87,6 +89,13 @@ namespace Microsoft.Build.Evaluation
         /// When an expansion occurs, truncate it to Expander.DefaultTruncationCharacterLimit or Expander.DefaultTruncationItemLimit.
         /// </summary>
         Truncate = 0x40,
+
+        /// <summary>
+        /// Issues build message if item references unqualified or qualified metadata odf self - as this can lead to unintended expansion and
+        ///  cross-combination of other items.
+        /// More info: https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-batching#item-batching-on-self-referencing-metadata
+        /// </summary>
+        LogOnItemMetadataSelfReference = 0x80,
 
         /// <summary>
         /// Expand only properties and then item lists
@@ -122,7 +131,7 @@ namespace Microsoft.Build.Evaluation
     /// </remarks>
     /// <typeparam name="P">Type of the properties used.</typeparam>
     /// <typeparam name="I">Type of the items used.</typeparam>
-    internal class Expander<P, I>
+    internal partial class Expander<P, I>
         where P : class, IProperty
         where I : class, IItem
     {
@@ -203,7 +212,7 @@ namespace Microsoft.Build.Evaluation
             /// concatenation of the string representation of the values, each additionally subjected
             /// to file path adjustment.
             /// </returns>
-            public object GetResult()
+            public readonly object GetResult()
             {
                 CheckDisposed();
                 if (_firstObject != null)
@@ -228,7 +237,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Throws <see cref="ObjectDisposedException"/> if this concatenator is already disposed.
             /// </summary>
-            private void CheckDisposed() =>
+            private readonly void CheckDisposed() =>
                 ErrorUtilities.VerifyThrowObjectDisposed(!_disposed, nameof(SpanBasedConcatenator));
 
             /// <summary>
@@ -271,16 +280,10 @@ namespace Microsoft.Build.Evaluation
         private static readonly char[] s_doubleQuoteChar = { '"' };
 
         /// <summary>
-        /// Those characters which indicate that an expression may contain expandable
-        /// expressions.
-        /// </summary>
-        private static char[] s_expandableChars = { '$', '%', '@' };
-
-        /// <summary>
         /// The CultureInfo from the invariant culture. Used to avoid allocations for
-        /// perfoming IndexOf etc.
+        /// performing IndexOf etc.
         /// </summary>
-        private static CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
+        private static readonly CompareInfo s_invariantCompareInfo = CultureInfo.InvariantCulture.CompareInfo;
 
         /// <summary>
         /// Properties to draw on for expansion.
@@ -300,34 +303,53 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Set of properties which are null during expansion.
         /// </summary>
-        private UsedUninitializedProperties _usedUninitializedProperties;
+        private PropertiesUseTracker _propertiesUseTracker;
 
         private readonly IFileSystem _fileSystem;
+
+        private readonly LoggingContext _loggingContext;
 
         /// <summary>
         /// Non-null if the expander was constructed for evaluation.
         /// </summary>
         internal EvaluationContext EvaluationContext { get; }
 
+        private Expander(IPropertyProvider<P> properties, LoggingContext loggingContext)
+        {
+            _properties = properties;
+            _propertiesUseTracker = new PropertiesUseTracker(loggingContext);
+            _loggingContext = loggingContext;
+        }
+
         /// <summary>
         /// Creates an expander passing it some properties to use.
         /// Properties may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IFileSystem fileSystem)
+        internal Expander(IPropertyProvider<P> properties, IFileSystem fileSystem, LoggingContext loggingContext)
+            : this(properties, loggingContext)
         {
-            _properties = properties;
-            _usedUninitializedProperties = new UsedUninitializedProperties();
             _fileSystem = fileSystem;
         }
+
+        /// <summary>
+        /// Creates an expander passing it some properties to use.
+        /// Properties may be null.
+        ///
+        /// Used for tests and for ToolsetReader - that operates agnostic on the project
+        ///   - so no logging context is passed, and no BuildCheck check will be executed.
+        /// </summary>
+        internal Expander(IPropertyProvider<P> properties, IFileSystem fileSystem)
+        : this(properties, fileSystem, null)
+        { }
 
         /// <summary>
         /// Creates an expander passing it some properties to use and the evaluation context.
         /// Properties may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, EvaluationContext evaluationContext)
+        internal Expander(IPropertyProvider<P> properties, EvaluationContext evaluationContext,
+            LoggingContext loggingContext)
+            : this(properties, loggingContext)
         {
-            _properties = properties;
-            _usedUninitializedProperties = new UsedUninitializedProperties();
             _fileSystem = evaluationContext.FileSystem;
             EvaluationContext = evaluationContext;
         }
@@ -336,18 +358,19 @@ namespace Microsoft.Build.Evaluation
         /// Creates an expander passing it some properties and items to use.
         /// Either or both may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IFileSystem fileSystem)
-            : this(properties, fileSystem)
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IFileSystem fileSystem, LoggingContext loggingContext)
+            : this(properties, fileSystem, loggingContext)
         {
             _items = items;
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Expander{P, I}"/> class.
         /// Creates an expander passing it some properties and items to use, and the evaluation context.
         /// Either or both may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, EvaluationContext evaluationContext)
-            : this(properties, evaluationContext)
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, EvaluationContext evaluationContext, LoggingContext loggingContext)
+            : this(properties, evaluationContext, loggingContext)
         {
             _items = items;
         }
@@ -356,20 +379,47 @@ namespace Microsoft.Build.Evaluation
         /// Creates an expander passing it some properties, items, and/or metadata to use.
         /// Any or all may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata, IFileSystem fileSystem)
-            : this(properties, items, fileSystem)
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata, IFileSystem fileSystem, LoggingContext loggingContext)
+            : this(properties, items, fileSystem, loggingContext)
         {
             _metadata = metadata;
         }
 
         /// <summary>
-        /// Whether to warn when we set a property for the first time, after it was previously used.
-        /// Default is false, unless MSBUILDWARNONUNINITIALIZEDPROPERTY is set.
+        /// Creates an expander passing it some properties, items, and/or metadata to use.
+        /// Any or all may be null.
+        ///
+        /// This is for the purpose of evaluations through API calls, that might not be able to pass the logging context
+        ///  - BuildCheck checking won't be executed for those.
+        /// (for one of the calls we can actually pass IDataConsumingContext - as we have logging service and project)
+        ///
         /// </summary>
-        internal bool WarnForUninitializedProperties
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata, IFileSystem fileSystem)
+            : this(properties, items, fileSystem, null)
         {
-            get { return _usedUninitializedProperties.Warn; }
-            set { _usedUninitializedProperties.Warn = value; }
+            _metadata = metadata;
+        }
+
+        private Expander(
+            IPropertyProvider<P> properties,
+            IItemProvider<I> items,
+            IMetadataTable metadata,
+            IFileSystem fileSystem,
+            EvaluationContext evaluationContext,
+            LoggingContext loggingContext)
+            : this(properties, items, metadata, fileSystem, loggingContext)
+        {
+            EvaluationContext = evaluationContext;
+        }
+
+        /// <summary>
+        /// Recreates the expander with passed in logging context
+        /// </summary>
+        /// <param name="loggingContext"></param>
+        /// <returns></returns>
+        internal Expander<P, I> WithLoggingContext(LoggingContext loggingContext)
+        {
+            return new Expander<P, I>(_properties, _items, _metadata, _fileSystem, EvaluationContext, loggingContext);
         }
 
         /// <summary>
@@ -386,10 +436,10 @@ namespace Microsoft.Build.Evaluation
         /// If a property is expanded but evaluates to null then it is considered to be un-initialized.
         /// We want to keep track of these properties so that we can warn if the property gets set later on.
         /// </summary>
-        internal UsedUninitializedProperties UsedUninitializedProperties
+        internal PropertiesUseTracker PropertiesUseTracker
         {
-            get { return _usedUninitializedProperties; }
-            set { _usedUninitializedProperties = value; }
+            get { return _propertiesUseTracker; }
+            set { _propertiesUseTracker = value; }
         }
 
         /// <summary>
@@ -398,7 +448,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static bool ExpressionMayContainExpandableExpressions(string expression)
         {
-            return expression.IndexOfAny(s_expandableChars) > -1;
+            return expression.AsSpan().IndexOfAny('$', '%', '@') >= 0;
         }
 
         /// <summary>
@@ -418,9 +468,9 @@ namespace Microsoft.Build.Evaluation
         ///
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
         /// </summary>
-        internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
+        internal string ExpandIntoStringAndUnescape(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
-            string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation, loggingContext);
+            string result = ExpandIntoStringLeaveEscaped(expression, options, elementLocation);
 
             return (result == null) ? null : EscapingUtilities.UnescapeAll(result);
         }
@@ -432,17 +482,17 @@ namespace Microsoft.Build.Evaluation
         ///
         /// If ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and it broke out early, returns null. Otherwise the result can be trusted.
         /// </summary>
-        internal string ExpandIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
+        internal string ExpandIntoStringLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
             if (expression.Length == 0)
             {
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
-            string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
-            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem, loggingContext);
+            string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, _loggingContext);
+            result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
             result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
             result = FileUtilities.MaybeAdjustFilePath(result);
 
@@ -460,10 +510,10 @@ namespace Microsoft.Build.Evaluation
                 return String.Empty;
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             string metaExpanded = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
-            return PropertyExpander<P>.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem);
+            return PropertyExpander<P>.ExpandPropertiesLeaveTypedAndEscaped(metaExpanded, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
         }
 
         /// <summary>
@@ -472,11 +522,11 @@ namespace Microsoft.Build.Evaluation
         /// Use this form when the result is going to be processed further, for example by matching against the file system,
         /// so literals must be distinguished, and you promise to unescape after that.
         /// </summary>
-        internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
+        internal SemiColonTokenizer ExpandIntoStringListLeaveEscaped(string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
             ErrorUtilities.VerifyThrow((options & ExpanderOptions.BreakOnNotEmpty) == 0, "not supported");
 
-            return ExpressionShredder.SplitSemiColonSeparatedList(ExpandIntoStringLeaveEscaped(expression, options, elementLocation, loggingContext));
+            return ExpressionShredder.SplitSemiColonSeparatedList(ExpandIntoStringLeaveEscaped(expression, options, elementLocation));
         }
 
         /// <summary>
@@ -508,10 +558,10 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
-            expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _usedUninitializedProperties, _fileSystem);
+            expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
             expression = FileUtilities.MaybeAdjustFilePath(expression);
 
             List<T> result = new List<T>();
@@ -582,7 +632,7 @@ namespace Microsoft.Build.Evaluation
                 return Array.Empty<T>();
             }
 
-            ErrorUtilities.VerifyThrowInternalNull(elementLocation, nameof(elementLocation));
+            ErrorUtilities.VerifyThrowInternalNull(elementLocation);
 
             return ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, expression, _items, itemFactory, options, includeNullItems, out isTransformExpression, elementLocation);
         }
@@ -609,7 +659,7 @@ namespace Microsoft.Build.Evaluation
             ExpanderOptions options,
             bool includeNullEntries,
             out bool isTransformExpression,
-            out List<Pair<string, I>> itemsFromCapture)
+            out List<KeyValuePair<string, I>> itemsFromCapture)
         {
             return ItemExpander.ExpandExpressionCapture(this, expressionCapture, _items, elementLocation, options, includeNullEntries, out isTransformExpression, out itemsFromCapture);
         }
@@ -871,8 +921,9 @@ namespace Microsoft.Build.Evaluation
             /// <param name="metadata">The metadata to be expanded.</param>
             /// <param name="options">Used to specify what to expand.</param>
             /// <param name="elementLocation">The location information for error reporting purposes.</param>
+            /// <param name="loggingContext">The logging context for this operation.</param>
             /// <returns>The string with item metadata expanded in-place, escaped.</returns>
-            internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation)
+            internal static string ExpandMetadataLeaveEscaped(string expression, IMetadataTable metadata, ExpanderOptions options, IElementLocation elementLocation, LoggingContext loggingContext = null)
             {
                 try
                 {
@@ -896,8 +947,8 @@ namespace Microsoft.Build.Evaluation
                     {
                         // if there are no item vectors in the string
                         // run a simpler Regex to find item metadata references
-                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options);
-                        result = RegularExpressions.ItemMetadataPattern.Value.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
+                        result = RegularExpressions.ItemMetadataRegex.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
                     }
                     else
                     {
@@ -915,7 +966,7 @@ namespace Microsoft.Build.Evaluation
                         using SpanBasedStringBuilder finalResultBuilder = Strings.GetSpanBasedStringBuilder();
 
                         int start = 0;
-                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options);
+                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
 
                         if (itemVectorExpressions != null)
                         {
@@ -928,7 +979,7 @@ namespace Microsoft.Build.Evaluation
                                 // Extract the part of the expression that appears before the item vector expression
                                 // e.g. the ABC in ABC@(foo->'%(FullPath)')
                                 string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
-                                string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                                string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
 
                                 // Append the metadata replacement
                                 finalResultBuilder.Append(replacementResult);
@@ -936,7 +987,7 @@ namespace Microsoft.Build.Evaluation
                                 // Expand any metadata that appears in the item vector expression's separator
                                 if (itemVectorExpressions[n].Separator != null)
                                 {
-                                    vectorExpression = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
+                                    vectorExpression = RegularExpressions.NonTransformItemMetadataRegex.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
                                 }
 
                                 // Append the item vector expression as is
@@ -953,7 +1004,7 @@ namespace Microsoft.Build.Evaluation
                         if (start < expression.Length)
                         {
                             string subExpressionToReplaceIn = expression.Substring(start);
-                            string replacementResult = RegularExpressions.NonTransformItemMetadataPattern.Value.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                            string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
 
                             finalResultBuilder.Append(replacementResult);
                         }
@@ -993,13 +1044,23 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 private ExpanderOptions _options;
 
+                private IElementLocation _elementLocation;
+
+                private LoggingContext _loggingContext;
+
                 /// <summary>
                 /// Constructor taking a source of metadata.
                 /// </summary>
-                internal MetadataMatchEvaluator(IMetadataTable metadata, ExpanderOptions options)
+                internal MetadataMatchEvaluator(
+                    IMetadataTable metadata,
+                    ExpanderOptions options,
+                    IElementLocation elementLocation,
+                    LoggingContext loggingContext)
                 {
                     _metadata = metadata;
-                    _options = options & (ExpanderOptions.ExpandMetadata | ExpanderOptions.Truncate);
+                    _options = options & (ExpanderOptions.ExpandMetadata | ExpanderOptions.Truncate | ExpanderOptions.LogOnItemMetadataSelfReference);
+                    _elementLocation = elementLocation;
+                    _loggingContext = loggingContext;
 
                     ErrorUtilities.VerifyThrow(options != ExpanderOptions.Invalid, "Must be expanding metadata of some kind");
                 }
@@ -1030,9 +1091,25 @@ namespace Microsoft.Build.Evaluation
                        (!isBuiltInMetadata && ((_options & ExpanderOptions.ExpandCustomMetadata) != 0)))
                     {
                         metadataValue = _metadata.GetEscapedValue(itemType, metadataName);
+
+                        if ((_options & ExpanderOptions.LogOnItemMetadataSelfReference) != 0 &&
+                            _loggingContext != null &&
+                            !string.IsNullOrEmpty(metadataName) &&
+                            _metadata is IItemTypeDefinition itemMetadata &&
+                            (string.IsNullOrEmpty(itemType) || string.Equals(itemType, itemMetadata.ItemType, StringComparison.Ordinal)))
+                        {
+                            _loggingContext.LogComment(MessageImportance.Low, new BuildEventFileInfo(_elementLocation),
+                                "ItemReferencingSelfInTarget", itemMetadata.ItemType, metadataName);
+                        }
+
                         if (IsTruncationEnabled(_options) && metadataValue.Length > CharacterLimitPerExpansion)
                         {
-                            metadataValue = metadataValue.Substring(0, CharacterLimitPerExpansion - 3) + "...";
+                            metadataValue =
+#if NET
+                                $"{metadataValue.AsSpan(0, CharacterLimitPerExpansion - 3)}...";
+#else
+                                $"{metadataValue.Substring(0, CharacterLimitPerExpansion - 3)}...";
+#endif
                         }
                     }
 
@@ -1074,9 +1151,8 @@ namespace Microsoft.Build.Evaluation
                 IPropertyProvider<T> properties,
                 ExpanderOptions options,
                 IElementLocation elementLocation,
-                UsedUninitializedProperties usedUninitializedProperties,
-                IFileSystem fileSystem,
-                LoggingContext loggingContext = null)
+                PropertiesUseTracker propertiesUseTracker,
+                IFileSystem fileSystem)
             {
                 return
                     ConvertToString(
@@ -1085,9 +1161,8 @@ namespace Microsoft.Build.Evaluation
                             properties,
                             options,
                             elementLocation,
-                            usedUninitializedProperties,
-                            fileSystem,
-                            loggingContext));
+                            propertiesUseTracker,
+                            fileSystem));
             }
 
             /// <summary>
@@ -1112,9 +1187,8 @@ namespace Microsoft.Build.Evaluation
                 IPropertyProvider<T> properties,
                 ExpanderOptions options,
                 IElementLocation elementLocation,
-                UsedUninitializedProperties usedUninitializedProperties,
-                IFileSystem fileSystem,
-                LoggingContext loggingContext = null)
+                PropertiesUseTracker propertiesUseTracker,
+                IFileSystem fileSystem)
             {
                 if (((options & ExpanderOptions.ExpandProperties) == 0) || String.IsNullOrEmpty(expression))
                 {
@@ -1223,12 +1297,12 @@ namespace Microsoft.Build.Evaluation
                                 properties,
                                 options,
                                 elementLocation,
-                                usedUninitializedProperties,
+                                propertiesUseTracker,
                                 fileSystem);
                         }
                         else // This is a regular property
                         {
-                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, usedUninitializedProperties, loggingContext);
+                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, propertiesUseTracker);
                         }
 
                         if (propertyValue != null)
@@ -1238,7 +1312,12 @@ namespace Microsoft.Build.Evaluation
                                 var value = propertyValue.ToString();
                                 if (value.Length > CharacterLimitPerExpansion)
                                 {
-                                    propertyValue = value.Substring(0, CharacterLimitPerExpansion - 3) + "...";
+                                    propertyValue =
+#if NET
+                                        $"{value.AsSpan(0, CharacterLimitPerExpansion - 3)}...";
+#else
+                                        $"{value.Substring(0, CharacterLimitPerExpansion - 3)}...";
+#endif
                                 }
                             }
 
@@ -1271,7 +1350,7 @@ namespace Microsoft.Build.Evaluation
                 IPropertyProvider<T> properties,
                 ExpanderOptions options,
                 IElementLocation elementLocation,
-                UsedUninitializedProperties usedUninitializedProperties,
+                PropertiesUseTracker propertiesUseTracker,
                 IFileSystem fileSystem)
             {
                 Function<T> function = null;
@@ -1302,14 +1381,15 @@ namespace Microsoft.Build.Evaluation
                             propertyBody,
                             elementLocation,
                             propertyValue,
-                            usedUninitializedProperties,
-                            fileSystem);
+                            propertiesUseTracker,
+                            fileSystem,
+                            propertiesUseTracker.LoggingContext);
 
                         // We may not have been able to parse out a function
                         if (function != null)
                         {
                             // We will have either extracted the actual property name
-                            // or realised that there is none (static function), and have recorded a null
+                            // or realized that there is none (static function), and have recorded a null
                             propertyName = function.Receiver;
                         }
                         else
@@ -1331,7 +1411,7 @@ namespace Microsoft.Build.Evaluation
                         }
                         else
                         {
-                            propertyValue = LookupProperty(properties, propertyBody, 0, indexerStart - 1, elementLocation, usedUninitializedProperties);
+                            propertyValue = LookupProperty(properties, propertyBody, 0, indexerStart - 1, elementLocation, propertiesUseTracker);
                             propertyBody = propertyBody.Substring(indexerStart);
 
                             // recurse so that the function representing the indexer can be executed on the property value
@@ -1341,7 +1421,7 @@ namespace Microsoft.Build.Evaluation
                                 properties,
                                 options,
                                 elementLocation,
-                                usedUninitializedProperties,
+                                propertiesUseTracker,
                                 fileSystem);
                         }
                     }
@@ -1359,7 +1439,7 @@ namespace Microsoft.Build.Evaluation
                 // doesn't exist in the collection, and we're not executing a static function
                 if (!String.IsNullOrEmpty(propertyName))
                 {
-                    propertyValue = LookupProperty(properties, propertyName, elementLocation, usedUninitializedProperties);
+                    propertyValue = LookupProperty(properties, propertyName, elementLocation, propertiesUseTracker);
                 }
 
                 if (function != null)
@@ -1449,7 +1529,15 @@ namespace Microsoft.Build.Evaluation
                 else
                 {
                     // The fall back is always to just convert to a string directly.
-                    convertedString = valueToConvert.ToString();
+                    // Issue: https://github.com/dotnet/msbuild/issues/9757
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                    {
+                        convertedString = Convert.ToString(valueToConvert, CultureInfo.InvariantCulture);
+                    }
+                    else
+                    {
+                        convertedString = valueToConvert.ToString();
+                    }
                 }
 
                 return convertedString;
@@ -1458,21 +1546,26 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Look up a simple property reference by the name of the property, e.g. "Foo" when expanding $(Foo).
             /// </summary>
-            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties)
+            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, IElementLocation elementLocation, PropertiesUseTracker propertiesUseTracker)
             {
-                return LookupProperty(properties, propertyName, 0, propertyName.Length - 1, elementLocation, usedUninitializedProperties);
+                return LookupProperty(properties, propertyName, 0, propertyName.Length - 1, elementLocation, propertiesUseTracker);
             }
 
             /// <summary>
             /// Look up a simple property reference by the name of the property, e.g. "Foo" when expanding $(Foo).
             /// </summary>
-            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, UsedUninitializedProperties usedUninitializedProperties, LoggingContext loggingContext = null)
+            private static object LookupProperty(IPropertyProvider<T> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, PropertiesUseTracker propertiesUseTracker)
             {
                 T property = properties.GetProperty(propertyName, startIndex, endIndex);
 
                 object propertyValue;
 
-                if (property == null && ((endIndex - startIndex) >= 7) && MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7))
+                bool isArtificial = property == null && ((endIndex - startIndex) >= 7) &&
+                                   MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7);
+
+                propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, elementLocation, property == null, isArtificial);
+
+                if (isArtificial)
                 {
                     // It could be one of the MSBuildThisFileXXXX properties,
                     // whose values vary according to the file they are in.
@@ -1487,36 +1580,16 @@ namespace Microsoft.Build.Evaluation
                 }
                 else if (property == null)
                 {
-                    // We have evaluated a property to null. We now need to see if we need to add it to the list of properties which are used before they have been initialized
-                    //
-                    // We also do not want to add the property to the list if the environment variable is not set, also we do not want to add the property to the list if we are currently
-                    // evaluating a condition because a common pattern for msbuild projects is to see if the property evaluates to empty and then set a value as this would cause a considerable number of false positives.   <A Condition="'$(A)' == ''">default</A>
-                    //
-                    // Another pattern used is where a property concatonates with other values,  <a>$(a);something</a> however we do not want to add the a element to the list because again this would make a number of
-                    // false positives. Therefore we check to see what element we are currently evaluating and if it is the same as our property we do not add the property to the list.
-                    if (usedUninitializedProperties.Warn && usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName != null)
-                    {
-                        // Check to see if the property name does not match the property we are currently evaluating, note the property we are currently evaluating in the element name, this means no $( or )
-                        if (!MSBuildNameIgnoreCaseComparer.Default.Equals(usedUninitializedProperties.CurrentlyEvaluatingPropertyElementName, propertyName, startIndex, endIndex - startIndex + 1))
-                        {
-                            string propertyTrimed = propertyName.Substring(startIndex, endIndex - startIndex + 1);
-                            if (!usedUninitializedProperties.Properties.ContainsKey(propertyTrimed))
-                            {
-                                usedUninitializedProperties.Properties.Add(propertyTrimed, elementLocation);
-                            }
-                        }
-                    }
-
                     propertyValue = String.Empty;
                 }
                 else
                 {
                     if (property is ProjectPropertyInstance.EnvironmentDerivedProjectPropertyInstance environmentDerivedProperty)
                     {
-                        environmentDerivedProperty.loggingContext = loggingContext;
+                        environmentDerivedProperty.loggingContext = propertiesUseTracker.LoggingContext;
                     }
 
-                    propertyValue = property.EvaluatedValueEscaped;
+                    propertyValue = property.GetEvaluatedValueEscaped(elementLocation);
                 }
 
                 return propertyValue;
@@ -1587,9 +1660,8 @@ namespace Microsoft.Build.Evaluation
             {
 #if RUNTIME_TYPE_NETCORE
                 // .NET Core MSBuild used to always return empty, so match that behavior
-                // on non-Windows (no registry), and with a changewave (in case someone
-                // had a registry property and it breaks when it lights up).
-                if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                // on non-Windows (no registry).
+                if (!NativeMethodsShared.IsWindows)
                 {
                     return string.Empty;
                 }
@@ -1662,7 +1734,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
                     {
-                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidRegistryPropertyExpression", "$(" + registryExpression + ")", ex.Message);
+                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidRegistryPropertyExpression", $"$({registryExpression})", ex.Message);
                     }
                 }
 
@@ -1715,7 +1787,7 @@ namespace Microsoft.Build.Evaluation
             /// Execute the list of transform functions.
             /// </summary>
             /// <typeparam name="S">class, IItem.</typeparam>
-            internal static IEnumerable<Pair<string, S>> Transform<S>(Expander<P, I> expander, bool includeNullEntries, Stack<TransformFunction<S>> transformFunctionStack, IEnumerable<Pair<string, S>> itemsOfType)
+            internal static IEnumerable<KeyValuePair<string, S>> Transform<S>(Expander<P, I> expander, bool includeNullEntries, Stack<TransformFunction<S>> transformFunctionStack, IEnumerable<KeyValuePair<string, S>> itemsOfType)
                 where S : class, IItem
             {
                 // If we have transforms on our stack, then we'll execute those first
@@ -1724,7 +1796,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     TransformFunction<S> function = transformFunctionStack.Pop();
 
-                    foreach (Pair<string, S> item in Transform(expander, includeNullEntries, transformFunctionStack, function.Execute(expander, includeNullEntries, itemsOfType)))
+                    foreach (KeyValuePair<string, S> item in Transform(expander, includeNullEntries, transformFunctionStack, function.Execute(expander, includeNullEntries, itemsOfType)))
                     {
                         yield return item;
                     }
@@ -1733,7 +1805,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // When we have no more tranforms on the stack, iterate over the items
                     // that we have to return them
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         yield return item;
                     }
@@ -1790,7 +1862,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 List<ExpressionShredder.ItemExpressionCapture> matches;
-                if (expression.IndexOf('@') == -1)
+                if (!expression.Contains('@'))
                 {
                     return null;
                 }
@@ -1866,7 +1938,7 @@ namespace Microsoft.Build.Evaluation
                     return result;
                 }
 
-                List<Pair<string, S>> itemsFromCapture;
+                List<KeyValuePair<string, S>> itemsFromCapture;
                 brokeEarlyNonEmpty = ExpandExpressionCapture(expander, expressionCapture, items, elementLocation /* including null items */, options, true, out isTransformExpression, out itemsFromCapture);
 
                 if (brokeEarlyNonEmpty)
@@ -1932,7 +2004,7 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options,
                 bool includeNullEntries,
                 out bool isTransformExpression,
-                out List<Pair<string, S>> itemsFromCapture)
+                out List<KeyValuePair<string, S>> itemsFromCapture)
                 where S : class, IItem
             {
                 ErrorUtilities.VerifyThrow(evaluatedItems != null, "Cannot expand items without providing items");
@@ -1946,11 +2018,15 @@ namespace Microsoft.Build.Evaluation
                 // If there are no items of the given type, then bail out early
                 if (itemsOfType.Count == 0)
                 {
-                    // .. but only if there isn't a function "Count()", since that will want to return something (zero) for an empty list
+                    // ... but only if there isn't a function "Count", since that will want to return something (zero) for an empty list
                     if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)) != true)
                     {
-                        itemsFromCapture = new List<Pair<string, S>>();
-                        return false;
+                        // ...or a function "AnyHaveMetadataValue", since that will want to return false for an empty list.
+                        if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
+                        {
+                            itemsFromCapture = new List<KeyValuePair<string, S>>();
+                            return false;
+                        }
                     }
                 }
 
@@ -1959,7 +2035,7 @@ namespace Microsoft.Build.Evaluation
                     isTransformExpression = true;
                 }
 
-                itemsFromCapture = new List<Pair<string, S>>(itemsOfType.Count);
+                itemsFromCapture = new List<KeyValuePair<string, S>>(itemsOfType.Count);
 
                 if (!isTransformExpression)
                 {
@@ -1971,7 +2047,7 @@ namespace Microsoft.Build.Evaluation
                             return true;
                         }
 
-                        itemsFromCapture.Add(new Pair<string, S>(item.EvaluatedIncludeEscaped, item));
+                        itemsFromCapture.Add(new KeyValuePair<string, S>(item.EvaluatedIncludeEscaped, item));
                     }
                 }
                 else
@@ -1979,7 +2055,7 @@ namespace Microsoft.Build.Evaluation
                     Stack<TransformFunction<S>> transformFunctionStack = PrepareTransformStackFromMatch<S>(elementLocation, expressionCapture);
 
                     // iterate over the tranform chain, creating the final items from its results
-                    foreach (Pair<string, S> itemTuple in Transform<S>(expander, includeNullEntries, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemPairEnumerable(itemsOfType)))
+                    foreach (KeyValuePair<string, S> itemTuple in Transform<S>(expander, includeNullEntries, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemPairEnumerable(itemsOfType)))
                     {
                         if (!string.IsNullOrEmpty(itemTuple.Key) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
                         {
@@ -1994,7 +2070,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     var joinedItems = string.Join(expressionCapture.Separator, itemsFromCapture.Select(i => i.Key));
                     itemsFromCapture.Clear();
-                    itemsFromCapture.Add(new Pair<string, S>(joinedItems, null));
+                    itemsFromCapture.Add(new KeyValuePair<string, S>(joinedItems, null));
                 }
 
                 return false; // did not break early
@@ -2082,7 +2158,7 @@ namespace Microsoft.Build.Evaluation
                     if (functionName == null)
                     {
                         functionName = "ExpandQuotedExpressionFunction";
-                        arguments = new string[] { function };
+                        arguments = [function];
                     }
                     else if (argumentsExpression != null)
                     {
@@ -2112,7 +2188,7 @@ namespace Microsoft.Build.Evaluation
                 ExpanderOptions options)
                 where S : class, IItem
             {
-                List<Pair<string, S>> itemsFromCapture;
+                List<KeyValuePair<string, S>> itemsFromCapture;
                 bool throwaway;
                 var brokeEarlyNonEmpty = ExpandExpressionCapture(expander, capture, evaluatedItems, elementLocation /* including null items */, options, true, out throwaway, out itemsFromCapture);
 
@@ -2167,13 +2243,13 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// A cache of previously created item function delegates.
                 /// </summary>
-                private static ConcurrentDictionary<string, ItemTransformFunction> s_transformFunctionDelegateCache = new ConcurrentDictionary<string, ItemTransformFunction>(StringComparer.OrdinalIgnoreCase);
+                private static readonly ConcurrentDictionary<string, ItemTransformFunction> s_transformFunctionDelegateCache = new ConcurrentDictionary<string, ItemTransformFunction>(StringComparer.OrdinalIgnoreCase);
 
                 /// <summary>
                 /// Delegate that represents the signature of all item transformation functions
                 /// This is used to support calling the functions by name.
                 /// </summary>
-                public delegate IEnumerable<Pair<string, S>> ItemTransformFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments);
+                public delegate IEnumerable<KeyValuePair<string, S>> ItemTransformFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments);
 
                 /// <summary>
                 /// Get a delegate to the given item transformation function by supplying the name and the
@@ -2182,7 +2258,7 @@ namespace Microsoft.Build.Evaluation
                 internal static ItemTransformFunction GetItemTransformFunction(IElementLocation elementLocation, string functionName, Type itemType)
                 {
                     ItemTransformFunction transformFunction = null;
-                    string qualifiedFunctionName = itemType.FullName + "::" + functionName;
+                    string qualifiedFunctionName = $"{itemType.FullName}::{functionName}";
 
                     // We may have seen this delegate before, if so grab the one we already created
                     if (!s_transformFunctionDelegateCache.TryGetValue(qualifiedFunctionName, out transformFunction))
@@ -2236,7 +2312,7 @@ namespace Microsoft.Build.Evaluation
                 /// Create an enumerator from a base IEnumerable of items into an enumerable
                 /// of transformation result which includes the new itemspec and the base item.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> GetItemPairEnumerable(IEnumerable<S> itemsOfType)
+                internal static IEnumerable<KeyValuePair<string, S>> GetItemPairEnumerable(IEnumerable<S> itemsOfType)
                 {
                     // iterate over the items, and yield out items in the tuple format
                     foreach (var item in itemsOfType)
@@ -2249,12 +2325,12 @@ namespace Microsoft.Build.Evaluation
                                     item.EvaluatedIncludeEscaped,
                                     forceEvaluate: true))
                             {
-                                yield return new Pair<string, S>(resultantItem, item);
+                                yield return new KeyValuePair<string, S>(resultantItem, item);
                             }
                         }
                         else
                         {
-                            yield return new Pair<string, S>(item.EvaluatedIncludeEscaped, item);
+                            yield return new KeyValuePair<string, S>(item.EvaluatedIncludeEscaped, item);
                         }
                     }
                 }
@@ -2262,20 +2338,20 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Intrinsic function that returns the number of items in the list.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> Count(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> Count(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
-                    yield return new Pair<string, S>(Convert.ToString(itemsOfType.Count(), CultureInfo.InvariantCulture), null /* no base item */);
+                    yield return new KeyValuePair<string, S>(Convert.ToString(itemsOfType.Count(), CultureInfo.InvariantCulture), null /* no base item */);
                 }
 
                 /// <summary>
                 /// Intrinsic function that returns the specified built-in modifer value of the items in itemsOfType
                 /// Tuple is {current item include, item under transformation}.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> ItemSpecModifierFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> ItemSpecModifierFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         // If the item include has become empty,
                         // this is the end of the pipeline for this item
@@ -2307,11 +2383,11 @@ namespace Microsoft.Build.Evaluation
                         {
                             // GetItemSpecModifier will have returned us an escaped string
                             // there is nothing more to do than yield it into the pipeline
-                            yield return new Pair<string, S>(result, item.Value);
+                            yield return new KeyValuePair<string, S>(result, item.Value);
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new Pair<string, S>(null, item.Value);
+                            yield return new KeyValuePair<string, S>(null, item.Value);
                         }
                     }
                 }
@@ -2319,11 +2395,11 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Intrinsic function that returns the subset of items that actually exist on disk.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> Exists(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> Exists(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         if (String.IsNullOrEmpty(item.Key))
                         {
@@ -2366,13 +2442,13 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Intrinsic function that combines the existing paths of the input items with a given relative path.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> Combine(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> Combine(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     string relativePath = arguments[0];
 
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         if (String.IsNullOrEmpty(item.Key))
                         {
@@ -2383,14 +2459,14 @@ namespace Microsoft.Build.Evaluation
                         string unescapedPath = EscapingUtilities.UnescapeAll(item.Key);
                         string combinedPath = Path.Combine(unescapedPath, relativePath);
                         string escapedPath = EscapingUtilities.Escape(combinedPath);
-                        yield return new Pair<string, S>(escapedPath, null);
+                        yield return new KeyValuePair<string, S>(escapedPath, null);
                     }
                 }
 
                 /// <summary>
                 /// Intrinsic function that returns all ancestor directories of the given items.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> GetPathsOfAllDirectoriesAbove(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> GetPathsOfAllDirectoriesAbove(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2398,7 +2474,7 @@ namespace Microsoft.Build.Evaluation
 
                     SortedSet<string> directories = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         if (String.IsNullOrEmpty(item.Key))
                         {
@@ -2458,7 +2534,7 @@ namespace Microsoft.Build.Evaluation
                     foreach (string directoryPath in directories)
                     {
                         string escapedDirectoryPath = EscapingUtilities.Escape(directoryPath);
-                        yield return new Pair<string, S>(escapedDirectoryPath, null);
+                        yield return new KeyValuePair<string, S>(escapedDirectoryPath, null);
                     }
                 }
 
@@ -2466,13 +2542,13 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns the DirectoryName of the items in itemsOfType
                 /// UNDONE: This can be removed in favor of a built-in %(DirectoryName) metadata in future.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> DirectoryName(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> DirectoryName(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     Dictionary<string, string> directoryNameTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         // If the item include has become empty,
                         // this is the end of the pipeline for this item
@@ -2521,11 +2597,11 @@ namespace Microsoft.Build.Evaluation
                         if (!String.IsNullOrEmpty(directoryName))
                         {
                             // return a result through the enumerator
-                            yield return new Pair<string, S>(directoryName, item.Value);
+                            yield return new KeyValuePair<string, S>(directoryName, item.Value);
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new Pair<string, S>(null, item.Value);
+                            yield return new KeyValuePair<string, S>(null, item.Value);
                         }
                     }
                 }
@@ -2533,13 +2609,13 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Intrinsic function that returns the contents of the metadata in specified in argument[0].
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> Metadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> Metadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     string metadataName = arguments[0];
 
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         if (item.Value != null)
                         {
@@ -2549,12 +2625,9 @@ namespace Microsoft.Build.Evaluation
                             {
                                 metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                             }
-                            catch (ArgumentException ex) // Blank metadata name
+                            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                            }
-                            catch (InvalidOperationException ex)
-                            {
+                                // Blank metadata name
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                             }
 
@@ -2562,25 +2635,25 @@ namespace Microsoft.Build.Evaluation
                             {
                                 // It may be that the itemspec has unescaped ';'s in it so we need to split here to handle
                                 // that case.
-                                if (metadataValue.IndexOf(';') >= 0)
+                                if (metadataValue.Contains(';'))
                                 {
                                     var splits = ExpressionShredder.SplitSemiColonSeparatedList(metadataValue);
 
                                     foreach (string itemSpec in splits)
                                     {
                                         // return a result through the enumerator
-                                        yield return new Pair<string, S>(itemSpec, item.Value);
+                                        yield return new KeyValuePair<string, S>(itemSpec, item.Value);
                                     }
                                 }
                                 else
                                 {
                                     // return a result through the enumerator
-                                    yield return new Pair<string, S>(metadataValue, item.Value);
+                                    yield return new KeyValuePair<string, S>(metadataValue, item.Value);
                                 }
                             }
                             else if (metadataValue != String.Empty && includeNullEntries)
                             {
-                                yield return new Pair<string, S>(metadataValue, item.Value);
+                                yield return new KeyValuePair<string, S>(metadataValue, item.Value);
                             }
                         }
                     }
@@ -2590,7 +2663,7 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns only the items from itemsOfType that have distinct Item1 in the Tuple
                 /// Using a case sensitive comparison.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> DistinctWithCase(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> DistinctWithCase(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     return DistinctWithComparer(expander, elementLocation, includeNullEntries, functionName, itemsOfType, arguments, StringComparer.Ordinal);
                 }
@@ -2599,7 +2672,7 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns only the items from itemsOfType that have distinct Item1 in the Tuple
                 /// Using a case insensitive comparison.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> Distinct(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> Distinct(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     return DistinctWithComparer(expander, elementLocation, includeNullEntries, functionName, itemsOfType, arguments, StringComparer.OrdinalIgnoreCase);
                 }
@@ -2608,20 +2681,18 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns only the items from itemsOfType that have distinct Item1 in the Tuple
                 /// Using a case insensitive comparison.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> DistinctWithComparer(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments, StringComparer comparer)
+                internal static IEnumerable<KeyValuePair<string, S>> DistinctWithComparer(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments, StringComparer comparer)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     // This dictionary will ensure that we only return one result per unique itemspec
-                    Dictionary<string, S> seenItems = new Dictionary<string, S>(comparer);
+                    HashSet<string> seenItems = new HashSet<string>(comparer);
 
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
-                        if (item.Key != null && !seenItems.ContainsKey(item.Key))
+                        if (item.Key != null && seenItems.Add(item.Key))
                         {
-                            seenItems[item.Key] = item.Value;
-
-                            yield return new Pair<string, S>(item.Key, item.Value);
+                            yield return item;
                         }
                     }
                 }
@@ -2629,23 +2700,20 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Intrinsic function reverses the item list.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> Reverse(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> Reverse(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
-                    foreach (Pair<String, S> item in itemsOfType.Reverse())
-                    {
-                        yield return new Pair<string, S>(item.Key, item.Value);
-                    }
+                    return itemsOfType.Reverse();
                 }
 
                 /// <summary>
                 /// Intrinsic function that transforms expressions like the %(foo) in @(Compile->'%(foo)').
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> ExpandQuotedExpressionFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> ExpandQuotedExpressionFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         MetadataMatchEvaluator matchEvaluator;
                         string include = null;
@@ -2657,7 +2725,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             matchEvaluator = new MetadataMatchEvaluator(item.Key, item.Value, elementLocation);
 
-                            include = RegularExpressions.ItemMetadataPattern.Value.Replace(arguments[0], matchEvaluator.GetMetadataValueFromMatch);
+                            include = RegularExpressions.ItemMetadataRegex.Replace(arguments[0], matchEvaluator.GetMetadataValueFromMatch);
                         }
 
                         // Include may be empty. Historically we have created items with empty include
@@ -2668,11 +2736,11 @@ namespace Microsoft.Build.Evaluation
                         // We pass in the existing item so we can copy over its metadata
                         if (!string.IsNullOrEmpty(include))
                         {
-                            yield return new Pair<string, S>(include, item.Value);
+                            yield return new KeyValuePair<string, S>(include, item.Value);
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new Pair<string, S>(null, item.Value);
+                            yield return new KeyValuePair<string, S>(null, item.Value);
                         }
                     }
                 }
@@ -2681,17 +2749,17 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that transforms expressions by invoking methods of System.String on the itemspec
                 /// of the item in the pipeline.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> ExecuteStringFunction(
+                internal static IEnumerable<KeyValuePair<string, S>> ExecuteStringFunction(
                     Expander<P, I> expander,
                     IElementLocation elementLocation,
                     bool includeNullEntries,
                     string functionName,
-                    IEnumerable<Pair<string, S>> itemsOfType,
+                    IEnumerable<KeyValuePair<string, S>> itemsOfType,
                     string[] arguments)
                 {
                     // Transform: expression is like @(Compile->'%(foo)'), so create completely new items,
                     // using the Include from the source items
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         Function<P> function = new Function<P>(
                             typeof(string),
@@ -2701,8 +2769,9 @@ namespace Microsoft.Build.Evaluation
                             arguments,
                             BindingFlags.Public | BindingFlags.InvokeMethod,
                             string.Empty,
-                            expander.UsedUninitializedProperties,
-                            expander._fileSystem);
+                            expander.PropertiesUseTracker,
+                            expander._fileSystem,
+                            expander._loggingContext);
 
                         object result = function.Execute(item.Key, expander._properties, ExpanderOptions.ExpandAll, elementLocation);
 
@@ -2711,11 +2780,11 @@ namespace Microsoft.Build.Evaluation
                         // We pass in the existing item so we can copy over its metadata
                         if (include.Length > 0)
                         {
-                            yield return new Pair<string, S>(include, item.Value);
+                            yield return new KeyValuePair<string, S>(include, item.Value);
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new Pair<string, S>(null, item.Value);
+                            yield return new KeyValuePair<string, S>(null, item.Value);
                         }
                     }
                 }
@@ -2723,15 +2792,15 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Intrinsic function that returns the items from itemsOfType with their metadata cleared, i.e. only the itemspec is retained.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> ClearMetadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> ClearMetadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         if (includeNullEntries || item.Key != null)
                         {
-                            yield return new Pair<string, S>(item.Key, null);
+                            yield return new KeyValuePair<string, S>(item.Key, null);
                         }
                     }
                 }
@@ -2740,13 +2809,13 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns only those items that have a not-blank value for the metadata specified
                 /// Using a case insensitive comparison.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> HasMetadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> HasMetadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     string metadataName = arguments[0];
 
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         string metadataValue = null;
 
@@ -2754,12 +2823,9 @@ namespace Microsoft.Build.Evaluation
                         {
                             metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
-                        catch (ArgumentException ex) // Blank metadata name
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
+                            // Blank metadata name
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
@@ -2768,7 +2834,7 @@ namespace Microsoft.Build.Evaluation
                         if (!string.IsNullOrEmpty(metadataValue))
                         {
                             // return a result through the enumerator
-                            yield return new Pair<string, S>(item.Key, item.Value);
+                            yield return item;
                         }
                     }
                 }
@@ -2777,14 +2843,14 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns only those items have the given metadata value
                 /// Using a case insensitive comparison.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> WithMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> WithMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     string metadataName = arguments[0];
                     string metadataValueToFind = arguments[1];
 
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         string metadataValue = null;
 
@@ -2792,19 +2858,49 @@ namespace Microsoft.Build.Evaluation
                         {
                             metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                         }
-                        catch (ArgumentException ex) // Blank metadata name
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                         {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                        }
-                        catch (InvalidOperationException ex)
-                        {
+                            // Blank metadata name
                             ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                         }
 
                         if (metadataValue != null && String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
                         {
                             // return a result through the enumerator
-                            yield return new Pair<string, S>(item.Key, item.Value);
+                            yield return item;
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// Intrinsic function that returns those items don't have the given metadata value
+                /// Using a case insensitive comparison.
+                /// </summary>
+                internal static IEnumerable<KeyValuePair<string, S>> WithoutMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                {
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
+
+                    string metadataName = arguments[0];
+                    string metadataValueToFind = arguments[1];
+
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
+                    {
+                        string metadataValue = null;
+
+                        try
+                        {
+                            metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
+                        }
+                        catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
+                        {
+                            // Blank metadata name
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
+                        }
+
+                        if (!String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
+                        {
+                            // return a result through the enumerator
+                            yield return item;
                         }
                     }
                 }
@@ -2813,7 +2909,7 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that returns a boolean to indicate if any of the items have the given metadata value
                 /// Using a case insensitive comparison.
                 /// </summary>
-                internal static IEnumerable<Pair<string, S>> AnyHaveMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<Pair<string, S>> itemsOfType, string[] arguments)
+                internal static IEnumerable<KeyValuePair<string, S>> AnyHaveMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2821,7 +2917,7 @@ namespace Microsoft.Build.Evaluation
                     string metadataValueToFind = arguments[1];
                     bool metadataFound = false;
 
-                    foreach (Pair<string, S> item in itemsOfType)
+                    foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         if (item.Value != null)
                         {
@@ -2831,12 +2927,9 @@ namespace Microsoft.Build.Evaluation
                             {
                                 metadataValue = item.Value.GetMetadataValueEscaped(metadataName);
                             }
-                            catch (ArgumentException ex) // Blank metadata name
+                            catch (Exception ex) when (ex is ArgumentException || ex is InvalidOperationException)
                             {
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
-                            }
-                            catch (InvalidOperationException ex)
-                            {
+                                // Blank metadata name
                                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", metadataName, ex.Message);
                             }
 
@@ -2845,7 +2938,7 @@ namespace Microsoft.Build.Evaluation
                                 metadataFound = true;
 
                                 // return a result through the enumerator
-                                yield return new Pair<string, S>("true", item.Value);
+                                yield return new KeyValuePair<string, S>("true", item.Value);
 
                                 // break out as soon as we found a match
                                 yield break;
@@ -2856,7 +2949,7 @@ namespace Microsoft.Build.Evaluation
                     if (!metadataFound)
                     {
                         // We did not locate an item with the required metadata
-                        yield return new Pair<string, S>("false", null);
+                        yield return new KeyValuePair<string, S>("false", null);
                     }
                 }
             }
@@ -2918,7 +3011,7 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Execute this transform function with the arguments contained within this TransformFunction instance.
                 /// </summary>
-                public IEnumerable<Pair<string, S>> Execute(Expander<P, I> expander, bool includeNullEntries, IEnumerable<Pair<string, S>> itemsOfType)
+                public IEnumerable<KeyValuePair<string, S>> Execute(Expander<P, I> expander, bool includeNullEntries, IEnumerable<KeyValuePair<string, S>> itemsOfType)
                 {
                     // Execute via the delegate
                     return _transform(expander, _elementLocation, includeNullEntries, _functionName, itemsOfType, _arguments);
@@ -2999,20 +3092,26 @@ namespace Microsoft.Build.Evaluation
         /// Regular expressions used by the expander.
         /// The expander currently uses regular expressions rather than a parser to do its work.
         /// </summary>
-        private static class RegularExpressions
+        private static partial class RegularExpressions
         {
             /**************************************************************************************************************************
             * WARNING: The regular expressions below MUST be kept in sync with the expressions in the ProjectWriter class -- if the
             * description of an item vector changes, the expressions must be updated in both places.
             *************************************************************************************************************************/
 
+#if NET
+            [GeneratedRegex(ItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
+            internal static partial Regex ItemMetadataRegex { get; }
+#else
             /// <summary>
             /// Regular expression used to match item metadata references embedded in strings.
             /// For example, %(Compile.DependsOn) or %(DependsOn).
             /// </summary>
-            internal static readonly Lazy<Regex> ItemMetadataPattern = new Lazy<Regex>(
-                () => new Regex(ItemMetadataSpecification,
-                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+            internal static Regex ItemMetadataRegex => s_itemMetadataRegex ??=
+                new Regex(ItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled);
+
+            internal static Regex s_itemMetadataRegex;
+#endif
 
             /// <summary>
             /// Name of the group matching the "name" of a metadatum.
@@ -3029,18 +3128,25 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal const string ItemTypeGroup = "ITEM_TYPE";
 
+            internal const string NonTransformItemMetadataSpecification = @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
+                                                                ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" +
+                                                                ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" +
+                                                                ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
+                                                                ItemVectorWithTransformRHS + @"))";
+
+#if NET
+            [GeneratedRegex(NonTransformItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
+            internal static partial Regex NonTransformItemMetadataRegex { get; }
+#else
             /// <summary>
             /// regular expression used to match item metadata references outside of item vector transforms.
             /// </summary>
             /// <remarks>PERF WARNING: this Regex is complex and tends to run slowly.</remarks>
-            internal static readonly Lazy<Regex> NonTransformItemMetadataPattern = new Lazy<Regex>(
-                () => new Regex(
-                    @"((?<=" + ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
-                    ItemVectorWithTransformRHS + @")) | ((?<!" + ItemVectorWithTransformLHS + @")" +
-                    ItemMetadataSpecification + @"(?=" + ItemVectorWithTransformRHS + @")) | ((?<!" +
-                    ItemVectorWithTransformLHS + @")" + ItemMetadataSpecification + @"(?!" +
-                    ItemVectorWithTransformRHS + @"))",
-                    RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled));
+            private static Regex s_nonTransformItemMetadataPattern;
+
+            internal static Regex NonTransformItemMetadataRegex => s_nonTransformItemMetadataPattern ??=
+                new Regex(NonTransformItemMetadataSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture | RegexOptions.Compiled);
+#endif
 
             /// <summary>
             /// Complete description of an item metadata reference, including the optional qualifying item type.
@@ -3103,12 +3209,14 @@ namespace Microsoft.Build.Evaluation
 
             public IFileSystem FileSystem { get; set; }
 
+            public LoggingContext LoggingContext { get; set; }
+
             /// <summary>
             /// List of properties which have been used but have not been initialized yet.
             /// </summary>
-            public UsedUninitializedProperties UsedUninitializedProperties { get; set; }
+            public PropertiesUseTracker PropertiesUseTracker { get; set; }
 
-            internal Function<T> Build()
+            internal readonly Function<T> Build()
             {
                 return new Function<T>(
                     ReceiverType,
@@ -3118,8 +3226,9 @@ namespace Microsoft.Build.Evaluation
                     Arguments,
                     BindingFlags,
                     Remainder,
-                    UsedUninitializedProperties,
-                    FileSystem);
+                    PropertiesUseTracker,
+                    FileSystem,
+                    LoggingContext);
             }
         }
 
@@ -3128,7 +3237,7 @@ namespace Microsoft.Build.Evaluation
         /// It is also responsible for executing the function.
         /// </summary>
         /// <typeparam name="T">Type of the properties used to expand the expression.</typeparam>
-        private class Function<T>
+        internal class Function<T>
             where T : class, IProperty
         {
             /// <summary>
@@ -3139,22 +3248,22 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// The name of the function.
             /// </summary>
-            private string _methodMethodName;
+            private readonly string _methodMethodName;
 
             /// <summary>
             /// The arguments for the function.
             /// </summary>
-            private string[] _arguments;
+            private readonly string[] _arguments;
 
             /// <summary>
             /// The expression that this function is part of.
             /// </summary>
-            private string _expression;
+            private readonly string _expression;
 
             /// <summary>
             /// The property name that this function is applied on.
             /// </summary>
-            private string _receiver;
+            private readonly string _receiver;
 
             /// <summary>
             /// The binding flags that will be used during invocation of this function.
@@ -3164,14 +3273,16 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// The remainder of the body once the function and arguments have been extracted.
             /// </summary>
-            private string _remainder;
+            private readonly string _remainder;
 
             /// <summary>
             /// List of properties which have been used but have not been initialized yet.
             /// </summary>
-            private UsedUninitializedProperties _usedUninitializedProperties;
+            private PropertiesUseTracker _propertiesUseTracker;
 
-            private IFileSystem _fileSystem;
+            private readonly IFileSystem _fileSystem;
+
+            private readonly LoggingContext _loggingContext;
 
             /// <summary>
             /// Construct a function that will be executed during property evaluation.
@@ -3184,13 +3295,14 @@ namespace Microsoft.Build.Evaluation
                 string[] arguments,
                 BindingFlags bindingFlags,
                 string remainder,
-                UsedUninitializedProperties usedUninitializedProperties,
-                IFileSystem fileSystem)
+                PropertiesUseTracker propertiesUseTracker,
+                IFileSystem fileSystem,
+                LoggingContext loggingContext)
             {
                 _methodMethodName = methodName;
                 if (arguments == null)
                 {
-                    _arguments = Array.Empty<string>();
+                    _arguments = [];
                 }
                 else
                 {
@@ -3202,8 +3314,9 @@ namespace Microsoft.Build.Evaluation
                 _receiverType = receiverType;
                 _bindingFlags = bindingFlags;
                 _remainder = remainder;
-                _usedUninitializedProperties = usedUninitializedProperties;
+                _propertiesUseTracker = propertiesUseTracker;
                 _fileSystem = fileSystem;
+                _loggingContext = loggingContext;
             }
 
             /// <summary>
@@ -3225,11 +3338,12 @@ namespace Microsoft.Build.Evaluation
                 string expressionFunction,
                 IElementLocation elementLocation,
                 object propertyValue,
-                UsedUninitializedProperties usedUnInitializedProperties,
-                IFileSystem fileSystem)
+                PropertiesUseTracker propertiesUseTracker,
+                IFileSystem fileSystem,
+                LoggingContext loggingContext)
             {
                 // Used to aggregate all the components needed for a Function
-                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> { FileSystem = fileSystem };
+                FunctionBuilder<T> functionBuilder = new FunctionBuilder<T> { FileSystem = fileSystem, LoggingContext = loggingContext };
 
                 // By default the expression root is the whole function expression
                 ReadOnlySpan<char> expressionRoot = expressionFunction == null ? ReadOnlySpan<char>.Empty : expressionFunction.AsSpan();
@@ -3248,7 +3362,7 @@ namespace Microsoft.Build.Evaluation
                 ProjectErrorUtilities.VerifyThrowInvalidProject(!expressionRoot.IsEmpty, elementLocation, "InvalidFunctionPropertyExpression", expressionFunction, String.Empty);
 
                 functionBuilder.Expression = expressionFunction;
-                functionBuilder.UsedUninitializedProperties = usedUnInitializedProperties;
+                functionBuilder.PropertiesUseTracker = propertiesUseTracker;
 
                 // This is a static method call
                 // A static method is the content that follows the last "::", the rest being the type
@@ -3262,7 +3376,7 @@ namespace Microsoft.Build.Evaluation
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionStaticMethodSyntax", expressionFunction, String.Empty);
                     }
 
-                    var typeName = expressionRoot.Slice(1, typeEndIndex - 1).ToString();
+                    var typeName = Strings.WeakIntern(expressionRoot.Slice(1, typeEndIndex - 1));
                     var methodStartIndex = typeEndIndex + 1;
 
                     if (expressionRoot.Length > methodStartIndex + 2 && expressionRoot[methodStartIndex] == ':' && expressionRoot[methodStartIndex + 1] == ':')
@@ -3320,7 +3434,7 @@ namespace Microsoft.Build.Evaluation
                     var rootEndIndex = expressionRoot.IndexOf('.');
 
                     // If this is an instance function rather than a static, then we'll capture the name of the property referenced
-                    var functionReceiver = expressionRoot.Slice(0, rootEndIndex).Trim().ToString();
+                    var functionReceiver = Strings.WeakIntern(expressionRoot.Slice(0, rootEndIndex).Trim());
 
                     // If propertyValue is null (we're not recursing), then we're expecting a valid property name
                     if (propertyValue == null && !IsValidPropertyName(functionReceiver))
@@ -3365,7 +3479,7 @@ namespace Microsoft.Build.Evaluation
 
                         // For our intrinsic function we need to support calling of internal methods
                         // since we don't want them to be public
-                        if (_receiverType == typeof(Microsoft.Build.Evaluation.IntrinsicFunctions))
+                        if (_receiverType == typeof(IntrinsicFunctions))
                         {
                             _bindingFlags |= BindingFlags.NonPublic;
                         }
@@ -3400,15 +3514,15 @@ namespace Microsoft.Build.Evaluation
                             properties,
                             options,
                             elementLocation,
-                            _usedUninitializedProperties,
+                            _propertiesUseTracker,
                             _fileSystem);
 
                         if (argument is string argumentValue)
                         {
                             // Unescape the value since we're about to send it out of the engine and into
                             // the function being called. If a file or a directory function, fix the path
-                            if (_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory)
-                                || _receiverType == typeof(System.IO.Path))
+                            if (_receiverType == typeof(File) || _receiverType == typeof(Directory)
+                                || _receiverType == typeof(Path))
                             {
                                 argumentValue = FileUtilities.FixFilePath(argumentValue);
                             }
@@ -3429,6 +3543,16 @@ namespace Microsoft.Build.Evaluation
                     // that it matches the left hand side ready for the default binder’s method invoke.
                     if (objectInstance != null && args.Length == 1 && (String.Equals("Equals", _methodMethodName, StringComparison.OrdinalIgnoreCase) || String.Equals("CompareTo", _methodMethodName, StringComparison.OrdinalIgnoreCase)))
                     {
+                        // Support comparison when the lhs is an integer
+                        if (ParseArgs.IsFloatingPointRepresentation(args[0]))
+                        {
+                            if (double.TryParse(objectInstance.ToString(), NumberStyles.Number | NumberStyles.Float, CultureInfo.InvariantCulture.NumberFormat, out double result))
+                            {
+                                objectInstance = result;
+                                _receiverType = objectInstance.GetType();
+                            }
+                        }
+
                         // change the type of the final unescaped string into the destination
                         args[0] = Convert.ChangeType(args[0], objectInstance.GetType(), CultureInfo.InvariantCulture);
                     }
@@ -3436,21 +3560,14 @@ namespace Microsoft.Build.Evaluation
                     if (_receiverType == typeof(IntrinsicFunctions))
                     {
                         // Special case a few methods that take extra parameters that can't be passed in by the user
-                        //
-
                         if (_methodMethodName.Equals("GetPathOfFileAbove") && args.Length == 1)
                         {
                             // Append the IElementLocation as a parameter to GetPathOfFileAbove if the user only
                             // specified the file name.  This is syntactic sugar so they don't have to always
                             // include $(MSBuildThisFileDirectory) as a parameter.
-                            //
                             string startingDirectory = String.IsNullOrWhiteSpace(elementLocation.File) ? String.Empty : Path.GetDirectoryName(elementLocation.File);
 
-                            args = new[]
-                            {
-                                args[0],
-                                startingDirectory,
-                            };
+                            args = [args[0], startingDirectory];
                         }
                     }
 
@@ -3458,7 +3575,7 @@ namespace Microsoft.Build.Evaluation
                     // need to locate an appropriate constructor and invoke it
                     if (String.Equals("new", _methodMethodName, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (!TryExecuteWellKnownConstructorNoThrow(out functionResult, args))
+                        if (!WellKnownFunctions.TryExecuteWellKnownConstructorNoThrow(_receiverType, out functionResult, args))
                         {
                             functionResult = LateBindExecute(null /* no previous exception */, BindingFlags.Public | BindingFlags.Instance, null /* no instance for a constructor */, args, true /* is constructor */);
                         }
@@ -3470,8 +3587,14 @@ namespace Microsoft.Build.Evaluation
                         try
                         {
                             // First attempt to recognize some well-known functions to avoid binding
-                            // and potential first-chance MissingMethodExceptions
-                            wellKnownFunctionSuccess = TryExecuteWellKnownFunction(out functionResult, objectInstance, args);
+                            // and potential first-chance MissingMethodExceptions.
+                            wellKnownFunctionSuccess = WellKnownFunctions.TryExecuteWellKnownFunction(_methodMethodName, _receiverType, _fileSystem, out functionResult, objectInstance, args);
+
+                            if (!wellKnownFunctionSuccess)
+                            {
+                                // Some well-known functions need evaluated value from properties.
+                                wellKnownFunctionSuccess = WellKnownFunctions.TryExecuteWellKnownFunctionWithPropertiesParam(_methodMethodName, _receiverType, _loggingContext, properties, out functionResult, objectInstance, args);
+                            }
                         }
                         // we need to preserve the same behavior on exceptions as the actual binder
                         catch (Exception ex)
@@ -3492,11 +3615,20 @@ namespace Microsoft.Build.Evaluation
                             // otherwise there is the potential of running a function twice!
                             try
                             {
-                                // First use InvokeMember using the standard binder - this will match and coerce as needed
-                                functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                // If there are any out parameters, try to figure out their type and create defaults for them as appropriate before calling the method.
+                                if (args.Any(a => "out _".Equals(a)))
+                                {
+                                    IEnumerable<MethodInfo> methods = _receiverType.GetMethods(_bindingFlags).Where(m => m.Name.Equals(_methodMethodName) && m.GetParameters().Length == args.Length);
+                                    functionResult = GetMethodResult(objectInstance, methods, args, 0);
+                                }
+                                else
+                                {
+                                    // If there are no out parameters, use InvokeMember using the standard binder - this will match and coerce as needed
+                                    functionResult = _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture);
+                                }
                             }
                             // If we're invoking a method, then there are deeper attempts that can be made to invoke the method.
-                            // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coersion is possible, so throw.
+                            // If not, we were asked to get a property or field but found that we cannot locate it. No further argument coercion is possible, so throw.
                             catch (MissingMethodException ex) when ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
                             {
                                 // The standard binder failed, so do our best to coerce types into the arguments for the function
@@ -3530,7 +3662,7 @@ namespace Microsoft.Build.Evaluation
                         properties,
                         options,
                         elementLocation,
-                        _usedUninitializedProperties,
+                        _propertiesUseTracker,
                         _fileSystem);
                 }
 
@@ -3568,1007 +3700,46 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            /// <summary>
-            /// Shortcut to avoid calling into binding if we recognize some most common functions.
-            /// Binding is expensive and throws first-chance MissingMethodExceptions, which is
-            /// bad for debugging experience and has a performance cost.
-            /// A typical binding operation with exception can take ~1.500 ms; this call is ~0.050 ms
-            /// (rough numbers just for comparison).
-            /// See https://github.com/dotnet/msbuild/issues/2217.
-            /// </summary>
-            /// <param name="returnVal">The value returned from the function call.</param>
-            /// <param name="objectInstance">Object that the function is called on.</param>
-            /// <param name="args">arguments.</param>
-            /// <returns>True if the well known function call binding was successful.</returns>
-            private bool TryExecuteWellKnownFunction(out object returnVal, object objectInstance, object[] args)
+            private object GetMethodResult(object objectInstance, IEnumerable<MethodInfo> methods, object[] args, int index)
             {
-                returnVal = null;
+                for (int i = index; i < args.Length; i++)
+                {
+                    if (args[i].Equals("out _"))
+                    {
+                        object toReturn = null;
+                        foreach (MethodInfo method in methods)
+                        {
+                            Type t = method.GetParameters()[i].ParameterType;
+                            args[i] = t.IsValueType ? Activator.CreateInstance(t) : null;
+                            object currentReturnValue = GetMethodResult(objectInstance, methods, args, i + 1);
+                            if (currentReturnValue is not null)
+                            {
+                                if (toReturn is null)
+                                {
+                                    toReturn = currentReturnValue;
+                                }
+                                else if (!toReturn.Equals(currentReturnValue))
+                                {
+                                    // There were multiple methods that seemed viable and gave different results. We can't differentiate between them so throw.
+                                    ErrorUtilities.ThrowArgument("CouldNotDifferentiateBetweenCompatibleMethods", _methodMethodName, args.Length);
+                                    return null;
+                                }
+                            }
+                        }
 
-                if (objectInstance is string text)
-                {
-                    if (string.Equals(_methodMethodName, nameof(string.StartsWith), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.StartsWith(arg0);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.Replace), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArgs(args, out string arg0, out string arg1))
-                        {
-                            returnVal = text.Replace(arg0, arg1);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.Contains), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.Contains(arg0);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.ToUpperInvariant), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (args.Length == 0)
-                        {
-                            returnVal = text.ToUpperInvariant();
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.ToLowerInvariant), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (args.Length == 0)
-                        {
-                            returnVal = text.ToLowerInvariant();
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.EndsWith), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.EndsWith(arg0);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.ToLower), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (args.Length == 0)
-                        {
-                            returnVal = text.ToLower();
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.IndexOf), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArgs(args, out string arg0, out StringComparison arg1))
-                        {
-                            returnVal = text.IndexOf(arg0, arg1);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.IndexOfAny), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.IndexOfAny(arg0.ToCharArray());
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.LastIndexOf), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.LastIndexOf(arg0);
-                            return true;
-                        }
-                        else if (TryGetArgs(args, out arg0, out int startIndex))
-                        {
-                            returnVal = text.LastIndexOf(arg0, startIndex);
-                            return true;
-                        }
-                        else if (TryGetArgs(args, out arg0, out StringComparison arg1))
-                        {
-                            returnVal = text.LastIndexOf(arg0, arg1);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.LastIndexOfAny), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string arg0))
-                        {
-                            returnVal = text.LastIndexOfAny(arg0.ToCharArray());
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.Length), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (args.Length == 0)
-                        {
-                            returnVal = text.Length;
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.Substring), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out int startIndex))
-                        {
-                            returnVal = text.Substring(startIndex);
-                            return true;
-                        }
-                        else if (TryGetArgs(args, out startIndex, out int length))
-                        {
-                            returnVal = text.Substring(startIndex, length);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.Split), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string separator) && separator.Length == 1)
-                        {
-                            returnVal = text.Split(separator[0]);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.PadLeft), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out int totalWidth))
-                        {
-                            returnVal = text.PadLeft(totalWidth);
-                            return true;
-                        }
-                        else if (TryGetArgs(args, out totalWidth, out string paddingChar) && paddingChar.Length == 1)
-                        {
-                            returnVal = text.PadLeft(totalWidth, paddingChar[0]);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.PadRight), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out int totalWidth))
-                        {
-                            returnVal = text.PadRight(totalWidth);
-                            return true;
-                        }
-                        else if (TryGetArgs(args, out totalWidth, out string paddingChar) && paddingChar.Length == 1)
-                        {
-                            returnVal = text.PadRight(totalWidth, paddingChar[0]);
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.TrimStart), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string trimChars) && trimChars.Length > 0)
-                        {
-                            returnVal = text.TrimStart(trimChars.ToCharArray());
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, nameof(string.TrimEnd), StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out string trimChars) && trimChars.Length > 0)
-                        {
-                            returnVal = text.TrimEnd(trimChars.ToCharArray());
-                            return true;
-                        }
-                    }
-                    else if (string.Equals(_methodMethodName, "get_Chars", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out int index))
-                        {
-                            returnVal = text[index];
-                            return true;
-                        }
-                    }
-                }
-                else if (objectInstance is string[] stringArray)
-                {
-                    if (string.Equals(_methodMethodName, "GetValue", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (TryGetArg(args, out int index))
-                        {
-                            returnVal = stringArray[index];
-                            return true;
-                        }
-                    }
-                }
-                else if (objectInstance == null) // Calling a well-known static function
-                {
-                    if (_receiverType == typeof(string))
-                    {
-                        if (string.Equals(_methodMethodName, nameof(string.IsNullOrWhiteSpace), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = string.IsNullOrWhiteSpace(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(string.IsNullOrEmpty), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = string.IsNullOrEmpty(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(string.Copy), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = arg0;
-                                return true;
-                            }
-                        }
-                    }
-                    else if (_receiverType == typeof(Math))
-                    {
-                        if (string.Equals(_methodMethodName, nameof(Math.Max), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out var arg0, out double arg1))
-                            {
-                                returnVal = Math.Max(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Math.Min), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out double arg0, out var arg1))
-                            {
-                                returnVal = Math.Min(arg0, arg1);
-                                return true;
-                            }
-                        }
-                    }
-                    else if (_receiverType == typeof(IntrinsicFunctions))
-                    {
-                        if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.EnsureTrailingSlash), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.EnsureTrailingSlash(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ValueOrDefault), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.ValueOrDefault(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.NormalizePath), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (ElementsOfType(args, typeof(string)))
-                            {
-                                returnVal = IntrinsicFunctions.NormalizePath(Array.ConvertAll(args, o => (string)o));
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetDirectoryNameOfFileAbove), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.GetDirectoryNameOfFileAbove(arg0, arg1, _fileSystem);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetRegistryValueFromView), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length >= 4 &&
-                                TryGetArgs(args, out string arg0, out string arg1, enforceLength: false))
-                            {
-                                returnVal = IntrinsicFunctions.GetRegistryValueFromView(arg0, arg1, args[2], new ArraySegment<object>(args, 3, args.Length - 3));
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsRunningFromVisualStudio), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.IsRunningFromVisualStudio();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Escape), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.Escape(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetPathOfFileAbove), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.GetPathOfFileAbove(arg0, arg1, _fileSystem);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Add), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
-                            {
-                                returnVal = arg0 + arg1;
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Subtract), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
-                            {
-                                returnVal = arg0 - arg1;
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Multiply), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
-                            {
-                                returnVal = arg0 * arg1;
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.Divide), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out double arg0, out double arg1))
-                            {
-                                returnVal = arg0 / arg1;
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetCurrentToolsDirectory), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetCurrentToolsDirectory();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetToolsDirectory32), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetToolsDirectory32();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetToolsDirectory64), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetToolsDirectory64();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetMSBuildSDKsPath), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetMSBuildSDKsPath();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetVsInstallRoot), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetVsInstallRoot();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetMSBuildExtensionsPath), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetMSBuildExtensionsPath();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetProgramFiles32), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = IntrinsicFunctions.GetProgramFiles32();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.VersionEquals), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.VersionEquals(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.VersionNotEquals), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.VersionNotEquals(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.VersionGreaterThan), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.VersionGreaterThan(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.VersionGreaterThanOrEquals), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.VersionGreaterThanOrEquals(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.VersionLessThan), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.VersionLessThan(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.VersionLessThanOrEquals), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.VersionLessThanOrEquals(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetFrameworkIdentifier), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.GetTargetFrameworkIdentifier(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetFrameworkVersion), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg0);
-                                return true;
-                            }
-                            if (TryGetArgs(args, out string arg1, out int arg2))
-                            {
-                                returnVal = IntrinsicFunctions.GetTargetFrameworkVersion(arg1, arg2);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.IsTargetFrameworkCompatible), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArgs(args, out string arg0, out string arg1))
-                            {
-                                returnVal = IntrinsicFunctions.IsTargetFrameworkCompatible(arg0, arg1);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetPlatformIdentifier), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.GetTargetPlatformIdentifier(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.GetTargetPlatformVersion), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg0);
-                                return true;
-                            }
-                            if (TryGetArgs(args, out string arg1, out int arg2))
-                            {
-                                returnVal = IntrinsicFunctions.GetTargetPlatformVersion(arg1, arg2);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ConvertToBase64), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.ConvertToBase64(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.ConvertFromBase64), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.ConvertFromBase64(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.StableStringHash), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = IntrinsicFunctions.StableStringHash(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(IntrinsicFunctions.AreFeaturesEnabled), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out Version arg0))
-                            {
-                                returnVal = IntrinsicFunctions.AreFeaturesEnabled(arg0);
-                                return true;
-                            }
-                        }
-                    }
-                    else if (_receiverType == typeof(Path))
-                    {
-                        if (string.Equals(_methodMethodName, nameof(Path.Combine), StringComparison.OrdinalIgnoreCase))
-                        {
-                            string arg0, arg1, arg2, arg3;
-
-                            // Combine has fast implementations for up to 4 parameters: https://github.com/dotnet/corefx/blob/2c55db90d622fa6279184e6243f0470a3755d13c/src/Common/src/CoreLib/System/IO/Path.cs#L293-L317
-                            switch (args.Length)
-                            {
-                                case 0:
-                                    return false;
-                                case 1:
-                                    if (TryGetArg(args, out arg0))
-                                    {
-                                        returnVal = Path.Combine(arg0);
-                                        return true;
-                                    }
-                                    break;
-                                case 2:
-                                    if (TryGetArgs(args, out arg0, out arg1))
-                                    {
-                                        returnVal = Path.Combine(arg0, arg1);
-                                        return true;
-                                    }
-                                    break;
-                                case 3:
-                                    if (TryGetArgs(args, out arg0, out arg1, out arg2))
-                                    {
-                                        returnVal = Path.Combine(arg0, arg1, arg2);
-                                        return true;
-                                    }
-                                    break;
-                                case 4:
-                                    if (TryGetArgs(args, out arg0, out arg1, out arg2, out arg3))
-                                    {
-                                        returnVal = Path.Combine(arg0, arg1, arg2, arg3);
-                                        return true;
-                                    }
-                                    break;
-                                default:
-                                    if (ElementsOfType(args, typeof(string)))
-                                    {
-                                        returnVal = Path.Combine(Array.ConvertAll(args, o => (string)o));
-                                        return true;
-                                    }
-                                    break;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.DirectorySeparatorChar), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = Path.DirectorySeparatorChar;
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.GetFullPath), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = Path.GetFullPath(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.IsPathRooted), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = Path.IsPathRooted(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.GetTempPath), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = Path.GetTempPath();
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.GetFileName), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = Path.GetFileName(arg0);
-                                return true;
-                            }
-                        }
-                        else if (string.Equals(_methodMethodName, nameof(Path.GetDirectoryName), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = Path.GetDirectoryName(arg0);
-                                return true;
-                            }
-                        }
-                    }
-                    else if (_receiverType == typeof(Version))
-                    {
-                        if (string.Equals(_methodMethodName, nameof(Version.Parse), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (TryGetArg(args, out string arg0))
-                            {
-                                returnVal = Version.Parse(arg0);
-                                return true;
-                            }
-                        }
-                    }
-                    else if (_receiverType == typeof(System.Guid))
-                    {
-                        if (string.Equals(_methodMethodName, nameof(Guid.NewGuid), StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (args.Length == 0)
-                            {
-                                returnVal = Guid.NewGuid();
-                                return true;
-                            }
-                        }
+                        return toReturn;
                     }
                 }
 
-                if (Traits.Instance.LogPropertyFunctionsRequiringReflection)
+                try
                 {
-                    LogFunctionCall("PropertyFunctionsRequiringReflection", objectInstance, args);
+                    return _receiverType.InvokeMember(_methodMethodName, _bindingFlags, Type.DefaultBinder, objectInstance, args, CultureInfo.InvariantCulture) ?? "null";
                 }
-
-                return false;
-            }
-
-            /// <summary>
-            /// Shortcut to avoid calling into binding if we recognize some most common constructors.
-            /// Analogous to TryExecuteWellKnownFunction but guaranteed to not throw.
-            /// </summary>
-            /// <param name="returnVal">The instance as created by the constructor call.</param>
-            /// <param name="args">Arguments.</param>
-            /// <returns>True if the well known constructor call binding was successful.</returns>
-            private bool TryExecuteWellKnownConstructorNoThrow(out object returnVal, object[] args)
-            {
-                returnVal = null;
-
-                if (_receiverType == typeof(string))
+                catch (Exception)
                 {
-                    if (args.Length == 0)
-                    {
-                        returnVal = String.Empty;
-                        return true;
-                    }
-                    if (TryGetArg(args, out string arg0))
-                    {
-                        returnVal = arg0;
-                        return true;
-                    }
+                    // This isn't a viable option, but perhaps another set of parameters will work.
+                    return null;
                 }
-                return false;
-            }
-
-            private bool ElementsOfType(object[] args, Type type)
-            {
-                for (var i = 0; i < args.Length; i++)
-                {
-                    if (args[i].GetType() != type)
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-            private static bool TryGetArgs(object[] args, out string arg0, out string arg1, bool enforceLength = true)
-            {
-                arg0 = null;
-                arg1 = null;
-
-                if (enforceLength && args.Length != 2)
-                {
-                    return false;
-                }
-
-                if (args[0] is string value0 &&
-                    args[1] is string value1)
-                {
-                    arg0 = value0;
-                    arg1 = value1;
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            private bool TryGetArgs(object[] args, out string arg0, out string arg1, out string arg2)
-            {
-                arg0 = null;
-                arg1 = null;
-                arg2 = null;
-
-                if (args.Length != 3)
-                {
-                    return false;
-                }
-
-                if (args[0] is string value0 &&
-                    args[1] is string value1 &&
-                    args[2] is string value2)
-                {
-                    arg0 = value0;
-                    arg1 = value1;
-                    arg2 = value2;
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            private bool TryGetArgs(object[] args, out string arg0, out string arg1, out string arg2, out string arg3)
-            {
-                arg0 = null;
-                arg1 = null;
-                arg2 = null;
-                arg3 = null;
-
-                if (args.Length != 4)
-                {
-                    return false;
-                }
-
-                if (args[0] is string value0 &&
-                    args[1] is string value1 &&
-                    args[2] is string value2 &&
-                    args[3] is string value3)
-                {
-                    arg0 = value0;
-                    arg1 = value1;
-                    arg2 = value2;
-                    arg3 = value3;
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            private bool TryGetArgs(object[] args, out string arg0, out string arg1)
-            {
-                arg0 = null;
-                arg1 = null;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                if (args[0] is string value0 &&
-                    args[1] is string value1)
-                {
-                    arg0 = value0;
-                    arg1 = value1;
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            private static bool TryGetArg(object[] args, out int arg0)
-            {
-                if (args.Length != 1)
-                {
-                    arg0 = 0;
-                    return false;
-                }
-
-                return TryConvertToInt(args[0], out arg0);
-            }
-
-            private static bool TryGetArg(object[] args, out Version arg0)
-            {
-                if (args.Length != 1)
-                {
-                    arg0 = default;
-                    return false;
-                }
-
-                return TryConvertToVersion(args[0], out arg0);
-            }
-
-            private static bool TryConvertToVersion(object value, out Version arg0)
-            {
-                string val = value as string;
-
-                if (string.IsNullOrEmpty(val) || !Version.TryParse(val, out arg0))
-                {
-                    arg0 = default;
-                    return false;
-                }
-
-                return true;
-            }
-
-            private static bool TryConvertToInt(object value, out int arg0)
-            {
-                switch (value)
-                {
-                    case double d:
-                        arg0 = Convert.ToInt32(d);
-                        return arg0 == d;
-                    case int i:
-                        arg0 = i;
-                        return true;
-                    case string s when int.TryParse(s, out arg0):
-                        return true;
-                }
-
-                arg0 = 0;
-                return false;
-            }
-
-            private static bool TryConvertToDouble(object value, out double arg)
-            {
-                if (value is double unboxed)
-                {
-                    arg = unboxed;
-                    return true;
-                }
-                else if (value is string str && double.TryParse(str, out arg))
-                {
-                    return true;
-                }
-
-                arg = 0;
-                return false;
-            }
-
-            private static bool TryGetArg(object[] args, out string arg0)
-            {
-                if (args.Length != 1)
-                {
-                    arg0 = null;
-                    return false;
-                }
-
-                arg0 = args[0] as string;
-                return arg0 != null;
-            }
-
-            private static bool TryGetArgs(object[] args, out string arg0, out StringComparison arg1)
-            {
-                if (args.Length != 2)
-                {
-                    arg0 = null;
-                    arg1 = default;
-
-                    return false;
-                }
-
-                arg0 = args[0] as string;
-
-                // reject enums as ints. In C# this would require a cast, which is not supported in msbuild expressions
-                if (arg0 == null || !(args[1] is string comparisonTypeName) || int.TryParse(comparisonTypeName, out _))
-                {
-                    arg1 = default;
-                    return false;
-                }
-
-                // Allow fully-qualified enum, e.g. "System.StringComparison.OrdinalIgnoreCase"
-                if (comparisonTypeName.Contains('.'))
-                {
-                    comparisonTypeName = comparisonTypeName.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
-                }
-
-                return Enum.TryParse(comparisonTypeName, out arg1);
-            }
-
-            private static bool TryGetArgs(object[] args, out int arg0, out int arg1)
-            {
-                arg0 = 0;
-                arg1 = 0;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                return TryConvertToInt(args[0], out arg0) &&
-                       TryConvertToInt(args[1], out arg1);
-            }
-
-            private static bool TryGetArgs(object[] args, out double arg0, out double arg1)
-            {
-                arg0 = 0;
-                arg1 = 0;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                return TryConvertToDouble(args[0], out arg0) &&
-                       TryConvertToDouble(args[1], out arg1);
-            }
-
-            private static bool TryGetArgs(object[] args, out int arg0, out string arg1)
-            {
-                arg0 = 0;
-                arg1 = null;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                arg1 = args[1] as string;
-                if (arg1 == null && args[1] is char ch)
-                {
-                    arg1 = ch.ToString();
-                }
-
-                if (TryConvertToInt(args[0], out arg0) &&
-                    arg1 != null)
-                {
-                    return true;
-                }
-
-                return false;
-            }
-
-            private static bool TryGetArgs(object[] args, out string arg0, out int arg1)
-            {
-                arg0 = null;
-                arg1 = 0;
-
-                if (args.Length != 2)
-                {
-                    return false;
-                }
-
-                var value1 = args[1] as string;
-                arg0 = args[0] as string;
-                if (value1 != null &&
-                    arg0 != null &&
-                    int.TryParse(value1, out arg1))
-                {
-                    return true;
-                }
-
-                return false;
-            }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            private void LogFunctionCall(string fileName, object objectInstance, object[] args)
-            {
-                var logFile = Path.Combine(Directory.GetCurrentDirectory(), fileName);
-
-                var argSignature = args != null
-                    ? string.Join(", ", args.Select(a => a?.GetType().Name ?? "null"))
-                    : string.Empty;
-
-                File.AppendAllText(logFile, $"ReceiverType={_receiverType?.FullName}; ObjectInstanceType={objectInstance?.GetType().FullName}; MethodName={_methodMethodName}({argSignature})\n");
             }
 
             /// <summary>
@@ -4589,7 +3760,7 @@ namespace Microsoft.Build.Evaluation
                     return null;
                 }
 
-                // Check if the type is in the whitelist cache. If it is, use it or load it.
+                // Check if the type is in the allowlist cache. If it is, use it or load it.
                 cachedTypeInformation = AvailableStaticMethods.GetTypeInformationFromTypeCache(typeName, simpleMethodName);
                 if (cachedTypeInformation != null)
                 {
@@ -4612,7 +3783,7 @@ namespace Microsoft.Build.Evaluation
 
                         // If the type information from the cache is not loadable, it means the cache information got corrupted somehow
                         // Throw here to prevent adding null types in the cache
-                        ErrorUtilities.VerifyThrowInternalNull(receiverType, $"Type information for {typeName} was present in the whitelist cache as {assemblyQualifiedTypeName} but the type could not be loaded.");
+                        ErrorUtilities.VerifyThrowInternalNull(receiverType, $"Type information for {typeName} was present in the allowlist cache as {assemblyQualifiedTypeName} but the type could not be loaded.");
 
                         // If we've used it once, chances are that we'll be using it again
                         // We can record the type here since we know it's available for calling from the fact that is was in the AvailableStaticMethods table
@@ -4630,7 +3801,7 @@ namespace Microsoft.Build.Evaluation
                     // DO NOT CACHE THE TYPE HERE!
                     // We don't add the resolved type here in the AvailableStaticMethods table. This is because that table is used
                     // during function parse, but only later during execution do we check for the ability to call specific methods on specific types.
-                    // Caching it here would load any type into the white list.
+                    // Caching it here would load any type into the allow list.
                     return receiverType;
                 }
 
@@ -4756,7 +3927,7 @@ namespace Microsoft.Build.Evaluation
                 // If there are no arguments, then just create an empty array
                 if (String.IsNullOrEmpty(argumentsContent))
                 {
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = [];
                 }
                 else
                 {
@@ -4830,7 +4001,7 @@ namespace Microsoft.Build.Evaluation
                     // It may be that there are '()' but no actual arguments content
                     if (argumentStartIndex == expressionFunction.Length - 1)
                     {
-                        functionArguments = Array.Empty<string>();
+                        functionArguments = [];
                     }
                     else
                     {
@@ -4840,7 +4011,7 @@ namespace Microsoft.Build.Evaluation
                         // If there are no arguments, then just create an empty array
                         if (string.IsNullOrEmpty(argumentsContent))
                         {
-                            functionArguments = Array.Empty<string>();
+                            functionArguments = [];
                         }
                         else
                         {
@@ -4863,7 +4034,7 @@ namespace Microsoft.Build.Evaluation
                         nextMethodIndex = indexerIndex;
                     }
 
-                    functionArguments = Array.Empty<string>();
+                    functionArguments = [];
 
                     if (nextMethodIndex > 0)
                     {
@@ -4921,11 +4092,11 @@ namespace Microsoft.Build.Evaluation
                         {
                             coercedArguments[n] = args[n].ToString().ToCharArray();
                         }
-                        else if (parameters[n].ParameterType.GetTypeInfo().IsEnum && args[n] is string && ((string)args[n]).Contains("."))
+                        else if (parameters[n].ParameterType.GetTypeInfo().IsEnum && args[n] is string v && v.Contains("."))
                         {
                             Type enumType = parameters[n].ParameterType;
-                            string typeLeafName = enumType.Name + ".";
-                            string typeFullName = enumType.FullName + ".";
+                            string typeLeafName = $"{enumType.Name}.";
+                            string typeFullName = $"{enumType.FullName}.";
 
                             // Enum.parse expects commas between enum components
                             // We'll support the C# type | syntax too
@@ -5004,17 +4175,17 @@ namespace Microsoft.Build.Evaluation
 
                     // We don't want to expose the real type name of our intrinsics
                     // so we'll replace it with "MSBuild"
-                    if (_receiverType == typeof(Microsoft.Build.Evaluation.IntrinsicFunctions))
+                    if (_receiverType == typeof(IntrinsicFunctions))
                     {
                         typeName = "MSBuild";
                     }
                     if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
                     {
-                        return "[" + typeName + "]::" + name + "(" + parameters + ")";
+                        return $"[{typeName}]::{name}({parameters})";
                     }
                     else
                     {
-                        return "[" + typeName + "]::" + name;
+                        return $"[{typeName}]::{name}";
                     }
                 }
                 else
@@ -5023,21 +4194,21 @@ namespace Microsoft.Build.Evaluation
 
                     if ((_bindingFlags & BindingFlags.InvokeMethod) == BindingFlags.InvokeMethod)
                     {
-                        return propertyValue + "." + name + "(" + parameters + ")";
+                        return $"{propertyValue}.{name}({parameters})";
                     }
                     else
                     {
-                        return propertyValue + "." + name;
+                        return $"{propertyValue}.{name}";
                     }
                 }
             }
 
             /// <summary>
-            /// Check the property function whitelist whether this method is available.
+            /// Check the property function allowlist whether this method is available.
             /// </summary>
             private static bool IsStaticMethodAvailable(Type receiverType, string methodName)
             {
-                if (receiverType == typeof(Microsoft.Build.Evaluation.IntrinsicFunctions))
+                if (receiverType == typeof(IntrinsicFunctions))
                 {
                     // These are our intrinsic functions, so we're OK with those
                     return true;
@@ -5062,7 +4233,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // This could be expanded to an allow / deny list.
-                return methodName != "GetType";
+                return !string.Equals("GetType", methodName, StringComparison.OrdinalIgnoreCase);
             }
 
             /// <summary>
@@ -5071,7 +4242,6 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private object LateBindExecute(Exception ex, BindingFlags bindingFlags, object objectInstance /* null unless instance method */, object[] args, bool isConstructor)
             {
-
                 // First let's try for a method where all arguments are strings..
                 Type[] types = new Type[_arguments.Length];
                 for (int n = 0; n < _arguments.Length; n++)
@@ -5093,15 +4263,25 @@ namespace Microsoft.Build.Evaluation
                 // search for a method with the right number of arguments
                 if (memberInfo == null)
                 {
-                    MethodBase[] members;
                     // Gather all methods that may match
+                    IEnumerable<MethodBase> members;
                     if (isConstructor)
                     {
                         members = _receiverType.GetConstructors(bindingFlags);
                     }
+                    else if (_receiverType == typeof(IntrinsicFunctions) && IntrinsicFunctionOverload.IsKnownOverloadMethodName(_methodMethodName))
+                    {
+                        MemberInfo[] foundMembers = _receiverType.FindMembers(
+                            MemberTypes.Method,
+                            bindingFlags,
+                            (info, criteria) => string.Equals(info.Name, (string)criteria, StringComparison.OrdinalIgnoreCase),
+                            _methodMethodName);
+                        Array.Sort(foundMembers, IntrinsicFunctionOverload.IntrinsicFunctionOverloadMethodComparer);
+                        members = foundMembers.Cast<MethodBase>();
+                    }
                     else
                     {
-                        members = _receiverType.GetMethods(bindingFlags);
+                        members = _receiverType.GetMethods(bindingFlags).Where(m => string.Equals(m.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase));
                     }
 
                     foreach (MethodBase member in members)
@@ -5111,22 +4291,19 @@ namespace Microsoft.Build.Evaluation
                         // Simple match on name and number of params, we will be case insensitive
                         if (parameters.Length == _arguments.Length)
                         {
-                            if (isConstructor || String.Equals(member.Name, _methodMethodName, StringComparison.OrdinalIgnoreCase))
-                            {
-                                // Try to find a method with the right name, number of arguments and
-                                // compatible argument types
-                                // we have a match on the name and argument number
-                                // now let's try to coerce the arguments we have
-                                // into the arguments on the matching method
-                                object[] coercedArguments = CoerceArguments(args, parameters);
+                            // Try to find a method with the right name, number of arguments and
+                            // compatible argument types
+                            // we have a match on the name and argument number
+                            // now let's try to coerce the arguments we have
+                            // into the arguments on the matching method
+                            object[] coercedArguments = CoerceArguments(args, parameters);
 
-                                if (coercedArguments != null)
-                                {
-                                    // We have a complete match
-                                    memberInfo = member;
-                                    args = coercedArguments;
-                                    break;
-                                }
+                            if (coercedArguments != null)
+                            {
+                                // We have a complete match
+                                memberInfo = member;
+                                args = coercedArguments;
+                                break;
                             }
                         }
                     }
@@ -5161,44 +4338,37 @@ namespace Microsoft.Build.Evaluation
         }
     }
 
-    /// <summary>
-    /// This class wraps information about properties which have been used before they are initialized.
-    /// </summary>
-    internal class UsedUninitializedProperties
+#nullable enable
+
+    internal static class IntrinsicFunctionOverload
     {
-        /// <summary>
-        /// This class wraps information about properties which have been used before they are initialized.
-        /// </summary>
-        internal UsedUninitializedProperties()
-        {
-            Properties = new Dictionary<string, IElementLocation>(StringComparer.OrdinalIgnoreCase);
-        }
+        private static readonly string[] s_knownOverloadName = { "Add", "Subtract", "Multiply", "Divide", "Modulo", };
 
-        /// <summary>
-        /// Hash set of properties which have been used before being initialized.
-        /// </summary>
-        internal IDictionary<string, IElementLocation> Properties
-        {
-            get;
-            set;
-        }
+        // Order by the TypeCode of the first parameter.
+        // When change wave is enabled, order long before double.
+        // Otherwise preserve prior behavior of double before long.
+        // For reuse, the comparer is cached in a non-generic type.
+        // Both comparer instances can be cached to support change wave testing.
+        private static IComparer<MemberInfo>? s_comparerLongBeforeDouble;
 
-        /// <summary>
-        ///  Are we currently supposed to warn if we used an uninitialized property.
-        /// </summary>
-        internal bool Warn
-        {
-            get;
-            set;
-        }
+        internal static IComparer<MemberInfo> IntrinsicFunctionOverloadMethodComparer => LongBeforeDoubleComparer;
 
-        /// <summary>
-        ///  What is the currently evaluating property element, this is so that we do not add a un initialized property if we are evaluating that property.
-        /// </summary>
-        internal string CurrentlyEvaluatingPropertyElementName
+        private static IComparer<MemberInfo> LongBeforeDoubleComparer => s_comparerLongBeforeDouble ??= Comparer<MemberInfo>.Create((key0, key1) => SelectTypeOfFirstParameter(key0).CompareTo(SelectTypeOfFirstParameter(key1)));
+
+        internal static bool IsKnownOverloadMethodName(string methodName) => s_knownOverloadName.Any(name => string.Equals(name, methodName, StringComparison.OrdinalIgnoreCase));
+
+        private static TypeCode SelectTypeOfFirstParameter(MemberInfo member)
         {
-            get;
-            set;
+            MethodBase? method = member as MethodBase;
+            if (method == null)
+            {
+                return TypeCode.Empty;
+            }
+
+            ParameterInfo[] parameters = method.GetParameters();
+            return parameters.Length > 0
+                ? Type.GetTypeCode(parameters[0].ParameterType)
+                : TypeCode.Empty;
         }
     }
 }

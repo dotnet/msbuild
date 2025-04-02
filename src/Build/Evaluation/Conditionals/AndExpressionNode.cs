@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -19,9 +18,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate as boolean
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (!LeftChild.TryBoolEvaluate(state, out bool leftBool, loggingContext))
+            if (!LeftChild.TryBoolEvaluate(state, out bool leftBool))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(
                      state.ElementLocation,
@@ -38,7 +37,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                if (!RightChild.TryBoolEvaluate(state, out bool rightBool, loggingContext))
+                if (!RightChild.TryBoolEvaluate(state, out bool rightBool))
                 {
                     ProjectErrorUtilities.ThrowInvalidProject(
                          state.ElementLocation,

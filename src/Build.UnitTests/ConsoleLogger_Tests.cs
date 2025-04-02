@@ -18,7 +18,6 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
@@ -133,7 +132,6 @@ namespace Microsoft.Build.UnitTests
 
             _output = output;
         }
-
 
         /// <summary>
         /// Verify when the project has not been named that we correctly get the same placeholder
@@ -277,7 +275,7 @@ namespace Microsoft.Build.UnitTests
 
             if (includeEvaluationPropertiesAndItems)
             {
-                pc.Collection.LoggingService.IncludeEvaluationPropertiesAndItems = true;
+                pc.Collection.LoggingService.SetIncludeEvaluationPropertiesAndItemsInEvents(inProjectStartedEvent: false, inEvaluationFinishedEvent: true);
             }
 
             var project = env.CreateTestProjectWithFiles(@"
@@ -1234,7 +1232,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MultilineFormatMixedLineEndings()
         {
-            string s = "foo" + "\r\n\r\n" + "bar" + "\n" + "baz" + "\n\r\n\n" +
+            string s = "\n" + "foo" + "\r\n\r\n" + "bar" + "\n" + "baz" + "\n\r\n\n" +
                 "jazz" + "\r\n" + "razz" + "\n\n" + "matazz" + "\n" + "end";
 
             SerialConsoleLogger cl = new SerialConsoleLogger();
@@ -1242,7 +1240,7 @@ namespace Microsoft.Build.UnitTests
             string ss = cl.IndentString(s, 0);
 
             // should convert lines to system format
-            ss.ShouldBe($"foo{Environment.NewLine}{Environment.NewLine}bar{Environment.NewLine}baz{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}jazz{Environment.NewLine}razz{Environment.NewLine}{Environment.NewLine}matazz{Environment.NewLine}end{Environment.NewLine}");
+            ss.ShouldBe($"{Environment.NewLine}foo{Environment.NewLine}{Environment.NewLine}bar{Environment.NewLine}baz{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}jazz{Environment.NewLine}razz{Environment.NewLine}{Environment.NewLine}matazz{Environment.NewLine}end{Environment.NewLine}");
         }
 
         [Fact]

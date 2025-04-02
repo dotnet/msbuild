@@ -19,7 +19,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Represents a task that can extract a .zip archive.
     /// </summary>
-    public sealed class Unzip : TaskExtension, ICancelableTask
+    public sealed class Unzip : TaskExtension, ICancelableTask, IIncrementalTask
     {
         // We pick a value that is the largest multiple of 4096 that is still smaller than the large object heap threshold (85K).
         // The CopyTo/CopyToAsync buffer is short-lived and is likely to be collected at Gen0, and it offers a significant
@@ -73,6 +73,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string Exclude { get; set; }
 
+        public bool FailIfNotIncremental { get; set; }
+
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
         {
@@ -114,6 +116,7 @@ namespace Microsoft.Build.Tasks
                         {
                             using (FileStream stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
                             {
+#pragma warning disable CA2000 // Dispose objects before losing scope because ZipArchive will dispose the stream when it is disposed.
                                 using (ZipArchive zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))
                                 {
                                     try
@@ -127,6 +130,7 @@ namespace Microsoft.Build.Tasks
                                         return false;
                                     }
                                 }
+#pragma warning restore CA2000 // Dispose objects before losing scope
                             }
                         }
                         catch (OperationCanceledException)
@@ -193,6 +197,11 @@ namespace Microsoft.Build.Tasks
                     Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFileMatch", zipArchiveEntry.FullName, destinationPath.FullName, nameof(SkipUnchangedFiles), "true");
                     continue;
                 }
+                else if (FailIfNotIncremental)
+                {
+                    Log.LogErrorFromResources("Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
+                    continue;
+                }
 
                 try
                 {
@@ -212,7 +221,8 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e)
                     {
-                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotMakeFileWriteable", zipArchiveEntry.FullName, destinationPath.FullName, e.Message);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(destinationPath.FullName);
+                        Log.LogErrorWithCodeFromResources("Unzip.ErrorCouldNotMakeFileWriteable", zipArchiveEntry.FullName, destinationPath.FullName, e.Message, lockedFileMessage);
                         continue;
                     }
                 }
@@ -221,7 +231,33 @@ namespace Microsoft.Build.Tasks
                 {
                     Log.LogMessageFromResources(MessageImportance.Normal, "Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
 
+#if NET
+                    FileStreamOptions fileStreamOptions = new()
+                    {
+                        Access = FileAccess.Write,
+                        Mode = FileMode.Create,
+                        Share = FileShare.None,
+                        BufferSize = 0x1000
+                    };
+
+                    const UnixFileMode OwnershipPermissions =
+                        UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+                        UnixFileMode.GroupRead | UnixFileMode.GroupWrite | UnixFileMode.GroupExecute |
+                        UnixFileMode.OtherRead | UnixFileMode.OtherWrite | UnixFileMode.OtherExecute;
+
+                    // Restore Unix permissions.
+                    // For security, limit to ownership permissions, and respect umask (through UnixCreateMode).
+                    // We don't apply UnixFileMode.None because .zip files created on Windows and .zip files created
+                    // with previous versions of .NET don't include permissions.
+                    UnixFileMode mode = (UnixFileMode)(zipArchiveEntry.ExternalAttributes >> 16) & OwnershipPermissions;
+                    if (mode != UnixFileMode.None && !NativeMethodsShared.IsWindows)
+                    {
+                        fileStreamOptions.UnixCreateMode = mode;
+                    }
+                    using (FileStream destination = new FileStream(destinationPath.FullName, fileStreamOptions))
+#else
                     using (Stream destination = File.Open(destinationPath.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
+#endif
                     using (Stream stream = zipArchiveEntry.Open())
                     {
                         stream.CopyToAsync(destination, _DefaultCopyBufferSize, _cancellationToken.Token)
@@ -283,7 +319,7 @@ namespace Microsoft.Build.Tasks
 
         private void ParsePattern(string pattern, out string[] patterns)
         {
-            patterns = Array.Empty<string>();
+            patterns = [];
             if (!string.IsNullOrWhiteSpace(pattern))
             {
                 if (FileMatcher.HasPropertyOrItemReferences(pattern))
@@ -291,15 +327,15 @@ namespace Microsoft.Build.Tasks
                     // Supporting property references would require access to Expander which is unavailable in Microsoft.Build.Tasks
                     Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternPropertyReferences", pattern);
                 }
-                else if (pattern.IndexOfAny(FileUtilities.InvalidPathChars) != -1)
+                else if (pattern.AsSpan().IndexOfAny(FileUtilities.InvalidPathChars) >= 0)
                 {
                     Log.LogErrorWithCodeFromResources("Unzip.ErrorParsingPatternInvalidPath", pattern);
                 }
                 else
                 {
                     patterns = pattern.Contains(';')
-                                   ? pattern.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select(FileMatcher.Normalize).ToArray()
-                                   : new[] { pattern };
+                                   ? pattern.Split([';'], StringSplitOptions.RemoveEmptyEntries).Select(FileMatcher.Normalize).ToArray()
+                                   : [pattern];
                 }
             }
         }

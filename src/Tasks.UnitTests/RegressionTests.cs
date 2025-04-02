@@ -8,7 +8,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -79,6 +78,30 @@ namespace Microsoft.Build.Tasks.UnitTests
             var logger = new MockLogger(_output);
             bool result = project.Build(logger);
             Assert.True(result, "Output:" + Environment.NewLine + logger.FullLog);
+        }
+
+        /// <summary>
+        /// Test for https://github.com/dotnet/msbuild/issues/8153
+        /// </summary>
+        [Fact]
+        public void IsWellKnownAttributeValuePreserved()
+        {
+            ObjectModelHelpers.DeleteTempProjectDirectory();
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("Myapp.proj", @"
+                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                  <Target Name =`Repro`>
+                    <CreateItem Include=`*.txt` AdditionalMetadata=`MyProperty=Identity`>
+                      <Output TaskParameter=`Include` ItemName=`TestItem`/>
+                    </CreateItem>
+                    <Error Text=`@(TestItem)` Condition=""'%(MyProperty)' != 'Identity' ""/>
+                  </Target>
+                </Project>
+                ");
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("Foo.txt", "foo");
+            MockLogger logger = new MockLogger(_output);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess("Myapp.proj", logger);
         }
     }
 }

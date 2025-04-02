@@ -89,14 +89,14 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// This property generates the logger name by appending together the class name and assembly name
         /// </summary>
-        internal string Name
+        public string Name
         {
             get
             {
                 if (!string.IsNullOrEmpty(_loggerClassName) &&
                     !string.IsNullOrEmpty(_loggerAssembly.AssemblyFile))
                 {
-                    return _loggerClassName + ":" + _loggerAssembly.AssemblyFile;
+                    return $"{_loggerClassName}:{_loggerAssembly.AssemblyFile}";
                 }
                 else if (!string.IsNullOrEmpty(_loggerClassName))
                 {
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Logging
                 }
                 else
                 {
-                    return _loggerAssembly.AssemblyFile;
+                    return _loggerAssembly.AssemblyFile ?? _loggerAssembly.AssemblyName;
                 }
             }
         }
@@ -117,6 +117,10 @@ namespace Microsoft.Build.Logging
             get
             {
                 return _loggerSwitchParameters;
+            }
+            internal set
+            {
+                _loggerSwitchParameters = value;
             }
         }
 

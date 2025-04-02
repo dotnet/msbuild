@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
@@ -12,7 +11,6 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -2567,8 +2565,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         }
 
         [Fact]
-        // FIXME: mono: looks for csc.exe
-        // https://github.com/dotnet/msbuild/issues/677
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2744,8 +2740,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// absolute path).  The fix was to use Assembly.LoadFrom instead.
         /// </summary>
         [Fact]
-        // FIXME: mono: looks for csc.exe
-        // https://github.com/dotnet/msbuild/issues/677
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting

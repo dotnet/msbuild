@@ -16,7 +16,7 @@ namespace Microsoft.Build.Evaluation
     {
         private class UpdateOperation : LazyItemOperation
         {
-            private readonly ImmutableList<ProjectMetadataElement> _metadata;
+            private readonly ImmutableArray<ProjectMetadataElement> _metadata;
             private ImmutableList<ItemBatchingContext>.Builder _itemsToUpdate = null;
             private ItemSpecMatchesItem _matchItemSpec = null;
             private bool? _needToExpandMetadataForEachItem = null;
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            private bool QualifiedMetadataReferencesExist(ImmutableList<ProjectMetadataElement> metadata, out bool? needToExpandMetadataForEachItem)
+            private bool QualifiedMetadataReferencesExist(ImmutableArray<ProjectMetadataElement> metadata, out bool? needToExpandMetadataForEachItem)
             {
                 needToExpandMetadataForEachItem = NeedToExpandMetadataForEachItem(metadata, out var itemsAndMetadataFound);
 

@@ -20,11 +20,11 @@ namespace Microsoft.Build.Framework
             AssemblyLoadingContext loadingContext,
             string? loadingInitiator,
             string? assemblyName,
-            string assemblyPath,
+            string? assemblyPath,
             Guid mvid,
             string? customAppDomainDescriptor,
             MessageImportance importance = MessageImportance.Low)
-            : base(null, null, null, importance, DateTime.UtcNow, assemblyName, assemblyPath, mvid)
+            : base(null, null, null, importance, DateTime.UtcNow, null)
         {
             LoadingContext = loadingContext;
             LoadingInitiator = loadingInitiator;
@@ -39,11 +39,14 @@ namespace Microsoft.Build.Framework
         public string? AssemblyName { get; private set; }
         public string? AssemblyPath { get; private set; }
         public Guid MVID { get; private set; }
-        // Null string indicates that load occurred on Default AppDomain (for both Core and Framework).
+        // Null string indicates that load occurred on Default AppDomain (for Framework).
+        // For Core, string won't be null.
         public string? AppDomainDescriptor { get; private set; }
 
         internal override void WriteToStream(BinaryWriter writer)
         {
+            base.WriteToStream(writer);
+
             writer.Write7BitEncodedInt((int)LoadingContext);
             writer.WriteTimestamp(RawTimestamp);
             writer.WriteOptionalBuildEventContext(BuildEventContext);
@@ -56,6 +59,8 @@ namespace Microsoft.Build.Framework
 
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
+            base.CreateFromStream(reader, version);
+
             LoadingContext = (AssemblyLoadingContext)reader.Read7BitEncodedInt();
             RawTimestamp = reader.ReadTimestamp();
             BuildEventContext = reader.ReadOptionalBuildEventContext();
@@ -73,7 +78,12 @@ namespace Microsoft.Build.Framework
                 if (RawMessage == null)
                 {
                     string? loadingInitiator = LoadingInitiator == null ? null : $" ({LoadingInitiator})";
-                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskAssemblyLoaded", LoadingContext.ToString(), loadingInitiator, AssemblyName, AssemblyPath, MVID.ToString(), AppDomainDescriptor ?? DefaultAppDomainDescriptor);
+#if FEATURE_ASSEMBLYLOADCONTEXT
+                    string resourceName = "TaskAssemblyLoadedWithAssemblyLoadContext";
+#else
+                    string resourceName = "TaskAssemblyLoaded";
+#endif
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword(resourceName, LoadingContext.ToString(), loadingInitiator, AssemblyName, AssemblyPath, MVID.ToString(), AppDomainDescriptor ?? DefaultAppDomainDescriptor);
                 }
 
                 return RawMessage;

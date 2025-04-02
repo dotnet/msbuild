@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Xml;
-using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
@@ -56,7 +54,7 @@ namespace Microsoft.Build.Construction
         private string _update;
 
         /// <summary>
-        /// Whether the include value has wildcards, 
+        /// Whether the include value has wildcards,
         /// cached for performance.
         /// </summary>
         private bool? _includeHasWildcards;
@@ -67,7 +65,7 @@ namespace Microsoft.Build.Construction
         internal ProjectItemElement(XmlElementWithLocation xmlElement, ProjectItemGroupElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -89,7 +87,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the Include value. 
+        /// Gets or sets the Include value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty or null.
         /// </summary>
@@ -111,7 +109,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the Exclude value. 
+        /// Gets or sets the Exclude value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty or null.
         /// </summary>
@@ -285,7 +283,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get any child metadata.
         /// </summary>
-        public ICollection<ProjectMetadataElement> Metadata => new ReadOnlyCollection<ProjectMetadataElement>(Children.OfType<ProjectMetadataElement>());
+        public ICollection<ProjectMetadataElement> Metadata => GetChildrenOfType<ProjectMetadataElement>();
 
         /// <summary>
         /// Location of the include attribute
@@ -333,7 +331,7 @@ namespace Microsoft.Build.Construction
         public ElementLocation KeepDuplicatesLocation => GetAttributeLocation(XMakeAttributes.keepDuplicates);
 
         /// <summary>
-        /// Whether the include value has wildcards, 
+        /// Whether the include value has wildcards,
         /// cached for performance.
         /// </summary>
         internal bool IncludeHasWildcards
@@ -391,8 +389,8 @@ namespace Microsoft.Build.Construction
         /// </param>
         public ProjectMetadataElement AddMetadata(string name, string unevaluatedValue, bool expressAsAttribute)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
 
             if (expressAsAttribute)
             {
@@ -441,7 +439,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ChangeItemType(string newItemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newItemType, nameof(newItemType));
+            ErrorUtilities.VerifyThrowArgumentLength(newItemType);
             XmlUtilities.VerifyThrowArgumentValidElementName(newItemType);
             ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newItemType), "CannotModifyReservedItem", newItemType);
             if (Link != null)

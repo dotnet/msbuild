@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -27,7 +28,7 @@ namespace Microsoft.Build.Evaluation
     /// we do use it for build-time items.
     /// </comment>
     [DebuggerDisplay("{ItemType}={EvaluatedInclude} [{UnevaluatedInclude}] #DirectMetadata={DirectMetadataCount}")]
-    public class ProjectItem : IItem<ProjectMetadata>, IProjectMetadataParent
+    public class ProjectItem : IItem<ProjectMetadata>, IProjectMetadataParent, IItemData
     {
         /// <summary>
         /// Project that this item lives in.
@@ -42,30 +43,30 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <remarks>
         /// This is ONLY used to figure out %(RecursiveDir) when it is requested.
-        /// It's likely too expensive to figure that out if it isn't needed, so we store 
+        /// It's likely too expensive to figure that out if it isn't needed, so we store
         /// the necessary material here.
         /// </remarks>
         private readonly string _evaluatedIncludeBeforeWildcardExpansionEscaped;
 
         /// <summary>
         /// Item definitions are stored in one single table shared by all items of a particular item type.
-        /// 
+        ///
         /// When an item is created from another item, such as by using an expression like Include="@(x)",
-        /// any item definition metadata those source items have must override any item definition metadata 
-        /// associated with the new item type. 
-        /// 
+        /// any item definition metadata those source items have must override any item definition metadata
+        /// associated with the new item type.
+        ///
         /// Copying all those item definition metadata into real metadata on this item would be very inefficient, because
         /// it would turn a single shared table into a separate table for every item.
-        /// 
+        ///
         /// Instead, we get a reference to the item definition of the source items, and consult
         /// that table before we consult our own item type's item definition. Since item definitions can't change at this point,
         /// it's safe to reference their original table.
-        /// 
+        ///
         /// If our item gets copied again, we need a reference to the inherited item definition and we need the real item
         /// definition of the source items. Thus a list is created. On copying, a list is created, beginning with a clone
         /// of any list the source item had, and ending with the item definition list of the source item type.
-        /// 
-        /// When we look up a metadata value we look at 
+        ///
+        /// When we look up a metadata value we look at
         /// (1) directly associated metadata and built-in metadata
         /// (2) the inherited item definition list, starting from the top
         /// (3) the item definition associated with our item type
@@ -126,12 +127,12 @@ namespace Microsoft.Build.Evaluation
                              PropertyDictionary<ProjectMetadata> directMetadataCloned,
                              List<ProjectItemDefinition> inheritedItemDefinitionsCloned)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
-            ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
+            ErrorUtilities.VerifyThrowInternalNull(project);
+            ErrorUtilities.VerifyThrowArgumentNull(xml);
 
             // Orcas accidentally allowed empty includes if they resulted from expansion: we preserve that bug
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeEscaped, nameof(evaluatedIncludeEscaped));
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeBeforeWildcardExpansionEscaped, nameof(evaluatedIncludeBeforeWildcardExpansionEscaped));
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeEscaped);
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeBeforeWildcardExpansionEscaped);
 
             _xml = xml;
             _project = project;
@@ -142,6 +143,9 @@ namespace Microsoft.Build.Evaluation
         }
 
         internal virtual ProjectItemLink Link => null;
+
+        /// <inheritdoc cref="IItemData.EnumerateMetadata"/>
+        IEnumerable<KeyValuePair<string, string>> IItemData.EnumerateMetadata() => Metadata.Select(m => new KeyValuePair<string, string>(m.Name, m.EvaluatedValue));
 
         /// <summary>
         /// Backing XML item.
@@ -193,9 +197,10 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        /// <summary>
-        /// Gets the evaluated value of the include, unescaped. 
-        /// </summary>
+        /// <inheritdoc cref="IItemData.EvaluatedInclude"/>
+        /// <remarks>
+        /// Gets the evaluated value of the include, unescaped.
+        /// </remarks>
         public string EvaluatedInclude
         {
             [DebuggerStepThrough]
@@ -407,7 +412,7 @@ namespace Microsoft.Build.Evaluation
                 return Link.GetMetadata(name);
             }
 
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             ProjectMetadata result = null;
 
@@ -425,7 +430,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Get the evaluated value of a metadata on this item, possibly from an item definition. 
+        /// Get the evaluated value of a metadata on this item, possibly from an item definition.
         /// Returns empty string if it does not exist.
         /// To determine whether a piece of metadata does not exist vs. simply has no value, use <see cref="HasMetadata(string)">HasMetadata</see>.
         /// May be used to access the value of built-in metadata, such as "FullPath".
@@ -468,12 +473,12 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// See <see cref="GetMetadataValue(string)">GetMetadataValue</see> for a more detailed explanation.  
-        /// Returns the escaped value of the metadatum requested.  
+        /// See <see cref="GetMetadataValue(string)">GetMetadataValue</see> for a more detailed explanation.
+        /// Returns the escaped value of the metadatum requested.
         /// </summary>
         string IItem.GetMetadataValueEscaped(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             string value = null;
 
@@ -523,7 +528,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Adds a ProjectMetadata to the item. 
+        /// Adds a ProjectMetadata to the item.
         /// This is ONLY called during evaluation and does not affect the XML.
         /// </summary>
         ProjectMetadata IItem<ProjectMetadata>.SetMetadata(ProjectMetadataElement metadataElement, string evaluatedInclude)
@@ -558,7 +563,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Overload of <see cref="SetMetadataValue(string,string)"/>. Adds the option of not splitting the item element and thus affecting all sibling items.
         /// Sibling items are defined as all ProjectItem instances that were created from the same item element.
-        /// 
+        ///
         /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state without a reevaluation
         /// </summary>
         /// /// <param name="name">Metadata name</param>
@@ -635,7 +640,7 @@ namespace Microsoft.Build.Evaluation
                 return Link.RemoveMetadata(name);
             }
 
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
             ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
@@ -663,7 +668,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Renames the item.
         /// Equivalent to setting the <see cref="UnevaluatedInclude"/> value.
-        /// Generally, no expansion occurs. This is because it would potentially result in several items, 
+        /// Generally, no expansion occurs. This is because it would potentially result in several items,
         /// which is not meaningful semantics when renaming a single item.
         /// However if the item does not need to be split (which would invalidate its ProjectItemElement),
         /// and the new value expands to exactly one item, then its evaluated include is updated
@@ -671,12 +676,12 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <remarks>
         /// Even if the new value expands to zero items, we do not expand it.
-        /// The common case we are interested in for expansion here is setting something 
-        /// like "$(sourcesroot)\foo.cs" and expanding that to a single item. 
-        /// If say "@(foo)" is set as the new name, and it expands to blank, that might 
-        /// be surprising to the host and maybe even unhandled, if on full reevaluation 
-        /// it wouldn’t expand to blank. That’s why we're being cautious and supporting 
-        /// the most common scenario only. 
+        /// The common case we are interested in for expansion here is setting something
+        /// like "$(sourcesroot)\foo.cs" and expanding that to a single item.
+        /// If say "@(foo)" is set as the new name, and it expands to blank, that might
+        /// be surprising to the host and maybe even unhandled, if on full reevaluation
+        /// it wouldn’t expand to blank. That’s why we're being cautious and supporting
+        /// the most common scenario only.
         /// Many hosts will do a ReevaluateIfNecessary before reading anyway.
         /// </remarks>
         public void Rename(string name)
@@ -826,7 +831,7 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            // ProjectMetadata objects may be being shared with other ProjectItem objects, 
+            // ProjectMetadata objects may be being shared with other ProjectItem objects,
             // or originate from item definitions, so it is necessary to replace ours with
             // new ones.
             List<ProjectMetadata> temporary = new List<ProjectMetadata>(_directMetadata.Count);
@@ -957,8 +962,8 @@ namespace Microsoft.Build.Evaluation
             /// <param name="definingProject">The path to the project that defined the item.</param>
             /// <returns>A new project item.</returns>
             /// <comments>
-            /// NOTE: defining project is ignored because we already know the ItemElement associated with 
-            /// this item, and use that for where it is defined. 
+            /// NOTE: defining project is ignored because we already know the ItemElement associated with
+            /// this item, and use that for where it is defined.
             /// </comments>
             public ProjectItem CreateItem(string include, string definingProject)
             {
@@ -974,8 +979,8 @@ namespace Microsoft.Build.Evaluation
             /// setting metadata should create new XML.
             /// </summary>
             /// <comments>
-            /// NOTE: defining project is ignored because we already know the ItemElement associated with 
-            /// this item, and use that for where it is defined. 
+            /// NOTE: defining project is ignored because we already know the ItemElement associated with
+            /// this item, and use that for where it is defined.
             /// </comments>
             public ProjectItem CreateItem(ProjectItem source, string definingProject)
             {
@@ -994,8 +999,8 @@ namespace Microsoft.Build.Evaluation
             /// If it's not, we have to clone that too.
             /// </remarks>
             /// <comments>
-            /// NOTE: defining project is ignored because we already know the ItemElement associated with 
-            /// this item, and use that for where it is defined. 
+            /// NOTE: defining project is ignored because we already know the ItemElement associated with
+            /// this item, and use that for where it is defined.
             /// </comments>
             public ProjectItem CreateItem(string evaluatedIncludeEscaped, ProjectItem source, string definingProject)
             {
@@ -1007,8 +1012,8 @@ namespace Microsoft.Build.Evaluation
             /// This is to support creating items from an include that may have a wildcard expression in it.
             /// </summary>
             /// <comments>
-            /// NOTE: defining project is ignored because we already know the ItemElement associated with 
-            /// this item, and use that for where it is defined. 
+            /// NOTE: defining project is ignored because we already know the ItemElement associated with
+            /// this item, and use that for where it is defined.
             /// </comments>
             public ProjectItem CreateItem(string evaluatedIncludeEscaped, string evaluatedIncludeBeforeWildcardExpansion, string definingProject)
             {
@@ -1020,11 +1025,11 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Applies the supplied metadata to the destination item.
             /// </summary>
-            public void SetMetadata(IEnumerable<Pair<ProjectMetadataElement, string>> metadata, IEnumerable<ProjectItem> destinationItems)
+            public void SetMetadata(IEnumerable<KeyValuePair<ProjectMetadataElement, string>> metadata, IEnumerable<ProjectItem> destinationItems)
             {
                 foreach (IItem<ProjectMetadata> item in destinationItems)
                 {
-                    foreach (Pair<ProjectMetadataElement, string> metadatum in metadata)
+                    foreach (KeyValuePair<ProjectMetadataElement, string> metadatum in metadata)
                     {
                         item.SetMetadata(metadatum.Key, metadatum.Value);
                     }

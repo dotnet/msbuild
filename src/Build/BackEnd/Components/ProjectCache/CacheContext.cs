@@ -22,10 +22,21 @@ namespace Microsoft.Build.Experimental.ProjectCache
         public IReadOnlyCollection<ProjectGraphEntryPoint>? GraphEntryPoints { get; }
         public string? MSBuildExePath { get; }
         public MSBuildFileSystemBase FileSystem { get; }
+        public IReadOnlyCollection<string> RequestedTargets { get; }
 
         public CacheContext(
             IReadOnlyDictionary<string, string> pluginSettings,
             MSBuildFileSystemBase fileSystem,
+            ProjectGraph? graph = null,
+            IReadOnlyCollection<ProjectGraphEntryPoint>? graphEntryPoints = null)
+            : this(pluginSettings, fileSystem, requestedTargets: [], graph, graphEntryPoints)
+        {
+        }
+
+        public CacheContext(
+            IReadOnlyDictionary<string, string> pluginSettings,
+            MSBuildFileSystemBase fileSystem,
+            IReadOnlyCollection<string> requestedTargets,
             ProjectGraph? graph = null,
             IReadOnlyCollection<ProjectGraphEntryPoint>? graphEntryPoints = null)
         {
@@ -38,6 +49,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             GraphEntryPoints = graphEntryPoints;
             MSBuildExePath = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
             FileSystem = fileSystem;
+            RequestedTargets = requestedTargets;
         }
     }
 }

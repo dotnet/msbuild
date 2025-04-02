@@ -5,15 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Xml;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
@@ -29,14 +29,15 @@ namespace Microsoft.Build.UnitTests.Definition
         public void OverrideTasksAreFoundInOverridePath()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
-            ProjectCollection e = new ProjectCollection();
+            using ProjectCollection e = new ProjectCollection();
             string dir = NativeMethodsShared.IsWindows ? "c:\\directory1\\directory2" : "/directory1/directory2";
             string overrideDir = NativeMethodsShared.IsWindows ? "c:\\msbuildoverridetasks" : "/msbuildoverridetasks";
-            Toolset t = new Toolset("toolsversionname", dir, new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), overrideDir, new DirectoryExists(this.directoryExists));
+            using var collection = new ProjectCollection();
+            Toolset t = new Toolset("toolsversionname", dir, new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), overrideDir, new DirectoryExists(this.directoryExists));
 
-            LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-            TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
-            TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
+            LoggingContext loggingContext = TestLoggingContext.CreateTestContext(new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+            TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, e.ProjectRootElementCache);
+            TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
 
             string[] expectedRegisteredTasks = { "a1", "a2", "a3", "a4", "b1", "e1", "g1", "g2", "g3" };
             string[] expectedOverrideTasks = { "a1" /* special because it is in the override tasks file as well as in the tasks file*/, "oa1", "oa2", "og1", "ooo" };
@@ -73,14 +74,17 @@ namespace Microsoft.Build.UnitTests.Definition
         public void OverrideTaskPathIsRelative()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
-            ProjectCollection e = new ProjectCollection();
-            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), "msbuildoverridetasks", new DirectoryExists(this.directoryExists));
+            using ProjectCollection e = new ProjectCollection();
+            using var collection = new ProjectCollection();
+            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), "msbuildoverridetasks", new DirectoryExists(this.directoryExists));
 
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
+            LoggingContext loggingContext = new TestLoggingContext(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
 
-            TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
+
+            TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
             Assert.Empty(taskoverrideRegistry.TaskRegistrations);
             string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", "msbuildoverridetasks");
@@ -90,14 +94,16 @@ namespace Microsoft.Build.UnitTests.Definition
         [WindowsFullFrameworkOnlyFact]
         public void OverrideTaskPathHasInvalidChars()
         {
-            ProjectCollection e = new ProjectCollection();
-            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), "k:\\||^%$#*msbuildoverridetasks", new DirectoryExists(this.directoryExists));
+            using ProjectCollection e = new ProjectCollection();
+            using var collection = new ProjectCollection();
+            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), "k:\\||^%$#*msbuildoverridetasks", new DirectoryExists(this.directoryExists));
 
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
+            LoggingContext loggingContext = new TestLoggingContext(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
 
-            TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
+            TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
             Assert.Empty(taskoverrideRegistry.TaskRegistrations);
             mockLogger.AssertLogContains("MSB4194");
@@ -107,14 +113,16 @@ namespace Microsoft.Build.UnitTests.Definition
         public void OverrideTaskPathHasTooLongOfAPath()
         {
             string tooLong = "c:\\" + new string('C', 6000);
-            ProjectCollection e = new ProjectCollection();
-            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), tooLong, new DirectoryExists(this.directoryExists));
+            using ProjectCollection e = new ProjectCollection();
+            using var collection = new ProjectCollection();
+            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), tooLong, new DirectoryExists(this.directoryExists));
 
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
+            LoggingContext loggingContext = new TestLoggingContext(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
 
-            TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
+            TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
             Assert.Empty(taskoverrideRegistry.TaskRegistrations);
             string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", tooLong);
@@ -125,14 +133,16 @@ namespace Microsoft.Build.UnitTests.Definition
         public void OverrideTaskPathIsNotFound()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
-            ProjectCollection e = new ProjectCollection();
-            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), "k:\\Thecatinthehat", new DirectoryExists(this.directoryExists));
+            using ProjectCollection e = new ProjectCollection();
+            using var collection = new ProjectCollection();
+            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2", new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), "k:\\Thecatinthehat", new DirectoryExists(this.directoryExists));
 
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
+            LoggingContext loggingContext = new TestLoggingContext(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
 
-            TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), e.ProjectRootElementCache);
+            TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
             Assert.Empty(taskoverrideRegistry.TaskRegistrations);
             string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", "k:\\Thecatinthehat");
@@ -143,17 +153,19 @@ namespace Microsoft.Build.UnitTests.Definition
         public void DefaultTasksAreFoundInToolsPath()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
+            using var collection = new ProjectCollection();
             Toolset t = new Toolset(
                 "toolsversionname",
                 NativeMethodsShared.IsWindows ? "c:\\directory1\\directory2" : "/directory1/directory2",
                 new PropertyDictionary<ProjectPropertyInstance>(),
-                new ProjectCollection(),
+                collection,
                 new DirectoryGetFiles(this.getFiles),
                 new LoadXmlFromPath(this.loadXmlFromPath),
                 null,
                 new DirectoryExists(this.directoryExists));
 
-            TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(null, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
+            LoggingContext loggingContext = TestLoggingContext.CreateTestContext(new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+            TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
             string[] expectedRegisteredTasks = { "a1", "a2", "a3", "a4", "b1", "e1", "g1", "g2", "g3" };
             string[] unexpectedRegisteredTasks = { "c1", "d1", "f1", "11", "12", "13", "21" };
@@ -174,14 +186,16 @@ namespace Microsoft.Build.UnitTests.Definition
         public void WarningLoggedIfNoDefaultTasksFound()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
-            ProjectCollection p = new ProjectCollection();
+            using ProjectCollection p = new ProjectCollection();
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
+            LoggingContext loggingContext = new TestLoggingContext(service, BuildEventContext.Invalid);
 
-            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2\\doesntexist", new PropertyDictionary<ProjectPropertyInstance>(), new ProjectCollection(), new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), null, new DirectoryExists(this.directoryExists));
+            using var colleciton = new ProjectCollection();
+            Toolset t = new Toolset("toolsversionname", "c:\\directory1\\directory2\\doesntexist", new PropertyDictionary<ProjectPropertyInstance>(), colleciton, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), null, new DirectoryExists(this.directoryExists));
 
-            TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(service, BuildEventContext.Invalid, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
+            TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
             string[] unexpectedRegisteredTasks = { "a1", "a2", "a3", "a4", "b1", "c1", "d1", "e1", "f1", "g1", "g2", "g3", "11", "12", "13", "21" };
 
@@ -197,13 +211,14 @@ namespace Microsoft.Build.UnitTests.Definition
         public void InvalidToolPath()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
-            ProjectCollection p = new ProjectCollection();
+            using ProjectCollection p = new ProjectCollection();
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
+            LoggingContext loggingContext = new TestLoggingContext(service, BuildEventContext.Invalid);
             Toolset t = new Toolset("toolsversionname", "invalid||path", new PropertyDictionary<ProjectPropertyInstance>(), p, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), null, new DirectoryExists(this.directoryExists));
 
-            TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(service, BuildEventContext.Invalid, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
+            TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
             Console.WriteLine(mockLogger.FullLog);
             Assert.Equal(1, mockLogger.WarningCount); // "Expected a warning for invalid character in toolpath"
@@ -217,23 +232,22 @@ namespace Microsoft.Build.UnitTests.Definition
         public void VerifyTasksFilesAreInSortedOrder()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
-            ProjectCollection p = new ProjectCollection();
+            using ProjectCollection p = new ProjectCollection();
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
+            LoggingContext loggingContext = new TestLoggingContext(service, BuildEventContext.Invalid);
             string dir = NativeMethodsShared.IsWindows ? "c:\\directory1\\directory2" : "/directory1/directory2";
             string overrideDir = NativeMethodsShared.IsWindows ? "c:\\msbuildoverridetasks" : "/msbuildoverridetasks";
             string[] foundFiles = Toolset.GetTaskFiles(
                 new DirectoryGetFiles(this.getFiles),
-                service,
-                BuildEventContext.Invalid,
+                loggingContext,
                 "*.tasks",
                 dir,
                 String.Empty);
             string[] foundoverrideFiles = Toolset.GetTaskFiles(
                 new DirectoryGetFiles(this.getFiles),
-                service,
-                BuildEventContext.Invalid,
+                loggingContext,
                 "*.overridetasks",
                 overrideDir,
                 String.Empty);
@@ -284,16 +298,18 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='98.6'>
+                var content = @"<Project ToolsVersion='98.6'>
                         <Target Name='Foo'>
                         </Target>
-                       </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                       </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                Project project = projectFromString.Project;
                 success = project.Build(mockLogger);
 
                 Assert.True(success);
@@ -319,16 +335,19 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='0.1'>
+                var content = @"<Project ToolsVersion='0.1'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                Project project = projectFromString.Project;
+
                 success = project.Build(mockLogger);
 
                 Assert.True(success);
@@ -352,16 +371,18 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='invalidToolsVersion'>
+                var content = @"<Project ToolsVersion='invalidToolsVersion'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                Project project = projectFromString.Project;
                 success = project.Build(mockLogger);
 
                 Assert.True(success);
@@ -386,10 +407,12 @@ namespace Microsoft.Build.UnitTests.Definition
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='invalidToolsVersion'>
+                var content = @"<Project ToolsVersion='invalidToolsVersion'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, "goober", p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, "goober", p);
+                Project project = projectFromString.Project;
                 success = project.Build(mockLogger);
                 // BANG!
             });
@@ -410,16 +433,18 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                Project project = projectFromString.Project;
                 success = project.Build(mockLogger);
 
                 Assert.True(success);
@@ -453,7 +478,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 string projectPath = Path.GetTempFileName();
                 File.WriteAllText(projectPath, content);
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
@@ -479,16 +504,18 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist()
         {
-            ProjectCollection p = new ProjectCollection();
+            using ProjectCollection p = new ProjectCollection();
             p.RemoveToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-            Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+            var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+            using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+            Project project = projectFromString.Project;
 
             Assert.Equal("4.0", project.ToolsVersion);
             bool success = project.Build(mockLogger);
@@ -513,18 +540,19 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", "foo");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 p.AddToolset(new Toolset("foo", @"c:\foo", p, @"c:\foo\override"));
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = project.Build(mockLogger);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                success = projectFromString.Project.Build(mockLogger);
 
                 Assert.True(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
@@ -551,17 +579,18 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", "foo");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-                success = project.Build(mockLogger);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                success = projectFromString.Project.Build(mockLogger);
 
                 Assert.True(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
@@ -591,18 +620,19 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-                ProjectInstance pi = project.CreateProjectInstance();
+                ProjectInstance pi = projectFromString.Project.CreateProjectInstance();
                 success = pi.Build(new ILogger[] { mockLogger });
 
                 Assert.True(success);
@@ -624,18 +654,19 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist_CreateProjectInstance()
         {
-            ProjectCollection p = new ProjectCollection();
+            using ProjectCollection p = new ProjectCollection();
             p.RemoveToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-            Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+            var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+            using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-            ProjectInstance pi = project.CreateProjectInstance();
+            ProjectInstance pi = projectFromString.Project.CreateProjectInstance();
             Assert.Equal("4.0", pi.ToolsVersion);
             bool success = pi.Build(new ILogger[] { mockLogger });
 
@@ -659,19 +690,20 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", "foo");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 p.AddToolset(new Toolset("foo", @"c:\foo", p, @"c:\foo\override"));
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-                ProjectInstance pi = project.CreateProjectInstance();
+                ProjectInstance pi = projectFromString.Project.CreateProjectInstance();
                 success = pi.Build(new ILogger[] { mockLogger });
 
                 Assert.True(success);
@@ -700,18 +732,19 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", "foo");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-                ProjectInstance pi = project.CreateProjectInstance();
+                ProjectInstance pi = projectFromString.Project.CreateProjectInstance();
                 success = pi.Build(new ILogger[] { mockLogger });
 
                 Assert.True(success);
@@ -743,18 +776,19 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-                ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                ProjectInstance pi = new ProjectInstance(projectFromString.Project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 success = pi.Build(new ILogger[] { mockLogger });
 
                 Assert.True(success);
@@ -776,18 +810,19 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist_ProjectInstance()
         {
-            ProjectCollection p = new ProjectCollection();
+            using ProjectCollection p = new ProjectCollection();
             p.RemoveToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-            Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+            var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+            using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-            ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+            ProjectInstance pi = new ProjectInstance(projectFromString.Project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
             Assert.Equal("4.0", pi.ToolsVersion);
             bool success = pi.Build(new ILogger[] { mockLogger });
 
@@ -810,19 +845,20 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", "foo");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 p.AddToolset(new Toolset("foo", @"c:\foo", p, @"c:\foo\override"));
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
-                ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                ProjectInstance pi = new ProjectInstance(projectFromString.Project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 success = pi.Build(new ILogger[] { mockLogger });
 
                 Assert.True(success);
@@ -851,18 +887,18 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION", "foo");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection p = new ProjectCollection();
+                using ProjectCollection p = new ProjectCollection();
                 MockLogger mockLogger = new MockLogger();
                 LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 service.RegisterLogger(mockLogger);
 
                 bool success = false;
-                Project project = new Project(XmlReader.Create(new StringReader(@"<Project ToolsVersion='4.0'>
+                var content = @"<Project ToolsVersion='4.0'>
                     <Target Name='Foo'>
                     </Target>
-                   </Project>")), null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-
-                ProjectInstance pi = new ProjectInstance(project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                   </Project>";
+                using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
+                ProjectInstance pi = new ProjectInstance(projectFromString.Project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 success = pi.Build(new ILogger[] { mockLogger });
 
                 Assert.True(success);
@@ -884,17 +920,20 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void InlineTasksInDotTasksFile()
         {
+            using var collection = new ProjectCollection();
             Toolset t = new Toolset(
                 "t",
                 NativeMethodsShared.IsWindows ? "c:\\inline" : "/inline",
                 new PropertyDictionary<ProjectPropertyInstance>(),
-                new ProjectCollection(),
+                collection,
                 new DirectoryGetFiles(this.getFiles),
                 new LoadXmlFromPath(this.loadXmlFromPath),
                 null,
                 new DirectoryExists(directoryExists));
 
-            TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(null, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4), ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
+            LoggingContext loggingContext = TestLoggingContext.CreateTestContext(new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+
+            TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
             // Did not crash due to trying to expand items without having items
         }

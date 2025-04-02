@@ -47,7 +47,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #region Properties
         /// <summary>
-        /// Provide a friendly name for the sink to make it easier to differentiate during 
+        /// Provide a friendly name for the sink to make it easier to differentiate during
         /// debugging and display
         /// </summary>
         public string Name
@@ -115,6 +115,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// This property is ignored by this event sink and relies on the receiver to keep track of whether or not any errors have been logged.
         /// </summary>
         public ISet<int> BuildSubmissionIdsThatHaveLoggedErrors { get; } = null;
+
         #endregion
         #region IBuildEventSink Methods
 

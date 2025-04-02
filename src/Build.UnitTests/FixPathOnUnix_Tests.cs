@@ -6,7 +6,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -41,7 +40,7 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.CreateFileInTempProjectDirectory("projectDirectory/main.proj", mainProjectContents);
             ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine("projectDirectory", "lib", "foo.dll"), "just a text file");
 
-            var projColln = new ProjectCollection();
+            using var projColln = new ProjectCollection();
             var logger = new MockLogger();
             projColln.RegisterLogger(logger);
 

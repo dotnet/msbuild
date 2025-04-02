@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Microsoft.Build.Framework.Telemetry
@@ -9,7 +10,7 @@ namespace Microsoft.Build.Framework.Telemetry
     /// <summary>
     /// Telemetry of build.
     /// </summary>
-    internal class BuildTelemetry : TelemetryBase
+    internal class BuildTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     {
         public override string EventName => "build";
 
@@ -39,12 +40,12 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Overall build success.
         /// </summary>
-        public bool? Success { get; set; }
+        public bool? BuildSuccess { get; set; }
 
         /// <summary>
         /// Build Target.
         /// </summary>
-        public string? Target { get; set; }
+        public string? BuildTarget { get; set; }
 
         /// <summary>
         /// MSBuild server fallback reason.
@@ -55,91 +56,167 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Version of MSBuild.
         /// </summary>
-        public Version? Version { get; set; }
+        public Version? BuildEngineVersion { get; set; }
 
         /// <summary>
         /// Display version of the Engine suitable for display to a user.
         /// </summary>
-        public string? DisplayVersion { get; set; }
+        public string? BuildEngineDisplayVersion { get; set; }
 
         /// <summary>
         /// Path to project file.
         /// </summary>
-        public string? Project { get; set; }
+        public string? ProjectPath { get; set; }
 
         /// <summary>
         /// Host in which MSBuild build was executed.
         /// For example: "VS", "VSCode", "Azure DevOps", "GitHub Action", "CLI", ...
         /// </summary>
-        public string? Host { get; set; }
+        public string? BuildEngineHost { get; set; }
+
+        /// <summary>
+        /// True if buildcheck was used.
+        /// </summary>
+        public bool? BuildCheckEnabled { get; set; }
+
+        /// <summary>
+        /// True if Smart Application Control was enabled.
+        /// </summary>
+        public bool? SACEnabled { get; set; }
 
         /// <summary>
         /// State of MSBuild server process before this build.
         /// One of 'cold', 'hot', null (if not run as server)
         /// </summary>
-        public string? InitialServerState { get; set; }
+        public string? InitialMSBuildServerState { get; set; }
 
         /// <summary>
         /// Framework name suitable for display to a user.
         /// </summary>
-        public string? FrameworkName { get; set; }
+        public string? BuildEngineFrameworkName { get; set; }
 
-        public override void UpdateEventProperties()
+        public override IDictionary<string, string> GetProperties()
         {
-            if (DisplayVersion != null)
+            var properties = new Dictionary<string, string>();
+
+            // populate property values
+            if (BuildEngineDisplayVersion != null)
             {
-                Properties["BuildEngineDisplayVersion"] = DisplayVersion;
+                properties[nameof(BuildEngineDisplayVersion)] = BuildEngineDisplayVersion;
             }
 
             if (StartAt.HasValue && FinishedAt.HasValue)
             {
-                Properties["BuildDurationInMilliseconds"] = (FinishedAt.Value - StartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+                properties[TelemetryConstants.BuildDurationPropertyName] = (FinishedAt.Value - StartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
             }
 
             if (InnerStartAt.HasValue && FinishedAt.HasValue)
             {
-                Properties["InnerBuildDurationInMilliseconds"] = (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+                properties[TelemetryConstants.InnerBuildDurationPropertyName] = (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
             }
 
-            if (FrameworkName != null)
+            if (BuildEngineFrameworkName != null)
             {
-                Properties["BuildEngineFrameworkName"] = FrameworkName;
+                properties[nameof(BuildEngineFrameworkName)] = BuildEngineFrameworkName;
             }
 
-            if (Host != null)
+            if (BuildEngineHost != null)
             {
-                Properties["BuildEngineHost"] = Host;
+                properties[nameof(BuildEngineHost)] = BuildEngineHost;
             }
 
-            if (InitialServerState != null)
+            if (InitialMSBuildServerState != null)
             {
-                Properties["InitialMSBuildServerState"] = InitialServerState;
+                properties[nameof(InitialMSBuildServerState)] = InitialMSBuildServerState;
             }
 
-            if (Project != null)
+            if (ProjectPath != null)
             {
-                Properties["ProjectPath"] = Project;
+                properties[nameof(ProjectPath)] = ProjectPath;
             }
 
             if (ServerFallbackReason != null)
             {
-                Properties["ServerFallbackReason"] = ServerFallbackReason;
+                properties[nameof(ServerFallbackReason)] = ServerFallbackReason;
             }
 
-            if (Success.HasValue)
+            if (BuildSuccess.HasValue)
             {
-                Properties["BuildSuccess"] = Success.HasValue.ToString(CultureInfo.InvariantCulture);
+                properties[nameof(BuildSuccess)] = BuildSuccess.Value.ToString(CultureInfo.InvariantCulture);
             }
 
-            if (Target != null)
+            if (BuildTarget != null)
             {
-                Properties["BuildTarget"] = Target;
+                properties[nameof(BuildTarget)] = BuildTarget;
             }
 
-            if (Version != null)
+            if (BuildEngineVersion != null)
             {
-                Properties["BuildEngineVersion"] = Version.ToString();
+                properties[nameof(BuildEngineVersion)] = BuildEngineVersion.ToString();
             }
+
+            if (BuildCheckEnabled != null)
+            {
+                properties[nameof(BuildCheckEnabled)] = BuildCheckEnabled.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (SACEnabled != null)
+            {
+                properties[nameof(SACEnabled)] = SACEnabled.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
+            return properties;
+        }
+
+        /// <summary>
+        /// Create a list of properties sent to VS telemetry with the information whether they should be hashed.
+        /// </summary>
+        /// <returns></returns>
+        public IList<TelemetryItem> GetActivityProperties()
+        {
+            List<TelemetryItem> telemetryItems = new(8);
+
+            if (StartAt.HasValue && FinishedAt.HasValue)
+            {
+                telemetryItems.Add(new TelemetryItem(TelemetryConstants.BuildDurationPropertyName, (FinishedAt.Value - StartAt.Value).TotalMilliseconds, false));
+            }
+
+            if (InnerStartAt.HasValue && FinishedAt.HasValue)
+            {
+                telemetryItems.Add(new TelemetryItem(TelemetryConstants.InnerBuildDurationPropertyName, (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds, false));
+            }
+
+            if (BuildEngineHost != null)
+            {
+                telemetryItems.Add(new TelemetryItem(nameof(BuildEngineHost), BuildEngineHost, false));
+            }
+
+            if (BuildSuccess.HasValue)
+            {
+                telemetryItems.Add(new TelemetryItem(nameof(BuildSuccess), BuildSuccess, false));
+            }
+
+            if (BuildTarget != null)
+            {
+                telemetryItems.Add(new TelemetryItem(nameof(BuildTarget), BuildTarget, true));
+            }
+
+            if (BuildEngineVersion != null)
+            {
+                telemetryItems.Add(new TelemetryItem(nameof(BuildEngineVersion), BuildEngineVersion.ToString(), false));
+            }
+
+            if (BuildCheckEnabled != null)
+            {
+                telemetryItems.Add(new TelemetryItem(nameof(BuildCheckEnabled), BuildCheckEnabled, false));
+            }
+
+            if (SACEnabled != null)
+            {
+                telemetryItems.Add(new TelemetryItem(nameof(SACEnabled), SACEnabled, false));
+            }
+
+            return telemetryItems;
         }
     }
 }

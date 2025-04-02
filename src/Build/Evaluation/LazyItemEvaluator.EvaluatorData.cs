@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
@@ -19,16 +21,16 @@ namespace Microsoft.Build.Evaluation
     {
         private class EvaluatorData : IEvaluatorData<P, I, M, D>
         {
-            private IEvaluatorData<P, I, M, D> _wrappedData;
-            private Func<string, ICollection<I>> _itemGetter;
+            private readonly IEvaluatorData<P, I, M, D> _wrappedData;
+            private readonly IReadOnlyDictionary<string, LazyItemList> _itemsByType;
 
-            public EvaluatorData(IEvaluatorData<P, I, M, D> wrappedData, Func<string, ICollection<I>> itemGetter)
+            public EvaluatorData(IEvaluatorData<P, I, M, D> wrappedData, IReadOnlyDictionary<string, LazyItemList> itemsByType)
             {
                 _wrappedData = wrappedData;
-                _itemGetter = itemGetter;
+                _itemsByType = itemsByType;
             }
 
-            public ItemDictionary<I> Items
+            public IItemDictionary<I> Items
             {
                 get
                 {
@@ -46,9 +48,10 @@ namespace Microsoft.Build.Evaluation
 
             public ICollection<I> GetItems(string itemType)
             {
-                return _itemGetter(itemType);
+                return _itemsByType.TryGetValue(itemType, out LazyItemList items)
+                    ? items.GetMatchedItems(globsToIgnore: ImmutableHashSet<string>.Empty)
+                    : Array.Empty<I>();
             }
-
 
             public IDictionary<string, List<TargetSpecification>> AfterTargets
             {
@@ -288,9 +291,9 @@ namespace Microsoft.Build.Evaluation
                 return _wrappedData.GetTarget(targetName);
             }
 
-            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext)
+            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext, LoggingContext loggingContext)
             {
-                _wrappedData.InitializeForEvaluation(toolsetProvider, evaluationContext);
+                _wrappedData.InitializeForEvaluation(toolsetProvider, evaluationContext, loggingContext);
             }
 
             public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult)
@@ -303,14 +306,14 @@ namespace Microsoft.Build.Evaluation
                 _wrappedData.RecordImportWithDuplicates(importElement, import, versionEvaluated);
             }
 
-            public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped)
+            public P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, BackEnd.Logging.LoggingContext loggingContext)
             {
-                return _wrappedData.SetProperty(propertyElement, evaluatedValueEscaped);
+                return _wrappedData.SetProperty(propertyElement, evaluatedValueEscaped, loggingContext);
             }
 
-            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, LoggingContext loggingContext = null)
+            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false, bool isCommandLineProperty = false)
             {
-                return _wrappedData.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext: loggingContext);
+                return _wrappedData.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext: loggingContext, isCommandLineProperty);
             }
         }
     }

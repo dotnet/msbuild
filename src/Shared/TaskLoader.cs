@@ -23,7 +23,7 @@ namespace Microsoft.Build.Shared
 #endif
 
         /// <summary>
-        /// Delegate for logging task loading errors. 
+        /// Delegate for logging task loading errors.
         /// </summary>
         internal delegate void LogError(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs);
 
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Creates an ITask instance and returns it.  
+        /// Creates an ITask instance and returns it.
         /// </summary>
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         internal static ITask CreateTask(
@@ -116,7 +116,7 @@ namespace Microsoft.Build.Shared
                             taskAppDomain.Load(loadedType.LoadedAssemblyName);
                         }
 
-                        // Hook up last minute dumping of any exceptions 
+                        // Hook up last minute dumping of any exceptions
                         taskAppDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
                         appDomainCreated?.Invoke(taskAppDomain);
                     }

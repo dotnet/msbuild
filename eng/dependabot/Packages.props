@@ -10,49 +10,60 @@
   these properties to override package versions if necessary. -->
 
   <ItemGroup>
-    <PackageVersion Include="BenchmarkDotNet" Version="0.13.1" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.10" />
     <PackageVersion Update="BenchmarkDotNet" Condition="'$(BenchmarkDotNetVersion)' != ''" Version="$(BenchmarkDotNetVersion)" />
+
+    <PackageVersion Include="AwesomeAssertions" Version="8.0.2" />
+    <PackageVersion Update="AwesomeAssertions" Condition="'$(AwesomeAssertionsVersion)' != ''" Version="$(AwesomeAssertionsVersion)" />
 
     <PackageVersion Include="LargeAddressAware" Version="1.0.5" />
     <PackageVersion Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' != ''" Version="$(LargeAddressAwareVersion)" />
 
-    <PackageVersion Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.2.2146" PrivateAssets="All" />
-    <PackageVersion Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Condition="'$(MicrosoftVisualStudioSetupConfigurationInteropVersion)' != ''" Version="$(MicrosoftVisualStudioSetupConfigurationInteropVersion)" PrivateAssets="All" />
+    <PackageVersion Include="Microsoft.BuildXL.Processes" Version="0.1.0-20241105.3" />
+    <PackageVersion Update="Microsoft.BuildXL.Processes" Condition="'$(BuildXLProcessesVersion)' != ''" Version="$(BuildXLProcessesVersion)" />
+
+    <PackageVersion Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.8.2112" />
+    <PackageVersion Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Condition="'$(MicrosoftVisualStudioSetupConfigurationInteropVersion)' != ''" Version="$(MicrosoftVisualStudioSetupConfigurationInteropVersion)" />
 
     <PackageVersion Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageVersion Update="Microsoft.Win32.Registry" Condition="'$(MicrosoftWin32RegistryVersion)' != ''" Version="$(MicrosoftWin32RegistryVersion)" />
 
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Update="Newtonsoft.Json" Condition="'$(NewtonsoftJsonVersion)' != ''" Version="$(NewtonsoftJsonVersion)" />
 
     <PackageVersion Include="PdbGit" Version="3.0.41" />
     <PackageVersion Update="PdbGit" Condition="'$(PdbGitVersion)' != ''" Version="$(PdbGitVersion)" />
 
-    <PackageVersion Include="Shouldly" Version="3.0.0" />
+    <PackageVersion Include="Shouldly" Version="4.2.1" />
     <PackageVersion Update="Shouldly" Condition="'$(ShouldlyVersion)' != ''" Version="$(ShouldlyVersion)" />
 
-    <PackageVersion Include="System.CodeDom" Version="7.0.0" />
+    <PackageVersion Include="FakeItEasy" Version="8.1.0" />
+    <PackageVersion Update="FakeItEasy" Condition="'$(FakeItEasyVersion)' != ''" Version="$(FakeItEasyVersion)" />
+
+    <PackageVersion Include="System.CodeDom" Version="9.0.0" />
     <PackageVersion Update="System.CodeDom" Condition="'$(SystemCodeDomVersion)' != ''" Version="$(SystemCodeDomVersion)" />
 
-    <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
-    <PackageVersion Update="System.Private.Uri" Condition="'$(SystemPrivateUriVersion)' != ''" Version="$(SystemPrivateUriVersion)" />
-
-    <PackageVersion Include="System.Runtime" Version="4.3.1" />
-    <PackageVersion Update="System.Runtime" Condition="'$(SystemRuntimeVersion)' != ''" Version="$(SystemRuntimeVersion)" />
-
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="7.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="9.0.0" />
     <PackageVersion Update="System.Security.Cryptography.Pkcs" Condition="'$(SystemSecurityCryptographyPkcsVersion)' != ''" Version="$(SystemSecurityCryptographyPkcsVersion)" />
 
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="7.0.1" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="9.0.0" />
     <PackageVersion Update="System.Security.Cryptography.Xml" Condition="'$(SystemSecurityCryptographyXmlVersion)' != ''" Version="$(SystemSecurityCryptographyXmlVersion)" />
 
-    <PackageVersion Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
-    <PackageVersion Update="System.Security.Cryptography.X509Certificates" Condition="'$(SystemSecurityCryptographyX509CertificatesVersion)' != ''" Version="$(SystemSecurityCryptographyX509CertificatesVersion)" />
+    <PackageVersion Include="Microsoft.Bcl.Cryptography.Xml" Version="9.0.0" />
+    <PackageVersion Update="Microsoft.Bcl.Cryptography.Xml" Condition="'$(MicrosoftBclCryptographyVersion)' != ''" Version="$(MicrosoftBclCryptographyVersion)" />
+
+    <!-- when this is bumped the submodule in https://github.com/dotnet/source-build-externals needs to be bumped in sync -->
+    <PackageVersion Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
+    <PackageVersion Update="Microsoft.VisualStudio.SolutionPersistence" Condition="'$(MicrosoftVisualStudioSolutionPersistenceVersion)' != ''" Version="$(MicrosoftVisualStudioSolutionPersistenceVersion)" />
+
+    <PackageVersion Include="Verify.Xunit" Version="19.14.1" />
+    <PackageVersion Update="Verify.XUnit" Condition="'$(VerifyXUnitVersion)' != ''" Version="$(VerifyXUnitVersion)" />
+
   </ItemGroup>
 
-  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true' AND $(ProjectIsDeprecated) != 'true'">
+  <ItemGroup Condition="'$(DotNetBuildSourceOnly)' != 'true' AND $(ProjectIsDeprecated) != 'true'">
     <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4" />
-    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.435" PrivateAssets="all"/>
+    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="all"/>
     <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 

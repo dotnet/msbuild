@@ -358,7 +358,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 logger.WarningCount.ShouldBe(2);
                 logger.ErrorCount.ShouldBe(1);
 
-                // The build should STOP when a task logs an error, make sure ReturnFailureWithoutLoggingErrorTask doesn't run. 
+                // The build should STOP when a task logs an error, make sure ReturnFailureWithoutLoggingErrorTask doesn't run.
                 logger.AssertLogDoesntContain("MSB1237");
             }
         }
@@ -525,6 +525,34 @@ namespace Microsoft.Build.Engine.UnitTests
                 MockLogger logger = proj.BuildProjectExpectFailure();
 
                 logger.AssertLogContains("MSB4181");
+            }
+        }
+
+        /// <summary>
+        /// MSBuildWarningsAsMessages should allow comma separation.
+        /// </summary>
+        [Fact]
+        public void MSBuildWarningsAsMessagesWithCommaSeparation()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                var content = """
+                <Project>
+                    <PropertyGroup>
+                       <MSBuildWarningsAsMessages>NAT011,NAT012</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+
+                    <Target Name='Build'>
+                        <Warning Code="NAT011" Text="You fail" />
+                        <Warning Code="NAT012" Text="Other Fail" />
+                    </Target>
+                </Project>
+                """;
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(content);
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(0);
             }
         }
     }

@@ -2,9 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-
-using Microsoft.Build.Shared;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Microsoft.Build.Framework.BuildException;
+using Microsoft.Build.Shared;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
@@ -17,7 +18,7 @@ namespace Microsoft.Build.Exceptions
     /// Exception subclass that ToolsetReaders should throw.
     /// </summary>
     [Serializable]
-    public class InvalidToolsetDefinitionException : Exception
+    public class InvalidToolsetDefinitionException : BuildExceptionBase
     {
         /// <summary>
         /// The MSBuild error code corresponding with this exception.
@@ -54,10 +55,13 @@ namespace Microsoft.Build.Exceptions
         /// <summary>
         /// Basic constructor.
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         protected InvalidToolsetDefinitionException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
+            ErrorUtilities.VerifyThrowArgumentNull(info);
 
             errorCode = info.GetString("errorCode");
         }
@@ -94,13 +98,29 @@ namespace Microsoft.Build.Exceptions
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
+            ErrorUtilities.VerifyThrowArgumentNull(info);
 
             base.GetObjectData(info, context);
 
             info.AddValue("errorCode", errorCode);
+        }
+
+        protected override IDictionary<string, string> FlushCustomState()
+        {
+            return new Dictionary<string, string>()
+            {
+                { nameof(errorCode), errorCode }
+            };
+        }
+
+        protected override void InitializeCustomState(IDictionary<string, string> state)
+        {
+            errorCode = state[nameof(errorCode)];
         }
 
         /// <summary>
@@ -119,7 +139,7 @@ namespace Microsoft.Build.Exceptions
 
         /// <summary>
         /// Throws an InvalidToolsetDefinitionException.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
@@ -136,7 +156,7 @@ namespace Microsoft.Build.Exceptions
         /// <summary>
         /// Throws an InvalidToolsetDefinitionException including a specified inner exception,
         /// which may be interesting to hosts.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
@@ -146,9 +166,7 @@ namespace Microsoft.Build.Exceptions
             string resourceName,
             params string[] args)
         {
-#if DEBUG
             ResourceUtilities.VerifyResourceStringExists(resourceName);
-#endif
             string errorCode;
             string helpKeyword;
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, resourceName, (object[])args);

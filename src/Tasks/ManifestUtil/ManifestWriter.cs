@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections;
-using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
@@ -24,14 +23,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             manifest.OnBeforeSave();
             var m = new MemoryStream();
             var s = new XmlSerializer(manifest.GetType());
-            var w = new StreamWriter(m);
+            using var w = new StreamWriter(m, System.Text.Encoding.UTF8, bufferSize: 1024, leaveOpen: true);
 
             int t1 = Environment.TickCount;
             s.Serialize(w, manifest);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "ManifestWriter.Serialize t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"ManifestWriter.Serialize t={Environment.TickCount - t1}");
 
             w.Flush();
             m.Position = 0;
+
             return m;
         }
 
@@ -84,7 +84,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="manifest"></param>
         /// <param name="output"></param>
@@ -187,7 +187,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             Util.WriteLogFile(n + ".write.3-formatted.xml", s4);
 
             Util.CopyStream(s4, output);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "ManifestWriter.WriteManifest t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"ManifestWriter.WriteManifest t={Environment.TickCount - t1}");
         }
     }
 }

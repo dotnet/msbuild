@@ -21,6 +21,9 @@ artifacts/
 # Visual Studio 2015 cache/options directory
 .vs/
 
+# Verify result files
+*.received.*
+
 *_i.c
 *_p.c
 *_i.h
@@ -218,3 +221,6 @@ stage1/
 
 # .DS_Store for macOS
 **/.DS_Store
+
+# We keep launchSettings.json local
+**/launchSettings.json

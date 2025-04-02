@@ -66,6 +66,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct the exception.
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         protected AppConfigException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }

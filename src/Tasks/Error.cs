@@ -3,6 +3,10 @@
 
 #nullable disable
 
+#if NET
+using System.Diagnostics.CodeAnalysis;
+#endif
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -36,6 +40,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// A link pointing to more information about the error
         /// </summary>
+        [StringSyntax(StringSyntaxAttribute.Uri)]
         public string HelpLink { get; set; }
 
         /// <summary>

@@ -1,0 +1,27 @@
+<Project DefaultTargets="PrintEnvVar">
+    <PropertyGroup>
+        <!--
+        <MyProp1>value-of-prop1</MyProp1>
+        <MyProp2>$(MyProp1)</MyProp2>
+        <MyProp3>blah</MyProp3>
+        -->
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(MyProp12)' == ''">
+        <MyProp13>$(MyProp11)</MyProp13>
+        <MSBuildTreatWarningsAsErrors>false</MSBuildTreatWarningsAsErrors>
+    </PropertyGroup>
+
+    <!--
+        <ItemGroup>
+        <a Include="$(nonexistent)" />
+        </ItemGroup>
+    -->
+
+    <Target Name="PrintEnvVar">
+        <Message Text="MyPropT2 has value $(MyPropT2)" Importance="High" Condition="'$(MyPropT2)' == ''" />
+        <PropertyGroup>
+            <MyPropT2>$(MyPropT2);xxx</MyPropT2>
+        </PropertyGroup>
+    </Target>
+</Project>

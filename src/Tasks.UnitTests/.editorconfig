@@ -1,0 +1,3 @@
+# Files that have inline expected results that include trailing whitespace
+[RoslynCodeTaskFactory_Tests.cs]
+trim_trailing_whitespace = false

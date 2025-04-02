@@ -7,7 +7,6 @@ using System.Configuration;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 using Xunit;
 using ToolsetConfigurationSection = Microsoft.Build.Evaluation.ToolsetConfigurationSection;
 
@@ -115,7 +114,7 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        ///  Tests if ToolsetConfigurationReaderTests is successfully initialized from the config file and that msbuildOVerrideTasksPath 
+        ///  Tests if ToolsetConfigurationReaderTests is successfully initialized from the config file and that msbuildOVerrideTasksPath
         ///  is correctly read in when the value is empty.
         /// </summary>
         [Fact]
@@ -194,7 +193,7 @@ namespace Microsoft.Build.UnitTests.Definition
         #region "Invalid cases (exception is expected to be thrown)"
 
         /// <summary>
-        /// name attribute is missing from toolset element 
+        /// name attribute is missing from toolset element
         /// </summary>
         [Fact]
         public void ToolsVersionTest_NameNotSpecified()
@@ -250,7 +249,7 @@ namespace Microsoft.Build.UnitTests.Definition
             });
         }
         /// <summary>
-        /// empty toolset element 
+        /// empty toolset element
         /// </summary>
         [Fact]
         public void ToolsVersionTest_EmptyElement()
@@ -662,7 +661,8 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private ToolsetConfigurationReader GetStandardConfigurationReader()
         {
-            return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
+            using var collection = new ProjectCollection();
+            return new ToolsetConfigurationReader(collection.EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
         }
         #endregion
 

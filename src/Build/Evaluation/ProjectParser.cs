@@ -96,8 +96,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectParser(XmlDocumentWithLocation document, ProjectRootElement project)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
-            ErrorUtilities.VerifyThrowInternalNull(document, nameof(document));
+            ErrorUtilities.VerifyThrowInternalNull(project);
+            ErrorUtilities.VerifyThrowInternalNull(document);
 
             _document = document;
             _project = project;
@@ -324,7 +324,7 @@ namespace Microsoft.Build.Construction
                 }
                 else if (isValidMetadataNameInAttribute)
                 {
-                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute.Name, attribute.Value);
+                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute);
                     metadatum.ExpressedAsAttribute = true;
                     metadatum.Parent = item;
 
@@ -577,7 +577,7 @@ namespace Microsoft.Build.Construction
             // Orcas compat: all target names are automatically unescaped
             string targetName = EscapingUtilities.UnescapeAll(ProjectXmlUtilities.GetAttributeValue(element, XMakeAttributes.name));
 
-            int indexOfSpecialCharacter = targetName.IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
+            int indexOfSpecialCharacter = targetName.AsSpan().IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
             if (indexOfSpecialCharacter >= 0)
             {
                 ProjectErrorUtilities.ThrowInvalidProject(element.GetAttributeLocation(XMakeAttributes.name), "NameInvalid", targetName, targetName[indexOfSpecialCharacter]);
@@ -629,13 +629,10 @@ namespace Microsoft.Build.Construction
                         {
                             ProjectErrorUtilities.ThrowInvalidProject(onError.Location, "NodeMustBeLastUnderElement", XMakeElements.onError, XMakeElements.target, childElement.Name);
                         }
-                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
+                        if (childElement.ChildNodes.Count == 1 && childElement.FirstChild.NodeType == XmlNodeType.Text)
                         {
-                            if (childElement.ChildNodes.Count == 1 && childElement.FirstChild.NodeType == XmlNodeType.Text)
-                            {
-                                // If the element has inner text and no other child elements except text, then this should be a property and throw invalid child element of <Target>
-                                ProjectErrorUtilities.ThrowInvalidProject(childElement.Location, "PropertyOutsidePropertyGroupInTarget", childElement.Name, childElement.ParentNode.Name);
-                            }
+                            // If the element has inner text and no other child elements except text, then this should be a property and throw invalid child element of <Target>
+                            ProjectErrorUtilities.ThrowInvalidProject(childElement.Location, "PropertyOutsidePropertyGroupInTarget", childElement.Name, childElement.ParentNode.Name);
                         }
 
                         child = ParseProjectTaskElement(childElement, target);
@@ -744,7 +741,7 @@ namespace Microsoft.Build.Construction
                 }
                 else if (isValidMetadataNameInAttribute)
                 {
-                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute.Name, attribute.Value);
+                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute);
                     metadatum.ExpressedAsAttribute = true;
                     metadatum.Parent = itemDefinition;
 

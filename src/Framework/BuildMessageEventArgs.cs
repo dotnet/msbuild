@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if NET
+using System.Diagnostics.CodeAnalysis;
+#endif
 using System.IO;
 using System.Runtime.Serialization;
 using Microsoft.Build.Shared;
@@ -98,7 +101,7 @@ namespace Microsoft.Build.Framework
         /// <param name="eventTimestamp">Timestamp when event was created</param>
         /// <param name="messageArgs">message arguments</param>
         public BuildMessageEventArgs(
-            string message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             string helpKeyword,
             string senderName,
             MessageImportance importance,
@@ -107,6 +110,28 @@ namespace Microsoft.Build.Framework
             : this(null, null, null, 0, 0, 0, 0, message, helpKeyword, senderName, importance, eventTimestamp, messageArgs)
         {
             // do nothing
+        }
+
+        /// <summary>
+        /// This constructor allows event data without ends to be initialized.
+        /// </summary>
+        /// <param name="code">event code</param>
+        /// <param name="file">file associated with the event</param>
+        /// <param name="lineNumber">line number (0 if not applicable)</param>
+        /// <param name="columnNumber">column number (0 if not applicable)</param>
+        /// <param name="message">text message</param>
+        protected BuildMessageEventArgs(
+            string code,
+            string message,
+            string file,
+            int lineNumber,
+            int columnNumber)
+            : base(message, helpKeyword: null, senderName: null)
+        {
+            this.code = code;
+            this.file = file;
+            this.lineNumber = lineNumber;
+            this.columnNumber = columnNumber;
         }
 
         /// <summary>
@@ -197,7 +222,7 @@ namespace Microsoft.Build.Framework
             int columnNumber,
             int endLineNumber,
             int endColumnNumber,
-            string message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             string helpKeyword,
             string senderName,
             MessageImportance importance,
@@ -213,6 +238,20 @@ namespace Microsoft.Build.Framework
             this.columnNumber = columnNumber;
             this.endLineNumber = endLineNumber;
             this.endColumnNumber = endColumnNumber;
+        }
+
+        protected BuildMessageEventArgs(
+           string message,
+           string file,
+           int lineNumber,
+           int columnNumber,
+           MessageImportance importance)
+            : base(message, helpKeyword: null, senderName: null)
+        {
+            this.importance = importance;
+            this.file = file;
+            this.lineNumber = lineNumber;
+            this.columnNumber = columnNumber;
         }
 
         private MessageImportance importance;
@@ -304,17 +343,21 @@ namespace Microsoft.Build.Framework
         public string Subcategory => subcategory;
 
         /// <summary>
-        /// Code associated with event. 
+        /// Code associated with event.
         /// </summary>
         public string Code => code;
 
         /// <summary>
         /// File associated with event.
         /// </summary>
-        public string File => file;
+        public string File
+        {
+            get => file;
+            internal set => file = value;
+        }
 
         /// <summary>
-        /// Line number of interest in associated file. 
+        /// Line number of interest in associated file.
         /// </summary>
         public int LineNumber
         {
@@ -323,7 +366,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Column number of interest in associated file. 
+        /// Column number of interest in associated file.
         /// </summary>
         public int ColumnNumber
         {
@@ -332,12 +375,12 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Ending line number of interest in associated file. 
+        /// Ending line number of interest in associated file.
         /// </summary>
         public int EndLineNumber => endLineNumber;
 
         /// <summary>
-        /// Ending column number of interest in associated file. 
+        /// Ending column number of interest in associated file.
         /// </summary>
         public int EndColumnNumber => endColumnNumber;
 

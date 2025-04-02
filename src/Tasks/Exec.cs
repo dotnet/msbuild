@@ -3,6 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+#if NET
+using System.Diagnostics.CodeAnalysis;
+#endif
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -94,6 +97,7 @@ namespace Microsoft.Build.Tasks
         /// use to spot error lines in the tool output. This is
         /// useful for tools that produce unusually formatted output
         /// </summary>
+        [StringSyntax(StringSyntaxAttribute.Regex)]
         public string CustomErrorRegularExpression
         {
             get => _customErrorRegex;
@@ -105,6 +109,7 @@ namespace Microsoft.Build.Tasks
         /// use to spot warning lines in the tool output. This is
         /// useful for tools that produce unusually formatted output
         /// </summary>
+        [StringSyntax(StringSyntaxAttribute.Regex)]
         public string CustomWarningRegularExpression
         {
             get => _customWarningRegex;
@@ -250,29 +255,6 @@ namespace Microsoft.Build.Tasks
                     sw.WriteLine("#!/bin/sh");
                 }
 
-                if (NativeMethodsShared.IsUnixLike && NativeMethodsShared.IsMono)
-                {
-                    // Extract the command we are going to run. Note that the command name may
-                    // be preceded by whitespace
-                    var m = Regex.Match(Command, @"^\s*((?:(?:(?<!\\)[^\0 !$`&*()+])|(?:(?<=\\)[^\0]))+)(.*)");
-                    if (m.Success && m.Groups.Count > 1 && m.Groups[1].Captures.Count > 0)
-                    {
-                        string exe = m.Groups[1].Captures[0].ToString();
-                        string commandLine = (m.Groups.Count > 2 && m.Groups[2].Captures.Count > 0) ?
-                            m.Groups[2].Captures[0].Value : "";
-
-
-                        // If we are trying to run a .exe file, prepend mono as the file may
-                        // not be runnable
-                        if (exe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)
-                            || exe.EndsWith(".exe\"", StringComparison.OrdinalIgnoreCase)
-                            || exe.EndsWith(".exe'", StringComparison.OrdinalIgnoreCase))
-                        {
-                            Command = "mono " + FileUtilities.FixFilePath(exe) + commandLine;
-                        }
-                    }
-                }
-
                 sw.WriteLine(Command);
 
                 if (!NativeMethodsShared.IsUnixLike)
@@ -410,7 +392,10 @@ namespace Microsoft.Build.Tasks
 
             if (ConsoleToMSBuild)
             {
-                string trimmedTextLine = singleLine.Trim();
+                string trimmedTextLine = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10) ?
+                    singleLine.TrimEnd() :
+                    singleLine.Trim();
+
                 if (trimmedTextLine.Length > 0)
                 {
                     // The lines read may be unescaped, so we need to escape them
@@ -591,7 +576,12 @@ namespace Microsoft.Build.Tasks
             {
                 commandLine.AppendSwitch("-c");
                 commandLine.AppendTextUnquoted(" \"");
-                commandLine.AppendTextUnquoted("export LANG=en_US.UTF-8; export LC_ALL=en_US.UTF-8; . ");
+                bool setLocale = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
+                if (setLocale)
+                {
+                    commandLine.AppendTextUnquoted("export LANG=en_US.UTF-8; export LC_ALL=en_US.UTF-8; ");
+                }
+                commandLine.AppendTextUnquoted(". ");
                 commandLine.AppendFileNameIfNotNull(batchFileForCommandLine);
                 commandLine.AppendTextUnquoted("\"");
             }

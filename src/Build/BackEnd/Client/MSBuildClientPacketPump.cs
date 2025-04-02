@@ -6,11 +6,13 @@ using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
-#if !FEATURE_APM
+
+#if NET
 using System.Threading.Tasks;
 #endif
+
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Client
 {
@@ -75,7 +77,7 @@ namespace Microsoft.Build.BackEnd.Client
 
         public MSBuildClientPacketPump(Stream stream)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(stream, nameof(stream));
+            ErrorUtilities.VerifyThrowArgumentNull(stream);
 
             _stream = stream;
             _isServerDisconnecting = false;
@@ -195,24 +197,25 @@ namespace Microsoft.Build.BackEnd.Client
 #if FEATURE_APM
                 IAsyncResult result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-                Task<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length);
+                Task<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
 #endif
 
                 bool continueReading = true;
                 do
                 {
-                    // Ordering of the wait handles is important. The first signalled wait handle in the array 
+                    // Ordering of the wait handles is important. The first signalled wait handle in the array
                     // will be returned by WaitAny if multiple wait handles are signalled. We prefer to have the
                     // terminate event triggered so that we cannot get into a situation where packets are being
                     // spammed to the client and it never gets an opportunity to shutdown.
-                    WaitHandle[] handles = new WaitHandle[] {
-                    localPacketPumpShutdownEvent,
+                    WaitHandle[] handles =
+                    [
+                        localPacketPumpShutdownEvent,
 #if FEATURE_APM
-                    result.AsyncWaitHandle
+                        result.AsyncWaitHandle
 #else
-                    ((IAsyncResult)readTask).AsyncWaitHandle
+                        ((IAsyncResult)readTask).AsyncWaitHandle
 #endif
-                    };
+                    ];
                     int waitId = WaitHandle.WaitAny(handles);
                     switch (waitId)
                     {
@@ -293,7 +296,7 @@ namespace Microsoft.Build.BackEnd.Client
 #if FEATURE_APM
                                     result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length);
+                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
 #endif
                                 }
                             }

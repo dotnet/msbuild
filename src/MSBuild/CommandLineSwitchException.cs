@@ -46,12 +46,15 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Serialization constructor
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         private CommandLineSwitchException(
             SerializationInfo info,
             StreamingContext context) :
             base(info, context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
+            ErrorUtilities.VerifyThrowArgumentNull(info);
 
             commandLineArg = info.GetString("commandLineArg");
         }
@@ -94,6 +97,9 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
 #endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {

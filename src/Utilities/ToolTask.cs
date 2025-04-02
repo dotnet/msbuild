@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     // INTERNAL WARNING: DO NOT USE the Log property in this class! Log points to resources in the task assembly itself, and
     // we want to use resources from Utilities. Use LogPrivate (for private Utilities resources) and LogShared (for shared MSBuild resources)
-    public abstract class ToolTask : Task, ICancelableTask
+    public abstract class ToolTask : Task, IIncrementalTask, ICancelableTask
     {
         private static readonly bool s_preserveTempFiles = string.Equals(Environment.GetEnvironmentVariable("MSBUILDPRESERVETOOLTEMPFILES"), "1", StringComparison.Ordinal);
 
@@ -150,6 +150,11 @@ namespace Microsoft.Build.Utilities
         private string _temporaryBatchFile;
 
         /// <summary>
+        /// The encoding set to the console code page.
+        /// </summary>
+        private Encoding _encoding;
+
+        /// <summary>
         /// Implemented by the derived class. Returns a string which is the name of the underlying .EXE to run e.g. "resgen.exe"
         /// Only used by the ToolExe getter.
         /// </summary>
@@ -229,7 +234,21 @@ namespace Microsoft.Build.Utilities
         /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
         /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
         /// </remarks>
-        protected virtual Encoding StandardOutputEncoding => EncodingUtilities.CurrentSystemOemEncoding;
+        protected virtual Encoding StandardOutputEncoding
+        {
+            get
+            {
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                {
+                    if (_encoding != null)
+                    {
+                        // Keep the encoding of standard output & error consistent with the console code page.
+                        return _encoding;
+                    }
+                }
+                return EncodingUtilities.CurrentSystemOemEncoding;
+            }
+        }
 
         /// <summary>
         /// Overridable property specifying the encoding of the captured task standard error stream
@@ -239,7 +258,21 @@ namespace Microsoft.Build.Utilities
         /// here since processes we run don't really have much to do with our console window (and also Console.OutputEncoding
         /// doesn't return the OEM code page if the running application that hosts MSBuild is not a console application).
         /// </remarks>
-        protected virtual Encoding StandardErrorEncoding => EncodingUtilities.CurrentSystemOemEncoding;
+        protected virtual Encoding StandardErrorEncoding
+        {
+            get
+            {
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                {
+                    if (_encoding != null)
+                    {
+                        // Keep the encoding of standard output & error consistent with the console code page.
+                        return _encoding;
+                    }
+                }
+                return EncodingUtilities.CurrentSystemOemEncoding;
+            }
+        }
 
         /// <summary>
         /// Gets the Path override value.
@@ -345,13 +378,29 @@ namespace Microsoft.Build.Utilities
         /// Implemented in the derived class
         /// </summary>
         /// <returns>true, if successful</returns>
-        protected internal virtual bool ValidateParameters() => true; // Default is no validation (ie. parameters are always valid, hence the true return value). This is useful for tools that don't need validation.
+        protected internal virtual bool ValidateParameters()
+        {
+            if (TaskProcessTerminationTimeout < -1)
+            {
+                Log.LogWarningWithCodeFromResources("ToolTask.InvalidTerminationTimeout", TaskProcessTerminationTimeout);
+                return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Returns true if task execution is not necessary. Executed after ValidateParameters
         /// </summary>
         /// <returns></returns>
-        protected virtual bool SkipTaskExecution() => false;
+        protected virtual bool SkipTaskExecution() { canBeIncremental = false; return false; }
+
+        /// <summary>
+        /// ToolTask is not incremental by default. When a derived class overrides SkipTaskExecution, then Question feature can take into effect.
+        /// </summary>
+        protected bool canBeIncremental { get; set; } = true;
+
+        public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
         /// Returns a string with those switches and other information that can go into a response file.
@@ -643,6 +692,19 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
+        /// We expect tasks to override this method if they need information about the tool process or its process events during task execution.
+        /// Implementation should make sure that the task is started in this method.
+        /// Starts the process during task execution.
+        /// </summary>
+        /// <param name="proc">Fully populated <see cref="Process"/> instance representing the tool process to be started.</param>
+        /// <returns>A started process. This could be <paramref name="proc"/> or another <see cref="Process"/> instance.</returns>
+        protected virtual Process StartToolProcess(Process proc)
+        {
+            proc.Start();
+            return proc;
+        }
+
+        /// <summary>
         /// Writes out a temporary response file and shell-executes the tool requested.  Enables concurrent
         /// logging of the output of the tool.
         /// </summary>
@@ -670,6 +732,7 @@ namespace Microsoft.Build.Utilities
             _standardOutputDataAvailable = new ManualResetEvent(false);
 
             _toolExited = new ManualResetEvent(false);
+            _terminatedTool = false;
             _toolTimeoutExpired = new ManualResetEvent(false);
 
             _eventsDisposed = false;
@@ -697,7 +760,7 @@ namespace Microsoft.Build.Utilities
                 ExitCode = -1;
 
                 // Start the process
-                proc.Start();
+                proc = StartToolProcess(proc);
 
                 // Close the input stream. This is done to prevent commands from
                 // blocking the build waiting for input from the user.
@@ -794,9 +857,11 @@ namespace Microsoft.Build.Utilities
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(fileName);
+
                 // Warn only -- occasionally temp files fail to delete because of virus checkers; we
                 // don't want the build to fail in such cases
-                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", fileName, e.Message);
+                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", fileName, e.Message, lockedFileMessage);
             }
         }
 
@@ -937,7 +1002,7 @@ namespace Microsoft.Build.Utilities
                     LogShared.LogWarningWithCodeFromResources("Shared.KillingProcessByCancellation", processName);
                 }
 
-                int timeout = 5000;
+                int timeout = TaskProcessTerminationTimeout >= -1 ? TaskProcessTerminationTimeout : 5000;
                 string timeoutFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTOOLTASKCANCELPROCESSWAITTIMEOUT");
                 if (timeoutFromEnvironment != null)
                 {
@@ -1109,7 +1174,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.EventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ReceiveExitNotification(object sender, EventArgs e)
+        protected void ReceiveExitNotification(object sender, EventArgs e)
         {
             ErrorUtilities.VerifyThrow(_toolExited != null,
                 "The signalling event for tool exit must be available.");
@@ -1132,7 +1197,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.Diagnostics.DataReceivedEventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ReceiveStandardErrorData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardErrorData, _standardErrorDataAvailable);
+        protected void ReceiveStandardErrorData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardErrorData, _standardErrorDataAvailable);
 
         /// <summary>
         /// Queues up the output from the stdout stream of the process executing
@@ -1143,7 +1208,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.Diagnostics.DataReceivedEventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ReceiveStandardOutputData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardOutputData, _standardOutputDataAvailable);
+        protected void ReceiveStandardOutputData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardOutputData, _standardOutputDataAvailable);
 
         /// <summary>
         /// Queues up the output from either the stderr or stdout stream of the
@@ -1324,6 +1389,11 @@ namespace Microsoft.Build.Utilities
                     // doing any actual work).
                     return true;
                 }
+                else if (canBeIncremental && FailIfNotIncremental)
+                {
+                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.NotUpToDate");
+                    return false;
+                }
 
                 string commandLineCommands = GenerateCommandLineCommands();
                 // If there are response file commands, then we need a response file later.
@@ -1382,10 +1452,14 @@ namespace Microsoft.Build.Utilities
                         }
 
                         File.AppendAllText(_temporaryBatchFile, commandLineCommands, encoding);
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                        {
+                            _encoding = encoding;
+                        }
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 
-                        // If for some crazy reason the path has a & character and a space in it
+                        // If for some reason the path has a & character and a space in it
                         // then get the short path of the temp path, which should not have spaces in it
                         // and then escape the &
                         if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))

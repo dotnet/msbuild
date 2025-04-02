@@ -6,7 +6,15 @@ param(
   [Parameter(Mandatory=$true)][string] $SourcelinkCliVersion    # Version of SourceLink CLI to use
 )
 
-. $PSScriptRoot\post-build-utils.ps1
+$ErrorActionPreference = 'Stop'
+Set-StrictMode -Version 2.0
+
+# `tools.ps1` checks $ci to perform some actions. Since the post-build
+# scripts don't necessarily execute in the same agent that run the
+# build.ps1/sh script this variable isn't automatically set.
+$ci = $true
+$disableConfigureToolsetImport = $true
+. $PSScriptRoot\..\tools.ps1
 
 # Cache/HashMap (File -> Exist flag) used to consult whether a file exist 
 # in the repository at a specific commit point. This is populated by inserting
@@ -21,6 +29,11 @@ $RetryWaitTimeInSeconds = 30
 
 # Wait time between check for system load
 $SecondsBetweenLoadChecks = 10
+
+if (!$InputPath -or !(Test-Path $InputPath)){
+  Write-Host "No files to validate."
+  ExitWithExitCode 0
+}
 
 $ValidatePackage = {
   param( 

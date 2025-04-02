@@ -17,7 +17,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Delete files from disk.
     /// </summary>
-    public class Delete : TaskExtension, ICancelableTask
+    public class Delete : TaskExtension, ICancelableTask, IIncrementalTask
     {
         #region Properties
 
@@ -56,6 +56,12 @@ namespace Microsoft.Build.Tasks
         public int Retries { get; set; } = 0;
 
         #endregion
+
+        /// <summary>
+        /// Set question parameter to verify if this is incremental.
+        /// </summary>
+        /// <remarks></remarks>
+        public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
         /// Verify that the inputs are correct.
@@ -115,8 +121,15 @@ namespace Microsoft.Build.Tasks
                     {
                         if (FileSystems.Default.FileExists(file.ItemSpec))
                         {
-                            // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                            Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", file.ItemSpec);
+                            if (FailIfNotIncremental)
+                            {
+                                Log.LogWarningFromResources("Delete.DeletingFile", file.ItemSpec);
+                            }
+                            else
+                            {
+                                // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
+                                Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", file.ItemSpec);
+                            }
 
                             File.Delete(file.ItemSpec);
                         }
@@ -133,17 +146,18 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(file?.ItemSpec ?? string.Empty);
                         if (retries < Retries)
                         {
                             retries++;
-                            Log.LogWarningWithCodeFromResources("Delete.Retrying", file.ToString(), retries, RetryDelayMilliseconds, e.Message);
+                            Log.LogWarningWithCodeFromResources("Delete.Retrying", file.ToString(), retries, RetryDelayMilliseconds, e.Message, lockedFileMessage);
 
                             Thread.Sleep(RetryDelayMilliseconds);
                             continue;
                         }
                         else
                         {
-                            LogError(file, e);
+                            LogError(file, e, lockedFileMessage);
                             // Add on failure to avoid reattempting
                             deletedFilesSet.Add(file.ItemSpec);
                         }
@@ -160,15 +174,16 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="file">The file that wasn't deleted.</param>
         /// <param name="e">The exception.</param>
-        private void LogError(ITaskItem file, Exception e)
+        /// <param name="lockedFileMessage">Message from <see cref="LockCheck"/>.</param>
+        private void LogError(ITaskItem file, Exception e, string lockedFileMessage)
         {
             if (TreatErrorsAsWarnings)
             {
-                Log.LogWarningWithCodeFromResources("Delete.Error", file.ItemSpec, e.Message);
+                Log.LogWarningWithCodeFromResources("Delete.Error", file.ItemSpec, e.Message, lockedFileMessage);
             }
             else
             {
-                Log.LogErrorWithCodeFromResources("Delete.Error", file.ItemSpec, e.Message);
+                Log.LogErrorWithCodeFromResources("Delete.Error", file.ItemSpec, e.Message, lockedFileMessage);
             }
         }
 

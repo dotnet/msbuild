@@ -9,8 +9,11 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading;
+using System.Xml.Linq;
 using Microsoft.Build.CommandLine;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
@@ -523,6 +526,91 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void VersionSwitch()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            // Ensure Change Wave 17.10 is enabled.
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+            List<string> cmdLine = new()
+            {
+#if !FEATURE_RUN_EXE_IN_TESTS
+                EnvironmentProvider.GetDotnetExePath(),
+#endif
+                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
+                "-nologo",
+                "-version"
+            };
+
+            using Process process = new()
+            {
+                StartInfo =
+                {
+                    FileName = cmdLine[0],
+                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                },
+            };
+
+            process.Start();
+            process.WaitForExit();
+            process.ExitCode.ShouldBe(0);
+
+            string output = process.StandardOutput.ReadToEnd();
+            output.EndsWith(Environment.NewLine).ShouldBeTrue();
+
+            process.Close();
+        }
+
+        /// <summary>
+        /// PR: Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
+        /// </summary>
+        [Fact]
+        public void VersionSwitchDisableChangeWave()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            // Disable Change Wave 17.10
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+            List<string> cmdLine = new()
+            {
+#if !FEATURE_RUN_EXE_IN_TESTS
+                EnvironmentProvider.GetDotnetExePath(),
+#endif
+                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
+                "-nologo",
+                "-version"
+            };
+
+            using Process process = new()
+            {
+                StartInfo =
+                {
+                    FileName = cmdLine[0],
+                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                },
+            };
+
+            process.Start();
+            process.WaitForExit();
+            process.ExitCode.ShouldBe(0);
+
+            string output = process.StandardOutput.ReadToEnd();
+            output.EndsWith(Environment.NewLine).ShouldBeFalse();
+
+            process.Close();
+        }
+
+        [Fact]
         public void ErrorCommandLine()
         {
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
@@ -565,6 +653,7 @@ namespace Microsoft.Build.UnitTests
                 MSBuildApp.ProcessVerbositySwitch("loquacious");
             });
         }
+
         [Fact]
         public void ValidMaxCPUCountSwitch()
         {
@@ -616,6 +705,173 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
+        [Fact]
+        public void GetPropertyWithInvalidProjectThrowsInvalidProjectFileExceptionNotInternalError()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", "Project");
+            string result = RunnerUtilities.ExecMSBuild($" {project.Path} -getProperty:Foo", out bool success);
+            success.ShouldBeFalse();
+            result.ShouldContain("MSB4025");
+            result.ShouldNotContain("MSB1025");
+        }
+
+        [Theory]
+        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, true, false)]
+        [InlineData("-getItem:MyItem", false, "", true, false, false, true, false)]
+        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, true, false)]
+        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, true, false)]
+        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, true, false)]
+        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, false, false)]
+        [InlineData("-getItem:MyItem", false, "", true, false, false, false, false)]
+        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, false, false)]
+        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, false, false)]
+        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, false, false)]
+        [InlineData("-getTargetResult:Restore", false, "", false, false, false, false, true)]
+        public void ExecuteAppWithGetPropertyItemAndTargetResult(
+            string extraSwitch,
+            bool fooPresent,
+            string fooResult,
+            bool itemIncludesAlwaysThere,
+            bool itemIncludesTargetItem,
+            bool targetResultPresent,
+            bool isGraphBuild,
+            bool restoreOnly)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+
+  <PropertyGroup>
+    <Foo>EvalValue</Foo>
+    <Baz>InnocuousValue</Baz>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MyItem Include=""itemAlwaysThere"" Metadatum=""metadatumValue"" />
+  </ItemGroup>
+
+  <Target Name=""MyTarget"" BeforeTargets=""Build"">
+    <PropertyGroup>
+      <Foo>TargetValue</Foo>
+    </PropertyGroup>
+    <ItemGroup>
+      <MyItem Include=""targetItem"" Metadato=""OtherMetadatum"" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name=""Build"">
+
+  </Target>
+
+  <Target Name=""Restore"">
+
+  </Target>
+
+</Project>
+");
+            string graph = isGraphBuild ? "--graph" : "";
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} {graph}", out bool success);
+            success.ShouldBeTrue(results);
+            if (fooPresent)
+            {
+                results.ShouldContain($"\"Foo\": \"{fooResult}\"");
+                results.ShouldContain("\"Bar\": \"\"");
+            }
+
+            results.ShouldNotContain("InnocuousValue");
+
+            results.Contains("itemAlwaysThere").ShouldBe(itemIncludesAlwaysThere);
+            results.Contains("targetItem").ShouldBe(itemIncludesTargetItem);
+
+            results.Contains("MyTarget").ShouldBe(targetResultPresent);
+            results.Contains("\"Result\": \"Success\"").ShouldBe(targetResultPresent || restoreOnly);
+            results.ShouldNotContain(ResourceUtilities.GetResourceString("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
+        }
+
+        [Fact]
+        public void BuildFailsWithBadPropertyName()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <Target Name=""Build"">
+  </Target>
+</Project>
+");
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} /p:someProperty:fdalse= ", out bool success);
+            success.ShouldBeFalse(results);
+
+            results.ShouldContain("error MSB4177");
+        }
+
+        [Theory]
+        [InlineData("-getProperty:Foo", "propertyContent")]
+        [InlineData("-getItem:Bar", "ItemContent")]
+        [InlineData("-getTargetResult:Biz", "Success")]
+        public void GetStarOutputsToFileIfRequested(string extraSwitch, string result)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <PropertyGroup>
+    <Foo>propertyContent</Foo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Bar Include=""ItemContent"" />
+  </ItemGroup>
+
+  <Target Name=""Biz"" />
+</Project>
+");
+            string resultFile = env.GetTempFile(".tmp").Path;
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} -getResultOutputFile:{resultFile}", out bool success);
+            success.ShouldBeTrue();
+            File.Exists(resultFile).ShouldBeTrue();
+            File.ReadAllText(resultFile).ShouldContain(result);
+
+            result = RunnerUtilities.ExecMSBuild($" {project.Path} {extraSwitch} -getResultOutputFile:", out success);
+            success.ShouldBeFalse();
+            result.ShouldContain("MSB1068");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void BuildFailsWithCompileErrorAndRestore(bool isGraphBuild)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <ItemGroup>
+    <CSFile Include=""Program.cs""/>
+  </ItemGroup>
+
+  <Target Name=""Build"">
+    <Csc Sources=""@(CSFile)"" />
+  </Target>
+</Project>
+        ");
+            TransientTestFile wrongSyntaxFile = env.CreateFile("Program.cs", @"
+            Console.WriteLine(""Hello, World!"")
+            A Line here for this to not compile right");
+
+            string graph = isGraphBuild ? "--graph" : "";
+            string result = RunnerUtilities.ExecMSBuild($" {project.Path} /restore {graph}", out bool success);
+
+            success.ShouldBeFalse();
+            result.ShouldContain("Program.cs(2,47): error CS1002: ; expected");
+            result.ShouldContain("Program.cs(3,20): error CS1003: Syntax error, ','");
+            result.ShouldContain("Program.cs(3,54): error CS1002: ; expected");
+        }
+
         /// <summary>
         /// Regression test for bug where the MSBuild.exe command-line app
         /// would sometimes set the UI culture to just "en" which is considered a "neutral" UI
@@ -640,7 +896,75 @@ namespace Microsoft.Build.UnitTests
 
             // Restore the current UI culture back to the way it was at the beginning of this unit test.
             thisThread.CurrentUICulture = originalUICulture;
+            MSBuildApp.SetConsoleUI();
         }
+
+
+        [Fact]
+        public void ConsoleUIRespectsSDKLanguage()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
+            {
+                return; // The feature to detect .NET SDK Languages is not enabled on this machine, so don't test it.
+            }
+
+            const string DOTNET_CLI_UI_LANGUAGE = nameof(DOTNET_CLI_UI_LANGUAGE);
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            // Save the current environment info so it can be restored.
+            var originalUILanguage = Environment.GetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE);
+
+            var originalOutputEncoding = Console.OutputEncoding;
+            var originalInputEncoding = Console.InputEncoding;
+            Thread thisThread = Thread.CurrentThread;
+            CultureInfo originalUICulture = thisThread.CurrentUICulture;
+
+            try
+            {
+                // Set the UI language based on the SDK environment var.
+                testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, "ja"); // Japanese chose arbitrarily.
+                MSBuildApp.SetConsoleUI();
+
+                Assert.Equal(new CultureInfo("ja"), thisThread.CurrentUICulture);
+                Assert.Equal(65001, Console.OutputEncoding.CodePage); // UTF-8 enabled for correct rendering.
+            }
+            finally
+            {
+                // Restore the current UI culture back to the way it was at the beginning of this unit test.
+                thisThread.CurrentUICulture = originalUICulture;
+                // Restore for full framework
+                CultureInfo.CurrentCulture = originalUICulture;
+                CultureInfo.DefaultThreadCurrentUICulture = originalUICulture;
+
+                // MSBuild should also restore the encoding upon exit, but we don't create that context here.
+                Console.OutputEncoding = originalOutputEncoding;
+                Console.InputEncoding = originalInputEncoding;
+
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+            }
+        }
+
+        /// <summary>
+        /// We shouldn't change the UI culture if the current UI culture is invariant.
+        /// In other cases, we can get an exception on CultureInfo creation when System.Globalization.Invariant enabled.
+        /// </summary>
+        [Fact]
+        public void SetConsoleUICultureInInvariantCulture()
+        {
+            Thread thisThread = Thread.CurrentThread;
+
+            // Save the current UI culture, so we can restore it at the end of this unit test.
+            CultureInfo originalUICulture = thisThread.CurrentUICulture;
+
+            thisThread.CurrentUICulture = CultureInfo.InvariantCulture;
+            MSBuildApp.SetConsoleUI();
+
+            // Make sure we don't change culture.
+            thisThread.CurrentUICulture.ShouldBe(CultureInfo.InvariantCulture);
+
+            // Restore the current UI culture back to the way it was at the beginning of this unit test.
+            thisThread.CurrentUICulture = originalUICulture;
+        }
+
 
 #if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
@@ -662,8 +986,8 @@ namespace Microsoft.Build.UnitTests
                 var msbuildExeName = Path.GetFileName(RunnerUtilities.PathToCurrentlyRunningMsBuildExe);
                 var newPathToMSBuildExe = Path.Combine(startDirectory, msbuildExeName);
                 var pathToConfigFile = Path.Combine(startDirectory, msbuildExeName + ".config");
-
-                string configContent = @"<?xml version =""1.0""?>
+                XElement configRuntimeElement = XDocument.Load(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + ".config").Root.Element("runtime");
+                string configContent = $@"<?xml version =""1.0""?>
                                             <configuration>
                                                 <configSections>
                                                     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"" />
@@ -683,6 +1007,7 @@ namespace Microsoft.Build.UnitTests
                                                 <foo/>
                                                 </msbuildToolsets>
                                                 <foo/>
+                                                {configRuntimeElement}
                                             </configuration>";
                 File.WriteAllText(pathToConfigFile, configContent);
 
@@ -798,6 +1123,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MSBuildEngineLogger()
         {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en"); // build machines may have other values.
+            CultureInfo.CurrentUICulture = new CultureInfo("en"); // Validate that the thread will produce an english log regardless of the machine OS language
+
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
             string projectString =
                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
@@ -833,6 +1162,8 @@ namespace Microsoft.Build.UnitTests
                 File.Exists(logFile).ShouldBeTrue();
 
                 var logFileContents = File.ReadAllText(logFile);
+
+                Assert.Equal(new CultureInfo("en"), Thread.CurrentThread.CurrentUICulture);
 
                 logFileContents.ShouldContain("Process = ");
                 logFileContents.ShouldContain("MSBuild executable path = ");
@@ -969,33 +1300,15 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryExplicit()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, AutoResponseFileName);
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile(AutoResponseFileName, "/p:A=1");
+            var msbuildParameters = "\"" + projectPath + "\"";
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
 
-            try
-            {
-                Directory.CreateDirectory(directory);
-
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
-
-                string rspContent = "/p:A=1";
-                File.WriteAllText(rspPath, rspContent);
-
-                var msbuildParameters = "\"" + projectPath + "\"";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=1]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=1]");
         }
 
         /// <summary>
@@ -1004,33 +1317,17 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryRandomName()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, "foo.rsp");
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile("foo.rsp", "/p:A=1");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            var msbuildParameters = "\"" + projectPath + "\"";
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
 
-                string rspContent = "/p:A=1";
-                File.WriteAllText(rspPath, rspContent);
-
-                var msbuildParameters = "\"" + projectPath + "\"";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=]");
         }
 
         /// <summary>
@@ -1040,33 +1337,18 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryCommandLineWins()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, AutoResponseFileName);
+            var directory = _env.CreateFolder();
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile(AutoResponseFileName, "/p:A=1");
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            var msbuildParameters = "\"" + projectPath + "\"" + " /p:A=2";
 
-                string rspContent = "/p:A=1";
-                File.WriteAllText(rspPath, rspContent);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
 
-                var msbuildParameters = "\"" + projectPath + "\"" + " /p:A=2";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=2]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=2]");
         }
 
         /// <summary>
@@ -1153,33 +1435,17 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryItselfWithNoAutoResponseSwitch()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, AutoResponseFileName);
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile(AutoResponseFileName, "/p:A=1 /noautoresponse");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            var msbuildParameters = "\"" + projectPath + "\"";
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeFalse();
 
-                string rspContent = "/p:A=1 /noautoresponse";
-                File.WriteAllText(rspPath, rspContent);
-
-                var msbuildParameters = "\"" + projectPath + "\"";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeFalse();
-
-                output.ShouldContain("MSB1027"); // msbuild.rsp cannot have /noautoresponse in it
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("MSB1027"); // msbuild.rsp cannot have /noautoresponse in it
         }
 
         /// <summary>
@@ -1188,33 +1454,33 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryButCommandLineNoAutoResponseSwitch()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
-            string rspPath = Path.Combine(directory, AutoResponseFileName);
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            directory.CreateFile(AutoResponseFileName, "/p:A=1 /noautoresponse");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            var msbuildParameters = "\"" + projectPath + "\" /noautoresponse";
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
+            output.ShouldContain("[A=]");
+        }
 
-                string rspContent = "/p:A=1 /noautoresponse";
-                File.WriteAllText(rspPath, rspContent);
+        /// <summary>
+        /// Directory.Build.rsp in the directory of the specified project/solution should be respected when searching the files (solution/proj) to build.
+        /// </summary>
+        [Fact]
+        public void ResponseFileInProjectDirectoryWithSolutionProjectDifferentNamesShouldBeRespected()
+        {
+            var directory = _env.CreateFolder();
+            var content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Completed'/></Target></Project>");
+            directory.CreateFile("projectFile.proj", content);
+            directory.CreateFile("solutionFile.sln", string.Empty);
+            directory.CreateFile("Directory.Build.rsp", "-ignoreProjectExtensions:.sln");
 
-                var msbuildParameters = "\"" + projectPath + "\" /noautoresponse";
-
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                File.Delete(rspPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            var msbuildParameters = "\"" + directory.Path + "\"";
+            RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
         }
 
         /// <summary>
@@ -1224,28 +1490,17 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFileInProjectDirectoryNullCase()
         {
-            string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
-            string projectPath = Path.Combine(directory, "my.proj");
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
 
-            try
-            {
-                Directory.CreateDirectory(directory);
+            var projectPath = directory.CreateFile("my.proj", content).Path;
 
-                string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
-                File.WriteAllText(projectPath, content);
+            var msbuildParameters = "\"" + projectPath + "\"";
 
-                var msbuildParameters = "\"" + projectPath + "\"";
+            string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
 
-                string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
-                successfulExit.ShouldBeTrue();
-
-                output.ShouldContain("[A=]");
-            }
-            finally
-            {
-                File.Delete(projectPath);
-                FileUtilities.DeleteWithoutTrailingBackslash(directory);
-            }
+            output.ShouldContain("[A=]");
         }
 
         /// <summary>
@@ -1314,8 +1569,7 @@ namespace Microsoft.Build.UnitTests
 
             string logContents = ExecuteMSBuildExeExpectSuccess(contents, envsToCreate: environmentVars, arguments: aggregateArguments);
 
-            string expected = $@"Task priority is '{expectedPrority}'";
-            logContents.ShouldContain(expected, () => logContents);
+            logContents.ShouldContain($@"Task priority is '{expectedPrority}'", customMessage: logContents);
         }
 
         /// <summary>
@@ -1323,8 +1577,10 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         [Theory]
         [InlineData(new[] { "my.proj", "my.sln", "my.slnf" }, "my.sln")]
+        [InlineData(new[] { "my.proj", "my.slnx", "my.slnf" }, "my.slnx")]
         [InlineData(new[] { "abc.proj", "bcd.csproj", "slnf.slnf", "other.slnf" }, "abc.proj")]
         [InlineData(new[] { "abc.sln", "slnf.slnf", "abc.slnf" }, "abc.sln")]
+        [InlineData(new[] { "abc.slnx", "slnf.slnf", "abc.slnf" }, "abc.slnx")]
         [InlineData(new[] { "abc.csproj", "abc.slnf", "not.slnf" }, "abc.csproj")]
         [InlineData(new[] { "abc.slnf" }, "abc.slnf")]
         public void TestDefaultBuildWithSolutionFilter(string[] projects, string answer)
@@ -1470,10 +1726,20 @@ namespace Microsoft.Build.UnitTests
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
 
+            projects = new[] { "test.proj", "test.slnx" };
+            extensionsToIgnore = new[] { ".vcproj" };
+            projectHelper = new IgnoreProjectExtensionsHelper(projects);
+            MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.slnx", StringCompareShould.IgnoreCase); // "Expected test.slnx to be only solution found"
+
             projects = new[] { "test.proj", "test.sln", "test.proj~", "test.sln~" };
             extensionsToIgnore = Array.Empty<string>();
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
+
+            projects = new[] { "test.proj", "test.slnx", "test.proj~", "test.sln~" };
+            extensionsToIgnore = Array.Empty<string>();
+            projectHelper = new IgnoreProjectExtensionsHelper(projects);
+            MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.slnx", StringCompareShould.IgnoreCase); // "Expected test.slnx to be only solution found"
 
             projects = new[] { "test.proj" };
             extensionsToIgnore = Array.Empty<string>();
@@ -1489,6 +1755,12 @@ namespace Microsoft.Build.UnitTests
             extensionsToIgnore = Array.Empty<string>();
             projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.sln", StringCompareShould.IgnoreCase); // "Expected test.sln to be only solution found"
+
+            projects = new[] { "test.slnx" };
+            extensionsToIgnore = Array.Empty<string>();
+            projectHelper = new IgnoreProjectExtensionsHelper(projects);
+            MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.slnx", StringCompareShould.IgnoreCase); // "Expected test.slnx to be only solution found"
+
 
             projects = new[] { "test.sln", "test.sln~" };
             extensionsToIgnore = Array.Empty<string>();
@@ -1542,6 +1814,21 @@ namespace Microsoft.Build.UnitTests
             });
         }
         /// <summary>
+        /// Test the case where there is a .slnx and a project in the same directory but they have different names
+        /// </summary>
+        [Fact]
+        public void TestProcessProjectSwitchSlnxProjDifferentNames()
+        {
+            string[] projects = ["test.proj", "Different.slnx"];
+            string[] extensionsToIgnore = null;
+
+            Should.Throw<InitializationException>(() =>
+            {
+                IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
+                MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
+            });
+        }
+        /// <summary>
         /// Test the case where we have two proj files in the same directory
         /// </summary>
         [Fact]
@@ -1579,6 +1866,33 @@ namespace Microsoft.Build.UnitTests
             {
                 string[] projects = { "test.sln", "Different.sln" };
                 string[] extensionsToIgnore = null;
+                IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
+                MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
+            });
+        }
+        /// <summary>
+        /// Test when there are two solutions in the same directory - .sln and .slnx
+        /// </summary>
+        [Fact]
+        public void TestProcessProjectSwitchSlnAndSlnx()
+        {
+            string[] projects = ["test.slnx", "Different.sln"];
+            string[] extensionsToIgnore = null;
+
+            Should.Throw<InitializationException>(() =>
+            {
+                IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
+                MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
+            });
+        }
+        [Fact]
+        public void TestProcessProjectSwitchTwoSlnx()
+        {
+            string[] projects = ["test.slnx", "Different.slnx"];
+            string[] extensionsToIgnore = null;
+
+            Should.Throw<InitializationException>(() =>
+            {
                 IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
             });
@@ -1625,7 +1939,7 @@ namespace Microsoft.Build.UnitTests
             internal IgnoreProjectExtensionsHelper(string[] filesInDirectory)
             {
                 _directoryFileNameList = new List<string>();
-                foreach (string file in filesInDirectory)
+                foreach (var file in filesInDirectory)
                 {
                     _directoryFileNameList.Add(file);
                 }
@@ -1643,7 +1957,7 @@ namespace Microsoft.Build.UnitTests
                 List<string> fileNamesToReturn = new List<string>();
                 foreach (string file in _directoryFileNameList)
                 {
-                    if (string.Equals(searchPattern, "*.sln", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(searchPattern, "*.sln?", StringComparison.OrdinalIgnoreCase))
                     {
                         if (FileUtilities.IsSolutionFilename(file))
                         {
@@ -1726,9 +2040,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -1747,9 +2059,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected one distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -1768,9 +2078,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected a central loggers to be attached"
 
@@ -1782,9 +2090,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
 
@@ -1795,9 +2101,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -1816,9 +2120,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -1831,9 +2133,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"{fileLoggerParameters[0]};logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -1846,9 +2146,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"{fileLoggerParameters[0]};logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -1861,9 +2159,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($";Parameter1;logFile={Path.Combine(Directory.GetCurrentDirectory(), "MSBuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -1876,9 +2172,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe(fileLoggerParameters[0] + ";" + fileLoggerParameters[1], StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -1889,9 +2183,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
             distributedLoggerRecords.Count.ShouldBe(1); // "Expected a distributed logger to be attached"
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"Parameter1;verbosity=Normal;logFile={Path.Combine(Directory.GetCurrentDirectory(), "..", "cat.log")};Parameter1", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
@@ -1902,9 +2194,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           2);
+                           distributedLoggerRecords);
             distributedLoggerRecords[0].ForwardingLoggerDescription.LoggerSwitchParameters.ShouldBe($"Parameter1;Parameter;;;Parameter;Parameter;logFile={Path.Combine(Directory.GetCurrentDirectory(), "msbuild.log")}", StringCompareShould.IgnoreCase); // "Expected parameter in logger to match parameter passed in"
         }
 
@@ -1922,9 +2212,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessDistributedFileLogger(
                            distributedFileLogger,
                            fileLoggerParameters,
-                           distributedLoggerRecords,
-                           loggers,
-                           1);
+                           distributedLoggerRecords);
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
@@ -2173,18 +2461,18 @@ $@"<Project>
 
             string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/t:Target1 /t:Target2");
 
-            logContents.ShouldContain("7514CB1641A948D0A3930C5EC2DC1940", () => logContents);
-            logContents.ShouldContain("E2C73B5843F94B63B067D9BEB2C4EC52", () => logContents);
+            logContents.ShouldContain("7514CB1641A948D0A3930C5EC2DC1940", customMessage: logContents);
+            logContents.ShouldContain("E2C73B5843F94B63B067D9BEB2C4EC52", customMessage: logContents);
         }
 
         [Theory]
-        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-logger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC")]
-        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-distributedlogger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo")]
-        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC")]
-        public void MissingOptionalLoggersAreIgnored(string logger)
+        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional;Foo", "nonExistentLogger.dll")]
+        [InlineData("-logger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo", "ClassA")]
+        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC", "nonExistentLogger.dll")]
+        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional;Foo", "nonExistentLogger.dll")]
+        [InlineData("-distributedlogger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo", "ClassA")]
+        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC", "nonExistentLogger.dll")]
+        public void MissingOptionalLoggersAreIgnored(string logger, string expectedLoggerName)
         {
             string projectString =
                 "<Project>" +
@@ -2197,8 +2485,8 @@ $@"<Project>
 
             var output = RunnerUtilities.ExecMSBuild(parametersLoggerOptional, out bool successfulExit, _output);
             successfulExit.ShouldBe(true);
-            output.ShouldContain("Hello", output);
-            output.ShouldContain("The specified logger could not be created and will not be used.", output);
+            output.ShouldContain("Hello", customMessage: output);
+            output.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created and will not be used.", customMessage: output);
         }
 
         [Theory]
@@ -2349,16 +2637,64 @@ EndGlobal
         }
 
         [Theory]
+        [InlineData("", true)]
+        [InlineData("/tl:true", false)]
+        [InlineData("/nologo", false)]
+        [InlineData("/getProperty:p", false)]
+        public void EndToEndVersionMessage(string arguments, bool shouldContainVersionMessage)
+        {
+            using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
+
+            string projectContents = ObjectModelHelpers.CleanupFileContents("""
+                                                                            <Project>
+                                                                                <Target Name="Hello">
+                                                                                </Target>
+                                                                            </Project>
+                                                                            """);
+
+            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
+
+            string output = RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, _output);
+            success.ShouldBeTrue();
+
+            string expectedVersionString =
+                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildVersionMessage",
+                    ProjectCollection.DisplayVersion, NativeMethodsShared.FrameworkName);
+
+            if (shouldContainVersionMessage)
+            {
+                output.ShouldContain(expectedVersionString);
+            }
+            else
+            {
+                output.ShouldNotContain(expectedVersionString);
+            }
+        }
+
+        [Theory]
         [InlineData("/v:diagnostic", MessageImportance.Low)]
         [InlineData("/v:detailed", MessageImportance.Low)]
         [InlineData("/v:normal", MessageImportance.Normal)]
         [InlineData("/v:minimal", MessageImportance.High)]
         [InlineData("/v:quiet", MessageImportance.High - 1)]
+
         [InlineData("/v:diagnostic /bl", MessageImportance.Low)]
         [InlineData("/v:detailed /bl", MessageImportance.Low)]
         [InlineData("/v:normal /bl", MessageImportance.Low)] // v:normal but with binary logger so everything must be logged
         [InlineData("/v:minimal /bl", MessageImportance.Low)] // v:minimal but with binary logger so everything must be logged
         [InlineData("/v:quiet /bl", MessageImportance.Low)] // v:quiet but with binary logger so everything must be logged
+
+        [InlineData("/v:diagnostic /check", MessageImportance.Low)]
+        [InlineData("/v:detailed /check", MessageImportance.Low)]
+        [InlineData("/v:normal /check", MessageImportance.Normal)]
+        [InlineData("/v:minimal /check", MessageImportance.High)]
+        [InlineData("/v:quiet /check", MessageImportance.High)]
+
+        [InlineData("/v:diagnostic /tl", MessageImportance.Low)]
+        [InlineData("/v:detailed /tl", MessageImportance.Low)]
+        [InlineData("/v:normal /tl", MessageImportance.Normal)]
+        [InlineData("/v:minimal /tl", MessageImportance.High)]
+        [InlineData("/v:quiet /tl", MessageImportance.High - 1)]
         public void EndToEndMinimumMessageImportance(string arguments, MessageImportance expectedMinimumMessageImportance)
         {
             using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
@@ -2463,7 +2799,7 @@ EndGlobal
         {
             (bool result, string output) = ExecuteMSBuildExe(projectContents, filesToCreate, envsToCreate, arguments);
 
-            result.ShouldBeTrue(() => output);
+            result.ShouldBeTrue(output);
 
             return output;
         }
@@ -2472,7 +2808,7 @@ EndGlobal
         {
             (bool result, string output) = ExecuteMSBuildExe(projectContents, filesToCreate, envsToCreate, arguments);
 
-            result.ShouldBeFalse(() => output);
+            result.ShouldBeFalse(output);
 
             return output;
         }

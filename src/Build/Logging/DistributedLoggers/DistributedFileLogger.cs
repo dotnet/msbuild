@@ -68,7 +68,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void ApplyFileLoggerParameter(string parameterName, string parameterValue)
         {
-            if (String.Equals("LOGFILE", parameterName, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals("LOGFILE", parameterName, StringComparison.OrdinalIgnoreCase))
             {
                 if (string.IsNullOrEmpty(parameterValue))
                 {
@@ -94,16 +94,17 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
+            ErrorUtilities.VerifyThrowArgumentNull(eventSource);
             ParseFileLoggerParameters();
             string fileName = _logFile;
+
             try
             {
                 // Create a new file logger and pass it some parameters to make the build log very detailed
                 _nodeFileLogger = new FileLogger();
                 string extension = Path.GetExtension(_logFile);
                 // If there is no extension add a default of .log to it
-                if (String.IsNullOrEmpty(extension))
+                if (string.IsNullOrEmpty(extension))
                 {
                     _logFile += ".log";
                     extension = ".log";
@@ -112,7 +113,7 @@ namespace Microsoft.Build.Logging
                 // but avoids confusion by being consistent with the Engine and any error messages it may produce.
                 fileName = _logFile.Replace(extension, _nodeId + extension);
                 _nodeFileLogger.Verbosity = LoggerVerbosity.Detailed;
-                _nodeFileLogger.Parameters = "ShowEventId;ShowCommandLine;logfile=" + fileName + ";" + _parameters;
+                _nodeFileLogger.Parameters = $"ShowEventId;ShowCommandLine;logfile={fileName};{_parameters}";
             }
             catch (ArgumentException e) // Catching Exception, but rethrowing unless it's a well-known exception.
             {
@@ -214,7 +215,7 @@ namespace Microsoft.Build.Logging
         #region Data
         // The file logger which will do the actual logging of the node's build output
         private FileLogger _nodeFileLogger;
-        // Reference for the central logger 
+        // Reference for the central logger
         private IEventRedirector _buildEventRedirector;
         // The Id of the node the forwardingLogger is attached to
         private int _nodeId;

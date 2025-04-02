@@ -11,7 +11,6 @@ using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -70,7 +69,7 @@ namespace Microsoft.Build.Graph.UnitTests
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
 
             _logger.FullLog.ShouldContain("MSB4256:");
-            _logger.AllBuildEvents.Count.ShouldBe(4);
+            _logger.AllBuildEvents.Count.ShouldBe(6);
             _logger.ErrorCount.ShouldBe(1);
         }
 
@@ -356,13 +355,13 @@ namespace Microsoft.Build.Graph.UnitTests
 
             deserializationInfo.exception.ShouldBeNull();
 
-            var buildResults = deserializationInfo.ResultsCache.GetEnumerator().ToArray();
+            var buildResults = deserializationInfo.ResultsCache.ToArray();
             buildResults.ShouldHaveSingleItem();
 
             var rootNodeBuildResult = buildResults.First();
             rootNodeBuildResult.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ToArray().ShouldBe(expectedOutput[rootNode]);
 
-            var configEntries = deserializationInfo.ConfigCache.GetEnumerator().ToArray();
+            var configEntries = deserializationInfo.ConfigCache.ToArray();
             configEntries.ShouldHaveSingleItem();
 
             configEntries.First().ConfigurationId.ShouldBe(rootNodeBuildResult.ConfigurationId);
@@ -408,7 +407,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// This method runs in two modes.
         /// When <param name="generateCacheFiles"></param> is true, the method will fill in the empty <param name="outputCaches"/> and <param name="expectedNodeBuildOutput"/>, simulating a build from scratch.
         /// When it is false, it uses the filled in <param name="outputCaches"/> and <param name="expectedNodeBuildOutput"/> to simulate a fully cached build.
-        /// 
+        ///
         /// </summary>
         /// <param name="env">The test environment under which to run.</param>
         /// <param name="topoSortedNodes"></param>
@@ -533,7 +532,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                 ? $"Targets='{explicitTargets}'"
                                 : string.Empty)}
                             >
-                            <Output TaskParameter='TargetOutputs' ItemName='i' />  
+                            <Output TaskParameter='TargetOutputs' ItemName='i' />
                         </MSBuild>
                     </Target>");
 
@@ -566,7 +565,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
 
-            _logger.AllBuildEvents.Count.ShouldBe(4);
+            _logger.AllBuildEvents.Count.ShouldBe(6);
             _logger.Errors.First().Message.ShouldContain("MSB4255:");
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist1");
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist2");

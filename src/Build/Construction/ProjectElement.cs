@@ -15,7 +15,7 @@ using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 namespace Microsoft.Build.Construction
 {
     /// <summary>
-    /// Abstract base class for MSBuild construction object model elements. 
+    /// Abstract base class for MSBuild construction object model elements.
     /// </summary>
     public abstract class ProjectElement : IProjectElement, ILinkableObject
     {
@@ -49,7 +49,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal ProjectElement(ProjectElementLink link)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(link, nameof(link));
+            ErrorUtilities.VerifyThrowArgumentNull(link);
 
             _xmlSource = link;
         }
@@ -60,8 +60,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal ProjectElement(XmlElement xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(xmlElement, nameof(xmlElement));
-            ErrorUtilities.VerifyThrowArgumentNull(containingProject, nameof(containingProject));
+            ErrorUtilities.VerifyThrowArgumentNull(xmlElement);
+            ErrorUtilities.VerifyThrowArgumentNull(containingProject);
 
             _xmlSource = (XmlElementWithLocation)xmlElement;
             _parent = parent;
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <remarks>
         /// If this is true, then the <see cref="XmlElement"/> will still be used to hold the data for this (pseudo) ProjectElement, but
-        /// it will not be added to the Xml tree.  
+        /// it will not be added to the Xml tree.
         /// </remarks>
         internal virtual bool ExpressedAsAttribute
         {
@@ -95,8 +95,8 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the Condition value. 
-        /// It will return empty string IFF a condition attribute is legal but it’s not present or has no value. 
+        /// Gets or sets the Condition value.
+        /// It will return empty string IFF a condition attribute is legal but it’s not present or has no value.
         /// It will return null IFF a Condition attribute is illegal on that element.
         /// Removes the attribute if the value to set is empty.
         /// It is possible for derived classes to throw an <see cref="InvalidOperationException"/> if setting the condition is
@@ -120,7 +120,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the Label value. 
+        /// Gets or sets the Label value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -164,7 +164,7 @@ namespace Microsoft.Build.Construction
 
             internal set
             {
-                ErrorUtilities.VerifyThrow(Link == null, "External project");
+                ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
                 if (value == null)
                 {
                     // We're about to lose the parent. Hijack the field to store the owning PRE.
@@ -261,7 +261,7 @@ namespace Microsoft.Build.Construction
             // ContainingProject is set ONLY when an element is first constructed.
             internal set
             {
-                ErrorUtilities.VerifyThrow(Link == null, "External project");
+                ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
                 ErrorUtilities.VerifyThrowArgumentNull(value, "ContainingProject");
 
                 if (_parent == null)
@@ -286,7 +286,7 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Location of the corresponding Xml element.
-        /// May not be correct if file is not saved, or 
+        /// May not be correct if file is not saved, or
         /// file has been edited since it was last saved.
         /// In the case of an unsaved edit, the location only
         /// contains the path to the file that the element originates from.
@@ -350,8 +350,8 @@ namespace Microsoft.Build.Construction
         /// <param name="element">The element to act as a template to copy from.</param>
         public virtual void CopyFrom(ProjectElement element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
-            ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), nameof(element));
+            ErrorUtilities.VerifyThrowArgumentNull(element);
+            ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), "CannotCopyFromElementOfThatType");
 
             if (this == element)
             {
@@ -617,7 +617,7 @@ namespace Microsoft.Build.Construction
             /// </summary>
             internal WrapperForProjectRootElement(ProjectRootElement containingProject)
             {
-                ErrorUtilities.VerifyThrowInternalNull(containingProject, nameof(containingProject));
+                ErrorUtilities.VerifyThrowInternalNull(containingProject);
                 ContainingProject = containingProject;
             }
 

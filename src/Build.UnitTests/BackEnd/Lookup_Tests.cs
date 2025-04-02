@@ -8,7 +8,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Xunit;
 
 #nullable disable
@@ -95,7 +94,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Start a target
             Lookup.Scope enteredScope = lookup.EnterScope("x");
 
-            // We see the one item 
+            // We see the one item
             Assert.Equal("a1", lookup.GetItems("i1").First().EvaluatedInclude);
             Assert.Single(lookup.GetItems("i1"));
 
@@ -163,7 +162,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectItemInstance[] newItems = new ProjectItemInstance[]
             {
                 new ProjectItemInstance(project, "i1", "a1", project.FullPath), // Should not get added
-                new ProjectItemInstance(project, "i1", "a2", project.FullPath), // Should get added               
+                new ProjectItemInstance(project, "i1", "a2", project.FullPath), // Should get added
             };
 
             // Perform the addition
@@ -213,9 +212,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectItemInstance[] newItems = new ProjectItemInstance[]
             {
                 new ProjectItemInstance(project, "i1", "a1", project.FullPath), // Should get added
-                new ProjectItemInstance(project, "i1", "a2", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>( "m1", "m1") }, project.FullPath), // Should get added               
-                new ProjectItemInstance(project, "i1", "a1", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>( "m1", "m1") }, project.FullPath), // Should not get added               
-                new ProjectItemInstance(project, "i1", "a1", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>( "m1", "m3") }, project.FullPath), // Should get added               
+                new ProjectItemInstance(project, "i1", "a2", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>( "m1", "m1") }, project.FullPath), // Should get added
+                new ProjectItemInstance(project, "i1", "a1", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>( "m1", "m1") }, project.FullPath), // Should not get added
+                new ProjectItemInstance(project, "i1", "a1", new KeyValuePair<string, string>[] { new KeyValuePair<string, string>( "m1", "m3") }, project.FullPath), // Should get added
             };
 
             // Perform the addition
@@ -822,7 +821,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
-            // Add an item with m=m1 and n=n1 
+            // Add an item with m=m1 and n=n1
             ProjectItemInstance item1 = new ProjectItemInstance(project, "i1", "a2", project.FullPath);
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
@@ -863,7 +862,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
-            // Add an item with m=m1 and n=n1 
+            // Add an item with m=m1 and n=n1
             ProjectItemInstance item1 = new ProjectItemInstance(project, "i1", "a2", project.FullPath);
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
@@ -929,7 +928,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal("n2", foundGroup.First().GetMetadataValue("n"));
             Assert.Equal("o1", foundGroup.First().GetMetadataValue("o"));
 
-            // Make a modification to the item to be n=n3 
+            // Make a modification to the item to be n=n3
             newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
             newMetadata.Add("n", "n3");
             lookup.ModifyItems("i1", group, newMetadata);
@@ -1026,7 +1025,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
-            // Add an item with m=m1 and n=n1 
+            // Add an item with m=m1 and n=n1
             ProjectItemInstance item1 = new ProjectItemInstance(project, "i1", "a2", project.FullPath);
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
@@ -1074,7 +1073,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ModifyItemInProjectPreviouslyModifiedAndGottenThroughGetItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            // Create some project state with an item with m=m1 and n=n1 
+            // Create some project state with an item with m=m1 and n=n1
             ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
             ProjectItemInstance item1 = new ProjectItemInstance(project, "i1", "a2", project.FullPath);
             item1.SetMetadata("m", "m1");
@@ -1130,7 +1129,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
-            // Add an item with m=m1 and n=n1 
+            // Add an item with m=m1 and n=n1
             ProjectItemInstance item1 = new ProjectItemInstance(project, "i1", "a2", project.FullPath);
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
@@ -1164,7 +1163,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RemoveItemFromProjectPreviouslyModifiedAndGottenThroughGetItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
-            // Create some project state with an item with m=m1 and n=n1 
+            // Create some project state with an item with m=m1 and n=n1
             ItemDictionary<ProjectItemInstance> table1 = new ItemDictionary<ProjectItemInstance>();
             ProjectItemInstance item1 = new ProjectItemInstance(project, "i1", "a2", project.FullPath);
             item1.SetMetadata("m", "m1");
@@ -1257,7 +1256,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Lookup.Scope enteredScope2 = lookup.EnterScope("x");
 
-            // Change the value again in the new scope 
+            // Change the value again in the new scope
             lookup.SetProperty(ProjectPropertyInstance.Create("p1", "v3"));
 
             // Lookup is updated, but not the original item group
@@ -1266,7 +1265,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Lookup.Scope enteredScope3 = lookup.EnterScope("x");
 
-            // Change the value again in the new scope 
+            // Change the value again in the new scope
             lookup.SetProperty(ProjectPropertyInstance.Create("p1", "v4"));
 
             Assert.Equal("v4", lookup.GetProperty("p1").EvaluatedValue);

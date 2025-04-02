@@ -1,9 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
-using System.Xml;
-
 using Microsoft.Build.Construction;
 using Xunit;
 
@@ -24,7 +21,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             Assert.Equal(0, Helpers.Count(project.Children));
-            Assert.Null(project.ItemGroups.GetEnumerator().Current);
+            Assert.Empty(project.ItemGroups);
         }
 
         /// <summary>
@@ -39,7 +36,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemGroupElement group = (ProjectItemGroupElement)Helpers.GetFirst(project.Children);
 
             Assert.Equal(0, Helpers.Count(group.Items));
@@ -60,7 +58,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemGroupElement group = (ProjectItemGroupElement)Helpers.GetFirst(project.Children);
 
             var items = Helpers.MakeList(group.Items);

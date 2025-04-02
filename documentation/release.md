@@ -17,3 +17,11 @@ As of [#7018](https://github.com/dotnet/msbuild/pull/7018), MSBuild uses a Rosly
 3. At release time, we must manually promote the `Unshipped` public API to `Shipped`.
 
 That is a new step in our release process for each formal release (including patch releases if they change API surface).
+
+## Major version extra update steps
+
+Update major version of VS in
+
+- [BuildEnvironmentHelper.cs](../src/Shared/BuildEnvironmentHelper.cs)
+- [Constants.cs](../src/Shared/Constants.cs)
+- [TelemetryConstants.cs](../src/Framework/Telemetry/TelemetryConstants.cs)

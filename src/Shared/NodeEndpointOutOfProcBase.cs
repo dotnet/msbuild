@@ -2,23 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 #if CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Concurrent;
 #else
 using System.Collections.Concurrent;
 #endif
-using System.IO;
-using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using System.IO.Pipes;
+using System.IO;
+
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
+
 #endif
-#if !FEATURE_APM
+#if NET451_OR_GREATER || NETCOREAPP
 using System.Threading.Tasks;
 #endif
 
@@ -29,16 +32,17 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// This is an implementation of INodeEndpoint for the out-of-proc nodes.  It acts only as a client.
     /// </summary>
+    [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is expected to keep the stream open for the process lifetime")]
     internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     {
         #region Private Data
 
-#if NETCOREAPP2_1_OR_GREATER || MONO
+#if NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// The amount of time to wait for the client to connect to the host.
         /// </summary>
         private const int ClientConnectTimeout = 60000;
-#endif // NETCOREAPP2_1 || MONO
+#endif // NETCOREAPP2_1
 
         /// <summary>
         /// The size of the buffers to use for named pipes
@@ -101,7 +105,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Per-node shared read buffer.
         /// </summary>
-        private SharedReadBuffer _sharedReadBuffer;
+        private BinaryReaderFactory _sharedReadBuffer;
 
         /// <summary>
         /// A way to cache a byte array when writing out packets
@@ -212,51 +216,46 @@ namespace Microsoft.Build.BackEnd
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
-            if (!NativeMethodsShared.IsMono)
-            {
-                SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-                PipeSecurity security = new PipeSecurity();
+            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+            PipeSecurity security = new PipeSecurity();
 
-                // Restrict access to just this account.  We set the owner specifically here, and on the
-                // pipe client side they will check the owner against this one - they must have identical
-                // SIDs or the client will reject this server.  This is used to avoid attacks where a
-                // hacked server creates a less restricted pipe in an attempt to lure us into using it and 
-                // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
-                PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
-                security.AddAccessRule(rule);
-                security.SetOwner(identifier);
+            // Restrict access to just this account.  We set the owner specifically here, and on the
+            // pipe client side they will check the owner against this one - they must have identical
+            // SIDs or the client will reject this server.  This is used to avoid attacks where a
+            // hacked server creates a less restricted pipe in an attempt to lure us into using it and
+            // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
+            PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+            security.AddAccessRule(rule);
+            security.SetOwner(identifier);
 
-                _pipeServer = new NamedPipeServerStream(
-                    pipeName,
-                    PipeDirection.InOut,
-                    1, // Only allow one connection at a time.
-                    PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough
+            _pipeServer = new NamedPipeServerStream(
+                pipeName,
+                PipeDirection.InOut,
+                1, // Only allow one connection at a time.
+                PipeTransmissionMode.Byte,
+                PipeOptions.Asynchronous | PipeOptions.WriteThrough
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                    | PipeOptions.CurrentUserOnly
+                | PipeOptions.CurrentUserOnly
 #endif
-                    ,
-                    PipeBufferSize, // Default input buffer
-                    PipeBufferSize,  // Default output buffer
-                    security,
-                    HandleInheritability.None);
-            }
-            else
-#endif
-            {
-                _pipeServer = new NamedPipeServerStream(
-                    pipeName,
-                    PipeDirection.InOut,
-                    1, // Only allow one connection at a time.
-                    PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough
+                ,
+                PipeBufferSize, // Default input buffer
+                PipeBufferSize,  // Default output buffer
+                security,
+                HandleInheritability.None);
+#else
+            _pipeServer = new NamedPipeServerStream(
+                pipeName,
+                PipeDirection.InOut,
+                1, // Only allow one connection at a time.
+                PipeTransmissionMode.Byte,
+                PipeOptions.Asynchronous | PipeOptions.WriteThrough
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                    | PipeOptions.CurrentUserOnly
+                | PipeOptions.CurrentUserOnly
 #endif
-                    ,
-                    PipeBufferSize, // Default input buffer
-                    PipeBufferSize);  // Default output buffer
-            }
+                ,
+                PipeBufferSize, // Default input buffer
+                PipeBufferSize);  // Default output buffer
+#endif
         }
 
         #endregion
@@ -402,7 +401,7 @@ namespace Microsoft.Build.BackEnd
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             int handshakePart = _pipeServer.ReadIntForHandshake(
                                 byteToAccept: i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
-#if NETCOREAPP2_1_OR_GREATER || MONO
+#if NETCOREAPP2_1_OR_GREATER
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
                             );
@@ -420,7 +419,7 @@ namespace Microsoft.Build.BackEnd
                         if (gotValidConnection)
                         {
                             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
-#if NETCOREAPP2_1_OR_GREATER || MONO
+#if NETCOREAPP2_1_OR_GREATER
                             _pipeServer.ReadEndOfHandshakeSignal(false, ClientConnectTimeout); /* wait a long time for the handshake from this side */
 #else
                             _pipeServer.ReadEndOfHandshakeSignal(false);
@@ -497,7 +496,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (localPipeServer.IsConnected)
                 {
-#if NETCOREAPP // OperatingSystem.IsWindows() is new in .NET 5.0
+#if NET // OperatingSystem.IsWindows() is new in .NET 5.0
                     if (OperatingSystem.IsWindows())
 #endif
                     {
@@ -513,34 +512,39 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private void RunReadLoop(Stream localReadPipe, Stream localWritePipe,
+        private void RunReadLoop(BufferedReadStream localReadPipe, NamedPipeServerStream localWritePipe,
             ConcurrentQueue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
         {
-            // Ordering of the wait handles is important.  The first signalled wait handle in the array 
+            // Ordering of the wait handles is important.  The first signalled wait handle in the array
             // will be returned by WaitAny if multiple wait handles are signalled.  We prefer to have the
             // terminate event triggered so that we cannot get into a situation where packets are being
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
             byte[] headerByte = new byte[5];
-#if FEATURE_APM
-            IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
+#if NET451_OR_GREATER
+            Task<int> readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
+#elif NETCOREAPP
+            Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length).AsTask();
 #else
-            Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
+            IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #endif
+
+            // Ordering is important.  We want packetAvailable to supercede terminate otherwise we will not properly wait for all
+            // packets to be sent by other threads which are shutting down, such as the logging thread.
+            WaitHandle[] handles = new WaitHandle[]
+            {
+#if NET451_OR_GREATER || NETCOREAPP
+                ((IAsyncResult)readTask).AsyncWaitHandle,
+#else
+                result.AsyncWaitHandle,
+#endif
+                localPacketAvailable,
+                localTerminatePacketPump,
+            };
 
             bool exitLoop = false;
             do
             {
-                // Ordering is important.  We want packetAvailable to supercede terminate otherwise we will not properly wait for all
-                // packets to be sent by other threads which are shutting down, such as the logging thread.
-                WaitHandle[] handles = new WaitHandle[] {
-#if FEATURE_APM
-                    result.AsyncWaitHandle,
-#else
-                    ((IAsyncResult)readTask).AsyncWaitHandle,
-#endif
-                    localPacketAvailable, localTerminatePacketPump };
-
                 int waitId = WaitHandle.WaitAny(handles);
                 switch (waitId)
                 {
@@ -549,10 +553,10 @@ namespace Microsoft.Build.BackEnd
                             int bytesRead = 0;
                             try
                             {
-#if FEATURE_APM
-                                bytesRead = localReadPipe.EndRead(result);
-#else
+#if NET451_OR_GREATER || NETCOREAPP
                                 bytesRead = readTask.Result;
+#else
+                                bytesRead = localReadPipe.EndRead(result);
 #endif
                             }
                             catch (Exception e)
@@ -593,7 +597,7 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-                            NodePacketType packetType = (NodePacketType)Enum.ToObject(typeof(NodePacketType), headerByte[0]);
+                            NodePacketType packetType = (NodePacketType)headerByte[0];
 
                             try
                             {
@@ -609,10 +613,18 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-#if FEATURE_APM
-                            result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
+#if NET451_OR_GREATER
+                            readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
+#elif NETCOREAPP
+                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length).AsTask();
 #else
-                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
+                            result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
+#endif
+
+#if NET451_OR_GREATER || NETCOREAPP
+                            handles[0] = ((IAsyncResult)readTask).AsyncWaitHandle;
+#else
+                            handles[0] = result.AsyncWaitHandle;
 #endif
                         }
 
@@ -675,8 +687,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-        #endregion
+#endregion
 
-        #endregion
+#endregion
     }
 }

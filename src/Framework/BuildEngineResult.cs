@@ -42,7 +42,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Did the build pass or fail. True means the build succeeded, False means the build failed.
         /// </summary>
-        public bool Result
+        public readonly bool Result
         {
             get
             {

@@ -8,7 +8,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 
 
@@ -79,7 +78,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         /// <summary>
         /// Tests that a strong reference is held to a single item
         /// </summary>
-        [WindowsFullFrameworkOnlyFact(additionalMessage: "This test fails on .NET Core and Mono: https://github.com/dotnet/msbuild/issues/282")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "This test fails on .NET Core: https://github.com/dotnet/msbuild/issues/282")]
         public void AddEntryStrongReference()
         {
             string projectPath = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";

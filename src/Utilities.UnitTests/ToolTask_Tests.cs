@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -25,7 +26,7 @@ namespace Microsoft.Build.UnitTests
             _output = testOutput;
         }
 
-        private sealed class MyTool : ToolTask, IDisposable
+        private class MyTool : ToolTask, IDisposable
         {
             private string _fullToolName;
             private string _responseFileCommands = string.Empty;
@@ -117,14 +118,14 @@ namespace Microsoft.Build.UnitTests
                 StartInfo = GetProcessStartInfo(GenerateFullPathToTool(), NativeMethodsShared.IsWindows ? "/x" : string.Empty, null);
                 return result;
             }
-        };
+        }
 
         [Fact]
         public void Regress_Mutation_UserSuppliedToolPathIsLogged()
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.ToolPath = NativeMethodsShared.IsWindows ? @"C:\MyAlternatePath" : "/MyAlternatePath";
 
@@ -140,7 +141,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.ToolPath = NativeMethodsShared.IsWindows ? @"C:\MyAlternatePath" : "/MyAlternatePath";
 
@@ -156,7 +157,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
 
                 // "cmd.exe" croaks big-time when given a very long command-line.  It pops up a message box on
@@ -182,7 +183,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows ? "/C garbagegarbagegarbagegarbage.exe" : "-c garbagegarbagegarbagegarbage.exe";
 
@@ -207,7 +208,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C echo Main.cs(17,20): error CS0168: The variable 'foo' is declared but never used"
@@ -232,8 +233,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DoNotFormatTaskCommandOrMessage()
         {
-            MyTool t = new MyTool();
-            MockEngine engine = new MockEngine();
+            using MyTool t = new MyTool();
+            MockEngine3 engine = new MockEngine3();
             t.BuildEngine = engine;
             // Unmatched curly would crash if they did
             t.MockCommandLineCommands = NativeMethodsShared.IsWindows
@@ -245,6 +246,37 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Process notification encoding should be consistent with console code page.
+        /// not meant to be formatted.
+        /// </summary>
+        [InlineData(0, "")]
+        [InlineData(-1, "1>&2")]
+        [Theory]
+        public void ProcessNotificationEncodingConsistentWithConsoleCodePage(int exitCode, string errorPart)
+        {
+            using MyTool t = new MyTool();
+            MockEngine engine = new MockEngine();
+            t.BuildEngine = engine;
+            t.UseCommandProcessor = true;
+            t.LogStandardErrorAsError = true;
+            t.EchoOff = true;
+            t.UseUtf8Encoding = EncodingUtilities.UseUtf8Always;
+            string content = "Building Custom Rule プロジェクト";
+            string outputMessage = exitCode == 0 ? content : $"'{content}' {errorPart}";
+            string commandLine = $"echo {outputMessage}";
+            t.MockCommandLineCommands = commandLine;
+            t.Execute();
+            t.ExitCode.ShouldBe(exitCode);
+
+            string log = engine.Log;
+            string singleQuote = NativeMethodsShared.IsWindows ? "'" : string.Empty;
+            string displayMessage = exitCode == 0 ? content : $"ERROR : {singleQuote}{content}{singleQuote}";
+            string pattern = $"{commandLine}{Environment.NewLine}\\s*{displayMessage}";
+            Regex regex = new Regex(pattern);
+            regex.Matches(log).Count.ShouldBe(1, $"{log} doesn't contain the log matching the pattern: {pattern}");
+        }
+
+        /// <summary>
         /// When a message is logged to the standard error stream do not error is LogStandardErrorAsError is not true or set.
         /// </summary>
         [Fact]
@@ -252,7 +284,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C Echo 'Who made you king anyways' 1>&2"
@@ -275,7 +307,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.LogStandardErrorAsError = true;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
@@ -299,7 +331,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.LogStandardErrorAsError = true;
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
@@ -324,7 +356,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.FullToolName = NativeMethodsShared.IsWindows ? "c:\\baz\\foo.exe" : "/baz/foo.exe";
 
@@ -345,7 +377,7 @@ namespace Microsoft.Build.UnitTests
             string copyName = NativeMethodsShared.IsWindows ? "xcopy.exe" : "cp";
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.FullToolName = shellName;
                 string systemPath = NativeMethodsShared.IsUnixLike ? "/bin" : Environment.GetFolderPath(Environment.SpecialFolder.System);
@@ -372,7 +404,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 t.FullToolName = "doesnotexist.exe";
 
@@ -392,7 +424,7 @@ namespace Microsoft.Build.UnitTests
         {
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 string toolName = NativeMethodsShared.IsWindows ? "cmd.exe" : "sh";
                 t.FullToolName = toolName;
@@ -418,7 +450,7 @@ namespace Microsoft.Build.UnitTests
 
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 engine.MinimumMessageImportance = MessageImportance.High;
 
                 t.BuildEngine = engine;
@@ -446,7 +478,7 @@ namespace Microsoft.Build.UnitTests
 
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 engine.MinimumMessageImportance = MessageImportance.High;
 
                 t.BuildEngine = engine;
@@ -480,7 +512,7 @@ namespace Microsoft.Build.UnitTests
 
             using (MyTool t = new MyTool())
             {
-                MockEngine engine = new MockEngine();
+                MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
                 // The command we're giving is the command to spew the contents of the temp
                 // file we created above.
@@ -509,8 +541,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EnvironmentVariablesToToolTask()
         {
-            MyTool task = new MyTool();
-            task.BuildEngine = new MockEngine();
+            using MyTool task = new MyTool();
+            task.BuildEngine = new MockEngine3();
             string userVarName = NativeMethodsShared.IsWindows ? "username" : "user";
             task.EnvironmentVariables = new[] { "a=b", "c=d", userVarName + "=x" /* built-in */, "path=" /* blank value */};
             bool result = task.Execute();
@@ -540,8 +572,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EnvironmentVariablesToToolTaskEqualsSign()
         {
-            MyTool task = new MyTool();
-            task.BuildEngine = new MockEngine();
+            using MyTool task = new MyTool();
+            task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "a=b=c" };
             bool result = task.Execute();
 
@@ -555,8 +587,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EnvironmentVariablesToToolTaskInvalid1()
         {
-            MyTool task = new MyTool();
-            task.BuildEngine = new MockEngine();
+            using MyTool task = new MyTool();
+            task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "x" };
             bool result = task.Execute();
 
@@ -570,8 +602,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EnvironmentVariablesToToolTaskInvalid2()
         {
-            MyTool task = new MyTool();
-            task.BuildEngine = new MockEngine();
+            using MyTool task = new MyTool();
+            task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "" };
             bool result = task.Execute();
 
@@ -585,8 +617,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EnvironmentVariablesToToolTaskInvalid3()
         {
-            MyTool task = new MyTool();
-            task.BuildEngine = new MockEngine();
+            using MyTool task = new MyTool();
+            task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "=a;b=c" };
             bool result = task.Execute();
 
@@ -600,8 +632,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EnvironmentVariablesToToolTaskNotSet()
         {
-            MyTool task = new MyTool();
-            task.BuildEngine = new MockEngine();
+            using MyTool task = new MyTool();
+            task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = null;
             bool result = task.Execute();
 
@@ -631,9 +663,9 @@ namespace Microsoft.Build.UnitTests
 
                     string directoryNamedSameAsTool = Directory.CreateDirectory(Path.Combine(tempDirectory, toolName)).FullName;
 
-                    MyTool task = new MyTool
+                    using MyTool task = new MyTool
                     {
-                        BuildEngine = new MockEngine(),
+                        BuildEngine = new MockEngine3(),
                         FullToolName = toolName,
                     };
                     bool result = task.Execute();
@@ -680,10 +712,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetProcessStartInfoCanOverrideEnvironmentVariables()
         {
-            MyTool task = new MyTool();
+            using MyTool task = new MyTool();
             task.DoProcessStartInfoMutation = (p) => p.Environment.Remove("a");
 
-            task.BuildEngine = new MockEngine();
+            task.BuildEngine = new MockEngine3();
             task.EnvironmentVariables = new[] { "a=b" };
             bool result = task.Execute();
 
@@ -694,8 +726,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VisualBasicLikeEscapedQuotesInCommandAreNotMadeForwardSlashes()
         {
-            MyTool t = new MyTool();
-            MockEngine engine = new MockEngine();
+            using MyTool t = new MyTool();
+            MockEngine3 engine = new MockEngine3();
             t.BuildEngine = engine;
             t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                             ? "/C echo \"hello \\\"world\\\"\""
@@ -703,6 +735,42 @@ namespace Microsoft.Build.UnitTests
             t.Execute();
             engine.AssertLogContains("echo \"hello \\\"world\\\"\"");
             engine.Errors.ShouldBe(0);
+        }
+
+        private sealed class MyToolWithCustomProcess : MyTool
+        {
+            protected override Process StartToolProcess(Process proc)
+            {
+#pragma warning disable CA2000 // Dispose objects before losing scope - caller needs the process
+                Process customProcess = new Process();
+#pragma warning restore CA2000
+                customProcess.StartInfo = proc.StartInfo;
+
+                customProcess.EnableRaisingEvents = true;
+                customProcess.Exited += ReceiveExitNotification;
+
+                customProcess.ErrorDataReceived += ReceiveStandardErrorData;
+                customProcess.OutputDataReceived += ReceiveStandardOutputData;
+                return base.StartToolProcess(customProcess);
+            }
+        }
+
+        [Fact]
+        public void UsesCustomProcess()
+        {
+            using (MyToolWithCustomProcess t = new MyToolWithCustomProcess())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                    ? "/C echo hello_stdout & echo hello_stderr >&2"
+                    : "-c \"echo hello_stdout ; echo hello_stderr >&2\"";
+
+                t.Execute();
+
+                engine.AssertLogContains("\nhello_stdout");
+                engine.AssertLogContains("\nhello_stderr");
+            }
         }
 
         /// <summary>
@@ -779,7 +847,7 @@ namespace Microsoft.Build.UnitTests
 
             var output = testEnvironment.ExpectFile();
 
-            MockEngine engine = new MockEngine();
+            MockEngine3 engine = new MockEngine3();
 
             var task = new ToolTaskThatNeedsUnicode
             {
@@ -824,6 +892,214 @@ namespace Microsoft.Build.UnitTests
             {
                 return $"echo łoł > {OutputPath}";
             }
+        }
+
+        /// <summary>
+        /// Verifies the validation of the <see cref="ToolTask.TaskProcessTerminationTimeout" />.
+        /// </summary>
+        /// <param name="timeout">New value for <see cref="ToolTask.TaskProcessTerminationTimeout" />.</param>
+        /// <param name="isInvalidValid">Is a task expected to be valid or not.</param>
+        [Theory]
+        [InlineData(int.MaxValue, false)]
+        [InlineData(97, false)]
+        [InlineData(0, false)]
+        [InlineData(-1, false)]
+        [InlineData(-2, true)]
+        [InlineData(-101, true)]
+        [InlineData(int.MinValue, true)]
+        public void SetsTerminationTimeoutCorrectly(int timeout, bool isInvalidValid)
+        {
+            using var env = TestEnvironment.Create(_output);
+
+            // Task under test:
+            var task = new ToolTaskSetsTerminationTimeout
+            {
+                BuildEngine = new MockEngine3()
+            };
+
+            task.TerminationTimeout = timeout;
+            task.ValidateParameters().ShouldBe(!isInvalidValid);
+            task.TerminationTimeout.ShouldBe(timeout);
+        }
+
+        /// <summary>
+        /// Verifies that a ToolTask instance can return correct results when executed multiple times with timeout.
+        /// </summary>
+        /// <param name="repeats">Specifies the number of repeats for external command execution.</param>
+        /// <param name="initialDelay">Delay to generate on the first execution in milliseconds.</param>
+        /// <param name="followupDelay">Delay to generate on follow-up execution in milliseconds.</param>
+        /// <param name="timeout">Task timeout in milliseconds.</param>
+        /// <remarks>
+        /// These tests execute the same task instance multiple times, which will in turn run a shell command to sleep
+        /// predefined amount of time. The first execution may time out, but all following ones won't. It is expected
+        /// that all following executions return success.
+        /// </remarks>
+        [Theory]
+        [InlineData(1, 1, 1, -1)] // Normal case, no repeat.
+        [InlineData(3, 1, 1, -1)] // Repeat without timeout.
+        [InlineData(3, 10000, 1, 1000)] // Repeat with timeout.
+        public void ToolTaskThatTimeoutAndRetry(int repeats, int initialDelay, int followupDelay, int timeout)
+        {
+            using var env = TestEnvironment.Create(_output);
+
+            MockEngine3 engine = new();
+
+            // Task under test:
+            var task = new ToolTaskThatSleeps
+            {
+                BuildEngine = engine,
+                InitialDelay = initialDelay,
+                FollowupDelay = followupDelay,
+                Timeout = timeout
+            };
+
+            // Execute the same task instance multiple times. The index is one-based.
+            bool result;
+            for (int i = 1; i <= repeats; i++)
+            {
+                // Execute the task:
+                result = task.Execute();
+
+                _output.WriteLine(engine.Log);
+
+                task.RepeatCount.ShouldBe(i);
+
+                // The first execution may fail (timeout), but all following ones should succeed:
+                if (i > 1)
+                {
+                    result.ShouldBeTrue();
+                    task.ExitCode.ShouldBe(0);
+                }
+            }
+        }
+
+        /// <summary>
+        /// A simple implementation of <see cref="ToolTask"/> to sleep for a while.
+        /// </summary>
+        /// <remarks>
+        /// This task runs shell command to sleep for predefined, variable amount of time based on how many times the
+        /// instance has been executed.
+        /// </remarks>
+        private sealed class ToolTaskThatSleeps : ToolTask
+        {
+            // Windows prompt command to sleep:
+            private readonly string _windowsSleep = "/c start /wait timeout {0}";
+
+            // UNIX command to sleep:
+            private readonly string _unixSleep = "-c \"sleep {0}\"";
+
+            // Full path to shell:
+            private readonly string _pathToShell;
+
+            public ToolTaskThatSleeps()
+                : base()
+            {
+                // Determines shell to use: cmd for Windows, sh for UNIX-like systems:
+                _pathToShell = NativeMethodsShared.IsUnixLike ? "/bin/sh" : "cmd.exe";
+            }
+
+            /// <summary>
+            /// Gets or sets the delay for the first execution.
+            /// </summary>
+            /// <remarks>
+            /// Defaults to 10 seconds.
+            /// </remarks>
+            public Int32 InitialDelay { get; set; } = 10000;
+
+            /// <summary>
+            /// Gets or sets the delay for the follow-up executions.
+            /// </summary>
+            /// <remarks>
+            /// Defaults to 1 milliseconds.
+            /// </remarks>
+            public Int32 FollowupDelay { get; set; } = 1;
+
+            /// <summary>
+            /// Int32 output parameter for the repeat counter for test purpose.
+            /// </summary>
+            [Output]
+            public Int32 RepeatCount { get; private set; } = 0;
+
+            /// <summary>
+            /// Gets the tool name (shell).
+            /// </summary>
+            protected override string ToolName => Path.GetFileName(_pathToShell);
+
+            /// <summary>
+            /// Gets the full path to shell.
+            /// </summary>
+            protected override string GenerateFullPathToTool() => _pathToShell;
+
+            /// <summary>
+            /// Generates a shell command to sleep different amount of time based on repeat counter.
+            /// </summary>
+            protected override string GenerateCommandLineCommands() =>
+                NativeMethodsShared.IsUnixLike ?
+                string.Format(_unixSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0) :
+                string.Format(_windowsSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0);
+
+            /// <summary>
+            /// Ensures that test parameters make sense.
+            /// </summary>
+            protected internal override bool ValidateParameters() =>
+                (InitialDelay > 0) && (FollowupDelay > 0) && base.ValidateParameters();
+
+            /// <summary>
+            /// Runs shell command to sleep for a while.
+            /// </summary>
+            /// <returns>
+            /// true if the task runs successfully; false otherwise.
+            /// </returns>
+            public override bool Execute()
+            {
+                RepeatCount++;
+                return base.Execute();
+            }
+        }
+
+        /// <summary>
+        /// A simple implementation of <see cref="ToolTask"/> to excercise <see cref="ToolTask.TaskProcessTerminationTimeout" />.
+        /// </summary>
+        private sealed class ToolTaskSetsTerminationTimeout : ToolTask
+        {
+            public ToolTaskSetsTerminationTimeout()
+                : base()
+            {
+                base.TaskResources = AssemblyResources.PrimaryResources;
+            }
+
+            /// <summary>
+            /// Gets or sets <see cref="ToolTask.TaskProcessTerminationTimeout" />.
+            /// </summary>
+            /// <remarks>
+            /// This is just a proxy property to access <see cref="ToolTask.TaskProcessTerminationTimeout" />.
+            /// </remarks>
+            public int TerminationTimeout
+            {
+                get => TaskProcessTerminationTimeout;
+                set => TaskProcessTerminationTimeout = value;
+            }
+
+            /// <summary>
+            /// Gets the tool name (dummy).
+            /// </summary>
+            protected override string ToolName => string.Empty;
+
+            /// <summary>
+            /// Gets the full path to tool (dummy).
+            /// </summary>
+            protected override string GenerateFullPathToTool() => string.Empty;
+
+            /// <summary>
+            /// Does nothing.
+            /// </summary>
+            /// <returns>
+            /// Always returns true.
+            /// </returns>
+            /// <remarks>
+            /// This dummy tool task is not meant to run anything.
+            /// </remarks>
+            public override bool Execute() => true;
         }
     }
 }

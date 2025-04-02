@@ -46,26 +46,20 @@ namespace Microsoft.Build.Evaluation
         protected EvaluationContext EvaluationContext { get; }
 
         protected IFileSystem FileSystem => EvaluationContext.FileSystem;
+
         protected FileMatcher FileMatcher => EvaluationContext.FileMatcher;
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
         {
             _outerEvaluatorData = data;
-            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext);
-            _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType));
-            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext);
+            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext, loggingContext);
+            _evaluatorData = new EvaluatorData(_outerEvaluatorData, _itemLists);
+            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext, loggingContext);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;
 
             EvaluationContext = evaluationContext;
-        }
-
-        private ImmutableList<I> GetItems(string itemType)
-        {
-            return _itemLists.TryGetValue(itemType, out LazyItemList itemList) ?
-                itemList.GetMatchedItems(ImmutableHashSet<string>.Empty) :
-                ImmutableList<I>.Empty;
         }
 
         public bool EvaluateConditionWithCurrentState(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions)
@@ -96,8 +90,6 @@ namespace Microsoft.Build.Evaluation
                     expanderOptions,
                     GetCurrentDirectoryForConditionEvaluation(element, lazyEvaluator),
                     element.ConditionLocation,
-                    lazyEvaluator._loggingContext.LoggingService,
-                    lazyEvaluator._loggingContext.BuildEventContext,
                     lazyEvaluator.FileSystem,
                     loggingContext: lazyEvaluator._loggingContext);
                 MSBuildEventSource.Log.EvaluateConditionStop(condition, result);
@@ -135,7 +127,7 @@ namespace Microsoft.Build.Evaluation
                 _normalizedItemValue = normalizedItemValue;
             }
 
-            public ItemData Clone(IItemFactory<I, I> itemFactory, ProjectItemElement initialItemElementForFactory)
+            public readonly ItemData Clone(IItemFactory<I, I> itemFactory, ProjectItemElement initialItemElementForFactory)
             {
                 // setting the factory's item element to the original item element that produced the item
                 // otherwise you get weird things like items that appear to have been produced by update elements
@@ -392,7 +384,7 @@ namespace Microsoft.Build.Evaluation
                                 break;
                             }
 
-                            string fullPath = FileUtilities.GetFullPath(frag.TextFragment, frag.ProjectDirectory);
+                            string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(frag.TextFragment, frag.ProjectDirectory);
                             if (itemsWithNoWildcards.ContainsKey(fullPath))
                             {
                                 // Another update will already happen on this path. Make that happen before evaluating this one.
@@ -444,14 +436,11 @@ namespace Microsoft.Build.Evaluation
 
             private static void ProcessNonWildCardItemUpdates(Dictionary<string, UpdateOperation> itemsWithNoWildcards, OrderedItemDataCollection.Builder items)
             {
-#if DEBUG
-                ErrorUtilities.VerifyThrow(itemsWithNoWildcards.All(fragment => !MSBuildConstants.CharactersForExpansion.Any(fragment.Key.Contains)), $"{nameof(itemsWithNoWildcards)} should not contain any text fragments with wildcards.");
-#endif
                 if (itemsWithNoWildcards.Count > 0)
                 {
                     for (int i = 0; i < items.Count; i++)
                     {
-                        string fullPath = FileUtilities.GetFullPath(items[i].Item.EvaluatedIncludeEscaped, items[i].Item.ProjectDirectory);
+                        string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(items[i].Item.EvaluatedInclude, items[i].Item.ProjectDirectory);
                         if (itemsWithNoWildcards.TryGetValue(fullPath, out UpdateOperation op))
                         {
                             items[i] = op.UpdateItem(items[i]);
@@ -492,7 +481,7 @@ namespace Microsoft.Build.Evaluation
 
         private class OperationBuilderWithMetadata : OperationBuilder
         {
-            public ImmutableList<ProjectMetadataElement>.Builder Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
+            public readonly ImmutableArray<ProjectMetadataElement>.Builder Metadata = ImmutableArray.CreateBuilder<ProjectMetadataElement>();
 
             public OperationBuilderWithMetadata(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {
@@ -625,7 +614,7 @@ namespace Microsoft.Build.Evaluation
 
         private void ProcessItemSpec(string rootDirectory, string itemSpec, IElementLocation itemSpecLocation, OperationBuilder builder)
         {
-            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory, loggingContext: _loggingContext);
+            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory);
 
             foreach (ItemSpecFragment fragment in builder.ItemSpec.Fragments)
             {
@@ -636,7 +625,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private static IEnumerable<string> GetExpandedMetadataValuesAndConditions(ICollection<ProjectMetadataElement> metadata, Expander<P, I> expander, LoggingContext loggingContext = null)
+        private static IEnumerable<string> GetExpandedMetadataValuesAndConditions(ICollection<ProjectMetadataElement> metadata, Expander<P, I> expander)
         {
             // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
             // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
@@ -650,8 +639,7 @@ namespace Microsoft.Build.Evaluation
                 yield return expander.ExpandIntoStringLeaveEscaped(
                     metadatumElement.Value,
                     expanderOptions,
-                    metadatumElement.Location,
-                    loggingContext);
+                    metadatumElement.Location);
 
                 yield return expander.ExpandIntoStringLeaveEscaped(
                     metadatumElement.Condition,
@@ -666,7 +654,7 @@ namespace Microsoft.Build.Evaluation
             {
                 operationBuilder.Metadata.AddRange(itemElement.Metadata);
 
-                var itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetExpandedMetadataValuesAndConditions(itemElement.Metadata, _expander, _loggingContext));
+                var itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetExpandedMetadataValuesAndConditions(itemElement.Metadata, _expander));
                 if (itemsAndMetadataFound.Items != null)
                 {
                     foreach (var itemType in itemsAndMetadataFound.Items)

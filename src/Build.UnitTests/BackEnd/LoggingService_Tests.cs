@@ -14,7 +14,6 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
@@ -417,7 +416,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(2, regularILoggerB.BuildStartedCount);
             Assert.Equal(2, regularILoggerC.BuildStartedCount);
 
-            // Make sure if we call build started again we only get one other build started event.
+            // Make sure if we call build finished again we only get one other build finished event.
             _initializedService.LogBuildFinished(true);
             Assert.Equal(2, regularILoggerA.BuildFinishedCount);
             Assert.Equal(2, regularILoggerB.BuildFinishedCount);
@@ -1068,7 +1067,7 @@ namespace Microsoft.Build.UnitTests.Logging
         public void ImportanceReflectsUnknownLoggerVerbosity()
         {
             // Minimum message importance is Low (i.e. we're logging everything) even when all registered loggers have
-            // Normal verbosity if at least of one them is not on our whitelist.
+            // Normal verbosity if at least of one them is not on our allowlist.
             _initializedService.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Normal));
             _initializedService.RegisterLogger(new MockLogger() { Verbosity = LoggerVerbosity.Normal });
             _initializedService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Normal));
@@ -1123,13 +1122,13 @@ namespace Microsoft.Build.UnitTests.Logging
             try
             {
                 _initializedService.ShutdownComponent();
-                Assert.True(false, "No Exceptions Generated");
+                Assert.Fail("No Exceptions Generated");
             }
             catch (Exception e)
             {
                 if (e.GetType() != expectedExceptionType)
                 {
-                    Assert.True(false, "Expected a " + expectedExceptionType + " but got a " + e.GetType() + " Stack:" + e.ToString());
+                    Assert.Fail("Expected a " + expectedExceptionType + " but got a " + e.GetType() + " Stack:" + e.ToString());
                 }
             }
         }

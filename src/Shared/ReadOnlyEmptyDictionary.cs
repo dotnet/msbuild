@@ -16,7 +16,7 @@ namespace Microsoft.Build.Collections
     /// </summary>
     /// <typeparam name="K">Key</typeparam>
     /// <typeparam name="V">Value</typeparam>
-    internal class ReadOnlyEmptyDictionary<K, V> : IDictionary<K, V>, IDictionary
+    internal class ReadOnlyEmptyDictionary<K, V> : IDictionary<K, V>, IReadOnlyDictionary<K, V>, IDictionary
     {
         /// <summary>
         /// The single instance
@@ -125,6 +125,22 @@ namespace Microsoft.Build.Collections
         ICollection IDictionary.Values
         {
             get { return (ICollection)((IDictionary<K, V>)this).Values; }
+        }
+
+        /// <summary>
+        /// Keys
+        /// </summary>
+        IEnumerable<K> IReadOnlyDictionary<K, V>.Keys
+        {
+            get { return Keys; }
+        }
+
+        /// <summary>
+        /// Values
+        /// </summary>
+        IEnumerable<V> IReadOnlyDictionary<K, V>.Values
+        {
+            get { return Values; }
         }
 
         /// <summary>
@@ -292,3 +308,22 @@ namespace Microsoft.Build.Collections
         }
     }
 }
+
+#if NET35
+namespace System.Collections.Generic
+{
+    public interface IReadOnlyCollection<T> : IEnumerable<T>
+    {
+        int Count { get; }
+    }
+
+    public interface IReadOnlyDictionary<TKey, TValue> : IReadOnlyCollection<KeyValuePair<TKey, TValue>>
+    {
+        TValue this[TKey key] { get; }
+        IEnumerable<TKey> Keys { get; }
+        IEnumerable<TValue> Values { get; }
+        bool ContainsKey(TKey key);
+        bool TryGetValue(TKey key, out TValue value);
+    }
+}
+#endif

@@ -1,8 +1,11 @@
 # Microsoft.Build (MSBuild)
 
+[![Build Status](https://dev.azure.com/dnceng-public/public/_apis/build/status/75?branchName=main&label=Public)](https://dev.azure.com/dnceng-public/public/_build?definitionId=75) [![Build Status](https://devdiv.visualstudio.com/DevDiv/_apis/build/status/9434?label=Internal&branchName=main)](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434)
+
+
 The Microsoft Build Engine is a platform for building applications. This engine, also known as MSBuild, provides an XML schema for a project file that controls how the build platform processes and builds software. Visual Studio uses MSBuild, but MSBuild can run without Visual Studio. By invoking msbuild.exe on your project or solution file, you can orchestrate and build products in environments where Visual Studio isn't installed.
 
-For more information on MSBuild, see the [MSBuild documentation](https://docs.microsoft.com/visualstudio/msbuild/msbuild) on docs.microsoft.com.
+For more information on MSBuild, see the [MSBuild documentation](https://learn.microsoft.com/visualstudio/msbuild/msbuild) on learn.microsoft.com.
 
 The [changelog](documentation/Changelog.md) has detailed information about changes made in different releases.
 
@@ -15,12 +18,12 @@ For the full supported experience, you will need to have Visual Studio 2022 or h
 To get started on **Visual Studio 2022**:
 
 1. [Install Visual Studio 2022](https://www.visualstudio.com/vs/).  Select the following Workloads:
-  - .NET desktop development
-  - .NET Core cross-platform development
+   - .NET desktop development
+   - .NET Core cross-platform development
 2. Ensure [long path support](https://learn.microsoft.com/windows/win32/fileio/maximum-file-path-limitation?tabs=registry#enable-long-paths-in-windows-10-version-1607-and-later) is enabled at the Windows level.
 3. Open a `Developer Command Prompt for VS 2022` prompt.
 4. Clone the source code: `git clone https://github.com/dotnet/msbuild`
-  - You may have to [download Git](https://git-scm.com/downloads) first.
+   - You may have to [download Git](https://git-scm.com/downloads) first.
 5. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
 6. Open `MSBuild.sln` or `MSBuild.Dev.slnf` in Visual Studio 2022.
 
@@ -41,7 +44,6 @@ Before you contribute, please read through the contributing and developer guides
 * **Developer Guide on:**
    - [.NET Core](documentation/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
    - [Full Framework](documentation/wiki/Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md)
-   - [Mono](documentation/wiki/Building-Testing-and-Debugging-on-Mono-MSBuild.md)
 
 * See our [help wanted issues](https://github.com/dotnet/msbuild/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22) for a list of issues we think are great to onboard new developers.
    - **Note:** Please leave a comment asking to be assigned the issue if you want to work on it.

@@ -3,7 +3,6 @@
 
 #if FEATURE_WIN32_REGISTRY
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -11,7 +10,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Constants = Microsoft.Build.Internal.Constants;
-using error = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using RegistryException = Microsoft.Build.Exceptions.RegistryException;
 using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;
@@ -63,7 +61,7 @@ namespace Microsoft.Build.Evaluation
         internal ToolsetRegistryReader(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, RegistryKeyWrapper msbuildRegistryWrapper)
             : base(environmentProperties, globalProperties)
         {
-            error.VerifyThrowArgumentNull(msbuildRegistryWrapper, nameof(msbuildRegistryWrapper));
+            ErrorUtilities.VerifyThrowArgumentNull(msbuildRegistryWrapper, nameof(msbuildRegistryWrapper));
 
             _msbuildRegistryWrapper = msbuildRegistryWrapper;
         }
@@ -75,7 +73,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                string[] toolsVersionNames = Array.Empty<string>();
+                string[] toolsVersionNames = [];
                 try
                 {
                     RegistryKeyWrapper subKey = null;
@@ -235,7 +233,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>An enumeration of property definitions.</returns>
         protected override IEnumerable<ToolsetPropertyDefinition> GetSubToolsetPropertyDefinitions(string toolsVersion, string subToolsetVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion, nameof(subToolsetVersion));
+            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion);
 
             RegistryKeyWrapper toolsVersionWrapper = null;
             RegistryKeyWrapper subToolsetWrapper = null;

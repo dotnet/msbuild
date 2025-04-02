@@ -1,10 +1,12 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -103,8 +105,9 @@ namespace Microsoft.Build.Tasks
             runtimeNode.Add(redirectNodes);
 
             var writeOutput = true;
+            var outputExists = FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec);
 
-            if (FileSystems.Default.FileExists(OutputAppConfigFile.ItemSpec))
+            if (outputExists)
             {
                 try
                 {
@@ -131,6 +134,7 @@ namespace Microsoft.Build.Tasks
 
             if (writeOutput)
             {
+                Log.LogMessageFromResources(MessageImportance.Low, "GenerateBindingRedirects.CreatingBindingRedirectionFile", OutputAppConfigFile.ItemSpec);
                 using (var stream = FileUtilities.OpenWrite(OutputAppConfigFile.ItemSpec, false))
                 {
                     doc.Save(stream);
@@ -161,7 +165,7 @@ namespace Microsoft.Build.Tasks
             var cultureString = suggestedRedirect.CultureName;
             if (String.IsNullOrEmpty(cultureString))
             {
-                // We use "neutral" for "Invariant Language (Invariant Country)" in assembly names.
+                // We use "neutral" for "Invariant Language (Invariant Country/Region)" in assembly names.
                 cultureString = "neutral";
             }
 
@@ -332,7 +336,12 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                document = XDocument.Load(appConfigItem.ItemSpec);
+                var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
+                using (XmlReader xr = XmlReader.Create(File.OpenRead(appConfigItem.ItemSpec), xrs))
+                {
+                    document = XDocument.Load(xr);
+                }
+
                 if (document.Root == null || document.Root.Name != "configuration")
                 {
                     Log.LogErrorWithCodeFromResources("GenerateBindingRedirects.MissingConfigurationNode");

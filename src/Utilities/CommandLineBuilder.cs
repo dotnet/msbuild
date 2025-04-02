@@ -15,7 +15,7 @@ namespace Microsoft.Build.Utilities
 {
     /// <summary>
     /// (1) Make sure values containing hyphens are quoted (RC at least requires this)
-    /// (2) Escape any embedded quotes. 
+    /// (2) Escape any embedded quotes.
     ///     -- Literal double quotes should be written in the form \" not ""
     ///     -- Backslashes falling just before doublequotes must be doubled.
     ///     -- Literal double quotes can only occur in pairs (you cannot pass a single literal double quote)
@@ -23,38 +23,38 @@ namespace Microsoft.Build.Utilities
     /// 	    in switches like /Dname=value.
     /// </summary>
     /// <remarks>
-    /// 
+    ///
     /// Below are some quoting experiments, using the /D switch with the CL and RC preprocessor.
     /// The /D switch is a little more tricky than most switches, because it has a name=value pair.
     /// The table below contains what the preprocessor actually embeds when passed the switch in the
     /// first column:
-    /// 
+    ///
     ///                      CL via cmd line         CL via response file       RC
-    ///     /DFOO="A"                A                   A   
+    ///     /DFOO="A"                A                   A
     ///     /D"FOO="A""              A                   A                       A
-    ///     /DFOO=A                  A                   A   
-    ///     /D"FOO=A"                A                   A   
+    ///     /DFOO=A                  A                   A
+    ///     /D"FOO=A"                A                   A
     ///     /DFOO=""A""              A                   A                       A
-    ///         
+    ///
     ///     /DFOO=\"A\"             "A"                                         "A"
     ///     /DFOO="""A"""           "A"                broken                   "A"
     ///     /D"FOO=\"A\""           "A"                                         "A"
     ///     /D"FOO=""A"""           "A"                                         "A"
-    ///         
-    ///     /DFOO="A B"             A B                 A B 
-    ///     /D"FOO=A B"             A B                 A B 
-    ///         
-    ///     /D"FOO="A B""          broken      
-    ///     /DFOO=\"A B\"          broken      
+    ///
+    ///     /DFOO="A B"             A B                 A B
+    ///     /D"FOO=A B"             A B                 A B
+    ///
+    ///     /D"FOO="A B""          broken
+    ///     /DFOO=\"A B\"          broken
     ///     /D"FOO=\"A B\""        "A B"               "A B"                   "A B"
     ///     /D"FOO=""A B"""        "A B"               broken                  broken
     ///
-    /// From my experiments (with CL and RC only) it seems that 
+    /// From my experiments (with CL and RC only) it seems that
     ///    -- Literal double quotes are most reliably written in the form \" not ""
     ///    -- Backslashes falling just before doublequotes must be doubled.
     ///    -- Values containing literal double quotes must be quoted.
     ///    -- Literal double quotes can only occur in pairs (you cannot pass a single literal double quote)
-    ///    -- For /Dname=value style switches, functional double quotes (for example to handle spaces) are best put around both 
+    ///    -- For /Dname=value style switches, functional double quotes (for example to handle spaces) are best put around both
     ///           name and value (in other words, these kinds of switches don't need special treatment for their '=' signs).
     ///    -- Values containing hyphens should be quoted; RC requires this, and CL does not mind.
     /// </remarks>
@@ -136,10 +136,10 @@ namespace Microsoft.Build.Utilities
         private readonly bool _useNewLineSeparator;
 
         /// <summary>
-        /// Instead of defining which characters must be quoted, define 
+        /// Instead of defining which characters must be quoted, define
         /// which characters we know its safe to not quote. This way leads
-        /// to more false-positives (which still work, but don't look as 
-        /// nice coming out of the logger), but is less likely to leave a 
+        /// to more false-positives (which still work, but don't look as
+        /// nice coming out of the logger), but is less likely to leave a
         /// security hole.
         /// </summary>
         private Regex _allowedUnquoted;
@@ -154,14 +154,14 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Use a private property so that we can lazy initialize the regex
         /// </summary>
-        private Regex DefinitelyNeedQuotes => _definitelyNeedQuotes
-            ?? (_definitelyNeedQuotes = new Regex(_quoteHyphens ? s_definitelyNeedQuotesRegexWithHyphen : s_definitelyNeedQuotesRegexNoHyphen, RegexOptions.CultureInvariant));
+        private Regex DefinitelyNeedQuotes => _definitelyNeedQuotes ??=
+            new Regex(_quoteHyphens ? s_definitelyNeedQuotesRegexWithHyphen : s_definitelyNeedQuotesRegexNoHyphen, RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Use a private getter property to we can lazy initialize the regex
         /// </summary>
-        private Regex AllowedUnquoted => _allowedUnquoted
-            ?? (_allowedUnquoted = new Regex(_quoteHyphens ? s_allowedUnquotedRegexNoHyphen : s_allowedUnquotedRegexWithHyphen, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
+        private Regex AllowedUnquoted => _allowedUnquoted ??=
+            new Regex(_quoteHyphens ? s_allowedUnquotedRegexNoHyphen : s_allowedUnquotedRegexWithHyphen, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Checks the given switch parameter to see if it must/can be quoted.
@@ -247,7 +247,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="unquotedTextToAppend"></param>
         protected void AppendQuotedTextToBuffer(StringBuilder buffer, string unquotedTextToAppend)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buffer, nameof(buffer));
+            ErrorUtilities.VerifyThrowArgumentNull(buffer);
 
             if (unquotedTextToAppend != null)
             {
@@ -259,6 +259,9 @@ namespace Microsoft.Build.Utilities
                 }
 
                 // Count the number of quotes
+#if NET
+                int literalQuotes = unquotedTextToAppend.AsSpan().Count('"');
+#else
                 int literalQuotes = 0;
                 for (int i = 0; i < unquotedTextToAppend.Length; i++)
                 {
@@ -267,6 +270,8 @@ namespace Microsoft.Build.Utilities
                         literalQuotes++;
                     }
                 }
+#endif
+
                 if (literalQuotes > 0)
                 {
                     // Replace any \" sequences with \\"
@@ -311,7 +316,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Appends a file name. Quotes are added if they are needed. 
+        /// Appends a file name. Quotes are added if they are needed.
         /// If the first character of the file name is a dash, ".\" is prepended to avoid confusing the file name with a switch
         /// This method does not append a space to the command line before executing.
         /// </summary>
@@ -399,7 +404,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">The delimiter between file names</param>
         public void AppendFileNamesIfNotNull(string[] fileNames, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
+            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
 
             if (fileNames?.Length > 0)
             {
@@ -434,7 +439,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between items in the command line</param>
         public void AppendFileNamesIfNotNull(ITaskItem[] fileItems, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
+            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
 
             if (fileItems?.Length > 0)
             {
@@ -478,7 +483,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="switchName">The switch to append to the command line, may not be null</param>
         public void AppendSwitch(string switchName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
 
             AppendSpaceIfNotEmpty();
             AppendTextUnquoted(switchName);
@@ -495,7 +500,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="parameter">Switch parameter to append, quoted if necessary. If null, this method has no effect.</param>
         public void AppendSwitchIfNotNull(string switchName, string parameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
 
             if (parameter != null)
             {
@@ -544,7 +549,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="parameter">Switch parameter to append, quoted if necessary. If null, this method has no effect.</param>
         public void AppendSwitchIfNotNull(string switchName, ITaskItem parameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
 
             if (parameter != null)
             {
@@ -565,8 +570,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between individual parameters, may not be null (may be empty)</param>
         public void AppendSwitchIfNotNull(string switchName, string[] parameters, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
 
             if (parameters?.Length > 0)
             {
@@ -597,8 +602,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between individual parameters, may not be null (may be empty)</param>
         public void AppendSwitchIfNotNull(string switchName, ITaskItem[] parameters, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
 
             if (parameters?.Length > 0)
             {
@@ -635,7 +640,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="parameter">Switch parameter to append, not quoted. If null, this method has no effect.</param>
         public void AppendSwitchUnquotedIfNotNull(string switchName, string parameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
 
             if (parameter != null)
             {
@@ -656,7 +661,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="parameter">Switch parameter to append, not quoted. If null, this method has no effect.</param>
         public void AppendSwitchUnquotedIfNotNull(string switchName, ITaskItem parameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
 
             if (parameter != null)
             {
@@ -676,8 +681,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between individual parameters, may not be null (may be empty)</param>
         public void AppendSwitchUnquotedIfNotNull(string switchName, string[] parameters, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
 
             if (parameters?.Length > 0)
             {
@@ -707,8 +712,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between individual parameters, may not be null (may be empty)</param>
         public void AppendSwitchUnquotedIfNotNull(string switchName, ITaskItem[] parameters, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
 
             if (parameters?.Length > 0)
             {

@@ -20,7 +20,6 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-#if !MONO
     /// <summary>
     /// These tests run. The temporary output folder for this test is Path.Combine(Path.GetTempPath(), DateTime.Now.Ticks.ToString())
     /// 1. When combination of (xml, xmlfile) x (xsl, xslfile).
@@ -68,12 +67,10 @@ namespace Microsoft.Build.UnitTests
         private readonly string _xslDocument = "<xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" xmlns:msxsl=\"urn:schemas-microsoft-com:xslt\" exclude-result-prefixes=\"msxsl\"><xsl:output method=\"xml\" indent=\"yes\"/><xsl:template match=\"@* | node()\"><surround><xsl:copy><xsl:apply-templates select=\"@* | node()\"/></xsl:copy></surround></xsl:template></xsl:stylesheet>";
 
 
-#if FEATURE_COMPILED_XSL
         /// <summary>
         /// The contents of another xsl document for tests
         /// </summary>
         private readonly string _xslDocument2 = "<?xml version = \"1.0\" ?><xsl:stylesheet version=\"1.0\" xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"><xsl:template match = \"myInclude\"><xsl:apply-templates select = \"document(@path)\"/></xsl:template><xsl:template match = \"@*|node()\"><xsl:copy><xsl:apply-templates select = \"@*|node()\"/></xsl:copy></xsl:template></xsl:stylesheet>";
-#endif
         /// <summary>
         /// The contents of xslparameters for tests.
         /// </summary>
@@ -129,7 +126,7 @@ namespace Microsoft.Build.UnitTests
                             t.XmlInputPaths = (TaskItem[])xmlValue;
                             break;
                         default:
-                            Assert.True(false, "Test error");
+                            Assert.Fail("Test error");
                             break;
                     }
 
@@ -145,7 +142,7 @@ namespace Microsoft.Build.UnitTests
                             t.XslCompiledDllPath = (TaskItem)xslValue;
                             break;
                         default:
-                            Assert.True(false, "Test error");
+                            Assert.Fail("Test error");
                             break;
                     }
 
@@ -190,7 +187,7 @@ namespace Microsoft.Build.UnitTests
                         t.XmlInputPaths = (TaskItem[])xmlValue;
                         break;
                     default:
-                        Assert.True(false, "Test error");
+                        Assert.Fail("Test error");
                         break;
                 }
 
@@ -239,7 +236,7 @@ namespace Microsoft.Build.UnitTests
                         t.XslCompiledDllPath = (TaskItem)xslValue;
                         break;
                     default:
-                        Assert.True(false, "Test error");
+                        Assert.Fail("Test error");
                         break;
                 }
 
@@ -1040,7 +1037,6 @@ namespace Microsoft.Build.UnitTests
             CleanUp(dir);
         }
 
-#if FEATURE_COMPILED_XSL
         /// <summary>
         /// Validate that the XslTransformation task allows use of the document function
         /// </summary>
@@ -1094,7 +1090,6 @@ namespace Microsoft.Build.UnitTests
 
             CleanUp(dir);
         }
-#endif
 
         /// <summary>
         /// Prepares the test environment, creates necessary files.
@@ -1217,7 +1212,7 @@ namespace Microsoft.Build.UnitTests
             }
             catch (Exception e)
             {
-                Assert.True(false, "Compiler didn't work" + e.ToString());
+                Assert.Fail("Compiler didn't work" + e.ToString());
             }
 
             asmBldr.Save(Path.GetFileName(outputFile), PortableExecutableKinds.ILOnly, ImageFileMachine.I386);
@@ -1263,5 +1258,4 @@ namespace Microsoft.Build.UnitTests
 #endif
         #endregion
     }
-#endif
 }

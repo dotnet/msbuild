@@ -11,7 +11,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #pragma warning disable 0219
 
@@ -299,8 +298,8 @@ namespace Microsoft.Build.UnitTests
             });
         }
         /// <summary>
-        /// Create a TaskItem with a null metadata value -- this is allowed, but 
-        /// internally converted to the empty string. 
+        /// Create a TaskItem with a null metadata value -- this is allowed, but
+        /// internally converted to the empty string.
         /// </summary>
         [Fact]
         public void CreateTaskItemWithNullMetadata()
@@ -313,8 +312,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Set metadata value to null value -- this is allowed, but 
-        /// internally converted to the empty string. 
+        /// Set metadata value to null value -- this is allowed, but
+        /// internally converted to the empty string.
         /// </summary>
         [Fact]
         public void SetNullMetadataValue()
@@ -324,9 +323,28 @@ namespace Microsoft.Build.UnitTests
             item.GetMetadata("m").ShouldBe(string.Empty);
         }
 
+        [Fact]
+        public void ImplementsIMetadataContainer()
+        {
+            Dictionary<string, string> metadata = new()
+            {
+                { "a", "a1" },
+                { "b", "b1" },
+            };
+
+            TaskItem item = new TaskItem("foo");
+            IMetadataContainer metadataContainer = (IMetadataContainer)item;
+
+            metadataContainer.ImportMetadata(metadata);
+
+            var actualMetadata = metadataContainer.EnumerateMetadata().OrderBy(metadata => metadata.Key).ToList();
+            var expectedMetadata = metadata.OrderBy(metadata => metadata.Value).ToList();
+            Assert.True(actualMetadata.SequenceEqual(expectedMetadata));
+        }
+
 #if FEATURE_APPDOMAIN
         /// <summary>
-        /// Test that task items can be successfully constructed based on a task item from another appdomain.  
+        /// Test that task items can be successfully constructed based on a task item from another appdomain.
         /// </summary>
         [Fact]
         public void RemoteTaskItem()
@@ -388,7 +406,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Miniature class to be remoted to another appdomain that just creates some TaskItems and makes them available for returning. 
+        /// Miniature class to be remoted to another appdomain that just creates some TaskItems and makes them available for returning.
         /// </summary>
         private sealed class TaskItemCreator
 #if FEATURE_APPDOMAIN
@@ -405,11 +423,11 @@ namespace Microsoft.Build.UnitTests
             }
 
             /// <summary>
-            /// Creates task items 
+            /// Creates task items
             /// </summary>
             public void Run(string[] includes, IDictionary<string, string> metadataToAdd)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(includes, nameof(includes));
+                ErrorUtilities.VerifyThrowArgumentNull(includes);
 
                 CreatedTaskItems = new TaskItem[includes.Length];
 

@@ -25,7 +25,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Go though an enumeration and create a sorted list of strings which can be parsed as versions. Keep around the original 
+        /// Go though an enumeration and create a sorted list of strings which can be parsed as versions. Keep around the original
         /// string because it may contain a v and this would be required to create the correct path on disk if the string was part of a path.
         /// </summary>
         internal static SortedDictionary<Version, List<string>> GatherVersionStrings(Version targetPlatformVersion, IEnumerable versions)
@@ -74,7 +74,7 @@ namespace Microsoft.Build.Shared
             // Versions must have at least a Major and a Minor (e.g. 10.0), so if it's
             // just one number without a decimal, add a decimal and a 0. Random strings
             // like "tmp" will be filtered out in the Parse() or TryParse() steps
-            if (version.IndexOf(".") == -1)
+            if (version.IndexOf('.') == -1)
             {
                 version += ".0";
             }

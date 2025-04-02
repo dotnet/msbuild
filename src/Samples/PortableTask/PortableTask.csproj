@@ -18,6 +18,6 @@
 
   <!-- This is only needed for a test in the MSBuild repo; it is unrelated to the PortableTask sample itself. -->
   <Target Name="CopyMSBuildUtilitiesToNewFolder" BeforeTargets="CopyFilesToOutputDirectory">
-    <Copy SourceFiles="$(PkgMicrosoft_Build_Utilities_Core)\lib\net46\Microsoft.Build.Utilities.Core.dll" DestinationFiles="$(OutDir)\OldMSBuild\Microsoft.Build.Utilities.Core.dll" />
+    <Copy SourceFiles="$(PkgMicrosoft_Build_Utilities_Core)\lib\net46\Microsoft.Build.Utilities.Core.dll" DestinationFiles="$(OutDir)\OldMSBuild\Microsoft.Build.Utilities.Core.dll" SkipUnchangedFiles="true"/>
   </Target>
 </Project>

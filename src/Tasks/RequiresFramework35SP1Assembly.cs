@@ -79,7 +79,12 @@ namespace Microsoft.Build.Tasks
         {
             if (version.StartsWith("v", StringComparison.OrdinalIgnoreCase))
             {
-                return new Version(version.Substring(1));
+                return Version.Parse(
+#if NET
+                    version.AsSpan(1));
+#else
+                    version.Substring(1));
+#endif
             }
             return new Version(version);
         }
@@ -145,7 +150,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Is this file's IncludeHash set to false?
         /// Is this file System.Data.Entity.dll?
-        /// Is this file Client Sentinel Assembly? 
+        /// Is this file Client Sentinel Assembly?
         /// </summary>
         private static bool IsExcludedFileOrSP1File(ITaskItem candidateFile)
         {

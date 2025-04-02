@@ -99,9 +99,8 @@ namespace Microsoft.Build.Shared
             name.CodeBase = assemblyNameToClone.CodeBase;
             name.KeyPair = assemblyNameToClone.KeyPair;
             name.VersionCompatibility = assemblyNameToClone.VersionCompatibility;
-#elif !MONO
+#else
             // Setting the culture name creates a new CultureInfo, leading to many allocations. Only set CultureName when the CultureInfo member is not available.
-            // CultureName not available on Mono
             name.CultureName = assemblyNameToClone.CultureName;
 #endif
 
@@ -167,9 +166,10 @@ namespace Microsoft.Build.Shared
 
             var allCulturesEnumValue = Enum.Parse(cultureTypesType, "AllCultures", true);
 
-            var cultures = s_cultureInfoGetCultureMethod.Invoke(null, new[] { allCulturesEnumValue }) as CultureInfo[];
+            var cultures = s_cultureInfoGetCultureMethod.Invoke(null, [allCulturesEnumValue]) as CultureInfo[];
 
-            FrameworkErrorUtilities.VerifyThrowInternalNull(cultures, "CultureInfo.GetCultures should work if all reflection checks pass");
+            // CultureInfo.GetCultures should work if all reflection checks pass
+            FrameworkErrorUtilities.VerifyThrowInternalNull(cultures);
 
             return cultures;
         }

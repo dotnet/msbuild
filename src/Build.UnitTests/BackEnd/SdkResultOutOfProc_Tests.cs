@@ -77,9 +77,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         public void Dispose()
         {
-            _buildManager.Dispose();
-            _projectCollection.Dispose();
-            _env.Dispose();
+            try
+            {
+                _buildManager.Dispose();
+                _projectCollection.Dispose();
+            }
+            finally
+            {
+                _env.Dispose();
+            }
             EvaluationContext.TestOnlyHookOnCreate = null;
         }
 

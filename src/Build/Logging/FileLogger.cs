@@ -7,6 +7,7 @@ using System.Text;
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -15,7 +16,7 @@ namespace Microsoft.Build.Logging
 {
     /// <summary>
     /// A specialization of the ConsoleLogger that logs to a file instead of the console.
-    /// The output in terms of what is written and how it looks is identical. For example you can 
+    /// The output in terms of what is written and how it looks is identical. For example you can
     /// log verbosely to a file using the FileLogger while simultaneously logging only high priority events
     /// to the console using a ConsoleLogger.
     /// </summary>
@@ -39,6 +40,11 @@ namespace Microsoft.Build.Logging
                 colorReset: BaseConsoleLogger.DontResetColor)
         {
             WriteHandler = Write;
+
+            if (EncodingUtilities.GetExternalOverriddenUILanguageIfSupportableWithEncoding() != null)
+            {
+                _encoding = Encoding.UTF8;
+            }
         }
 
         #endregion
@@ -50,7 +56,7 @@ namespace Microsoft.Build.Logging
         /// <param name="eventSource">Available events.</param>
         public override void Initialize(IEventSource eventSource)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(eventSource, nameof(eventSource));
+            ErrorUtilities.VerifyThrowArgumentNull(eventSource);
             eventSource.BuildFinished += FileLoggerBuildFinished;
             InitializeFileLogger(eventSource, 1);
         }
@@ -82,6 +88,9 @@ namespace Microsoft.Build.Logging
             // Finally, ask the base console logger class to initialize. It may
             // want to make decisions based on our verbosity, so we do this last.
             base.Initialize(eventSource, nodeCount);
+            KnownTelemetry.LoggingConfigurationTelemetry.FileLoggersCount++;
+            KnownTelemetry.LoggingConfigurationTelemetry.FileLogger = true;
+            KnownTelemetry.LoggingConfigurationTelemetry.FileLoggerVerbosity = Verbosity.ToString();
 
             if (!SkipProjectStartedText && Verbosity >= LoggerVerbosity.Normal)
             {

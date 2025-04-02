@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -42,5 +44,32 @@ namespace Microsoft.Build.Framework
         /// The name of the uninitialized property that was read.
         /// </summary>
         public string PropertyName { get; set; }
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+
+            writer.WriteOptionalString(PropertyName);
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            base.CreateFromStream(reader, version);
+
+            PropertyName = reader.ReadOptionalString();
+        }
+
+        public override string Message
+        {
+            get
+            {
+                if (RawMessage == null)
+                {
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("UninitializedPropertyRead", PropertyName);
+                }
+
+                return RawMessage;
+            }
+        }
     }
 }

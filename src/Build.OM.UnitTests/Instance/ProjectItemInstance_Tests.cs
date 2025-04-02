@@ -3,18 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Shouldly;
+using Microsoft.Build.UnitTests.Shared;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -24,12 +19,19 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for ProjectItemInstance public members
     /// </summary>
-    public class ProjectItemInstance_Tests
+    public class ProjectItemInstance_Tests : IDisposable
     {
         /// <summary>
         /// The number of built-in metadata for items.
         /// </summary>
         public const int BuiltInMetadataCount = 15;
+        private Lazy<DummyMappedDrive> _mappedDrive = DummyMappedDriveUtils.GetLazyDummyMappedDrive();
+
+
+        public void Dispose()
+        {
+            _mappedDrive.Value?.Dispose();
+        }
 
         internal const string TargetItemWithInclude = @"
             <Project>
@@ -96,6 +98,49 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
+        /// Basic ProjectItemInstance with metadata added using ImportMetadata
+        /// </summary>
+        [Fact]
+        public void AccessorsWithImportedMetadata()
+        {
+            ProjectItemInstance item = GetItemInstance();
+
+            ((IMetadataContainer)item).ImportMetadata(new Dictionary<string, string>
+            {
+                { "m1", "v1" },
+                { "m2", "v2" },
+            });
+
+            Assert.Equal("m1", item.GetMetadata("m1").Name);
+            Assert.Equal("m2", item.GetMetadata("m2").Name);
+            Assert.Equal("v1", item.GetMetadataValue("m1"));
+            Assert.Equal("v2", item.GetMetadataValue("m2"));
+        }
+
+        /// <summary>
+        /// ImportMetadata adds and overwrites metadata, does not delete existing metadata
+        /// </summary>
+        [Fact]
+        public void ImportMetadataAddsAndOverwrites()
+        {
+            ProjectItemInstance item = GetItemInstance();
+
+            item.SetMetadata("m1", "v1");
+            item.SetMetadata("m2", "v0");
+
+            ((IMetadataContainer)item).ImportMetadata(new Dictionary<string, string>
+            {
+                { "m2", "v2" },
+                { "m3", "v3" },
+            });
+
+            // m1 was not deleted, m2 was overwritten, m3 was added
+            Assert.Equal("v1", item.GetMetadataValue("m1"));
+            Assert.Equal("v2", item.GetMetadataValue("m2"));
+            Assert.Equal("v3", item.GetMetadataValue("m3"));
+        }
+
+        /// <summary>
         /// Get metadata not present
         /// </summary>
         [Fact]
@@ -105,6 +150,56 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Null(item.GetMetadata("X"));
             Assert.Equal(String.Empty, item.GetMetadataValue("X"));
         }
+
+        [Fact]
+        public void CopyMetadataToTaskItem()
+        {
+            ProjectItemInstance fromItem = GetItemInstance();
+
+            fromItem.SetMetadata("m1", "v1");
+            fromItem.SetMetadata("m2", "v2");
+
+            ITaskItem toItem = new Utilities.TaskItem();
+
+            ((ITaskItem)fromItem).CopyMetadataTo(toItem);
+
+            Assert.Equal("v1", toItem.GetMetadata("m1"));
+            Assert.Equal("v2", toItem.GetMetadata("m2"));
+        }
+
+#if FEATURE_APPDOMAIN
+        private sealed class RemoteTaskItemFactory : MarshalByRefObject
+        {
+            public ITaskItem CreateTaskItem() => new Utilities.TaskItem();
+        }
+
+        [Fact]
+        public void CopyMetadataToRemoteTaskItem()
+        {
+            ProjectItemInstance fromItem = GetItemInstance();
+
+            fromItem.SetMetadata("m1", "v1");
+            fromItem.SetMetadata("m2", "v2");
+
+            AppDomain appDomain = null;
+            try
+            {
+                appDomain = AppDomain.CreateDomain("CopyMetadataToRemoteTaskItem", null, AppDomain.CurrentDomain.SetupInformation);
+                RemoteTaskItemFactory itemFactory = (RemoteTaskItemFactory)appDomain.CreateInstanceFromAndUnwrap(typeof(RemoteTaskItemFactory).Module.FullyQualifiedName, typeof(RemoteTaskItemFactory).FullName);
+
+                ITaskItem toItem = itemFactory.CreateTaskItem();
+
+                ((ITaskItem)fromItem).CopyMetadataTo(toItem);
+
+                Assert.Equal("v1", toItem.GetMetadata("m1"));
+                Assert.Equal("v2", toItem.GetMetadata("m2"));
+            }
+            finally
+            {
+                AppDomain.Unload(appDomain);
+            }
+        }
+#endif
 
         /// <summary>
         /// Set include
@@ -906,33 +1001,30 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Log warning for drive enumerating wildcards that exist in projects on Windows platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
         [WindowsOnlyTheory]
         [InlineData(
             TargetItemWithIncludeAndExclude,
-            @"z:$(Microsoft_WindowsAzure_EngSys)\**\*",
+            @"%DRIVE%:$(Microsoft_WindowsAzure_EngSys)\**\*",
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
-
-        [InlineData(
-            TargetItemWithIncludeAndExclude,
-            @"$(Microsoft_WindowsAzure_EngSys)\*.pdb",
-            @"z:$(Microsoft_WindowsAzure_EngSys)\**\*")]
 
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)**",
             null,
             "Microsoft_WindowsAzure_EngSys",
-            @"z:\")]
+            @"%DRIVE%:\")]
 
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)\**\*",
             null,
             "Microsoft_WindowsAzure_EngSys",
-            @"z:")]
+            @"%DRIVE%:")]
         public void LogWindowsWarningUponBuildingProjectWithDriveEnumeration(string content, string include, string exclude = null, string property = null, string propertyValue = null)
         {
+            include = DummyMappedDriveUtils.UpdatePathToMappedDrive(include, _mappedDrive.Value.MappedDriveLetter);
+            exclude = DummyMappedDriveUtils.UpdatePathToMappedDrive(exclude, _mappedDrive.Value.MappedDriveLetter);
+            propertyValue = DummyMappedDriveUtils.UpdatePathToMappedDrive(propertyValue, _mappedDrive.Value.MappedDriveLetter);
             content = (string.IsNullOrEmpty(property) && string.IsNullOrEmpty(propertyValue)) ?
                 string.Format(content, include, exclude) :
                 string.Format(content, property, propertyValue, include);
@@ -947,7 +1039,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Log warning for drive enumerating wildcards that exist in projects on Unix platform.
         /// </summary>
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7330")]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/8373")]
         [UnixOnlyTheory]
         [InlineData(
             TargetWithDefinedPropertyAndItemWithInclude,
@@ -1069,7 +1161,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// </summary>
         private static IList<ProjectItemInstance> GetItems(string content)
         {
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             ProjectInstance project = new ProjectInstance(xml);
 
             return Helpers.MakeList(project.GetItems("i"));

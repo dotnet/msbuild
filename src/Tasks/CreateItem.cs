@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -29,7 +29,7 @@ namespace Microsoft.Build.Tasks
         public bool PreserveExistingMetadata { get; set; } = false;
 
         /// <summary>
-        /// A list of metadata name/value pairs to apply to the output items.  
+        /// A list of metadata name/value pairs to apply to the output items.
         /// A typical input: "metadataname1=metadatavalue1", "metadataname2=metadatavalue2", ...
         /// </summary>
         /// <remarks>
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Tasks
         ///     The fact that this is a `string[]` makes the following illegal:
         ///         `<CreateItem AdditionalMetadata="TargetPath=@(OutputPathItem)" />`
         ///     The engine fails on this because it doesn't like item lists being concatenated with string
-        ///     constants when the data is being passed into an array parameter.  So the workaround is to 
+        ///     constants when the data is being passed into an array parameter.  So the workaround is to
         ///     write this in the project file:
         ///         `<CreateItem AdditionalMetadata="@(OutputPathItem-&gt;'TargetPath=%(Identity)')" />`
         ///     ]]>
@@ -61,8 +61,8 @@ namespace Microsoft.Build.Tasks
             }
 
             // Expand wild cards.
-            (Include, bool expandedInclude) = TryExpandingWildcards(Include, XMakeAttributes.include);
-            (Exclude, bool expandedExclude) = TryExpandingWildcards(Exclude, XMakeAttributes.exclude);
+            (Include, bool expandedInclude) = TryExpandWildcards(Include, XMakeAttributes.include);
+            (Exclude, bool expandedExclude) = TryExpandWildcards(Exclude, XMakeAttributes.exclude);
 
             // Execution stops if wildcard expansion fails due to drive enumeration and related env var is set.
             if (!(expandedInclude && expandedExclude))
@@ -94,6 +94,7 @@ namespace Microsoft.Build.Tasks
             return !Log.HasLoggedErrors;
         }
 
+#nullable enable
         /// <summary>
         /// Create the list of output items.
         /// </summary>
@@ -118,7 +119,7 @@ namespace Microsoft.Build.Tasks
                             {
                                 if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(nameAndValue.Key))
                                 {
-                                    // Explicitly setting built-in metadata, is not allowed. 
+                                    // Explicitly setting built-in metadata, is not allowed.
                                     Log.LogErrorWithCodeFromResources("CreateItem.AdditionalMetadataError", nameAndValue.Key);
                                     break;
                                 }
@@ -133,54 +134,19 @@ namespace Microsoft.Build.Tasks
             return outputItems;
         }
 
-        /// <summary>
-        /// Attempts to expand wildcards and logs warnings or errors for attempted drive enumeration.
-        /// </summary>
-        private (ITaskItem[] Element, bool NoLoggedErrors) TryExpandingWildcards(ITaskItem[] expand, string attributeType)
-        {
-            const string CreateItemTask = nameof(CreateItem);
-
-            string fileSpec;
-            FileMatcher.SearchAction searchAction;
-
-            (expand, searchAction, fileSpec) = ExpandWildcards(expand);
-
-            // Log potential drive enumeration glob anomalies when applicable.
-            if (searchAction == FileMatcher.SearchAction.LogDriveEnumeratingWildcard)
-            {
-                Log.LogWarningWithCodeFromResources(
-                    "WildcardResultsInDriveEnumeration",
-                    EscapingUtilities.UnescapeAll(fileSpec),
-                    attributeType,
-                    CreateItemTask,
-                    BuildEngine.ProjectFileOfTaskNode);
-            }
-            else if (searchAction == FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard)
-            {
-                Log.LogErrorWithCodeFromResources(
-                    "WildcardResultsInDriveEnumeration",
-                    EscapingUtilities.UnescapeAll(fileSpec),
-                    attributeType,
-                    CreateItemTask,
-                    BuildEngine.ProjectFileOfTaskNode);
-            }
-
-            return (expand, !Log.HasLoggedErrors);
-        }
 
         /// <summary>
         /// Expand wildcards in the item list.
         /// </summary>
-        private static (ITaskItem[] Element, FileMatcher.SearchAction Action, string FileSpec) ExpandWildcards(ITaskItem[] expand)
+        private (ITaskItem[]? Element, bool NoLoggedErrors) TryExpandWildcards(ITaskItem[]? expand, string attributeType)
         {
             // Used to detect and log drive enumerating wildcard patterns.
             string[] files;
-            FileMatcher.SearchAction action = FileMatcher.SearchAction.None;
             string itemSpec = string.Empty;
 
             if (expand == null)
             {
-                return (null, action, itemSpec);
+                return (null, true);
             }
             else
             {
@@ -189,28 +155,51 @@ namespace Microsoft.Build.Tasks
                 {
                     if (FileMatcher.HasWildcards(i.ItemSpec))
                     {
-                        (files, action, _) = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
-                        itemSpec = i.ItemSpec;
-                        if (action == FileMatcher.SearchAction.FailOnDriveEnumeratingWildcard)
+                        FileMatcher.Default.GetFileSpecInfo(i.ItemSpec, out string directoryPart, out string wildcardPart, out string filenamePart, out bool needsRecursion, out bool isLegalFileSpec);
+                        bool logDriveEnumeratingWildcard = FileMatcher.IsDriveEnumeratingWildcardPattern(directoryPart, wildcardPart);
+                        if (logDriveEnumeratingWildcard)
                         {
-                            return (expanded.ToArray(), action, itemSpec);
+                            Log.LogWarningWithCodeFromResources(
+                                "WildcardResultsInDriveEnumeration",
+                                EscapingUtilities.UnescapeAll(i.ItemSpec),
+                                attributeType,
+                                nameof(CreateItem),
+                                BuildEngine.ProjectFileOfTaskNode);
                         }
 
-                        foreach (string file in files)
+                        if (logDriveEnumeratingWildcard && Traits.Instance.ThrowOnDriveEnumeratingWildcard)
                         {
-                            TaskItem newItem = new TaskItem(i) { ItemSpec = file };
-
-                            // Compute the RecursiveDir portion.
-                            FileMatcher.Result match = FileMatcher.Default.FileMatch(i.ItemSpec, file);
-                            if (match.isLegalFileSpec && match.isMatch)
+                            Log.LogErrorWithCodeFromResources(
+                                "WildcardResultsInDriveEnumeration",
+                                EscapingUtilities.UnescapeAll(i.ItemSpec),
+                                attributeType,
+                                nameof(CreateItem),
+                                BuildEngine.ProjectFileOfTaskNode);
+                        }
+                        else if (isLegalFileSpec)
+                        {
+                            (files, _, _, string? globFailure) = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
+                            if (globFailure != null)
                             {
-                                if (!string.IsNullOrEmpty(match.wildcardDirectoryPart))
-                                {
-                                    newItem.SetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir, match.wildcardDirectoryPart);
-                                }
+                                Log.LogMessage(MessageImportance.Low, globFailure);
                             }
 
-                            expanded.Add(newItem);
+                            foreach (string file in files)
+                            {
+                                TaskItem newItem = new TaskItem(i) { ItemSpec = file };
+
+                                // Compute the RecursiveDir portion.
+                                FileMatcher.Result match = FileMatcher.Default.FileMatch(i.ItemSpec, file);
+                                if (match.isLegalFileSpec && match.isMatch)
+                                {
+                                    if (!string.IsNullOrEmpty(match.wildcardDirectoryPart))
+                                    {
+                                        newItem.SetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir, match.wildcardDirectoryPart);
+                                    }
+                                }
+
+                                expanded.Add(newItem);
+                            }
                         }
                     }
                     else
@@ -218,7 +207,7 @@ namespace Microsoft.Build.Tasks
                         expanded.Add(i);
                     }
                 }
-                return (expanded.ToArray(), action, itemSpec);
+                return (expanded.ToArray(), !Log.HasLoggedErrors);
             }
         }
 

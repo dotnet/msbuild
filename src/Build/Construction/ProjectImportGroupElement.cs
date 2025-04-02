@@ -3,8 +3,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
@@ -33,7 +31,7 @@ namespace Microsoft.Build.Construction
         internal ProjectImportGroupElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -51,7 +49,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get any contained properties.
         /// </summary>
-        public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>(Children.OfType<ProjectImportElement>());
+        public ICollection<ProjectImportElement> Imports => GetChildrenOfType<ProjectImportElement>();
 
         #endregion // Properties
 
@@ -63,7 +61,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectImportElement AddImport(string project)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentLength(project);
 
             ProjectImportElement newImport = ContainingProject.CreateImportElement(project);
             AppendChild(newImport);

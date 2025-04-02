@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
@@ -47,7 +46,7 @@ namespace Microsoft.Build.Construction
         internal ProjectTaskElement(XmlElementWithLocation xmlElement, ProjectTargetElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -126,7 +125,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Gets any output children.
         /// </summary>
-        public ICollection<ProjectOutputElement> Outputs => new Collections.ReadOnlyCollection<ProjectOutputElement>(Children.OfType<ProjectOutputElement>());
+        public ICollection<ProjectOutputElement> Outputs => GetChildrenOfType<ProjectOutputElement>();
 
         /// <summary>
         /// Enumerable over the unevaluated parameters on the task.
@@ -213,7 +212,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                ErrorUtilities.VerifyThrow(Link == null, "External project");
+                ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
                 lock (_locker)
                 {
@@ -230,8 +229,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOutputElement AddOutputItem(string taskParameter, string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskParameter, nameof(taskParameter));
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowArgumentLength(taskParameter);
+            ErrorUtilities.VerifyThrowArgumentLength(itemType);
 
             return AddOutputItem(taskParameter, itemType, null);
         }
@@ -260,8 +259,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOutputElement AddOutputProperty(string taskParameter, string propertyName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskParameter, nameof(taskParameter));
-            ErrorUtilities.VerifyThrowArgumentLength(propertyName, nameof(propertyName));
+            ErrorUtilities.VerifyThrowArgumentLength(taskParameter);
+            ErrorUtilities.VerifyThrowArgumentLength(propertyName);
 
             return AddOutputProperty(taskParameter, propertyName, null);
         }
@@ -297,7 +296,7 @@ namespace Microsoft.Build.Construction
 
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+                ErrorUtilities.VerifyThrowArgumentLength(name);
 
                 EnsureParametersInitialized();
 
@@ -323,8 +322,8 @@ namespace Microsoft.Build.Construction
 
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-                ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
+                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
                 ErrorUtilities.VerifyThrowArgument(!XMakeAttributes.IsSpecialTaskAttribute(name), "CannotAccessKnownAttributes", name);
 
                 _parameters = null;
@@ -412,7 +411,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static ProjectTaskElement CreateDisconnected(string name, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             XmlElementWithLocation element = containingProject.CreateElement(name);
 
@@ -450,7 +449,7 @@ namespace Microsoft.Build.Construction
                     {
                         // By pulling off and caching the Location early here, it becomes frozen for the life of this object.
                         // That means that if the name of the file is changed after first load (possibly from null) it will
-                        // remain the old value here. Correctly, this should cache the attribute not the location. Fixing 
+                        // remain the old value here. Correctly, this should cache the attribute not the location. Fixing
                         // that will need profiling, though, as this cache was added for performance.
                         _parameters[attribute.Name] = (attribute.Value, attribute.Location);
                     }

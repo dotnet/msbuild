@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// There reference is not a well-formed fusion name *and* its not a file 
+    /// There reference is not a well-formed fusion name *and* its not a file
     /// that exists on disk.
     /// </summary>
     [Serializable]
@@ -26,6 +26,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct
         /// </summary>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         private InvalidReferenceAssemblyNameException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }

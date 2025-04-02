@@ -49,6 +49,9 @@ namespace Microsoft.Build.Framework
 
         IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata() => Metadata;
 
+        void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
+            => throw new InvalidOperationException($"{nameof(TaskItemData)} does not support write operations");
+
         public int MetadataCount => Metadata.Count;
 
         public ICollection MetadataNames => (ICollection)Metadata.Keys;
@@ -63,7 +66,7 @@ namespace Microsoft.Build.Framework
 
         public void CopyMetadataTo(ITaskItem destinationItem)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException($"{nameof(TaskItemData)} does not support write operations");
         }
 
         public string GetMetadata(string metadataName)
@@ -74,12 +77,12 @@ namespace Microsoft.Build.Framework
 
         public void RemoveMetadata(string metadataName)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException($"{nameof(TaskItemData)} does not support write operations");
         }
 
         public void SetMetadata(string metadataName, string metadataValue)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException($"{nameof(TaskItemData)} does not support write operations");
         }
 
         public override string ToString()

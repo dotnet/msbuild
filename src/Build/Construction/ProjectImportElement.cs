@@ -35,7 +35,7 @@ namespace Microsoft.Build.Construction
         internal ProjectImportElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject, SdkReference sdkReference = null)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
             SdkReference = sdkReference;
         }
 
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the Project value. 
+        /// Gets or sets the Project value.
         /// </summary>
         public string Project
         {

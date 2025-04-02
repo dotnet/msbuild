@@ -7,11 +7,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
@@ -23,24 +25,24 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>
-    internal static class Utilities
+    internal static partial class Utilities
     {
         /// <summary>
-        /// Save off the contents of the environment variable that specifies whether we should treat higher toolsversions as the current 
+        /// Save off the contents of the environment variable that specifies whether we should treat higher toolsversions as the current
         /// toolsversion.  (Some hosts require this.)
         /// </summary>
         private static bool s_shouldTreatHigherToolsVersionsAsCurrent = (Environment.GetEnvironmentVariable("MSBUILDTREATHIGHERTOOLSVERSIONASCURRENT") != null);
 
         /// <summary>
-        /// Save off the contents of the environment variable that specifies whether we should treat all toolsversions, regardless of 
+        /// Save off the contents of the environment variable that specifies whether we should treat all toolsversions, regardless of
         /// whether they are higher or lower, as the current toolsversion.  (Some hosts require this.)
         /// </summary>
         private static bool s_shouldTreatOtherToolsVersionsAsCurrent = (Environment.GetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT") != null);
 
         /// <summary>
-        /// If set, default to the ToolsVersion from the project file (or if that doesn't isn't set, default to 2.0).  Otherwise, use Dev12+ 
-        /// defaulting logic: first check the MSBUILDDEFAULTTOOLSVERSION environment variable, then check for a DefaultOverrideToolsVersion, 
-        /// then if both fail, use the current ToolsVersion. 
+        /// If set, default to the ToolsVersion from the project file (or if that doesn't isn't set, default to 2.0).  Otherwise, use Dev12+
+        /// defaulting logic: first check the MSBUILDDEFAULTTOOLSVERSION environment variable, then check for a DefaultOverrideToolsVersion,
+        /// then if both fail, use the current ToolsVersion.
         /// </summary>
         private static bool s_uselegacyDefaultToolsVersionBehavior = (Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION") != null);
 
@@ -56,10 +58,10 @@ namespace Microsoft.Build.Internal
 
         /// <summary>
         /// INTERNAL FOR UNIT-TESTING ONLY
-        /// 
-        /// We've got several environment variables that we read into statics since we don't expect them to ever 
-        /// reasonably change, but we need some way of refreshing their values so that we can modify them for 
-        /// unit testing purposes. 
+        ///
+        /// We've got several environment variables that we read into statics since we don't expect them to ever
+        /// reasonably change, but we need some way of refreshing their values so that we can modify them for
+        /// unit testing purposes.
         /// </summary>
         internal static void RefreshInternalEnvironmentValues()
         {
@@ -78,7 +80,7 @@ namespace Microsoft.Build.Internal
         {
             ErrorUtilities.VerifyThrow(s != null, "Need value to set.");
 
-            if (s.IndexOf('<') != -1)
+            if (s.Contains('<'))
             {
                 // If the value looks like it probably contains XML markup ...
                 try
@@ -94,7 +96,7 @@ namespace Microsoft.Build.Internal
                 }
             }
 
-            // The value does not contain valid XML markup.  Store it as text, so it gets 
+            // The value does not contain valid XML markup.  Store it as text, so it gets
             // escaped properly.
             node.InnerText = s;
         }
@@ -108,10 +110,10 @@ namespace Microsoft.Build.Internal
         {
             // XmlNode.InnerXml gives back a string that consists of the set of characters
             // in between the opening and closing elements of the XML node, without doing any
-            // unescaping.  Any "strange" character sequences (like "<![CDATA[...]]>" will remain 
+            // unescaping.  Any "strange" character sequences (like "<![CDATA[...]]>" will remain
             // exactly so and will not be translated or interpreted.  The only modification that
             // .InnerXml will do is that it will normalize any Xml contained within.  This means
-            // normalizing whitespace between XML attributes and quote characters that surround XML 
+            // normalizing whitespace between XML attributes and quote characters that surround XML
             // attributes.  If PreserveWhitespace is false, then it will also normalize whitespace
             // between elements.
             //
@@ -138,19 +140,19 @@ namespace Microsoft.Build.Internal
             // use ... InnerXml or InnerText.  There are two basic scenarios we care about.
             //
             // 1.)  The first scenario is that the user is trying to create a property whose
-            //      contents are actually XML.  That is to say that the contents may be written 
+            //      contents are actually XML.  That is to say that the contents may be written
             //      to a XML file, or may be passed in as a string to XmlDocument.LoadXml.
-            //      In this case, we would want to use XmlNode.InnerXml, because we DO NOT want 
-            //      character sequences to be unescaped.  If we did unescape them, then whatever 
+            //      In this case, we would want to use XmlNode.InnerXml, because we DO NOT want
+            //      character sequences to be unescaped.  If we did unescape them, then whatever
             //      XML parser tried to read in the stream as XML later on would totally barf.
             //
             // 2.)  The second scenario is the the user is trying to create a property that
             //      is just intended to be treated as a string.  That string may be very large
             //      and could contain all sorts of whitespace, carriage returns, special characters,
-            //      etc.  But in the end, it's just a big string.  In this case, whatever 
+            //      etc.  But in the end, it's just a big string.  In this case, whatever
             //      task is actually processing this string ... it's not going to know anything
             //      about character sequences such as &amp; and &lt;.  These character sequences
-            //      are specific to XML markup.  So, here we want to use XmlNode.InnerText so that 
+            //      are specific to XML markup.  So, here we want to use XmlNode.InnerText so that
             //      the character sequences get unescaped into their actual character before
             //      the string is passed to the task (or wherever else the property is used).
             //      Of course, if the string value of the property needs to contain characters
@@ -220,7 +222,7 @@ namespace Microsoft.Build.Internal
             }
 
             // ...or it looks like the whole thing is a big CDATA tag ...
-            bool startsWithCData = (innerXml.IndexOf("<![CDATA[", StringComparison.Ordinal) == 0);
+            bool startsWithCData = innerXml.AsSpan().TrimStart().StartsWith("<![CDATA[".AsSpan(), StringComparison.Ordinal);
 
             if (startsWithCData)
             {
@@ -292,7 +294,12 @@ namespace Microsoft.Build.Internal
         }
 
         // used to find the xmlns attribute
-        private static readonly Regex s_xmlnsPattern = new Regex("xmlns=\"[^\"]*\"\\s*");
+#if NET
+        [GeneratedRegex("xmlns=\"[^\"]*\"\\s*")]
+        private static partial Regex XmlnsPattern { get; }
+#else
+        private static Regex XmlnsPattern { get; } = new Regex("xmlns=\"[^\"]*\"\\s*");
+#endif
 
         /// <summary>
         /// Removes the xmlns attribute from an XML string.
@@ -301,7 +308,7 @@ namespace Microsoft.Build.Internal
         /// <returns>The modified XML string.</returns>
         internal static string RemoveXmlNamespace(string xml)
         {
-            return s_xmlnsPattern.Replace(xml, String.Empty);
+            return XmlnsPattern.Replace(xml, String.Empty);
         }
 
         /// <summary>
@@ -309,23 +316,23 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static string CreateToolsVersionListString(IEnumerable<Toolset> toolsets)
         {
-            string toolsVersionList = String.Empty;
+            StringBuilder sb = StringBuilderCache.Acquire();
+
             foreach (Toolset toolset in toolsets)
             {
-                toolsVersionList += "\"" + toolset.ToolsVersion + "\", ";
+                if (sb.Length != 0)
+                {
+                    sb.Append(", ");
+                }
+
+                sb.Append('"').Append(toolset.ToolsVersion).Append('"');
             }
 
-            // Remove trailing comma and space
-            if (toolsVersionList.Length > 0)
-            {
-                toolsVersionList = toolsVersionList.Substring(0, toolsVersionList.Length - 2);
-            }
-
-            return toolsVersionList;
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
         /// <summary>
-        /// Figure out what ToolsVersion to use to actually build the project with. 
+        /// Figure out what ToolsVersion to use to actually build the project with.
         /// </summary>
         /// <param name="explicitToolsVersion">The user-specified ToolsVersion (through e.g. /tv: on the command line)</param>
         /// <param name="toolsVersionFromProject">The ToolsVersion from the project file</param>
@@ -338,8 +345,8 @@ namespace Microsoft.Build.Internal
         {
             string toolsVersionToUse = explicitToolsVersion;
 
-            // hosts may need to treat toolsversions later than the current one as the current one ... or may just 
-            // want to treat all toolsversions as though they're the current one, so give them that ability 
+            // hosts may need to treat toolsversions later than the current one as the current one ... or may just
+            // want to treat all toolsversions as though they're the current one, so give them that ability
             // through an environment variable
             if (s_shouldTreatOtherToolsVersionsAsCurrent)
             {
@@ -361,15 +368,15 @@ namespace Microsoft.Build.Internal
                     }
                 }
 
-                // If ToolsVersion has not either been explicitly set or been overridden via one of the methods 
+                // If ToolsVersion has not either been explicitly set or been overridden via one of the methods
                 // mentioned above
                 if (toolsVersionToUse == null)
                 {
-                    // We want to generate the ToolsVersion based on the legacy behavior if EITHER: 
-                    // - the environment variable (MSBUILDLEGACYDEFAULTTOOLSVERSION) is set 
-                    // - the current ToolsVersion doesn't actually exist.  This is extremely unlikely 
-                    //   to happen normally, but may happen in checked-in toolset scenarios, in which 
-                    //   case we want to make sure we're at least as tolerant as Dev11 was. 
+                    // We want to generate the ToolsVersion based on the legacy behavior if EITHER:
+                    // - the environment variable (MSBUILDLEGACYDEFAULTTOOLSVERSION) is set
+                    // - the current ToolsVersion doesn't actually exist.  This is extremely unlikely
+                    //   to happen normally, but may happen in checked-in toolset scenarios, in which
+                    //   case we want to make sure we're at least as tolerant as Dev11 was.
                     Toolset currentToolset = null;
 
                     if (getToolset != null)
@@ -377,11 +384,11 @@ namespace Microsoft.Build.Internal
                         currentToolset = getToolset(MSBuildConstants.CurrentToolsVersion);
                     }
 
-                    // if we want to do the legacy behavior, act as we did through Dev11:  
+                    // if we want to do the legacy behavior, act as we did through Dev11:
                     // - If project file defines a ToolsVersion that has a valid toolset associated with it, use that
                     // - Otherwise, if project file defines an invalid ToolsVersion, use the current ToolsVersion
-                    // - Otherwise, if project file does not define a ToolsVersion, use the default ToolsVersion (must 
-                    //   be "2.0" since 2.0 projects did not have a ToolsVersion field). 
+                    // - Otherwise, if project file does not define a ToolsVersion, use the default ToolsVersion (must
+                    //   be "2.0" since 2.0 projects did not have a ToolsVersion field).
                     if (s_uselegacyDefaultToolsVersionBehavior || (getToolset != null && currentToolset == null))
                     {
                         if (!String.IsNullOrEmpty(toolsVersionFromProject))
@@ -389,8 +396,8 @@ namespace Microsoft.Build.Internal
                             toolsVersionToUse = toolsVersionFromProject;
 
                             // If we can tell that the toolset specified in the project is not present
-                            // then we'll use the current version.  Otherwise, we'll assume our caller 
-                            // knew what it was doing. 
+                            // then we'll use the current version.  Otherwise, we'll assume our caller
+                            // knew what it was doing.
                             if (getToolset != null && getToolset(toolsVersionToUse) == null)
                             {
                                 toolsVersionToUse = MSBuildConstants.CurrentToolsVersion;
@@ -403,9 +410,9 @@ namespace Microsoft.Build.Internal
                     }
                     else
                     {
-                        // Otherwise, first check to see if the default ToolsVersion has been set in the environment.  
-                        // Ideally we'll check to make sure it's a valid ToolsVersion, but if we don't have the ability 
-                        // to do so, we'll assume the person who set the environment variable knew what they were doing. 
+                        // Otherwise, first check to see if the default ToolsVersion has been set in the environment.
+                        // Ideally we'll check to make sure it's a valid ToolsVersion, but if we don't have the ability
+                        // to do so, we'll assume the person who set the environment variable knew what they were doing.
                         if (!String.IsNullOrEmpty(s_defaultToolsVersionFromEnvironment))
                         {
                             if (getToolset == null || getToolset(s_defaultToolsVersionFromEnvironment) != null)
@@ -414,11 +421,11 @@ namespace Microsoft.Build.Internal
                             }
                         }
 
-                        // Otherwise, check to see if the override default toolsversion from the toolset works.  Though 
-                        // it's attached to the Toolset, it's actually MSBuild version dependent, so any loaded Toolset 
-                        // should have the same one. 
+                        // Otherwise, check to see if the override default toolsversion from the toolset works.  Though
+                        // it's attached to the Toolset, it's actually MSBuild version dependent, so any loaded Toolset
+                        // should have the same one.
                         //
-                        // And if that doesn't work, then just fall back to the current ToolsVersion. 
+                        // And if that doesn't work, then just fall back to the current ToolsVersion.
                         if (toolsVersionToUse == null)
                         {
                             if (getToolset != null && currentToolset != null)
@@ -462,15 +469,15 @@ namespace Microsoft.Build.Internal
         /// Retrieves properties derived from the current
         /// environment variables.
         /// </summary>
-        internal static PropertyDictionary<ProjectPropertyInstance> GetEnvironmentProperties()
+        internal static PropertyDictionary<ProjectPropertyInstance> GetEnvironmentProperties(bool makeReadOnly)
         {
             IDictionary<string, string> environmentVariablesBag = CommunicationsUtilities.GetEnvironmentVariables();
 
-            PropertyDictionary<ProjectPropertyInstance> environmentProperties = new PropertyDictionary<ProjectPropertyInstance>(environmentVariablesBag.Count + 2);
+            var envPropertiesHashSet = new RetrievableValuedEntryHashSet<ProjectPropertyInstance>(environmentVariablesBag.Count + 2, MSBuildNameIgnoreCaseComparer.Default);
 
-            // We set the MSBuildExtensionsPath variables here because we don't want to make them official 
-            // reserved properties; we need the ability for people to override our default in their 
-            // environment or as a global property.  
+            // We set the MSBuildExtensionsPath variables here because we don't want to make them official
+            // reserved properties; we need the ability for people to override our default in their
+            // environment or as a global property.
 
 #if !FEATURE_INSTALLED_MSBUILD
             string extensionsPath = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
@@ -483,31 +490,31 @@ namespace Microsoft.Build.Internal
                                           ? Path.Combine(programFiles32, ReservedPropertyNames.extensionsPathSuffix)
                                           : programFiles32;
 #endif
-            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath32, extensionsPath32, true));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath32, extensionsPath32, true));
 
 #if !FEATURE_INSTALLED_MSBUILD
             string extensionsPath64 = extensionsPath;
-            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
 #else
-            // "MSBuildExtensionsPath64". This points to whatever the value of "Program Files" environment variable is on a 
+            // "MSBuildExtensionsPath64". This points to whatever the value of "Program Files" environment variable is on a
             // 64-bit machine, and is empty on a 32-bit machine.
             if (FrameworkLocationHelper.programFiles64 != null)
             {
-                // if ProgramFiles and ProgramFiles(x86) are the same, then this is a 32-bit box, 
+                // if ProgramFiles and ProgramFiles(x86) are the same, then this is a 32-bit box,
                 // so we only want to set MSBuildExtensionsPath64 if they're not
                 string extensionsPath64 = NativeMethodsShared.IsWindows
                                               ? Path.Combine(
                                                   FrameworkLocationHelper.programFiles64,
                                                   ReservedPropertyNames.extensionsPathSuffix)
                                               : FrameworkLocationHelper.programFiles64;
-                environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
+                envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
             }
 #endif
 
 #if FEATURE_INSTALLED_MSBUILD
-            // MSBuildExtensionsPath:  The way this used to work is that it would point to "Program Files\MSBuild" on both 
+            // MSBuildExtensionsPath:  The way this used to work is that it would point to "Program Files\MSBuild" on both
             // 32-bit and 64-bit machines.  We have a switch to continue using that behavior; however the default is now for
-            // MSBuildExtensionsPath to always point to the same location as MSBuildExtensionsPath32. 
+            // MSBuildExtensionsPath to always point to the same location as MSBuildExtensionsPath32.
 
             bool useLegacyMSBuildExtensionsPathBehavior = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH"));
 
@@ -523,13 +530,13 @@ namespace Microsoft.Build.Internal
             }
 #endif
 
-            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath, extensionsPath, true));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath, extensionsPath, true));
 
             // Windows XP and Windows Server 2003 don't define LocalAppData in their environment.
             // We'll set it here if the environment doesn't have it so projects can reliably
             // depend on $(LocalAppData).
             string localAppData = String.Empty;
-            ProjectPropertyInstance localAppDataProp = environmentProperties.GetProperty(ReservedPropertyNames.localAppData);
+            ProjectPropertyInstance localAppDataProp = envPropertiesHashSet.Get(ReservedPropertyNames.localAppData);
             if (localAppDataProp != null)
             {
                 localAppData = localAppDataProp.EvaluatedValue;
@@ -551,11 +558,11 @@ namespace Microsoft.Build.Internal
             }
 
 
-            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.localAppData, localAppData));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.localAppData, localAppData));
 
             // Add MSBuildUserExtensionsPath at $(LocalAppData)\Microsoft\MSBuild
             string userExtensionsPath = Path.Combine(localAppData, ReservedPropertyNames.userExtensionsPathSuffix);
-            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.userExtensionsPath, userExtensionsPath));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.userExtensionsPath, userExtensionsPath));
 
             foreach (KeyValuePair<string, string> environmentVariable in environmentVariablesBag)
             {
@@ -570,7 +577,7 @@ namespace Microsoft.Build.Internal
                 {
                     ProjectPropertyInstance environmentProperty = ProjectPropertyInstance.Create(environmentVariableName, environmentVariable.Value);
 
-                    environmentProperties.Set(environmentProperty);
+                    envPropertiesHashSet.Add(environmentProperty);
                 }
                 else
                 {
@@ -579,11 +586,17 @@ namespace Microsoft.Build.Internal
                 }
             }
 
+            if (makeReadOnly)
+            {
+                envPropertiesHashSet.MakeReadOnly();
+            }
+
+            var environmentProperties = new PropertyDictionary<ProjectPropertyInstance>(envPropertiesHashSet);
             return environmentProperties;
         }
 
         /// <summary>
-        /// Extension to IEnumerable to get the count if it 
+        /// Extension to IEnumerable to get the count if it
         /// can be quickly gotten, otherwise 0.
         /// </summary>
         public static int FastCountOrZero(this IEnumerable enumerable)
@@ -604,55 +617,48 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
-        {
-            while (enumerator.MoveNext())
-            {
-                yield return enumerator.Current;
-            }
-        }
-
-        public static T[] ToArray<T>(this IEnumerator<T> enumerator)
-        {
-            return enumerator.ToEnumerable().ToArray();
-        }
-
-        public static void EnumerateProperties<TArg>(IEnumerable properties, TArg arg, Action<TArg, KeyValuePair<string, string>> callback)
+        /// <summary>
+        /// Iterates through the nongeneric enumeration and provides generic strong-typed enumeration of properties.
+        /// </summary>
+        public static IEnumerable<PropertyData> EnumerateProperties(IEnumerable properties)
         {
             if (properties == null)
             {
-                return;
+                return [];
             }
 
             if (properties is PropertyDictionary<ProjectPropertyInstance> propertyInstanceDictionary)
             {
-                propertyInstanceDictionary.Enumerate((key, value) =>
-                {
-                    callback(arg, new KeyValuePair<string, string>(key, value));
-                });
+                return propertyInstanceDictionary.Enumerate();
             }
             else if (properties is PropertyDictionary<ProjectProperty> propertyDictionary)
             {
-                propertyDictionary.Enumerate((key, value) =>
-                {
-                    callback(arg, new KeyValuePair<string, string>(key, value));
-                });
+                return propertyDictionary.Enumerate();
             }
             else
             {
-                foreach (var item in properties)
+                return CastOneByOne(properties);
+            }
+
+            IEnumerable<PropertyData> CastOneByOne(IEnumerable props)
+            {
+                foreach (var item in props)
                 {
                     if (item is IProperty property && !string.IsNullOrEmpty(property.Name))
                     {
-                        callback(arg, new KeyValuePair<string, string>(property.Name, property.EvaluatedValue ?? string.Empty));
+                        yield return new(property.Name, property.EvaluatedValue ?? string.Empty);
                     }
                     else if (item is DictionaryEntry dictionaryEntry && dictionaryEntry.Key is string key && !string.IsNullOrEmpty(key))
                     {
-                        callback(arg, new KeyValuePair<string, string>(key, dictionaryEntry.Value as string ?? string.Empty));
+                        yield return new(key, dictionaryEntry.Value as string ?? string.Empty);
                     }
                     else if (item is KeyValuePair<string, string> kvp)
                     {
-                        callback(arg, kvp);
+                        yield return new(kvp.Key, kvp.Value);
+                    }
+                    else if (item is KeyValuePair<string, TimeSpan> keyTimeSpanValue)
+                    {
+                        yield return new(keyTimeSpanValue.Key, keyTimeSpanValue.Value.Ticks.ToString());
                     }
                     else
                     {
@@ -669,61 +675,169 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        public static void EnumerateItems(IEnumerable items, Action<DictionaryEntry> callback)
+        /// <summary>
+        /// Iterates through the nongeneric enumeration and provides generic strong-typed callback to handle the properties.
+        /// </summary>
+        public static void EnumerateProperties<TArg>(IEnumerable properties, TArg arg, Action<TArg, KeyValuePair<string, string>> callback)
         {
+            foreach (var tuple in EnumerateProperties(properties))
+            {
+                callback(arg, new KeyValuePair<string, string>(tuple.Name, tuple.Value));
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types.
+        /// </summary>
+        public static IEnumerable<ItemData> EnumerateItems(IEnumerable items)
+        {
+            // The actual type of the item data can be of types:
+            //  * <see cref="ProjectItemInstance"/>
+            //  * <see cref="ProjectItem"/>
+            //  * <see cref="IItem"/>
+            //  * <see cref="ITaskItem"/>
+            //  * possibly others
+            // That's why we here wrap with ItemAccessor if needed
+
+            if (items == null)
+            {
+                return [];
+            }
+
             if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
             {
-                projectItemInstanceDictionary.EnumerateItemsPerType((itemType, itemList) =>
-                {
-                    foreach (var item in itemList)
-                    {
-                        callback(new DictionaryEntry(itemType, item));
-                    }
-                });
+                return projectItemInstanceDictionary
+                    .EnumerateItemsPerType()
+                    .Select(t => t.itemValue.Select(itemValue => new ItemData(t.itemType, (IItemData)itemValue)))
+                    .SelectMany(tpl => tpl);
             }
             else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
             {
-                projectItemDictionary.EnumerateItemsPerType((itemType, itemList) =>
-                {
-                    foreach (var item in itemList)
-                    {
-                        callback(new DictionaryEntry(itemType, item));
-                    }
-                });
+                return projectItemDictionary
+                    .EnumerateItemsPerType()
+                    .Select(t => t.itemValue.Select(itemValue => new ItemData(t.itemType, (IItemData)itemValue)))
+                    .SelectMany(tpl => tpl);
             }
             else
             {
-                foreach (var item in items)
-                {
-                    string itemType = default;
-                    object itemValue = null;
+                return CastItemsOneByOne(items, null);
+            }
+        }
 
-                    if (item is IItem iitem)
+        /// <summary>
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types.
+        /// Only items with matching type (case insensitive, MSBuild valid names only) will be returned.
+        /// </summary>
+        public static IEnumerable<ItemData> EnumerateItemsOfType(IEnumerable items, string typeName)
+        {
+            if (items == null)
+            {
+                return [];
+            }
+
+            if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
+            {
+                return
+                    projectItemInstanceDictionary[typeName]
+                        .Select(i => new ItemData(i.ItemType, (IItemData)i));
+            }
+            else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
+            {
+                return
+                    projectItemDictionary[typeName]
+                        .Select(i => new ItemData(i.ItemType, (IItemData)i));
+            }
+            else
+            {
+                return CastItemsOneByOne(items, [typeName]);
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types.
+        /// Only items with matching type (case insensitive, MSBuild valid names only) will be returned.
+        /// </summary>
+        public static IEnumerable<ItemData> EnumerateItemsOfTypes(IEnumerable items, string[] typeNames)
+        {
+            if (items == null)
+            {
+                return [];
+            }
+
+            if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
+            {
+                return typeNames.Select(typeName =>
+                    projectItemInstanceDictionary[typeName]
+                        .Select(i => new ItemData(i.ItemType, (IItemData)i)))
+                        .SelectMany(j => j);
+            }
+            else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
+            {
+                return typeNames.Select(typeName =>
+                        projectItemDictionary[typeName]
+                            .Select(i => new ItemData(i.ItemType, (IItemData)i)))
+                    .SelectMany(j => j);
+            }
+            else
+            {
+                return CastItemsOneByOne(items, typeNames);
+            }
+        }
+
+        /// <summary>
+        /// Iterates through the nongeneric enumeration of items and provides generic strong-typed callback to handle the items.
+        /// </summary>
+        public static void EnumerateItems(IEnumerable items, Action<DictionaryEntry> callback)
+        {
+            foreach (var tuple in EnumerateItems(items))
+            {
+                callback(new DictionaryEntry(tuple.Type, tuple.Value));
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the nongeneric items and attempts to cast them.
+        /// </summary>
+        /// <param name="items">Nongeneric list of items.</param>
+        /// <param name="itemTypeNamesToFetch">If not null, only the items with matching type (case insensitive, MSBuild valid names only) will be returned.</param>
+        /// <returns></returns>
+        private static IEnumerable<ItemData> CastItemsOneByOne(IEnumerable items, string[] itemTypeNamesToFetch)
+        {
+            foreach (var item in items)
+            {
+                string itemType = default;
+                object itemValue = null;
+
+                if (item is IItem iitem)
+                {
+                    itemType = iitem.Key;
+                    itemValue = iitem;
+                }
+                else if (item is DictionaryEntry dictionaryEntry)
+                {
+                    itemType = dictionaryEntry.Key as string;
+                    itemValue = dictionaryEntry.Value;
+                }
+                else
+                {
+                    if (item == null)
                     {
-                        itemType = iitem.Key;
-                        itemValue = iitem;
-                    }
-                    else if (item is DictionaryEntry dictionaryEntry)
-                    {
-                        itemType = dictionaryEntry.Key as string;
-                        itemValue = dictionaryEntry.Value;
+                        Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
                     }
                     else
                     {
-                        if (item == null)
-                        {
-                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
-                        }
-                        else
-                        {
-                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
-                        }
+                        Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
                     }
+                }
 
-                    if (!String.IsNullOrEmpty(itemType))
-                    {
-                        callback(new DictionaryEntry(itemType, itemValue));
-                    }
+                // if itemTypeNameToFetch was not set - then return all items
+                if (itemValue != null && (itemTypeNamesToFetch == null || itemTypeNamesToFetch.Any(tp => MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, tp))))
+                {
+                    // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
+                    //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
+                    // However! NodePacketTranslator and BuildEventArgsReader might deserialize those as TaskItemData
+                    //  (see xml comments of TaskItemData for details)
+                    yield return new ItemData(itemType!, itemValue);
                 }
             }
         }

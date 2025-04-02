@@ -205,7 +205,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         {
                             try
                             {
-                                var sr = new StreamReader(fs);
+                                using var sr = new StreamReader(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, 1024, leaveOpen: true);
                                 string data = sr.ReadToEnd();
                                 if (!string.IsNullOrEmpty(data))
                                 {
@@ -255,7 +255,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 Internet => SecurityZone.Internet,
                 _ => throw new ArgumentException(String.Empty /* no message */, nameof(targetZone)),
             };
-            var evidence = new Evidence(new EvidenceBase[] { new Zone(zone), new System.Runtime.Hosting.ActivationArguments(new System.ApplicationIdentity("")) }, null);
+            var evidence = new Evidence([new Zone(zone), new System.Runtime.Hosting.ActivationArguments(new System.ApplicationIdentity(""))], null);
 
             PermissionSet sandbox = SecurityManager.GetStandardSandbox(evidence);
             string resultInString = sandbox.ToString();
@@ -455,7 +455,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             else
             {
-                a = Array.Empty<string>();
+                a = [];
             }
             return a;
         }
@@ -610,14 +610,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SupportedOSPlatform("windows")]
         public static void SignFile(string certPath, SecureString certPassword, Uri timestampUrl, string path)
         {
-            X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
+            using X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
             SignFile(cert, timestampUrl, path);
         }
 
         private static bool UseSha256Algorithm(X509Certificate2 cert)
         {
             Oid oid = cert.SignatureAlgorithm;
-            // Issue 6732: Clickonce does not support sha384/sha512 file hash so we default to sha256 
+            // Issue 6732: Clickonce does not support sha384/sha512 file hash so we default to sha256
             // for certs with that signature algorithm.
             return string.Equals(oid.FriendlyName, "sha256RSA", StringComparison.OrdinalIgnoreCase) ||
                    string.Equals(oid.FriendlyName, "sha384RSA", StringComparison.OrdinalIgnoreCase) ||
@@ -694,8 +694,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     try
                     {
                         var doc = new XmlDocument { PreserveWhitespace = true };
-                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                        using (XmlReader xr = XmlReader.Create(path, xrSettings))
+                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                        FileStream fs = File.OpenRead(path);
+
+                        using (XmlReader xr = XmlReader.Create(fs, xrSettings))
                         {
                             doc.Load(xr);
                         }
@@ -703,8 +705,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         CmiManifestSigner2 signer;
                         if (useSha256 && rsa is RSACryptoServiceProvider rsacsp)
                         {
-                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
-                            signer = new CmiManifestSigner2(csp, cert, useSha256);
+#pragma warning disable CA2000 // Dispose objects before losing scope because CmiManifestSigner2 will dispose the RSACryptoServiceProvider
+                            signer = new CmiManifestSigner2(SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256), cert, useSha256);
+#pragma warning restore CA2000 // Dispose objects before losing scope
                         }
                         else
                         {
@@ -838,7 +841,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 commandLine.AppendFormat(CultureInfo.InvariantCulture,
                                             "{0} {1} ",
-                                            useRFC3161Timestamp ? "/tr" : "/t",
+                                            useRFC3161Timestamp ? "/td sha256 /tr" : "/t",
                                             timestampUrl.ToString());
             }
             commandLine.AppendFormat(CultureInfo.InvariantCulture, "\"{0}\"", path);

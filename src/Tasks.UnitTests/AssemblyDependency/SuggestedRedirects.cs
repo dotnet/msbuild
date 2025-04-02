@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
@@ -19,7 +18,7 @@ using Xunit.Abstractions;
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     /// <summary>
-    /// Unit tests for the ResolveAssemblyReference task that involve, among other things, checking suggested redirects 
+    /// Unit tests for the ResolveAssemblyReference task that involve, among other things, checking suggested redirects
     /// </summary>
     public sealed class SuggestedRedirects : ResolveAssemblyReferenceTestFixture
     {

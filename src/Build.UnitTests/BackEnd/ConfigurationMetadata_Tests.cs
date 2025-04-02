@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -150,7 +148,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>");
 
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            Project project = new Project(XmlReader.Create(new StringReader(projectBody)), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            using ProjectFromString projectFromString = new(projectBody, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            Project project = projectFromString.Project;
             project.FullPath = "file";
 
             return project;

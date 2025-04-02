@@ -3,7 +3,6 @@
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Xunit;
 
 #nullable disable
@@ -28,7 +27,7 @@ namespace Microsoft.Build.UnitTests.Logging
             });
         }
         /// <summary>
-        /// Verify the correct exception is thrown when the logger is initialized with a null 
+        /// Verify the correct exception is thrown when the logger is initialized with a null
         /// event source.
         /// </summary>
         [Fact]

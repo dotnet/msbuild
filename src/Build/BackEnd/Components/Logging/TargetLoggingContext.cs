@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
@@ -37,13 +36,23 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Creates a new target logging context from an existing project context and target.
         /// </summary>
         internal TargetLoggingContext(ProjectLoggingContext projectLoggingContext, string projectFullPath, ProjectTargetInstance target, string parentTargetName, TargetBuiltReason buildReason)
-            : base(projectLoggingContext)
+            : base(projectLoggingContext, CreateInitialContext(projectLoggingContext, projectFullPath, target, parentTargetName, buildReason))
         {
             _projectLoggingContext = projectLoggingContext;
             _target = target;
 
-            this.BuildEventContext = LoggingService.LogTargetStarted(projectLoggingContext.BuildEventContext, target.Name, projectFullPath, target.Location.File, parentTargetName, buildReason);
             this.IsValid = true;
+        }
+
+        private static BuildEventContext CreateInitialContext(ProjectLoggingContext projectLoggingContext,
+            string projectFullPath, ProjectTargetInstance target, string parentTargetName,
+            TargetBuiltReason buildReason)
+        {
+            BuildEventContext buildEventContext = projectLoggingContext.LoggingService.LogTargetStarted(
+                projectLoggingContext.BuildEventContext, target.Name, projectFullPath, target.Location.File,
+                parentTargetName, buildReason);
+
+            return buildEventContext;
         }
 
         /// <summary>
@@ -91,7 +100,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void LogTargetBatchFinished(string projectFullPath, bool success, IEnumerable<TaskItem> targetOutputs)
         {
-            ErrorUtilities.VerifyThrow(IsValid, "Should be valid");
+            this.CheckValidity();
 
             TargetOutputItemsInstanceEnumeratorProxy targetOutputWrapper = null;
 
@@ -108,11 +117,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Log that a task is about to start
         /// </summary>
-        internal TaskLoggingContext LogTaskBatchStarted(string projectFullPath, ProjectTargetInstanceChild task)
+        internal TaskLoggingContext LogTaskBatchStarted(string projectFullPath, ProjectTargetInstanceChild task, string taskAssemblyLocation)
         {
-            ErrorUtilities.VerifyThrow(IsValid, "Should be valid");
+            this.CheckValidity();
 
-            return new TaskLoggingContext(this, projectFullPath, task);
+            return new TaskLoggingContext(this, projectFullPath, task, taskAssemblyLocation);
         }
 
         /// <summary>
@@ -121,7 +130,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <remarks>
         /// This class is designed to be passed to loggers.
-        /// The expense of copying items is only incurred if and when 
+        /// The expense of copying items is only incurred if and when
         /// a logger chooses to enumerate over it.
         /// </remarks>
         internal class TargetOutputItemsInstanceEnumeratorProxy : IEnumerable<TaskItem>

@@ -145,6 +145,11 @@ namespace Microsoft.Build.Execution
         private PropertyDictionary<ProjectPropertyInstance> _globalProperties = new PropertyDictionary<ProjectPropertyInstance>();
 
         /// <summary>
+        /// Properties passed from the command line (e.g. by using /p:).
+        /// </summary>
+        private ICollection<string> _propertiesFromCommandLine;
+
+        /// <summary>
         /// The loggers.
         /// </summary>
         private IEnumerable<ILogger> _loggers;
@@ -205,6 +210,12 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private bool _logInitialPropertiesAndItems;
 
+        private bool _question;
+
+        private bool _isBuildCheckEnabled;
+
+        private bool _isTelemetryEnabled;
+
         /// <summary>
         /// The settings used to load the project under build
         /// </summary>
@@ -218,12 +229,14 @@ namespace Microsoft.Build.Execution
 
         private string _outputResultsCacheFile;
 
+        private bool _reportFileAccesses;
+
         /// <summary>
         /// Constructor for those who intend to set all properties themselves.
         /// </summary>
         public BuildParameters()
         {
-            Initialize(Utilities.GetEnvironmentProperties(), new ProjectRootElementCache(false), null);
+            Initialize(Utilities.GetEnvironmentProperties(makeReadOnly: false), new ProjectRootElementCache(false), null);
         }
 
         /// <summary>
@@ -232,7 +245,7 @@ namespace Microsoft.Build.Execution
         /// <param name="projectCollection">The ProjectCollection from which the BuildParameters should populate itself.</param>
         public BuildParameters(ProjectCollection projectCollection)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
+            ErrorUtilities.VerifyThrowArgumentNull(projectCollection);
 
             Initialize(new PropertyDictionary<ProjectPropertyInstance>(projectCollection.EnvironmentProperties), projectCollection.ProjectRootElementCache, new ToolsetProvider(projectCollection.Toolsets));
 
@@ -242,6 +255,7 @@ namespace Microsoft.Build.Execution
             _defaultToolsVersion = projectCollection.DefaultToolsVersion;
 
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(projectCollection.GlobalPropertiesCollection);
+            _propertiesFromCommandLine = projectCollection.PropertiesFromCommandLine;
         }
 
         /// <summary>
@@ -257,7 +271,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal BuildParameters(BuildParameters other, bool resetEnvironment = false)
         {
-            ErrorUtilities.VerifyThrowInternalNull(other, nameof(other));
+            ErrorUtilities.VerifyThrowInternalNull(other);
 
             _buildId = other._buildId;
             _culture = other._culture;
@@ -271,6 +285,7 @@ namespace Microsoft.Build.Execution
             _environmentProperties = other._environmentProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._environmentProperties) : null;
             _forwardingLoggers = other._forwardingLoggers != null ? new List<ForwardingLoggerRecord>(other._forwardingLoggers) : null;
             _globalProperties = other._globalProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._globalProperties) : null;
+            _propertiesFromCommandLine = other._propertiesFromCommandLine != null ? new HashSet<string>(other._propertiesFromCommandLine, StringComparer.OrdinalIgnoreCase) : null;
             HostServices = other.HostServices;
             _loggers = other._loggers != null ? new List<ILogger>(other._loggers) : null;
             _maxNodeCount = other._maxNodeCount;
@@ -301,8 +316,12 @@ namespace Microsoft.Build.Execution
             _projectIsolationMode = other.ProjectIsolationMode;
             _inputResultsCacheFiles = other._inputResultsCacheFiles;
             _outputResultsCacheFile = other._outputResultsCacheFile;
+            _reportFileAccesses = other._reportFileAccesses;
             DiscardBuildResults = other.DiscardBuildResults;
             LowPriority = other.LowPriority;
+            Question = other.Question;
+            IsBuildCheckEnabled = other.IsBuildCheckEnabled;
+            IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
@@ -321,6 +340,10 @@ namespace Microsoft.Build.Execution
             set => _useSynchronousLogging = value;
         }
 
+        /// <summary>
+        /// Properties passed from the command line (e.g. by using /p:).
+        /// </summary>
+        public ICollection<string> PropertiesFromCommandLine => _propertiesFromCommandLine;
 
         /// <summary>
         /// Indicates whether to emit a default error if a task returns false without logging an error.
@@ -798,6 +821,17 @@ namespace Microsoft.Build.Execution
             set => _outputResultsCacheFile = value;
         }
 
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Gets or sets a value indicating whether file accesses should be reported to any configured project cache plugins.
+        /// </summary>
+        public bool ReportFileAccesses
+        {
+            get => _reportFileAccesses;
+            set => _reportFileAccesses = value;
+        }
+#endif
+
         /// <summary>
         /// Determines whether MSBuild will save the results of builds after EndBuild to speed up future builds.
         /// </summary>
@@ -807,6 +841,35 @@ namespace Microsoft.Build.Execution
         /// Gets or sets a value indicating whether the build process should run as low priority.
         /// </summary>
         public bool LowPriority { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value that will error when the build process fails an incremental check.
+        /// </summary>
+        public bool Question
+        {
+            get => _question;
+            set => _question = value;
+        }
+
+        /// <summary>
+        /// Gets or sets an indication of build check enablement.
+        /// </summary>
+        public bool IsBuildCheckEnabled
+        {
+            get => _isBuildCheckEnabled;
+            set => _isBuildCheckEnabled = value;
+        }
+
+        /// <summary>
+        /// Gets or sets an indication if telemetry is enabled.
+        /// This is reserved for future usage - we will likely add a whole dictionary of enablement per telemetry namespace
+        ///  as we plan to have variable sampling rate per various sources.
+        /// </summary>
+        internal bool IsTelemetryEnabled
+        {
+            get => _isTelemetryEnabled;
+            set => _isTelemetryEnabled = value;
+        }
 
         /// <summary>
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>
@@ -871,7 +934,11 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _logInitialPropertiesAndItems);
             translator.TranslateEnum(ref _projectLoadSettings, (int)_projectLoadSettings);
             translator.Translate(ref _interactive);
+            translator.Translate(ref _question);
+            translator.Translate(ref _isBuildCheckEnabled);
+            translator.Translate(ref _isTelemetryEnabled);
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
+            translator.Translate(ref _reportFileAccesses);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

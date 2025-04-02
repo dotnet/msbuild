@@ -4,8 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 #if DEBUG
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Reflection;
 #endif
 
@@ -18,13 +19,13 @@ namespace Microsoft.Build.Internal
     /// </summary>
     internal static class Tracing
     {
-        // Disabling warning about unused fields -- this is effectively a 
+        // Disabling warning about unused fields -- this is effectively a
         // debug-only class, so these fields cause a build break in RET
 #pragma warning disable 649
         /// <summary>
         /// A dictionary of named counters
         /// </summary>
-        private static Dictionary<string, int> s_counts;
+        private static readonly Dictionary<string, int> s_counts;
 
         /// <summary>
         /// Last time logging happened
@@ -34,7 +35,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// How often to log
         /// </summary>
-        private static TimeSpan s_interval;
+        private static readonly TimeSpan s_interval;
 
         /// <summary>
         /// A place callers can put something worth logging later
@@ -43,8 +44,8 @@ namespace Microsoft.Build.Internal
 
         /// <summary>
         /// Short name of the current assembly - to distinguish statics when this type is shared into different assemblies
-        /// </summary> 
-        private static string s_currentAssemblyName;
+        /// </summary>
+        private static readonly string s_currentAssemblyName;
 #pragma warning restore 649
 
 #if DEBUG
@@ -58,7 +59,7 @@ namespace Microsoft.Build.Internal
 
             string val = Environment.GetEnvironmentVariable("MSBUILDTRACEINTERVAL");
             double seconds;
-            if (!String.IsNullOrEmpty(val) && System.Double.TryParse(val, out seconds))
+            if (!String.IsNullOrEmpty(val) && System.Double.TryParse(val, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture.NumberFormat, out seconds))
             {
                 s_interval = TimeSpan.FromSeconds(seconds);
             }
@@ -94,7 +95,7 @@ namespace Microsoft.Build.Internal
         [Conditional("DEBUG")]
         internal static void Slot<K, V>(string tag, KeyValuePair<K, V> value)
         {
-            Slot(tag, value.Key.ToString() + "=" + value.Key.ToString());
+            Slot(tag, $"{value.Key}={value.Key}");
         }
 
         /// <summary>
@@ -140,7 +141,6 @@ namespace Microsoft.Build.Internal
         /// Dump all the named counters, if any
         /// </summary>
         [Conditional("DEBUG")]
-        [SuppressMessage("Microsoft.MSInternal", "CA908:AvoidTypesThatRequireJitCompilationInPrecompiledAssemblies", Justification = "Debug only")]
         internal static void Dump()
         {
             if (s_counts.Count > 0)

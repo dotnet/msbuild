@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
 
-            Assert.Null(project.UsingTasks.GetEnumerator().Current);
+            Assert.Empty(project.UsingTasks);
         }
 
         /// <summary>
@@ -356,7 +356,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -376,7 +376,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -395,7 +395,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -417,7 +417,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectUsingTaskElement usingTask = (ProjectUsingTaskElement)Helpers.GetFirst(project.Children);
             Assert.NotNull(usingTask);
             Assert.Equal(2, usingTask.Count);
@@ -443,7 +444,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Helpers.GetFirst(project.Children);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -464,7 +465,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Helpers.GetFirst(project.Children);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -478,7 +479,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectUsingTaskElement usingTask = (ProjectUsingTaskElement)Helpers.GetFirst(project.Children);
             return usingTask;
         }
@@ -495,7 +497,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectUsingTaskElement usingTask = (ProjectUsingTaskElement)Helpers.GetFirst(project.Children);
             return usingTask;
         }
@@ -511,7 +514,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectUsingTaskElement usingTask = (ProjectUsingTaskElement)Helpers.GetFirst(project.Children);
             return usingTask;
         }

@@ -8,19 +8,20 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Xml;
-
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+#if NET
 using Microsoft.Build.Framework;
+#endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 #if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
 #endif
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
@@ -191,11 +192,6 @@ namespace Microsoft.Build.Evaluation
         private Expander<ProjectPropertyInstance, ProjectItemInstance> _expander;
 
         /// <summary>
-        /// Bag of properties for the expander to expand the properties and items in the using tasks files
-        /// </summary>
-        private PropertyDictionary<ProjectPropertyInstance> _propertyBag;
-
-        /// <summary>
         /// SubToolsets that map to this toolset.
         /// </summary>
         private Dictionary<string, SubToolset> _subToolsets;
@@ -275,10 +271,10 @@ namespace Microsoft.Build.Evaluation
         /// <param name="defaultOverrideToolsVersion">ToolsVersion to use as the default ToolsVersion for this version of MSBuild.</param>
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, string msbuildOverrideTasksPath, string defaultOverrideToolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
-            ErrorUtilities.VerifyThrowArgumentLength(toolsPath, nameof(toolsPath));
-            ErrorUtilities.VerifyThrowArgumentNull(environmentProperties, nameof(environmentProperties));
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
+            ErrorUtilities.VerifyThrowArgumentLength(toolsPath);
+            ErrorUtilities.VerifyThrowArgumentNull(environmentProperties);
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
 
             _toolsVersion = toolsVersion;
             this.ToolsPath = toolsPath;
@@ -354,8 +350,8 @@ namespace Microsoft.Build.Evaluation
         internal Toolset(string toolsVersion, string toolsPath, PropertyDictionary<ProjectPropertyInstance> buildProperties, ProjectCollection projectCollection, DirectoryGetFiles getFiles, LoadXmlFromPath loadXmlFromPath, string msbuildOverrideTasksPath, DirectoryExists directoryExists)
             : this(toolsVersion, toolsPath, buildProperties, projectCollection.EnvironmentProperties, projectCollection.GlobalPropertiesCollection, null, msbuildOverrideTasksPath, null)
         {
-            ErrorUtilities.VerifyThrowInternalNull(getFiles, nameof(getFiles));
-            ErrorUtilities.VerifyThrowInternalNull(loadXmlFromPath, nameof(loadXmlFromPath));
+            ErrorUtilities.VerifyThrowInternalNull(getFiles);
+            ErrorUtilities.VerifyThrowInternalNull(loadXmlFromPath);
 
             _directoryExists = directoryExists;
             _getFiles = getFiles;
@@ -368,6 +364,15 @@ namespace Microsoft.Build.Evaluation
         private Toolset(ITranslator translator)
         {
             ((ITranslatable)this).Translate(translator);
+        }
+
+        /// <summary>
+        /// Helper for inspecting internal task registries that might or might not be initialized at this point.
+        /// </summary>
+        internal void InspectInternalTaskRegistry(Action<TaskRegistry> visitor)
+        {
+            visitor(_defaultTaskRegistry);
+            visitor(_overrideTaskRegistry);
         }
 
         /// <summary>
@@ -691,7 +696,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Given a search path and a task pattern get a list of task or override task files.
         /// </summary>
-        internal static string[] GetTaskFiles(DirectoryGetFiles getFiles, ILoggingService loggingServices, BuildEventContext buildEventContext, string taskPattern, string searchPath, string taskFileWarning)
+        internal static string[] GetTaskFiles(DirectoryGetFiles getFiles, LoggingContext loggingContext, string taskPattern, string searchPath, string taskFileWarning)
         {
             string[] defaultTasksFiles = null;
 
@@ -709,8 +714,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (defaultTasksFiles.Length == 0)
                 {
-                    loggingServices.LogWarning(
-                        buildEventContext,
+                    loggingContext.LogWarning(
                         null,
                         new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
                         taskFileWarning,
@@ -721,8 +725,7 @@ namespace Microsoft.Build.Evaluation
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                loggingServices.LogWarning(
-                    buildEventContext,
+                loggingContext.LogWarning(
                     null,
                     new BuildEventFileInfo(/* this warning truly does not involve any file */ String.Empty),
                     taskFileWarning,
@@ -737,7 +740,7 @@ namespace Microsoft.Build.Evaluation
                 Array.Sort<string>(defaultTasksFiles, StringComparer.OrdinalIgnoreCase);
                 return defaultTasksFiles;
             }
-            return Array.Empty<string>();
+            return [];
         }
 
         /// <summary>
@@ -825,13 +828,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Return a task registry stub for the tasks in the *.tasks file for this toolset
         /// </summary>
-        /// <param name="loggingServices">The logging services used to log during task registration.</param>
-        /// <param name="buildEventContext">The build event context used to log during task registration.</param>
+        /// <param name="loggingContext">The logging context used to log during task registration.</param>
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         /// <returns>The task registry</returns>
-        internal TaskRegistry GetTaskRegistry(ILoggingService loggingServices, BuildEventContext buildEventContext, ProjectRootElementCacheBase projectRootElementCache)
+        internal TaskRegistry GetTaskRegistry(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
-            RegisterDefaultTasks(loggingServices, buildEventContext, projectRootElementCache);
+            RegisterDefaultTasks(loggingContext, projectRootElementCache);
             return _defaultTaskRegistry;
         }
 
@@ -852,13 +854,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Return a task registry for the override tasks in the *.overridetasks file for this toolset
         /// </summary>
-        /// <param name="loggingServices">The logging services used to log during task registration.</param>
-        /// <param name="buildEventContext">The build event context used to log during task registration.</param>
+        /// <param name="loggingContext">The logging context used to log during task registration.</param>
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         /// <returns>The task registry</returns>
-        internal TaskRegistry GetOverrideTaskRegistry(ILoggingService loggingServices, BuildEventContext buildEventContext, ProjectRootElementCacheBase projectRootElementCache)
+        internal TaskRegistry GetOverrideTaskRegistry(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
-            RegisterOverrideTasks(loggingServices, buildEventContext, projectRootElementCache);
+            RegisterOverrideTasks(loggingContext, projectRootElementCache);
             return _overrideTaskRegistry;
         }
 
@@ -873,10 +874,9 @@ namespace Microsoft.Build.Evaluation
         /// 3) comment tags are always ignored regardless of their placement
         /// 4) the rest of the tags are expected to be &lt;UsingTask&gt; tags
         /// </remarks>
-        /// <param name="loggingServices">The logging services to use to log during this registration.</param>
-        /// <param name="buildEventContext">The build event context to use to log during this registration.</param>
+        /// <param name="loggingContext">The logging context to use to log during this registration.</param>
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
-        private void RegisterDefaultTasks(ILoggingService loggingServices, BuildEventContext buildEventContext, ProjectRootElementCacheBase projectRootElementCache)
+        private void RegisterDefaultTasks(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
             if (!_defaultTasksRegistrationAttempted)
             {
@@ -884,10 +884,10 @@ namespace Microsoft.Build.Evaluation
                 {
                     _defaultTaskRegistry = new TaskRegistry(projectRootElementCache);
 
-                    InitializeProperties(loggingServices, buildEventContext);
+                    InitializeProperties(loggingContext);
 
-                    string[] defaultTasksFiles = GetTaskFiles(_getFiles, loggingServices, buildEventContext, DefaultTasksFilePattern, ToolsPath, "DefaultTasksFileLoadFailureWarning");
-                    LoadAndRegisterFromTasksFile(defaultTasksFiles, loggingServices, buildEventContext, "DefaultTasksFileFailure", projectRootElementCache, _defaultTaskRegistry);
+                    string[] defaultTasksFiles = GetTaskFiles(_getFiles, loggingContext, DefaultTasksFilePattern, ToolsPath, "DefaultTasksFileLoadFailureWarning");
+                    LoadAndRegisterFromTasksFile(defaultTasksFiles, loggingContext, "DefaultTasksFileFailure", projectRootElementCache, _defaultTaskRegistry);
                 }
                 finally
                 {
@@ -899,92 +899,90 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Initialize the properties which are used to evaluate the tasks files.
         /// </summary>
-        private void InitializeProperties(ILoggingService loggingServices, BuildEventContext buildEventContext)
+        private void InitializeProperties(LoggingContext loggingContext)
         {
+            if (_expander != null)
+            {
+                return;
+            }
+
             try
             {
-                if (_propertyBag == null)
-                {
-                    List<ProjectPropertyInstance> reservedProperties = new List<ProjectPropertyInstance>();
 
-                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.binPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
-                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.toolsVersion, ToolsVersion, mayBeReserved: true));
+                List<ProjectPropertyInstance> reservedProperties = new List<ProjectPropertyInstance>();
 
-                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.toolsPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
-                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion, mayBeReserved: true));
-                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild, mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.binPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.toolsVersion, ToolsVersion, mayBeReserved: true));
 
-                    reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.msbuildRuntimeType,
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.toolsPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.assemblyVersion, Constants.AssemblyVersion, mayBeReserved: true));
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.version, MSBuildAssemblyFileVersion.Instance.MajorMinorBuild, mayBeReserved: true));
+
+                reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.msbuildRuntimeType,
 #if RUNTIME_TYPE_NETCORE
-                        Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core",
-#elif MONO
-                        NativeMethodsShared.IsMono ? "Mono" : "Full");
+                    Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core",
 #else
-                        "Full",
+                    "Full",
 #endif
-                        mayBeReserved: true));
+                    mayBeReserved: true));
 
 
-                    // Add one for the subtoolset version property -- it may or may not be set depending on whether it has already been set by the
-                    // environment or global properties, but it's better to create a dictionary that's one too big than one that's one too small.
-                    int count = _environmentProperties.Count + reservedProperties.Count + Properties.Values.Count + _globalProperties.Count + 1;
+                // Add one for the subtoolset version property -- it may or may not be set depending on whether it has already been set by the
+                // environment or global properties, but it's better to create a dictionary that's one too big than one that's one too small.
+                int count = _environmentProperties.Count + reservedProperties.Count + Properties.Values.Count + _globalProperties.Count + 1;
 
-                    // GenerateSubToolsetVersion checks the environment and global properties, so it's safe to go ahead and gather the
-                    // subtoolset properties here without fearing that we'll have somehow come up with the wrong subtoolset version.
-                    string subToolsetVersion = this.GenerateSubToolsetVersion();
-                    SubToolset subToolset;
-                    ICollection<ProjectPropertyInstance> subToolsetProperties = null;
+                // GenerateSubToolsetVersion checks the environment and global properties, so it's safe to go ahead and gather the
+                // subtoolset properties here without fearing that we'll have somehow come up with the wrong subtoolset version.
+                string subToolsetVersion = this.GenerateSubToolsetVersion();
+                SubToolset subToolset;
+                ICollection<ProjectPropertyInstance> subToolsetProperties = null;
 
-                    if (subToolsetVersion != null)
-                    {
-                        if (SubToolsets.TryGetValue(subToolsetVersion, out subToolset))
-                        {
-                            subToolsetProperties = subToolset.Properties.Values;
-                            count += subToolsetProperties.Count;
-                        }
-                    }
-
-                    _propertyBag = new PropertyDictionary<ProjectPropertyInstance>(count);
-
-                    // Should be imported in the same order as in the evaluator:
-                    // - Environment
-                    // - Toolset
-                    // - Subtoolset (if any)
-                    // - Global
-                    _propertyBag.ImportProperties(_environmentProperties);
-
-                    _propertyBag.ImportProperties(reservedProperties);
-
-                    _propertyBag.ImportProperties(Properties.Values);
-
-                    if (subToolsetVersion != null)
-                    {
-                        _propertyBag.Set(ProjectPropertyInstance.Create(Constants.SubToolsetVersionPropertyName, subToolsetVersion));
-                    }
-
-                    if (subToolsetProperties != null)
-                    {
-                        _propertyBag.ImportProperties(subToolsetProperties);
-                    }
-
-                    _propertyBag.ImportProperties(_globalProperties);
-                }
-
-                if (_expander == null)
+                if (subToolsetVersion != null)
                 {
-                    _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(_propertyBag, FileSystems.Default);
+                    if (SubToolsets.TryGetValue(subToolsetVersion, out subToolset))
+                    {
+                        subToolsetProperties = subToolset.Properties.Values;
+                        count += subToolsetProperties.Count;
+                    }
                 }
+
+                PropertyDictionary<ProjectPropertyInstance> propertyBag = new PropertyDictionary<ProjectPropertyInstance>(count);
+
+                // Should be imported in the same order as in the evaluator:
+                // - Environment
+                // - Toolset
+                // - Subtoolset (if any)
+                // - Global
+                propertyBag.ImportProperties(_environmentProperties);
+
+                propertyBag.ImportProperties(reservedProperties);
+
+                propertyBag.ImportProperties(Properties.Values);
+
+                if (subToolsetVersion != null)
+                {
+                    propertyBag.Set(ProjectPropertyInstance.Create(Constants.SubToolsetVersionPropertyName, subToolsetVersion));
+                }
+
+                if (subToolsetProperties != null)
+                {
+                    propertyBag.ImportProperties(subToolsetProperties);
+                }
+
+                propertyBag.ImportProperties(_globalProperties);
+
+                _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, FileSystems.Default, loggingContext);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                loggingServices.LogError(buildEventContext, new BuildEventFileInfo(/* this warning truly does not involve any file it is just gathering properties */String.Empty), "TasksPropertyBagError", e.Message);
+                loggingContext.LogError(new BuildEventFileInfo(/* this warning truly does not involve any file it is just gathering properties */String.Empty), "TasksPropertyBagError", e.Message);
             }
         }
 
         /// <summary>
         /// Used to load information about MSBuild override tasks i.e. tasks that override tasks declared in tasks or project files.
         /// </summary>
-        private void RegisterOverrideTasks(ILoggingService loggingServices, BuildEventContext buildEventContext, ProjectRootElementCacheBase projectRootElementCache)
+        private void RegisterOverrideTasks(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
             if (!_overrideTasksRegistrationAttempted)
             {
@@ -1013,23 +1011,23 @@ namespace Microsoft.Build.Evaluation
                             if (!overrideDirectoryExists)
                             {
                                 string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", _overrideTasksPath);
-                                loggingServices.LogWarning(buildEventContext, null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
+                                loggingContext.LogWarning(null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
                             }
                         }
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
                         string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskProblemWithPath", _overrideTasksPath, e.Message);
-                        loggingServices.LogWarning(buildEventContext, null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
+                        loggingContext.LogWarning(null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
                     }
 
                     if (overrideDirectoryExists)
                     {
-                        InitializeProperties(loggingServices, buildEventContext);
-                        string[] overrideTasksFiles = GetTaskFiles(_getFiles, loggingServices, buildEventContext, OverrideTasksFilePattern, _overrideTasksPath, "OverrideTasksFileLoadFailureWarning");
+                        InitializeProperties(loggingContext);
+                        string[] overrideTasksFiles = GetTaskFiles(_getFiles, loggingContext, OverrideTasksFilePattern, _overrideTasksPath, "OverrideTasksFileLoadFailureWarning");
 
                         // Load and register any override tasks
-                        LoadAndRegisterFromTasksFile(overrideTasksFiles, loggingServices, buildEventContext, "OverrideTasksFileFailure", projectRootElementCache, _overrideTaskRegistry);
+                        LoadAndRegisterFromTasksFile(overrideTasksFiles, loggingContext, "OverrideTasksFileFailure", projectRootElementCache, _overrideTaskRegistry);
                     }
                 }
                 finally
@@ -1042,12 +1040,36 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Do the actual loading of the tasks or override tasks file and register the tasks in the task registry
         /// </summary>
-        private void LoadAndRegisterFromTasksFile(string[] defaultTaskFiles, ILoggingService loggingServices, BuildEventContext buildEventContext, string taskFileError, ProjectRootElementCacheBase projectRootElementCache, TaskRegistry registry)
+        private void LoadAndRegisterFromTasksFile(string[] defaultTaskFiles, LoggingContext loggingContext, string taskFileError, ProjectRootElementCacheBase projectRootElementCache, TaskRegistry registry)
         {
-            foreach (string defaultTasksFile in defaultTaskFiles)
+            string currentTasksFile = null;
+            try
             {
-                try
+                TaskRegistry.InitializeTaskRegistryFromUsingTaskElements<ProjectPropertyInstance, ProjectItemInstance>(
+                    loggingContext,
+                    EnumerateTasksRegistrations(),
+                    registry,
+                    _expander,
+                    ExpanderOptions.ExpandProperties,
+                    FileSystems.Default);
+            }
+            catch (XmlException e)
+            {
+                // handle XML errors in the default tasks file
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(currentTasksFile, e),
+                    taskFileError, e.Message);
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                loggingContext.LogError(new BuildEventFileInfo(currentTasksFile),
+                    taskFileError, e.Message);
+            }
+
+            IEnumerable<(ProjectUsingTaskElement projectUsingTaskXml, string directoryOfImportingFile)> EnumerateTasksRegistrations()
+            {
+                foreach (string defaultTasksFile in defaultTaskFiles)
                 {
+                    currentTasksFile = defaultTasksFile;
                     // Important to keep the following line since unit tests use the delegate.
                     ProjectRootElement projectRootElement;
                     if (_loadXmlFromPath != null)
@@ -1062,7 +1084,7 @@ namespace Microsoft.Build.Evaluation
                             preserveFormatting: false);
                     }
 
-                    foreach (ProjectElement elementXml in projectRootElement.Children)
+                    foreach (ProjectElement elementXml in projectRootElement.ChildrenEnumerable)
                     {
                         ProjectUsingTaskElement usingTask = elementXml as ProjectUsingTaskElement;
 
@@ -1074,26 +1096,8 @@ namespace Microsoft.Build.Evaluation
                                 elementXml.XmlElement.Name);
                         }
 
-                        TaskRegistry.RegisterTasksFromUsingTaskElement<ProjectPropertyInstance, ProjectItemInstance>(
-                            loggingServices,
-                            buildEventContext,
-                            Path.GetDirectoryName(defaultTasksFile),
-                            usingTask,
-                            registry,
-                            _expander,
-                            ExpanderOptions.ExpandProperties,
-                            FileSystems.Default);
+                        yield return (usingTask, Path.GetDirectoryName(defaultTasksFile));
                     }
-                }
-                catch (XmlException e)
-                {
-                    // handle XML errors in the default tasks file
-                    ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(defaultTasksFile, e), taskFileError, e.Message);
-                }
-                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                {
-                    loggingServices.LogError(buildEventContext, new BuildEventFileInfo(defaultTasksFile), taskFileError, e.Message);
-                    break;
                 }
             }
         }

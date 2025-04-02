@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -19,9 +18,9 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate as boolean
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (!LeftChild.TryBoolEvaluate(state, out bool boolValue, loggingContext))
+            if (!LeftChild.TryBoolEvaluate(state, out bool boolValue))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(
                     state.ElementLocation,
@@ -42,12 +41,15 @@ namespace Microsoft.Build.Evaluation
             return "!" + LeftChild.GetUnexpandedValue(state);
         }
 
+        /// <inheritdoc cref="GenericExpressionNode"/>
+        internal override bool IsUnexpandedValueEmpty() => false;
+
         /// <summary>
         /// Returns expanded value with '!' prepended. Useful for error messages.
         /// </summary>
-        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override string GetExpandedValue(ConditionEvaluator.IConditionEvaluationState state)
         {
-            return "!" + LeftChild.GetExpandedValue(state, loggingContext);
+            return "!" + LeftChild.GetExpandedValue(state);
         }
 
         internal override string DebuggerDisplay => $"(not {LeftChild.DebuggerDisplay})";

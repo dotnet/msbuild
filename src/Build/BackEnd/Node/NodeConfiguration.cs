@@ -161,7 +161,21 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _buildParameters, BuildParameters.FactoryForDeserialization);
             translator.TranslateArray(ref _forwardingLoggers, LoggerDescription.FactoryForTranslation);
 #if FEATURE_APPDOMAIN
-            translator.TranslateDotNet(ref _appDomainSetup);
+            byte[] appDomainConfigBytes = null;
+
+            // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+            }
+
+            translator.Translate(ref appDomainConfigBytes);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                _appDomainSetup = new AppDomainSetup();
+                _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
+            }
 #endif
             translator.Translate(ref _loggingNodeConfiguration);
         }
@@ -173,6 +187,7 @@ namespace Microsoft.Build.BackEnd
         {
             NodeConfiguration configuration = new NodeConfiguration();
             configuration.Translate(translator);
+
             return configuration;
         }
         #endregion

@@ -13,23 +13,23 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Collections
 {
     /// <summary>
-    /// Collection of items that allows a list of all items of a specified type to be 
-    /// retrieved in O(1), and specific items to be added, removed, or checked for in O(1). 
+    /// Collection of items that allows a list of all items of a specified type to be
+    /// retrieved in O(1), and specific items to be added, removed, or checked for in O(1).
     /// All items of a particular type can also be removed in O(1).
     /// Items are ordered with respect to all other items of their type.
     /// </summary>
     /// <remarks>
     /// Really a Dictionary&lt;string, ICollection&lt;T&gt;&gt; where the key (the item type) is obtained from IKeyed.Key
-    /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and 
+    /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and
     /// either not expose this collection or expose it through a readonly wrapper.
     /// At various places in this class locks are taken on the backing collection.  The reason for this is to allow
-    /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will 
+    /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will
     /// lock the backing collection when it does its deep cloning.  This prevents asynchronous access from corrupting
     /// the state of the enumeration until the collection has been fully copied.
     /// </remarks>
     /// <typeparam name="T">Item class type to store</typeparam>
     [DebuggerDisplay("#Item types={ItemTypes.Count} #Items={Count}")]
-    internal sealed class ItemDictionary<T> : IEnumerable<T>, IItemProvider<T>
+    internal sealed class ItemDictionary<T> : IItemDictionary<T>
         where T : class, IKeyed, IItem
     {
         /// <summary>
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Constructor for an empty collection.
         /// </summary>
-        internal ItemDictionary()
+        public ItemDictionary()
         {
             // Tracing.Record("new item dictionary");
             _itemLists = new Dictionary<string, LinkedList<T>>(MSBuildNameIgnoreCaseComparer.Default);
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Collections
         /// Constructor for an empty collection taking an initial capacity
         /// for the number of distinct item types
         /// </summary>
-        internal ItemDictionary(int initialItemTypesCapacity, int initialItemsCapacity = 0)
+        public ItemDictionary(int initialItemTypesCapacity, int initialItemsCapacity = 0)
         {
             // Tracing.Record("new item dictionary");
             _itemLists = new Dictionary<string, LinkedList<T>>(initialItemTypesCapacity, MSBuildNameIgnoreCaseComparer.Default);
@@ -71,7 +71,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Constructor for an collection holding items from a specified enumerable.
         /// </summary>
-        internal ItemDictionary(IEnumerable<T> items)
+        public ItemDictionary(IEnumerable<T> items)
         {
             // Tracing.Record("new item dictionary");
             _itemLists = new Dictionary<string, LinkedList<T>>(MSBuildNameIgnoreCaseComparer.Default);
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Number of items in total, for debugging purposes.
         /// </summary>
-        internal int Count => _nodes.Count;
+        public int Count => _nodes.Count;
 
         /// <summary>
         /// Get the item types that have at least one item in this collection
@@ -91,7 +91,7 @@ namespace Microsoft.Build.Collections
         /// KeyCollection&lt;K&gt; is already a read only collection, so no protection
         /// is necessary.
         /// </remarks>
-        internal ICollection<string> ItemTypes
+        public ICollection<string> ItemTypes
         {
             get
             {
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Collections
         /// Use AddItem or RemoveItem to modify items in this project.
         /// Using the return value from this in a multithreaded situation is unsafe.
         /// </summary>
-        internal ICollection<T> this[string itemtype]
+        public ICollection<T> this[string itemtype]
         {
             get
             {
@@ -172,11 +172,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Enumerates item lists per each item type under the lock.
         /// </summary>
-        /// <param name="itemTypeCallback">
-        /// A delegate that accepts the item type string and a list of items of that type.
-        /// Will be called for each item type in the list.
-        /// </param>
-        internal void EnumerateItemsPerType(Action<string, IEnumerable<T>> itemTypeCallback)
+        public IEnumerable<(string itemType, IEnumerable<T> itemValue)> EnumerateItemsPerType()
         {
             lock (_itemLists)
             {
@@ -188,8 +184,23 @@ namespace Microsoft.Build.Collections
                         continue;
                     }
 
-                    itemTypeCallback(itemTypeBucket.Key, itemTypeBucket.Value);
+                    yield return (itemTypeBucket.Key, itemTypeBucket.Value);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Enumerates item lists per each item type under the lock.
+        /// </summary>
+        /// <param name="itemTypeCallback">
+        /// A delegate that accepts the item type string and a list of items of that type.
+        /// Will be called for each item type in the list.
+        /// </param>
+        public void EnumerateItemsPerType(Action<string, IEnumerable<T>> itemTypeCallback)
+        {
+            foreach (var tuple in EnumerateItemsPerType())
+            {
+                itemTypeCallback(tuple.itemType, tuple.itemValue);
             }
         }
 
@@ -214,7 +225,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Whether the provided item is in this table or not.
         /// </summary>
-        internal bool Contains(T projectItem)
+        public bool Contains(T projectItem)
         {
             lock (_itemLists)
             {
@@ -226,18 +237,22 @@ namespace Microsoft.Build.Collections
         /// Add a new item to the collection, at the
         /// end of the list of other items with its key.
         /// </summary>
-        internal void Add(T projectItem)
+        public void Add(T projectItem)
         {
             lock (_itemLists)
             {
-                if (!_itemLists.TryGetValue(projectItem.Key, out LinkedList<T> list))
-                {
-                    list = new LinkedList<T>();
-                    _itemLists[projectItem.Key] = list;
-                }
+                AddProjectItem(projectItem);
+            }
+        }
 
-                LinkedListNode<T> node = list.AddLast(projectItem);
-                _nodes.Add(projectItem, node);
+        public void AddRange(IEnumerable<T> projectItems)
+        {
+            lock (_itemLists)
+            {
+                foreach (var projectItem in projectItems)
+                {
+                    AddProjectItem(projectItem);
+                }
             }
         }
 
@@ -248,8 +263,8 @@ namespace Microsoft.Build.Collections
         /// <remarks>
         /// If a list is emptied, removes the list from the enclosing collection
         /// so it can be garbage collected.
-        /// </remarks>        
-        internal bool Remove(T projectItem)
+        /// </remarks>
+        public bool Remove(T projectItem)
         {
             lock (_itemLists)
             {
@@ -279,7 +294,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         /// <param name="existingItem">The item to be replaced.</param>
         /// <param name="newItem">The replacement item.</param>
-        internal void Replace(T existingItem, T newItem)
+        public void Replace(T existingItem, T newItem)
         {
             ErrorUtilities.VerifyThrow(existingItem.Key == newItem.Key, "Cannot replace an item {0} with an item {1} with a different name.", existingItem.Key, newItem.Key);
             lock (_itemLists)
@@ -297,12 +312,9 @@ namespace Microsoft.Build.Collections
         /// Add the set of items specified to this dictionary
         /// </summary>
         /// <param name="other">An enumerator over the items to remove.</param>
-        internal void ImportItems(IEnumerable<T> other)
+        public void ImportItems(IEnumerable<T> other)
         {
-            foreach (T item in other)
-            {
-                Add(item);
-            }
+            AddRange(other);
         }
 
         /// <summary>
@@ -311,7 +323,7 @@ namespace Microsoft.Build.Collections
         /// <comment>
         /// This is a little faster than ImportItems where all the items have the same item type.
         /// </comment>
-        internal void ImportItemsOfType(string itemType, IEnumerable<T> items)
+        public void ImportItemsOfType(string itemType, IEnumerable<T> items)
         {
             lock (_itemLists)
             {
@@ -337,7 +349,7 @@ namespace Microsoft.Build.Collections
         /// Remove the set of items specified from this dictionary
         /// </summary>
         /// <param name="other">An enumerator over the items to remove.</param>
-        internal void RemoveItems(IEnumerable<T> other)
+        public void RemoveItems(IEnumerable<T> other)
         {
             foreach (T item in other)
             {
@@ -352,7 +364,7 @@ namespace Microsoft.Build.Collections
         /// batching over the item type, but their bucket does not contain items of that type.
         /// See <see cref="HasEmptyMarker">HasEmptyMarker</see>.
         /// </summary>
-        internal void AddEmptyMarker(string itemType)
+        public void AddEmptyMarker(string itemType)
         {
             lock (_itemLists)
             {
@@ -366,7 +378,7 @@ namespace Microsoft.Build.Collections
         /// Lookup can call this to see whether there was an explicit marker placed indicating that
         /// there are no items of this type. See comment on <see cref="AddEmptyMarker">AddEmptyMarker</see>.
         /// </summary>
-        internal bool HasEmptyMarker(string itemType)
+        public bool HasEmptyMarker(string itemType)
         {
             lock (_itemLists)
             {
@@ -377,6 +389,18 @@ namespace Microsoft.Build.Collections
 
                 return false;
             }
+        }
+
+        private void AddProjectItem(T projectItem)
+        {
+            if (!_itemLists.TryGetValue(projectItem.Key, out LinkedList<T> list))
+            {
+                list = new LinkedList<T>();
+                _itemLists[projectItem.Key] = list;
+            }
+
+            LinkedListNode<T> node = list.AddLast(projectItem);
+            _nodes.Add(projectItem, node);
         }
 
         /// <summary>

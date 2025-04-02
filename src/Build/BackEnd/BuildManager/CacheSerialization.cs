@@ -19,7 +19,7 @@ namespace Microsoft.Build.Execution
             string outputCacheFile,
             ProjectIsolationMode projectIsolationMode)
         {
-            ErrorUtilities.VerifyThrowInternalNull(outputCacheFile, nameof(outputCacheFile));
+            ErrorUtilities.VerifyThrowInternalNull(outputCacheFile);
 
             try
             {
@@ -121,14 +121,14 @@ namespace Microsoft.Build.Execution
 
                 using (var fileStream = File.OpenRead(inputCacheFile))
                 {
-                    using var translator = BinaryTranslator.GetReadTranslator(fileStream, null);
+                    using var translator = BinaryTranslator.GetReadTranslator(fileStream, InterningBinaryReader.PoolingBuffer);
 
                     translator.Translate(ref configCache);
                     translator.Translate(ref resultsCache);
                 }
 
-                ErrorUtilities.VerifyThrowInternalNull(configCache, nameof(configCache));
-                ErrorUtilities.VerifyThrowInternalNull(resultsCache, nameof(resultsCache));
+                ErrorUtilities.VerifyThrowInternalNull(configCache);
+                ErrorUtilities.VerifyThrowInternalNull(resultsCache);
 
                 return (configCache, resultsCache, null);
             }

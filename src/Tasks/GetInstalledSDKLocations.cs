@@ -169,8 +169,8 @@ namespace Microsoft.Build.Tasks
                     item.SetMetadata("PlatformVersion", sdk.Value.Item2);
 
                     // Need to stash these so we can unroll the platform via GetMatchingPlatformSDK when we get the reference files for the sdks
-                    item.SetMetadata(DirectoryRootsMetadataName, String.Join(";", SDKDirectoryRoots ?? Array.Empty<string>()));
-                    item.SetMetadata(ExtensionDirectoryRootsMetadataName, String.Join(";", SDKExtensionDirectoryRoots ?? Array.Empty<string>()));
+                    item.SetMetadata(DirectoryRootsMetadataName, String.Join(";", SDKDirectoryRoots ?? []));
+                    item.SetMetadata(ExtensionDirectoryRootsMetadataName, String.Join(";", SDKExtensionDirectoryRoots ?? []));
                     item.SetMetadata(RegistryRootMetadataName, SDKRegistryRoot);
 
                     outputItems.Add(item);
@@ -194,7 +194,9 @@ namespace Microsoft.Build.Tasks
                 object staticCacheDisposer = buildEngine4.GetRegisteredTaskObject(StaticSDKCacheKey, RegisteredTaskObjectLifetime.Build);
                 if (staticCacheDisposer == null)
                 {
+#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed because the object is registered with the engine and disposed of at the end of the build.
                     BuildCacheDisposeWrapper staticDisposer = new BuildCacheDisposeWrapper(ToolLocationHelper.ClearSDKStaticCache);
+#pragma warning restore CA2000 // Dispose objects before losing scope
                     buildEngine4.RegisterTaskObject(StaticSDKCacheKey, staticDisposer, RegisteredTaskObjectLifetime.Build, allowEarlyCollection: false);
                 }
             }

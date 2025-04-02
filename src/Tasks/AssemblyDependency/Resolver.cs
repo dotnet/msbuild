@@ -72,6 +72,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="sdkName">The name of the sdk to resolve.</param>
         /// <param name="rawFileNameCandidate">The reference's 'include' treated as a raw file name.</param>
         /// <param name="isPrimaryProjectReference">Whether or not this reference was directly from the project file (and therefore not a dependency)</param>
+        /// <param name="isImmutableFrameworkReference">True if <paramref name="rawFileNameCandidate"/> is guaranteed to exist on disk and never change.</param>
         /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
         /// <param name="executableExtensions">Allowed executable extensions.</param>
         /// <param name="hintPath">The item's hintpath value.</param>
@@ -85,6 +86,7 @@ namespace Microsoft.Build.Tasks
             string sdkName,
             string rawFileNameCandidate,
             bool isPrimaryProjectReference,
+            bool isImmutableFrameworkReference,
             bool wantSpecificVersion,
             string[] executableExtensions,
             string hintPath,
@@ -206,7 +208,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // Its pretty hard to get here, you need an assembly that contains a valid reference
                     // to a dependent assembly that, in turn, throws a FileLoadException during GetAssemblyName.
-                    // Still it happened once, with an older version of the CLR. 
+                    // Still it happened once, with an older version of the CLR.
 
                     // ...falling through and relying on the targetAssemblyName==null behavior below...
                 }
@@ -231,7 +233,7 @@ namespace Microsoft.Build.Tasks
                     // If we are targeting a given processor architecture check to see if they match, if we are targeting MSIL then any architecture will do.
                     if (compareProcessorArchitecture)
                     {
-                        // Only reject the assembly if the target processor architecture does not match the assemby processor architecture and the assembly processor architecture is not NONE or MSIL.
+                        // Only reject the assembly if the target processor architecture does not match the assembly processor architecture and the assembly processor architecture is not NONE or MSIL.
                         if (
                               targetAssemblyName.AssemblyName.ProcessorArchitecture != targetProcessorArchitecture &&  /* The target and assembly architectures do not match*/
                               (targetProcessorArchitecture != ProcessorArchitecture.None && targetAssemblyName.AssemblyName.ProcessorArchitecture != ProcessorArchitecture.None)  /*The assembly is not none*/
@@ -328,7 +330,7 @@ namespace Microsoft.Build.Tasks
                         throw new InvalidParameterValueException("SearchPaths", directory + (directory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + baseName, e.Message);
                     }
 
-                    // We have a full path returned 
+                    // We have a full path returned
                     if (ResolveAsFile(fullPath, assemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected))
                     {
                         if (candidateFullPath == null)
@@ -338,10 +340,10 @@ namespace Microsoft.Build.Tasks
 
                         /*
                          * After finding a file we now will check to see if it matches the type of processor architecture we want to return. The rules are as follows
-                         * 
+                         *
                          * If targeting AMD64 / X86 / IA64 / ARM /NONE we will return the first assembly which has a matching processor architecture OR is an assembly with a processor architecture of MSIL or NONE
-                         * 
-                         * If targeting MSIL we will first look through all of the assemblies, if an MSIL assembly is found we will return that. If no MSIL assembly is found we will return 
+                         *
+                         * If targeting MSIL we will first look through all of the assemblies, if an MSIL assembly is found we will return that. If no MSIL assembly is found we will return
                          * the first assembly which matches reguardless of its processor architecture.
                          */
 
