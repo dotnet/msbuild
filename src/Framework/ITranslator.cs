@@ -98,6 +98,8 @@ namespace Microsoft.Build.BackEnd
             get;
         }
 
+        bool IsInterning { get; }
+
         /// <summary>
         /// Translates a boolean.
         /// </summary>
@@ -366,5 +368,14 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The type of object to test.</typeparam>
         /// <returns>True if the object should be written, false otherwise.</returns>
         bool TranslateNullable<T>(T value);
+
+        void Intern(ref string str, bool nullable = false);
+
+        void Intern(ref string[] array);
+
+
+        void InternPath(ref string str, bool nullable = false);
+
+        void WithInterning(IEqualityComparer<string> comparer, int initialCapacity, Action<ITranslator> internBlock);
     }
 }
