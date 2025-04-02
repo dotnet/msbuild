@@ -274,11 +274,17 @@ namespace System.IO
         public static void ReadExactly(this Stream stream, byte[] buffer, int offset, int count)
         {
             if (buffer == null)
+            {
                 throw new ArgumentNullException(nameof(buffer));
-            if (offset < 0 || offset >= buffer.Length)
+            }
+            if (offset < 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(offset));
-            if (count < 0 || offset + count > buffer.Length)
+            }
+            if ((uint)count > buffer.Length - offset)
+            {
                 throw new ArgumentOutOfRangeException(nameof(count));
+            }
 
             while (count > 0)
             {
