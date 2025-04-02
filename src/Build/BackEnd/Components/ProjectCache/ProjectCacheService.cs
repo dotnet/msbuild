@@ -16,7 +16,9 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
+#if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.FileAccesses;
+#endif
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
@@ -32,7 +34,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     {
         private static readonly ParallelOptions s_parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount };
 
-        private static HashSet<string> s_projectSpecificPropertyNames = new(StringComparer.OrdinalIgnoreCase) { "TargetFramework", "Configuration", "Platform", "TargetPlatform", "OutputType" };
+        private static readonly HashSet<string> s_projectSpecificPropertyNames = new(StringComparer.OrdinalIgnoreCase) { "TargetFramework", "Configuration", "Platform", "TargetPlatform", "OutputType" };
 
         private readonly BuildManager _buildManager;
         private readonly IBuildComponentHost _componentHost;
@@ -115,8 +117,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                             foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(node.ProjectInstance))
                             {
                                 // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
-                                _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, requestedTargets, cancellationToken)
-                                    .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
+                                _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, requestedTargets, cancellationToken);
                             }
                         });
                 },
@@ -149,8 +150,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         projectCacheDescriptor =>
                         {
                             // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
-                            _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, requestedTargets, cancellationToken)
-                                .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
+                            _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, requestedTargets, cancellationToken);
                         });
                 },
                 cancellationToken);
@@ -449,7 +449,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 },
                 cancellationToken);
 
-            async Task<(CacheResult Result, int ProjectContextId)> ProcessCacheRequestAsync()
+            async ValueTask<(CacheResult Result, int ProjectContextId)> ProcessCacheRequestAsync()
             {
                 EvaluateProjectIfNecessary(cacheRequest.Submission, cacheRequest.Configuration);
 
@@ -499,7 +499,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             }
         }
 
-        private async Task<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, BuildRequestConfiguration buildRequestConfiguration, BuildEventContext buildEventContext, CancellationToken cancellationToken)
+        private async ValueTask<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, BuildRequestConfiguration buildRequestConfiguration, BuildEventContext buildEventContext, CancellationToken cancellationToken)
         {
             ErrorUtilities.VerifyThrowInternalNull(buildRequest.ProjectInstance, nameof(buildRequest.ProjectInstance));
 

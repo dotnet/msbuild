@@ -9,7 +9,6 @@ using System.Threading;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 

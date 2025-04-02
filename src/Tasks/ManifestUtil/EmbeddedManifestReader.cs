@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -74,7 +73,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             int t1 = Environment.TickCount;
             EmbeddedManifestReader r = new EmbeddedManifestReader(path);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "EmbeddedManifestReader.Read t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"EmbeddedManifestReader.Read t={Environment.TickCount - t1}");
             return r._manifest;
         }
     }
