@@ -54,7 +54,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 byte[] buffer = new byte[2];
-                ReadExactly(s, buffer, 0, 2);
+                s.ReadExactly(buffer, 0, 2);
                 s.Position = 0;
                 var document = new XmlDocument();
                 var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
@@ -138,7 +138,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 byte[] buffer = new byte[2];
-                ReadExactly(s, buffer, 0, 2);
+                s.ReadExactly(buffer, 0, 2);
                 s.Position = 0;
                 // if first two bytes are "MZ" then we're looking at an .exe or a .dll not a .manifest
                 if ((buffer[0] == 0x4D) && (buffer[1] == 0x5A))
@@ -247,28 +247,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-#if NET
-        private static void ReadExactly(Stream stream, byte[] buffer, int offset, int count)
-        {
-            stream.ReadExactly(buffer, offset, count);
-        }
-#else
-        private static void ReadExactly(Stream stream, byte[] buffer, int offset, int count)
-        {
-            while (count > 0)
-            {
-                int read = stream.Read(buffer, offset, count);
-                if (read <= 0)
-                {
-                    throw new EndOfStreamException();
-                }
-                offset += read;
-                count -= read;
-            }
-        }
-#endif
-    }
-
     internal class ComInfo
     {
         public ComInfo(string manifestFileName, string componentFileName, string clsid, string tlbid)
@@ -286,3 +264,32 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public string TlbId { get; }
     }
 }
+
+#if !NET
+namespace System.IO
+{
+    public static class StreamExtensions
+    {
+        public static void ReadExactly(this Stream stream, byte[] buffer, int offset, int count)
+        {
+            if (buffer == null)
+                throw new ArgumentNullException(nameof(buffer));
+            if (offset < 0 || offset >= buffer.Length)
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            if (count < 0 || offset + count > buffer.Length)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            while (count > 0)
+            {
+                int read = stream.Read(buffer, offset, count);
+                if (read <= 0)
+                {
+                    throw new EndOfStreamException();
+                }
+                offset +=read;
+                count -= read;
+            }
+        }
+    }
+}
+#endif

@@ -1735,22 +1735,7 @@ class X
                 var buffer = new byte[10];
                 using (FileStream fs = File.Open(readFile, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
                 {
-#if NET
                     fs.ReadExactly(buffer, 0, 10);
-#else
-                    int count = 10;
-                    int offset = 0;
-                    while (count > 0)
-                    {
-                        int read = fs.Read(buffer, offset, count);
-                        if (read <= 0)
-                        {
-                            throw new EndOfStreamException();
-                        }
-                        offset += read;
-                        count -= read;
-                    }
-#endif
                 }
 
                 FileTracker.WriteContextTLogs(testDir, tlogRootName);

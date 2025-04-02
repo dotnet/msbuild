@@ -163,22 +163,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             byte[] buffer = new byte[2];
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-#if NET
                 s.ReadExactly(buffer, 0, 2);
-#else
-                int count = 2;
-                int offset = 0;
-                while (count > 0)
-                {
-                    int read = s.Read(buffer, offset, count);
-                    if (read <= 0)
-                    {
-                        throw new EndOfStreamException();
-                    }
-                    offset += read;
-                    count -= read;
-                }
-#endif
             }
 
             // if first two bytes are "MZ" then we're looking at an .exe or a .dll not a .manifest
