@@ -101,9 +101,9 @@ namespace Microsoft.Build.Shared
                 bool isAssignableToITask = iTaskItemType.IsAssignableFrom(pt);
 
                 Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
-                if (loadedViaMetadataLoadContext)
+                if (loadedViaMetadataLoadContext && PropertyAssemblyQualifiedNames != null)
                 {
-                    PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName ?? string.Empty;
+                    PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName?? string.Empty;
                 }
             }
 #else
@@ -182,7 +182,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Assembly-qualified names for properties. Only has a value if this type was loaded using MetadataLoadContext.
         /// </summary>
-        internal string[] PropertyAssemblyQualifiedNames { get; private set; } = [];
+        internal string[]? PropertyAssemblyQualifiedNames { get; private set; }
 
         /// <summary>
         /// Gets the assembly the type was loaded from.
