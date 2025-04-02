@@ -246,6 +246,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return m;
             }
         }
+    }
 
     internal class ComInfo
     {
