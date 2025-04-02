@@ -4,13 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #if FEATURE_THREAD_CULTURE
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
+#else
+using System.Globalization;
 #endif
 using NodeEngineShutdownReason = Microsoft.Build.Execution.NodeEngineShutdownReason;
 
@@ -382,7 +383,7 @@ namespace Microsoft.Build.BackEnd
                 InProcNodeThreadProc();
             });
 #endif
-            _inProcNodeThread.Name = String.Format(CultureInfo.CurrentCulture, "In-proc Node ({0})", _componentHost.Name);
+            _inProcNodeThread.Name = $"In-proc Node ({_componentHost.Name})";
             _inProcNodeThread.IsBackground = true;
 #if FEATURE_THREAD_CULTURE
             _inProcNodeThread.CurrentCulture = _componentHost.BuildParameters.Culture;

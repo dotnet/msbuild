@@ -10,7 +10,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Serialization;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -630,11 +629,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     // Check for two or more assemblies with the same identity...
                     string identity = assembly.AssemblyIdentity.GetFullName(AssemblyIdentity.FullNameFlags.All);
                     string key = identity.ToLowerInvariant();
-                    if (!identityList.ContainsKey(key))
+                    if (!identityList.TryGetValue(key, out bool value))
                     {
                         identityList.Add(key, false);
                     }
-                    else if (!identityList[key])
+                    else if (!value)
                     {
                         OutputMessages.AddWarningMessage("GenerateManifest.DuplicateAssemblyIdentity", identity);
                         identityList[key] = true; // only warn once per identity

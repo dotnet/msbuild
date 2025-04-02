@@ -810,7 +810,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>
         /// The result of the tasks, based on the last task which ran.
         /// </returns>
-        private async Task<WorkUnitResult> ProcessBucket(ITaskBuilder taskBuilder, TargetLoggingContext targetLoggingContext, TaskExecutionMode mode, Lookup lookupForInference, Lookup lookupForExecution)
+        private async ValueTask<WorkUnitResult> ProcessBucket(ITaskBuilder taskBuilder, TargetLoggingContext targetLoggingContext, TaskExecutionMode mode, Lookup lookupForInference, Lookup lookupForExecution)
         {
             WorkUnitResultCode aggregatedTaskResult = WorkUnitResultCode.Success;
             WorkUnitActionCode finalActionCode = WorkUnitActionCode.Continue;
