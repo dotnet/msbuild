@@ -177,8 +177,10 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _resolvedSDKReferences = Array.Empty<TaskItem>();
         private bool _ignoreDefaultInstalledAssemblyTables = false;
         private bool _ignoreDefaultInstalledAssemblySubsetTables = false;
+        private bool _enableCustomCulture = false;
         private string[] _candidateAssemblyFiles = [];
         private string[] _targetFrameworkDirectories = [];
+        private string[] _nonCultureResourceDirectories = [];
         private string[] _searchPaths = [];
         private string[] _allowedAssemblyExtensions = [".winmd", ".dll", ".exe"];
         private string[] _relatedFileExtensions = [".pdb", ".xml", ".pri"];
@@ -420,6 +422,24 @@ namespace Microsoft.Build.Tasks
         {
             get { return _targetFrameworkDirectories; }
             set { _targetFrameworkDirectories = value; }
+        }
+
+        /// <summary>
+        /// Contains list of directories that point to custom culture resources that has to be ignored by MSBuild.
+        /// </summary>
+        public string[] NonCultureResourceDirectories
+        {
+            get { return _nonCultureResourceDirectories; }
+            set { _nonCultureResourceDirectories = value; }
+        }
+
+        /// <summary>
+        /// Contains the information if custom culture is enabled.
+        /// </summary>
+        public bool EnableCustomCulture
+        {
+            get { return _enableCustomCulture; }
+            set { _enableCustomCulture = value; }     
         }
 
         /// <summary>
@@ -1511,7 +1531,10 @@ namespace Microsoft.Build.Tasks
             }
 
             Log.LogMessage(importance, property, "TargetFrameworkDirectories");
-            Log.LogMessage(importance, indent + String.Join(",", TargetFrameworkDirectories));
+            Log.LogMessage(importance, indent + string.Join(",", TargetFrameworkDirectories));
+
+            Log.LogMessage(importance, property, "NonCultureResourceDirectories");
+            Log.LogMessage(importance, indent + string.Join(",", NonCultureResourceDirectories));
 
             Log.LogMessage(importance, property, "InstalledAssemblyTables");
             foreach (ITaskItem installedAssemblyTable in InstalledAssemblyTables)
@@ -1546,6 +1569,9 @@ namespace Microsoft.Build.Tasks
 
             Log.LogMessage(importance, property, "AutoUnify");
             Log.LogMessage(importance, $"{indent}{AutoUnify}");
+
+            Log.LogMessage(importance, property, "EnableCustomCulture");
+            Log.LogMessage(importance, $"{indent}{EnableCustomCulture}");
 
             Log.LogMessage(importance, property, "CopyLocalDependenciesWhenParentReferenceInGac");
             Log.LogMessage(importance, $"{indent}{_copyLocalDependenciesWhenParentReferenceInGac}");
@@ -2386,6 +2412,7 @@ namespace Microsoft.Build.Tasks
                         _findSatellites,
                         _findSerializationAssemblies,
                         _findRelatedFiles,
+                        _enableCustomCulture,
                         _searchPaths,
                         _allowedAssemblyExtensions,
                         _relatedFileExtensions,
@@ -2419,7 +2446,8 @@ namespace Microsoft.Build.Tasks
                         _warnOrErrorOnTargetArchitectureMismatch,
                         _ignoreTargetFrameworkAttributeVersionMismatch,
                         _unresolveFrameworkAssembliesFromHigherFrameworks,
-                        assemblyMetadataCache);
+                        assemblyMetadataCache,
+                        _nonCultureResourceDirectories);
 
                     dependencyTable.FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences;
 
