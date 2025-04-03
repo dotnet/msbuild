@@ -5,6 +5,7 @@ trigger:
 
 jobs:
 - job: CheckVersionBumpOnReleaseBranches
+  condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
   displayName: "Check Version Bump On Release Branches"
   steps:
   - powershell: |
