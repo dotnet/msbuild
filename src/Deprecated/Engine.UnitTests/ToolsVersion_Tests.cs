@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests
             TaskRegistry taskRegistry = (TaskRegistry) t.GetTaskRegistry(null);
 
             Console.WriteLine(mockLogger.FullLog);
-            Assert.AreEqual(1, mockLogger.WarningCount, "Expected a warning for invalid character in toolpath"); 
+            Assert.AreEqual(1, mockLogger.WarningCount, "Expected a warning for invalid character in toolpath");
         }
 
         public ToolsetState_Tests()
@@ -154,7 +154,7 @@ namespace Microsoft.Build.UnitTests
               new DefaultTasksFile("d:\\directory1\\directory2\\f.tasks",
                       @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='f1' AssemblyName='f' />
-                       </Project>"), 
+                       </Project>"),
               new DefaultTasksFile("c:\\directory1\\directory2\\g.custom.tasks",
                       @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <UsingTask TaskName='g1' AssemblyName='g' />

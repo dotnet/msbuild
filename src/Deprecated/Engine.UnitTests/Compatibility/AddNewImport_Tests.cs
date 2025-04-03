@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
     /// <summary>
     /// Indirection delegate type for AddNewImport Method invocation
     /// </summary>
-    public delegate void AddNewImportDelegate(Project p, string path, string condition); 
+    public delegate void AddNewImportDelegate(Project p, string path, string condition);
 
     /// <summary>
     /// indirection for  tests of Project.AddNewImport and ImportCollection.AddNewImport
@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
     public abstract class AddNewImportTests
     {
         #region Indirection Delegates
-     
+
         /// <summary>
         /// Indirection delegate for AddNewImport Method invocation
         /// </summary>
@@ -38,12 +38,12 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         {
             get;
             set;
-        } 
+        }
 
         #endregion
 
         /// <summary>
-        ///  AddNewImport Test, Empty 
+        ///  AddNewImport Test, Empty
         /// </summary>
         [Test]
         [ExpectedException(typeof(ArgumentException))]
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        ///  AddNewImport Test, Null 
+        ///  AddNewImport Test, Null
         /// </summary>
         [Test]
         [ExpectedException(typeof(ArgumentNullException))]
@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        ///  AddNewImport Test, Where imported file does not exist 
+        ///  AddNewImport Test, Where imported file does not exist
         /// </summary>
         [Test]
         public void AddNewImportFile_DoesNotExist()
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        ///  AddNewImport Test, Import a file with an empty condition. 
+        ///  AddNewImport Test, Import a file with an empty condition.
         /// </summary>
         [Test]
         public void AddNewImportFile_EmptyCondition()
@@ -276,7 +276,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 Assertion.AssertEquals(0, p.Imports.Count);
                 object o = p.EvaluatedItems;  // force evaluation of imported projects.
                 Assertion.AssertEquals(2, CompatibilityTestHelpers.CountNodesWithName(p.Xml, "Import"));  // 2 in xml
-                Assertion.AssertEquals(1, p.Imports.Count); // 1 in OM. 
+                Assertion.AssertEquals(1, p.Imports.Count); // 1 in OM.
             }
             finally
             {

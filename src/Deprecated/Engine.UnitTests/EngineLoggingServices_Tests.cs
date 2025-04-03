@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// We dont need to do anything to process events, we just want to get what events are in the queue 
+        /// We dont need to do anything to process events, we just want to get what events are in the queue
         /// </summary>
         internal override bool ProcessPostedLoggingEvents()
         {
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests
         public void LogErrorEvent()
         {
             List<BuildEventArgs> eventList = new List<BuildEventArgs>();
-            
+
             // Log a number of events and then make sure that queue at the end contains all of those events
             for (int i = 0; i < 10; i++)
             {
@@ -164,17 +164,17 @@ namespace Microsoft.Build.UnitTests
 
             // Get the logging queue after we have logged a number of messages
            DualQueue<BuildEventArgs> currentQueue = engineLoggingServicesHelper.GetCurrentQueueBuildEvents();
-            
+
             // Assert that every event we sent to the logger exists in the queue
             Assert.IsTrue(eventList.TrueForAll(delegate(BuildEventArgs args)
                                                {
                                                    return currentQueue.Contains(args);
                                                }), "Expected to find all events sent to LogErrorEvent");
-            
+
             // Assert that every event in the queue is of the correct type
             AssertForEachEventInQueue(currentQueue, IsInstanceOfType<BuildErrorEventArgs>);
         }
-        
+
         /// <summary>
         /// Test the case where null events are attempted to be logged
         /// </summary>
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
         {
             engineLoggingServicesHelper.LogErrorEvent(null);
         }
-        
+
         /// <summary>
         /// Test warning events
         /// </summary>
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
         public void LogWarningEvent()
         {
             List<BuildEventArgs> eventList = new List<BuildEventArgs>();
-           
+
             // Log a number of events
             for (int i = 0; i < 10; i++)
             {
@@ -200,7 +200,7 @@ namespace Microsoft.Build.UnitTests
                 eventList.Add(eventToAdd);
                 engineLoggingServicesHelper.LogWarningEvent(eventToAdd);
             }
-            
+
             // Get the logged event queue from the "logger"
            DualQueue<BuildEventArgs> currentQueue = engineLoggingServicesHelper.GetCurrentQueueBuildEvents();
 
@@ -209,7 +209,7 @@ namespace Microsoft.Build.UnitTests
                                                {
                                                    return currentQueue.Contains(args);
                                                }), "Expected to find all events sent to LogWarningEvent");
-            
+
             // Assert that every event in the queue is of the correct type
             AssertForEachEventInQueue(currentQueue, IsInstanceOfType<BuildWarningEventArgs>);
         }
@@ -254,7 +254,7 @@ namespace Microsoft.Build.UnitTests
         public void LogMessageEvent()
         {
             List<BuildEventArgs> eventList = new List<BuildEventArgs>();
-            
+
             // Log a number of message events and keep track of the events we tried to log
             for (int i = 0; i < 10; i++)
             {
@@ -304,7 +304,7 @@ namespace Microsoft.Build.UnitTests
         public void LogCustomEvent()
         {
             List<BuildEventArgs> eventList = new List<BuildEventArgs>();
-            
+
             // Log a number of events and keep track of which events we sent to the logger
             for (int i = 0; i < 10; i++)
             {
@@ -321,7 +321,7 @@ namespace Microsoft.Build.UnitTests
                                                {
                                                    return currentQueue.Contains(args);
                                                }), "Expected to find all events sent to logcustomevent");
-            
+
             // Assert that every event in the queue is of the correct type
             AssertForEachEventInQueue(currentQueue, IsInstanceOfType<MyCustomBuildEventArgs>);
         }
@@ -378,7 +378,7 @@ namespace Microsoft.Build.UnitTests
         public void PostLoggingEventMultiThreaded()
         {
             List<BuildEventArgs> eventsAdded = new List<BuildEventArgs>();
-            
+
             // Add a number of events on multiple threads
             ManualResetEvent[] waitHandles = new ManualResetEvent[10];
             for (int i = 0; i < waitHandles.Length; i++)
@@ -439,7 +439,7 @@ namespace Microsoft.Build.UnitTests
             // Would have tested the case where null was passed and critical events is false, but this would cause an assertion window
             // to popup thereby failing the test
         }
-       
+
         /// <summary>
         /// Test logging messages to the logger
         /// </summary>
@@ -449,21 +449,21 @@ namespace Microsoft.Build.UnitTests
             // Send a message, this message should be posted to the queue
             engineLoggingServicesHelper.LogCommentFromText(null, MessageImportance.Low, "Message");
             engineLoggingServicesHelper.LogCommentFromText(null, MessageImportance.Low, string.Empty);
-            
+
             // Make sure that the one message got posted to the queue
             DualQueue<BuildEventArgs> currentQueue = engineLoggingServicesHelper.GetCurrentQueueBuildEvents();
             Assert.IsTrue(currentQueue.Count == 2, "Expected to find two events on the queue");
             AssertForEachEventInQueue(currentQueue, IsInstanceOfType<BuildMessageEventArgs>);
 
         }
-        
+
         /// <summary>
         /// Test logging message comments to the logger
         /// </summary>
         [Test]
         public void LogCommentGoodMessages()
         {
-            // Send a message while not logging critical events, since comments are not considered critical they should 
+            // Send a message while not logging critical events, since comments are not considered critical they should
             // not show up in the queue
             engineLoggingServicesHelper.OnlyLogCriticalEvents = true;
             engineLoggingServicesHelper.LogComment((BuildEventContext)null, MessageImportance.Normal, "ErrorConvertedIntoWarning");
@@ -478,13 +478,13 @@ namespace Microsoft.Build.UnitTests
             engineLoggingServicesHelper.LogComment((BuildEventContext)null, MessageImportance.Normal, "ErrorConvertedIntoWarning", 3);
             engineLoggingServicesHelper.LogComment((BuildEventContext)null, "ErrorConvertedIntoWarning");
             engineLoggingServicesHelper.LogComment((BuildEventContext)null, "ErrorCount", 3);
-            
+
             // Get the queue from the logger
            DualQueue<BuildEventArgs> currentQueue = engineLoggingServicesHelper.GetCurrentQueueBuildEvents();
-            
+
             // Make sure we got all the events we sent to the logger
             Assert.IsTrue(currentQueue.Count == 4, "Expected to find four events on the queue");
-            
+
             // Make sure that every event in the queue is of the correct type
             AssertForEachEventInQueue(currentQueue, IsInstanceOfType<BuildMessageEventArgs>);
         }
@@ -552,7 +552,7 @@ namespace Microsoft.Build.UnitTests
             engineLoggingServicesHelper.OnlyLogCriticalEvents = true;
             engineLoggingServicesHelper.LogTaskStarted(null, "taskName", "projectFile", "projectFileOfTaskNode");
             Assert.IsTrue(engineLoggingServicesHelper.GetCurrentQueueBuildEvents().Count == 0, "Expected to find no events in the queue");
-            
+
             // Test logging while logging all events
             engineLoggingServicesHelper.OnlyLogCriticalEvents = false;
             engineLoggingServicesHelper.LogTaskStarted(null, "taskName", "projectFile", "projectFileOfTaskNode");
@@ -571,7 +571,7 @@ namespace Microsoft.Build.UnitTests
             engineLoggingServicesHelper.OnlyLogCriticalEvents = true;
             engineLoggingServicesHelper.LogTaskFinished(null, "taskName", "projectFile", "projectFileOfTaskNode", true);
             Assert.IsTrue(engineLoggingServicesHelper.GetCurrentQueueBuildEvents().Count == 0, "Expected to find no events in the queue");
-            
+
             // Test logging while logging all events
             engineLoggingServicesHelper.OnlyLogCriticalEvents = false;
             engineLoggingServicesHelper.LogTaskFinished(null, "taskName", "projectFile", "projectFileOfTaskNode", true);
@@ -590,7 +590,7 @@ namespace Microsoft.Build.UnitTests
             engineLoggingServicesHelper.OnlyLogCriticalEvents = true;
             engineLoggingServicesHelper.LogTargetStarted(null, "TargetName", "projectFile", "projectFileOfTargetNode");
             Assert.IsTrue(engineLoggingServicesHelper.GetCurrentQueueBuildEvents().Count == 0, "Expected to find no events in the queue");
-            
+
             // Test logging while logging all events
             engineLoggingServicesHelper.OnlyLogCriticalEvents = false;
             engineLoggingServicesHelper.LogTargetStarted(null, "targetName", "projectFile", "projectFileOfTargetNode");
@@ -609,7 +609,7 @@ namespace Microsoft.Build.UnitTests
             engineLoggingServicesHelper.OnlyLogCriticalEvents = true;
             engineLoggingServicesHelper.LogTargetFinished(null, "TargetName", "projectFile", "projectFileOfTargetNode", true);
             Assert.IsTrue(engineLoggingServicesHelper.GetCurrentQueueBuildEvents().Count == 0, "Expected to find no events in the queue");
-            
+
             // Test logging while logging all events, even non critical ones
             engineLoggingServicesHelper.OnlyLogCriticalEvents = false;
             engineLoggingServicesHelper.LogTargetFinished(null, "TargetName", "projectFile", "projectFileOfTargetNode", true);
@@ -628,7 +628,7 @@ namespace Microsoft.Build.UnitTests
             engineLoggingServicesHelper.OnlyLogCriticalEvents = true;
             engineLoggingServicesHelper.LogProjectStarted(-1, null, null, "projectFile", "targetNames", null, null);
             Assert.IsTrue(engineLoggingServicesHelper.GetCurrentQueueBuildEvents().Count == 0, "Expected to find no events in the queue");
-            
+
             // Test logging while logging all events, even non critical ones
             engineLoggingServicesHelper.OnlyLogCriticalEvents = false;
             engineLoggingServicesHelper.LogProjectStarted(-1, null, null, "projectFile", "targetNames", null, null);
@@ -647,7 +647,7 @@ namespace Microsoft.Build.UnitTests
             engineLoggingServicesHelper.OnlyLogCriticalEvents = true;
             engineLoggingServicesHelper.LogProjectFinished(null, "projectFile", true);
             Assert.IsTrue(engineLoggingServicesHelper.GetCurrentQueueBuildEvents().Count == 0, "Expected no events in queue but found some");
-            
+
             //Test logging while logging all events, even non critical ones
             engineLoggingServicesHelper.OnlyLogCriticalEvents = false;
             engineLoggingServicesHelper.LogProjectFinished(null, "projectFile", true);
@@ -1252,9 +1252,9 @@ namespace Microsoft.Build.UnitTests
         #endregion
 
         #region OutProcLoggingTest
-       
+
         /// <summary>
-        /// Test logging the out of proc logger by sending events to the logger and check 
+        /// Test logging the out of proc logger by sending events to the logger and check
         /// the inproc logger queue which is the eventual handler of the events
         /// </summary>
         [Test]
@@ -1263,14 +1263,14 @@ namespace Microsoft.Build.UnitTests
 
             VerifyEventSourceHelper eventSourceHelper = new VerifyEventSourceHelper();
             EngineLoggingServicesInProc inProcLoggingServicesEventsAllEvents = new EngineLoggingServicesInProc(eventSourceHelper.sourceForEvents, false, new ManualResetEvent(false));
-            
+
 
             Engine buildEngine = new Engine();
             buildEngine.LoggingServices = inProcLoggingServicesEventsAllEvents;
-            
+
             EngineCallback outProcessorProxy = new EngineCallback(buildEngine);
             int nodeId = buildEngine.GetNextNodeId();
-            Node parentNode = new Node(nodeId, new LoggerDescription[0], outProcessorProxy, null, 
+            Node parentNode = new Node(nodeId, new LoggerDescription[0], outProcessorProxy, null,
                 ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry, String.Empty);
 
 
@@ -1418,7 +1418,7 @@ namespace Microsoft.Build.UnitTests
             inProcLoggingServicesEventsAllEvents.ProcessPostedLoggingEvents();
             eventSourceHelper.AssertEventsAndNoOthers("anyEventRaised", "messageRaised");
             eventSourceHelper.ClearEvents();
-            
+
             //send a lot of events to test the event batching
             for (int i = 0; i < 600; i++)
             {
@@ -1432,7 +1432,7 @@ namespace Microsoft.Build.UnitTests
             // Check that the events are correctly sorted when posted with different logger ids
             loggingServicesOutProc.PostLoggingEvent(new BuildMessageEventArgs("Message", "help", "sender", MessageImportance.Low));
             loggingServicesOutProc.PostLoggingEvent(new NodeLoggingEventWithLoggerId(new BuildStartedEventArgs("message", "help"), EngineLoggingServicesInProc.FIRST_AVAILABLE_LOGGERID));
-            loggingServicesOutProc.PostLoggingEvent(new NodeLoggingEventWithLoggerId(new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true), 
+            loggingServicesOutProc.PostLoggingEvent(new NodeLoggingEventWithLoggerId(new TargetFinishedEventArgs("message", "help", "targetName", "ProjectFile", "targetFile", true),
                                                                                      EngineLoggingServicesInProc.FIRST_AVAILABLE_LOGGERID +1));
             loggingServicesOutProc.ProcessPostedLoggingEvents();
             inProcLoggingServicesEventsAllEvents.ProcessPostedLoggingEvents();

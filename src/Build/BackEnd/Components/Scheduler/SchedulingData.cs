@@ -605,7 +605,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Retrieves a set of build requests which have the specified parent.  If root is null, this will retrieve all of the 
+        /// Retrieves a set of build requests which have the specified parent.  If root is null, this will retrieve all of the
         /// top-level requests.
         /// </summary>
         public IEnumerable<SchedulableRequest> GetRequestsByHierarchy(SchedulableRequest root)

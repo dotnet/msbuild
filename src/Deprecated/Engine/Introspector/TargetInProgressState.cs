@@ -14,7 +14,7 @@ namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
     /// This class is used to construct and contain the state of an inprogress targets. The primary data
-    /// includes build requests blocked until this target completes and build requests that must complete 
+    /// includes build requests blocked until this target completes and build requests that must complete
     /// before this target can make forward process.
     /// </summary>
     internal class TargetInProgessState
@@ -87,7 +87,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// List of unique identifiers for the targets that are blocked until the current 
+        /// List of unique identifiers for the targets that are blocked until the current
         /// target completes
         /// </summary>
         internal List<TargetIdWrapper> ParentTargets
@@ -99,7 +99,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// List of build requests that are blocked until the current 
+        /// List of build requests that are blocked until the current
         /// target completes
         /// </summary>
         internal List<BuildRequest> ParentBuildRequests
@@ -111,7 +111,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Array of build requests that must complete before the current 
+        /// Array of build requests that must complete before the current
         /// target can make forward process
         internal BuildRequest[] OutstandingBuildRequests
         {
@@ -233,7 +233,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     return new TargetIdWrapper(((TaskExecutionContext)executionContext).ParentTarget);
                 }
-                // If the parent context if a routing context the parent target is not available 
+                // If the parent context if a routing context the parent target is not available
                 // on the current node, so store the request instead
                 else
                 {
@@ -604,7 +604,7 @@ namespace Microsoft.Build.BuildEngine
 
             // Target name
             internal string name;
-            // Id for the parent project 
+            // Id for the parent project
             internal int projectId;
             // Id for the node where the target exists
             internal int nodeId;

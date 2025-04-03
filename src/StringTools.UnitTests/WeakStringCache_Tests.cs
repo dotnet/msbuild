@@ -120,10 +120,6 @@ namespace Microsoft.NET.StringTools.Tests
         /// 2. The string is no longer retrievable after all strong GC refs are gone.
         /// 3. The cache completely removes the handle after calling Scavenge on it.
         /// </summary>
-        /// <remarks>
-        /// Disabled on MacOS Mono because it doesn't play well with conservative GC scanning.
-        /// https://www.mono-project.com/docs/advanced/garbage-collector/sgen/#precise-stack-marking
-        /// </remarks>
         [Fact]
         public void RetainsStringUntilCollected()
         {
@@ -161,10 +157,6 @@ namespace Microsoft.NET.StringTools.Tests
         /// <summary>
         /// Same as RetainsStringUntilCollected but with multiple strings sharing the same hash code.
         /// </summary>
-        /// <remarks>
-        /// Disabled on MacOS Mono because it doesn't play well with conservative GC scanning.
-        /// https://www.mono-project.com/docs/advanced/garbage-collector/sgen/#precise-stack-marking
-        /// </remarks>
         [Fact]
         public void RetainsLastStringWithGivenHashCode()
         {

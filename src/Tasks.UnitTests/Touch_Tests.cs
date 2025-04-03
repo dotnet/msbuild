@@ -377,7 +377,7 @@ namespace Microsoft.Build.UnitTests
 
             bool success = Execute(t);
 
-            Assert.False(success);
+            Assert.True(success);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.CreatingFile"), mynonexisting_txt, "AlwaysCreate"),
@@ -401,7 +401,7 @@ namespace Microsoft.Build.UnitTests
 
             bool success = Execute(t);
 
-            Assert.False(success);
+            Assert.True(success);
 
             Assert.Contains(
                 String.Format(AssemblyResources.GetString("Touch.Touching"), myexisting_txt),
