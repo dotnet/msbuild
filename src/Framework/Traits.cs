@@ -7,11 +7,12 @@ using System.Globalization;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    ///     Represents toggleable features of the MSBuild engine
+    ///     Represents toggleable features of the MSBuild engine.
     /// </summary>
     internal class Traits
     {
         private static Traits _instance = new Traits();
+
         public static Traits Instance
         {
             get
@@ -131,7 +132,6 @@ namespace Microsoft.Build.Framework
         public readonly bool DebugUnitTests = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugUnitTests"));
 
         public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
-
 
         /// <summary>
         /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.
