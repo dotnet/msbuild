@@ -139,7 +139,7 @@
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.targets" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4')) and '$(MicroBuild_EnablePGO)' != 'false'" />
 
   <PropertyGroup>
-    <UseFrozenMaintenancePackageVersions Condition="'$(UseFrozenMaintenancePackageVersions)' == '' AND $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net472')) AND '$(OutputType)' != 'exe'">true</UseFrozenMaintenancePackageVersions>
+    <UseFrozenMaintenancePackageVersions Condition="'$(UseFrozenMaintenancePackageVersions)' == '' AND '$(IsUnitTestProject)' != 'true' AND $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net472')) AND '$(OutputType)' != 'exe'">true</UseFrozenMaintenancePackageVersions>
 
     <FrozenMicrosoftIORedistVersion>6.0.1</FrozenMicrosoftIORedistVersion>
     <FrozenSystemMemoryVersion>4.5.5</FrozenSystemMemoryVersion>
