@@ -7,7 +7,7 @@ The diagram below illustrates the key components and workflows of the MSBuild Sc
 ## Request Lifecycle
 
 ### 1. Submission
-- BuildManager generates submits root request to the Scheduler
+- BuildManager generates root request to the Scheduler
 - Configuration is registered and SchedulableRequest is created
 
 ### 2. Scheduling
@@ -64,8 +64,7 @@ When a parent request determines it needs results from a child request, the foll
 
 ![MSBuild Scheduler Schema](./schedulableRequest_parent_relationships.png)
 
-If parent is absent = a schedulable request doesn't have any dependencies, the request will have `parentRequest = null`.
-
+If the parent is absent, meaning a schedulable request doesn't have any dependencies, the request will have `parentRequest = null`.
 ### Scheduler
 Central controller that manages build requests:
 - Assigns `SchedulableRequests` to nodes
@@ -93,7 +92,7 @@ Basic representation of build operation
 - `ConfigurationId`: Identifies which project configuration this request is for. A configuration represents a unique combination of project file + global properties + tools version.
 - `NodeRequestId`: A node-specific identifier for the request. Each node maintains its own request IDs, which are used for local tracking on that node (whether in-process or out-of-process).
 - `SubmissionId`: an identifier that groups related BuildRequests that originate from a single top-level build command or operation.
-- `ParentGlobalRequestId`: References the GlobalRequestId of the request that created this one. For example, if ProjectA depends on ProjectB, the request to build ProjectB would have ProjectA's request ID as it.
+- `ParentGlobalRequestId`: References the GlobalRequestId of the request that created this one. For example, if ProjectA depends on ProjectB, the request to build ProjectB would have ProjectA's request ID as its ParentGlobalRequestId. This allows the scheduler to track dependencies and manage the build process effectively.
 - `Targets`: The list of targets to build in this project. These are the specific build tasks to execute, like "Clean", "Build", or "Publish".
 
 ## Caching System
