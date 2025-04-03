@@ -16,6 +16,7 @@ variables:
 jobs:
 - job: CheckVersionBumpOnReleaseBranches
   displayName: "Check Version Bump On Release Branches"
+  condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
   steps:
   - powershell: |
       $versionsFile = "eng/Versions.props"
@@ -46,7 +47,6 @@ jobs:
       if (!($isInitialCommit -or $isVersionBumped)) {
         throw "Hello! I noticed that you're targeting one of our servicing branches. You need to increase the revision version number (the last part) of 'VersionPrefix' in eng/Versions.props."
       }
-    condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
     displayName: "Check if patch version is bumped up"
 
 - job: IfOnlyDocumentionChanged
@@ -294,7 +294,7 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
-    env: 
+    env:
         MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
@@ -361,7 +361,7 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
-    env: 
+    env:
         MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
