@@ -11,7 +11,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using BuildEventContext = Microsoft.Build.Framework.BuildEventContext;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 namespace Microsoft.Build.Evaluation

@@ -7,7 +7,6 @@ using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #if !TASKHOST
 using System.Buffers.Binary;

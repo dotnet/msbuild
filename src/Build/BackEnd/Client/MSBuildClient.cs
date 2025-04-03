@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Client;
@@ -74,9 +75,19 @@ namespace Microsoft.Build.Experimental
         private readonly string _pipeName;
 
         /// <summary>
-        /// The named pipe client for client-server communication.
+        /// The named pipe stream for client-server communication.
         /// </summary>
-        private NodePipeClient _pipeClient = null!;
+        private NamedPipeClientStream _nodeStream = null!;
+
+        /// <summary>
+        /// A way to cache a byte array when writing out packets
+        /// </summary>
+        private readonly MemoryStream _packetMemoryStream;
+
+        /// <summary>
+        /// A binary writer to help write into <see cref="_packetMemoryStream"/>
+        /// </summary>
+        private readonly BinaryWriter _binaryWriter;
 
         /// <summary>
         /// Used to estimate the size of the build with an ETW trace.
@@ -119,14 +130,26 @@ namespace Microsoft.Build.Experimental
             // Client <-> Server communication stream
             _handshake = GetHandshake();
             _pipeName = OutOfProcServerNode.GetPipeName(_handshake);
+            _packetMemoryStream = new MemoryStream();
+            _binaryWriter = new BinaryWriter(_packetMemoryStream);
 
             CreateNodePipeStream();
         }
 
         private void CreateNodePipeStream()
         {
-            _pipeClient = new NodePipeClient(_pipeName, _handshake);
-            _packetPump = new MSBuildClientPacketPump(_pipeClient);
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            _nodeStream = new NamedPipeClientStream(
+                serverName: ".",
+                _pipeName,
+                PipeDirection.InOut,
+                PipeOptions.Asynchronous
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                | PipeOptions.CurrentUserOnly
+#endif
+            );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            _packetPump = new MSBuildClientPacketPump(_nodeStream);
         }
 
         /// <summary>
@@ -400,7 +423,7 @@ namespace Microsoft.Build.Experimental
             try
             {
                 packet = packetResolver();
-                _pipeClient.WritePacket(packet);
+                WritePacket(_nodeStream, packet);
                 CommunicationsUtilities.Trace("Command packet of type '{0}' sent...", packet.Type);
             }
             catch (Exception ex)
@@ -598,7 +621,7 @@ namespace Microsoft.Build.Experimental
                 tryAgain = false;
                 try
                 {
-                    _pipeClient.ConnectToServer(Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds));
+                    NodeProviderOutOfProcBase.ConnectToPipeStream(_nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds));
                 }
                 catch (Exception ex)
                 {
@@ -620,6 +643,31 @@ namespace Microsoft.Build.Experimental
             }
 
             return true;
+        }
+
+        private void WritePacket(Stream nodeStream, INodePacket packet)
+        {
+            MemoryStream memoryStream = _packetMemoryStream;
+            memoryStream.SetLength(0);
+
+            ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(memoryStream);
+
+            // Write header
+            memoryStream.WriteByte((byte)packet.Type);
+
+            // Pad for packet length
+            _binaryWriter.Write(0);
+
+            // Reset the position in the write buffer.
+            packet.Translate(writeTranslator);
+
+            int packetStreamLength = (int)memoryStream.Position;
+
+            // Now write in the actual packet length
+            memoryStream.Position = 1;
+            _binaryWriter.Write(packetStreamLength - 5);
+
+            nodeStream.Write(memoryStream.GetBuffer(), 0, packetStreamLength);
         }
     }
 }

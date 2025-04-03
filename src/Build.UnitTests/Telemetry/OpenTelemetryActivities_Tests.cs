@@ -4,11 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using Xunit;
-using Shouldly;
 using Microsoft.Build.Framework.Telemetry;
+using Shouldly;
+using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.Telemetry
 {
@@ -18,7 +16,7 @@ namespace Microsoft.Build.Engine.UnitTests.Telemetry
         public void WithTag_ShouldSetUnhashedValue()
         {
             var activity = new Activity("TestActivity");
-            activity.Start(); 
+            activity.Start();
 
             var telemetryItem = new TelemetryItem(
                 Name: "TestItem",
@@ -121,7 +119,7 @@ namespace Microsoft.Build.Engine.UnitTests.Telemetry
     }
 
     /// <summary>
-    /// A simple mock for testing IActivityTelemetryDataHolder. 
+    /// A simple mock for testing IActivityTelemetryDataHolder.
     /// Returns two items: one hashed, one not hashed.
     /// </summary>
     internal sealed class MockTelemetryDataHolder : IActivityTelemetryDataHolder

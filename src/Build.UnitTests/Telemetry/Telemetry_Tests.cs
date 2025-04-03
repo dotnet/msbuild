@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+#if NET
 using System.Text.Json;
+#endif
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;

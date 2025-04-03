@@ -45,9 +45,9 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Creates a packet with data from a binary stream.
+        /// Creates and routes a packet with data from a binary stream.
         /// </summary>
-        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
             // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
             if (!_packetFactories.TryGetValue(packetType, out PacketFactoryRecord record))
@@ -55,7 +55,7 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.ThrowInternalError("No packet handler for type {0}", packetType);
             }
 
-            return record.DeserializePacket(translator);
+            record.DeserializeAndRoutePacket(nodeId, translator);
         }
 
         /// <summary>
@@ -63,12 +63,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
-            if (!_packetFactories.TryGetValue(packet.Type, out PacketFactoryRecord record))
-            {
-                ErrorUtilities.ThrowInternalError("No packet handler for type {0}", packet.Type);
-            }
-
+            PacketFactoryRecord record = _packetFactories[packet.Type];
             record.RoutePacket(nodeId, packet);
         }
 
@@ -99,9 +94,13 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Creates a packet from a binary stream.
+            /// Creates a packet from a binary stream and sends it to the registered handler.
             /// </summary>
-            public INodePacket DeserializePacket(ITranslator translator) => _factoryMethod(translator);
+            public void DeserializeAndRoutePacket(int nodeId, ITranslator translator)
+            {
+                INodePacket packet = _factoryMethod(translator);
+                RoutePacket(nodeId, packet);
+            }
 
             /// <summary>
             /// Routes the packet to the correct destination.

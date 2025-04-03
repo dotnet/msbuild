@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable

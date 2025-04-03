@@ -30,9 +30,8 @@
        already consuming the newest version of these same dependencies. -->
   <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' == 'true'">
     <!-- Use newest package versions. -->
-    <SystemMemoryVersion>4.6.2</SystemMemoryVersion>
-    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.1</SystemRuntimeCompilerServicesUnsafeVersion>
-    <MicrosoftIORedistVersion>6.1.2</MicrosoftIORedistVersion>
+    <SystemMemoryVersion>4.6.0</SystemMemoryVersion>
+    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.0</SystemRuntimeCompilerServicesUnsafeVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
     <!-- Keep using older versions. Upgrade carefully. -->
@@ -43,10 +42,10 @@
     -->
     <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
-    <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- manually maintained versions -->
+    <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
     <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
   </PropertyGroup>
@@ -84,8 +83,8 @@
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.25164.2</MicrosoftDotNetXUnitExtensionsVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.14.0-3.25171.27</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.14.0-preview.1.89</NuGetBuildTasksVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.14.0-3.25179.1</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.14.0-preview.1.97</NuGetBuildTasksVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
     <BootstrapSdkVersion>9.0.200-preview.0.24603.3</BootstrapSdkVersion>
