@@ -4,6 +4,30 @@ The diagram below illustrates the key components and workflows of the MSBuild Sc
 
 ![MSBuild Scheduler Schema](./scheduler_architecture.png)
 
+## Request Lifecycle
+
+### 1. Submission
+- BuildManager generates submits root request to the Scheduler
+- Configuration is registered and SchedulableRequest is created
+
+### 2. Scheduling
+- Scheduler applies algorithm to select node for request
+- Request is assigned to node and moves to Executing state
+
+### 3. Execution
+- Node processes request and may encounter dependencies
+- If blocked, node reports to Scheduler with blocker information
+- Scheduler creates new requests for dependencies and schedules them
+
+### 4. Completion
+- Node reports build results back to Scheduler
+- Results are cached and request is marked complete
+- Parent requests are unblocked with results
+
+### 5. Result Processing
+- Results propagate through dependency chain
+- When all requests complete, submission is reported complete
+
 ## Core Components
 
 ### SchedulableRequest
@@ -22,7 +46,7 @@ In MSBuild, builds often have dependencies. When a project needs to build anothe
 The original one becomes the "parent request" of this new child request.
 For example:
 
-ProjectA is building (parent request) => ProjectA references ProjectB, so it creates a request to build ProjectB (child request) => ProjectA's request is considered the "parent request" of ProjectB's request
+`ProjectA` is building (parent request) => `ProjectA` references `ProjectB`, so it creates a request to build `ProjectB` (child request) => `ProjectA's` request is considered the "parent request" of `ProjectB's` request
 
 This parent-child relationship is tracked through:
 - `ParentGlobalRequestId` in the `BuildRequest`
@@ -44,13 +68,13 @@ If parent is absent = a schedulable request doesn't have any dependencies, the r
 
 ### Scheduler
 Central controller that manages build requests:
-- Assigns SchedulableRequests to nodes
+- Assigns `SchedulableRequests` to nodes
 - Handles blocking and unblocking requests
 - Checks if the result can be satisfied from the MSBuild cache
 
 ### SchedulingData
-Tracks state of all SchedulableRequest
-- Request SchedulableRequest state transitions
+Tracks state of all `SchedulableRequest`
+- Request `SchedulableRequest` state transitions
 - Node assignments
 - Configuration tracking
 
@@ -65,12 +89,12 @@ This data can then be used by subsequent builds to determine how best to distrib
 
 ### BuildRequest
 Basic representation of build operation
-- GlobalRequestId: A unique identifier for the request across the entire build session. This ID stays constant regardless of which node processes the request. It allows the scheduler to track and reference the request throughout the build lifecycle. If two requests are semantically identical (same targets for the same project **configuration**), they may share the same GlobalRequestId to enable result reuse.
-- ConfigurationId: Identifies which project configuration this request is for. A configuration represents a unique combination of project file + global properties + tools version.
-- NodeRequestId: A node-specific identifier for the request. Each node maintains its own request IDs, which are used for local tracking on that node (whether in-process or out-of-process).
-- SubmissionId: an identifier that groups related BuildRequests that originate from a single top-level build command or operation.
-- ParentGlobalRequestId: References the GlobalRequestId of the request that created this one. For example, if ProjectA depends on ProjectB, the request to build ProjectB would have ProjectA's request ID as it.
-- Targets: The list of targets to build in this project. These are the specific build tasks to execute, like "Clean", "Build", or "Publish".
+- `GlobalRequestId`: A unique identifier for the request across the entire build session. This ID stays constant regardless of which node processes the request. It allows the scheduler to track and reference the request throughout the build lifecycle. If two requests are semantically identical (same targets for the same project **configuration**), they may share the same GlobalRequestId to enable result reuse.
+- `ConfigurationId`: Identifies which project configuration this request is for. A configuration represents a unique combination of project file + global properties + tools version.
+- `NodeRequestId`: A node-specific identifier for the request. Each node maintains its own request IDs, which are used for local tracking on that node (whether in-process or out-of-process).
+- `SubmissionId`: an identifier that groups related BuildRequests that originate from a single top-level build command or operation.
+- `ParentGlobalRequestId`: References the GlobalRequestId of the request that created this one. For example, if ProjectA depends on ProjectB, the request to build ProjectB would have ProjectA's request ID as it.
+- `Targets`: The list of targets to build in this project. These are the specific build tasks to execute, like "Clean", "Build", or "Publish".
 
 ## Caching System
 
@@ -146,27 +170,3 @@ Similar to WithMaxWaitingRequests, but only considers direct dependencies rather
 
 ### CustomSchedulerForSQL
 Specialized algorithm for SQL builds to avoid node overloading. This algorithm intentionally limits the number of configurations assigned to any single node, which helps with builds that have many configurations that reference the same projects. It can be fine-tuned with the `MSBUILDCUSTOMSCHEDULERFORSQLCONFIGURATIONLIMITMULTIPLIER` environment variable.
-
-## Request Lifecycle
-
-### 1. Submission
-- BuildManager generates submits root request to the Scheduler
-- Configuration is registered and SchedulableRequest is created
-
-### 2. Scheduling
-- Scheduler applies algorithm to select node for request
-- Request is assigned to node and moves to Executing state
-
-### 3. Execution
-- Node processes request and may encounter dependencies
-- If blocked, node reports to Scheduler with blocker information
-- Scheduler creates new requests for dependencies and schedules them
-
-### 4. Completion
-- Node reports build results back to Scheduler
-- Results are cached and request is marked complete
-- Parent requests are unblocked with results
-
-### 5. Result Processing
-- Results propagate through dependency chain
-- When all requests complete, submission is reported complete
