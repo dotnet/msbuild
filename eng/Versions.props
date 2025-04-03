@@ -24,8 +24,9 @@
     <!-- manually maintained versions -->
     <!--
         Modifying the version of System.Memory is very high impact and causes downstream breaks in third-party tooling that uses the MSBuild API.
-        When updating the version of System.Memory file a breaking change here: https://github.com/dotnet/docs/issues/new?assignees=gewarren&labels=breaking-change%2CPri1%2Cdoc-idea&template=breaking-change.yml&title=%5BBreaking+change%5D%3A+
-        and follow the guidelines written here (internal-link): https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/1796/How-to-add-a-Known-Issue
+        As a result, we CONTINUE TO REFERENCE the old versions at build time, so those are the versions that get embedded into MSBuild assemblies.
+        However, we can update, binding-redirect to, and distribute the newest version (that matches the VS-referenced versions) in order to get the benefits of updating.
+        See uses of $(UseFrozenMaintenancePackageVersions) for details.
     -->
     <SystemMemoryVersion>4.6.0</SystemMemoryVersion>
     <SystemThreadingTasksExtensionsVersion>4.6.0</SystemThreadingTasksExtensionsVersion>
