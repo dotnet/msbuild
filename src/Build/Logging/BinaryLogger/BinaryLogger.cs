@@ -4,6 +4,8 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
@@ -334,6 +336,15 @@ namespace Microsoft.Build.Logging
 
                 projectImportsCollector.FileIOExceptionEvent -= EventSource_AnyEventRaised;
                 projectImportsCollector = null;
+            }
+
+            // Write the build check editorconfig file paths to the log
+            if (EditorConfigParser.EditorConfigFilePaths.Any())
+            {
+                foreach (var filePath in EditorConfigParser.EditorConfigFilePaths)
+                {
+                    projectImportsCollector.AddFile(filePath);
+                }
             }
 
             if (stream != null)
