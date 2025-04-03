@@ -323,6 +323,14 @@ namespace Microsoft.Build.Logging
 
             if (projectImportsCollector != null)
             {
+                // Write the build check editorconfig file paths to the log
+                if (EditorConfigParser.EditorConfigFilePaths.Any())
+                {
+                    foreach (var filePath in EditorConfigParser.EditorConfigFilePaths)
+                    {
+                        projectImportsCollector.AddFile(filePath);
+                    }
+                }
                 projectImportsCollector.Close();
 
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
@@ -338,14 +346,6 @@ namespace Microsoft.Build.Logging
                 projectImportsCollector = null;
             }
 
-            // Write the build check editorconfig file paths to the log
-            if (EditorConfigParser.EditorConfigFilePaths.Any())
-            {
-                foreach (var filePath in EditorConfigParser.EditorConfigFilePaths)
-                {
-                    projectImportsCollector.AddFile(filePath);
-                }
-            }
 
             if (stream != null)
             {
