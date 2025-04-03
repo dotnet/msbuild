@@ -266,13 +266,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     }
 }
 
-#if !NET
 namespace System.IO
 {
     public static class StreamExtensions
     {
         public static void ReadExactly(this Stream stream, byte[] buffer, int offset, int count)
         {
+#if !NET
             if (buffer == null)
             {
                 throw new ArgumentNullException(nameof(buffer));
@@ -296,7 +296,7 @@ namespace System.IO
                 offset +=read;
                 count -= read;
             }
+#endif
         }
     }
 }
-#endif
