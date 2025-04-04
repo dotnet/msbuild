@@ -1573,6 +1573,9 @@ namespace Microsoft.Build.Tasks
             Log.LogMessage(importance, property, "EnableCustomCulture");
             Log.LogMessage(importance, $"{indent}{EnableCustomCulture}");
 
+            Log.LogMessage(importance, property, "EnableCustomCulture");
+            Log.LogMessage(importance, $"{indent}{EnableCustomCulture}");
+
             Log.LogMessage(importance, property, "CopyLocalDependenciesWhenParentReferenceInGac");
             Log.LogMessage(importance, $"{indent}{_copyLocalDependenciesWhenParentReferenceInGac}");
 

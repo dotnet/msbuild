@@ -9,6 +9,9 @@
     <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
 
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
+
+    <!-- The output of this project is sort of an "executable" so it can get the latest versions of everything. -->
+    <UseFrozenMaintenancePackageVersions>false</UseFrozenMaintenancePackageVersions>
   </PropertyGroup>
 
   <ItemGroup>

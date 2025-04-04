@@ -2,6 +2,7 @@
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
+    <UseFrozenMaintenancePackageVersions>false</UseFrozenMaintenancePackageVersions>
     <NuspecFile>VS.ExternalAPIs.MSBuild.nuspec</NuspecFile>
     <IsShipping>false</IsShipping>
     <PlatformTarget>x86</PlatformTarget>

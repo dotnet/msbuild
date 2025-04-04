@@ -16,6 +16,8 @@
 
     <IsShipping>false</IsShipping>
     <ExcludeFromSourceOnlyBuild>true</ExcludeFromSourceOnlyBuild>
+
+    <UseFrozenMaintenancePackageVersions>false</UseFrozenMaintenancePackageVersions>
   </PropertyGroup>
 
 </Project>
