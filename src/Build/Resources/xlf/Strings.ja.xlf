@@ -223,12 +223,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0109_MessageFmt">
         <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
-        <target state="new">Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</target>
+        <target state="translated">プロジェクト {1} のタスク {0} は、{2} CLI を使用してプロジェクトをビルドします。代わりに MSBuild タスクを使用する必要があります。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0109_Title">
         <source>The 'Exec' task should not be used to build a project.</source>
-        <target state="new">The 'Exec' task should not be used to build a project.</target>
+        <target state="translated">'Exec' タスクはプロジェクトのビルドには使用しないでください。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
