@@ -1,0 +1,13 @@
+name: "Labeler: Cache Retention"
+
+on:
+  schedule:
+    - cron: "10 3 * * *" # 3:10 every day (arbitrary time daily, modified to different values in each repository)
+
+  workflow_dispatch:
+
+jobs:
+  cache-retention:
+    # Do not run the workflow on forks outside the 'dotnet' org
+    if: ${{ github.repository_owner == 'dotnet' }}
+    uses: dotnet/issue-labeler/.github/workflows/cache-retention.yml@3fe21fbd027653d2263d259333b154d33c157572 # v1.0.0
