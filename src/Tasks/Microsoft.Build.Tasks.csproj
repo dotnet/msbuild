@@ -66,14 +66,12 @@
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
     <Compile Include="ConvertToAbsolutePath.cs" />
-    <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\ExtensionFoldersRegistryKey.cs">
       <Link>ExtensionFoldersRegistryKey.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileDelegates.cs">
       <Link>FileDelegates.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs" />
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>PropertyParser.cs</Link>
     </Compile>
@@ -118,7 +116,6 @@
     <Compile Include="..\Shared\Modifiers.cs">
       <Link>Modifiers.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Shared\Tracing.cs" />

@@ -12,6 +12,8 @@ namespace Microsoft.Build.Framework
     /// </summary>
     internal interface IMetadataContainer
     {
+        int CustomMetadataCount { get; }
+
         /// <summary>
         /// Returns a list of metadata names and unescaped values, including
         /// metadata from item definition groups, but not including built-in
@@ -32,5 +34,7 @@ namespace Microsoft.Build.Framework
         /// to be unique and values are assumed to be escaped.
         /// </param>
         void ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata);
+
+        bool HasSameBackingCollection(ICollection<KeyValuePair<string, string>> backingCollection);
     }
 }
