@@ -2392,6 +2392,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>succeeded: {0}</value>
     <comment>{0} whole number</comment>
   </data>
+  <data name="OpenTelemetryLoadFailed" xml:space="preserve">
+    <value>Loading telemetry libraries failed with exception: {0}.</value>
+  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 
