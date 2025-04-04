@@ -5,7 +5,7 @@
     <VersionPrefix>17.14.3</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <PackageValidationBaselineVersion>17.13.9</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
