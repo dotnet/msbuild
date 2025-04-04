@@ -12,6 +12,10 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 
 internal sealed class EditorConfigParser
 {
+    // Define a static property to hold the editorConfigFilePath
+    private static ConcurrentBag<string> editorConfigFilePaths = new ConcurrentBag<string>();
+    public static IEnumerable<string> EditorConfigFilePaths => editorConfigFilePaths;
+
     private const string EditorconfigFile = ".editorconfig";
 
     /// <summary>
@@ -34,16 +38,15 @@ internal sealed class EditorConfigParser
         var editorConfigDataFromFilesList = new List<EditorConfigFile>();
 
         var directoryOfTheProject = Path.GetDirectoryName(filePath);
-        // The method will look for the file in parent directory if not found in current until found or the directory is root. 
+        // The method will look for the file in parent directory if not found in current until found or the directory is root.
         var editorConfigFilePath = FileUtilities.GetPathOfFileAbove(EditorconfigFile, directoryOfTheProject);
-
         while (editorConfigFilePath != string.Empty)
         {
             var editorConfig = _editorConfigFileCache.GetOrAdd(editorConfigFilePath, (key) =>
             {
                 return EditorConfigFile.Parse(File.ReadAllText(editorConfigFilePath));
             });
-
+            editorConfigFilePaths.Add(editorConfigFilePath);
             editorConfigDataFromFilesList.Add(editorConfig);
 
             if (editorConfig.IsRoot)
@@ -61,7 +64,7 @@ internal sealed class EditorConfigParser
     }
 
     /// <summary>
-    /// Retrieves the config dictionary from the sections that matched the filePath. 
+    /// Retrieves the config dictionary from the sections that matched the filePath.
     /// </summary>
     /// <param name="editorConfigFiles"></param>
     /// <param name="filePath"></param>
