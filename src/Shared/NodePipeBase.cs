@@ -226,7 +226,7 @@ namespace Microsoft.Build.Internal
         }
 
 #if !TASKHOST
-        private async Task<int> ReadAsync(byte[] buffer, int bytesToRead, CancellationToken cancellationToken)
+        private async ValueTask<int> ReadAsync(byte[] buffer, int bytesToRead, CancellationToken cancellationToken)
         {
             int totalBytesRead = 0;
             while (totalBytesRead < bytesToRead)
