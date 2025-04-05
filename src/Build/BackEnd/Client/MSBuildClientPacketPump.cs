@@ -126,6 +126,16 @@ namespace Microsoft.Build.BackEnd.Client
         }
 
         /// <summary>
+        /// Deserializes a packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator to use as a source for packet data.</param>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
+        }
+
+        /// <summary>
         /// Routes a packet to the appropriate handler.
         /// </summary>
         /// <param name="nodeId">The node id from which the packet was received.</param>

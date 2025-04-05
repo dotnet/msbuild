@@ -256,6 +256,16 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Takes a serializer and deserializes the packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
+        }
+
+        /// <summary>
         /// Routes the specified packet. This is called by the Inproc node directly since it does not have to do any deserialization
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>

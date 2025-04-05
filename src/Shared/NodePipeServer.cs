@@ -25,11 +25,13 @@ namespace Microsoft.Build.Internal
         /// </summary>
         private const int PipeBufferSize = 131_072;
 
+#if NET
         /// <summary>
         /// A timeout for the handshake. This is only used on Unix-like socket implementations, because the
         /// timeout on the PipeStream connection is ignore.
         /// </summary>
         private static readonly int s_handshakeTimeout = NativeMethodsShared.IsWindows ? 0 : 60_000;
+#endif
 
         private readonly NamedPipeServerStream _pipeServer;
 
@@ -179,7 +181,11 @@ namespace Microsoft.Build.Internal
             for (int i = 0; i < HandshakeComponents.Length; i++)
             {
                 // This will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard.
+#if NET
                 int handshakePart = _pipeServer.ReadIntForHandshake(byteToAccept: i == 0 ? CommunicationsUtilities.handshakeVersion : null, s_handshakeTimeout);
+#else
+                int handshakePart = _pipeServer.ReadIntForHandshake(byteToAccept: i == 0 ? CommunicationsUtilities.handshakeVersion : null);
+#endif
 
                 if (handshakePart != HandshakeComponents[i])
                 {
@@ -190,7 +196,11 @@ namespace Microsoft.Build.Internal
             }
 
             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
+#if NET
             _pipeServer.ReadEndOfHandshakeSignal(false, s_handshakeTimeout);
+#else
+            _pipeServer.ReadEndOfHandshakeSignal(false);
+#endif
 
             CommunicationsUtilities.Trace("Successfully connected to parent.");
             _pipeServer.WriteEndOfHandshakeSignal();

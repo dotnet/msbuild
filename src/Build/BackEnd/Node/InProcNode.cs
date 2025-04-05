@@ -223,6 +223,16 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Not necessary for in-proc node - we don't serialize.
+        /// </summary>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            // The in-proc endpoint shouldn't be serializing, just routing.
+            ErrorUtilities.ThrowInternalError("Unexpected call to DeserializePacket on the in-proc node.");
+            return null;
+        }
+
+        /// <summary>
         /// Routes the packet to the appropriate handler.
         /// </summary>
         /// <param name="nodeId">The node id.</param>
