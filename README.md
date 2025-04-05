@@ -1,4 +1,4 @@
-# Microsoft.Build (MSBuild)
+#  Microsoft.Build (MSBuild)
 
 [![Build Status](https://dev.azure.com/dnceng-public/public/_apis/build/status/75?branchName=main&label=Public)](https://dev.azure.com/dnceng-public/public/_build?definitionId=75) [![Build Status](https://devdiv.visualstudio.com/DevDiv/_apis/build/status/9434?label=Internal&branchName=main)](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434)
 
