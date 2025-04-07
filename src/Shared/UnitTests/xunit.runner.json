@@ -3,7 +3,7 @@
     "shadowCopy": false,
     "appDomain": "required",
     "longRunningTestSeconds": 60,
-    "maxParallelThreads": 1,
-    "parallelizeTestCollections": false,
+    "maxParallelThreads": 4,
+    "parallelizeTestCollections": true,
     "diagnosticMessages":  true
 }
