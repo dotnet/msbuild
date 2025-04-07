@@ -6,11 +6,13 @@ using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
-#if !FEATURE_APM
+
+#if NET
 using System.Threading.Tasks;
 #endif
+
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Client
 {

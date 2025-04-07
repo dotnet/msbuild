@@ -10,10 +10,13 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
+
+#if !CLR2COMPATIBILITY
+using Microsoft.Build.Framework.Logging;
+#endif
 
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
