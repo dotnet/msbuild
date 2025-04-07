@@ -29,6 +29,8 @@ on:
         description: "Pulls: Test Model"
         type: boolean
         default: true
+       repository:
+         description: "Repository to train the models from"
 
       data_limit:
         description: "Max number of items to include in the model"
@@ -56,5 +58,6 @@ jobs:
       test_pulls: ${{ inputs.test_pulls }}
       data_limit: ${{ inputs.data_limit && fromJSON(inputs.data_limit) || 0 }}
       cache_key_suffix: ${{ inputs.cache_key_suffix }}
+      repository: ${{ inputs.repository }}
       label_prefix: "Area: "
       threshold: 0.40
