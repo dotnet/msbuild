@@ -2711,6 +2711,13 @@ EndGlobal
 
             TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
 
+            // If /bl is specified, set a path for the binlog that is defined by the test environment
+            if (arguments.Contains("/bl"))
+            {
+                string binlogPath = Path.Combine(testProject.TestRoot, "output.binlog");
+                arguments = arguments.Replace("/bl", $"/bl:{binlogPath}");
+            }
+
             // Build in-proc.
             RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, _output);
             success.ShouldBeTrue();
