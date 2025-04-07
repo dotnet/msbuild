@@ -29,7 +29,7 @@ on:
         description: "Pulls: Test Model"
         type: boolean
         default: true
-       repository:
+      repository:
          description: "Repository to train the models from"
 
       data_limit:
