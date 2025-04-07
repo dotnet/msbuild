@@ -221,6 +221,16 @@
         <target state="translated">Le proprietà “TargetFramework” e “TargetFrameworks” non vengono rispettate e non devono essere specificate nei progetti che non utilizzano il SDK di.NET.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0109_MessageFmt">
+        <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
+        <target state="translated">L'attività {0} del progetto{1} compila un progetto utilizzando la CLI {2}. È necessario utilizzare invece l'attività MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0109_Title">
+        <source>The 'Exec' task should not be used to build a project.</source>
+        <target state="translated">L'attività 'Esecuzione' non deve essere utilizzata per compilare un progetto.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">È stato eseguito l'accesso alla proprietà '{0}', ma non è mai stata inizializzata.</target>

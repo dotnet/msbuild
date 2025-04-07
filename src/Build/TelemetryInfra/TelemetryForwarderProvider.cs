@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.TelemetryInfra;
@@ -74,7 +74,7 @@ internal class TelemetryForwarderProvider : IBuildComponent
         public void FinalizeProcessing(LoggingContext loggingContext)
         {
             WorkerNodeTelemetryEventArgs telemetryArgs = new(_workerNodeTelemetryData)
-                { BuildEventContext = loggingContext.BuildEventContext };
+            { BuildEventContext = loggingContext.BuildEventContext };
             loggingContext.LogBuildEvent(telemetryArgs);
         }
     }

@@ -65,7 +65,7 @@ namespace Microsoft.Build.Evaluation
             var outerXml = description;
             outerXml = outerXml.Replace(@"xmlns=""http://schemas.microsoft.com/developer/msbuild/2003""", "");
 
-            var newLineIndex = outerXml.IndexOfAny(['\r', '\n']);
+            var newLineIndex = outerXml.AsSpan().IndexOfAny('\r', '\n');
             return newLineIndex == -1 ? outerXml : outerXml.Remove(newLineIndex);
         }
 
@@ -74,9 +74,19 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         protected void AppendDefaultHeaderWithSeparator(StringBuilder stringBuilder, string separator)
         {
-            stringBuilder.AppendLine(
-                string.Join(separator, "Id", "ParentId", "Pass", "File", "Line #", "Expression", "Inc (ms)", "Inc (%)", "Exc (ms)",
-                        "Exc (%)", "#", "Kind", "Bug"));
+            stringBuilder.Append("Id").Append(separator)
+                         .Append("ParentId").Append(separator)
+                         .Append("Pass").Append(separator)
+                         .Append("File").Append(separator)
+                         .Append("Line #").Append(separator)
+                         .Append("Expression").Append(separator)
+                         .Append("Inc (ms)").Append(separator)
+                         .Append("Inc (%)").Append(separator)
+                         .Append("Exc (ms)").Append(separator)
+                         .Append("Exc (%)").Append(separator)
+                         .Append('#').Append(separator)
+                         .Append("Kind").Append(separator)
+                         .Append("Bug").AppendLine();
         }
 
         /// <summary>
@@ -92,9 +102,9 @@ namespace Microsoft.Build.Evaluation
                 evaluationLocation.Line?.ToString() ?? string.Empty,
                 NormalizeExpression(evaluationLocation.ElementDescription, evaluationLocation.Kind) ?? string.Empty,
                 GetMilliseconds(profiledLocation.InclusiveTime),
-                GetPercentage(totalTime, profiledLocation.InclusiveTime) + "%",
+                $"{GetPercentage(totalTime, profiledLocation.InclusiveTime)}%",
                 GetMilliseconds(profiledLocation.ExclusiveTime),
-                GetPercentage(totalTime, profiledLocation.ExclusiveTime) + "%",
+                $"{GetPercentage(totalTime, profiledLocation.ExclusiveTime)}%",
                 profiledLocation.NumberOfHits,
                 evaluationLocation.Kind + separator));
         }

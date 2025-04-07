@@ -215,7 +215,6 @@
                      可用的參數。
                         default -- 指定終端機記錄器的預設值
                         。其需要下列其中一值: 
-。
                            - 'on'、'true' 會強制使用 TerminalLogger，即使
                             其之後可能會停用。
                            - 'off'、'false' 會強制使用 TerminalLogger，即使
