@@ -27,19 +27,18 @@
   <!-- Production Dependencies -->
   <PropertyGroup>
     <!-- manually maintained versions -->
-    <MicrosoftIORedistVersion>6.1.2</MicrosoftIORedistVersion>
-    <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
+    <MicrosoftIORedistVersion>6.1.3</MicrosoftIORedistVersion>
     <SystemBuffersVersion>4.6.1</SystemBuffersVersion>
     <!--
         Modifying the version of System.Memory is very high impact and causes downstream breaks in third-party tooling that uses the MSBuild API.
-        When updating the version of System.Memory file a breaking change here: https://github.com/dotnet/docs/issues/new?assignees=gewarren&labels=breaking-change%2CPri1%2Cdoc-idea&template=breaking-change.yml&title=%5BBreaking+change%5D%3A+
-        and follow the guidelines written here (internal-link): https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/1796/How-to-add-a-Known-Issue
+        As a result, we CONTINUE TO REFERENCE the old versions at build time, so those are the versions that get embedded into MSBuild assemblies.
+        However, we can update, binding-redirect to, and distribute the newest version (that matches the VS-referenced versions) in order to get the benefits of updating.
+        See uses of $(UseFrozenMaintenancePackageVersions) for details.
     -->
-    <SystemMemoryVersion>4.6.2</SystemMemoryVersion>
+    <SystemMemoryVersion>4.6.3</SystemMemoryVersion>
     <SystemNumericsVectorsVersion>4.6.1</SystemNumericsVectorsVersion>
-    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.1</SystemRuntimeCompilerServicesUnsafeVersion>
-    <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
-    <SystemThreadingTasksExtensionsVersion>4.6.2</SystemThreadingTasksExtensionsVersion>
+    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.2</SystemRuntimeCompilerServicesUnsafeVersion>
+    <SystemThreadingTasksExtensionsVersion>4.6.3</SystemThreadingTasksExtensionsVersion>
   </PropertyGroup>
   <PropertyGroup>
     <!-- dotnet/runtime packages -->
@@ -53,12 +52,14 @@
     <SystemReflectionMetadataLoadContextVersion>9.0.0</SystemReflectionMetadataLoadContextVersion>
     <SystemResourcesExtensionsVersion>9.0.0</SystemResourcesExtensionsVersion>
     <SystemSecurityCryptographyProtectedDataVersion>9.0.0</SystemSecurityCryptographyProtectedDataVersion>
+    <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
     <SystemTextEncodingCodePagesVersion>9.0.0</SystemTextEncodingCodePagesVersion>
     <SystemTextJsonVersion>9.0.0</SystemTextJsonVersion>
     <SystemThreadingChannelsVersion>9.0.0</SystemThreadingChannelsVersion>
     <SystemThreadingTasksDataflowVersion>9.0.0</SystemThreadingTasksDataflowVersion>
   </PropertyGroup>
   <PropertyGroup>
+    <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
     <!-- maintained in eng/dependabot/Packages.props -->
     <!--
     <SystemCodeDomVersion></SystemCodeDomVersion>
@@ -74,9 +75,9 @@
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.25164.2</MicrosoftDotNetXUnitExtensionsVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.14.0-3.25179.1</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.14.0-preview.1.89</NuGetBuildTasksVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.25204.5</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftNetCompilersToolsetVersion>4.14.0-3.25202.5</MicrosoftNetCompilersToolsetVersion>
+    <NuGetBuildTasksVersion>6.14.0-preview.1.102</NuGetBuildTasksVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
     <BootstrapSdkVersion>9.0.200-preview.0.24603.3</BootstrapSdkVersion>
