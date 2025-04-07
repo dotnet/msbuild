@@ -5,10 +5,10 @@ using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.TelemetryInfra;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 

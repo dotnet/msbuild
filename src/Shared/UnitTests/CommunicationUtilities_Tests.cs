@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
 
 namespace Microsoft.Build.UnitTests

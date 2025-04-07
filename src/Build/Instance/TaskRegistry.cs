@@ -11,7 +11,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -20,7 +19,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
@@ -68,64 +66,64 @@ namespace Microsoft.Build.Execution
         /// callbacks; as forcing those out of proc would be just setting them up for
         /// known failure.
         /// </summary>
-        private static bool s_forceTaskHostLaunch = (Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1");
+        private static readonly bool s_forceTaskHostLaunch = (Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1");
 
         /// <summary>
         /// Simple name for the MSBuild tasks (v4), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksV4SimpleName = "Microsoft.Build.Tasks.v4.0";
+        private const string s_tasksV4SimpleName = "Microsoft.Build.Tasks.v4.0";
 
         /// <summary>
         /// Filename for the MSBuild tasks (v4), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksV4Filename = s_tasksV4SimpleName + ".dll";
+        private const string s_tasksV4Filename = $"{s_tasksV4SimpleName}.dll";
 
         /// <summary>
         /// Expected location that MSBuild tasks (v4) is picked up from if the user
         /// references it with just a simple name, used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_potentialTasksV4Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV4Filename);
+        private static readonly string s_potentialTasksV4Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV4Filename);
 
         /// <summary>
         /// Simple name for the MSBuild tasks (v12), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksV12SimpleName = "Microsoft.Build.Tasks.v12.0";
+        private const string s_tasksV12SimpleName = "Microsoft.Build.Tasks.v12.0";
 
         /// <summary>
         /// Filename for the MSBuild tasks (v12), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksV12Filename = s_tasksV12SimpleName + ".dll";
+        private const string s_tasksV12Filename = $"{s_tasksV12SimpleName}.dll";
 
         /// <summary>
         /// Expected location that MSBuild tasks (v12) is picked up from if the user
         /// references it with just a simple name, used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_potentialTasksV12Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV12Filename);
+        private static readonly string s_potentialTasksV12Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV12Filename);
 
         /// <summary>
         /// Simple name for the MSBuild tasks (v14+), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksCoreSimpleName = "Microsoft.Build.Tasks.Core";
+        private const string s_tasksCoreSimpleName = "Microsoft.Build.Tasks.Core";
 
         /// <summary>
         /// Filename for the MSBuild tasks (v14+), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksCoreFilename = s_tasksCoreSimpleName + ".dll";
+        private const string s_tasksCoreFilename = $"{s_tasksCoreSimpleName}.dll";
 
         /// <summary>
         /// Expected location that MSBuild tasks (v14+) is picked up from if the user
         /// references it with just a simple name, used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_potentialTasksCoreLocation = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksCoreFilename);
+        private static readonly string s_potentialTasksCoreLocation = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksCoreFilename);
 
         /// <summary>
         /// Monotonically increasing counter for registered tasks.
@@ -853,13 +851,13 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// The singleton comparer to use when an exact match is desired
                 /// </summary>
-                private static RegisteredTaskIdentityComparer s_exact = new RegisteredTaskIdentityComparer(true /* exact match */);
+                private static readonly RegisteredTaskIdentityComparer s_exact = new RegisteredTaskIdentityComparer(true /* exact match */);
 
                 /// <summary>
                 /// The singleton comparer to use when a fuzzy match is desired.  Note that this still does an exact match on the
                 /// name, but does a fuzzy match on the task identity parameters.
                 /// </summary>
-                private static RegisteredTaskIdentityComparer s_fuzzy = new RegisteredTaskIdentityComparer(false /* fuzzy match */);
+                private static readonly RegisteredTaskIdentityComparer s_fuzzy = new RegisteredTaskIdentityComparer(false /* fuzzy match */);
 
                 /// <summary>
                 /// Keeps track of whether we're doing exact or fuzzy equivalency

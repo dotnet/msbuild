@@ -10,6 +10,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 
 #if !TASKHOST
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Experimental.BuildCheck;
 #endif
 
@@ -17,11 +18,6 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework.Profiler;
 using System.Collections;
-using System.Linq;
-#endif
-
-#if FEATURE_APPDOMAIN
-using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 #endif
 
 #nullable disable
@@ -274,12 +270,13 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Dictionary of methods used to read BuildEventArgs.
         /// </summary>
-        private static Dictionary<LoggingEventType, MethodInfo> s_readMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
+        private static readonly Dictionary<LoggingEventType, MethodInfo> s_readMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
+
 #endif
         /// <summary>
         /// Dictionary of methods used to write BuildEventArgs.
         /// </summary>
-        private static Dictionary<LoggingEventType, MethodInfo> s_writeMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
+        private static readonly Dictionary<LoggingEventType, MethodInfo> s_writeMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
 
         /// <summary>
         /// Delegate for translating targetfinished events.
@@ -431,14 +428,14 @@ namespace Microsoft.Build.Shared
             bool eventCanSerializeItself = methodInfo != null;
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
-                if (_buildEvent is ProjectEvaluationStartedEventArgs
-                    or ProjectEvaluationFinishedEventArgs
-                    or ResponseFileUsedEventArgs)
-                {
-                    // switch to serialization methods that we provide in this file
-                    // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
-                    eventCanSerializeItself = false;
-                }
+            if (_buildEvent is ProjectEvaluationStartedEventArgs
+                or ProjectEvaluationFinishedEventArgs
+                or ResponseFileUsedEventArgs)
+            {
+                // switch to serialization methods that we provide in this file
+                // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
+                eventCanSerializeItself = false;
+            }
 #endif
 
             translator.Translate(ref eventCanSerializeItself);

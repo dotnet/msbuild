@@ -860,7 +860,7 @@ namespace Microsoft.Build.Construction
             traversalProject.ToolsVersion = wrapperProjectToolsVersion;
             traversalProject.DefaultTargets = "Build";
             traversalProject.InitialTargets = "ValidateSolutionConfiguration;ValidateToolsVersions;ValidateProjects";
-            traversalProject.FullPath = _solutionFile.FullPath + ".metaproj";
+            traversalProject.FullPath = $"{_solutionFile.FullPath}.metaproj";
 
             // Add default solution configuration/platform names in case the user doesn't specify them on the command line
             AddConfigurationPlatformDefaults(traversalProject);
@@ -982,7 +982,7 @@ namespace Microsoft.Build.Construction
             // For debugging purposes: some information is lost when evaluating into a project instance,
             // so make it possible to see what we have at this point.
             string path = traversalProject.FullPath;
-            string metaprojectPath = _solutionFile.FullPath + ".metaproj.tmp";
+            string metaprojectPath = $"{_solutionFile.FullPath}.metaproj.tmp";
             EmitMetaproject(traversalProject, metaprojectPath);
             traversalProject.FullPath = path;
 
@@ -1349,7 +1349,7 @@ namespace Microsoft.Build.Construction
             string outputItemAsItem = null;
             if (!String.IsNullOrEmpty(outputItem))
             {
-                outputItemAsItem = "@(" + outputItem + ")";
+                outputItemAsItem = $"@({outputItem})";
             }
 
             ProjectTargetInstance target = metaprojectInstance.AddTarget(targetName ?? "Build", String.Empty, String.Empty, outputItemAsItem, null, String.Empty, String.Empty, String.Empty, String.Empty, false /* legacy target returns behaviour */);
@@ -1396,7 +1396,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void AddMetaprojectBuildTask(ProjectInSolution project, ProjectTargetInstance target, string targetToBuild, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", Strings.WeakIntern("'%(ProjectReference.Identity)' == '" + GetMetaprojectName(project) + "'"), String.Empty);
+            ProjectTaskInstance task = target.AddTask("MSBuild", Strings.WeakIntern($"'%(ProjectReference.Identity)' == '{GetMetaprojectName(project)}'"), String.Empty);
             task.SetParameter("Projects", "@(ProjectReference)");
 
             if (targetToBuild != null)
@@ -1979,7 +1979,7 @@ namespace Microsoft.Build.Construction
             string outputItemAsItem = null;
             if (!String.IsNullOrEmpty(outputItem))
             {
-                outputItemAsItem = "@(" + outputItem + ")";
+                outputItemAsItem = $"@({outputItem})";
             }
 
             string correctedTargetName = targetName ?? "Build";
@@ -2052,13 +2052,13 @@ namespace Microsoft.Build.Construction
             if (!String.IsNullOrEmpty(outputItem))
             {
                 outputItemName = MakeIntoSafeItemName(baseProjectName) + outputItem;
-                outputItemAsItem = "@(" + outputItemName + ")";
+                outputItemAsItem = $"@({outputItemName})";
             }
 
             ProjectTargetInstance targetElement = traversalProject.AddTarget(actualTargetName, null, null, outputItemAsItem, null, null, null, null, null, false /* legacy target returns behaviour */);
             if (canBuildDirectly)
             {
-                AddProjectBuildTask(traversalProject, projectConfiguration, targetElement, targetToBuild, "@(ProjectReference)", "'%(ProjectReference.Identity)' == '" + EscapingUtilities.Escape(project.AbsolutePath) + "'", outputItemName);
+                AddProjectBuildTask(traversalProject, projectConfiguration, targetElement, targetToBuild, "@(ProjectReference)", $"'%(ProjectReference.Identity)' == '{EscapingUtilities.Escape(project.AbsolutePath)}'", outputItemName);
             }
             else
             {
