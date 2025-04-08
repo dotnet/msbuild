@@ -293,6 +293,16 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Deserializes and routes a packet.  Not used in the in-proc node.
+        /// </summary>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            // Not used
+            ErrorUtilities.ThrowInternalErrorUnreachable();
+            return null;
+        }
+
+        /// <summary>
         /// Routes a packet.
         /// </summary>
         /// <param name="nodeId">The id of the node from which the packet is being routed.</param>

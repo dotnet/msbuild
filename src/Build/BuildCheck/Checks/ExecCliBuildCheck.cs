@@ -17,10 +17,10 @@ namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 internal sealed class ExecCliBuildCheck : Check
 {
     public static CheckRule SupportedRule = new CheckRule(
-        "BC0109",
+        "BC0302",
         "ExecCliBuild",
-        ResourceUtilities.GetResourceString("BuildCheck_BC0109_Title")!,
-        ResourceUtilities.GetResourceString("BuildCheck_BC0109_MessageFmt")!,
+        ResourceUtilities.GetResourceString("BuildCheck_BC0302_Title")!,
+        ResourceUtilities.GetResourceString("BuildCheck_BC0302_MessageFmt")!,
         new CheckConfiguration() { Severity = CheckResultSeverity.Warning });
 
     private const string ExecTaskName = "Exec";

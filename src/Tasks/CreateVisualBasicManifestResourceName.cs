@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
                 Actual implementation is in a static method called CreateManifestNameImpl.
                 The reason is that CreateManifestName can't be static because it is an
                 override of a method declared in the base class, but its convenient
-                to expose a static version anyway for unittesting purposes.
+                to expose a static version anyway for unit testing purposes.
             */
             return CreateManifestNameImpl(
                 fileName,
@@ -61,7 +61,8 @@ namespace Microsoft.Build.Tasks
                 culture,
                 binaryStream,
                 Log,
-                treatAsCultureNeutral);
+                treatAsCultureNeutral,
+                EnableCustomCulture);
         }
 
         /// <summary>
@@ -80,6 +81,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="binaryStream">File contents binary stream, may be null</param>
         /// <param name="log">Task's TaskLoggingHelper, for logging warnings or errors</param>
         /// <param name="treatAsCultureNeutral">Whether to treat the current file as 'culture-neutral' and retain the culture in the name.</param>
+        /// <param name="enableCustomCulture">Whether custom culture handling is expected.</param>
         /// <returns>Returns the manifest name</returns>
         internal static string CreateManifestNameImpl(
             string fileName,
@@ -90,7 +92,8 @@ namespace Microsoft.Build.Tasks
             string culture,
             Stream binaryStream, // File contents binary stream, may be null
             TaskLoggingHelper log,
-            bool treatAsCultureNeutral = false)
+            bool treatAsCultureNeutral = false,
+            bool enableCustomCulture = false)
         {
             // Use the link file name if there is one, otherwise, fall back to file name.
             string embeddedFileName = linkFileName;
@@ -102,13 +105,12 @@ namespace Microsoft.Build.Tasks
             dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
             Culture.ItemCultureInfo info;
 
-            if (!string.IsNullOrEmpty(culture) && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
+            if (!string.IsNullOrEmpty(culture) && enableCustomCulture)
             {
                 info = new Culture.ItemCultureInfo()
                 {
                     culture = culture,
-                    cultureNeutralFilename =
-                        embeddedFileName.RemoveLastInstanceOf("." + culture, StringComparison.OrdinalIgnoreCase)
+                    cultureNeutralFilename = embeddedFileName.RemoveLastInstanceOf("." + culture, StringComparison.OrdinalIgnoreCase),
                 };
             }
             else
