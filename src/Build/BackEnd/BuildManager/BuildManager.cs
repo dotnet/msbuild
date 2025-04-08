@@ -727,15 +727,16 @@ namespace Microsoft.Build.Execution
         private void InitializeTelemetry()
         {
             OpenTelemetryManager.Instance.Initialize(isStandalone: false);
+            string? failureMessage = OpenTelemetryManager.Instance.LoadFailureExceptionMessage;
             if (_deferredBuildMessages != null &&
-                OpenTelemetryManager.Instance.LoadFailureExceptionMessage != null &&
+                failureMessage != null &&
                 _deferredBuildMessages is ICollection<DeferredBuildMessage> deferredBuildMessagesCollection)
             {
                 deferredBuildMessagesCollection.Add(
                     new DeferredBuildMessage(
                         ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                             "OpenTelemetryLoadFailed",
-                            OpenTelemetryManager.Instance.LoadFailureExceptionMessage),
+                            failureMessage),
                     MessageImportance.Low));
 
                 // clean up the message from OpenTelemetryManager to avoid double logging it
