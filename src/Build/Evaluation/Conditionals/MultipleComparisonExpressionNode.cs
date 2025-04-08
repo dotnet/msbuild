@@ -37,7 +37,7 @@ namespace Microsoft.Build.Evaluation
         /// Order in which comparisons are attempted is numeric, boolean, then string.
         /// Updates conditioned properties table.
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
             ProjectErrorUtilities.VerifyThrowInvalidProject(
                 LeftChild != null && RightChild != null,
@@ -51,8 +51,18 @@ namespace Microsoft.Build.Evaluation
             // and we know which do, then we already have enough information to evaluate this expression.
             // That means we don't have to fully expand a condition like " '@(X)' == '' "
             // which is a performance advantage if @(X) is a huge item list.
-            bool leftEmpty = LeftChild.EvaluatesToEmpty(state, loggingContext);
-            bool rightEmpty = RightChild.EvaluatesToEmpty(state, loggingContext);
+
+            // This is the possible case of an expression similar to '$(a)' == '', where a usage of uninitialized
+            //  property is reasonable and should not be flagged by uninitialized reads detection.
+            // So if at least one side is empty, we know to signal to PropertiesUseTracker to not flag in this scope.
+            // The other side might not be property at all - that's fine, as then PropertiesUseTracker won't be even called.
+            if (LeftChild.IsUnexpandedValueEmpty() || RightChild.IsUnexpandedValueEmpty())
+            {
+                state.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluationWithOneSideEmpty;
+            }
+
+            bool leftEmpty = LeftChild.EvaluatesToEmpty(state);
+            bool rightEmpty = RightChild.EvaluatesToEmpty(state);
             if (leftEmpty || rightEmpty)
             {
                 UpdateConditionedProperties(state);
@@ -69,13 +79,13 @@ namespace Microsoft.Build.Evaluation
                 // is 17.0).
                 return Compare(leftNumericValue, rightNumericValue);
             }
-            else if (LeftChild.TryBoolEvaluate(state, out bool leftBoolValue, loggingContext) && RightChild.TryBoolEvaluate(state, out bool rightBoolValue, loggingContext))
+            else if (LeftChild.TryBoolEvaluate(state, out bool leftBoolValue) && RightChild.TryBoolEvaluate(state, out bool rightBoolValue))
             {
                 return Compare(leftBoolValue, rightBoolValue);
             }
 
-            string leftExpandedValue = LeftChild.GetExpandedValue(state, loggingContext);
-            string rightExpandedValue = RightChild.GetExpandedValue(state, loggingContext);
+            string leftExpandedValue = LeftChild.GetExpandedValue(state);
+            string rightExpandedValue = RightChild.GetExpandedValue(state);
 
             ProjectErrorUtilities.VerifyThrowInvalidProject(
                 leftExpandedValue != null && rightExpandedValue != null,
@@ -84,6 +94,9 @@ namespace Microsoft.Build.Evaluation
                     state.Condition);
 
             UpdateConditionedProperties(state);
+
+            // reset back the property read context (it's no longer a condition with one side empty)
+            state.PropertiesUseTracker.PropertyReadContext = PropertyReadContext.ConditionEvaluation;
 
             return Compare(leftExpandedValue, rightExpandedValue);
         }

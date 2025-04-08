@@ -24,7 +24,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             manifest.OnBeforeSave();
             var m = new MemoryStream();
             var s = new XmlSerializer(manifest.GetType());
-            var w = new StreamWriter(m);
+            using var w = new StreamWriter(m, System.Text.Encoding.UTF8, bufferSize: 1024, leaveOpen: true);
 
             int t1 = Environment.TickCount;
             s.Serialize(w, manifest);
@@ -32,6 +32,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             w.Flush();
             m.Position = 0;
+
             return m;
         }
 

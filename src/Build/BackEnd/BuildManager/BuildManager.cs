@@ -21,10 +21,13 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
+using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
@@ -1962,11 +1965,10 @@ namespace Microsoft.Build.Execution
 
                 // Non-graph builds verify this in RequestBuilder, but for graph builds we need to disambiguate
                 // between entry nodes and other nodes in the graph since only entry nodes should error. Just do
-                // the verification expicitly before the build even starts.
+                // the verification explicitly before the build even starts.
                 foreach (ProjectGraphNode entryPointNode in projectGraph.EntryPointNodes)
                 {
-                    ImmutableList<string> targetList = targetsPerNode[entryPointNode];
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(targetList.Count > 0, entryPointNode.ProjectInstance.ProjectFileLocation, "NoTargetSpecified");
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(entryPointNode.ProjectInstance.Targets.Count > 0, entryPointNode.ProjectInstance.ProjectFileLocation, "NoTargetSpecified");
                 }
 
                 resultsPerNode = BuildGraph(projectGraph, targetsPerNode, submission.BuildRequestData);
@@ -2004,7 +2006,7 @@ namespace Microsoft.Build.Execution
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode,
             GraphBuildRequestData graphBuildRequestData)
         {
-            var waitHandle = new AutoResetEvent(true);
+            using var waitHandle = new AutoResetEvent(true);
             var graphBuildStateLock = new object();
 
             var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
@@ -2952,7 +2954,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a logging service around the specified set of loggers.
         /// </summary>
-        private ILoggingService CreateLoggingService(IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> forwardingLoggers, ISet<string> warningsAsErrors, ISet<string> warningsNotAsErrors, ISet<string> warningsAsMessages)
+        private ILoggingService CreateLoggingService(
+            IEnumerable<ILogger> loggers,
+            IEnumerable<ForwardingLoggerRecord> forwardingLoggers,
+            ISet<string> warningsAsErrors,
+            ISet<string> warningsNotAsErrors,
+            ISet<string> warningsAsMessages)
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
 
@@ -2976,6 +2983,30 @@ namespace Microsoft.Build.Execution
             loggingService.WarningsNotAsErrors = warningsNotAsErrors;
             loggingService.WarningsAsMessages = warningsAsMessages;
 
+            if (_buildParameters.IsBuildCheckEnabled)
+            {
+                var buildCheckManagerProvider =
+                    ((IBuildComponentHost)this).GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider;
+                buildCheckManagerProvider!.Instance.SetDataSource(BuildCheckDataSource.EventArgs);
+
+                // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportnace.Low is used)
+                // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
+                LoggerDescription forwardingLoggerDescription = new LoggerDescription(
+                    loggerClassName: typeof(BuildCheckForwardingLogger).FullName,
+                    loggerAssemblyName: typeof(BuildCheckForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                    loggerAssemblyFile: null,
+                    loggerSwitchParameters: null,
+                    verbosity: LoggerVerbosity.Quiet);
+
+                ILogger buildCheckLogger =
+                    new BuildCheckConnectorLogger(new AnalyzerLoggingContextFactory(loggingService),
+                        buildCheckManagerProvider.Instance);
+
+                ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(buildCheckLogger, forwardingLoggerDescription) };
+
+                forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
+            }
+
             try
             {
                 if (loggers != null)
@@ -2988,17 +3019,9 @@ namespace Microsoft.Build.Execution
 
                 if (loggingService.Loggers.Count == 0)
                 {
-                    // We need to register SOME logger if we don't have any. This ensures the out of proc nodes will still send us message,
-                    // ensuring we receive project started and finished events.
-                    LoggerDescription forwardingLoggerDescription = new LoggerDescription(
-                        loggerClassName: typeof(ConfigurableForwardingLogger).FullName,
-                        loggerAssemblyName: typeof(ConfigurableForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
-                        loggerAssemblyFile: null,
-                        loggerSwitchParameters: "PROJECTSTARTEDEVENT;PROJECTFINISHEDEVENT;FORWARDPROJECTCONTEXTEVENTS",
-                        verbosity: LoggerVerbosity.Quiet);
-
-                    ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(new NullLogger(), forwardingLoggerDescription) };
-                    forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
+                    // if no loggers have been registered - let's make sure that at least on forwarding logger
+                    //  will forward events we need (project started and finished events)
+                    forwardingLoggers = ProcessForwardingLoggers(forwardingLoggers);
                 }
 
                 if (forwardingLoggers != null)
@@ -3016,6 +3039,75 @@ namespace Microsoft.Build.Execution
             }
 
             return loggingService;
+
+            // We need to register SOME logger if we don't have any. This ensures the out of proc nodes will still send us message,
+            // ensuring we receive project started and finished events.
+            static List<ForwardingLoggerRecord> ProcessForwardingLoggers(IEnumerable<ForwardingLoggerRecord> forwarders)
+            {
+                Type configurableLoggerType = typeof(ConfigurableForwardingLogger);
+                string engineAssemblyName = configurableLoggerType.GetTypeInfo().Assembly.GetName().FullName;
+                string configurableLoggerName = configurableLoggerType.FullName;
+
+                if (forwarders == null)
+                {
+                    return [CreateMinimalForwarder()];
+                }
+
+                List<ForwardingLoggerRecord> result = forwarders.ToList();
+
+                // The forwarding loggers that are registered are unknown to us - we cannot make any assumptions.
+                // So to be on a sure side - we need to add ours.
+                if (!result.Any(l => l.ForwardingLoggerDescription.Name.Contains(engineAssemblyName)))
+                {
+                    result.Add(CreateMinimalForwarder());
+                    return result;
+                }
+
+                // Those are the cases where we are sure that we have the forwarding setup as need.
+                if (result.Any(l =>
+                        l.ForwardingLoggerDescription.Name.Contains(typeof(CentralForwardingLogger).FullName)
+                        ||
+                        (l.ForwardingLoggerDescription.Name.Contains(configurableLoggerName)
+                         &&
+                         l.ForwardingLoggerDescription.LoggerSwitchParameters.Contains("PROJECTSTARTEDEVENT")
+                         &&
+                         l.ForwardingLoggerDescription.LoggerSwitchParameters.Contains("PROJECTFINISHEDEVENT")
+                         &&
+                         l.ForwardingLoggerDescription.LoggerSwitchParameters.Contains("FORWARDPROJECTCONTEXTEVENTS")
+                        )))
+                {
+                    return result;
+                }
+
+                // In case there is a ConfigurableForwardingLogger, that is not configured as we'd need - we can adjust the config
+                ForwardingLoggerRecord configurableLogger = result.FirstOrDefault(l =>
+                    l.ForwardingLoggerDescription.Name.Contains(configurableLoggerName));
+
+                // If there is not - we need to add our own.
+                if (configurableLogger == null)
+                {
+                    result.Add(CreateMinimalForwarder());
+                    return result;
+                }
+
+                configurableLogger.ForwardingLoggerDescription.LoggerSwitchParameters += ";PROJECTSTARTEDEVENT;PROJECTFINISHEDEVENT;FORWARDPROJECTCONTEXTEVENTS;RESPECTVERBOSITY";
+
+                return result;
+
+                ForwardingLoggerRecord CreateMinimalForwarder()
+                {
+                    // We need to register SOME logger if we don't have any. This ensures the out of proc nodes will still send us message,
+                    // ensuring we receive project started and finished events.
+                    LoggerDescription forwardingLoggerDescription = new LoggerDescription(
+                        loggerClassName: configurableLoggerName,
+                        loggerAssemblyName: engineAssemblyName,
+                        loggerAssemblyFile: null,
+                        loggerSwitchParameters: "PROJECTSTARTEDEVENT;PROJECTFINISHEDEVENT;FORWARDPROJECTCONTEXTEVENTS",
+                        verbosity: LoggerVerbosity.Quiet);
+
+                    return new ForwardingLoggerRecord(new NullLogger(), forwardingLoggerDescription);
+                }
+            }
         }
 
         private static void LogDeferredMessages(ILoggingService loggingService, IEnumerable<DeferredBuildMessage> deferredBuildMessages)
