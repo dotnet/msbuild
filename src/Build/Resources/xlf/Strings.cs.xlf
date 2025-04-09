@@ -223,12 +223,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
         <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
-        <target state="new">Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</target>
+        <target state="translated">Úloha {0} z projektu {1} sestaví projekt pomocí rozhraní příkazového řádku {2}. Místo toho by se měla použít úloha MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_Title">
         <source>The 'Exec' task should not be used to build a project.</source>
-        <target state="new">The 'Exec' task should not be used to build a project.</target>
+        <target state="translated">Úloha Exec by se neměla používat k sestavení projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
