@@ -1,4 +1,4 @@
-﻿# editorconfig.org
+# editorconfig.org
 
 # top-most EditorConfig file
 root = true
@@ -415,6 +415,11 @@ dotnet_diagnostic.IDE0301.severity = suggestion
 dotnet_diagnostic.IDE0305.severity = suggestion
 dotnet_diagnostic.IDE0306.severity = suggestion
 
+dotnet_diagnostic.IDE0350.severity = suggestion
+dotnet_diagnostic.IDE0052.severity = suggestion
+dotnet_diagnostic.IDE0051.severity = suggestion
+dotnet_diagnostic.IDE0040.severity = suggestion
+
 # Temporarily disable SA1010 "Opening square brackets should not be preceded by a space" until https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3687 is fixed
 dotnet_diagnostic.SA1010.severity = none
 
@@ -448,3 +453,16 @@ dotnet_diagnostic.xUnit1031.severity = none
 # The latter brings incosistency in the codebase and some times in one test case.
 # So we are disabling this rule with respect to the above mentioned reasons.
 dotnet_diagnostic.xUnit2013.severity = none
+
+# Build Checks
+[*.{csproj,proj,metaproj,props,swixproj}]
+build_check.BC0101.Severity=suggestion
+build_check.BC0102.Severity=suggestion
+build_check.BC0103.Severity=suggestion
+build_check.BC0104.Severity=suggestion
+build_check.BC0105.Severity=suggestion
+build_check.BC0106.Severity=suggestion
+build_check.BC0107.Severity=suggestion
+build_check.BC0201.Severity=suggestion
+build_check.BC0202.Severity=suggestion
+build_check.BC0203.Severity=suggestion
