@@ -156,7 +156,7 @@
       </trans-unit>
       <trans-unit id="CommonSdk.BaseIntermediateOutputPathMismatchWarning">
         <source>MSB3539: The value of the property "BaseIntermediateOutputPath" was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the "MSBuildProjectExtensionsPath" instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</source>
-        <target state="translated">MSB3539: La valeur de la propriété « BaseIntermediateOutputPath » a été modifiée après son utilisation par MSBuild, ce qui peut entraîner des résultats de build inattendus. Des outils tels que NuGet écriront les sorties dans le chemin spécifié par « MSBuildProjectExtensionsPath ». Pour définir cette propriété, vous devez le faire avant l'importation de Microsoft.Common.props, par exemple en utilisant Directory.Build.props.  Pour plus d'informations, veuillez consulter https://go.microsoft.com/fwlink/?linkid=869650"</target>
+        <target state="translated">MSB3539: la valeur de la propriété « BaseIntermediateOutputPath » a été modifiée après son utilisation par MSBuild, ce qui peut entraîner des résultats de build inattendus. Les outils tels que NuGet écrivent des sorties dans le chemin spécifié par « MSBuildProjectExtensionsPath » à la place. Pour définir cette propriété, il faut vous y prendre avant l'importation de Microsoft.Common.props, par exemple en utilisant Directory.Build.props.  Pour plus d’informations, visitez https://go.microsoft.com/fwlink/?linkid=869650 »</target>
         <note>{StrBegin="MSB3539: "} </note>
       </trans-unit>
       <trans-unit id="CommonSdk.CrossTargetingGetTargetFrameworks">
@@ -186,7 +186,7 @@
       </trans-unit>
       <trans-unit id="CommonSdk.MSBuildProjectExtensionsPathModifiedAfterUse">
         <source>MSB3540: The value of the property "MSBuildProjectExtensionsPath" was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</source>
-        <target state="translated">MSB3540: La valeur de la propriété « MSBuildProjectExtensionsPath » a été modifiée après son utilisation par MSBuild, ce qui peut entraîner des résultats de build inattendus.  Pour définir cette propriété, vous devez le faire avant l'importation de Microsoft.Common.props, par exemple en utilisant Directory.Build.props.  Pour plus d'informations, veuillez consulter https://go.microsoft.com/fwlink/?linkid=869650</target>
+        <target state="translated">MSB3540: la valeur de la propriété « MSBuildProjectExtensionsPath » a été modifiée après son utilisation par MSBuild, ce qui peut entraîner des résultats de build inattendus.  Pour définir cette propriété, il faut vous y prendre avant l'importation de Microsoft.Common.props, par exemple en utilisant Directory.Build.props.  Pour plus d’informations, veuillez consulter https://go.microsoft.com/fwlink/?linkid=869650</target>
         <note>{StrBegin="MSB3540: "}</note>
       </trans-unit>
       <trans-unit id="CommonSdk.ManifestResourceWithNoCultureWarning">
@@ -201,7 +201,7 @@
       </trans-unit>
       <trans-unit id="CommonSdk.NonExistentProjectReference">
         <source>MSB9008: The referenced project {0} does not exist.</source>
-        <target state="translated">MSB9008: Le projet référencé {0} n'existe pas.</target>
+        <target state="translated">MSB9008: le projet {0} référencé n’existe pas.</target>
         <note />
       </trans-unit>
       <trans-unit id="CommonSdk.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
@@ -1180,8 +1180,8 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/binaryformatter-migration-guide</source>
-        <target state="translated">MSB3825: La ressource « {0} » sera désérialisée par BinaryFormatter au moment de l’exécution. BinaryFormatter est obsolète en raison de risques de sécurité connus et est supprimé de .NET 9+. Si vous souhaitez continuer à l’utiliser, définissez la propriété « GenerateResourceWarnOnBinaryFormatterUse » sur false.
-           Plus d’informations : https://aka.ms/binaryformatter-migration-guide</target>
+        <target state="translated">MSB3825: la ressource « {0} » sera désérialisée via BinaryFormatter lors de l’exécution. BinaryFormatter est déconseillé en raison de risques de sécurité connus et est supprimé de .NET 9+. Si vous souhaitez continuer à l’utiliser, définissez la propriété « GenerateResourceWarnOnBinaryFormatterUse » sur la valeur false.
+           Plus découvrir d’informations : https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
