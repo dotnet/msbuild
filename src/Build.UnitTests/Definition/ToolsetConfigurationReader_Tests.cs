@@ -662,7 +662,8 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private ToolsetConfigurationReader GetStandardConfigurationReader()
         {
-            return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
+            using var collection = new ProjectCollection();
+            return new ToolsetConfigurationReader(collection.EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
         }
         #endregion
 

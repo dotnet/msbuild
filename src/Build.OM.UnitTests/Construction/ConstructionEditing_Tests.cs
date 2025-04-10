@@ -2313,14 +2313,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void Dirtying_ItemCondition()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var projectFileContents = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <i Include=""i1"" />
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             ProjectItem item = Helpers.GetFirst(project.Items);
 
             item.Xml.Condition = "false";
@@ -2338,16 +2339,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void Dirtying_MetadataCondition()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <i Include=""i1"">
       <m>m1</m>
     </i>
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
             ProjectMetadata metadatum = Helpers.GetFirst(project.Items).GetMetadata("m");
 
             metadatum.Xml.Condition = "false";
