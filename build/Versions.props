@@ -66,6 +66,7 @@
     <ShouldlyVersion>3.0.0</ShouldlyVersion>
   </PropertyGroup>
 
+  <!-- This target was added in the newer version of the RoslynTools.RepoToolset package. For current branch we should override it to avoid issues with the execution. -->
   <Target Name="GetVsixVersion" />
 
 </Project>
