@@ -581,7 +581,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // The path components should be reconstructed using the first encountered value.
             Assert.Equal(fullPath, deserializedFullPath);
-            Assert.Equal(fullPath, Path.Combine(deserializedDirectory, deserializedFullPath));
+            Assert.Equal(fullPath, Path.Combine(deserializedDirectory, deserializedFileName));
         }
 
         /// <summary>
