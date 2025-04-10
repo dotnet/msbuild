@@ -12,7 +12,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 
 internal sealed class EditorConfigParser
 {
-    // Define a static property to hold the editorConfigFilePath
+    // static property for embedding resolved `.editorconfig`s in binlog
     private static ConcurrentBag<string> editorConfigFilePaths = new ConcurrentBag<string>();
     public static IEnumerable<string> EditorConfigFilePaths => editorConfigFilePaths;
 

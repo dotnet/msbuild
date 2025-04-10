@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
@@ -324,12 +323,9 @@ namespace Microsoft.Build.Logging
             if (projectImportsCollector != null)
             {
                 // Write the build check editorconfig file paths to the log
-                if (EditorConfigParser.EditorConfigFilePaths.Any())
+                foreach (var filePath in EditorConfigParser.EditorConfigFilePaths)
                 {
-                    foreach (var filePath in EditorConfigParser.EditorConfigFilePaths)
-                    {
-                        projectImportsCollector.AddFile(filePath);
-                    }
+                    projectImportsCollector.AddFile(filePath);
                 }
                 projectImportsCollector.Close();
 
