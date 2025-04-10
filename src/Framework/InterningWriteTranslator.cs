@@ -18,7 +18,7 @@ namespace Microsoft.Build.BackEnd
     /// 1. Serialize the list of unique strings to an array, where the ID is the index.
     /// 2. Serialize the temporary buffer (aka the packet body) with all interned strings replaced by their ID.
     /// This ordering is important since the reader will need the string lookup table before parsing the body.
-    /// As such, two rules need to be follwed when using this class:
+    /// As such, two rules need to be followed when using this class:
     /// 1. Any interleaved non-interned writes should be written using the exposed BinaryWriter to keep the overall
     /// packet in sync.
     /// 2. Translate should *only* be called after all internable writes have been processed.

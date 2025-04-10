@@ -371,7 +371,7 @@ namespace Microsoft.Build.BackEnd
         /// Creates a scope which activates string interning / deduplication for any Intern_xx method.
         /// This should generally be called from the root level packet.
         /// </summary>
-        /// <param name="comparer">The strseaparating comparer to use when populating the intern cache.</param>
+        /// <param name="comparer">The string comparer to use when populating the intern cache.</param>
         /// <param name="initialCapacity">The initial capacity of the intern cache.</param>
         /// <param name="internBlock">A delegate providing a translator, in which all Intern_xx calls will go through the intern cache.</param>
         /// <remarks>
