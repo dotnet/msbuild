@@ -487,11 +487,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests interning path-like strings within an intern scope.
         /// </summary>
         [Theory]
-        [InlineData(@"C:\src\msbuild\artifacts\bin\SomeProject.Namespace\Debug\net472\SomeProject.NameSpace.dll", true)]
+        [InlineData(@"C:/src/msbuild/artifacts/bin/SomeProject.Namespace/Debug/net472/SomeProject.NameSpace.dll", true)]
         [InlineData("foo", true)]
         [InlineData("", true)]
         [InlineData(null, true)]
-        [InlineData(@"C:\src\msbuild\artifacts\bin\SomeProject.Namespace\Debug\net472\SomeProject.NameSpace.dll", false)]
+        [InlineData(@"C:/src/msbuild/artifacts/bin/SomeProject.Namespace/Debug/net472/SomeProject.NameSpace.dll", false)]
         [InlineData("foo", false)]
         [InlineData("", false)]
         public void TestInternPathWithInterning(string value, bool nullable)
@@ -524,9 +524,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestInternPathWithComponentsFirst()
         {
             // Create a case mismatch to test if the path parts are deduplicated.
-            string directory = @"C:\SRC\MSBUILD\ARTIFACTS\BIN\SOMEPROJECT.NAMESPACE\DEBUG\NET472\";
+            string directory = @"C:/SRC/MSBUILD/ARTIFACTS/BIN/SOMEPROJECT.NAMESPACE/DEBUG/NET472/";
             string fileName = @"SOMEPROJECT.NAMESPACE.DLL";
-            string fullPath = @"C:\src\msbuild\artifacts\bin\SomeProject.Namespace\Debug\net472\SomeProject.NameSpace.dll";
+            string fullPath = @"C:/src/msbuild/artifacts/bin/SomeProject.Namespace/Debug/net472/SomeProject.NameSpace.dll";
 
             TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 2, translator =>
             {
@@ -558,8 +558,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestInternPathWithFullPathFirst()
         {
             // Create a case mismatch to test if the path parts are deduplicated.
-            string fullPath = @"c:\src\msbuild\artifacts\bin\someproject.namespace\debug\net472\someproject.namespace.dll";
-            string directory = @"C:\SRC\MSBUILD\ARTIFACTS\BIN\SOMEPROJECT.NAMESPACE\DEBUG\NET472\";
+            string fullPath = @"c:/src/msbuild/artifacts/bin/someproject.namespace/debug/net472/someproject.namespace.dll";
+            string directory = @"C:/SRC/MSBUILD/ARTIFACTS/BIN/SOMEPROJECT.NAMESPACE/DEBUG/NET472/";
             string fileName = @"SOMEPROJECT.NAMESPACE.DLL";
 
             TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 2, translator =>
@@ -709,12 +709,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// All calls should be forwarded to the regular translate method.
         /// </summary>
         [Theory]
-        [InlineData(@"C:\src\msbuild\artifacts\bin\SomeProject.Namespace\Debug\net472\SomeProject.NameSpace.dll", true)]
+        [InlineData(@"C:/src/msbuild/artifacts/bin/SomeProject.Namespace/Debug/net472/SomeProject.NameSpace.dll", true)]
         [InlineData("foo", true)]
         [InlineData("", true)]
         [InlineData(null, true)]
         [InlineData("foo", false)]
-        [InlineData(@"C:\src\msbuild\artifacts\bin\SomeProject.Namespace\Debug\net472\SomeProject.NameSpace.dll", false)]
+        [InlineData(@"C:/src/msbuild/artifacts/bin/SomeProject.Namespace/Debug/net472/SomeProject.NameSpace.dll", false)]
         [InlineData("", false)]
         [InlineData(null, false)]
         public void TestInternPathNoInterning(string value, bool nullable)
@@ -1042,13 +1042,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Dictionary<string, string> value = new(StringComparer.OrdinalIgnoreCase)
             {
-                ["foo"] = @"C:\src\msbuild\artifacts\bin\ProjectA.Namespace\Debug\net472\ProjectA.NameSpace.dll",
-                ["alpha"] = @"C:\src\msbuild\artifacts\bin\ProjectB.Namespace\Debug\net472\ProjectB.NameSpace.dll",
+                ["foo"] = @"C:/src/msbuild/artifacts/bin/ProjectA.Namespace/Debug/net472/ProjectA.NameSpace.dll",
+                ["alpha"] = @"C:/src/msbuild/artifacts/bin/ProjectB.Namespace/Debug/net472/ProjectB.NameSpace.dll",
             };
             Dictionary<string, string> valueUpperCase = new(StringComparer.OrdinalIgnoreCase)
             {
-                ["FOO"] = @"C:\SRC\MSBUILD\ARTIFACTS\BIN\PROJECTA.NAMESPACE\DEBUG\NET472\PROJECTA.NAMESPACE.DLL",
-                ["ALPHA"] = @"C:\SRC\MSBUILD\ARTIFACTS\BIN\PROJECTB.NAMESPACE\DEBUG\NET472\PROJECTB.NAMESPACE.DLL",
+                ["FOO"] = @"C:/SRC/MSBUILD/ARTIFACTS/BIN/PROJECTA.NAMESPACE/DEBUG/NET472/PROJECTA.NAMESPACE.DLL",
+                ["ALPHA"] = @"C:/SRC/MSBUILD/ARTIFACTS/BIN/PROJECTB.NAMESPACE/DEBUG/NET472/PROJECTB.NAMESPACE.DLL",
             };
 
             TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 4, translator =>
@@ -1083,8 +1083,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestInternPathDictionaryStringT()
         {
-            const string PathA = @"C:\src\msbuild\artifacts\bin\ProjectA.Namespace\Debug\net472\ProjectA.NameSpace.dll";
-            const string PathB = @"C:\src\msbuild\artifacts\bin\ProjectB.Namespace\Debug\net472\ProjectB.NameSpace.dll";
+            const string PathA = @"C:/src/msbuild/artifacts/bin/ProjectA.Namespace/Debug/net472/ProjectA.NameSpace.dll";
+            const string PathB = @"C:/src/msbuild/artifacts/bin/ProjectB.Namespace/Debug/net472/ProjectB.NameSpace.dll";
 
             // Since we don't have string values, mismatch the key comparer to verify that interning works.
             Dictionary<string, BaseClass> value = new(StringComparer.Ordinal)
