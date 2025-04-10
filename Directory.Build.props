@@ -3,6 +3,8 @@
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <Configurations>Debug;Release;Debug-MONO;Release-MONO</Configurations>
+    <!-- Override the feeds from RoslynTools.RepoToolset package to work around the dead feed https://dotnetmygetlegacy.blob.core.windows.net/dotnet-core/index.json. -->
+    <RestoreSources>https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json</RestoreSources>
   </PropertyGroup>
 
   <PropertyGroup>
