@@ -12,12 +12,4 @@
     <PackageReference Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
   </ItemGroup>
 
-  <!-- Add a target that will output the version information -->
-  <Target Name="OutputVersionInfo" DependsOnTargets="GetBuildVersion">
-    <Message Importance="High" Text="##vso[task.setvariable variable=SWIX_VERSION]$(Version)" />
-    <Message Importance="High" Text="##vso[task.setvariable variable=SWIX_ASSEMBLY_VERSION]$(AssemblyVersion)" />
-    <Message Importance="High" Text="##vso[task.setvariable variable=SWIX_FILE_VERSION]$(FileVersion)" />
-    <Message Importance="High" Text="##vso[task.setvariable variable=SWIX_PACKAGE_VERSION]$(PackageVersion)" />
-    <Message Importance="High" Text="Version: $(Version)" />
-  </Target>
 </Project>

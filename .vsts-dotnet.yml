@@ -77,7 +77,7 @@ extends:
           displayName: 'Get version from Nerdbank.GitVersioning'
           inputs:
             solution: '$(Build.Repository.LocalPath)\build\SetMicrobuildVersion\SetMicrobuildVersion.csproj'
-            msbuildArguments: '/t:OutputVersionInfo /restore'
+            msbuildArguments: '/restore'
             platform: 'AnyCPU'
             configuration: 'Release'
 
