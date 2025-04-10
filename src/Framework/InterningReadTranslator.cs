@@ -4,52 +4,46 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.BackEnd
 {
+    /// <summary>
+    /// Reads strings form a translator which contains interned packets.
+    /// </summary>
+    /// <remarks>
+    /// This maintains a reusable lookup table to deserialize packets interned by <see cref="InterningWriteTranslator"/>.
+    /// On Translate, the intern header (aka the array of strings indexed by ID) is deserialized.
+    /// The caller can then forward reads to deserialize any interned values in the packet body.
+    /// </remarks>
     internal sealed class InterningReadTranslator : ITranslatable
     {
+        private readonly ITranslator _translator;
+
         private List<string> _strings = [];
 
-        private Dictionary<PathIds, string> _pathIdsToString = [];
-
-        private readonly ITranslator _translator;
+        private Dictionary<InternPathIds, string> _pathIdsToString = [];
 
         internal InterningReadTranslator(ITranslator translator)
         {
+            if (translator.Mode != TranslationDirection.ReadFromStream)
+            {
+                throw new InvalidOperationException(
+                    $"{nameof(InterningReadTranslator)} can only be used with {nameof(TranslationDirection.ReadFromStream)}.");
+            }
+
             _translator = translator;
         }
 
-        internal string? ReadNullable()
-        {
-            if (!_translator.TranslateNullable(string.Empty))
-            {
-                return null;
-            }
-
-            return Read();
-        }
-
-        internal string Read()
+        internal string? Read()
         {
             int key = -1;
             _translator.Translate(ref key);
             return _strings[key];
         }
 
-        internal string? ReadNullablePath()
+        internal string? ReadPath()
         {
-            if (!_translator.TranslateNullable(string.Empty))
-            {
-                return null;
-            }
-
-            return ReadPath();
-        }
-
-        internal string ReadPath()
-        {
+            // If the writer set a null marker, read this as a single string.
             if (!_translator.TranslateNullable(string.Empty))
             {
                 return Read();
@@ -60,8 +54,9 @@ namespace Microsoft.Build.BackEnd
             _translator.Translate(ref directoryKey);
             _translator.Translate(ref fileNameKey);
 
-            PathIds pathIds = new(directoryKey, fileNameKey);
+            InternPathIds pathIds = new(directoryKey, fileNameKey);
 
+            // Only concatenate paths the first time we encounter a pair.
             if (_pathIdsToString.TryGetValue(pathIds, out string? path))
             {
                 return path;
@@ -77,18 +72,14 @@ namespace Microsoft.Build.BackEnd
 
         public void Translate(ITranslator translator)
         {
+            // Only deserialize the intern header since the caller will be reading directly from the stream.
             _translator.Translate(ref _strings);
-            foreach (string str in _strings)
-            {
-                Console.WriteLine(str);
-            }
 #if NET
+            _pathIdsToString.Clear();
             _pathIdsToString.EnsureCapacity(_strings.Count);
 #else
             _pathIdsToString = new(_strings.Count);
 #endif
         }
-
-        private readonly record struct PathIds(int DirectoryId, int FileNameId);
     }
 }

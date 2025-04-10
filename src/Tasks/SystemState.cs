@@ -265,13 +265,10 @@ namespace Microsoft.Build.Tasks
                 throw new NullReferenceException(nameof(instanceLocalFileStateCache));
             }
 
-            translator.WithInterning(StringComparer.Ordinal, 100, translator =>
-            {
-                translator.InternPathDictionary(
-                    ref (translator.Mode == TranslationDirection.WriteToStream) ? ref instanceLocalOutgoingFileStateCache : ref instanceLocalFileStateCache,
-                    StringComparer.OrdinalIgnoreCase,
-                    t => new FileState(t));
-            });
+            translator.TranslateDictionary(
+                ref (translator.Mode == TranslationDirection.WriteToStream) ? ref instanceLocalOutgoingFileStateCache : ref instanceLocalFileStateCache,
+                StringComparer.OrdinalIgnoreCase,
+                (ITranslator t) => new FileState(t));
 
             // IsDirty should be false for either direction. Either this cache was brought
             // up-to-date with the on-disk cache or vice versa. Either way, they agree.

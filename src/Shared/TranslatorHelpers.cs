@@ -89,7 +89,10 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref dictionary, comparer, AdaptFactory(valueFactory));
         }
 
-        public static void InternDictionary(this ITranslator translator, ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer)
+        public static void InternDictionary(
+            this ITranslator translator,
+            ref Dictionary<string, string> dictionary,
+            IEqualityComparer<string> comparer)
         {
             IDictionary<string, string> localDict = dictionary;
             translator.TranslateDictionary(
@@ -100,7 +103,11 @@ namespace Microsoft.Build.BackEnd
             dictionary = (Dictionary<string, string>)localDict;
         }
 
-        public static void InternDictionary<T>(this ITranslator translator, ref Dictionary<string, T> dictionary, IEqualityComparer<string> stringComparer, NodePacketValueFactory<T> valueFactory)
+        public static void InternDictionary<T>(
+            this ITranslator translator,
+            ref Dictionary<string, T> dictionary,
+            IEqualityComparer<string> stringComparer,
+            NodePacketValueFactory<T> valueFactory)
             where T : ITranslatable
         {
             IDictionary<string, T> localDict = dictionary;
@@ -112,9 +119,14 @@ namespace Microsoft.Build.BackEnd
             dictionary = (Dictionary<string, T>)localDict;
         }
 
-        public static void InternPathDictionary(this ITranslator translator, ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer)
+        public static void InternPathDictionary(
+            this ITranslator translator,
+            ref Dictionary<string, string> dictionary,
+            IEqualityComparer<string> comparer)
         {
             IDictionary<string, string> localDict = dictionary;
+
+            // For now, assume only the value contains path-like strings (e.g. TaskItem metadata).
             translator.TranslateDictionary(
                 ref localDict,
                 (ITranslator translator, ref string key) => translator.Intern(ref key),
@@ -123,7 +135,11 @@ namespace Microsoft.Build.BackEnd
             dictionary = (Dictionary<string, string>)localDict;
         }
 
-        public static void InternPathDictionary<T>(this ITranslator translator, ref Dictionary<string, T> dictionary, IEqualityComparer<string> stringComparer, NodePacketValueFactory<T> valueFactory)
+        public static void InternPathDictionary<T>(
+            this ITranslator translator,
+            ref Dictionary<string, T> dictionary,
+            IEqualityComparer<string> stringComparer,
+            NodePacketValueFactory<T> valueFactory)
             where T : ITranslatable
         {
             IDictionary<string, T> localDict = dictionary;
@@ -293,14 +309,14 @@ namespace Microsoft.Build.BackEnd
                 publicKeyToken = assemblyName.GetPublicKeyToken();
             }
 
-            translator.InternPath(ref name, nullable: true);
+            translator.Translate(ref name);
             translator.Translate(ref version);
             translator.TranslateEnum(ref flags, (int)flags);
             translator.TranslateEnum(ref processorArchitecture, (int)processorArchitecture);
             translator.Translate(ref cultureInfo);
             translator.TranslateEnum(ref hashAlgorithm, (int)hashAlgorithm);
             translator.TranslateEnum(ref versionCompatibility, (int)versionCompatibility);
-            translator.Intern(ref codeBase, nullable: true);
+            translator.Translate(ref codeBase);
 
             translator.Translate(ref publicKey);
             translator.Translate(ref publicKeyToken);

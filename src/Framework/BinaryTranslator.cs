@@ -50,30 +50,25 @@ namespace Microsoft.Build.BackEnd
             return new BinaryWriteTranslator(stream);
         }
 
-        // TODO: Avoid expsoing write translator?
-        internal static ITranslator GetWriteTranslator(Stream stream, InterningWriteTranslator interner)
-        {
-            return new BinaryWriteTranslator(stream, interner, isInterning: true);
-        }
-
         /// <summary>
         /// Implementation of ITranslator for reading from a stream.
         /// </summary>
         private class BinaryReadTranslator : ITranslator
         {
             /// <summary>
-            /// The stream used as a source or destination for data.
+            /// The intern reader used in an intern scope.
             /// </summary>
-            private Stream _packetStream;
+            private readonly InterningReadTranslator _interner;
 
             /// <summary>
             /// The binary reader used in read mode.
             /// </summary>
             private BinaryReader _reader;
 
-            private InterningReadTranslator _interner;
-
-            public bool IsInterning { get; private set; }
+            /// <summary>
+            /// Whether the caller has entered an intern scope.
+            /// </summary>
+            private bool _isInterning;
 
 #nullable enable
             /// <summary>
@@ -81,9 +76,8 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public BinaryReadTranslator(Stream packetStream, BinaryReaderFactory buffer)
             {
-                _packetStream = packetStream;
                 _reader = buffer.Create(packetStream);
-                _interner = new(this);
+                _interner = new InterningReadTranslator(this);
             }
 #nullable disable
 
@@ -802,40 +796,45 @@ namespace Microsoft.Build.BackEnd
 
             public void WithInterning(IEqualityComparer<string> comparer, int initialCapacity, Action<ITranslator> internBlock)
             {
-                if (IsInterning)
+                if (_isInterning)
                 {
                     throw new InvalidOperationException("Cannot enter recursive intern block.");
                 }
 
-                IsInterning = true;
+                _isInterning = true;
 
+                // Deserialize the intern header before entering the intern scope.
                 _interner.Translate(this);
+
+                // No other setup is needed since we can parse the packet directly from the stream.
                 internBlock(this);
 
-                IsInterning = false;
+                _isInterning = false;
             }
 
-            public void Intern(ref string str, bool nullable)
+            public void Intern(ref string str, bool nullable = true)
             {
-                if (!IsInterning)
+                if (!_isInterning)
                 {
                     Translate(ref str);
+                    return;
                 }
-                else if (nullable)
+
+                if (nullable && !TranslateNullable(string.Empty))
                 {
-                    str = _interner.ReadNullable();
+                    str = null;
+                    return;
                 }
-                else
-                {
-                    str = _interner.Read();
-                }
+
+                str = _interner.Read();
             }
 
             public void Intern(ref string[] array)
             {
-                if (!IsInterning)
+                if (!_isInterning)
                 {
                     Translate(ref array);
+                    return;
                 }
 
                 if (!TranslateNullable(array))
@@ -843,30 +842,30 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-
                 int count = _reader.ReadInt32();
                 array = new string[count];
 
                 for (int i = 0; i < count; i++)
                 {
-                    array[i] = _interner.ReadNullable();
+                    array[i] = _interner.Read();
                 }
             }
 
-            public void InternPath(ref string str, bool nullable)
+            public void InternPath(ref string str, bool nullable = true)
             {
-                if (!IsInterning)
+                if (!_isInterning)
                 {
                     Translate(ref str);
+                    return;
                 }
-                else if (nullable)
+
+                if (nullable && !TranslateNullable(string.Empty))
                 {
-                    str = _interner.ReadNullablePath();
+                    str = null;
+                    return;
                 }
-                else
-                {
-                    str = _interner.ReadPath();
-                }
+
+                str = _interner.ReadPath();
             }
         }
 
@@ -876,34 +875,29 @@ namespace Microsoft.Build.BackEnd
         private class BinaryWriteTranslator : ITranslator
         {
             /// <summary>
-            /// The stream used as a source or destination for data.
-            /// </summary>
-            private Stream _packetStream;
-
-            /// <summary>
             /// The binary writer used in write mode.
             /// </summary>
             private BinaryWriter _writer;
 
-            private readonly InterningWriteTranslator _interner = new();
+            /// <summary>
+            /// The intern writer used in an intern scope.
+            /// This must be lazily instantiated since the interner has its own internal write translator, and
+            /// would otherwise go into a recursive loop on initalization.
+            /// </summary>
+            private InterningWriteTranslator _interner;
 
-            public bool IsInterning { get; private set; }
+            /// <summary>
+            /// Whether the caller has entered an intern scope.
+            /// </summary>
+            private bool _isInterning;
 
             /// <summary>
             /// Constructs a serializer from the specified stream, operating in the designated mode.
             /// </summary>
             /// <param name="packetStream">The stream serving as the source or destination of data.</param>
             public BinaryWriteTranslator(Stream packetStream)
-                : this(packetStream, new InterningWriteTranslator())
             {
-            }
-
-            internal BinaryWriteTranslator(Stream packetStream, InterningWriteTranslator interner, bool isInterning = false)
-            {
-                _packetStream = packetStream;
                 _writer = new BinaryWriter(packetStream);
-                _interner = interner;
-                IsInterning = isInterning;
             }
 
             /// <summary>
@@ -1604,67 +1598,88 @@ namespace Microsoft.Build.BackEnd
 
             public void WithInterning(IEqualityComparer<string> comparer, int initialCapacity, Action<ITranslator> internBlock)
             {
-                if (IsInterning)
+                if (_isInterning)
                 {
                     throw new InvalidOperationException("Cannot enter recursive intern block.");
                 }
 
-                _interner.InitCapacity(comparer, initialCapacity);
-                internBlock(_interner.Translator);
+                // Every new scope requires the interner's state to be reset.
+                _interner ??= new InterningWriteTranslator();
+                _interner.Setup(comparer, initialCapacity);
+
+                // Temporaily swap our writer with the interner.
+                // This forwards all writes to this translator into the interning buffer, so that any non-interned
+                // writes which are interleaved will be in the correct order.
+                BinaryWriter streamWriter = _writer;
+                _writer = _interner.Writer;
+                _isInterning = true;
+
+                try
+                {
+                    internBlock(this);
+                }
+                finally
+                {
+                    _writer = streamWriter;
+                    _isInterning = false;
+                }
+
+                // Write the interned buffer into the real output stream.
                 _interner.Translate(this);
             }
 
-            public void Intern(ref string str, bool nullable)
+            public void Intern(ref string str, bool nullable = true)
             {
-                if (!IsInterning)
+                if (!_isInterning)
                 {
                     Translate(ref str);
+                    return;
                 }
-                else if (nullable)
+
+                if (nullable && !TranslateNullable(str))
                 {
-                    _interner.InternNullable(str);
+                    return;
                 }
-                else
-                {
-                    _interner.Intern(str);
-                }
+
+                _interner.Intern(str);
             }
 
             public void Intern(ref string[] array)
             {
-                if (!IsInterning)
+                if (!_isInterning)
                 {
                     Translate(ref array);
+                    return;
                 }
 
-                if (!_interner.Translator.TranslateNullable(array))
+                if (!TranslateNullable(array))
                 {
                     return;
                 }
 
                 int count = array.Length;
-                _interner.Translator.Translate(ref count);
+                Translate(ref count);
 
                 for (int i = 0; i < count; i++)
                 {
-                    _interner.InternNullable(array[i]);
+                    _interner.Intern(array[i]);
                 }
             }
 
-            public void InternPath(ref string str, bool nullable)
+            public void InternPath(ref string str, bool nullable = true)
             {
-                if (!IsInterning)
+                if (!_isInterning)
                 {
                     Translate(ref str);
+                    return;
                 }
-                else if (nullable)
+
+                if (nullable && !TranslateNullable(str))
                 {
-                    _interner.InternNullablePath(str);
+                    return;
                 }
-                else
-                {
-                    _interner.InternPath(str);
-                }
+
+                _interner.InternPath(str);
             }
         }
     }
