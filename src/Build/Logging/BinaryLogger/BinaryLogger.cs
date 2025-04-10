@@ -327,6 +327,7 @@ namespace Microsoft.Build.Logging
                 {
                     projectImportsCollector.AddFile(filePath);
                 }
+                EditorConfigParser.ClearEditorConfigFilePaths();
                 projectImportsCollector.Close();
 
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)

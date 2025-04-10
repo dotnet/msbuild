@@ -30,6 +30,13 @@ internal sealed class EditorConfigParser
     }
 
     /// <summary>
+    /// Clears the editorConfigFilePaths collection after embedding in the binlog.
+    /// </summary>
+    public static void ClearEditorConfigFilePaths()
+    {
+        editorConfigFilePaths = new ConcurrentBag<string>();
+    }
+    /// <summary>
     /// Fetches the list of EditorconfigFile ordered from the nearest to the filePath.
     /// </summary>
     /// <param name="filePath"></param>
