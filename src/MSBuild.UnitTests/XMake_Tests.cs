@@ -10,6 +10,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
 using Microsoft.Build.CommandLine;
@@ -2712,9 +2713,12 @@ EndGlobal
             TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
 
             // If /bl is specified, set a path for the binlog that is defined by the test environment
-            if (arguments.Contains("/bl"))
+            string pattern = @"/v:(\w+)\s/b"; ;
+            Regex.Match(arguments, pattern);
+            Match match = Regex.Match(arguments, pattern);
+            if (match.Success)
             {
-                string binlogPath = Path.Combine(testProject.TestRoot, "output.binlog");
+                string binlogPath = Path.Combine(testProject.TestRoot, match.Groups[1] + ".binlog");
                 arguments = arguments.Replace("/bl", $"/bl:{binlogPath}");
             }
 
