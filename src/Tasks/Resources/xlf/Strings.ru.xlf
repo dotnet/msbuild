@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithTaskElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</source>
-        <target state="translated">MSB3752: "{0}" элемента &lt;{1}&gt; в задаче "{2}", но пуст. Убедитесь, что атрибут имеет правильное значение.</target>
+        <target state="translated">MSB3752: атрибут "{0}" элемента &lt;{1}&gt; в задаче "{2}" установлен, но пуст. Предоставьте правильное значение атрибута.</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
@@ -1180,8 +1180,8 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/binaryformatter-migration-guide</source>
-        <target state="translated">MSB3825: для ресурса "{0}" будет выполнена десериализация с помощью BinaryFormatter во время выполнения. BinaryFormatter является нерекомендуемым из-за известных рисков безопасности и удален из .NET 9+. Если вы хотите продолжить использовать его, задайте для свойства GenerateResourceWarnOnBinaryFormatterUse значение false.
-           Дополнительные сведения: https://aka.ms/binaryformatter-migration-guide</target>
+        <target state="translated">MSB3825: для ресурса "{0}" будет выполнена десериализация с помощью BinaryFormatter во время выполнения. Сериализация BinaryFormatter упразднена из-за известных рисков безопасности и удалена из .NET 9 и более поздних версий. Чтобы продолжить использовать эту сериализацию, задайте для свойства "GenerateResourceWarnOnBinaryFormatterUse" значение false.
+           Подробнее: https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
