@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Execution;
@@ -163,10 +162,8 @@ namespace Microsoft.Build.Shared
         /// <value>The loaded type.</value>
         internal Type Type { get; private set; }
 
-        [DisallowNull]
         internal AssemblyName LoadedAssemblyName { get; private set; }
 
-        [DisallowNull]
         internal string Path { get; private set; }
 
         /// <summary>
