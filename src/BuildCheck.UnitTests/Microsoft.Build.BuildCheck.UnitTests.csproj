@@ -27,7 +27,7 @@
     <PackageReference Include="Shouldly" />
   </ItemGroup>
 
-    <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="System.Collections.Immutable" />
 
     <Reference Include="System.Net.Http"  />
