@@ -12,12 +12,11 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0106](#bc0106---copytooutputdirectoryalways-should-be-avoided) | Warning | N/A | 9.0.200 | CopyToOutputDirectory='Always' should be avoided. |
 | [BC0107](#bc0107---targetframework-and-targetframeworks-specified-together) | Warning | N/A | 9.0.200 | TargetFramework and TargetFrameworks specified together. |
 | [BC0108](#bc0108---targetframework-or-targetframeworks-specified-in-non-sdk-style-project) | Warning | N/A | 9.0.300 | TargetFramework or TargetFrameworks specified in non-SDK style project. |
-| [BC0109](#bc0109---building-using-the-exec-task) | Warning | N/A | 9.0.300 | Building using the Exec task. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
 | [BC0203](#bc0203----property-declared-but-never-used) | None | Project | 9.0.100 | Property declared but never used. |
 | [BC0301](#bc0301---building-from-downloads-folder) | None | Project | 9.0.300 | Building from Downloads folder. |
-
+| [BC0302](#bc0302---building-using-the-exec-task) | Warning | N/A | 9.0.300 | Building using the Exec task. |
 
 Notes: 
  * What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
@@ -138,14 +137,6 @@ dotnet build my-multi-target.csproj /p:TargetFramework=net9.0
 
 Make sure the Target Framework is specified appropriately for your project.
 
-<a name="BC0109"></a>
-## BC0109 - Building using the Exec task.
-
-"The 'Exec' task should not be used to build projects."
-
-Building projects using the dotnet/msbuild/nuget CLI in the `Exec` task is not recommended, as it spawns a separate build process that the MSBuild engine cannot track. Please use the [MSBuild task](https://learn.microsoft.com/visualstudio/msbuild/msbuild-task) instead.
-
-
 <a name="BC0201"></a>
 ## BC0201 - Usage of undefined property.
 
@@ -204,6 +195,13 @@ Common cases of false positives:
 Placing project files into Downloads folder (or any other folder that cannot be fully trusted including all parent folders up to a root drive) is not recomended, as unintended injection of unrelated MSBuild logic can occur.
 
 Place your projects into trusted locations - including cases when you intend to only open the project in IDE.
+
+<a name="BC0302"></a>
+## BC0302 - Building using the Exec task.
+
+"The 'Exec' task should not be used to build projects."
+
+Building projects using the dotnet/msbuild/nuget CLI in the `Exec` task is not recommended, as it spawns a separate build process that the MSBuild engine cannot track. Please use the [MSBuild task](https://learn.microsoft.com/visualstudio/msbuild/msbuild-task) instead.
 
 <BR/>
 <BR/>

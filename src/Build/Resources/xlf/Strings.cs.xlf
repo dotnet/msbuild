@@ -221,12 +221,12 @@
         <target state="translated">Vlastnosti TargetFramework a TargetFrameworks se nedodržují a neměly by se zadává v projektech, které nepoužívají sadu .NET SDK.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
-      <trans-unit id="BuildCheck_BC0109_MessageFmt">
+      <trans-unit id="BuildCheck_BC0302_MessageFmt">
         <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
         <target state="translated">Úloha {0} z projektu {1} sestaví projekt pomocí rozhraní příkazového řádku {2}. Místo toho by se měla použít úloha MSBuild.</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildCheck_BC0109_Title">
+      <trans-unit id="BuildCheck_BC0302_Title">
         <source>The 'Exec' task should not be used to build a project.</source>
         <target state="translated">Úloha Exec by se neměla používat k sestavení projektu.</target>
         <note />
