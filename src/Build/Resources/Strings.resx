@@ -1340,6 +1340,9 @@
   <data name="SDKResolverFailed" xml:space="preserve">
     <value>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</value>
   </data>
+  <data name="SingleResolverFailedToResolveSDK" xml:space="preserve">
+    <value>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</value>
+  </data>
   <data name="FailedToResolveSDK" xml:space="preserve">
     <value>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
   {1}</value>
