@@ -30,7 +30,7 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="System.Collections.Immutable" />
 
-    <Reference Include="System.Net.Http"  />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>

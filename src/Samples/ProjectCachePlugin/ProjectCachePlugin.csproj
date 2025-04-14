@@ -21,7 +21,7 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="System.Text.Encodings.Web" Version="4.7.2" ExcludeAssets="all" />
-    <Reference Include="System.Net.Http"  />
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
 </Project>
