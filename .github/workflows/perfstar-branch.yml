@@ -24,10 +24,15 @@ jobs:
       - name: Get PR information
         id: pr_info
         run: |
-          PR_DATA=$(gh pr view ${{ github.event.issue.number }} --json headRefName,headRefOid)
-          echo "pr_head_branch=$(echo $PR_DATA | jq -r '.headRefName')" >> $GITHUB_OUTPUT
-          echo "pr_head_sha=$(echo $PR_DATA | jq -r '.headRefOid')" >> $GITHUB_OUTPUT
-          echo "new_branch_name=perf/$(echo $PR_DATA | jq -r '.headRefName')" >> $GITHUB_OUTPUT
+          PR_DATA=$(gh pr view ${{ github.event.issue.number }} --json headRefName,headRefOid,headRepository)
+          HEAD_REF=$(echo $PR_DATA | jq -r '.headRefName')
+          HEAD_SHA=$(echo $PR_DATA | jq -r '.headRefOid')
+          HEAD_REPO=$(echo $PR_DATA | jq -r '.headRepository.nameWithOwner')
+          
+          echo "pr_head_branch=${HEAD_REF}" >> $GITHUB_OUTPUT
+          echo "pr_head_sha=${HEAD_SHA}" >> $GITHUB_OUTPUT
+          echo "pr_head_repo=${HEAD_REPO}" >> $GITHUB_OUTPUT
+          echo "new_branch_name=perf/${HEAD_REF}" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -35,6 +40,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Ensure we can access the PR's commits (especially important for forks)
+          git fetch origin pull/${{ github.event.issue.number }}/head:pr-${{ github.event.issue.number }}-head
           
           # Create branch from PR head
           git checkout -b ${{ steps.pr_info.outputs.new_branch_name }} ${{ steps.pr_info.outputs.pr_head_sha }}
