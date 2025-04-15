@@ -663,7 +663,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
-    <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
 
@@ -682,6 +681,7 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
+    <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">

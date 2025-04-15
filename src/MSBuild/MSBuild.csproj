@@ -179,7 +179,6 @@
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" /><!-- for consistency with Framework via transitives -->
   </ItemGroup>
   <!-- Manually download this library for RoslynCodeTaskFactory.
            See target AddRefAssemblies below. -->
@@ -194,6 +193,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" /><!-- for consistency with Framework via transitives -->
   </ItemGroup>
 
   <ItemGroup>
