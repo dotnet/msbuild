@@ -105,6 +105,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 throw new NotImplementedException();
             }
 
+            public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+            {
+                throw new NotImplementedException();
+            }
+
             public void RoutePacket(int nodeId, INodePacket packet)
             {
                 _dataReceivedContext = new DataReceivedContext(Thread.CurrentThread, packet);
