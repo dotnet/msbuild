@@ -345,6 +345,11 @@ namespace Microsoft.Build.Evaluation
             {
                 evaluator.Evaluate();
             }
+            catch (Exception ex)
+            {
+                evaluator._evaluationLoggingContext.LogErrorFromText(null, null, null, new BuildEventFileInfo(root.ProjectFileLocation.File),
+                    ex.Message);
+            }
             finally
             {
                 IEnumerable globalProperties = null;
