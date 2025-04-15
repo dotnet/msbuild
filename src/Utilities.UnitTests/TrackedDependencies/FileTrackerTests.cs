@@ -1735,7 +1735,9 @@ class X
                 var buffer = new byte[10];
                 using (FileStream fs = File.Open(readFile, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
                 {
+#pragma warning disable CA2022
                     fs.Read(buffer, 0, 10);
+#pragma warning restore CA2022
                 }
 
                 FileTracker.WriteContextTLogs(testDir, tlogRootName);
@@ -2524,7 +2526,7 @@ namespace ConsoleApplication4
             {
                 if (file.Equals(lines[i], StringComparison.OrdinalIgnoreCase))
                 {
-                    Assert.True(false, "Found string '" + file + "' in '" + tlog + "' at line " + i + ", when it shouldn't have been in the log at all.");
+                    Assert.Fail("Found string '" + file + "' in '" + tlog + "' at line " + i + ", when it shouldn't have been in the log at all.");
                 }
             }
         }
@@ -2549,7 +2551,7 @@ namespace ConsoleApplication4
 
             if (timesFound != timesFoundSoFar)
             {
-                Assert.True(false, "Searched " + tlog + " but didn't find " + timesFound + " instances of " + file);
+                Assert.Fail("Searched " + tlog + " but didn't find " + timesFound + " instances of " + file);
             }
         }
 

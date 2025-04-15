@@ -569,7 +569,9 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     /// <typeparam name="P">Property type</typeparam>
     /// <typeparam name="I">Item type</typeparam>
-    internal sealed class MetadataTrie<P, I> where P : class, IProperty where I : class, IItem, IMetadataTable
+    internal sealed class MetadataTrie<P, I>
+        where P : class, IProperty
+        where I : class, IItem, IMetadataTable
     {
         private readonly Dictionary<string, MetadataTrie<P, I>> _children;
         private readonly Func<string, string> _normalize;
