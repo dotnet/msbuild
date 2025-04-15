@@ -400,7 +400,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                string[] values = line.Split(MSBuildConstants.SemicolonChar);
+                string[] values = line.Split(MSBuildConstants.SpaceChar);
                 if (values.Length < 3)
                 {
                     throw new InvalidDataException("Too few values in build plan.");
