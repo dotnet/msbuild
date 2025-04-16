@@ -179,9 +179,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static Assembly? AssemblyResolver(object sender, ResolveEventArgs args)
         {
-            if (args.Name.Equals(s_resolverLoadedType?.LoadedAssemblyName.FullName, StringComparison.OrdinalIgnoreCase))
+            if (args.Name.Equals(s_resolverLoadedType?.LoadedAssemblyName?.FullName, StringComparison.OrdinalIgnoreCase))
             {
-                return s_resolverLoadedType?.LoadedAssembly ?? Assembly.Load(s_resolverLoadedType?.Path);
+                if (s_resolverLoadedType == null || s_resolverLoadedType.Path == null)
+                {
+                    return null;
+                }
+                return s_resolverLoadedType.LoadedAssembly ?? Assembly.Load(s_resolverLoadedType.Path);
             }
 
             return null;
