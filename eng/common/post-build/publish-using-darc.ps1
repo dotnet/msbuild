@@ -5,7 +5,8 @@ param(
   [Parameter(Mandatory=$false)][string] $MaestroApiEndPoint = 'https://maestro.dot.net',
   [Parameter(Mandatory=$true)][string] $WaitPublishingFinish,
   [Parameter(Mandatory=$false)][string] $ArtifactsPublishingAdditionalParameters,
-  [Parameter(Mandatory=$false)][string] $SymbolPublishingAdditionalParameters
+  [Parameter(Mandatory=$false)][string] $SymbolPublishingAdditionalParameters,
+  [Parameter(Mandatory=$false)][bool] $DefaultChannelsRequired
 )
 
 try {
@@ -41,6 +42,7 @@ try {
     --source-branch main `
     --azdev-pat "$AzdoToken" `
     --bar-uri "$MaestroApiEndPoint" `
+    --default-channels-required "$DefaultChannelsRequired" `
     --ci `
     --verbose `
 	@optionalParams

@@ -39,7 +39,7 @@ parameters:
     displayName: Enable NuGet validation
     type: boolean
     default: true
-    
+
   - name: publishInstallersAndChecksums
     displayName: Publish installers and checksums
     type: boolean
@@ -54,6 +54,11 @@ parameters:
       params: ''
       artifactNames: ''
       downloadArtifacts: true
+
+  - name: defaultChannelsRequired
+    displayName: Requires existence of enabled default channel association for a build branch.
+    type: boolean
+    default: false
 
   # These parameters let the user customize the call to sdk-task.ps1 for publishing
   # symbols & general artifacts as well as for signing validation
@@ -159,13 +164,13 @@ stages:
           os: windows
         # If it's not devdiv, it's dnceng
         ${{ else }}:
-          ${{ if eq(parameters.is1ESPipeline, true) }}:        
+          ${{ if eq(parameters.is1ESPipeline, true) }}:
             name: $(DncEngInternalBuildPool)
             image: 1es-windows-2022
             os: windows
           ${{ else }}:
             name: $(DncEngInternalBuildPool)
-            demands: ImageOverride -equals windows.vs2022.amd64          
+            demands: ImageOverride -equals windows.vs2022.amd64
       steps:
         - template: /eng/common/core-templates/post-build/setup-maestro-vars.yml
           parameters:
@@ -223,13 +228,13 @@ stages:
           os: windows
         # If it's not devdiv, it's dnceng
         ${{ else }}:
-          ${{ if eq(parameters.is1ESPipeline, true) }}:          
+          ${{ if eq(parameters.is1ESPipeline, true) }}:
             name: $(DncEngInternalBuildPool)
             image: 1es-windows-2022
             os: windows
           ${{ else }}:
             name: $(DncEngInternalBuildPool)
-            demands: ImageOverride -equals windows.vs2022.amd64          
+            demands: ImageOverride -equals windows.vs2022.amd64
       steps:
         - template: /eng/common/core-templates/post-build/setup-maestro-vars.yml
           parameters:
@@ -252,9 +257,9 @@ stages:
           displayName: Validate
           inputs:
             filePath: $(Build.SourcesDirectory)/eng/common/post-build/sourcelink-validation.ps1
-            arguments: -InputPath $(Build.ArtifactStagingDirectory)/BlobArtifacts/ 
-              -ExtractPath $(Agent.BuildDirectory)/Extract/ 
-              -GHRepoName $(Build.Repository.Name) 
+            arguments: -InputPath $(Build.ArtifactStagingDirectory)/BlobArtifacts/
+              -ExtractPath $(Agent.BuildDirectory)/Extract/
+              -GHRepoName $(Build.Repository.Name)
               -GHCommit $(Build.SourceVersion)
               -SourcelinkCliVersion $(SourceLinkCLIVersion)
           continueOnError: true
@@ -284,13 +289,13 @@ stages:
           os: windows
         # If it's not devdiv, it's dnceng
         ${{ else }}:
-          ${{ if eq(parameters.is1ESPipeline, true) }}:          
+          ${{ if eq(parameters.is1ESPipeline, true) }}:
             name: NetCore1ESPool-Publishing-Internal
             image: windows.vs2019.amd64
             os: windows
           ${{ else }}:
             name: NetCore1ESPool-Publishing-Internal
-            demands: ImageOverride -equals windows.vs2019.amd64          
+            demands: ImageOverride -equals windows.vs2019.amd64
       steps:
         - template: /eng/common/core-templates/post-build/setup-maestro-vars.yml
           parameters:
@@ -314,3 +319,4 @@ stages:
               -WaitPublishingFinish true
               -ArtifactsPublishingAdditionalParameters '${{ parameters.artifactsPublishingAdditionalParameters }}'
               -SymbolPublishingAdditionalParameters '${{ parameters.symbolPublishingAdditionalParameters }}'
+              -DefaultChannelsRequired ${{ parameters.defaultChannelsRequired }}
