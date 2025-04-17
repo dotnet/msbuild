@@ -3,6 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+#if DEBUG
+using System.IO;
+#endif
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
