@@ -186,7 +186,7 @@ namespace Microsoft.Build.BackEnd
                             response.Type = ResultsCacheResponseType.Satisfied;
 
                             // Check for the initial targets.  If we don't know what the initial targets are, we assume they are not satisfied.
-                            if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss))
+                            if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, checkTargetsMissingResults: false, skippedResultsAreOK: true))
                             {
                                 response.Type = ResultsCacheResponseType.NotSatisfied;
                             }
