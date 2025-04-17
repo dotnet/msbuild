@@ -3,11 +3,11 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Build.ProjectCache
+namespace Microsoft.Build.Experimental.ProjectCache
 {
     public class ProjectCacheDescriptor
     {
-        internal ProjectCacheDescriptor(
+        private ProjectCacheDescriptor(
             string? pluginAssemblyPath,
             IReadOnlyDictionary<string, string>? pluginSettings,
             ProjectCachePluginBase? pluginInstance)
