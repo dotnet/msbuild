@@ -805,7 +805,18 @@ namespace Microsoft.Build.BackEnd
                         using (FullTracking.Track(taskLoggingContext.TargetLoggingContext.Target.Name, _taskNode.Name, _buildRequestEntry.ProjectRootDirectory, _buildRequestEntry.RequestConfiguration.Project.PropertiesToBuildWith))
 #endif
                         {
-                            taskResult = taskExecutionHost.Execute();
+                            if (taskLoggingContext.TargetLoggingContext.Target.Name == "CreateVsixContainer")
+                            {
+                                taskResult = taskExecutionHost.Execute();
+                            }
+                            else if (taskLoggingContext.TargetLoggingContext.Target.Name == "SetVsSDKEnvironmentVariables")
+                            {
+                                taskResult = taskExecutionHost.Execute();
+                            }
+                            else
+                            {
+                                taskResult = taskExecutionHost.Execute();
+                            }
                         }
                     }
                 }

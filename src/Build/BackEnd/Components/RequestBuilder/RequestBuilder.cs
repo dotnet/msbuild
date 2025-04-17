@@ -643,7 +643,6 @@ namespace Microsoft.Build.BackEnd
             if (IsBuilderUsingLegacyThreadingSemantics(_componentHost, _requestEntry))
             {
                 // Create a task which completes when the legacy threading task thread is finished.
-                _componentHost.LegacyThreadingData.SignalLegacyThreadStart(this);
 
                 _requestTask = Task.Factory.StartNew(
                     () =>
@@ -1115,6 +1114,7 @@ namespace Microsoft.Build.BackEnd
             _projectLoggingContext = null;
 
             MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath);
+            // Console.WriteLine($"Building project: Targets => {string.Join(",", _requestEntry.RequestConfiguration.RequestedTargets ?? new string[] { "NO TARGETS" })} ** Path => {_requestEntry.RequestConfiguration.ProjectFullPath}");
 
             try
             {

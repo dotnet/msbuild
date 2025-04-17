@@ -60,7 +60,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal void LogFatalTaskError(Exception exception, BuildEventFileInfo file, string taskName)
         {
             CheckValidity();
-            LoggingService.LogFatalTaskError(BuildEventContext, exception, file, taskName);
+            LoggingService.LogFatalTaskError(BuildEventContext, exception, file, "MY CUSTOM ERROR MESSAGE: " + taskName);
             _hasLoggedErrors = true;
         }
     }

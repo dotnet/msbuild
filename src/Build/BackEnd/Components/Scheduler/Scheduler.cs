@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
@@ -544,6 +545,7 @@ namespace Microsoft.Build.BackEnd
             _currentInProcNodeCount = 0;
             _currentOutOfProcNodeCount = 0;
 
+            Interlocked.Exchange(ref _nextGlobalRequestId, 0);
             _nextGlobalRequestId = 0;
             _customRequestSchedulingAlgorithm = null;
         }
@@ -1656,8 +1658,7 @@ namespace Microsoft.Build.BackEnd
             BuildRequest newRequest = new BuildRequest(parentRequest.BuildRequest.SubmissionId, BuildRequest.ResultsTransferNodeRequestId, parentRequest.BuildRequest.ConfigurationId, [], null, parentRequest.BuildRequest.BuildEventContext, parentRequest.BuildRequest, parentRequest.BuildRequest.BuildRequestDataFlags);
 
             // Assign a new global request id - always different from any other.
-            newRequest.GlobalRequestId = _nextGlobalRequestId;
-            _nextGlobalRequestId++;
+            newRequest.GlobalRequestId = Interlocked.Increment(ref _nextGlobalRequestId);
 
             // Now add the response.  Send it to the node where the configuration's results are stored.  When those results come back
             // we will update the storage location in the configuration.  This is doing a bit of a run around the scheduler - we don't
@@ -2286,8 +2287,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            request.GlobalRequestId = _nextGlobalRequestId;
-            _nextGlobalRequestId++;
+            request.GlobalRequestId = Interlocked.Increment(ref _nextGlobalRequestId);
         }
 
         /// <summary>

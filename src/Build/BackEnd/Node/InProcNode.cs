@@ -168,7 +168,6 @@ namespace Microsoft.Build.BackEnd
                             }
 
                         case 1:
-
                             while (_receivedPackets.TryDequeue(out INodePacket packet))
                             {
                                 if (packet != null)

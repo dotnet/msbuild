@@ -56,7 +56,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A mapping of all the nodes managed by this provider.
         /// </summary>
-        private Dictionary<int, NodeContext> _nodeContexts;
+        private Dictionary<int, NodeContext> _nodeContexts = new Dictionary<int, NodeContext>();
 
         /// <summary>
         /// Flag indicating we have disposed.
@@ -129,8 +129,15 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            _componentHost = host;
-            _nodeContexts = new Dictionary<int, NodeContext>();
+            lock (_nodeContexts)
+            {
+                if (_componentHost is not null)
+                {
+                    throw new InvalidOperationException("component host was already set.");
+                }
+
+                _componentHost = host;
+            }
         }
 
         /// <summary>
@@ -242,26 +249,69 @@ namespace Microsoft.Build.BackEnd
             }
 
             bool nodeExists;
+            NodeContext context;
             lock (_nodeContexts)
             {
                 nodeExists = _nodeContexts.ContainsKey(nodeId);
+
+                if (nodeExists)
+                {
+                    return false;
+                }
+
+                context = new();
+                _nodeContexts[nodeId] = context;
             }
 
             // If it doesn't already exist, create it.
             if (!nodeExists)
             {
-                if (!InstantiateNode(nodeId, factory))
+                if (!InitializeNode(nodeId, context, factory))
                 {
                     return false;
                 }
             }
 
-            lock (_nodeContexts)
-            {
-                _nodeContexts[nodeId]._inProcNodeEndpoint.SendData(configuration);
-            }
+            context._inProcNodeEndpoint.SendData(configuration);
 
             return true;
+
+            bool InitializeNode(int nodeId, NodeContext nodeContext, INodePacketFactory factory)
+            {
+                NodeEndpointInProc.EndpointPair endpoints = NodeEndpointInProc.CreateInProcEndpoints(NodeEndpointInProc.EndpointMode.Synchronous, _componentHost, nodeId);
+
+                nodeContext._inProcNodeEndpoint = endpoints.ManagerEndpoint;
+                nodeContext._inProcNodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(InProcNodeEndpoint_OnLinkStatusChanged);
+
+                nodeContext._packetFactory = factory;
+                nodeContext._inProcNode = new InProcNode(_componentHost, endpoints.NodeEndpoint, nodeId);
+#if FEATURE_THREAD_CULTURE
+                nodeContext._inProcNodeThread = new Thread(() => InProcNodeThreadProc(nodeId, nodeContext._inProcNode), BuildParameters.ThreadStackSize);
+#else
+                CultureInfo culture = _componentHost.BuildParameters.Culture;
+                CultureInfo uiCulture = _componentHost.BuildParameters.UICulture;
+                nodeContext._inProcNodeThread = new Thread(() =>
+                {
+                    CultureInfo.CurrentCulture = culture;
+                    CultureInfo.CurrentUICulture = uiCulture;
+                    InProcNodeThreadProc(nodeId, nodeContext._inProcNode);
+                });
+#endif
+                nodeContext._inProcNodeThread.Name = String.Format(CultureInfo.CurrentCulture, "In-proc Node ({0})", _componentHost.Name);
+                nodeContext._inProcNodeThread.IsBackground = true;
+#if FEATURE_THREAD_CULTURE
+                nodeContext._inProcNodeThread.CurrentCulture = _componentHost.BuildParameters.Culture;
+                nodeContext._inProcNodeThread.CurrentUICulture = _componentHost.BuildParameters.UICulture;
+#endif
+                nodeContext._inProcNodeThread.Start();
+
+                nodeContext._inProcNodeEndpoint.Connect(this);
+
+                int connectionTimeout = CommunicationsUtilities.NodeConnectionTimeout;
+                bool connected = nodeContext._endpointConnectedEvent.WaitOne(connectionTimeout);
+                ErrorUtilities.VerifyThrow(connected, "In-proc node failed to start up within {0}ms", connectionTimeout);
+                return true;
+            }
         }
 
         #endregion
@@ -359,61 +409,13 @@ namespace Microsoft.Build.BackEnd
         #region Private Methods
 
         /// <summary>
-        /// Creates a new in-proc node.
-        /// </summary>
-        private bool InstantiateNode(int nodeId, INodePacketFactory factory)
-        {
-            ErrorUtilities.VerifyThrow(!_nodeContexts.ContainsKey(nodeId), "In Proc node already instantiated.");
-
-            NodeEndpointInProc.EndpointPair endpoints = NodeEndpointInProc.CreateInProcEndpoints(NodeEndpointInProc.EndpointMode.Synchronous, _componentHost, nodeId);
-
-            NodeContext nodeContext = new();
-            lock (_nodeContexts)
-            {
-                _nodeContexts[nodeId] = nodeContext;
-            }
-
-            nodeContext._inProcNodeEndpoint = endpoints.ManagerEndpoint;
-            nodeContext._inProcNodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(InProcNodeEndpoint_OnLinkStatusChanged);
-
-            nodeContext._packetFactory = factory;
-            nodeContext._inProcNode = new InProcNode(_componentHost, endpoints.NodeEndpoint, nodeId);
-#if FEATURE_THREAD_CULTURE
-            nodeContext._inProcNodeThread = new Thread(() => InProcNodeThreadProc(nodeId, nodeContext._inProcNode), BuildParameters.ThreadStackSize);
-#else
-            CultureInfo culture = _componentHost.BuildParameters.Culture;
-            CultureInfo uiCulture = _componentHost.BuildParameters.UICulture;
-            nodeContext._inProcNodeThread = new Thread(() =>
-            {
-                CultureInfo.CurrentCulture = culture;
-                CultureInfo.CurrentUICulture = uiCulture;
-                InProcNodeThreadProc(nodeId, nodeContext._inProcNode);
-            });
-#endif
-            nodeContext._inProcNodeThread.Name = String.Format(CultureInfo.CurrentCulture, "In-proc Node ({0})", _componentHost.Name);
-            nodeContext._inProcNodeThread.IsBackground = true;
-#if FEATURE_THREAD_CULTURE
-            nodeContext._inProcNodeThread.CurrentCulture = _componentHost.BuildParameters.Culture;
-            nodeContext._inProcNodeThread.CurrentUICulture = _componentHost.BuildParameters.UICulture;
-#endif
-            nodeContext._inProcNodeThread.Start();
-
-            nodeContext._inProcNodeEndpoint.Connect(this);
-
-            int connectionTimeout = CommunicationsUtilities.NodeConnectionTimeout;
-            bool connected = nodeContext._endpointConnectedEvent.WaitOne(connectionTimeout);
-            ErrorUtilities.VerifyThrow(connected, "In-proc node failed to start up within {0}ms", connectionTimeout);
-            return true;
-        }
-
-        /// <summary>
         /// Thread proc which runs the in-proc node.
         /// </summary>
         private void InProcNodeThreadProc(int nodeId, INode inProcNode)
         {
             Exception e;
             NodeEngineShutdownReason reason = inProcNode.Run(out e);
-            InProcNodeShutdown(reason, e);
+            InProcNodeShutdown(nodeId, reason, e);
         }
 
         /// <summary>
@@ -450,9 +452,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Callback invoked when the endpoint shuts down.
         /// </summary>
+        /// <param name="nodeId">The node that's shutting down.</param>
         /// <param name="reason">The reason the endpoint is shutting down.</param>
         /// <param name="e">Any exception which was raised that caused the endpoint to shut down.</param>
-        private void InProcNodeShutdown(NodeEngineShutdownReason reason, Exception e)
+        private void InProcNodeShutdown(int nodeId, NodeEngineShutdownReason reason, Exception e)
         {
             switch (reason)
             {
@@ -476,12 +479,15 @@ namespace Microsoft.Build.BackEnd
             {
                 if (disposing)
                 {
-                    foreach (NodeContext nodeContext in _nodeContexts.Values)
+                    lock (_nodeContexts)
                     {
-                        if (nodeContext._endpointConnectedEvent != null)
+                        foreach (NodeContext nodeContext in _nodeContexts.Values)
                         {
-                            nodeContext._endpointConnectedEvent.Dispose();
-                            nodeContext._endpointConnectedEvent = null;
+                            if (nodeContext._endpointConnectedEvent != null)
+                            {
+                                nodeContext._endpointConnectedEvent.Dispose();
+                                nodeContext._endpointConnectedEvent = null;
+                            }
                         }
                     }
                 }

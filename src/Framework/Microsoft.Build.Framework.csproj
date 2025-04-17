@@ -60,10 +60,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\..\..\Detours\vc\Debug\NativeDetourWrapper.dll" Link="NativeDetourWrapper.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\..\Detours\vc\Debug\NativeDetourWrapper.pdb" Link="NativeDetourWrapper.pdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\Detours\CLRDetourWrapper\CLRDetourWrapper.vcxproj" />
   </ItemGroup>
 
   <ItemGroup>
     <RCResourceFile Include="native.rc" />
   </ItemGroup>
+  
 </Project>

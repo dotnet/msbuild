@@ -29,7 +29,8 @@ internal static class NativeMethods
 {
 #if NET472_OR_GREATER || NET5_0_OR_GREATER
     public static AsyncLocal<string> AsyncCurrentDirectory = new AsyncLocal<string>();
-    internal static DetourWrapper detourWrapper = new DetourWrapper(AsyncCurrentDirectory);
+    public static AsyncLocal<Dictionary<string, string>> AsyncEnvironmentVariables = new AsyncLocal<Dictionary<string, string>>();
+    internal static DetourWrapper detourWrapper = new DetourWrapper(AsyncCurrentDirectory, AsyncEnvironmentVariables);
 #endif
 
     #region Constants
