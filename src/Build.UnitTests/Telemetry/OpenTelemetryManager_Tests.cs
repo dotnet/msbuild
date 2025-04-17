@@ -2,7 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -96,6 +99,23 @@ namespace Microsoft.Build.Engine.UnitTests.Telemetry
             // Because the manager is already initialized, second call is a no-op
             state1.ShouldBe(false);
             state2.ShouldBe(false);
+        }
+
+        [Fact]
+        public void TelemetryLoadFailureIsLoggedOnce()
+        {
+            OpenTelemetryManager.Instance.LoadFailureExceptionMessage = new System.IO.FileNotFoundException().ToString();
+            using BuildManager bm = new BuildManager();
+            var deferredMessages = new List<BuildManager.DeferredBuildMessage>();
+            bm.BeginBuild(new BuildParameters(), deferredMessages);
+            deferredMessages.ShouldContain(x => x.Text.Contains("FileNotFound"));
+            bm.EndBuild();
+            bm.BeginBuild(new BuildParameters());
+            bm.EndBuild();
+
+            // should not add message twice
+            int count = deferredMessages.Count(x => x.Text.Contains("FileNotFound"));
+            count.ShouldBe(1);
         }
 
         /* Helper methods */

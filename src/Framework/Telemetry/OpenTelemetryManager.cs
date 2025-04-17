@@ -39,6 +39,8 @@ namespace Microsoft.Build.Framework.Telemetry
         private IOpenTelemetryCollector? _collector;
 #endif
 
+        public string? LoadFailureExceptionMessage { get; set; }
+
         /// <summary>
         /// Optional activity source for MSBuild or other telemetry usage.
         /// </summary>
@@ -104,6 +106,7 @@ namespace Microsoft.Build.Framework.Telemetry
             {
                 // catch exceptions from loading the OTel SDK or Collector to maintain usability of Microsoft.Build.Framework package in our and downstream tests in VS.
                 _telemetryState = TelemetryState.Unsampled;
+                LoadFailureExceptionMessage = ex.ToString();
                 return;
             }
 #endif
