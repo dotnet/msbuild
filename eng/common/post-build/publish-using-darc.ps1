@@ -35,6 +35,12 @@ try {
     $optionalParams.Add("--no-wait") | Out-Null
   }
 
+  if ($DefaultChannelsRequired) {
+    $optionalParams.Add("--default-channels-required") | Out-Null
+    $optionalParams.Add($True) | Out-Null
+    write-host "Requires existence of enabled default channel association for a build branch. Applies only if --default-channels specified."
+  }
+
   & $darc add-build-to-channel `
     --id $buildId `
     --publishing-infra-version $PublishingInfraVersion `
@@ -42,7 +48,6 @@ try {
     --source-branch main `
     --azdev-pat "$AzdoToken" `
     --bar-uri "$MaestroApiEndPoint" `
-    --default-channels-required $DefaultChannelsRequired `
     --ci `
     --verbose `
 	@optionalParams
