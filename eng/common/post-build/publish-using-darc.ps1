@@ -37,8 +37,7 @@ try {
 
   if ($DefaultChannelsRequired) {
     $optionalParams.Add("--default-channels-required") | Out-Null
-    $optionalParams.Add($True) | Out-Null
-    write-host "Requires existence of enabled default channel association for a build branch. Applies only if --default-channels specified."
+    $optionalParams.Add("$True") | Out-Null
   }
 
   & $darc add-build-to-channel `
