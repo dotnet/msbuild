@@ -15,6 +15,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.TelemetryInfra;
+using Microsoft.NET.StringTools;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
 #nullable disable
@@ -314,6 +315,8 @@ namespace Microsoft.Build.BackEnd
                 _requestsByGlobalRequestId.Clear();
                 _unsubmittedRequests.Clear();
                 _unresolvedConfigurations.ClearConfigurations();
+                Strings.ClearCachedStrings();
+
                 ChangeStatus(BuildRequestEngineStatus.Uninitialized);
             }
         }
