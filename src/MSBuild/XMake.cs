@@ -724,7 +724,7 @@ namespace Microsoft.Build.CommandLine
                 ProfilerLogger profilerLogger = null;
                 bool enableProfiler = false;
                 bool interactive = false;
-                ProjectIsolationMode isolateProjects = ProjectIsolationMode.False;
+                ProjectIsolationMode isolateProjects = ProjectIsolationMode.True;
                 GraphBuildOptions graphBuildOptions = null;
                 bool lowPriority = false;
                 string[] inputResultsCaches = null;
