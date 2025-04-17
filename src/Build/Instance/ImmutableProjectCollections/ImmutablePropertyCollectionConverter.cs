@@ -68,5 +68,7 @@ namespace Microsoft.Build.Instance
 
             return true;
         }
+
+        public bool HasSameBackingCollection(ICopyOnWritePropertyDictionary<T> other) => ReferenceEquals(other, this);
     }
 }

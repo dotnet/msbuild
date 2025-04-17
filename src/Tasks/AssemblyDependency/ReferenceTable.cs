@@ -2604,6 +2604,9 @@ namespace Microsoft.Build.Tasks
             var scatterItems = new List<ITaskItem>();
             var copyLocalItems = new List<ITaskItem>();
 
+            // Cache shared source items to avoid enumerating slow ProjectItemInstance.TaskItem.
+            Dictionary<ITaskItem, TaskItem> referenceMetadataCache = new(ITaskItemComparer.Default);
+
             foreach (KeyValuePair<AssemblyNameExtension, Reference> kvp in References)
             {
                 AssemblyNameExtension assemblyName = kvp.Key;
@@ -2637,7 +2640,7 @@ namespace Microsoft.Build.Tasks
 
                 if (reference.IsResolved)
                 {
-                    ITaskItem referenceItem = SetItemMetadata(relatedItems, satelliteItems, serializationAssemblyItems, scatterItems, assemblyName.FullName, reference, assemblyName);
+                    ITaskItem referenceItem = SetItemMetadata(relatedItems, satelliteItems, serializationAssemblyItems, scatterItems, assemblyName.FullName, reference, assemblyName, referenceMetadataCache);
 
                     if (reference.IsPrimary)
                     {
@@ -2678,14 +2681,21 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set metadata on the items which will be output from RAR.
         /// </summary>
-        private ITaskItem SetItemMetadata(List<ITaskItem> relatedItems, List<ITaskItem> satelliteItems, List<ITaskItem> serializationAssemblyItems, List<ITaskItem> scatterItems, string fusionName, Reference reference, AssemblyNameExtension assemblyName)
+        private ITaskItem SetItemMetadata(
+            List<ITaskItem> relatedItems,
+            List<ITaskItem> satelliteItems,
+            List<ITaskItem> serializationAssemblyItems,
+            List<ITaskItem> scatterItems,
+            string fusionName,
+            Reference reference,
+            AssemblyNameExtension assemblyName,
+            Dictionary<ITaskItem, TaskItem> referenceMetadataCache)
         {
             // Set up the main item.
             TaskItem referenceItem = new TaskItem();
             referenceItem.ItemSpec = reference.FullPath;
 
             IMetadataContainer referenceItemAsMetadataContainer = referenceItem;
-            referenceItemAsMetadataContainer.ImportMetadata(EnumerateCommonMetadata());
 
             // If there was a primary source item, then forward metadata from it.
             // It's important that the metadata from the primary source item
@@ -2698,19 +2708,30 @@ namespace Microsoft.Build.Tasks
             if (reference.PrimarySourceItem != null)
             {
                 reference.PrimarySourceItem.CopyMetadataTo(referenceItem);
+                referenceItemAsMetadataContainer.ImportMetadata(EnumerateCommonMetadata());
             }
             else
             {
-                bool hasImplementationFile = referenceItem.GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length > 0;
-                bool hasImageRuntime = referenceItem.GetMetadata(ItemMetadataNames.imageRuntime).Length > 0;
-                bool hasWinMDFile = referenceItem.GetMetadata(ItemMetadataNames.winMDFile).Length > 0;
+                bool hasImplementationFile = false; // This is apparently never true?
+                bool hasImageRuntime = !string.IsNullOrEmpty(reference.ImageRuntime);
+                bool hasWinMDFile = false; // this is also never true?
 
                 // If there were non-primary source items, then forward metadata from them.
                 ICollection<ITaskItem> sourceItems = reference.GetSourceItems();
                 foreach (ITaskItem sourceItem in sourceItems)
                 {
-                    sourceItem.CopyMetadataTo(referenceItem);
+                    // Source items are shared between references. ProjectItemInstance.TaskItem is expensive to enumerate as it always
+                    // creates a new backing collection. Cache the result in a Utilities.TaskItem.instead.
+                    if (!referenceMetadataCache.TryGetValue(sourceItem, out TaskItem clonedItem))
+                    {
+                        clonedItem = new TaskItem(sourceItem);
+                        referenceMetadataCache[sourceItem] = clonedItem;
+                    }
+
+                    clonedItem.CopyMetadataTo(referenceItem);
                 }
+
+                referenceItemAsMetadataContainer.ImportMetadata(EnumerateCommonMetadata());
 
                 // If the item originally did not have the implementation file metadata then we do not want to get it from the set of primary source items
                 // since the implementation file is something specific to the source item and not supposed to be propagated.
@@ -3240,6 +3261,15 @@ namespace Microsoft.Build.Tasks
             return _externallyResolvedImmutableFiles.TryGetValue(path, out AssemblyNameExtension assemblyNameExtension)
                 ? assemblyNameExtension
                 : null;
+        }
+
+        private class ITaskItemComparer : IEqualityComparer<ITaskItem>
+        {
+            internal static ITaskItemComparer Default = new();
+
+            public bool Equals(ITaskItem first, ITaskItem second) => ReferenceEquals(first, second);
+
+            public int GetHashCode(ITaskItem value) => value.GetHashCode();
         }
     }
 }
