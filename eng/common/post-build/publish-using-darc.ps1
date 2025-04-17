@@ -42,7 +42,7 @@ try {
     --source-branch main `
     --azdev-pat "$AzdoToken" `
     --bar-uri "$MaestroApiEndPoint" `
-    --default-channels-required "$DefaultChannelsRequired" `
+    --default-channels-required $DefaultChannelsRequired `
     --ci `
     --verbose `
 	@optionalParams
