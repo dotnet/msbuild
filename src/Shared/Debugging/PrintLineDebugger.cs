@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
@@ -38,13 +37,17 @@ namespace Microsoft.Build.Shared.Debugging
         public static Lazy<PrintLineDebugger> DefaultWithProcessInfo =
             new Lazy<PrintLineDebugger>(() => Create(null, null, true));
 
+#if DEBUG
         private readonly string _id;
+#endif
 
         private readonly CommonWriterType _writerSetByThisInstance;
 
         public PrintLineDebugger(string id, CommonWriterType writer)
         {
+#if DEBUG
             _id = id ?? string.Empty;
+#endif
 
             if (writer != null)
             {
@@ -145,10 +148,12 @@ namespace Microsoft.Build.Shared.Debugging
 #endif
         }
 
+#if DEBUG
         private static string CallsiteString(string sourceFilePath, string memberName, int sourceLineNumber)
         {
             return $"@{Path.GetFileNameWithoutExtension(sourceFilePath)}.{memberName}({sourceLineNumber})";
         }
+#endif
 
         private void ReleaseUnmanagedResources()
         {
