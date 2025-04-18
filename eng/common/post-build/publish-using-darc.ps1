@@ -37,7 +37,7 @@ try {
 
   if ($DefaultChannelsRequired) {
     $optionalParams.Add("--default-channels-required") | Out-Null
-    $optionalParams.Add("$True") | Out-Null
+    $optionalParams.Add(1) | Out-Null
   }
 
   & $darc add-build-to-channel `
