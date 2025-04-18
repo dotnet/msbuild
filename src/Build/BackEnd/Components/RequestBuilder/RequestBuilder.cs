@@ -1106,8 +1106,6 @@ namespace Microsoft.Build.BackEnd
             // logged with the node logging context
             _projectLoggingContext = null;
 
-            MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath);
-
             try
             {
                 // Load the project
@@ -1145,6 +1143,13 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
+                // Determine the set of targets we need to build
+                (string name, TargetBuiltReason reason)[] allTargets = _requestEntry.RequestConfiguration
+   .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
+                }
                 HandleProjectStarted(buildCheckManager);
 
                 // Make sure to extract known immutable folders from properties and register them for fast up-to-date check
@@ -1162,9 +1167,6 @@ namespace Microsoft.Build.BackEnd
 
                 _requestEntry.Request.BuildEventContext = _projectLoggingContext.BuildEventContext;
 
-                // Determine the set of targets we need to build
-                (string name, TargetBuiltReason reason)[] allTargets = _requestEntry.RequestConfiguration
-                    .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
 
                 ProjectErrorUtilities.VerifyThrowInvalidProject(allTargets.Length > 0,
                     _requestEntry.RequestConfiguration.Project.ProjectFileLocation, "NoTargetSpecified");
