@@ -276,7 +276,7 @@ stages:
       - template: /eng/common/core-templates/variables/pool-providers.yml
         parameters:
           is1ESPipeline: ${{ parameters.is1ESPipeline }}
-      -defaultChannelsRequired: ${{ if eq(parameters.defaultChannelsRequired, true) }} $True ${{ else }} $False
+      - defaultChannelsRequired: ${{ if eq(parameters.defaultChannelsRequired, true) }} $True ${{ else }} $False
     jobs:
     - job:
       displayName: Publish Using Darc
