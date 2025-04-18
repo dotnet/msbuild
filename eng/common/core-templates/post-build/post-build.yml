@@ -319,4 +319,4 @@ stages:
               -WaitPublishingFinish true
               -ArtifactsPublishingAdditionalParameters '${{ parameters.artifactsPublishingAdditionalParameters }}'
               -SymbolPublishingAdditionalParameters '${{ parameters.symbolPublishingAdditionalParameters }}'
-              -DefaultChannelsRequired ${{ parameters.defaultChannelsRequired }}
+              -DefaultChannelsRequired ${{ if eq(parameters.defaultChannelsRequired, true) }} $True ${{ else }} $False
