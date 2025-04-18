@@ -4526,6 +4526,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
+#if FEATURE_XML_SCHEMA_VALIDATION
         /// <summary>
         /// Figures out if the project needs to be validated against a schema.
         /// </summary>
@@ -4546,6 +4547,7 @@ namespace Microsoft.Build.CommandLine
 
             return schemaFile;
         }
+#endif
 
         /// <summary>
         /// Given an invalid ToolsVersion string and the collection of valid toolsets,

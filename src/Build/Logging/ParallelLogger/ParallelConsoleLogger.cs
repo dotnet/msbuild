@@ -1402,22 +1402,6 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Write message taking into account whether or not the prefix (timestamp and key) have already been written on the line
-        /// </summary>
-        private void WriteBasedOnPrefix(string nonNullMessage, bool prefixAlreadyWritten, int adjustedPrefixWidth)
-        {
-            if (prefixAlreadyWritten)
-            {
-                WriteHandler(nonNullMessage + Environment.NewLine);
-            }
-            else
-            {
-                // No prefix info has been written, indent the line to the proper location
-                WriteHandler(IndentString(nonNullMessage, adjustedPrefixWidth));
-            }
-        }
-
-        /// <summary>
         /// Will display the target started event which was deferred until the first visible message for the target is ready to be displayed
         /// </summary>
         private void DisplayDeferredTargetStartedEvent(BuildEventContext e)

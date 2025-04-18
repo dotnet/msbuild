@@ -1262,24 +1262,9 @@ namespace Microsoft.Build.Shared
             private const string MicrosoftSDKsRegistryKey = @"SOFTWARE\Microsoft\Microsoft SDKs";
 
             /// <summary>
-            /// The registry key of this .net framework, i.e. "SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" for .net v4.5.
-            /// </summary>
-            private readonly string _dotNetFrameworkRegistryKey;
-
-            /// <summary>
-            /// The name in registry to indicate that this .net framework is installed, i.e. "Install" for .net v4.5.
-            /// </summary>
-            private readonly string _dotNetFrameworkSetupRegistryInstalledName;
-
-            /// <summary>
             /// The key in registry to indicate the sdk tools folder, i.e. "WinSDK-NetFx40Tools-x86" for .net v4.5.
             /// </summary>
             private readonly string _dotNetFrameworkSdkRegistryToolsKey;
-
-            /// <summary>
-            /// The version of visual studio that shipped with this .net framework.
-            /// </summary>
-            private readonly Version _visualStudioVersion;
 
             /// <summary>
             /// Does this .net framework include MSBuild?
@@ -1298,9 +1283,24 @@ namespace Microsoft.Build.Shared
 
 #if FEATURE_WIN32_REGISTRY
             /// <summary>
-            /// Cached path of the corresponding windows sdk.
+            /// The registry key of this .net framework, i.e. "SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" for .net v4.5.
+            /// </summary>
+            private readonly string _dotNetFrameworkRegistryKey;
+
+            /// <summary>
+            /// The name in registry to indicate that this .net framework is installed, i.e. "Install" for .net v4.5.
+            /// </summary>
+            private readonly string _dotNetFrameworkSetupRegistryInstalledName;
+
+            /// <summary>
+            /// /// Cached path of the corresponding windows sdk.
             /// </summary>
             private string _pathToWindowsSdk;
+
+            /// <summary>
+            /// The version of visual studio that shipped with this .net framework.
+            /// </summary>
+            private readonly Version _visualStudioVersion;
 #endif
 
             /// <summary>
@@ -1319,15 +1319,18 @@ namespace Microsoft.Build.Shared
                 Version visualStudioVersion = null)
             {
                 this.Version = version;
-                this._visualStudioVersion = visualStudioVersion;
-                this._dotNetFrameworkRegistryKey = dotNetFrameworkRegistryKey;
-                this._dotNetFrameworkSetupRegistryInstalledName = dotNetFrameworkSetupRegistryInstalledName;
                 this.DotNetFrameworkFolderPrefix = dotNetFrameworkVersionFolderPrefix;
                 this._dotNetFrameworkSdkRegistryToolsKey = dotNetFrameworkSdkRegistryToolsKey;
                 this.DotNetFrameworkSdkRegistryInstallationFolderName = dotNetFrameworkSdkRegistryInstallationFolderName;
                 this._hasMsBuild = hasMSBuild;
                 this._pathsToDotNetFramework = new ConcurrentDictionary<DotNetFrameworkArchitecture, string>();
                 this._pathsToDotNetFrameworkSdkTools = new ConcurrentDictionary<Version, string>();
+
+#if FEATURE_WIN32_REGISTRY
+                this._dotNetFrameworkRegistryKey = dotNetFrameworkRegistryKey;
+                this._dotNetFrameworkSetupRegistryInstalledName = dotNetFrameworkSetupRegistryInstalledName;
+                this._visualStudioVersion = visualStudioVersion;
+#endif
             }
 
             /// <summary>

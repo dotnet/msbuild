@@ -1085,6 +1085,7 @@ namespace Microsoft.Build.Execution
                 _directMetadata.ImportProperties(metadata.Select(kvp => new ProjectMetadataInstance(kvp.Key, kvp.Value, allowItemSpecModifiers: true)));
             }
 
+#if FEATURE_APPDOMAIN
             /// <summary>
             /// Used to return metadata from another AppDomain. Can't use yield return because the
             /// generated state machine is not marked as [Serializable], so we need to allocate.
@@ -1106,6 +1107,7 @@ namespace Microsoft.Build.Execution
                 // Probably better to send the raw array across the wire even if it's another allocation.
                 return result.ToArray();
             }
+#endif
 
             private IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(ICopyOnWritePropertyDictionary<ProjectMetadataInstance> list)
             {

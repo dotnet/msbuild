@@ -2015,7 +2015,6 @@ namespace Microsoft.Build.Tasks
                 return result != null;
             }
         }
-#endif
 
         /// <summary>
         /// Turns the nicely justified block of base64 found in a resx into a byte array.
@@ -2046,6 +2045,7 @@ namespace Microsoft.Build.Tasks
                 return Convert.FromBase64String(text);
             }
         }
+#endif
 
         /// <summary>
         /// Make sure that OutputResources has 1 file name for each name in Sources.
@@ -2295,10 +2295,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private List<ITaskItem> _inFiles;
 
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// List of satellite input files to process.
         /// </summary>
         private List<ITaskItem> _satelliteInFiles;
+#endif
 
         /// <summary>
         /// List of output files to process.
@@ -2309,11 +2311,6 @@ namespace Microsoft.Build.Tasks
         /// Whether we are extracting ResW files from an assembly, instead of creating .resources files.
         /// </summary>
         private bool _extractResWFiles;
-
-        /// <summary>
-        /// Where to write extracted ResW files.
-        /// </summary>
-        private string _resWOutputDirectory;
 
         private bool _usePreserializedResources;
 
@@ -2402,7 +2399,9 @@ namespace Microsoft.Build.Tasks
             _logger = log;
             _assemblyFiles = assemblyFilesList;
             _inFiles = inputs;
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             _satelliteInFiles = satelliteInputs;
+#endif
             _outFiles = outputs;
             _useSourcePath = sourcePath;
             _stronglyTypedLanguage = language;
@@ -2413,7 +2412,6 @@ namespace Microsoft.Build.Tasks
             _stronglyTypedClassIsPublic = publicClass;
             _readers = new List<ReaderInfo>();
             _extractResWFiles = extractingResWFiles;
-            _resWOutputDirectory = resWOutputDirectory;
             _portableLibraryCacheInfo = new List<ResGenDependencies.PortableLibraryFile>();
             _usePreserializedResources = usePreserializedResources;
             _logWarningForBinaryFormatter = logWarningForBinaryFormatter;

@@ -111,7 +111,7 @@ namespace Microsoft.Build.BackEnd
                     RecursiveAccumulateConfigurationTimes(rootRequest, accumulatedTimeByConfiguration);
 
                     List<KeyValuePair<int, double>> configurationsInOrder = new(accumulatedTimeByConfiguration);
-                    configurationsInOrder.Sort((KeyValuePair<int, double> l, KeyValuePair<int, double> r) => Comparer<int>.Default.Compare(l.Key, r.Key));
+                    configurationsInOrder.Sort((l, r) => Comparer<int>.Default.Compare(l.Key, r.Key));
                     foreach (KeyValuePair<int, double> configuration in configurationsInOrder)
                     {
                         file.WriteLine(String.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", configuration.Key, configuration.Value, _configCache[configuration.Key].ProjectFullPath));

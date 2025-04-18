@@ -508,6 +508,7 @@ namespace Microsoft.Build.Utilities
             _metadata.SetItems(metadata.Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value ?? string.Empty)));
         }
 
+#if FEATURE_APPDOMAIN
         private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager()
         {
             if (_metadata == null)
@@ -526,6 +527,7 @@ namespace Microsoft.Build.Utilities
 
             return result;
         }
+#endif
 
         private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataLazy()
         {

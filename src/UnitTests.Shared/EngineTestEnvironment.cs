@@ -25,9 +25,9 @@ namespace Microsoft.Build.UnitTests
     public partial class TestEnvironment
     {
         // reset the default build manager and the state it might have accumulated from other tests
-#pragma warning disable CA1823 // Avoid unused private fields
+#pragma warning disable CA1823, IDE0052 // Avoid unused private fields
         private object _resetBuildManager = new ResetDefaultBuildManager();
-#pragma warning restore CA1823 // Avoid unused private fields
+#pragma warning restore CA1823, IDE0052 // Avoid unused private fields
 
         private sealed class ResetDefaultBuildManager
         {

@@ -881,23 +881,6 @@ namespace Microsoft.Build.BackEnd
                 _process.KillTree(timeoutMilliseconds: 5000);
             }
 
-#if FEATURE_APM
-            /// <summary>
-            /// Completes the asynchronous packet write to the node.
-            /// </summary>
-            private void PacketWriteComplete(IAsyncResult result)
-            {
-                try
-                {
-                    _serverToClientStream.EndWrite(result);
-                }
-                catch (IOException)
-                {
-                    // Do nothing here because any exception will be caught by the async read handler
-                }
-            }
-#endif
-
             private bool ProcessHeaderBytesRead(int bytesRead)
             {
                 if (bytesRead != _headerByte.Length)

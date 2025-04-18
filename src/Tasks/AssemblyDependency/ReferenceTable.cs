@@ -92,10 +92,6 @@ namespace Microsoft.Build.Tasks
         private readonly GetAssemblyMetadata _getAssemblyMetadata;
         /// <summary>Delegate used to get the image runtime version of a file</summary>
         private readonly GetAssemblyRuntimeVersion _getRuntimeVersion;
-#if FEATURE_WIN32_REGISTRY
-        /// <summary> Delegate to get the base registry key for AssemblyFoldersEx</summary>
-        private OpenBaseKey _openBaseKey;
-#endif
         /// <summary>Version of the runtime we are targeting</summary>
         private readonly Version _targetedRuntimeVersion;
 
@@ -320,9 +316,6 @@ namespace Microsoft.Build.Tasks
             _getRuntimeVersion = getRuntimeVersion;
             _projectTargetFramework = projectTargetFramework;
             _targetedRuntimeVersion = targetedRuntimeVersion;
-#if FEATURE_WIN32_REGISTRY
-            _openBaseKey = openBaseKey;
-#endif
             _targetFrameworkMoniker = targetFrameworkMoniker;
             _latestTargetFrameworkDirectories = latestTargetFrameworkDirectories;
             _copyLocalDependenciesWhenParentReferenceInGac = copyLocalDependenciesWhenParentReferenceInGac;

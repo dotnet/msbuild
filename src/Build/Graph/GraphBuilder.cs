@@ -662,8 +662,10 @@ namespace Microsoft.Build.Graph
             {
                 ReferenceItems.AddOrUpdate(
                     key,
+#pragma warning disable IDE0350
                     addValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance referenceItem) => referenceItem,
                     updateValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance existingItem, ProjectItemInstance newItem) =>
+#pragma warning restore IDE0350
                     {
                         string existingTargetsMetadata = existingItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
                         string newTargetsMetadata = newItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);

@@ -171,10 +171,8 @@ namespace Microsoft.Build.Tasks
                 ErrorUtilities.VerifyThrowArgumentNull(translator);
 
                 translator.Translate(ref lastModified);
-                translator.Translate(ref assemblyName,
-                    (ITranslator t) => new AssemblyNameExtension(t));
-                translator.TranslateArray(ref dependencies,
-                    (ITranslator t) => new AssemblyNameExtension(t));
+                translator.Translate(ref assemblyName, (t) => new AssemblyNameExtension(t));
+                translator.TranslateArray(ref dependencies, (t) => new AssemblyNameExtension(t));
                 translator.Translate(ref scatterFiles);
                 translator.Translate(ref runtimeVersion);
                 translator.Translate(ref frameworkName);
@@ -268,7 +266,7 @@ namespace Microsoft.Build.Tasks
             translator.TranslateDictionary(
                 ref (translator.Mode == TranslationDirection.WriteToStream) ? ref instanceLocalOutgoingFileStateCache : ref instanceLocalFileStateCache,
                 StringComparer.OrdinalIgnoreCase,
-                (ITranslator t) => new FileState(t));
+                (t) => new FileState(t));
 
             // IsDirty should be false for either direction. Either this cache was brought
             // up-to-date with the on-disk cache or vice versa. Either way, they agree.
