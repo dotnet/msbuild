@@ -6,7 +6,7 @@ param(
   [Parameter(Mandatory=$true)][string] $WaitPublishingFinish,
   [Parameter(Mandatory=$false)][string] $ArtifactsPublishingAdditionalParameters,
   [Parameter(Mandatory=$false)][string] $SymbolPublishingAdditionalParameters,
-  [Parameter(Mandatory=$false)][bool] $DefaultChannelsRequired
+  [Parameter(Mandatory=$false)][string] $DefaultChannelsRequired
 )
 
 try {
@@ -35,7 +35,7 @@ try {
     $optionalParams.Add("--no-wait") | Out-Null
   }
 
-  if ($DefaultChannelsRequired) {
+  if ("true" -eq $DefaultChannelsRequired) {
     $optionalParams.Add("--default-channels-required") | Out-Null
     $optionalParams.Add($true) | Out-Null
   }
