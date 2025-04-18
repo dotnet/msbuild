@@ -361,6 +361,7 @@
     <Compile Include="BackEnd\Components\Communications\NodeInfo.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderInProc.cs" />
+    <Compile Include="BackEnd\Components\Communications\RarNodeLauncher.cs" />
     <Compile Include="BackEnd\Components\IBuildComponent.cs" />
     <Compile Include="BackEnd\Components\IBuildComponentHost.cs" />
     <Compile Include="BackEnd\Components\Scheduler\IScheduler.cs" />

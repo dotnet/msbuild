@@ -34,6 +34,20 @@
     <!-- Binary serialization by ITranslatable -->
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
+
+    <!-- Node communication -->
+    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
+    <Compile Include="..\Shared\INodeEndpoint.cs" />
+    <Compile Include="..\Shared\INodePacket.cs" />
+    <Compile Include="..\Shared\INodePacketFactory.cs" />
+    <Compile Include="..\Shared\INodePacketHandler.cs" />
+    <Compile Include="..\Shared\NodeBuildComplete.cs" />
+    <Compile Include="..\Shared\NamedPipeUtil.cs" />
+    <Compile Include="..\Shared\NodePacketFactory.cs" />
+    <Compile Include="..\Shared\NodePipeBase.cs" />
+    <Compile Include="..\Shared\NodePipeClient.cs" />
+    <Compile Include="..\Shared\NodePipeServer.cs" />
+    <Compile Include="..\Shared\NodeShutdown.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -183,6 +197,12 @@
     <Compile Include="AssemblyDependency\UnificationVersion.cs" />
     <Compile Include="AssemblyDependency\UnifiedAssemblyName.cs" />
     <Compile Include="AssemblyDependency\WarnOrErrorOnTargetArchitectureMismatchBehavior.cs" />
+    <Compile Include="AssemblyDependency\Node\OutOfProcRarClient.cs" />
+    <Compile Include="AssemblyDependency\Node\OutOfProcRarNode.cs" />
+    <Compile Include="AssemblyDependency\Node\OutOfProcRarNodeEndpoint.cs" />
+    <Compile Include="AssemblyDependency\Node\RarNodeExecuteRequest.cs" />
+    <Compile Include="AssemblyDependency\Node\RarNodeExecuteResponse.cs" />
+    <Compile Include="AssemblyDependency\Node\RarNodeShutdownReason.cs" />
     <Compile Include="AssemblyFolder.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyRemapping.cs" />
@@ -676,6 +696,7 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="Microsoft.Win32.Registry" />
     <PackageReference Include="System.Reflection.Metadata" />
+    <PackageReference Include="System.Threading.Channels" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
