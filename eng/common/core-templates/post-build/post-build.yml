@@ -56,7 +56,7 @@ parameters:
       downloadArtifacts: true
 
   - name: defaultChannelsRequired
-    displayName: Requires existence of enabled default channel association for a build branch.
+    displayName: Fail the build if there are no default channel(s) registrations for the current build
     type: boolean
     default: false
 
