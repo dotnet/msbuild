@@ -55,7 +55,7 @@ parameters:
       artifactNames: ''
       downloadArtifacts: true
 
-  - name: defaultChannelsRequired
+  - name: requireDefaultChannels
     displayName: Fail the build if there are no default channel(s) registrations for the current build
     type: boolean
     default: false
@@ -319,4 +319,4 @@ stages:
               -WaitPublishingFinish true
               -ArtifactsPublishingAdditionalParameters '${{ parameters.artifactsPublishingAdditionalParameters }}'
               -SymbolPublishingAdditionalParameters '${{ parameters.symbolPublishingAdditionalParameters }}'
-              -DefaultChannelsRequired ${{ parameters.defaultChannelsRequired }}
+              -RequireDefaultChannels ${{ parameters.requireDefaultChannels }}
