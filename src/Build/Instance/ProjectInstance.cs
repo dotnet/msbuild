@@ -3342,10 +3342,10 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
+            CopyOnWritePropertyDictionary directMetadata = null;
             if (item.DirectMetadata != null)
             {
-                directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                directMetadata = new CopyOnWritePropertyDictionary();
 
                 IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
                 directMetadata.ImportProperties(projectMetadataInstances);
@@ -3403,7 +3403,7 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                    directMetadata = new CopyOnWritePropertyDictionary();
 
                     IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
                     directMetadata.ImportProperties(projectMetadataInstances);

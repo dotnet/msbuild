@@ -134,6 +134,8 @@ namespace Microsoft.Build.Execution
             { return Name; }
         }
 
+        internal string Key => ((IKeyed)this).Key;
+
         /// <summary>
         /// Implementation of IValued
         /// </summary>
@@ -144,6 +146,8 @@ namespace Microsoft.Build.Execution
             get
             { return EvaluatedValueEscaped; }
         }
+
+        internal string EscapedValue => ((IValued)this).EscapedValue;
 
         /// <summary>
         /// Evaluated and escaped value of the metadata.
@@ -185,6 +189,10 @@ namespace Microsoft.Build.Execution
 
         #endregion
 
+        public override bool Equals(object other) => other is ProjectMetadataInstance instance && Equals(instance);
+
+        public override int GetHashCode() => StringComparer.OrdinalIgnoreCase.GetHashCode(_name) ^ _escapedValue.GetHashCode();
+
         #region IEquatable<ProjectMetadataInstance> Members
 
         /// <summary>
@@ -192,7 +200,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="other">The other metadata</param>
         /// <returns>True if they are equivalent, false otherwise.</returns>
-        bool IEquatable<ProjectMetadataInstance>.Equals(ProjectMetadataInstance other)
+        public bool Equals(ProjectMetadataInstance other)
         {
             if (Object.ReferenceEquals(this, other))
             {
