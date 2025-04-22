@@ -630,6 +630,11 @@
         <target state="translated">Metody {0} nie można wywołać przy użyciu kolekcji zawierającej nazwy docelowe o wartości null lub puste.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="new">Loading telemetry libraries failed with exception: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">Właściwość danych wyjściowych: </target>

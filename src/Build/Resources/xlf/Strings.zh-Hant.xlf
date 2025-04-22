@@ -630,6 +630,11 @@
         <target state="translated">無法使用內含 null 或空白目標名稱的集合呼叫方法 {0}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="new">Loading telemetry libraries failed with exception: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">輸出屬性: </target>
