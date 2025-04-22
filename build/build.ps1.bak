@@ -353,7 +353,7 @@ function AddLogCmd([string] $logName, [string[]] $extraArgs)
 
     # When running under CI, also create a text log, so it can be viewed in the Jenkins UI
     if ($ci) {
-      $extraArgs = $extraArgs + "/flp:Verbosity=diag;LogFile=`"$LogDir\$logName.log`""
+      $extraArgs = $extraArgs + ("/flp:Verbosity=diag;LogFile=" + '"' + (Join-Path $LogDir "$logName.log") + '"')
     }
   }
 

@@ -9,10 +9,7 @@
     <RestoreSources>$(DotNetRestoreSources)</RestoreSources>
     <RestoreSources  Condition="'$(DotNetBuildOffline)' != 'true'">
         $(RestoreSources);
-        https://dotnet.myget.org/F/roslyn/api/v3/index.json;
-        https://dotnet.myget.org/F/nuget-build/api/v3/index.json;
-        https://dotnet.myget.org/F/roslyn-tools/api/v3/index.json;
-        https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json
+        https://pkgs.dev.azure.com/dnceng/public/_packaging/myget-legacy/nuget/v3/index.json;https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-public/nuget/v3/index.json
     </RestoreSources>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
@@ -68,5 +65,8 @@
     <MicrosoftExtensionsDependencyModelVersion>2.1.0</MicrosoftExtensionsDependencyModelVersion>
     <ShouldlyVersion>3.0.0</ShouldlyVersion>
   </PropertyGroup>
+
+  <!-- This target was added in the newer version of the RoslynTools.RepoToolset package. For current branch we should override it to avoid issues with the execution. -->
+  <Target Name="GetVsixVersion" />
 
 </Project>

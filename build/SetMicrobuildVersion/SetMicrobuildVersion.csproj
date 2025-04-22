@@ -1,22 +1,15 @@
-<Project DefaultTargets="GetBuildVersion">
-
-  <Import Project="..\Versions.props" />
+<Project Sdk="Microsoft.NET.Sdk" DefaultTargets="GetBuildVersion">
+  <Import Project="..\Versions.props"/>
 
   <PropertyGroup>
+    <TargetFramework>net46</TargetFramework>
     <ImportDirectoryBuildProps>false</ImportDirectoryBuildProps>
     <ImportDirectoryBuildTargets>false</ImportDirectoryBuildTargets>
+
   </PropertyGroup>
 
-   <Import Project="Sdk.props" Sdk="RoslynTools.RepoToolset" />
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
+  </ItemGroup>
 
-   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
-    <RestoreSources>$(RestoreSources);https://api.nuget.org/v3/index.json</RestoreSources>
-  </PropertyGroup>
-
-   <ItemGroup>
-      <PackageReference Include="Nerdbank.GitVersioning" Version="$(GitVersioningVersion)" PrivateAssets="All" />
-   </ItemGroup>
-
-   <Import Project="Sdk.targets" Sdk="RoslynTools.RepoToolset" />
 </Project>
