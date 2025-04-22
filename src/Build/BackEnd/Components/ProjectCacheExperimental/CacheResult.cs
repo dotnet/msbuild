@@ -11,9 +11,11 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {
+#pragma warning disable CS0618  // suppress “obsolete” warnings in this file due to this referencing other Experimental.ProjectCache types
     /// <summary>
     /// Result types that a plugin can return for a given build request.
     /// </summary>
+    [Obsolete("This class is moved to Microsoft.Build.ProjectCache namespace.", false)]
     public enum CacheResultType
     {
         /// <summary>

@@ -29,7 +29,9 @@ namespace Microsoft.Build.BackEnd
                 new(typeof(InternalLoggerException), (msg, inner) => new InternalLoggerException(msg, inner)),
                 new(typeof(InvalidProjectFileException), (msg, inner) => new InvalidProjectFileException(msg, inner)),
                 new(typeof(InvalidToolsetDefinitionException), (msg, inner) => new InvalidToolsetDefinitionException(msg, inner)),
+#pragma warning disable CS0618  // this class has to handle the obsolete exception until they're removed from the codebase
                 new(typeof(Experimental.ProjectCache.ProjectCacheException), (msg, inner) => new Experimental.ProjectCache.ProjectCacheException(msg, inner)),
+#pragma warning restore CS0618
                 new(typeof(ProjectCache.ProjectCacheException), (msg, inner) => new ProjectCache.ProjectCacheException(msg, inner)),
                 new(typeof(InternalErrorException), InternalErrorException.CreateFromRemote),
                 new(typeof(LoggerException), (msg, inner) => new LoggerException(msg, inner)),

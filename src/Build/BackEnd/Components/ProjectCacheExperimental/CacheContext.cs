@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Graph;
@@ -8,6 +9,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {
+#pragma warning disable CS0618  // suppress “obsolete” warnings in this file due to this referencing other Experimental.ProjectCache types
     /// <summary>
     ///     Holds various information about the current msbuild execution that the cache might use.
     ///     The cache may need to know about the top level projects or the entire project graph, so MSBuild
@@ -15,6 +17,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     ///     and the plugin can construct its own graph based on those.
     ///     So either <see cref="Graph" />is null, or <see cref="GraphEntryPoints" /> is null. But not both.
     /// </summary>
+    [Obsolete("This class is moved to Microsoft.Build.ProjectCache namespace.", false)]
     public class CacheContext
     {
         public IReadOnlyDictionary<string, string> PluginSettings { get; }

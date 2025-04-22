@@ -1,10 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {
+#pragma warning disable CS0618  // suppress “obsolete” warnings in this file due to this referencing other Experimental.ProjectCache types
+    [Obsolete("This class is moved to Microsoft.Build.ProjectCache namespace.", false)]
     public class ProjectCacheDescriptor
     {
         private ProjectCacheDescriptor(
