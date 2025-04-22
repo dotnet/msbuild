@@ -779,7 +779,6 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void CancelAllSubmissions()
         {
-            // Log the cancellation started event to ETL traces
             MSBuildEventSource.Log.CancelSubmissionsStart();
             CancelAllSubmissions(true);
         }
