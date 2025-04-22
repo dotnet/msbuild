@@ -55,7 +55,7 @@ fi
 
 if [[ $build_stage1 == true ]];
 then
-	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties || exit $?
+	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci --test --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties || exit $?
 fi
 
 bootstrapRoot="$Stage1Dir/bin/bootstrap"
@@ -98,4 +98,4 @@ export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
 # - Do run tests
 # - Don't try to create a bootstrap deployment
-. "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
+# . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties

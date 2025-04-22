@@ -7,6 +7,8 @@
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
     <MicroBuildPluginsSwixBuildVersion>1.0.672</MicroBuildPluginsSwixBuildVersion>
@@ -48,4 +50,6 @@
       <FileVersion>$(VersionPrefix).$(FileVersion.Split('.')[3])</FileVersion>
     </PropertyGroup>
   </Target>
+
+  <Import Project=".\DotNetBuild.props" />
 </Project>

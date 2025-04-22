@@ -37,6 +37,7 @@ jobs:
     - name: _BuildConfig
       value: ${{ parameters.configuration }}
     - group: Publish-Build-Assets
+    - group: AzureDevOps-Artifact-Feeds-Pats
     - name: runCodesignValidationInjection
       value: false
 
@@ -47,26 +48,38 @@ jobs:
       inputs:
         artifactName: AssetManifests
         downloadPath: '$(Build.StagingDirectory)/Download'
+        checkDownloadedFiles: true
       condition: ${{ parameters.condition }}
       continueOnError: ${{ parameters.continueOnError }}
-    
-    - ${{ if and(eq(parameters.runAsPublic, 'false'), ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-      - task: NuGetAuthenticate@0
 
-    - task: PowerShell@2
+    - ${{ if and(eq(parameters.runAsPublic, 'false'), ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+      - task: NuGetAuthenticate@1
+
+      - task: PowerShell@2 
+        displayName: Enable cross-org NuGet feed authentication 
+        inputs: 
+          filePath: $(Build.SourcesDirectory)/eng/common/enable-cross-org-publishing.ps1 
+          arguments: -token $(dn-bot-all-orgs-artifact-feeds-rw) 
+
+    - task: AzureCLI@2
       displayName: Publish Build Assets
+      condition: ${{ parameters.condition }}
+      continueOnError: ${{ parameters.continueOnError }}
       inputs:
-        filePath: eng\common\sdk-task.ps1
-        arguments: -task PublishBuildAssets -restore -msbuildEngine dotnet
+        azureSubscription: "Darc: Maestro Production"
+        scriptType: ps
+        scriptLocation: scriptPath
+        scriptPath: eng\common\sdk-task.ps1
+        arguments: >
+          -task PublishBuildAssets
+          -restore
+          -msbuildEngine dotnet
           /p:ManifestsPath='$(Build.StagingDirectory)/Download/AssetManifests'
-          /p:BuildAssetRegistryToken=$(MaestroAccessToken)
-          /p:MaestroApiEndpoint=https://maestro-prod.westus2.cloudapp.azure.com
+          /p:MaestroApiEndpoint=https://maestro.dot.net
           /p:PublishUsingPipelines=${{ parameters.publishUsingPipelines }}
           /p:Configuration=$(_BuildConfig)
           /p:OfficialBuildId=$(Build.BuildNumber)
-      condition: ${{ parameters.condition }}
-      continueOnError: ${{ parameters.continueOnError }}
-    
+
     - task: powershell@2
       displayName: Create ReleaseConfigs Artifact
       inputs:
@@ -75,15 +88,39 @@ jobs:
           Add-Content -Path "$(Build.StagingDirectory)/ReleaseConfigs.txt" -Value $(BARBuildId)
           Add-Content -Path "$(Build.StagingDirectory)/ReleaseConfigs.txt" -Value "$(DefaultChannels)"
           Add-Content -Path "$(Build.StagingDirectory)/ReleaseConfigs.txt" -Value $(IsStableBuild)
-    
+
     - task: PublishBuildArtifacts@1
       displayName: Publish ReleaseConfigs Artifact
       inputs:
         PathtoPublish: '$(Build.StagingDirectory)/ReleaseConfigs.txt'
         PublishLocation: Container
         ArtifactName: ReleaseConfigs
-    
+
+    - task: powershell@2
+      displayName: Check if SymbolPublishingExclusionsFile.txt exists
+      inputs:
+        targetType: inline
+        script: |
+          $symbolExclusionfile = "$(Build.SourcesDirectory)/eng/SymbolPublishingExclusionsFile.txt"
+          if(Test-Path -Path $symbolExclusionfile)
+          {
+            Write-Host "SymbolExclusionFile exists"
+            Write-Host "##vso[task.setvariable variable=SymbolExclusionFile]true"
+          }
+          else{
+           Write-Host "Symbols Exclusion file does not exists"
+           Write-Host "##vso[task.setvariable variable=SymbolExclusionFile]false"
+          }
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish SymbolPublishingExclusionsFile Artifact
+      condition: eq(variables['SymbolExclusionFile'], 'true')
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)/eng/SymbolPublishingExclusionsFile.txt'
+        PublishLocation: Container
+        ArtifactName: ReleaseConfigs
+        
     - ${{ if eq(parameters.enablePublishBuildArtifacts, 'true') }}:
       - template: /eng/common/templates/steps/publish-logs.yml
         parameters:
-          JobLabel: 'Publish_Artifacts_Logs'     
+          JobLabel: 'Publish_Artifacts_Logs'

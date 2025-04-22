@@ -1,0 +1,261 @@
+<UsageData>
+  <Usages>
+    <Usage Id="BenchmarkDotNet" Version="0.12.1" IsDirectDependency="true" />
+    <Usage Id="BenchmarkDotNet.Annotations" Version="0.12.1" />
+    <Usage Id="CommandLineParser" Version="2.4.3" />
+    <Usage Id="Iced" Version="1.4.0" />
+    <Usage Id="jnm2.ReferenceAssemblies.net35" Version="1.0.1" IsDirectDependency="true" />
+    <Usage Id="Microsoft.AspNetCore.App.Runtime.win-x64" Version="5.0.17" />
+    <Usage Id="Microsoft.AspNetCore.App.Runtime.win-x86" Version="5.0.17" />
+    <Usage Id="Microsoft.Build" Version="14.3.0" IsDirectDependency="true" />
+    <Usage Id="Microsoft.Build.CentralPackageVersions" Version="2.0.1" />
+    <Usage Id="Microsoft.Build.Framework" Version="14.3.0" IsDirectDependency="true" />
+    <Usage Id="Microsoft.Build.Framework" Version="15.5.180" IsDirectDependency="true" />
+    <Usage Id="Microsoft.Build.NuGetSdkResolver" Version="5.11.1-rc.5" IsDirectDependency="true" />
+    <Usage Id="Microsoft.Build.Tasks.Git" Version="1.1.0-beta-21480-02" />
+    <Usage Id="Microsoft.Build.Utilities.Core" Version="14.3.0" IsDirectDependency="true" />
+    <Usage Id="Microsoft.Build.Utilities.Core" Version="15.5.180" IsDirectDependency="true" />
+    <Usage Id="Microsoft.CodeAnalysis.Analyzers" Version="2.6.1" />
+    <Usage Id="Microsoft.CodeAnalysis.Common" Version="2.10.0" />
+    <Usage Id="Microsoft.CodeAnalysis.CSharp" Version="2.10.0" />
+    <Usage Id="Microsoft.CSharp" Version="4.0.1" />
+    <Usage Id="Microsoft.CSharp" Version="4.3.0" />
+    <Usage Id="Microsoft.Diagnostics.NETCore.Client" Version="0.2.61701" />
+    <Usage Id="Microsoft.Diagnostics.Runtime" Version="1.1.57604" />
+    <Usage Id="Microsoft.Diagnostics.Tracing.TraceEvent" Version="2.0.49" />
+    <Usage Id="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.24623.4" />
+    <Usage Id="Microsoft.DotNet.PlatformAbstractions" Version="2.1.0" />
+    <Usage Id="Microsoft.DotNet.SourceBuild.Tasks" Version="6.0.0-beta.24623.4" IsDirectDependency="true" IsAutoReferenced="true" />
+    <Usage Id="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.21431.1" IsDirectDependency="true" IsAutoReferenced="true" />
+    <Usage Id="Microsoft.Extensions.DependencyModel" Version="5.0.0" IsDirectDependency="true" />
+    <Usage Id="Microsoft.Net.Compilers.Toolset" Version="3.9.0-2.20574.26" IsDirectDependency="true" IsAutoReferenced="true" />
+    <Usage Id="Microsoft.NETCore.App.Host.win-x64" Version="5.0.17" />
+    <Usage Id="Microsoft.NETCore.App.Host.win-x86" Version="5.0.17" />
+    <Usage Id="Microsoft.NETCore.App.Runtime.win-x64" Version="5.0.17" />
+    <Usage Id="Microsoft.NETCore.App.Runtime.win-x86" Version="5.0.17" />
+    <Usage Id="Microsoft.NETCore.Platforms" Version="1.0.1" />
+    <Usage Id="Microsoft.NETCore.Platforms" Version="1.1.0" />
+    <Usage Id="Microsoft.NETCore.Platforms" Version="2.0.0" />
+    <Usage Id="Microsoft.NETCore.Platforms" Version="3.1.0" />
+    <Usage Id="Microsoft.NETCore.Targets" Version="1.0.1" />
+    <Usage Id="Microsoft.NETCore.Targets" Version="1.1.0" />
+    <Usage Id="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" IsDirectDependency="true" />
+    <Usage Id="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" IsDirectDependency="true" IsAutoReferenced="true" />
+    <Usage Id="Microsoft.NETFramework.ReferenceAssemblies.net35" Version="1.0.2" />
+    <Usage Id="Microsoft.NETFramework.ReferenceAssemblies.net45" Version="1.0.2" />
+    <Usage Id="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.2" />
+    <Usage Id="Microsoft.SourceLink.AzureRepos.Git" Version="1.1.0-beta-21480-02" IsDirectDependency="true" IsAutoReferenced="true" />
+    <Usage Id="Microsoft.SourceLink.Common" Version="1.1.0-beta-21480-02" />
+    <Usage Id="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-21480-02" IsDirectDependency="true" IsAutoReferenced="true" />
+    <Usage Id="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" IsDirectDependency="true" />
+    <Usage Id="Microsoft.Win32.Primitives" Version="4.0.1" />
+    <Usage Id="Microsoft.Win32.Primitives" Version="4.3.0" />
+    <Usage Id="Microsoft.Win32.Registry" Version="4.0.0" />
+    <Usage Id="Microsoft.Win32.Registry" Version="4.3.0" />
+    <Usage Id="Microsoft.Win32.Registry" Version="4.5.0" />
+    <Usage Id="Microsoft.Win32.SystemEvents" Version="4.7.0" />
+    <Usage Id="NETStandard.Library" Version="1.6.1" IsDirectDependency="true" IsAutoReferenced="true" />
+    <Usage Id="NETStandard.Library" Version="2.0.3" IsDirectDependency="true" IsAutoReferenced="true" />
+    <Usage Id="Newtonsoft.Json" Version="9.0.1" />
+    <Usage Id="NuGet.Build.Tasks" Version="5.11.1-rc.5" IsDirectDependency="true" />
+    <Usage Id="NuGet.Commands" Version="5.11.1-rc.5" />
+    <Usage Id="NuGet.Common" Version="5.11.1-rc.5" />
+    <Usage Id="NuGet.Configuration" Version="5.11.1-rc.5" />
+    <Usage Id="NuGet.Credentials" Version="5.11.1-rc.5" />
+    <Usage Id="NuGet.DependencyResolver.Core" Version="5.11.1-rc.5" />
+    <Usage Id="NuGet.Frameworks" Version="5.11.1-rc.5" />
+    <Usage Id="NuGet.LibraryModel" Version="5.11.1-rc.5" />
+    <Usage Id="NuGet.Packaging" Version="5.11.1-rc.5" />
+    <Usage Id="NuGet.ProjectModel" Version="5.11.1-rc.5" />
+    <Usage Id="NuGet.Protocol" Version="5.11.1-rc.5" />
+    <Usage Id="NuGet.Versioning" Version="5.11.1-rc.5" />
+    <Usage Id="Perfolizer" Version="0.2.1" />
+    <Usage Id="runtime.any.System.Collections" Version="4.3.0" />
+    <Usage Id="runtime.any.System.Globalization" Version="4.3.0" />
+    <Usage Id="runtime.any.System.IO" Version="4.3.0" />
+    <Usage Id="runtime.any.System.Reflection" Version="4.3.0" />
+    <Usage Id="runtime.any.System.Reflection.Primitives" Version="4.3.0" />
+    <Usage Id="runtime.any.System.Resources.ResourceManager" Version="4.3.0" />
+    <Usage Id="runtime.any.System.Runtime" Version="4.3.0" />
+    <Usage Id="runtime.any.System.Runtime.Handles" Version="4.3.0" />
+    <Usage Id="runtime.any.System.Runtime.InteropServices" Version="4.3.0" />
+    <Usage Id="runtime.any.System.Text.Encoding" Version="4.3.0" />
+    <Usage Id="runtime.any.System.Threading.Tasks" Version="4.3.0" />
+    <Usage Id="runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl" Version="4.3.0" />
+    <Usage Id="runtime.fedora.23-x64.runtime.native.System.Security.Cryptography.OpenSsl" Version="4.3.0" />
+    <Usage Id="runtime.fedora.24-x64.runtime.native.System.Security.Cryptography.OpenSsl" Version="4.3.0" />
+    <Usage Id="runtime.native.System" Version="4.0.0" />
+    <Usage Id="runtime.native.System" Version="4.3.0" />
+    <Usage Id="runtime.native.System.IO.Compression" Version="4.3.0" />
+    <Usage Id="runtime.native.System.Net.Http" Version="4.3.0" />
+    <Usage Id="runtime.native.System.Security.Cryptography.Apple" Version="4.3.0" />
+    <Usage Id="runtime.native.System.Security.Cryptography.OpenSsl" Version="4.3.0" />
+    <Usage Id="runtime.opensuse.13.2-x64.runtime.native.System.Security.Cryptography.OpenSsl" Version="4.3.0" />
+    <Usage Id="runtime.opensuse.42.1-x64.runtime.native.System.Security.Cryptography.OpenSsl" Version="4.3.0" />
+    <Usage Id="runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.Apple" Version="4.3.0" />
+    <Usage Id="runtime.osx.10.10-x64.runtime.native.System.Security.Cryptography.OpenSsl" Version="4.3.0" />
+    <Usage Id="runtime.rhel.7-x64.runtime.native.System.Security.Cryptography.OpenSsl" Version="4.3.0" />
+    <Usage Id="runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography.OpenSsl" Version="4.3.0" />
+    <Usage Id="runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography.OpenSsl" Version="4.3.0" />
+    <Usage Id="runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography.OpenSsl" Version="4.3.0" />
+    <Usage Id="runtime.win.System.Runtime.Extensions" Version="4.3.0" />
+    <Usage Id="runtime.win7.System.Private.Uri" Version="4.3.0" />
+    <Usage Id="Shouldly" Version="3.0.0" IsDirectDependency="true" />
+    <Usage Id="System.AppContext" Version="4.1.0" />
+    <Usage Id="System.AppContext" Version="4.3.0" />
+    <Usage Id="System.Buffers" Version="4.3.0" />
+    <Usage Id="System.Buffers" Version="4.4.0" />
+    <Usage Id="System.Buffers" Version="4.5.0" />
+    <Usage Id="System.Buffers" Version="4.5.1" />
+    <Usage Id="System.CodeDom" Version="4.4.0" />
+    <Usage Id="System.CodeDom" Version="4.5.0" />
+    <Usage Id="System.Collections" Version="4.0.11" />
+    <Usage Id="System.Collections" Version="4.3.0" />
+    <Usage Id="System.Collections.Concurrent" Version="4.0.12" />
+    <Usage Id="System.Collections.Concurrent" Version="4.3.0" />
+    <Usage Id="System.Collections.Immutable" Version="1.2.0" />
+    <Usage Id="System.Collections.Immutable" Version="1.5.0" />
+    <Usage Id="System.Collections.Immutable" Version="5.0.0" />
+    <Usage Id="System.Collections.NonGeneric" Version="4.0.1" />
+    <Usage Id="System.Collections.Specialized" Version="4.0.1" />
+    <Usage Id="System.Configuration.ConfigurationManager" Version="4.7.0" />
+    <Usage Id="System.Console" Version="4.0.0" />
+    <Usage Id="System.Console" Version="4.3.0" />
+    <Usage Id="System.Diagnostics.Debug" Version="4.0.11" />
+    <Usage Id="System.Diagnostics.Debug" Version="4.3.0" />
+    <Usage Id="System.Diagnostics.DiagnosticSource" Version="4.3.0" />
+    <Usage Id="System.Diagnostics.FileVersionInfo" Version="4.3.0" />
+    <Usage Id="System.Diagnostics.Process" Version="4.1.0" />
+    <Usage Id="System.Diagnostics.StackTrace" Version="4.3.0" />
+    <Usage Id="System.Diagnostics.Tools" Version="4.0.1" />
+    <Usage Id="System.Diagnostics.Tools" Version="4.3.0" />
+    <Usage Id="System.Diagnostics.TraceSource" Version="4.0.0" />
+    <Usage Id="System.Diagnostics.Tracing" Version="4.1.0" />
+    <Usage Id="System.Diagnostics.Tracing" Version="4.3.0" />
+    <Usage Id="System.Drawing.Common" Version="4.7.0" />
+    <Usage Id="System.Dynamic.Runtime" Version="4.0.11" />
+    <Usage Id="System.Dynamic.Runtime" Version="4.3.0" />
+    <Usage Id="System.Formats.Asn1" Version="5.0.0" />
+    <Usage Id="System.Globalization" Version="4.0.11" />
+    <Usage Id="System.Globalization" Version="4.3.0" />
+    <Usage Id="System.Globalization.Calendars" Version="4.3.0" />
+    <Usage Id="System.Globalization.Extensions" Version="4.0.1" />
+    <Usage Id="System.Globalization.Extensions" Version="4.3.0" />
+    <Usage Id="System.IO" Version="4.1.0" />
+    <Usage Id="System.IO" Version="4.3.0" />
+    <Usage Id="System.IO.Compression" Version="4.3.0" />
+    <Usage Id="System.IO.Compression.ZipFile" Version="4.3.0" />
+    <Usage Id="System.IO.FileSystem" Version="4.0.1" />
+    <Usage Id="System.IO.FileSystem" Version="4.3.0" />
+    <Usage Id="System.IO.FileSystem.Primitives" Version="4.0.1" />
+    <Usage Id="System.IO.FileSystem.Primitives" Version="4.3.0" />
+    <Usage Id="System.Linq" Version="4.1.0" />
+    <Usage Id="System.Linq" Version="4.3.0" />
+    <Usage Id="System.Linq.Expressions" Version="4.1.0" />
+    <Usage Id="System.Linq.Expressions" Version="4.3.0" />
+    <Usage Id="System.Management" Version="4.5.0" />
+    <Usage Id="System.Memory" Version="4.5.3" />
+    <Usage Id="System.Memory" Version="4.5.4" />
+    <Usage Id="System.Net.Http" Version="4.3.0" />
+    <Usage Id="System.Net.Primitives" Version="4.3.0" />
+    <Usage Id="System.Net.Sockets" Version="4.3.0" />
+    <Usage Id="System.Numerics.Vectors" Version="4.4.0" />
+    <Usage Id="System.ObjectModel" Version="4.0.12" />
+    <Usage Id="System.ObjectModel" Version="4.3.0" />
+    <Usage Id="System.Private.DataContractSerialization" Version="4.1.1" />
+    <Usage Id="System.Private.Uri" Version="4.3.0" />
+    <Usage Id="System.Reflection" Version="4.1.0" />
+    <Usage Id="System.Reflection" Version="4.3.0" />
+    <Usage Id="System.Reflection.Emit" Version="4.0.1" />
+    <Usage Id="System.Reflection.Emit" Version="4.3.0" />
+    <Usage Id="System.Reflection.Emit.ILGeneration" Version="4.0.1" />
+    <Usage Id="System.Reflection.Emit.ILGeneration" Version="4.3.0" />
+    <Usage Id="System.Reflection.Emit.Lightweight" Version="4.0.1" />
+    <Usage Id="System.Reflection.Emit.Lightweight" Version="4.3.0" />
+    <Usage Id="System.Reflection.Extensions" Version="4.0.1" />
+    <Usage Id="System.Reflection.Extensions" Version="4.3.0" />
+    <Usage Id="System.Reflection.Metadata" Version="1.6.0" />
+    <Usage Id="System.Reflection.Primitives" Version="4.0.1" />
+    <Usage Id="System.Reflection.Primitives" Version="4.3.0" />
+    <Usage Id="System.Reflection.TypeExtensions" Version="4.1.0" />
+    <Usage Id="System.Reflection.TypeExtensions" Version="4.3.0" />
+    <Usage Id="System.Resources.Extensions" Version="4.6.0" />
+    <Usage Id="System.Resources.Reader" Version="4.0.0" />
+    <Usage Id="System.Resources.ResourceManager" Version="4.0.1" />
+    <Usage Id="System.Resources.ResourceManager" Version="4.3.0" />
+    <Usage Id="System.Runtime" Version="4.1.0" />
+    <Usage Id="System.Runtime" Version="4.3.0" />
+    <Usage Id="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
+    <Usage Id="System.Runtime.CompilerServices.Unsafe" Version="4.5.3" />
+    <Usage Id="System.Runtime.CompilerServices.Unsafe" Version="5.0.0" />
+    <Usage Id="System.Runtime.Extensions" Version="4.1.0" />
+    <Usage Id="System.Runtime.Extensions" Version="4.3.0" />
+    <Usage Id="System.Runtime.Handles" Version="4.0.1" />
+    <Usage Id="System.Runtime.Handles" Version="4.3.0" />
+    <Usage Id="System.Runtime.InteropServices" Version="4.1.0" />
+    <Usage Id="System.Runtime.InteropServices" Version="4.3.0" />
+    <Usage Id="System.Runtime.InteropServices.RuntimeInformation" Version="4.0.0" />
+    <Usage Id="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+    <Usage Id="System.Runtime.Numerics" Version="4.3.0" />
+    <Usage Id="System.Runtime.Serialization.Primitives" Version="4.1.1" />
+    <Usage Id="System.Runtime.Serialization.Xml" Version="4.1.1" />
+    <Usage Id="System.Security.AccessControl" Version="4.5.0" />
+    <Usage Id="System.Security.AccessControl" Version="4.7.0" />
+    <Usage Id="System.Security.Cryptography.Algorithms" Version="4.3.0" />
+    <Usage Id="System.Security.Cryptography.Cng" Version="4.3.0" />
+    <Usage Id="System.Security.Cryptography.Cng" Version="4.7.0" />
+    <Usage Id="System.Security.Cryptography.Cng" Version="5.0.0" />
+    <Usage Id="System.Security.Cryptography.Csp" Version="4.3.0" />
+    <Usage Id="System.Security.Cryptography.Encoding" Version="4.3.0" />
+    <Usage Id="System.Security.Cryptography.OpenSsl" Version="4.3.0" />
+    <Usage Id="System.Security.Cryptography.Pkcs" Version="4.7.0" />
+    <Usage Id="System.Security.Cryptography.Pkcs" Version="5.0.0" />
+    <Usage Id="System.Security.Cryptography.Primitives" Version="4.3.0" />
+    <Usage Id="System.Security.Cryptography.ProtectedData" Version="4.4.0" />
+    <Usage Id="System.Security.Cryptography.ProtectedData" Version="4.7.0" />
+    <Usage Id="System.Security.Cryptography.X509Certificates" Version="4.3.0" />
+    <Usage Id="System.Security.Cryptography.Xml" Version="4.7.0" />
+    <Usage Id="System.Security.Permissions" Version="4.7.0" />
+    <Usage Id="System.Security.Principal.Windows" Version="4.5.0" />
+    <Usage Id="System.Security.Principal.Windows" Version="4.7.0" />
+    <Usage Id="System.Text.Encoding" Version="4.0.11" />
+    <Usage Id="System.Text.Encoding" Version="4.3.0" />
+    <Usage Id="System.Text.Encoding.CodePages" Version="4.0.1" />
+    <Usage Id="System.Text.Encoding.CodePages" Version="4.3.0" />
+    <Usage Id="System.Text.Encoding.Extensions" Version="4.0.11" />
+    <Usage Id="System.Text.Encoding.Extensions" Version="4.3.0" />
+    <Usage Id="System.Text.Json" Version="4.7.0" />
+    <Usage Id="System.Text.RegularExpressions" Version="4.1.0" />
+    <Usage Id="System.Text.RegularExpressions" Version="4.3.0" />
+    <Usage Id="System.Threading" Version="4.0.11" />
+    <Usage Id="System.Threading" Version="4.3.0" />
+    <Usage Id="System.Threading.Tasks" Version="4.0.11" />
+    <Usage Id="System.Threading.Tasks" Version="4.3.0" />
+    <Usage Id="System.Threading.Tasks.Dataflow" Version="4.9.0" />
+    <Usage Id="System.Threading.Tasks.Extensions" Version="4.0.0" />
+    <Usage Id="System.Threading.Tasks.Extensions" Version="4.3.0" />
+    <Usage Id="System.Threading.Tasks.Extensions" Version="4.5.2" />
+    <Usage Id="System.Threading.Tasks.Parallel" Version="4.0.1" />
+    <Usage Id="System.Threading.Tasks.Parallel" Version="4.3.0" />
+    <Usage Id="System.Threading.Thread" Version="4.0.0" />
+    <Usage Id="System.Threading.Thread" Version="4.3.0" />
+    <Usage Id="System.Threading.ThreadPool" Version="4.0.10" />
+    <Usage Id="System.Threading.Timer" Version="4.0.1" />
+    <Usage Id="System.Threading.Timer" Version="4.3.0" />
+    <Usage Id="System.ValueTuple" Version="4.5.0" />
+    <Usage Id="System.Windows.Extensions" Version="4.7.0" />
+    <Usage Id="System.Xml.ReaderWriter" Version="4.0.11" />
+    <Usage Id="System.Xml.ReaderWriter" Version="4.3.0" />
+    <Usage Id="System.Xml.XDocument" Version="4.0.11" />
+    <Usage Id="System.Xml.XDocument" Version="4.3.0" />
+    <Usage Id="System.Xml.XmlDocument" Version="4.0.1" />
+    <Usage Id="System.Xml.XmlDocument" Version="4.3.0" />
+    <Usage Id="System.Xml.XmlSerializer" Version="4.0.11" />
+    <Usage Id="System.Xml.XPath" Version="4.3.0" />
+    <Usage Id="System.Xml.XPath.XDocument" Version="4.3.0" />
+    <Usage Id="xunit.abstractions" Version="2.0.3" />
+    <Usage Id="xunit.core" Version="2.4.2-pre.9" IsDirectDependency="true" />
+    <Usage Id="xunit.extensibility.core" Version="2.4.2-pre.9" />
+    <Usage Id="xunit.extensibility.execution" Version="2.4.2-pre.9" />
+  </Usages>
+</UsageData>
