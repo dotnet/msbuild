@@ -664,7 +664,7 @@ namespace Microsoft.Build.Execution
 
             if (exactMatchRequired)
             {
-                return Enumerable.Empty<RegisteredTaskRecord>();
+                return [];
             }
 
             // look through all task declarations for partial matches

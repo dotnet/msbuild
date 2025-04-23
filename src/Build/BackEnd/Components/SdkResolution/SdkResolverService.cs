@@ -349,7 +349,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 SetResolverState(submissionId, sdkResolver, context.State);
 
-                result ??= (SdkResult)resultFactory.IndicateFailure(new string[] { ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", sdkResolver.Name) }, Array.Empty<string>());
+                result ??= (SdkResult)resultFactory.IndicateFailure([ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", sdkResolver.Name)], []);
 
                 if (result.Success)
                 {
@@ -380,8 +380,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 results.Add(result);
             }
 
-            warnings = results.SelectMany(r => r.Warnings ?? Array.Empty<string>());
-            errors = results.SelectMany(r => r.Errors ?? Array.Empty<string>());
+            warnings = results.SelectMany(r => r.Warnings ?? []);
+            errors = results.SelectMany(r => r.Errors ?? []);
 
             sdkResult = new SdkResult(sdk, null, null);
             return false;

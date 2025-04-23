@@ -730,7 +730,7 @@ namespace Microsoft.Build.Evaluation
                 Array.Sort<string>(defaultTasksFiles, StringComparer.OrdinalIgnoreCase);
                 return defaultTasksFiles;
             }
-            return Array.Empty<string>();
+            return [];
         }
 
         /// <summary>

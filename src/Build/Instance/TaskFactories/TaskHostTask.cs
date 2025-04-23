@@ -483,9 +483,9 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    exceptionMessageArgs = new string[] { _taskType.Type.Name,
+                    exceptionMessageArgs = [_taskType.Type.Name,
                         AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
-                        string.Empty };
+                        string.Empty];
                 }
 
                 _taskLoggingContext.LogFatalError(taskHostTaskComplete.TaskException, new BuildEventFileInfo(_taskLocation), taskHostTaskComplete.TaskExceptionMessage, taskHostTaskComplete.TaskExceptionMessageArgs);

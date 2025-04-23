@@ -561,7 +561,7 @@ namespace Microsoft.Build.Tasks
 
             if (!splitSuccessful)
             {
-                LogErrorOrWarning(new Tuple<string, object[]>("ResolveSDKReference.SDKReferenceIncorrectFormat", new object[] { referenceItem.ItemSpec }));
+                LogErrorOrWarning(new Tuple<string, object[]>("ResolveSDKReference.SDKReferenceIncorrectFormat", [referenceItem.ItemSpec]));
                 return null;
             }
 
@@ -613,7 +613,7 @@ namespace Microsoft.Build.Tasks
             else if (reference.ResolutionErrors == null || reference.ResolutionErrors.Count == 0)
             {
                 // We only want to say we could not find it if there were no other errors which would cause it not to be found
-                LogErrorOrWarning(new Tuple<string, object[]>("ResolveSDKReference.CouldNotResolveSDK", new object[] { reference.ReferenceItem.ItemSpec }));
+                LogErrorOrWarning(new Tuple<string, object[]>("ResolveSDKReference.CouldNotResolveSDK", [reference.ReferenceItem.ItemSpec]));
             }
 
             // Log warnings

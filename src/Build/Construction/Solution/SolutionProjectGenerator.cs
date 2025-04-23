@@ -189,7 +189,7 @@ namespace Microsoft.Build.Construction
 
             if (targetNames != null)
             {
-                _targetNames = targetNames.Select(i => i.Split(new char[] { ':' }, 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
+                _targetNames = targetNames.Select(i => i.Split([':'], 2, StringSplitOptions.RemoveEmptyEntries).Last()).ToList();
             }
         }
 

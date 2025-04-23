@@ -229,7 +229,7 @@ internal sealed class BuildCheckCentralContext
                     return;
                 }
 
-                configPerRule = new[] { commonConfig };
+                configPerRule = [commonConfig];
             }
             else
             {
