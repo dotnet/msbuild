@@ -209,7 +209,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(taskName != null, "Must specify the name of the task that failed.");
 
-            LogFatalError(buildEventContext, exception, file, "FatalTaskError", "DIFFERENT CUSTOM ERROR MESSAGE: " + taskName);
+            LogFatalError(buildEventContext, exception, file, "FatalTaskError", taskName);
         }
 
         /// <summary>

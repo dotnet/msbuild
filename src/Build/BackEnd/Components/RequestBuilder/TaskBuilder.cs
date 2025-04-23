@@ -813,6 +813,10 @@ namespace Microsoft.Build.BackEnd
                             {
                                 taskResult = taskExecutionHost.Execute();
                             }
+                            else if (taskLoggingContext.TargetLoggingContext.Target.Name == "_CompileTemporaryAssembly")
+                            {
+                                taskResult = taskExecutionHost.Execute();
+                            }
                             else
                             {
                                 taskResult = taskExecutionHost.Execute();

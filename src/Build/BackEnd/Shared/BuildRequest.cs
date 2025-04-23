@@ -258,14 +258,12 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             get
             {
-                Thread.MemoryBarrier();
                 return _globalRequestId;
             }
 
             set
             {
                 ErrorUtilities.VerifyThrow(_globalRequestId == InvalidGlobalRequestId, "Global Request ID cannot be set twice.");
-                Thread.MemoryBarrier();
                 _globalRequestId = value;
             }
         }

@@ -80,7 +80,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// The default maximum size for the logging event queue.
         /// </summary>
-        private const uint DefaultQueueCapacity = 200000;
+        private const uint DefaultQueueCapacity = 2000000;
 
         /// <summary>
         /// Lock for the nextProjectId

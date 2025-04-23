@@ -124,6 +124,7 @@ namespace Microsoft.Build.BackEnd
             _targetBuilderCallback = targetBuilderCallback;
             _continueOnError = false;
             _activeProxy = true;
+            Thread.MemoryBarrier();
             _callbackMonitor = new object();
             _disableInprocNode = Traits.Instance.InProcNodeDisabled || host.BuildParameters.DisableInProcNode;
             EngineServices = new EngineServicesImpl(this);
@@ -517,38 +518,39 @@ namespace Microsoft.Build.BackEnd
         /// <param name="e">The event args</param>
         public void LogMessageEvent(Microsoft.Build.Framework.BuildMessageEventArgs e)
         {
-            lock (_callbackMonitor)
+            ErrorUtilities.VerifyThrowArgumentNull(e);
+
+            Thread.MemoryBarrier();
+            if (!_activeProxy)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e);
-
-                if (!_activeProxy)
+                // The task has been logging on another thread, typically
+                // because of logging a spawned process's output, and has
+                // not terminated this logging before it returned. This is common
+                // enough that we don't want to crash and break the entire build. But
+                // we don't have any good way to log it any more, as not only has this task
+                // finished, the whole build might have finished! The task author will
+                // just have to figure out that their task has a bug by themselves.
+                Thread.MemoryBarrier();
+                if (s_breakOnLogAfterTaskReturns)
                 {
-                    // The task has been logging on another thread, typically
-                    // because of logging a spawned process's output, and has
-                    // not terminated this logging before it returned. This is common
-                    // enough that we don't want to crash and break the entire build. But
-                    // we don't have any good way to log it any more, as not only has this task
-                    // finished, the whole build might have finished! The task author will
-                    // just have to figure out that their task has a bug by themselves.
-                    if (s_breakOnLogAfterTaskReturns)
-                    {
-                        Trace.Fail(String.Format(CultureInfo.CurrentUICulture, "Task at {0}, after already returning, attempted to log '{1}'", _taskLocation.ToString(), e.Message));
-                    }
-
-                    return;
+                    Trace.Fail(String.Format(CultureInfo.CurrentUICulture, "Task at {0}, after already returning, attempted to log '{1}'", _taskLocation.ToString(), e.Message));
                 }
 
-                // If we are in building across process we need the events to be serializable. This method will
-                // check to see if we are building with multiple process and if the event is serializable. It will
-                // also log a warning if the event is not serializable and drop the logging message.
-                if (IsRunningMultipleNodes && !IsEventSerializable(e))
-                {
-                    return;
-                }
-
-                e.BuildEventContext = _taskLoggingContext.BuildEventContext;
-                _taskLoggingContext.LoggingService.LogBuildEvent(e);
+                return;
             }
+
+            // If we are in building across process we need the events to be serializable. This method will
+            // check to see if we are building with multiple process and if the event is serializable. It will
+            // also log a warning if the event is not serializable and drop the logging message.
+            Thread.MemoryBarrier();
+            if (IsRunningMultipleNodes && !IsEventSerializable(e))
+            {
+                return;
+            }
+
+            e.BuildEventContext = _taskLoggingContext.BuildEventContext;
+
+            _taskLoggingContext.LoggingService.LogBuildEvent(e);
         }
 
         /// <summary>
@@ -1078,6 +1080,7 @@ namespace Microsoft.Build.BackEnd
             {
                 VerifyActiveProxy();
                 _activeProxy = false;
+                Thread.MemoryBarrier();
 
                 ReleaseAllCores();
 

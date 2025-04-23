@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Build.Framework;
 
@@ -41,8 +42,6 @@ public readonly record struct PropertyData(string Name, string Value);
 /// </remarks>
 public readonly struct ItemData
 {
-    private readonly Func<IEnumerable<KeyValuePair<string, string>>> _enumerateMetadata;
-
     public ItemData(string type, object value)
     {
 
@@ -56,17 +55,14 @@ public readonly struct ItemData
         if (value is IItemData dt)
         {
             EvaluatedInclude = dt.EvaluatedInclude;
-            _enumerateMetadata = dt.EnumerateMetadata;
         }
         else if (value is ITaskItem ti)
         {
             EvaluatedInclude = ti.ItemSpec;
-            _enumerateMetadata = ti.EnumerateMetadata;
         }
         else
         {
             EvaluatedInclude = value.ToString() ?? string.Empty;
-            _enumerateMetadata = () => [];
         }
     }
 
@@ -91,5 +87,19 @@ public readonly struct ItemData
     /// The item metadata
     /// </summary>
     public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata()
-        => _enumerateMetadata();
+    {
+        object? value = Value;
+        if (value is IItemData dt)
+        {
+            return dt.EnumerateMetadata();
+        }
+        else if (value is ITaskItem ti)
+        {
+            return ti.EnumerateMetadata();
+        }
+        else
+        {
+            return Enumerable.Empty<KeyValuePair<string, string>>();
+        }
+    }
 }

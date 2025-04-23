@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Reflection;
 using System.Resources;
@@ -18,6 +19,8 @@ namespace Microsoft.Build.Shared
         /// A slot for msbuild.exe to add a resource manager over its own resources, that can also be consulted.
         /// </summary>
         private static ResourceManager s_msbuildExeResourceManager;
+
+        private static ConcurrentDictionary<string, string> resourceCache = new();
 
         /// <summary>
         /// The internals of the Engine are exposed to MSBuild.exe, so they must share the same AssemblyResources class and
@@ -75,7 +78,12 @@ namespace Microsoft.Build.Shared
         /// <returns>The resource string, or null if not found.</returns>
         private static string GetStringFromEngineResources(string name)
         {
-            string resource = s_resources.GetString(name, CultureInfo.CurrentUICulture);
+            if (resourceCache.TryGetValue(name, out string resource))
+            {
+                return resource;
+            }
+
+            resource = s_resources.GetString(name, CultureInfo.CurrentUICulture);
 
             if (resource == null)
             {
@@ -83,6 +91,8 @@ namespace Microsoft.Build.Shared
             }
 
             ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", name);
+
+            resourceCache[name] = resource;
 
             return resource;
         }
