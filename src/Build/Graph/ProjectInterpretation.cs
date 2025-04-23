@@ -44,7 +44,11 @@ namespace Microsoft.Build.Graph
 
         public static ProjectInterpretation Instance = new ProjectInterpretation();
 
-        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = [(GlobalPropertiesModifier)ProjectReferenceGlobalPropertiesModifier];
+        private ProjectInterpretation()
+        {
+        }
+
+        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = new[] { (GlobalPropertiesModifier)ProjectReferenceGlobalPropertiesModifier }.ToImmutableList();
 
         internal enum ProjectType
         {
@@ -294,7 +298,7 @@ namespace Microsoft.Build.Graph
                     project: outerBuild,
                     itemType: InnerBuildReferenceItemName,
                     includeEscaped: outerBuild.FullPath,
-                    directMetadata: [new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}")],
+                    directMetadata: new[] { new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}") },
                     definingFileEscaped: outerBuild.FullPath);
             }
         }

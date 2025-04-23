@@ -19,8 +19,8 @@ namespace Microsoft.Build.Framework
         public BuildSubmissionStartedEventArgs()
         {
             GlobalProperties = new Dictionary<string, string?>();
-            EntryProjectsFullPath = [];
-            TargetNames = [];
+            EntryProjectsFullPath = Enumerable.Empty<string>();
+            TargetNames = Enumerable.Empty<string>();
             Flags = BuildRequestDataFlags.None;
             SubmissionId = 0;
         }

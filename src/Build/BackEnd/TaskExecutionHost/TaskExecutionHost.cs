@@ -804,7 +804,7 @@ namespace Microsoft.Build.BackEnd
 
             if (!(outputs is ITaskItem[] taskItemOutputs))
             {
-                taskItemOutputs = [(ITaskItem)outputs];
+                taskItemOutputs = new[] { (ITaskItem)outputs };
             }
 
             return taskItemOutputs;
@@ -1325,7 +1325,7 @@ namespace Microsoft.Build.BackEnd
                             parameterName: parameter.Name,
                             propertyName: null,
                             itemType: parameter.Name,
-                            parameterValueAsList ?? (object[])[parameterValue],
+                            parameterValueAsList ?? new object[] { parameterValue },
                             parameter.LogItemMetadata);
                     }
                 }
@@ -1486,7 +1486,7 @@ namespace Microsoft.Build.BackEnd
                                     parameterName: parameter.Name,
                                     propertyName: outputTargetName,
                                     itemType: outputTargetName,
-                                    (object[])[outputString],
+                                    new object[] { outputString },
                                     parameter.LogItemMetadata);
                             }
                             else
@@ -1573,7 +1573,7 @@ namespace Microsoft.Build.BackEnd
                                     parameterName: parameter.Name,
                                     propertyName: outputTargetName,
                                     itemType: outputTargetName,
-                                    (object[])[outputString],
+                                    new object[] { outputString },
                                     parameter.LogItemMetadata);
                             }
                             else

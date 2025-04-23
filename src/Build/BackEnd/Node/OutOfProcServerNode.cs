@@ -139,7 +139,7 @@ namespace Microsoft.Build.Experimental
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 
-            WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent];
+            var waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent };
 
             // Get the current directory before doing any work. We need this so we can restore the directory when the node shutsdown.
             while (true)

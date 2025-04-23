@@ -215,7 +215,7 @@ namespace Microsoft.Build.Tasks
         public static RedistList GetFrameworkList20()
         {
             string frameworkVersion20Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20);
-            string[] redistListPaths = [];
+            string[] redistListPaths = Array.Empty<string>();
             if (frameworkVersion20Path != null)
             {
                 redistListPaths = RedistList.GetRedistListPathsFromDisk(frameworkVersion20Path);
@@ -255,7 +255,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public static RedistList GetRedistListFromPath(string path)
         {
-            string[] redistListPaths = (path == null) ? [] : GetRedistListPathsFromDisk(path);
+            string[] redistListPaths = (path == null) ? Array.Empty<string>() : GetRedistListPathsFromDisk(path);
 
             var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
             for (int i = 0; i < redistListPaths.Length; ++i)
@@ -272,7 +272,7 @@ namespace Microsoft.Build.Tasks
 
             // On dogfood build machines, v3.5 is not formally installed, so this returns null.
             // We don't use redist lists in this case.
-            string[] redistListPaths = (referenceAssembliesPath == null) ? [] : GetRedistListPathsFromDisk(referenceAssembliesPath);
+            string[] redistListPaths = (referenceAssembliesPath == null) ? Array.Empty<string>() : GetRedistListPathsFromDisk(referenceAssembliesPath);
 
             var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
             for (int i = 0; i < redistListPaths.Length; ++i)
@@ -317,7 +317,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return [];
+            return Array.Empty<string>();
         }
 
         /// <summary>
@@ -1067,7 +1067,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return [];
+            return Array.Empty<string>();
         }
         #endregion
     }

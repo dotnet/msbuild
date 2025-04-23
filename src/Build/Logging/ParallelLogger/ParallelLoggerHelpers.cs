@@ -146,7 +146,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // or the event is raised before the project started event
             if (startedEvent == null)
             {
-                return [];
+                return Array.Empty<string>();
             }
 
             List<ProjectStartedEventMinimumFields> projectStackTrace = GetProjectCallStack(e);

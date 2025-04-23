@@ -22,13 +22,14 @@ namespace Microsoft.Build.Shared
         private readonly string _directory;
 
         internal static readonly ImmutableHashSet<string> WellKnownAssemblyNames =
-        [
-            "MSBuild",
-            "Microsoft.Build",
-            "Microsoft.Build.Framework",
-            "Microsoft.Build.Tasks.Core",
-            "Microsoft.Build.Utilities.Core",
-        ];
+            new[]
+            {
+                "MSBuild",
+                "Microsoft.Build",
+                "Microsoft.Build.Framework",
+                "Microsoft.Build.Tasks.Core",
+                "Microsoft.Build.Utilities.Core",
+            }.ToImmutableHashSet();
 
         public MSBuildLoadContext(string assemblyPath)
             : base($"MSBuild plugin {assemblyPath}")
@@ -68,11 +69,11 @@ namespace Microsoft.Build.Shared
             foreach (var cultureSubfolder in string.IsNullOrEmpty(assemblyName.CultureName)
                 // If no culture is specified, attempt to load directly from
                 // the known dependency paths.
-                ? (string[])[string.Empty]
+                ? new[] { string.Empty }
                 // Search for satellite assemblies in culture subdirectories
                 // of the assembly search directories, but fall back to the
                 // bare search directory if that fails.
-                : [assemblyName.CultureName, string.Empty])
+                : new[] { assemblyName.CultureName, string.Empty })
             {
                 var candidatePath = Path.Combine(_directory,
                     cultureSubfolder,

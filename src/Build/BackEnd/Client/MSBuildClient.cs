@@ -467,11 +467,10 @@ namespace Microsoft.Build.Experimental
 
             try
             {
-                string[] msBuildServerOptions =
-                [
+                string[] msBuildServerOptions = new string[] {
                     "/nologo",
                     "/nodemode:8"
-                ];
+                };
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
                 Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions), nodeId: 0);

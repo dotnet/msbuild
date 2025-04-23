@@ -125,7 +125,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private void CheckForUnknownSubKeys(RegistryKey key)
         {
-            CheckForUnknownSubKeys(key, []);
+            CheckForUnknownSubKeys(key, Array.Empty<string>());
         }
 
         private void CheckForUnknownSubKeys(RegistryKey key, string[] knownNames)
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private void CheckForUnknownValues(RegistryKey key)
         {
-            CheckForUnknownValues(key, []);
+            CheckForUnknownValues(key, Array.Empty<string>());
         }
 
         private void CheckForUnknownValues(RegistryKey key, string[] knownNames)
@@ -230,7 +230,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     registeredPath = (string)subKey.GetValue(null);
                     threadingModel = (string)subKey.GetValue("ThreadingModel");
                     CheckForUnknownSubKeys(subKey);
-                    CheckForUnknownValues(subKey, ["ThreadingModel"]);
+                    CheckForUnknownValues(subKey, new string[] { "ThreadingModel" });
                 }
                 else if (String.Equals(subKeyName, "ProgID", StringComparison.OrdinalIgnoreCase))
                 {

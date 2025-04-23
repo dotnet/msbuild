@@ -292,7 +292,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     XmlMode = XmlModes.Xml;
-                    _data = [xml];
+                    _data = new[] { xml };
                 }
             }
 

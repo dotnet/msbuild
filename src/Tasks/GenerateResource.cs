@@ -579,7 +579,7 @@ namespace Microsoft.Build.Tasks
                     if (!ExtractResWFiles)
                     {
                         commandLineBuilder.AppendFileNamesIfNotNull(
-                            [inputFiles[i].ItemSpec, outputFiles[i].ItemSpec],
+                            new string[] { inputFiles[i].ItemSpec, outputFiles[i].ItemSpec },
                             ",");
                     }
                     else
@@ -597,7 +597,7 @@ namespace Microsoft.Build.Tasks
                 // append the strongly-typed resource details
                 commandLineBuilder.AppendSwitchIfNotNull(
                     "/str:",
-                    [StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName],
+                    new string[] { StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName },
                     ",");
             }
 
@@ -1238,7 +1238,7 @@ namespace Microsoft.Build.Tasks
             while (currentCommand.Length < s_maximumCommandLength && i < inputsToProcess.Count)
             {
                 currentCommand.AppendFileNamesIfNotNull(
-                        [inputsToProcess[i], outputsToProcess[i]],
+                        new ITaskItem[] { inputsToProcess[i], outputsToProcess[i] },
                         ",");
                 i++;
             }
@@ -1705,7 +1705,7 @@ namespace Microsoft.Build.Tasks
 
             // Check the timestamp of each of the passed-in references to find the newest;
             // and then the additional inputs
-            ITaskItem[] inputs = this.References ?? [.. (this.AdditionalInputs ?? [])];
+            var inputs = (this.References ?? Enumerable.Empty<ITaskItem>()).Concat(this.AdditionalInputs ?? Enumerable.Empty<ITaskItem>());
 
             foreach (ITaskItem input in inputs)
             {
@@ -2020,7 +2020,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Chars that should be ignored in the nicely justified block of base64
         /// </summary>
-        private static readonly char[] s_specialChars = [' ', '\r', '\n'];
+        private static readonly char[] s_specialChars = new char[] { ' ', '\r', '\n' };
 
         /// <summary>
         /// Turns the nicely justified block of base64 found in a resx into a byte array.

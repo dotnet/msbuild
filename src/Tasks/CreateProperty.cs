@@ -59,7 +59,7 @@ namespace Microsoft.Build.Tasks
         {
             if (Value == null)
             {
-                Value = [];
+                Value = Array.Empty<string>();
             }
 
             return true;

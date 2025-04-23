@@ -601,7 +601,7 @@ namespace Microsoft.Build.Tasks
                             else
                             {
                                 resGenArguments.AppendFileNamesIfNotNull(
-                                    [inputFiles[i], outputFiles[i]],
+                                    new[] { inputFiles[i], outputFiles[i] },
                                     ",");
                             }
                         }
@@ -616,7 +616,7 @@ namespace Microsoft.Build.Tasks
                     // append the strongly-typed resource details
                     resGenArguments.AppendSwitchIfNotNull(
                         "/str:",
-                        [StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName],
+                        new[] { StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName },
                         ",");
                 }
             }

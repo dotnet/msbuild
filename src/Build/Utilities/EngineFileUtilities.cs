@@ -187,7 +187,7 @@ namespace Microsoft.Build.Internal
         {
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, nameof(filespecEscaped));
 
-            string[] fileList = [];
+            string[] fileList = Array.Empty<string>();
 
             // Used to properly detect and log drive enumerating wildcards when applicable.
             string excludeFileSpec = string.Empty;
@@ -202,7 +202,7 @@ namespace Microsoft.Build.Internal
             if (filespecMatchesLazyWildcard || (filespecHasNoWildCards && excludeSpecsAreEmpty))
             {
                 // Just return the original string.
-                fileList = [returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped)];
+                fileList = new string[] { returnEscaped ? filespecEscaped : EscapingUtilities.UnescapeAll(filespecEscaped) };
             }
             else
             {

@@ -1060,7 +1060,7 @@ namespace Microsoft.Build.Utilities
                 ErrorUtilities.DebugTraceMessage("GetLegacyTargetPlatformReferences", "Encountered exception trying to gather the platform references: {0}", e.Message);
             }
 
-            return [];
+            return Array.Empty<string>();
         }
 
         /// <summary>
@@ -1081,7 +1081,7 @@ namespace Microsoft.Build.Utilities
             ErrorUtilities.VerifyThrowArgumentLength(targetPlatformIdentifier);
             ErrorUtilities.VerifyThrowArgumentLength(targetPlatformVersion);
 
-            string[] contractWinMDs = [];
+            string[] contractWinMDs = Array.Empty<string>();
 
             TargetPlatformSDK matchingSdk = GetMatchingPlatformSDK(targetPlatformIdentifier, targetPlatformVersion, diskRoots, null, registryRoot);
             string platformKey = TargetPlatformSDK.GetSdkKey(targetPlatformIdentifier, targetPlatformVersion);
@@ -1119,7 +1119,7 @@ namespace Microsoft.Build.Utilities
         {
             if (apiContracts == null)
             {
-                return [];
+                return Array.Empty<string>();
             }
 
             var contractWinMDs = new List<string>();
@@ -2479,7 +2479,7 @@ namespace Microsoft.Build.Utilities
                         GatherExtensionSDKListFromDirectory(extensionSdkDiskRoots, extensionSdk);
                         s_cachedExtensionSdks.Add(cachedExtensionSdksKey, extensionSdk);
                     }
-                    collection = collection.Concat([extensionSdk]);
+                    collection = collection.Concat(new[] { extensionSdk });
                 }
 
                 return collection;

@@ -231,7 +231,7 @@ namespace Microsoft.Build.Shared
                     ErrorUtilities.ThrowInternalError("Unexpected filesystem entity type.");
                     break;
             }
-            return [];
+            return Array.Empty<string>();
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            return [];
+            return Array.Empty<string>();
         }
 
         /// <summary>
@@ -354,12 +354,12 @@ namespace Microsoft.Build.Shared
             catch (System.Security.SecurityException)
             {
                 // For code access security.
-                return [];
+                return Array.Empty<string>();
             }
             catch (System.UnauthorizedAccessException)
             {
                 // For OS security.
-                return [];
+                return Array.Empty<string>();
             }
         }
 
@@ -410,12 +410,12 @@ namespace Microsoft.Build.Shared
             catch (System.Security.SecurityException)
             {
                 // For code access security.
-                return [];
+                return Array.Empty<string>();
             }
             catch (System.UnauthorizedAccessException)
             {
                 // For OS security.
-                return [];
+                return Array.Empty<string>();
             }
         }
 
@@ -1042,7 +1042,7 @@ namespace Microsoft.Build.Shared
         {
             if (!stepResult.ConsiderFiles)
             {
-                return [];
+                return Enumerable.Empty<string>();
             }
 
             // Back-compat hack: We don't use case-insensitive file enumeration I/O on Linux so the behavior is different depending
@@ -2340,18 +2340,18 @@ namespace Microsoft.Build.Shared
                     // - maintain legacy behaviour where an illegal filespec is treated as a normal string
                     if (FileUtilities.PathsEqual(filespecUnescaped, excludeSpec))
                     {
-                        return [];
+                        return Array.Empty<string>();
                     }
 
                     var match = Default.FileMatch(excludeSpec, filespecUnescaped);
 
                     if (match.isLegalFileSpec && match.isMatch)
                     {
-                        return [];
+                        return Array.Empty<string>();
                     }
                 }
             }
-            return [filespecUnescaped];
+            return new[] { filespecUnescaped };
         }
 
         /// <summary>
@@ -2377,7 +2377,7 @@ namespace Microsoft.Build.Shared
 
             if (action == SearchAction.ReturnEmptyList)
             {
-                return ([], action, string.Empty);
+                return (Array.Empty<string>(), action, string.Empty);
             }
             else if (action == SearchAction.ReturnFileSpec)
             {
@@ -2385,7 +2385,7 @@ namespace Microsoft.Build.Shared
             }
             else if (action == SearchAction.FailOnDriveEnumeratingWildcard)
             {
-                return ([], action, string.Empty);
+                return (Array.Empty<string>(), action, string.Empty);
             }
             else if ((action != SearchAction.RunSearch) && (action != SearchAction.LogDriveEnumeratingWildcard))
             {
@@ -2430,7 +2430,7 @@ namespace Microsoft.Build.Shared
                     }
                     else if (excludeAction == SearchAction.FailOnDriveEnumeratingWildcard)
                     {
-                        return ([], excludeAction, excludeSpec);
+                        return (Array.Empty<string>(), excludeAction, excludeSpec);
                     }
                     else if (excludeAction == SearchAction.LogDriveEnumeratingWildcard)
                     {

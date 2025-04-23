@@ -1424,7 +1424,7 @@ namespace Microsoft.Build.Shared
             int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
             if (count == 0)
             {
-                return (DictionaryEntry[])[];
+                return Enumerable.Empty<DictionaryEntry>();
             }
 
             var list = new ArrayList(count);
@@ -1446,7 +1446,7 @@ namespace Microsoft.Build.Shared
             int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
             if (count == 0)
             {
-                return (DictionaryEntry[])[];
+                return Enumerable.Empty<DictionaryEntry>();
             }
 
             var list = new ArrayList(count);

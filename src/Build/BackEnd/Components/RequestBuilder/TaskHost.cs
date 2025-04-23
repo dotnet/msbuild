@@ -261,11 +261,11 @@ namespace Microsoft.Build.BackEnd
         {
             VerifyActiveProxy();
             return BuildProjectFilesInParallel(
-                [projectFileName],
+                new string[] { projectFileName },
                 targetNames,
-                [globalProperties],
-                [targetOutputs],
-                [toolsVersion],
+                new IDictionary[] { globalProperties },
+                new IDictionary[] { targetOutputs },
+                new string[] { toolsVersion },
                 true,
                 false);
         }
@@ -1205,8 +1205,8 @@ namespace Microsoft.Build.BackEnd
                     BuildResult[] results = await builderCallback.BuildProjects(
                         projectFileNames,
                         propertyDictionaries,
-                        toolsVersion ?? [],
-                        targetNames ?? [],
+                        toolsVersion ?? Array.Empty<string>(),
+                        targetNames ?? Array.Empty<string>(),
                         waitForResults: true,
                         skipNonexistentTargets: skipNonexistentTargets);
 
