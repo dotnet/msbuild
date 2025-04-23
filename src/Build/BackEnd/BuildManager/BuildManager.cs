@@ -668,7 +668,7 @@ namespace Microsoft.Build.Execution
 
                 var logger = new BinaryLogger { Parameters = binlogPath };
 
-                return (loggers ?? Enumerable.Empty<ILogger>()).Concat([logger]);
+                return (loggers ?? []).Concat([logger]);
             }
 
             void InitializeCaches()
