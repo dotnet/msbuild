@@ -76,7 +76,6 @@ extends:
         VSDropPath: https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(SourceBranchName)/$(MSBuild_CI_BuildNumber)
         VSManVersionSuffix: $(MSBuild_ExtApisPackageVersion)+$(MSBuild_CI_SourceVersion)
         StandardVSManPath: Microsoft.Build.vsman{$(VSManVersionSuffix)}=$(VSDropPath);Microsoft.Build.vsman
-        Arm64VSManPath: Microsoft.Build.Arm64.vsman{$(VSManVersionSuffix)}=$(VSDropPath);Microsoft.Build.Arm64.vsman
         UnGACVSManPath: Microsoft.Build.UnGAC.vsman=$(VSDropPath);Microsoft.Build.UnGAC.vsman
         InsertJsonValues: $(StandardVSManPath),$(Arm64VSManPath),$(UnGACVSManPath)
         InsertConfigValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion)
