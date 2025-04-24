@@ -203,7 +203,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="$(VisualStudioSetupInteropVersion)" />
-    <PackageReference Include="PdbGit" Version="3.0.41" />
+    <!-- Disabled PdbGit because of warnings; it could/should be brought back.
+    <PackageReference Include="PdbGit" /> -->
     <PackageReference Include="SourceLink.Create.CommandLine" Version="2.1.2" />
     <PackageReference Include="LargeAddressAware" Version="$(LargeAddressAwareVersion)" PrivateAssets="All" />
   </ItemGroup>
