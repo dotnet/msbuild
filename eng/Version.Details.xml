@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="721dc7a2a59416b21fc49447d264009d708d6000" BarId="265489" />
   <ProductDependencies>
     <!-- Intermediate is necessary for source build. -->
     <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="9.0.0-alpha.1.25209.1">
