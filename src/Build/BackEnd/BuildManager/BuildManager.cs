@@ -800,6 +800,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void CancelAllSubmissions()
         {
+            MSBuildEventSource.Log.CancelSubmissionsStart();
             CancelAllSubmissions(true);
         }
 
