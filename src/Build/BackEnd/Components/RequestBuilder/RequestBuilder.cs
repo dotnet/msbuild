@@ -497,7 +497,7 @@ namespace Microsoft.Build.BackEnd
             // a queue of pending requests.
             ResourceResponse responseObject = null;
             using AutoResetEvent responseEvent = new AutoResetEvent(false);
-            _pendingResourceRequests.Enqueue((ResourceResponse response) =>
+            _pendingResourceRequests.Enqueue((response) =>
             {
                 responseObject = response;
                 responseEvent.Set();

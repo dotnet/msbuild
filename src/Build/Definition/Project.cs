@@ -3815,7 +3815,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Cause the project to be actually loaded into the collection, and register for
                 // rename notifications so we can subsequently update the collection.
-                _renameHandler = (string oldFullPath) => ProjectCollection.OnAfterRenameLoadedProject(oldFullPath, Owner);
+                _renameHandler = (oldFullPath) => ProjectCollection.OnAfterRenameLoadedProject(oldFullPath, Owner);
 
                 Xml.OnAfterProjectRename += _renameHandler;
                 Xml.OnProjectXmlChanged += ProjectRootElement_ProjectXmlChangedHandler;
