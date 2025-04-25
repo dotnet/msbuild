@@ -901,7 +901,16 @@ namespace Microsoft.Build.Execution
 
         internal bool UsesInputCaches() => InputResultsCacheFiles != null;
 
-        internal bool SkippedResultsDoNotCauseCacheMiss() => ProjectIsolationMode == ProjectIsolationMode.True;
+        internal bool SkippedResultsDoNotCauseCacheMiss()
+        {
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
+            {
+                // By default skipped results should not cause cache miss. See https://github.com/dotnet/msbuild/issues/11753
+                return true;
+            }
+
+            return ProjectIsolationMode == ProjectIsolationMode.True;
+        }
 
         /// <summary>
         /// Implementation of the serialization mechanism.

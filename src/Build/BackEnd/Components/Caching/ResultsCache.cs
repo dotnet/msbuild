@@ -160,8 +160,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="configDefaultTargets">The default targets for the request's configuration.</param>
         /// <param name="skippedResultsDoNotCauseCacheMiss">If false, a cached skipped target will cause this method to return "NotSatisfied".
         /// If true, then as long as there is a result in the cache (regardless of whether it was skipped or not), this method
-        /// will return "Satisfied". In most cases this should be false, but it may be set to true in a situation where there is no
-        /// chance of re-execution (which is the usual response to missing / skipped targets), and the caller just needs the data.</param>
+        /// will return "Satisfied". In most cases this should be true, since conditionally skipped target would not be executed a second time if the configuration remains unchanged.</param>
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
         public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss)
         {
