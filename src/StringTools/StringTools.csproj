@@ -10,7 +10,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
 
-    <VersionPrefix>1.0.1</VersionPrefix>
+    <VersionPrefix>1.0.0</VersionPrefix>
     <AssemblyVersion></AssemblyVersion>
     <SemanticVersioningV1>true</SemanticVersioningV1>
 
