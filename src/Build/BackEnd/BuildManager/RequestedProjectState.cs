@@ -95,6 +95,7 @@ namespace Microsoft.Build.Execution
                 if (mergedProperties.Count > 0)
                 {
                     result.PropertyFilters = mergedProperties.ToList();
+                }
             }
 
             // Merge item filters
