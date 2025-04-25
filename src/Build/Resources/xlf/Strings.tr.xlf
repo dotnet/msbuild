@@ -632,7 +632,7 @@
       </trans-unit>
       <trans-unit id="OpenTelemetryLoadFailed">
         <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="new">Loading telemetry libraries failed with exception: {0}.</target>
+        <target state="translated">Telemetri kitaplıklarının yüklenmesi şu hayatla başarısız oldu: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
