@@ -44,15 +44,105 @@ namespace Microsoft.Build.Execution
             RequestedProjectState result = new RequestedProjectState();
             if (PropertyFilters is not null)
             {
-                result.PropertyFilters = new List<string>(PropertyFilters);
+                result.PropertyFilters = [.. PropertyFilters];
             }
+
             if (ItemFilters is not null)
             {
                 result.ItemFilters = ItemFilters.ToDictionary(
                     kvp => kvp.Key,
                     kvp => kvp.Value == null ? null : new List<string>(kvp.Value));
             }
+
             return result;
+        }
+
+        /// <summary>
+        /// Returns a new RequestedProjectState that contains the union of filters from this instance and another.
+        /// </summary>
+        /// <param name="other">The other RequestedProjectState to merge with.</param>
+        /// <returns>A new RequestedProjectState representing the merged filters.</returns>
+        internal RequestedProjectState Merge(RequestedProjectState other)
+        {
+            // If either is null, return a clone of the non-null one
+            if (other == null)
+            {
+                return DeepClone();
+            }
+
+            RequestedProjectState result = new RequestedProjectState();
+
+            // Merge property filters
+            if (PropertyFilters != null || other.PropertyFilters != null)
+            {
+                HashSet<string> mergedProperties = new(StringComparer.OrdinalIgnoreCase);
+                if (PropertyFilters != null)
+                {
+                    foreach (var prop in PropertyFilters)
+                    {
+                        mergedProperties.Add(prop);
+                    }
+                }
+
+                if (other.PropertyFilters != null)
+                {
+                    foreach (var prop in other.PropertyFilters)
+                    {
+                        mergedProperties.Add(prop);
+                    }
+                }
+
+                if (mergedProperties.Count > 0)
+                {
+                    result.PropertyFilters = mergedProperties?.ToList();
+                }
+            }
+
+            // Merge item filters
+            if (ItemFilters != null || other.ItemFilters != null)
+            {
+                Dictionary<string, List<string>> mergedItems = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+                // Add items from both filters
+                MergeItemFiltersFrom(mergedItems, ItemFilters);
+                MergeItemFiltersFrom(mergedItems, other.ItemFilters);
+
+                if (mergedItems.Count > 0)
+                {
+                    result.ItemFilters = mergedItems;
+                }
+            }
+
+            return result;
+
+            // Helper method to add item filters from a source to the merged result
+            void MergeItemFiltersFrom(Dictionary<string, List<string>> mergedItems, IDictionary<string, List<string>> source)
+            {
+                if (source == null)
+                {
+                    return;
+                }
+
+                foreach (var itemType in source)
+                {
+                    if (!mergedItems.TryGetValue(itemType.Key, out List<string> metadataList))
+                    {
+                        metadataList = new List<string>();
+                        mergedItems[itemType.Key] = metadataList;
+                    }
+
+                    if (itemType.Value != null)
+                    {
+                        foreach (var metadata in itemType.Value)
+                        {
+                            if (!metadataList.Contains(metadata, StringComparer.OrdinalIgnoreCase))
+                            {
+                                metadataList.Add(metadata);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -72,7 +162,7 @@ namespace Microsoft.Build.Execution
             }
             else if (another.PropertyFilters is not null)
             {
-                HashSet<string> anotherPropertyFilters = new HashSet<string>(another.PropertyFilters);
+                HashSet<string> anotherPropertyFilters = new(another.PropertyFilters);
                 foreach (string propertyFilter in PropertyFilters)
                 {
                     if (!anotherPropertyFilters.Contains(propertyFilter))
@@ -99,6 +189,7 @@ namespace Microsoft.Build.Execution
                         // The instance to compare against doesn't have this item -> not a subset.
                         return false;
                     }
+
                     if (kvp.Value is null)
                     {
                         if (metadata is not null)
@@ -109,7 +200,7 @@ namespace Microsoft.Build.Execution
                     }
                     else if (metadata is not null)
                     {
-                        HashSet<string> anotherMetadata = new HashSet<string>(metadata);
+                        HashSet<string> anotherMetadata = [.. metadata];
                         foreach (string metadatum in kvp.Value)
                         {
                             if (!anotherMetadata.Contains(metadatum))
@@ -130,19 +221,10 @@ namespace Microsoft.Build.Execution
             translator.TranslateDictionary(ref _itemFilters, TranslateString, TranslateMetadataForItem, CreateItemMetadataDictionary);
         }
 
-        private static IDictionary<string, List<string>> CreateItemMetadataDictionary(int capacity)
-        {
-            return new Dictionary<string, List<string>>(capacity, StringComparer.OrdinalIgnoreCase);
-        }
+        private static IDictionary<string, List<string>> CreateItemMetadataDictionary(int capacity) => new Dictionary<string, List<string>>(capacity, StringComparer.OrdinalIgnoreCase);
 
-        private static void TranslateMetadataForItem(ITranslator translator, ref List<string> list)
-        {
-            translator.Translate(ref list);
-        }
+        private static void TranslateMetadataForItem(ITranslator translator, ref List<string> list) => translator.Translate(ref list);
 
-        private static void TranslateString(ITranslator translator, ref string s)
-        {
-            translator.Translate(ref s);
-        }
+        private static void TranslateString(ITranslator translator, ref string s) => translator.Translate(ref s);
     }
 }
