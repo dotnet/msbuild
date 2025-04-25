@@ -20,7 +20,6 @@
   <PropertyGroup>
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
     <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
-    <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
   </PropertyGroup>
