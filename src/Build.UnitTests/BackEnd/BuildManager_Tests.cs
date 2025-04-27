@@ -1421,9 +1421,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// With two overlapping submissions, the first of which skips a target and the second
+        /// If the ChangeWave 17.14 is disabled, with two overlapping submissions, the first of which skips a target and the second
         /// of which should not, ensure that the second submission does not, in fact, skip
-        /// the target.  (E.g. despite the fact that the target results are in the cache already
+        /// the target. (E.g. despite the fact that the target results are in the cache already
         /// as 'skipped', ensure that we retry execution in case conditions have changed.)
         /// </summary>
         [Fact]
@@ -1451,6 +1451,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 </Project>
 ");
+
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "17.14");
 
             BuildRequestData data = GetBuildRequestData(contents, new[] { "A" });
             var data2 = new BuildRequestData(data.ProjectInstance, new[] { "MaySkip" }, data.HostServices);
