@@ -14,10 +14,12 @@ using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+#if FEATURE_REPORTFILEACCESSES
+using Microsoft.Build.FileAccesses;
+#endif
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 #nullable disable
@@ -342,6 +344,16 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Deserializes a packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator to use as a source for packet data.</param>
+        INodePacket INodePacketFactory.DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
+        }
+
+        /// <summary>
         /// Routes a packet to the appropriate handler.
         /// </summary>
         /// <param name="nodeId">The node id from which the packet was received.</param>
@@ -583,27 +595,27 @@ namespace Microsoft.Build.Execution
         {
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
-#if RUNTIME_TYPE_NETCORE
                 if (packet is LogMessagePacketBase logMessage
-                    && logMessage.EventType == LoggingEventType.CustomEvent
-                    && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
+                    && logMessage.EventType == LoggingEventType.CustomEvent)
                 {
                     BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
 
                     // Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet<T>
                     // Since BinaryFormatter is deprecated in dotnet 8+, log error so users discover root cause easier
                     // then by reading CommTrace where it would be otherwise logged as critical infra error.
-                    _loggingService.LogError(_loggingContext?.BuildEventContext ?? BuildEventContext.Invalid, null, BuildEventFileInfo.Empty,
-                            "DeprecatedEventSerialization",
-                            buildEvent?.GetType().Name ?? string.Empty);
+#if RUNTIME_TYPE_NETCORE
+                    _loggingService.LogError(
+#else
+                    _loggingService.LogWarning(
+#endif
+                        _loggingContext?.BuildEventContext ?? BuildEventContext.Invalid, null, BuildEventFileInfo.Empty,
+                        "DeprecatedEventSerialization",
+                        buildEvent?.GetType().Name ?? string.Empty);
                 }
                 else
                 {
                     _nodeEndpoint.SendData(packet);
                 }
-#else
-                _nodeEndpoint.SendData(packet);
-#endif
             }
         }
 
@@ -847,7 +859,8 @@ namespace Microsoft.Build.Execution
             _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
             if (_shutdownReason == NodeEngineShutdownReason.BuildCompleteReuse)
             {
-                ProcessPriorityClass priorityClass = Process.GetCurrentProcess().PriorityClass;
+                using Process currentProcess = Process.GetCurrentProcess();
+                ProcessPriorityClass priorityClass = currentProcess.PriorityClass;
                 if (priorityClass != ProcessPriorityClass.Normal && priorityClass != ProcessPriorityClass.BelowNormal)
                 {
                     // This isn't a priority class known by MSBuild. We should avoid connecting to this node.
@@ -860,7 +873,7 @@ namespace Microsoft.Build.Execution
                     {
                         if (!lowPriority || NativeMethodsShared.IsWindows)
                         {
-                            Process.GetCurrentProcess().PriorityClass = lowPriority ? ProcessPriorityClass.Normal : ProcessPriorityClass.BelowNormal;
+                            currentProcess.PriorityClass = lowPriority ? ProcessPriorityClass.Normal : ProcessPriorityClass.BelowNormal;
                         }
                         else
                         {

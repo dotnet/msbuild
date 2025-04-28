@@ -279,7 +279,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         if (element.ElementInformation.LineNumber != 0)
                         {
-                            locationString = String.Format("{0} ({1})", element.ElementInformation.Source, element.ElementInformation.LineNumber);
+                            locationString = $"{element.ElementInformation.Source} ({element.ElementInformation.LineNumber})";
                         }
                         else
                         {

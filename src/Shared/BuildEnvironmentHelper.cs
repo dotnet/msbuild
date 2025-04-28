@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -431,12 +430,13 @@ namespace Microsoft.Build.Shared
             // an unmanaged application (for example, using custom CLR hosting).
             if (AssemblyUtilities.EntryAssembly == null)
             {
-                return Process.GetCurrentProcess().MainModule.FileName;
+                return EnvironmentUtilities.ProcessPath;
             }
 
             return AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
 #else
-            return Process.GetCurrentProcess().MainModule.FileName;
+
+            return EnvironmentUtilities.ProcessPath;
 #endif
         }
 

@@ -207,7 +207,7 @@ namespace Microsoft.Build.Evaluation
         protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os)
         {
             Dictionary<string, ProjectImportPathMatch> kindToPathsCache;
-            var key = toolsVersion + ":" + os;
+            var key = $"{toolsVersion}:{os}";
             if (_projectImportSearchPathsCache.TryGetValue(key, out kindToPathsCache))
             {
                 return kindToPathsCache;

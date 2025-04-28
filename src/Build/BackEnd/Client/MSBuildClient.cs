@@ -176,7 +176,7 @@ namespace Microsoft.Build.Experimental
                 bool serverIsAlreadyRunning = ServerIsRunning();
                 if (KnownTelemetry.PartialBuildTelemetry != null)
                 {
-                    KnownTelemetry.PartialBuildTelemetry.InitialServerState = serverIsAlreadyRunning ? "hot" : "cold";
+                    KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState = serverIsAlreadyRunning ? "hot" : "cold";
                 }
                 if (!serverIsAlreadyRunning)
                 {
@@ -474,7 +474,7 @@ namespace Microsoft.Build.Experimental
                 ];
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
-                Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions), nodeId: 0);
+                using Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions), nodeId: 0);
                 CommunicationsUtilities.Trace("Server started with PID: {0}", msbuildProcess?.Id);
             }
             catch (Exception ex)
@@ -521,7 +521,7 @@ namespace Microsoft.Build.Experimental
                 ? null
                 : new PartialBuildTelemetry(
                     startedAt: KnownTelemetry.PartialBuildTelemetry.StartAt.GetValueOrDefault(),
-                    initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialServerState,
+                    initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState,
                     serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason);
 
             return new ServerNodeBuildCommand(

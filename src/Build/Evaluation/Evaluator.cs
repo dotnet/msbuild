@@ -12,7 +12,6 @@ using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -159,6 +158,11 @@ namespace Microsoft.Build.Evaluation
         private readonly PropertyDictionary<ProjectPropertyInstance> _environmentProperties;
 
         /// <summary>
+        /// Properties passed from the command line (e.g. by using /p:).
+        /// </summary>
+        private readonly ICollection<string> _propertiesFromCommandLine;
+
+        /// <summary>
         /// The cache to consult for any imports that need loading.
         /// </summary>
         private readonly ProjectRootElementCacheBase _projectRootElementCache;
@@ -201,6 +205,7 @@ namespace Microsoft.Build.Evaluation
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            ICollection<string> propertiesFromCommandLine,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
             IDirectoryCacheFactory directoryCacheFactory,
@@ -253,6 +258,7 @@ namespace Microsoft.Build.Evaluation
             _loadSettings = loadSettings;
             _maxNodeCount = maxNodeCount;
             _environmentProperties = environmentProperties;
+            _propertiesFromCommandLine = propertiesFromCommandLine ?? [];
             _itemFactory = itemFactory;
             _projectRootElementCache = projectRootElementCache;
             _sdkResolverService = sdkResolverService;
@@ -301,6 +307,7 @@ namespace Microsoft.Build.Evaluation
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            ICollection<string> propertiesFromCommandLine,
             ILoggingService loggingService,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
@@ -321,6 +328,7 @@ namespace Microsoft.Build.Evaluation
                 loadSettings,
                 maxNodeCount,
                 environmentProperties,
+                propertiesFromCommandLine,
                 itemFactory,
                 toolsetProvider,
                 directoryCacheFactory,
@@ -801,7 +809,7 @@ namespace Microsoft.Build.Evaluation
                             {
                                 if (!String.Equals(entry.Name, "currentsolutionconfigurationcontents", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    propertyDump += entry.Name + "=" + entry.EvaluatedValue + "\n";
+                                    propertyDump += $"{entry.Name}={entry.EvaluatedValue}\n";
                                 }
                             }
 
@@ -1240,7 +1248,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Put all the global properties into our property bag
+        /// Put all the global properties into our property bag.
         /// </summary>
         private int AddGlobalProperties()
         {
@@ -1251,7 +1259,13 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectPropertyInstance globalProperty in _data.GlobalPropertiesDictionary)
             {
-                _data.SetProperty(globalProperty.Name, ((IProperty)globalProperty).EvaluatedValueEscaped, true /* IS global property */, false /* may NOT be a reserved name */, loggingContext: _evaluationLoggingContext);
+                _ = _data.SetProperty(
+                    globalProperty.Name,
+                    ((IProperty)globalProperty).EvaluatedValueEscaped,
+                    isGlobalProperty: true /* it is a global property, but it comes from command line and is tracked separately */,
+                    mayBeReserved: false /* may NOT be a reserved name */,
+                    loggingContext: _evaluationLoggingContext,
+                    isCommandLineProperty: _propertiesFromCommandLine.Contains(globalProperty.Name) /* IS coming from command line argument */);
             }
 
             return _data.GlobalPropertiesDictionary.Count;
@@ -1872,19 +1886,17 @@ namespace Microsoft.Build.Evaluation
         // Creates a project to set the properties and include the items from an SdkResult
         private ProjectRootElement CreateProjectForSdkResult(SdkResult sdkResult)
         {
-            int propertiesAndItemsHash;
-
-#if NETCOREAPP
-            HashCode hash = new HashCode();
+#if NET
+            HashCode hash = default;
 #else
-            propertiesAndItemsHash = -849885975;
+            int propertiesAndItemsHash = -849885975;
 #endif
 
             if (sdkResult.PropertiesToAdd != null)
             {
                 foreach (var property in sdkResult.PropertiesToAdd)
                 {
-#if NETCOREAPP
+#if NET
                     hash.Add(property.Key);
                     hash.Add(property.Value);
 #else
@@ -1897,7 +1909,7 @@ namespace Microsoft.Build.Evaluation
             {
                 foreach (var item in sdkResult.ItemsToAdd)
                 {
-#if NETCOREAPP
+#if NET
                     hash.Add(item.Key);
                     hash.Add(item.Value);
 #else
@@ -1908,16 +1920,21 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-#if NETCOREAPP
-            propertiesAndItemsHash = hash.ToHashCode();
+#if NET
+            int propertiesAndItemsHash = hash.ToHashCode();
 #endif
 
-            // Generate a unique filename for the generated project for each unique set of properties and items.
-            string projectPath = _projectRootElement.FullPath + ".SdkResolver." + propertiesAndItemsHash + ".proj";
+            // Generate a unique filename for the generated project for each unique set of properties and items that ends like ".SdkResolver.{propertiesAndItemsHash}.proj".
+            // _projectRootElement.FullPath can be null. This can be in the case when Project is created from XmlReader. For that case we generate filename like "{Guid}.SdkResolver.{propertiesAndItemsHash}.proj in the current directory.
+            // Otherwise the project is in the same directory as _projectRootElement and has a name of the same project and ends like ".SdkResolver.{propertiesAndItemsHash}.proj".
+            string projectNameEnding = $".SdkResolver.{propertiesAndItemsHash}.proj";
+            string projectPath = _projectRootElement.FullPath != null ?
+             _projectRootElement.FullPath + projectNameEnding :
+             FileUtilities.NormalizePath(Guid.NewGuid() + projectNameEnding);
 
             ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)
             {
-                ProjectRootElement project = ProjectRootElement.Create();
+                ProjectRootElement project = ProjectRootElement.CreateEphemeral(_projectRootElementCache);
                 project.FullPath = projectPath;
 
                 if (sdkResult.PropertiesToAdd?.Any() == true)
@@ -2122,7 +2139,7 @@ namespace Microsoft.Build.Evaluation
                         // If neither file involved is the project itself, append its path in square brackets
                         if (previouslyImportedAt.ContainingProject != _projectRootElement && importElement.ContainingProject != _projectRootElement)
                         {
-                            parenthesizedProjectLocation = "[" + _projectRootElement.FullPath + "]";
+                            parenthesizedProjectLocation = $"[{_projectRootElement.FullPath}]";
                         }
                         // TODO: Detect if the duplicate import came from an SDK attribute
                         _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "DuplicateImport", importFileUnescaped, previouslyImportedAt.Location.LocationString, parenthesizedProjectLocation);
@@ -2563,7 +2580,7 @@ namespace Microsoft.Build.Evaluation
             if (_lastModifiedProject != null)
             {
                 P oldValue = _data.GetProperty(Constants.MSBuildAllProjectsPropertyName);
-                string streamImports = string.Join(";", _streamImports.ToArray());
+                string streamImports = string.Join(";", _streamImports);
                 _data.SetProperty(
                     Constants.MSBuildAllProjectsPropertyName,
                     oldValue == null

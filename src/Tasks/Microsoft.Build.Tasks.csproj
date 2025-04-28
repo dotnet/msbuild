@@ -37,9 +37,6 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
-    <Compile Include="..\Shared\EnvironmentUtilities.cs">
-      <Link>EnvironmentUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>AssemblyDependency\AssemblyFoldersEx.cs</Link>
     </Compile>
@@ -450,24 +447,6 @@
     <Content Include="Microsoft.NETFramework.props">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Microsoft.VisualStudioVersion.v11.Common.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Microsoft.VisualStudioVersion.v12.Common.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Microsoft.VisualStudioVersion.v14.Common.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Microsoft.VisualStudioVersion.v15.Common.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Microsoft.VisualStudioVersion.v16.Common.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Microsoft.VisualStudioVersion.v17.Common.props">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <!-- Resource Files -->
     <EmbeddedResource Include="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
@@ -666,7 +645,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
-    <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
 
@@ -685,6 +663,7 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
+    <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">

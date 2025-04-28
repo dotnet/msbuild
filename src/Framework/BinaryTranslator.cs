@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.BuildException;
 
@@ -57,11 +56,6 @@ namespace Microsoft.Build.BackEnd
         private class BinaryReadTranslator : ITranslator
         {
             /// <summary>
-            /// The stream used as a source or destination for data.
-            /// </summary>
-            private Stream _packetStream;
-
-            /// <summary>
             /// The binary reader used in read mode.
             /// </summary>
             private BinaryReader _reader;
@@ -72,7 +66,6 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public BinaryReadTranslator(Stream packetStream, BinaryReaderFactory buffer)
             {
-                _packetStream = packetStream;
                 _reader = buffer.Create(packetStream);
             }
 #nullable disable
@@ -497,22 +490,6 @@ namespace Microsoft.Build.BackEnd
                 value = (T)Enum.ToObject(enumType, numericValue);
             }
 
-            /// <summary>
-            /// Translates a value using the .Net binary formatter.
-            /// </summary>
-            /// <typeparam name="T">The reference type.</typeparam>
-            /// <param name="value">The value to be translated.</param>
-            public void TranslateDotNet<T>(ref T value)
-            {
-                if (!TranslateNullable(value))
-                {
-                    return;
-                }
-
-                BinaryFormatter formatter = new BinaryFormatter();
-                value = (T)formatter.Deserialize(_packetStream);
-            }
-
             public void TranslateException(ref Exception value)
             {
                 if (!TranslateNullable(value))
@@ -817,11 +794,6 @@ namespace Microsoft.Build.BackEnd
         private class BinaryWriteTranslator : ITranslator
         {
             /// <summary>
-            /// The stream used as a source or destination for data.
-            /// </summary>
-            private Stream _packetStream;
-
-            /// <summary>
             /// The binary writer used in write mode.
             /// </summary>
             private BinaryWriter _writer;
@@ -832,7 +804,6 @@ namespace Microsoft.Build.BackEnd
             /// <param name="packetStream">The stream serving as the source or destination of data.</param>
             public BinaryWriteTranslator(Stream packetStream)
             {
-                _packetStream = packetStream;
                 _writer = new BinaryWriter(packetStream);
             }
 
@@ -1192,26 +1163,6 @@ namespace Microsoft.Build.BackEnd
                 where T : struct, Enum
             {
                 _writer.Write(numericValue);
-            }
-
-            /// <summary>
-            /// Translates a value using the .Net binary formatter.
-            /// </summary>
-            /// <typeparam name="T">The reference type.</typeparam>
-            /// <param name="value">The value to be translated.</param>
-            public void TranslateDotNet<T>(ref T value)
-            {
-                // All the calling paths are already guarded by ChangeWaves.Wave17_10 - so it's a no-op adding it here as well.
-                // But let's have it here explicitly - so it's clearer for the CodeQL reviewers.
-                if (!TranslateNullable(value) || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-                {
-                    return;
-                }
-
-                // codeql[cs/dangerous-binary-deserialization] This code needs explicit opt-in to be used (ChangeWaves.Wave17_10). This exists as a temporary compat opt-in for old 3rd party loggers, before they are migrated based on documented guidance.
-                // The opt-in documentation: https://github.com/dotnet/msbuild/blob/main/documentation/wiki/ChangeWaves.md#1710
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(_packetStream, value);
             }
 
             public void TranslateException(ref Exception value)
