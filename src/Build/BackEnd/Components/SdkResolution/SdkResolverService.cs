@@ -48,7 +48,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// Stores the list of manifests of specific SDK resolvers which could be loaded.
         /// </summary>
-        private IReadOnlyList<SdkResolverManifest> _specificResolversManifestsRegistry;
+        protected IReadOnlyList<SdkResolverManifest> _specificResolversManifestsRegistry;
 
         /// <summary>
         /// Stores the list of manifests of general SDK resolvers which could be loaded.
