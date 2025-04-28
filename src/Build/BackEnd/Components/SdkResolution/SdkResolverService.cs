@@ -48,12 +48,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// Stores the list of manifests of specific SDK resolvers which could be loaded.
         /// </summary>
-        private List<SdkResolverManifest> _specificResolversManifestsRegistry;
+        private IReadOnlyList<SdkResolverManifest> _specificResolversManifestsRegistry;
 
         /// <summary>
         /// Stores the list of manifests of general SDK resolvers which could be loaded.
         /// </summary>
-        private List<SdkResolverManifest> _generalResolversManifestsRegistry;
+        protected IReadOnlyList<SdkResolverManifest> _generalResolversManifestsRegistry;
+
 
         /// <summary>
         /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
@@ -259,7 +260,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return new SdkResult(sdk, null, null);
         }
 
-        private List<SdkResolver> GetResolvers(List<SdkResolverManifest> resolversManifests, LoggingContext loggingContext, ElementLocation sdkReferenceLocation)
+        private List<SdkResolver> GetResolvers(IReadOnlyList<SdkResolverManifest> resolversManifests, LoggingContext loggingContext, ElementLocation sdkReferenceLocation)
         {
             // Create a sorted by priority list of resolvers. Load them if needed.
             List<SdkResolver> resolvers = new List<SdkResolver>();
@@ -421,8 +422,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, ResolvableSdkRegex: null);
                 generalResolversManifestsRegistry.Add(sdkResolverManifest);
                 _manifestToResolvers[sdkResolverManifest] = resolvers;
-                _generalResolversManifestsRegistry = generalResolversManifestsRegistry;
-                _specificResolversManifestsRegistry = specificResolversManifestsRegistry;
+
+                _generalResolversManifestsRegistry = generalResolversManifestsRegistry.AsReadOnly();
+                _specificResolversManifestsRegistry = specificResolversManifestsRegistry.AsReadOnly();
             }
         }
 
@@ -519,8 +521,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 // Then it will wait at the lock and return after we release it since the collections we have filled them before releasing the lock.
                 // The collections are never modified after this point.
                 // So I've made them ReadOnly
-                _specificResolversManifestsRegistry = specificResolversManifestsRegistry;
-                _generalResolversManifestsRegistry = generalResolversManifestsRegistry;
+                _specificResolversManifestsRegistry = specificResolversManifestsRegistry.AsReadOnly();
+                _generalResolversManifestsRegistry = generalResolversManifestsRegistry.AsReadOnly();
             }
         }
 
