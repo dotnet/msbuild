@@ -68,7 +68,7 @@ namespace Microsoft.Build.Evaluation
         {
             ItemsAndMetadataPair pair = new ItemsAndMetadataPair(null, null);
 
-            foreach (string expression in expressions)
+            foreach (string expression in expressions.GetStructEnumerable())
             {
                 GetReferencedItemNamesAndMetadata(expression, 0, expression.Length, ref pair, ShredderOptions.All);
             }
