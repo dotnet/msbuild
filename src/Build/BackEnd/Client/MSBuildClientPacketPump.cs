@@ -6,11 +6,13 @@ using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
-#if !FEATURE_APM
+
+#if NET
 using System.Threading.Tasks;
 #endif
+
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Client
 {
@@ -121,6 +123,16 @@ namespace Microsoft.Build.BackEnd.Client
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
             _packetFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
+        }
+
+        /// <summary>
+        /// Deserializes a packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator to use as a source for packet data.</param>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
         }
 
         /// <summary>

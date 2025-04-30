@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if RUNTIME_TYPE_NETCORE
-using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Shared;
 #endif

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.BuildException;
 
@@ -57,11 +56,6 @@ namespace Microsoft.Build.BackEnd
         private class BinaryReadTranslator : ITranslator
         {
             /// <summary>
-            /// The stream used as a source or destination for data.
-            /// </summary>
-            private Stream _packetStream;
-
-            /// <summary>
             /// The binary reader used in read mode.
             /// </summary>
             private BinaryReader _reader;
@@ -72,7 +66,6 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public BinaryReadTranslator(Stream packetStream, BinaryReaderFactory buffer)
             {
-                _packetStream = packetStream;
                 _reader = buffer.Create(packetStream);
             }
 #nullable disable
@@ -797,11 +790,6 @@ namespace Microsoft.Build.BackEnd
         private class BinaryWriteTranslator : ITranslator
         {
             /// <summary>
-            /// The stream used as a source or destination for data.
-            /// </summary>
-            private Stream _packetStream;
-
-            /// <summary>
             /// The binary writer used in write mode.
             /// </summary>
             private BinaryWriter _writer;
@@ -812,7 +800,6 @@ namespace Microsoft.Build.BackEnd
             /// <param name="packetStream">The stream serving as the source or destination of data.</param>
             public BinaryWriteTranslator(Stream packetStream)
             {
-                _packetStream = packetStream;
                 _writer = new BinaryWriter(packetStream);
             }
 

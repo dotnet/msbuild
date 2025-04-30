@@ -3,7 +3,9 @@
 
 using System;
 using System.Globalization;
+#if !NET
 using System.Text;
+#endif
 using Error = Microsoft.Build.Shared.ErrorUtilities;
 
 #nullable disable

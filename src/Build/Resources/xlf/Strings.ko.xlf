@@ -221,6 +221,16 @@
         <target state="translated">'TargetFramework' 및 'TargetFrameworks' 속성은 사용되지 않으며 .NET SDK를 사용하지 않는 프로젝트에서 지정해서는 안 됩니다.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0302_MessageFmt">
+        <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
+        <target state="translated">프로젝트 {1}의 작업 {0}(은)는 {2} CLI를 사용하여 프로젝트를 빌드합니다. 대신 MSBuild 작업을 사용해야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0302_Title">
+        <source>The 'Exec' task should not be used to build a project.</source>
+        <target state="translated">'Exec' 작업은 프로젝트를 빌드하는 데 사용하면 안 됩니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">속성: '{0}'에 액세스했지만 초기화되지 않았습니다.</target>
@@ -618,6 +628,11 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">null 또는 빈 대상 이름을 포함하는 컬렉션을 사용하여 {0} 메서드를 호출할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="translated">예외 {0}(으)로 인해 원격 분석 라이브러리를 로드하지 못했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">

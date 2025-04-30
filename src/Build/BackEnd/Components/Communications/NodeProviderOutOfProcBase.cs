@@ -3,27 +3,25 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-#if FEATURE_PIPE_SECURITY
+using Microsoft.Build.BackEnd.Logging;
+
+#if NETFRAMEWORK
+using Microsoft.Build.Eventing;
 using System.Security.Principal;
 #endif
 
-#if FEATURE_APM
-using Microsoft.Build.Eventing;
-#endif
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Task = System.Threading.Tasks.Task;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
 
 #nullable disable
 
@@ -882,23 +880,6 @@ namespace Microsoft.Build.BackEnd
 
                 _process.KillTree(timeoutMilliseconds: 5000);
             }
-
-#if FEATURE_APM
-            /// <summary>
-            /// Completes the asynchronous packet write to the node.
-            /// </summary>
-            private void PacketWriteComplete(IAsyncResult result)
-            {
-                try
-                {
-                    _serverToClientStream.EndWrite(result);
-                }
-                catch (IOException)
-                {
-                    // Do nothing here because any exception will be caught by the async read handler
-                }
-            }
-#endif
 
             private bool ProcessHeaderBytesRead(int bytesRead)
             {

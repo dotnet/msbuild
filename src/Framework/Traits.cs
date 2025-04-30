@@ -7,11 +7,12 @@ using System.Globalization;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    ///     Represents toggleable features of the MSBuild engine
+    ///     Represents toggleable features of the MSBuild engine.
     /// </summary>
     internal class Traits
     {
         private static Traits _instance = new Traits();
+
         public static Traits Instance
         {
             get
@@ -132,7 +133,6 @@ namespace Microsoft.Build.Framework
 
         public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
 
-
         /// <summary>
         /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.
         /// mirroring
@@ -142,6 +142,7 @@ namespace Microsoft.Build.Framework
         public bool FrameworkTelemetryOptOut = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
         public double? TelemetrySampleRateOverride = ParseDoubleFromEnvironmentVariable("MSBUILD_TELEMETRY_SAMPLE_RATE");
         public bool ExcludeTasksDetailsFromTelemetry = IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
+        public bool FlushNodesTelemetryIntoConsole = IsEnvVarOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
 
         // for VS17.14
         public readonly bool TelemetryOptIn = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTIN");
@@ -163,9 +164,15 @@ namespace Microsoft.Build.Framework
                 : defaultValue;
         }
 
+        /// <summary>
+        /// Parse a double from an environment variable with invariant culture.
+        /// </summary>
         private static double? ParseDoubleFromEnvironmentVariable(string environmentVariable)
         {
-            return double.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out double result)
+            return double.TryParse(Environment.GetEnvironmentVariable(environmentVariable),
+                                  NumberStyles.Float,
+                                  CultureInfo.InvariantCulture,
+                                  out double result)
                 ? result
                 : null;
         }

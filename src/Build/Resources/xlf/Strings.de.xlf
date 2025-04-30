@@ -221,6 +221,16 @@
         <target state="translated">Die Eigenschaften "TargetFramework" und "TargetFrameworks" werden nicht berücksichtigt und sollten nicht in Projekten angegeben werden, die nicht das .NET SDK verwenden.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0302_MessageFmt">
+        <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
+        <target state="translated">Die {0}-Aufgabe aus dem Projekt {1} erstellt ein Projekt mithilfe der {2} CLI. Stattdessen sollte die MSBuild-Aufgabe verwendet werden.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0302_Title">
+        <source>The 'Exec' task should not be used to build a project.</source>
+        <target state="translated">Die "Ausführen"-Aufgabe sollte nicht zum Erstellen eines Projekts verwendet werden.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">Auf die Eigenschaft „{0}“ wurde zugegriffen, sie wurde jedoch nie initialisiert.</target>
@@ -618,6 +628,11 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">Die Methode "{0}" kann nicht mit einer Sammlung aufgerufen werden, die NULL oder leere Zielnamen enthält.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="translated">Fehler beim Laden von Telemetriebibliotheken. Ausnahme:{0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">

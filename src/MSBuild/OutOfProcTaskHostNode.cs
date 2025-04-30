@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -590,6 +589,16 @@ namespace Microsoft.Build.CommandLine
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
             _packetFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
+        }
+
+        /// <summary>
+        /// Takes a serializer and deserializes the packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
         }
 
         /// <summary>

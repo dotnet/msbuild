@@ -13,9 +13,7 @@ using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 
 #if NET
-using System.Diagnostics.CodeAnalysis;
 using System.Buffers;
-
 #endif
 
 #if NETFRAMEWORK
@@ -808,15 +806,17 @@ public sealed partial class TerminalLogger : INodeLogger
         // For cache plugin projects which result in a cache hit, ensure the output path is set
         // to the item spec corresponding to the GetTargetPath target upon completion.
         var buildEventContext = e.BuildEventContext;
+        var targetOutputs = e.TargetOutputs;
         if (_restoreContext is null
             && buildEventContext is not null
+            && targetOutputs is not null
             && _hasUsedCache
             && e.TargetName == "GetTargetPath"
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
         {
-            if (project.IsCachePluginProject)
+            if (project is not null && project.IsCachePluginProject)
             {
-                foreach (ITaskItem output in e.TargetOutputs)
+                foreach (ITaskItem output in targetOutputs)
                 {
                     project.OutputPath = output.ItemSpec.AsMemory();
                     break;
