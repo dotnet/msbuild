@@ -486,10 +486,12 @@ namespace Microsoft.Build.BackEnd
             {
                 foreach (var item in items)
                 {
-                    var metadataToRemove = item.MetadataNames.Where(name => !keepMetadata.Contains(name));
-                    foreach (var metadataName in metadataToRemove)
+                    foreach (var metadataName in item.MetadataNames)
                     {
-                        item.RemoveMetadata(metadataName);
+                        if (!keepMetadata.Contains(metadataName))
+                        {
+                            item.RemoveMetadata(metadataName);
+                        }
                     }
                 }
             }
@@ -497,10 +499,12 @@ namespace Microsoft.Build.BackEnd
             {
                 foreach (var item in items)
                 {
-                    var metadataToRemove = item.MetadataNames.Where(name => removeMetadata.Contains(name));
-                    foreach (var metadataName in metadataToRemove)
+                    foreach (var metadataName in item.MetadataNames)
                     {
-                        item.RemoveMetadata(metadataName);
+                        if (removeMetadata.Contains(metadataName))
+                        {
+                            item.RemoveMetadata(metadataName);
+                        }
                     }
                 }
             }
@@ -517,7 +521,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A list of matching items</returns>
         private HashSet<string> EvaluateExcludePaths(IReadOnlyList<string> excludes, ElementLocation excludeLocation)
         {
-            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(excludes.Count, StringComparer.OrdinalIgnoreCase);
             foreach (string excludeSplit in excludes)
             {
                 string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(
