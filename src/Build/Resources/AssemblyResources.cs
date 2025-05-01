@@ -20,7 +20,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static ResourceManager s_msbuildExeResourceManager;
 
-        private static ConcurrentDictionary<string, string> resourceCache = new();
+        private static ConcurrentDictionary<string, string> engineResourceCache = new();
+        private static ConcurrentDictionary<string, string> msbuildExeResourceCache = new();
 
         /// <summary>
         /// The internals of the Engine are exposed to MSBuild.exe, so they must share the same AssemblyResources class and
@@ -78,21 +79,20 @@ namespace Microsoft.Build.Shared
         /// <returns>The resource string, or null if not found.</returns>
         private static string GetStringFromEngineResources(string name)
         {
-            if (resourceCache.TryGetValue(name, out string resource))
+            string resource = engineResourceCache.GetOrAdd(name, static key =>
             {
-                return resource;
-            }
+                CultureInfo currentUICulture = CultureInfo.CurrentUICulture;
+                string retrievedResource = s_resources.GetString(key, currentUICulture);
 
-            resource = s_resources.GetString(name, CultureInfo.CurrentUICulture);
+                if (retrievedResource == null)
+                {
+                    retrievedResource = s_sharedResources.GetString(key, currentUICulture);
+                }
 
-            if (resource == null)
-            {
-                resource = s_sharedResources.GetString(name, CultureInfo.CurrentUICulture);
-            }
+                ErrorUtilities.VerifyThrow(retrievedResource != null, $"Missing resource '{key}'");
 
-            ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", name);
-
-            resourceCache[name] = resource;
+                return retrievedResource;
+            });
 
             return resource;
         }
@@ -108,7 +108,7 @@ namespace Microsoft.Build.Shared
             if (s_msbuildExeResourceManager != null)
             {
                 // Try MSBuild.exe's resources
-                resource = s_msbuildExeResourceManager.GetString(name, CultureInfo.CurrentUICulture);
+                msbuildExeResourceCache.GetOrAdd(name, static key => s_msbuildExeResourceManager.GetString(key, CultureInfo.CurrentUICulture));
             }
 
             return resource;

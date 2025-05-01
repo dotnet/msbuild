@@ -1059,6 +1059,29 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             /// <param name="list">The list to be translated.</param>
             /// <param name="objectTranslator">The translator to use for the items in the list</param>
+            /// <typeparam name="T">A TaskItemType</typeparam>
+            public void Translate<T>(ref IReadOnlyCollection<T> list, ObjectTranslator<T> objectTranslator)
+            {
+                if (!TranslateNullable(list))
+                {
+                    return;
+                }
+
+                int count = list.Count;
+                _writer.Write(count);
+
+                foreach (T value in list)
+                {
+                    T loopValue = value;
+                    objectTranslator(this, ref loopValue);
+                }
+            }
+
+            /// <summary>
+            /// Translates a list of T using an <see cref="ObjectTranslator{T}"/>
+            /// </summary>
+            /// <param name="list">The list to be translated.</param>
+            /// <param name="objectTranslator">The translator to use for the items in the list</param>
             /// <param name="collectionFactory">factory to create the IList</param>
             /// <typeparam name="T">A TaskItemType</typeparam>
             /// <typeparam name="L">IList subtype</typeparam>

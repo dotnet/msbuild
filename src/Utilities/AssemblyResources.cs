@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Reflection;
 using System.Resources;
@@ -14,6 +15,7 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class AssemblyResources
     {
+        private static readonly ConcurrentDictionary<string, string> s_resourceStrings = new ConcurrentDictionary<string, string>();
         /// <summary>
         /// Loads the specified resource string, either from the assembly's primary resources, or its shared resources.
         /// </summary>
@@ -22,12 +24,16 @@ namespace Microsoft.Build.Shared
         /// <returns>The resource string, or null if not found.</returns>
         internal static string GetString(string name)
         {
-            string resource = PrimaryResources.GetString(name, CultureInfo.CurrentUICulture)
-                ?? SharedResources.GetString(name, CultureInfo.CurrentUICulture);
+            return s_resourceStrings.GetOrAdd(name, static key =>
+            {
+                CultureInfo currentUICulture = CultureInfo.CurrentUICulture;
+                string resource = PrimaryResources.GetString(key, currentUICulture)
+                    ?? SharedResources.GetString(key, currentUICulture);
 
-            ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", name);
+                ErrorUtilities.VerifyThrow(resource != null, "Missing resource '{0}'", key);
 
-            return resource;
+                return resource;
+            });
         }
 
         /// <summary>

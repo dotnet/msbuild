@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -114,11 +115,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             foreach (ProjectUsingTaskElement taskElement in elementList)
             {
-                List<TaskRegistry.RegisteredTaskRecord> registrationRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(taskElement.TaskName, null)];
+                ConcurrentBag<TaskRegistry.RegisteredTaskRecord> registrationRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(taskElement.TaskName, null)];
                 Assert.NotNull(registrationRecords); // "Task registrationrecord not found in TaskRegistry.TaskRegistrations!"
                 Assert.Single(registrationRecords); // "Expected only one record registered under this TaskName!"
 
-                AssemblyLoadInfo taskAssemblyLoadInfo = registrationRecords[0].TaskFactoryAssemblyLoadInfo;
+                AssemblyLoadInfo taskAssemblyLoadInfo = registrationRecords.First().TaskFactoryAssemblyLoadInfo;
                 string assemblyName = String.IsNullOrEmpty(taskElement.AssemblyName) ? null : taskElement.AssemblyName;
                 string assemblyFile = String.IsNullOrEmpty(taskElement.AssemblyFile) ? null : taskElement.AssemblyFile;
                 Assert.Equal(taskAssemblyLoadInfo, AssemblyLoadInfo.Create(assemblyName, assemblyFile)); // "Task record was not properly registered by TaskRegistry.RegisterTask!"
@@ -154,11 +155,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             foreach (ProjectUsingTaskElement taskElement in elementList)
             {
-                List<TaskRegistry.RegisteredTaskRecord> registrationRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(taskElement.TaskName, null)];
+                ConcurrentBag<TaskRegistry.RegisteredTaskRecord> registrationRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(taskElement.TaskName, null)];
                 Assert.NotNull(registrationRecords); // "Task registrationrecord not found in TaskRegistry.TaskRegistrations!"
                 Assert.Single(registrationRecords); // "Expected only one record registered under this TaskName!"
 
-                AssemblyLoadInfo taskAssemblyLoadInfo = registrationRecords[0].TaskFactoryAssemblyLoadInfo;
+                AssemblyLoadInfo taskAssemblyLoadInfo = registrationRecords.First().TaskFactoryAssemblyLoadInfo;
 
                 string assemblyName = String.IsNullOrEmpty(taskElement.AssemblyName) ? null : taskElement.AssemblyName;
                 string assemblyFile = String.IsNullOrEmpty(taskElement.AssemblyFile) ? null : taskElement.AssemblyFile;
@@ -198,16 +199,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(2, registry.TaskRegistrations.Count); // "Expected only two buckets since two of three tasks have the same name!"
 
             // Now let's look at the bucket with only one task
-            List<TaskRegistry.RegisteredTaskRecord> singletonBucket = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(elementList[1].TaskName, null)];
+            ConcurrentBag<TaskRegistry.RegisteredTaskRecord> singletonBucket = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(elementList[1].TaskName, null)];
             Assert.NotNull(singletonBucket); // "Record not found in TaskRegistry.TaskRegistrations!"
             Assert.Single(singletonBucket); // "Expected only Record registered under this TaskName!"
-            AssemblyLoadInfo singletonAssemblyLoadInfo = singletonBucket[0].TaskFactoryAssemblyLoadInfo;
+            AssemblyLoadInfo singletonAssemblyLoadInfo = singletonBucket.First().TaskFactoryAssemblyLoadInfo;
             string assemblyName = String.IsNullOrEmpty(elementList[1].AssemblyName) ? null : elementList[1].AssemblyName;
             string assemblyFile = String.IsNullOrEmpty(elementList[1].AssemblyFile) ? null : elementList[1].AssemblyFile;
             Assert.Equal(singletonAssemblyLoadInfo, AssemblyLoadInfo.Create(assemblyName, assemblyFile)); // "Task record was not properly registered by TaskRegistry.RegisterTask!"
 
             // Now let's look at the bucket with two tasks
-            List<TaskRegistry.RegisteredTaskRecord> duplicateBucket = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(elementList[0].TaskName, null)];
+            ConcurrentBag<TaskRegistry.RegisteredTaskRecord> duplicateBucket = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(elementList[0].TaskName, null)];
             Assert.NotNull(duplicateBucket); // "Records not found in TaskRegistry.TaskRegistrations!"
             Assert.Equal(2, duplicateBucket.Count); // "Expected two Records registered under this TaskName!"
 
@@ -261,11 +262,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             foreach (ProjectUsingTaskElement taskElement in elementList)
             {
-                List<TaskRegistry.RegisteredTaskRecord> registrationRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(taskElement.TaskName, null)];
+                ConcurrentBag<TaskRegistry.RegisteredTaskRecord> registrationRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(taskElement.TaskName, null)];
                 Assert.NotNull(registrationRecords); // "Task registrationrecord not found in TaskRegistry.TaskRegistrations!"
                 Assert.Single(registrationRecords); // "Expected only one record registered under this TaskName!"
 
-                AssemblyLoadInfo taskAssemblyLoadInfo = registrationRecords[0].TaskFactoryAssemblyLoadInfo;
+                AssemblyLoadInfo taskAssemblyLoadInfo = registrationRecords.First().TaskFactoryAssemblyLoadInfo;
                 string assemblyName = String.IsNullOrEmpty(taskElement.AssemblyName) ? null : taskElement.AssemblyName;
                 string assemblyFile = String.IsNullOrEmpty(taskElement.AssemblyFile) ? null : taskElement.AssemblyFile;
                 Assert.Equal(taskAssemblyLoadInfo, AssemblyLoadInfo.Create(assemblyName, assemblyFile == null ? null : Path.GetFullPath(assemblyFile))); // "Task record was not properly registered by TaskRegistry.RegisterTask!"
@@ -1127,7 +1128,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(3, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.TaskRegistrations!"
 
-            IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
+            IDictionary<TaskRegistry.RegisteredTaskIdentity, ConcurrentBag<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
 
             foreach (ProjectUsingTaskElement taskElement in elementList)
             {
@@ -1140,13 +1141,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 expandedAssemblyFile = String.IsNullOrEmpty(expandedAssemblyFile) ? null : expandedAssemblyFile;
                 expandedTaskFactory = String.IsNullOrEmpty(expandedTaskFactory) ? "AssemblyTaskFactory" : expandedTaskFactory;
 
-                List<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(expandedtaskName, null)];
+                ConcurrentBag<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(expandedtaskName, null)];
                 Assert.NotNull(registeredTaskRecords); // "Task to be found in TaskRegistry.TaskRegistrations!"
                 Assert.Single(registeredTaskRecords); // "Expected only one task registered under this TaskName!"
 
-                Assert.Equal(expandedTaskFactory, registeredTaskRecords[0].TaskFactoryAttributeName);
+                Assert.Equal(expandedTaskFactory, registeredTaskRecords.First().TaskFactoryAttributeName);
 
-                AssemblyLoadInfo taskAssemblyLoadInfo = registeredTaskRecords[0].TaskFactoryAssemblyLoadInfo;
+                AssemblyLoadInfo taskAssemblyLoadInfo = registeredTaskRecords.First().TaskFactoryAssemblyLoadInfo;
                 Assert.Equal(taskAssemblyLoadInfo, AssemblyLoadInfo.Create(expandedAssemblyName, expandedAssemblyFile == null ? null : Path.GetFullPath(expandedAssemblyFile))); // "Task record was not properly registered by TaskRegistry.RegisterTask!"
             }
         }
@@ -1183,7 +1184,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(2, registeredTaskCount); // "Expected two registered tasks in TaskRegistry.TaskRegistrations!"
 
-            IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
+            IDictionary<TaskRegistry.RegisteredTaskIdentity, ConcurrentBag<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
 
             for (int i = 0; i <= 2; i += 2)
             {
@@ -1195,11 +1196,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 expandedAssemblyName = String.IsNullOrEmpty(expandedAssemblyName) ? null : expandedAssemblyName;
                 expandedAssemblyFile = String.IsNullOrEmpty(expandedAssemblyFile) ? null : expandedAssemblyFile;
 
-                List<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(expandedtaskName, null)];
+                ConcurrentBag<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity(expandedtaskName, null)];
                 Assert.NotNull(registeredTaskRecords); // "Task to be found in TaskRegistry.TaskRegistrations!"
                 Assert.Single(registeredTaskRecords); // "Expected only one task registered under this TaskName!"
 
-                AssemblyLoadInfo taskAssemblyLoadInfo = registeredTaskRecords[0].TaskFactoryAssemblyLoadInfo;
+                AssemblyLoadInfo taskAssemblyLoadInfo = registeredTaskRecords.First().TaskFactoryAssemblyLoadInfo;
                 Assert.Equal(taskAssemblyLoadInfo, AssemblyLoadInfo.Create(expandedAssemblyName, Path.GetFullPath(expandedAssemblyFile))); // "Task record was not properly registered by TaskRegistry.RegisterTask!"
             }
         }
@@ -1221,14 +1222,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(1, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.TaskRegistrations!"
 
-            IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
+            IDictionary<TaskRegistry.RegisteredTaskIdentity, ConcurrentBag<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
 
             ProjectUsingTaskElement taskElement = elementList[0];
-            List<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Hello", null)];
+            ConcurrentBag<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Hello", null)];
             Assert.NotNull(registeredTaskRecords); // "Task to be found in TaskRegistry.TaskRegistrations!"
             Assert.Single(registeredTaskRecords); // "Expected only one task registered under this TaskName!"
-            Assert.Empty(registeredTaskRecords[0].ParameterGroupAndTaskBody.UsingTaskParameters);
-            Assert.Null(registeredTaskRecords[0].ParameterGroupAndTaskBody.InlineTaskXmlBody);
+            Assert.Empty(registeredTaskRecords.First().ParameterGroupAndTaskBody.UsingTaskParameters);
+            Assert.Null(registeredTaskRecords.First().ParameterGroupAndTaskBody.InlineTaskXmlBody);
         }
 
         [Fact]
@@ -1273,13 +1274,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(1, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.TaskRegistrations!"
-            IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
+            IDictionary<TaskRegistry.RegisteredTaskIdentity, ConcurrentBag<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
 
             ProjectUsingTaskElement taskElement = elementList[0];
-            List<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)];
+            ConcurrentBag<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)];
             Assert.NotNull(registeredTaskRecords); // "Task to be found in TaskRegistry.TaskRegistrations!"
             Assert.Single(registeredTaskRecords); // "Expected only one task registered under this TaskName!"
-            TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord = registeredTaskRecords[0].ParameterGroupAndTaskBody;
+            TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord = registeredTaskRecords.First().ParameterGroupAndTaskBody;
             Assert.NotNull(inlineTaskRecord);
             Assert.Null(inlineTaskRecord.InlineTaskXmlBody);
             Assert.Empty(inlineTaskRecord.UsingTaskParameters);
@@ -1309,14 +1310,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(1, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.TaskRegistrations!"
-            IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
+            IDictionary<TaskRegistry.RegisteredTaskIdentity, ConcurrentBag<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
 
             ProjectUsingTaskElement taskElement = elementList[0];
-            List<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)];
+            ConcurrentBag<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)];
             Assert.NotNull(registeredTaskRecords); // "Task to be found in TaskRegistry.TaskRegistrations!"
             Assert.Single(registeredTaskRecords); // "Expected only one task registered under this TaskName!"
 
-            TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord = registeredTaskRecords[0].ParameterGroupAndTaskBody;
+            TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord = registeredTaskRecords.First().ParameterGroupAndTaskBody;
             Assert.NotNull(inlineTaskRecord);
             Assert.Null(inlineTaskRecord.InlineTaskXmlBody);
             Assert.Equal(2, inlineTaskRecord.UsingTaskParameters.Count);
@@ -1348,7 +1349,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"].PropertyType.Equals(typeof(String)));
+            Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)].First().ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"].PropertyType.Equals(typeof(String)));
         }
 
         /// <summary>
@@ -1363,7 +1364,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"].PropertyType.Equals(typeof(String)));
+            Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)].First().ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"].PropertyType.Equals(typeof(String)));
         }
 
         /// <summary>
@@ -1573,7 +1574,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            Assert.False(((TaskPropertyInfo)registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"]).Output);
+            Assert.False(((TaskPropertyInfo)registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)].First().ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"]).Output);
         }
 
         /// <summary>
@@ -1588,7 +1589,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            Assert.False(((TaskPropertyInfo)registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"]).Output);
+            Assert.False(((TaskPropertyInfo)registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)].First().ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"]).Output);
         }
 
         /// <summary>
@@ -1620,7 +1621,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            Assert.False(((TaskPropertyInfo)registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"]).Required);
+            Assert.False(((TaskPropertyInfo)registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)].First().ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"]).Required);
         }
 
         /// <summary>
@@ -1635,7 +1636,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            Assert.False(((TaskPropertyInfo)registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"]).Required);
+            Assert.False(((TaskPropertyInfo)registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)].First().ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"]).Required);
         }
 
         /// <summary>
@@ -1682,14 +1683,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             int registeredTaskCount = GetDeepCountOfRegisteredTasks(registry.TaskRegistrations);
             Assert.Equal(1, registeredTaskCount); // "Expected three registered tasks in TaskRegistry.TaskRegistrations!"
-            IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
+            IDictionary<TaskRegistry.RegisteredTaskIdentity, ConcurrentBag<TaskRegistry.RegisteredTaskRecord>> registeredTasks = registry.TaskRegistrations;
 
             ProjectUsingTaskElement taskElement = elementList[0];
-            List<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)];
+            ConcurrentBag<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)];
             Assert.NotNull(registeredTaskRecords); // "Task to be found in TaskRegistry.TaskRegistrations!"
             Assert.Single(registeredTaskRecords); // "Expected only one task registered under this TaskName!"
 
-            TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord = registeredTaskRecords[0].ParameterGroupAndTaskBody;
+            TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord = registeredTaskRecords.First().ParameterGroupAndTaskBody;
             Assert.NotNull(inlineTaskRecord);
             Assert.Null(inlineTaskRecord.InlineTaskXmlBody);
             Assert.Equal(2, inlineTaskRecord.UsingTaskParameters.Count);
@@ -1734,10 +1735,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            List<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)];
+            ConcurrentBag<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)];
             Assert.Single(registeredTaskRecords); // "Expected only one task registered under this TaskName!"
 
-            TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord = registeredTaskRecords[0].ParameterGroupAndTaskBody;
+            TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord = registeredTaskRecords.First().ParameterGroupAndTaskBody;
             Assert.NotNull(inlineTaskRecord);
             Assert.False(inlineTaskRecord.TaskBodyEvaluated);
         }
@@ -1758,10 +1759,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            List<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)];
+            ConcurrentBag<TaskRegistry.RegisteredTaskRecord> registeredTaskRecords = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)];
             Assert.Single(registeredTaskRecords); // "Expected only one task registered under this TaskName!"
 
-            TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord = registeredTaskRecords[0].ParameterGroupAndTaskBody;
+            TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord = registeredTaskRecords.First().ParameterGroupAndTaskBody;
             Assert.NotNull(inlineTaskRecord);
             Assert.True(inlineTaskRecord.TaskBodyEvaluated);
         }
@@ -1777,7 +1778,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // Make sure when evaluate is false the string passed in is not expanded
-            Assert.False(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.TaskBodyEvaluated.Equals(body));
+            Assert.False(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)].First().ParameterGroupAndTaskBody.TaskBodyEvaluated.Equals(body));
         }
 
         /// <summary>
@@ -1795,7 +1796,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
             // Make sure when evaluate is false the string passed in is not expanded
-            Assert.False(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.TaskBodyEvaluated.Equals(expandedBody));
+            Assert.False(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)].First().ParameterGroupAndTaskBody.TaskBodyEvaluated.Equals(expandedBody));
         }
 
         /// <summary>
@@ -1821,7 +1822,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string evaluate = bool.FalseString;
             List<ProjectUsingTaskElement> elementList = CreateTaskBodyElementWithAttributes(evaluate, "");
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            Assert.False(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.TaskBodyEvaluated);
+            Assert.False(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)].First().ParameterGroupAndTaskBody.TaskBodyEvaluated);
         }
 
         /// <summary>
@@ -1833,7 +1834,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string evaluate = "";
             List<ProjectUsingTaskElement> elementList = CreateTaskBodyElementWithAttributes(evaluate, "");
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.TaskBodyEvaluated);
+            Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)].First().ParameterGroupAndTaskBody.TaskBodyEvaluated);
         }
 
         /// <summary>
@@ -1845,7 +1846,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string evaluate = null;
             List<ProjectUsingTaskElement> elementList = CreateTaskBodyElementWithAttributes(evaluate, "");
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-            Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.TaskBodyEvaluated);
+            Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)].First().ParameterGroupAndTaskBody.TaskBodyEvaluated);
         }
         #endregion
 
@@ -2125,7 +2126,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     true /* case-insensitive */);
             }
 
-            Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"].PropertyType.Equals(paramType));
+            Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)].First().ParameterGroupAndTaskBody.UsingTaskParameters["ParameterWithAllAttributesHardCoded"].PropertyType.Equals(paramType));
         }
 
         /// <summary>
@@ -2169,7 +2170,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Count the number of registry records which exist in the task registry
         /// </summary>
-        internal static int GetDeepCountOfRegisteredTasks(IDictionary<TaskRegistry.RegisteredTaskIdentity, List<TaskRegistry.RegisteredTaskRecord>> registryRecords)
+        internal static int GetDeepCountOfRegisteredTasks(IDictionary<TaskRegistry.RegisteredTaskIdentity, ConcurrentBag<TaskRegistry.RegisteredTaskRecord>> registryRecords)
         {
             return registryRecords?.Values.Sum(recordList => recordList.Count) ?? 0;
         }

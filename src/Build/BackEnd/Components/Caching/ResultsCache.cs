@@ -64,29 +64,17 @@ namespace Microsoft.Build.BackEnd
         /// <param name="result">The result to add.</param>
         public void AddResult(BuildResult result)
         {
-            lock (_resultsByConfiguration)
+            _resultsByConfiguration.AddOrUpdate(result.ConfigurationId, static (key, newResult) => newResult, static (key, existingResult, newResult) =>
             {
-                if (_resultsByConfiguration.TryGetValue(result.ConfigurationId, out BuildResult buildResult))
+                // Merging results would be meaningless as we would be merging the object with itself.
+                if (!Object.ReferenceEquals(existingResult, newResult))
                 {
-                    if (Object.ReferenceEquals(buildResult, result))
-                    {
-                        // Merging results would be meaningless as we would be merging the object with itself.
-                        return;
-                    }
+                    existingResult.MergeResults(newResult);
+                }
 
-                    buildResult.MergeResults(result);
-                }
-                else
-                {
-                    // Note that we are not making a copy here.  This is by-design.  The TargetBuilder uses this behavior
-                    // to ensure that re-entering a project will be able to see all previously built targets and avoid
-                    // building them again.
-                    if (!_resultsByConfiguration.TryAdd(result.ConfigurationId, result))
-                    {
-                        ErrorUtilities.ThrowInternalError("Failed to add result for configuration {0}", result.ConfigurationId);
-                    }
-                }
-            }
+                return existingResult;
+            },
+                result);
         }
 
         /// <summary>
@@ -94,15 +82,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ClearResults()
         {
-            lock (_resultsByConfiguration)
+            foreach (KeyValuePair<int, BuildResult> result in _resultsByConfiguration)
             {
-                foreach (KeyValuePair<int, BuildResult> result in _resultsByConfiguration)
-                {
-                    result.Value.ClearCachedFiles();
-                }
-
-                _resultsByConfiguration.Clear();
+                result.Value.ClearCachedFiles();
             }
+
+            _resultsByConfiguration.Clear();
         }
 
         /// <summary>
@@ -114,17 +99,14 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
 
-            lock (_resultsByConfiguration)
+            if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult result))
             {
-                if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult result))
+                foreach (string target in request.Targets)
                 {
-                    foreach (string target in request.Targets)
-                    {
-                        ErrorUtilities.VerifyThrow(result.HasResultsForTarget(target), "No results in cache for target " + target);
-                    }
-
-                    return result;
+                    ErrorUtilities.VerifyThrow(result.HasResultsForTarget(target), "No results in cache for target " + target);
                 }
+
+                return result;
             }
 
             return null;
@@ -138,10 +120,7 @@ namespace Microsoft.Build.BackEnd
         public BuildResult GetResultsForConfiguration(int configurationId)
         {
             BuildResult results;
-            lock (_resultsByConfiguration)
-            {
-                _resultsByConfiguration.TryGetValue(configurationId, out results);
-            }
+            _resultsByConfiguration.TryGetValue(configurationId, out results);
 
             return results;
         }
@@ -168,57 +147,54 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
             ResultsCacheResponse response = new(ResultsCacheResponseType.NotSatisfied);
 
-            lock (_resultsByConfiguration)
+            if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult allResults))
             {
-                if (_resultsByConfiguration.TryGetValue(request.ConfigurationId, out BuildResult allResults))
+                bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
+                    ? AreBuildResultFlagsCompatible(request, allResults) : true;
+
+                if (buildDataFlagsSatisfied)
                 {
-                    bool buildDataFlagsSatisfied = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12)
-                        ? AreBuildResultFlagsCompatible(request, allResults) : true;
+                    // Check for targets explicitly specified.
+                    bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, checkTargetsMissingResults: true, skippedResultsDoNotCauseCacheMiss);
 
-                    if (buildDataFlagsSatisfied)
+                    if (explicitTargetsSatisfied)
                     {
-                        // Check for targets explicitly specified.
-                        bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, checkTargetsMissingResults: true, skippedResultsDoNotCauseCacheMiss);
+                        // All of the explicit targets, if any, have been satisfied
+                        response.Type = ResultsCacheResponseType.Satisfied;
 
-                        if (explicitTargetsSatisfied)
+                        // Check for the initial targets.  If we don't know what the initial targets are, we assume they are not satisfied.
+                        if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss))
                         {
-                            // All of the explicit targets, if any, have been satisfied
-                            response.Type = ResultsCacheResponseType.Satisfied;
+                            response.Type = ResultsCacheResponseType.NotSatisfied;
+                        }
 
-                            // Check for the initial targets.  If we don't know what the initial targets are, we assume they are not satisfied.
-                            if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss))
+                        // We could still be missing implicit targets, so check those...
+                        if (request.Targets.Count == 0)
+                        {
+                            // Check for the default target, if necessary.  If we don't know what the default targets are, we
+                            // assume they are not satisfied.
+                            if (configDefaultTargets == null || !CheckResults(allResults, configDefaultTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss))
                             {
                                 response.Type = ResultsCacheResponseType.NotSatisfied;
                             }
+                        }
 
-                            // We could still be missing implicit targets, so check those...
-                            if (request.Targets.Count == 0)
+                        // Now report those results requested, if they are satisfied.
+                        if (response.Type == ResultsCacheResponseType.Satisfied)
+                        {
+                            List<string> targetsToAddResultsFor = new List<string>(configInitialTargets);
+
+                            // Now report either the explicit targets or the default targets
+                            if (request.Targets.Count > 0)
                             {
-                                // Check for the default target, if necessary.  If we don't know what the default targets are, we
-                                // assume they are not satisfied.
-                                if (configDefaultTargets == null || !CheckResults(allResults, configDefaultTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss))
-                                {
-                                    response.Type = ResultsCacheResponseType.NotSatisfied;
-                                }
+                                targetsToAddResultsFor.AddRange(request.Targets);
+                            }
+                            else
+                            {
+                                targetsToAddResultsFor.AddRange(configDefaultTargets);
                             }
 
-                            // Now report those results requested, if they are satisfied.
-                            if (response.Type == ResultsCacheResponseType.Satisfied)
-                            {
-                                List<string> targetsToAddResultsFor = new List<string>(configInitialTargets);
-
-                                // Now report either the explicit targets or the default targets
-                                if (request.Targets.Count > 0)
-                                {
-                                    targetsToAddResultsFor.AddRange(request.Targets);
-                                }
-                                else
-                                {
-                                    targetsToAddResultsFor.AddRange(configDefaultTargets);
-                                }
-
-                                response.Results = new BuildResult(request, allResults, targetsToAddResultsFor.ToArray(), null);
-                            }
+                            response.Results = new BuildResult(request, allResults, targetsToAddResultsFor.ToArray(), null);
                         }
                     }
                 }
@@ -233,12 +209,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="configurationId">The configuration</param>
         public void ClearResultsForConfiguration(int configurationId)
         {
-            lock (_resultsByConfiguration)
-            {
-                _resultsByConfiguration.TryRemove(configurationId, out BuildResult removedResult);
+            _resultsByConfiguration.TryRemove(configurationId, out BuildResult removedResult);
 
-                removedResult?.ClearCachedFiles();
-            }
+            removedResult?.ClearCachedFiles();
         }
 
         public void Translate(ITranslator translator)
@@ -262,12 +235,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void WriteResultsToDisk()
         {
-            lock (_resultsByConfiguration)
+            foreach (BuildResult resultToCache in _resultsByConfiguration.Values)
             {
-                foreach (BuildResult resultToCache in _resultsByConfiguration.Values)
-                {
-                    resultToCache.CacheIfPossible();
-                }
+                resultToCache.CacheIfPossible();
             }
         }
 
