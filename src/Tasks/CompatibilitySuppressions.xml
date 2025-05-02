@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <!-- For ease of logging the "not supported on Core" message, these tasks are a
-       TaskRequiresFramework on netstandard/netcore. Since the type is sealed there,
-       that shouldn't cause any implementation problems since no one can derive
-       from it and try to call TaskExtension.Log. -->
   <Suppression>
     <DiagnosticId>CP0007</DiagnosticId>
     <Target>T:Microsoft.Build.Tasks.AL</Target>
@@ -71,11 +67,6 @@
     <Left>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Left>
     <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
   </Suppression>
-  <!-- PKV004 for netstandard2.0-supporting TFs that we do not have runtime assemblies for.
-      This is intentional, because you can only use MSBuild in the context of a .NET SDK
-      (on net7.0, as of MSBuild 17.4) or in the context of Visual Studio (net472), but we
-      have previously shipped netstandard2.0 packages, and if you want to support both
-      runtime contexts it still makes sense to target that. -->
   <Suppression>
     <DiagnosticId>PKV004</DiagnosticId>
     <Target>.NETCoreApp,Version=v2.0</Target>

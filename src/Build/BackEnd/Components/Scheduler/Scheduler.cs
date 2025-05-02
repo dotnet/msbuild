@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -580,7 +579,7 @@ namespace Microsoft.Build.BackEnd
                 return Task.FromResult(0);
             }
 
-            Func<int, int> grantCores = (int availableCores) =>
+            Func<int, int> grantCores = (availableCores) =>
             {
                 int grantedCores = Math.Min(requestedCores, availableCores);
                 if (grantedCores > 0)
@@ -600,7 +599,7 @@ namespace Microsoft.Build.BackEnd
                 // We have no cores to grant at the moment, queue up the request.
                 TaskCompletionSource<int> completionSource = new TaskCompletionSource<int>();
                 _pendingRequestCoresCallbacks.Enqueue(completionSource);
-                return completionSource.Task.ContinueWith((Task<int> task) => grantCores(task.Result), TaskContinuationOptions.ExecuteSynchronously);
+                return completionSource.Task.ContinueWith((task) => grantCores(task.Result), TaskContinuationOptions.ExecuteSynchronously);
             }
         }
 
@@ -2431,7 +2430,7 @@ namespace Microsoft.Build.BackEnd
 
             bool haveNonIdleNode = false;
             StringBuilder stringBuilder = new StringBuilder(64);
-            stringBuilder.AppendFormat("{0}:   ", previousEventTime.Ticks);
+            stringBuilder.Append(previousEventTime.Ticks).Append(":   ");
             for (int i = 0; i < currentWork.Length; i++)
             {
                 if (currentWork[i] == invalidWorkId)
@@ -2567,7 +2566,7 @@ namespace Microsoft.Build.BackEnd
                     FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
                     using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
-                    file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, _schedulingData.EventTime.Ticks);
+                    file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, _schedulingData.EventTime.Ticks);
                     file.WriteLine(format, stuff);
                     file.Flush();
                 }
@@ -2814,7 +2813,7 @@ namespace Microsoft.Build.BackEnd
                 request.State,
                 buildRequest.ConfigurationId,
                 _configCache[buildRequest.ConfigurationId].ProjectFullPath,
-                string.Join(", ", buildRequest.Targets.ToArray()));
+                string.Join(", ", buildRequest.Targets));
         }
 
         /// <summary>

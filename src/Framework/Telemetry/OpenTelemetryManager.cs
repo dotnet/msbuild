@@ -9,10 +9,8 @@ using OpenTelemetry;
 using OpenTelemetry.Trace;
 #endif
 using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -40,6 +38,8 @@ namespace Microsoft.Build.Framework.Telemetry
         private TracerProvider? _tracerProvider;
         private IOpenTelemetryCollector? _collector;
 #endif
+
+        public string? LoadFailureExceptionMessage { get; set; }
 
         /// <summary>
         /// Optional activity source for MSBuild or other telemetry usage.
@@ -106,6 +106,7 @@ namespace Microsoft.Build.Framework.Telemetry
             {
                 // catch exceptions from loading the OTel SDK or Collector to maintain usability of Microsoft.Build.Framework package in our and downstream tests in VS.
                 _telemetryState = TelemetryState.Unsampled;
+                LoadFailureExceptionMessage = ex.ToString();
                 return;
             }
 #endif

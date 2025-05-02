@@ -459,7 +459,8 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
-            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
+            InitializeTelemetry();
+
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -723,6 +724,26 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        private void InitializeTelemetry()
+        {
+            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
+            string? failureMessage = OpenTelemetryManager.Instance.LoadFailureExceptionMessage;
+            if (_deferredBuildMessages != null &&
+                failureMessage != null &&
+                _deferredBuildMessages is ICollection<DeferredBuildMessage> deferredBuildMessagesCollection)
+            {
+                deferredBuildMessagesCollection.Add(
+                    new DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            "OpenTelemetryLoadFailed",
+                            failureMessage),
+                    MessageImportance.Low));
+
+                // clean up the message from OpenTelemetryManager to avoid double logging it
+                OpenTelemetryManager.Instance.LoadFailureExceptionMessage = null;
+            }
+        }
+
 #if FEATURE_REPORTFILEACCESSES
         /// <summary>
         /// Configure the build to use I/O tracking for nodes.
@@ -779,6 +800,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void CancelAllSubmissions()
         {
+            MSBuildEventSource.Log.CancelSubmissionsStart();
             CancelAllSubmissions(true);
         }
 
@@ -2405,7 +2427,7 @@ namespace Microsoft.Build.Execution
             {
                 // Resource request requires a response and may be blocking. Our continuation is effectively a callback
                 // to be called once at least one core becomes available.
-                _scheduler!.RequestCores(request.GlobalRequestId, request.NumCores, request.IsBlocking).ContinueWith((Task<int> task) =>
+                _scheduler!.RequestCores(request.GlobalRequestId, request.NumCores, request.IsBlocking).ContinueWith((task) =>
                 {
                     var response = new ResourceResponse(request.GlobalRequestId, task.Result);
                     _nodeManager!.SendData(node, response);
@@ -2801,12 +2823,11 @@ namespace Microsoft.Build.Execution
             {
                 // Get the remote loggers
                 ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent<ILoggingService>(BuildComponentType.LoggingService);
-                var remoteLoggers = new List<LoggerDescription>(loggingService.LoggerDescriptions);
 
                 _nodeConfiguration = new NodeConfiguration(
                 -1, /* must be assigned by the NodeManager */
                 _buildParameters,
-                remoteLoggers.ToArray()
+                loggingService.LoggerDescriptions.ToArray()
 #if FEATURE_APPDOMAIN
                 , AppDomain.CurrentDomain.SetupInformation
 #endif
@@ -2990,8 +3011,8 @@ namespace Microsoft.Build.Execution
                 // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportance.Low is used)
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
-                    loggerClassName: typeof(InternalTelemeteryForwardingLogger).FullName,
-                    loggerAssemblyName: typeof(InternalTelemeteryForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                    loggerClassName: typeof(InternalTelemetryForwardingLogger).FullName,
+                    loggerAssemblyName: typeof(InternalTelemetryForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
                     loggerAssemblyFile: null,
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);
