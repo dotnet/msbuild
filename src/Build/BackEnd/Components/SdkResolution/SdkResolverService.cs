@@ -250,7 +250,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             if (failOnUnresolvedSdk)
             {
-                loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
+                if (resolvers.Count == 1) // Check if only one resolver was used
+                {
+                    // Log the single resolver's error message directly
+                    loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "SingleResolverFailedToResolveSDK", sdk.Name, resolvers[0].Name, string.Join(Environment.NewLine, errors));
+                }
+                else
+                {
+                    // Log the error with the MSBuild wrapper
+                    loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
+                }
             }
 
             LogWarnings(loggingContext, sdkReferenceLocation, warnings);
