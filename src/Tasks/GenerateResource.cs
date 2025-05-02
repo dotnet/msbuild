@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Resources;
 using System.Resources.Extensions;
 using System.Reflection;
@@ -41,7 +42,6 @@ using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using Microsoft.Win32;
-using System.Linq;
 #endif
 
 #nullable disable
